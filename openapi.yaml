@@ -336,13 +336,17 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: |
+          An explanation comment
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
       responses:
-        '200':
-          description: Successful operation _(service explained)_
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/schemas/Comment'
+        '204':
+          description: Service explained successfully
         '401':
           description: Unauthorized
         '403':
@@ -713,8 +717,11 @@ components:
             An absolute URI that identifies the specific occurrence of the problem.
             It may or may not yield further information if dereferenced.
     Comment:
-      type: string
-      example: This is an explanation comment
+      type: object
+      properties:
+        comment:
+          type: string
+          example: This is an explanation comment
   securitySchemes:
     api_key:
       type: apiKey
