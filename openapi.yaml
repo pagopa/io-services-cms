@@ -702,8 +702,6 @@ components:
     Todo:
       type: string
       example: TODO
-  responses: 
-  requestBodies:
   securitySchemes:
     subscription_key:
       type: apiKey
