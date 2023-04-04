@@ -34,12 +34,10 @@ paths:
       tags:
         - services
       summary: Create a new service
-      description: |
-        Create a new Service with the attributes provided in the request payload.
+      description: Create a new Service with the attributes provided in the request payload.
       operationId: createService
       requestBody:
-        description: |
-          A service body payload
+        description: A service body payload
         content:
           application/json:
             schema:
@@ -139,8 +137,7 @@ paths:
       tags:
         - services
       summary: Update service
-      description: |
-        Update an existing service by by `serviceId`.
+      description: Update an existing service by `serviceId`.
       operationId: updateService
       parameters:
         - name: serviceId
@@ -181,9 +178,7 @@ paths:
       tags:
         - services
       summary: Delete service
-      description: |
-        Delete a service by `serviceId`.<br>_Note: This API operation needs the __Manage
-        API key__ owned by the service user, otherwise `403 forbidden` will be returned to the caller._
+      description: Delete a service by `serviceId`.
       operationId: deleteService
       parameters:
         - name: serviceId
@@ -212,8 +207,7 @@ paths:
       tags:
         - services
       summary: Upload service logo
-      description: |
-        Upload service logo by by `serviceId`.
+      description: Upload service logo by `serviceId`.
       operationId: updateServiceLogo
       parameters:
         - name: serviceId
@@ -251,8 +245,7 @@ paths:
       tags:
         - services-authorization
       summary: Regenerate service key
-      description: |
-        Regenerate service key by `serviceId`.
+      description: Regenerate service key by `serviceId`.
       operationId: regenerateServiceKey
       parameters:
         - name: serviceId
@@ -294,8 +287,7 @@ paths:
       tags:
         - service-actions
       summary: Send service to review
-      description: |
-        Send service to review by `serviceId`.
+      description: Send service to review by `serviceId`.
       operationId: reviewService
       parameters:
         - name: serviceId
@@ -326,8 +318,7 @@ paths:
       tags:
         - service-actions
       summary: Explain service review
-      description: |
-        Explain service review by `serviceId`.
+      description: Explain service review by `serviceId`.
       operationId: explainService
       parameters:
         - name: serviceId
@@ -337,8 +328,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: |
-          An explanation comment
+        description: An explanation comment
         content:
           application/json:
             schema:
@@ -366,8 +356,7 @@ paths:
       tags:
         - service-release
       summary: Publish service on IO
-      description: |
-        Publish service by `serviceId` on __IO Platform__.
+      description: Publish service by `serviceId` on __IO Platform__.
       operationId: releaseService
       parameters:
         - name: serviceId
@@ -397,8 +386,7 @@ paths:
       tags:
         - service-release
       summary: Retrieve last published version of service
-      description: |
-        Publish service by `serviceId` on __IO Platform__.
+      description: Retrieve last version of service published on __IO Platform__.
       operationId: getPublishedService
       parameters:
         - name: serviceId
@@ -430,8 +418,7 @@ paths:
       tags:
         - service-release
       summary: Unpublish service from IO
-      description: |
-        Unpublish service by `serviceId` from __IO Platform__.
+      description: Unpublish service by `serviceId` from __IO Platform__.
       operationId: unpublishService
       parameters:
         - name: serviceId
@@ -460,8 +447,7 @@ paths:
       tags:
         - organizations
       summary: Upload organization logo
-      description: |
-        Upload organization logo by `fiscalCode`.
+      description: Upload organization logo by `fiscalCode`.
       operationId: uploadOrganizationLogo
       parameters:
         - name: fiscalCode
