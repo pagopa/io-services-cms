@@ -71,7 +71,7 @@ paths:
       parameters: 
         - name: limit
           in: query
-          description: Number of services per page
+          description: Number of services per request
           required: true
           schema:
             type: number
@@ -281,7 +281,7 @@ paths:
       security:
         - api_key: []
   /services/{serviceId}/review:
-    post: 
+    put: 
       tags:
         - service-review
       summary: Send service to review
@@ -311,7 +311,7 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-    put: 
+    patch: 
       tags:
         - service-review
       summary: Explain service review
@@ -607,18 +607,15 @@ components:
     PaginationResultSet:
       type: object
       properties:
-        count:
-          type: number
-          description: actual result count
         offset:
           type: number
           description: result set offset
         limit:
           type: number
-          description: page size
-        total:
+          description: result set size
+        count:
           type: number
-          description: total paginable items
+          description: total record count
     Organization:
       type: object
       properties: 
