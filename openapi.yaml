@@ -14,14 +14,14 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.3.0
+  version: 0.4.0
 servers:
   - url: https://todo-url
 tags:
   - name: services
     description: Services API specification
-  - name: service-actions
-    description: Service Actions API specification
+  - name: service-review
+    description: Service Review API specification
   - name: service-release
     description: Service Release API specification
   - name: services-authorization
@@ -280,10 +280,10 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-  /services/{serviceId}/actions/review:
-    patch: 
+  /services/{serviceId}/review:
+    post: 
       tags:
-        - service-actions
+        - service-review
       summary: Send service to review
       description: Send service to review by service ID
       operationId: reviewService
@@ -311,10 +311,9 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-  /services/{serviceId}/actions/explain:
-    patch: 
+    put: 
       tags:
-        - service-actions
+        - service-review
       summary: Explain service review
       description: Explain service review by service ID
       operationId: explainService
@@ -335,6 +334,8 @@ paths:
       responses:
         '204':
           description: Service explained successfully
+        '400':
+          description: Invalid payload
         '401':
           description: Unauthorized
         '403':
