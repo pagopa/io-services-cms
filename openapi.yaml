@@ -14,7 +14,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.5.0
+  version: 0.6.0
 servers:
   - url: https://todo-url
 tags:
@@ -457,6 +457,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: limit
+          in: query
+          description: Number of service history per request
+          required: true
+          schema:
+            type: number
+        - name: offset
+          in: query
+          description: Offset service history number
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           description: Service history fetched successfully
@@ -465,7 +477,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Service'
+                  $ref: '#/components/schemas/ServicePagination'
         '401':
           description: Unauthorized
         '403':
@@ -529,11 +541,14 @@ components:
               $ref: '#/components/schemas/ServiceVisibility'
             version:
               type: integer
+            last_update:
+              $ref: '#/components/schemas/Timestamp'
         - $ref: '#/components/schemas/ServiceData'
       required: 
         - id
         - status
         - visibility
+        - last_update
     ServicePayload:
       description: A payload used to create or update a service.
       allOf:
@@ -615,7 +630,7 @@ components:
         value:
             $ref: '#/components/schemas/ServiceStatusType'
         reason:
-          description: Reason for status value. This property is optional and exists only when value is _rejected_
+          description: Reason for status value
           type: string
       required: 
         - value
@@ -749,6 +764,10 @@ components:
         comment:
           type: string
           example: This is an explanation comment
+    Timestamp:
+      type: string
+      description: A date-time field in ISO-8601 format and UTC timezone.
+      example: '2023-01-22T00:00:00.000Z'
   securitySchemes:
     api_key:
       type: apiKey
