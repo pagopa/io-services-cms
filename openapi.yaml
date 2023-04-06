@@ -14,7 +14,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.4.0
+  version: 0.5.0
 servers:
   - url: https://todo-url
 tags:
@@ -26,6 +26,8 @@ tags:
     description: Service Release API specification
   - name: services-authorization
     description: Services Authorization API specification
+  - name: service-history
+    description: Service History API specification
   - name: organizations
     description: Organizations API specification
 paths:
@@ -441,6 +443,39 @@ paths:
           description: Internal server error
       security:
         - api_key: []
+  /services/{serviceId}/history:
+    get:
+      tags:
+        - service-history
+      summary: Retrieve service history
+      description: Retrieve all versions of a service
+      operationId: getServiceHistory
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service history fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
   /organizations/{fiscalCode}/logo:
     put:
       tags:
@@ -575,6 +610,16 @@ components:
       required: 
         - scope
     ServiceStatus:
+      type: object
+      properties: 
+        value:
+            $ref: '#/components/schemas/ServiceStatusType'
+        reason:
+          description: Reason for status value. This property is optional and exists only when value is _rejected_
+          type: string
+      required: 
+        - value
+    ServiceStatusType:
       description: |
         Service status lifecycle<br>
         - _draft_: A new draft of the service has been created, filled in completely or partially and saved by the system.
