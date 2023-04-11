@@ -109,6 +109,4 @@ applyOpen("door-id") // TaskEither<Error, {fsm: {state: "Open"}}>;
 ```
 
 ## Known issues
-1. Transitions must be implemented in the very same order as they are defined
-1. Transitions with the same id MUST NOT be implemented twice (now it's possible)
-1. Must use `t.unknown` on states with no data type
+1. `exec` can be implemented with void as returning type, and the type system does not complain
