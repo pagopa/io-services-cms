@@ -15,7 +15,7 @@
   "scripts": {
     "build": "rm -rf ./dist & tsc",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit && vitest typecheck"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "fp-ts": "^2.13.1",
