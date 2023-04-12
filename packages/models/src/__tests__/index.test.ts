@@ -1,6 +1,5 @@
-import { expect } from "chai";
-import { assertType, test } from "vitest";
+import { test } from "vitest";
 
-test("it works!", () => {
+test("it works!", ({ expect }) => {
   expect(1).equal(1);
 });
