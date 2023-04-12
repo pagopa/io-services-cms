@@ -1,0 +1,28 @@
+{
+  "name": "@pagopa/fp-ts-fsm",
+  "main": "./dist/index.js",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "packageManager": "yarn@3.3.0",
+  "scripts": {
+    "build": "rm -rf ./dist & tsc",
+    "test": "vitest",
+    "typecheck": "tsc -p ./tsconfig.test.json --noEmit && vitest typecheck"
+  },
+  "dependencies": {
+    "fp-ts": "^2.13.1",
+    "io-ts": "^2.2.20"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+    "vitest": "^0.30.1"
+  }
+}
