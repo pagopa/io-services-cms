@@ -1,0 +1,4 @@
+internal: packages/**/*
+docs: docs/**/*
+ci: .github/workflows/**/*
+changeset: .changeset/**/*
