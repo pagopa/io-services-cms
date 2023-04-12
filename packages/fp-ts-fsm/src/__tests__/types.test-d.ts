@@ -1,16 +1,7 @@
-import {
-  ExpectTypeOf,
-  assertType,
-  expectTypeOf,
-  test,
-  AssertType,
-} from "vitest";
+import { assertType, test } from "vitest";
 import { Transition, FSM, TransitionApplication, StateSet } from "../types";
-import * as t from "io-ts";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
-import { makeFSM, Store } from "..";
 
 // helpers
 type Equals<A, B extends A> = never;
@@ -147,9 +138,17 @@ test("TransitionApplications", () => {
     Transition<"Closed", "Locked", "lock", DoorStates, DoorActions>,
     Transition<"Locked", "Closed", "unlock", DoorStates, DoorActions>
   ];
-  type DoorFSM = FSM<DoorStates, DoorActions, DoorTransitions>;
 
   type __tests__ = [
+    // FSM is a valid definition
+    FSM<DoorStates, DoorActions, DoorTransitions>,
+
+    FuncEquals<
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "create">,
+      [FSM<DoorStates, DoorActions, DoorTransitions>, "create", string],
+      TE.TaskEither<Error, void & { fsm: { state: "Open" } }>
+    >,
+
     FuncEquals<
       TransitionApplication<DoorStates, DoorActions, DoorTransitions, "open">,
       [FSM<DoorStates, DoorActions, DoorTransitions>, "open", string],
@@ -186,14 +185,6 @@ test("TransitionApplications", () => {
         { foo: "wrong" }
       ],
       TE.TaskEither<Error, { date: number } & { fsm: { state: "Locked" } }>
-    >,
-
-    // must apply an existing action
-    FuncEquals<
-      // @ts-expect-error
-      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "wrong">,
-      string,
-      any
     >
   ];
 });

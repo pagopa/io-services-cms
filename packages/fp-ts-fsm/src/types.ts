@@ -15,7 +15,7 @@ export type StateSet<
   [K in keyof R]: t.Type<R[K]>;
 };
 // just an helper for common usages
-export type AnyStateSet = Record<string, t.Type<unknown>>;
+export type AnyStateSet = StateSet<{ [K in string]: unknown }>;
 
 // Given a set of states (which comes in the form of a record), return its list of allowes states
 // This type hides the need to narrow keys to strings.
