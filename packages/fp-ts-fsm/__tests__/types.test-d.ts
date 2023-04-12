@@ -8,40 +8,22 @@ import {
 import { Transition, FSM, TransitionApplication, StateSet } from "../types";
 import * as t from "io-ts";
 import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import { makeFSM, Store } from "..";
 
 // helpers
-type Equals<A, B extends never> = never;
+type Equals<A, B extends A> = never;
+type FuncEquals<
+  A extends (...args: unknown[]) => unknown,
+  P extends Parameters<A>,
+  R extends ReturnType<A>
+> = never;
 type Never<A extends never> = never;
-
-// Example: door FSM
-type DoorStates = StateSet<{
-  Open: void;
-  Closed: void;
-  Locked: { date: number };
-}>;
-type DoorActions = {
-  create: {};
-  close: {};
-  open: {};
-  lock: { date: number };
-  unlock: {};
-};
-type DoorTransitions = [
-  Transition<void, "Open", "create", DoorStates, DoorActions>,
-  Transition<"Open", "Closed", "close", DoorStates, DoorActions>,
-  Transition<"Closed", "Open", "open", DoorStates, DoorActions>,
-  Transition<"Closed", "Locked", "lock", DoorStates, DoorActions>,
-  Transition<"Locked", "Closed", "unlock", DoorStates, DoorActions>
-];
-type DoorFSM = FSM<DoorStates, DoorActions, DoorTransitions>;
 
 test("Transitions", () => {
   type MyStates = StateSet<{ fooState: void }>;
   type MyActions = { fooAction: {} };
-
-  type X = Never<keyof MyStates & keyof MyActions>;
 
   type __tests__ = [
     // OK a correct transition
@@ -142,4 +124,76 @@ test("Transitions", () => {
     from: "fooState",
     to: "fooState",
   });
+});
+
+test("TransitionApplications", () => {
+  // Example: door FSM
+  type DoorStates = StateSet<{
+    Open: void;
+    Closed: void;
+    Locked: { date: number };
+  }>;
+  type DoorActions = {
+    create: {};
+    close: {};
+    open: {};
+    lock: { date: number };
+    unlock: {};
+  };
+  type DoorTransitions = [
+    Transition<void, "Open", "create", DoorStates, DoorActions>,
+    Transition<"Open", "Closed", "close", DoorStates, DoorActions>,
+    Transition<"Closed", "Open", "open", DoorStates, DoorActions>,
+    Transition<"Closed", "Locked", "lock", DoorStates, DoorActions>,
+    Transition<"Locked", "Closed", "unlock", DoorStates, DoorActions>
+  ];
+  type DoorFSM = FSM<DoorStates, DoorActions, DoorTransitions>;
+
+  type __tests__ = [
+    FuncEquals<
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "open">,
+      [FSM<DoorStates, DoorActions, DoorTransitions>, "open", string],
+      TE.TaskEither<Error, void & { fsm: { state: "Open" } }>
+    >,
+
+    FuncEquals<
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "lock">,
+      [
+        FSM<DoorStates, DoorActions, DoorTransitions>,
+        "lock",
+        string,
+        { date: number }
+      ],
+      TE.TaskEither<Error, { date: number } & { fsm: { state: "Locked" } }>
+    >,
+
+    // must provide arguments for lock action
+    FuncEquals<
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "lock">,
+      // @ts-expect-error
+      [FSM<DoorStates, DoorActions, DoorTransitions>, "lock", string],
+      TE.TaskEither<Error, { date: number } & { fsm: { state: "Locked" } }>
+    >,
+
+    // must provide arguments in correct shape for lock action
+    FuncEquals<
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "lock">,
+      // @ts-expect-error
+      [
+        FSM<DoorStates, DoorActions, DoorTransitions>,
+        "lock",
+        string,
+        { foo: "wrong" }
+      ],
+      TE.TaskEither<Error, { date: number } & { fsm: { state: "Locked" } }>
+    >,
+
+    // must apply an existing action
+    FuncEquals<
+      // @ts-expect-error
+      TransitionApplication<DoorStates, DoorActions, DoorTransitions, "wrong">,
+      string,
+      any
+    >
+  ];
 });

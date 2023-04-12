@@ -166,10 +166,7 @@ export type TransitionApplication<
   AppliedAction extends AllowedActions<A>
 > = (
   ...args: TransitionApplicationArgs<S, A, T, AppliedAction>
-) => TE.TaskEither<
-  Error,
-  t.TypeOf<TransitionApplicationResult<T, AppliedAction, S, A>>
->;
+) => TE.TaskEither<Error, TransitionApplicationResult<T, AppliedAction, S, A>>;
 
 type TransitionApplicationArgs<
   S extends AnyStateSet,
@@ -202,18 +199,24 @@ type TransitionApplicationResult<
     ? never
     : // The list contains exacly one element in the expected shape.
     List extends [
-        { action: AppliedAction; to: infer ToState extends keyof States }
+        {
+          action: AppliedAction;
+          to: infer ToState extends AllowedStates<States>;
+        }
       ]
-    ? States[ToState]
+    ? t.TypeOf<States[ToState]> & StateMetadata<ToState>
     : // The list contains one element in the expected shape, and more to inspect.
     // The result is the type of the matched state union what's matched in the remaining list.
     // This is the recursive step.
     List extends [
-        { action: AppliedAction; to: infer ToState extends keyof States },
+        {
+          action: AppliedAction;
+          to: infer ToState extends AllowedStates<States>;
+        },
         ...infer Rest extends any[]
       ]
     ?
-        | States[ToState]
+        | (t.TypeOf<States[ToState]> & StateMetadata<ToState>)
         | TransitionApplicationResult<Rest, AppliedAction, States, Actions>
     : // The first element has not been matched, hence we skip it.
     List extends [any, ...infer Rest extends any[]]
