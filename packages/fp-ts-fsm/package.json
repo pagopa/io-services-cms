@@ -1,7 +1,19 @@
 {
   "name": "@pagopa/fp-ts-fsm",
+  "main": "./dist/index.js",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "packageManager": "yarn@3.3.0",
   "scripts": {
+    "build": "rm -rf ./dist & tsc",
     "test": "vitest typecheck && vitest"
   },
   "dependencies": {
