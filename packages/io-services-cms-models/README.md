@@ -21,3 +21,16 @@ stateDiagram-v2
     rejected --> draft: edit
     approved --> deleted: delete
 ```
+
+#### Usage
+```ts
+import { ServiceLifecycle } from "io-services-cms-models";
+
+const MyStore /* define a store to persist data */
+const service /* incoming service data */
+
+const applyTask = ServiceLifecycle
+    .apply("create", "my-id", { service });
+
+const result = await applyTask(MyStore)();
+```
