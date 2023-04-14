@@ -4,28 +4,22 @@ import * as TE from "fp-ts/TaskEither";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import { describe, it, expect } from "vitest";
 import { FSMStore, WithState } from "../../lib/fsm";
-import { apply, ServiceLifecycleFSM } from "..";
+import { apply, FSM } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../types";
 
 // a simple in-memory store
-const createMapStore = (): FSMStore<keyof ServiceLifecycleFSM["states"]> => {
-  const m = new Map<
-    string,
-    WithState<keyof ServiceLifecycleFSM["states"], unknown>
-  >();
+const createMapStore = (): FSMStore<keyof FSM["states"]> => {
+  const m = new Map<string, WithState<keyof FSM["states"], unknown>>();
 
   return {
     // @ts-ignore
     fetch: (id: string) =>
       pipe(
         m.has(id)
-          ? O.some<WithState<keyof ServiceLifecycleFSM["states"], unknown>>(
-              m.get(id) as WithState<
-                keyof ServiceLifecycleFSM["states"],
-                unknown
-              >
+          ? O.some<WithState<keyof FSM["states"], unknown>>(
+              m.get(id) as WithState<keyof FSM["states"], unknown>
             )
           : O.none,
         TE.right
