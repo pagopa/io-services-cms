@@ -1,0 +1,726 @@
+openapi: 3.0.3
+info:
+  title: IO Services CMS
+  description: |-
+    _This is the IO Service CMS based on the OpenAPI 3.0 specification._
+
+    ### Some useful links:
+    - [IO-SERVICES-CMS Github codebase](https://github.com/pagopa/io-services-cms)
+    - [IO-SERVICES-CMS Source API definition ](https://github.com/pagopa/io-services-cms/openapi.yaml)
+
+  contact:
+    name: PagoPA S.p.A.
+    url: https://docs.pagopa.it/io-guida-tecnica/
+  version: 0.8.0
+servers:
+  - url: https://url
+tags:
+  - name: services
+    description: Services API specification
+  - name: service-review
+    description: Service Review API specification
+  - name: service-release
+    description: Service Release API specification
+  - name: service-authorization
+    description: Service Authorization API specification
+  - name: organizations
+    description: Organizations API specification
+paths:
+  /services:
+    post:
+      tags:
+        - services
+      summary: Create a new service
+      description: Create a new Service with the attributes provided in the request payload
+      operationId: createService
+      requestBody:
+        description: A service body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicePayload'
+        required: true
+      responses:
+        '201':
+          description: Service created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    get:
+      tags:
+        - services
+      summary: Retrieve all services
+      description: Retrieve all services owned by the calling user
+      operationId: getServices
+      parameters: 
+        - name: limit
+          in: query
+          description: Number of services per request
+          required: true
+          schema:
+            type: number
+        - name: offset
+          in: query
+          description: Offset services number
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Services fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicePagination'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /services/{serviceId}:
+    get:
+      tags:
+        - services
+      summary: Retrieve service
+      description: Retrieve a service by ID
+      operationId: getService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    put:
+      tags:
+        - services
+      summary: Update service
+      description: Update an existing service by ID
+      operationId: updateService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Updated service payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicePayload'
+        required: true
+      responses:
+        '200':
+          description: Service updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    delete:
+      tags:
+        - services
+      summary: Delete service
+      description: Delete a service by ID
+      operationId: deleteService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Service deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /services/{serviceId}/logo:
+    put:
+      tags:
+        - services
+      summary: Upload service logo
+      description: Upload service logo by service ID
+      operationId: updateServiceLogo
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Service logo payload _(base64 string representation)_
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logo'
+        required: true
+      responses:
+        '204':
+          description: Service logo updated successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /services/{serviceId}/key:
+    put:
+      tags:
+        - service-authorization
+      summary: Regenerate service key
+      description: Regenerate service key by service ID
+      operationId: regenerateServiceKey
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Service key type
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionKeyTypePayload'
+        required: true
+      responses:
+        '200':
+          description: Service key regenerated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionKeys'
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /services/{serviceId}/review:
+    put: 
+      tags:
+        - service-review
+      summary: Send service to review
+      description: Send service to review by service ID
+      operationId: reviewService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Service revirew taken in charge
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Service status is incompatible with review action request
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    patch: 
+      tags:
+        - service-review
+      summary: Explain service review
+      description: Explain service review by service ID
+      operationId: explainService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: An explanation comment
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Comment'
+        required: true
+      responses:
+        '204':
+          description: Service explained successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Service status is incompatible with explain action request
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /services/{serviceId}/release:
+    post: 
+      tags:
+        - service-release
+      summary: Publish service on IO
+      description: Publish service by ID on __IO Platform__
+      operationId: releaseService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Service published successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Service status is incompatible with publish action request
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    get: 
+      tags:
+        - service-release
+      summary: Retrieve last published version of service
+      description: Retrieve last version of service published on __IO Platform__
+      operationId: getPublishedService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fetched published service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+    delete: 
+      tags:
+        - service-release
+      summary: Unpublish service from IO
+      description: Unpublish service by ID from __IO Platform__
+      operationId: unpublishService
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Service unpublished successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+  /organizations/{fiscalCode}/logo:
+    put:
+      tags:
+        - organizations
+      summary: Upload organization logo
+      description: Upload organization logo by fiscal code
+      operationId: uploadOrganizationLogo
+      parameters:
+        - name: fiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Organization logo payload _(base64 string representation)_
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logo'
+        required: true
+      responses:
+        '204':
+          description: Organization logo updated successfully
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+      security:
+        - api_key: []
+components:
+  schemas:
+    Service:
+      description: Service model data
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+            status:
+              $ref: '#/components/schemas/ServiceStatus'
+            visibility:
+              $ref: '#/components/schemas/ServiceVisibility'
+            version:
+              type: integer
+            last_update:
+              $ref: '#/components/schemas/Timestamp'
+        - $ref: '#/components/schemas/ServiceData'
+      required: 
+        - id
+        - status
+        - visibility
+        - last_update
+    ServicePayload:
+      description: A payload used to create or update a service.
+      allOf:
+        - $ref: '#/components/schemas/ServiceData'
+    ServiceData:
+      type: object
+      description: Service basic data
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        require_secure_channel:
+          type: boolean
+        authorized_recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/FiscalCode'
+        max_allowed_payment_amount:
+          type: integer
+          format: int32
+        metadata:
+          $ref: '#/components/schemas/ServiceMetadata'
+      required: 
+        - name
+        - description
+        - organization
+        - metadata
+    ServiceMetadata:
+      type: object
+      description: A set of service metadata properties
+      properties:
+        web_url:
+          type: string
+          minLength: 1
+        app_ios:
+          type: string
+          minLength: 1
+        app_android:
+          type: string
+          minLength: 1
+        tos_url:
+          type: string
+          minLength: 1
+        privacy_url:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        pec:
+          type: string
+          minLength: 1
+        cta:
+          type: string
+          minLength: 1
+        token_name:
+          type: string
+          minLength: 1
+        support_url:
+          type: string
+          minLength: 1
+        scope:
+          type: string
+          enum: [NATIONAL, LOCAL]
+      required: 
+        - scope
+    ServiceStatus:
+      type: object
+      properties: 
+        value:
+            $ref: '#/components/schemas/ServiceStatusType'
+        reason:
+          description: Reason for status value
+          type: string
+      required: 
+        - value
+    ServiceStatusType:
+      description: |
+        Service status lifecycle<br>
+        - _draft_: A new draft of the service has been created, filled in completely or partially and saved by the system.
+        - _submitted_: The draft has been sent for internal validation to PagoPA and the response is awaited. In this state, the service is
+        immutable and is frozen in the shipped version.
+        - _approved_: The service has been approved by the _PagoPA S.p.A._ internal validation process, it is correct and suitable for publication.
+        - _rejected_: The service goes back to the draft but cannot be resubmitted for validation unless it is modified by the institution in
+        at least one of its fields.
+        - _deleted_: The service is permanently deleted from the Back-Office.
+      type: string
+      enum: [draft, submitted, approved, rejected, deleted]
+    ServiceVisibility:
+      description: |
+        Service publication status<br>
+        - _empty_: Initial state, i.e. the service has never been approved
+        - _published_: The service is visible in _IO App_ to users
+        - _unpublished_: The service is no longer visible in _IO App_ to users, but remains in the institution's Back-Office, which can
+        later choose to publish it again.
+      type: string
+      enum: [empty, published, unpublished]
+    ServicePagination:
+      type: object
+      properties: 
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        pagination:
+          $ref: '#/components/schemas/PaginationResultSet'
+    PaginationResultSet:
+      type: object
+      properties:
+        offset:
+          type: number
+          description: result set offset
+        limit:
+          type: number
+          description: result set size
+        count:
+          type: number
+          description: total record count
+    Organization:
+      type: object
+      properties: 
+        name:
+          type: string
+        fiscal_code:
+          $ref: '#/components/schemas/FiscalCode'
+        department_name:
+          type: string
+    FiscalCode:
+      type: string
+      description: User's fiscal code.
+      pattern: ^(?:[A-Z][AEIOU][AEIOUX]|[AEIOU]X{2}|[B-DF-HJ-NP-TV-Z]{2}[A-Z]){2}(?:[\dLMNP-V]{2}(?:[A-EHLMPR-T](?:[04LQ][1-9MNP-V]|[15MR][\dLMNP-V]|[26NS][0-8LMNP-U])|[DHPS][37PT][0L]|[ACELMRT][37PT][01LM]|[AC-EHLMPR-T][26NS][9V])|(?:[02468LNQSU][048LQU]|[13579MPRTV][26NS])B[26NS][9V])(?:[A-MZ][1-9MNP-V][\dLMNP-V]{2}|[A-M][0L](?:[1-9MNP-V][\dLMNP-V]|[0L][1-9MNP-V]))[A-Z]$
+      example: SPNDNL80R13C555X
+    Logo:
+      description: A base64 string representation of the logo PNG image.
+      type: object
+      properties:
+        logo:
+          type: string
+          format: byte
+          minLength: 1
+      required:
+        - logo
+    SubscriptionKeys:
+      type: object
+      properties:
+        primary_key:
+          type: string
+        secondary_key:
+          type: string
+      required:
+        - primary_key
+        - secondary_key
+    SubscriptionKeyType:
+      type: string
+      enum: [PRIMARY_KEY, SECONDARY_KEY]
+    SubscriptionKeyTypePayload:
+      type: object
+      properties:
+        key_type:
+          $ref: '#/components/schemas/SubscriptionKeyType'
+      required:
+        - key_type
+    ResponseError:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |-
+            An absolute URI that identifies the problem type. When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: about:blank
+          example: https://example.com/problem/constraint-violation
+        title:
+          type: string
+          description: |
+            A short summary of the problem type. Written in english and readable for engineers.
+            <br>_(usually not suited for non technical stakeholders and not localized)._
+          example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: |
+            The HTTP status code generated by the origin server for this occurrence of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 200
+        detail:
+          type: string
+          description: |
+            A human readable explanation specific to this occurrence of the problem.
+          example: There was an error processing the request
+        instance:
+          type: string
+          format: uri
+          description: |
+            An absolute URI that identifies the specific occurrence of the problem.
+            It may or may not yield further information if dereferenced.
+    Comment:
+      type: object
+      properties:
+        comment:
+          type: string
+          example: This is an explanation comment
+    Timestamp:
+      type: string
+      description: A date-time field in ISO-8601 format and UTC timezone.
+      example: '2023-01-22T00:00:00.000Z'
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: X-CUSTOM-KEY
+      in: header
+      description: The Custom API key used for securing API calls.
