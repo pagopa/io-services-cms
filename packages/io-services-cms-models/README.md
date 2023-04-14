@@ -22,6 +22,18 @@ stateDiagram-v2
 ```
 
 #### Usage
+
+`ServiceLifecycle` can be manipulated via the `apply` function, which applies an action to a service fetched by its `id`. It requires a [`FMSStore`](lib/fsm.ts) implementation to interact with the persistence layer.
+
+The `apply` function accepts three arguments:
+
+|name|type|description|
+|-|-|-|
+|action|`string`|The name of the action to be applied|
+|id|`ServiceId`|The id of the item subject of the application|
+|args?|`Record<string, unknown>`|Additional arguments required by the action, see table below |
+
+
 ```ts
 import { ServiceLifecycle } from "io-services-cms-models";
 
@@ -29,7 +41,18 @@ const MyStore /* define a store to persist data */
 const service /* incoming service data */
 
 const applyTask = ServiceLifecycle
-    .apply("create", "my-id", { service });
+    .apply("create", "my-id", { data: service });
 
 const result = await applyTask(MyStore)();
 ```
+
+#### Actions
+
+|action|arguments|description|
+|-|-|-|
+|create|* `data`: the service object to be created, with its `id`|Create a new service from scratch| -
+|edit|* `data`: the service object to be created, with its `id`|Modify an existing service|
+|submit| - |Submit a service for review|
+|reject|* `reason`: a message to comment the rejection | Reject a service due to validation issues|
+|approve|* `approvalDate`: the timestamp of the approvation | Approve a submitted service |
+|delete| - |Delete a service|
