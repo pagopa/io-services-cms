@@ -53,6 +53,7 @@ const result = await applyTask(MyStore)();
 |create|* `data`: the service object to be created, with its `id`|Create a new service from scratch| -
 |edit|* `data`: the service object to be created, with its `id`|Modify an existing service|
 |submit| - |Submit a service for review|
+|abort| - |Undo a review submission|
 |reject|* `reason`: a message to comment the rejection | Reject a service due to validation issues|
 |approve|* `approvalDate`: the timestamp of the approvation | Approve a submitted service |
 |delete| - |Delete a service|
