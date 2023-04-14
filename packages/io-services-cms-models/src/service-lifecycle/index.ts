@@ -36,7 +36,7 @@ type States = [
 ];
 
 // Definition of the FSM for service lifecycle
-export type FSM = {
+type FSM = {
   states: StateSet<ToRecord<States>>;
   transitions: [
     Transition<"create", void, void, "draft", Service, { data: Service }>,
@@ -67,7 +67,7 @@ export type FSM = {
 };
 
 // implementation
-export const FSM: FSM = {
+const FSM: FSM = {
   states: {
     draft: Service,
     submitted: Service,
@@ -223,7 +223,50 @@ export const FSM: FSM = {
  * @param args optional arguments, depending on the action definition
  * @returns either an error or the element in the new state
  */
-export function apply(
+function apply(
+  appliedAction: "create" | "edit",
+  id: ServiceId,
+  args: { data: Service }
+): ReaderTaskEither<
+  FSMStore<keyof FSM["states"]>,
+  Error,
+  WithState<"draft", Service>
+>;
+function apply(
+  appliedAction: "submit",
+  id: ServiceId
+): ReaderTaskEither<
+  FSMStore<keyof FSM["states"]>,
+  Error,
+  WithState<"submitted", Service>
+>;
+function apply(
+  appliedAction: "approve",
+  id: ServiceId,
+  args: { approvalDate: string }
+): ReaderTaskEither<
+  FSMStore<keyof FSM["states"]>,
+  Error,
+  WithState<"approved", Service>
+>;
+function apply(
+  appliedAction: "reject",
+  id: ServiceId,
+  args: { reason: string }
+): ReaderTaskEither<
+  FSMStore<keyof FSM["states"]>,
+  Error,
+  WithState<"rejected", Service>
+>;
+function apply(
+  appliedAction: "delete",
+  id: ServiceId
+): ReaderTaskEither<
+  FSMStore<keyof FSM["states"]>,
+  Error,
+  WithState<"deleted", Service>
+>;
+function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
   args?: Parameters<FSM["transitions"][number]["exec"]>[0]["args"]
@@ -337,3 +380,5 @@ export function apply(
     );
   };
 }
+
+export { apply, FSM };
