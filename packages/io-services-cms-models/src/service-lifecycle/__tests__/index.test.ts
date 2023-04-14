@@ -8,6 +8,10 @@ import { apply, FSM } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../types";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode,
+} from "@pagopa/ts-commons/lib/strings";
 
 // a simple in-memory store
 const createMapStore = (): FSMStore<keyof FSM["states"]> => {
@@ -79,26 +83,29 @@ const expectFailure = async ({ id, actions, expected }) => {
   expect(stored).toEqual(expected);
 };
 
-const aServiceId = "my-id";
-const aService = {
-  id: aServiceId,
-  data: {
-    name: "a service",
-    require_secure_channel: false,
-    authorized_recipients: [],
-    max_allowed_payment_amount: 0,
-    organization: {
-      name: "org",
-      fiscal_code: "fc",
-    },
-    metadata: {
-      scope: "LOCAL" as const,
+const aServiceId = "my-id" as NonEmptyString;
+const aService = pipe(
+  {
+    id: aServiceId,
+    data: {
+      name: "a service",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
+      metadata: {
+        scope: "LOCAL",
+      },
     },
   },
-};
+  Service.decode,
+  E.getOrElseW((_) => {
+    throw new Error(`Bad mock`);
+  })
+);
 
 const changeName = ({ data, ...rest }: Service, name: string): Service => ({
-  data: { ...data, name },
+  data: { ...data, name: name as NonEmptyString },
   ...rest,
 });
 

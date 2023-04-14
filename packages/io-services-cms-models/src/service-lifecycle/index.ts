@@ -81,9 +81,9 @@ const FSM: FSM = {
       action: "create",
       to: "draft",
       from: "*",
-      exec: ({ args: { data } }) =>
+      exec: ({ args: { data: service } }) =>
         E.right({
-          ...data,
+          ...service,
           fsm: { state: "draft", lastTransition: "apply create on *" },
         }),
     },
