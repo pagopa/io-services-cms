@@ -1,25 +1,46 @@
 import * as t from "io-ts";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode,
+} from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
+import {
+  IWithinRangeIntegerTag,
+  WithinRangeInteger,
+} from "@pagopa/ts-commons/lib/numbers";
+
+type MaxAllowedAmount = t.TypeOf<typeof MaxAllowedAmount>;
+const MaxAllowedAmount = t.union([
+  WithinRangeInteger<0, 9999999999, IWithinRangeIntegerTag<0, 9999999999>>(
+    0,
+    9999999999
+  ),
+  t.literal(9999999999),
+]);
 
 const OrganizationData = t.intersection([
   t.type({
-    name: t.string,
-    fiscal_code: t.string,
+    name: NonEmptyString,
+    fiscal_code: OrganizationFiscalCode,
   }),
   t.partial({
     // optional, as it's an external reference not present in legacy data
-    id: t.string,
-    department_name: t.string,
+    id: NonEmptyString,
+    department_name: NonEmptyString,
   }),
 ]);
 
 const ServiceData = t.intersection([
   t.type({
-    name: t.string,
-    require_secure_channel: t.boolean,
-    authorized_recipients: t.array(t.string),
-    max_allowed_payment_amount: t.number,
+    name: NonEmptyString,
+    require_secure_channel: withDefault(t.boolean, false),
+    authorized_recipients: withDefault(t.array(t.string), []),
+    max_allowed_payment_amount: withDefault(
+      MaxAllowedAmount,
+      0 as MaxAllowedAmount
+    ),
   }),
-  t.partial({ description: t.string }),
+  t.partial({ description: NonEmptyString }),
 ]);
 
 const ServiceMetadata = t.intersection([
@@ -27,19 +48,19 @@ const ServiceMetadata = t.intersection([
     scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
   }),
   t.partial({
-    address: t.string,
-    appAndroid: t.string,
-    appIos: t.string,
-    cta: t.string,
-    description: t.string,
-    email: t.string,
-    pec: t.string,
-    phone: t.string,
-    privacyUrl: t.string,
-    supportUrl: t.string,
-    tokenName: t.string,
-    tosUrl: t.string,
-    webUrl: t.string,
+    address: NonEmptyString,
+    appAndroid: NonEmptyString,
+    appIos: NonEmptyString,
+    cta: NonEmptyString,
+    description: NonEmptyString,
+    email: NonEmptyString,
+    pec: NonEmptyString,
+    phone: NonEmptyString,
+    privacyUrl: NonEmptyString,
+    supportUrl: NonEmptyString,
+    tokenName: NonEmptyString,
+    tosUrl: NonEmptyString,
+    webUrl: NonEmptyString,
   }),
 ]);
 
