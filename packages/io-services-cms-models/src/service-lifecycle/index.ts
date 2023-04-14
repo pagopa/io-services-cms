@@ -269,7 +269,7 @@ function apply(
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
-  args?: Parameters<FSM["transitions"][number]["exec"]>[0]["args"]
+  args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
 ): ReaderTaskEither<FSMStore<keyof FSM["states"]>, Error, AllResults> {
   return (store) => {
     // select transitions for the action to apply
