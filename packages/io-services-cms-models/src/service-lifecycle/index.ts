@@ -35,34 +35,34 @@ type States = [
   WithState<"deleted", Service>
 ];
 
+type Actions = {
+  create: { data: Service };
+  edit: { data: Service };
+  delete: void;
+  submit: void;
+  abort: void;
+  reject: { reason: string };
+  approve: { approvalDate: string };
+};
+
+// helpers
+type Action<S extends keyof Actions> = [S, Actions[S]];
+type State<S extends keyof ToRecord<States>> = [S, ToRecord<States>[S]];
+
 // Definition of the FSM for service lifecycle
 type FSM = {
   states: StateSet<ToRecord<States>>;
   transitions: [
-    Transition<"create", void, void, "draft", Service, { data: Service }>,
-    Transition<"edit", "draft", Service, "draft", Service, { data: Service }>,
-    Transition<"delete", "draft", Service, "deleted", Service>,
-    Transition<"submit", "draft", Service, "submitted", Service>,
-    Transition<"abort", "submitted", Service, "draft", Service>,
-    Transition<
-      "approve",
-      "submitted",
-      Service,
-      "approved",
-      Service,
-      { approvalDate: string /* timestamp */ }
-    >,
-    Transition<
-      "reject",
-      "submitted",
-      Service,
-      "rejected",
-      Service,
-      { reason: string }
-    >,
-    Transition<"delete", "rejected", Service, "deleted", Service>,
-    Transition<"delete", "approved", Service, "deleted", Service>,
-    Transition<"edit", "rejected", Service, "draft", Service, { data: Service }>
+    Transition<Action<"create">, void, State<"draft">>,
+    Transition<Action<"edit">, State<"draft">, State<"draft">>,
+    Transition<Action<"delete">, State<"draft">, State<"deleted">>,
+    Transition<Action<"submit">, State<"draft">, State<"submitted">>,
+    Transition<Action<"abort">, State<"submitted">, State<"draft">>,
+    Transition<Action<"approve">, State<"submitted">, State<"approved">>,
+    Transition<Action<"reject">, State<"submitted">, State<"rejected">>,
+    Transition<Action<"delete">, State<"rejected">, State<"deleted">>,
+    Transition<Action<"delete">, State<"approved">, State<"deleted">>,
+    Transition<Action<"edit">, State<"rejected">, State<"draft">>
   ];
 };
 

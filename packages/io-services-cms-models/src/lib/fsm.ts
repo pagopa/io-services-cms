@@ -61,24 +61,23 @@ export type StateSetTypes<
 };
 
 export type Transition<
-  Action extends string,
-  FromState extends string | void,
-  FromStateType extends unknown, // eslint-disable-line @typescript-eslint/no-unnecessary-type-constraint
-  ToState extends string,
-  ToStateType extends unknown, // eslint-disable-line @typescript-eslint/no-unnecessary-type-constraint
-  Input extends Record<string, unknown> | void = void
+  Action extends [string, Record<string, unknown> | void],
+  FromState extends [string, unknown] | void,
+  ToState extends [string, unknown]
 > = {
-  id: `apply ${Action} on ${FromState extends string ? FromState : "*"}`;
-  action: Action;
-  from: FromState extends string ? FromState : "*";
-  to: ToState;
+  id: `apply ${Action[0]} on ${FromState extends [string, unknown]
+    ? FromState[0]
+    : "*"}`;
+  action: Action[0];
+  from: FromState extends [string, unknown] ? FromState[0] : "*";
+  to: ToState[0];
   exec: (
-    params: (FromState extends string
-      ? { current: WithState<FromState, FromStateType> }
+    params: (FromState extends [string, unknown]
+      ? { current: WithState<FromState[0], FromState[1]> }
       : { current: undefined }) &
-      (Input extends Record<string, unknown>
-        ? { args: Input }
+      (Action[1] extends Record<string, unknown>
+        ? { args: Action[1] }
         : { args: undefined }) &
       Record<string, never>
-  ) => E.Either<Error, WithState<ToState, ToStateType>>;
+  ) => E.Either<Error, WithState<ToState[0], ToState[1]>>;
 };
