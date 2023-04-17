@@ -11,7 +11,7 @@ variable "cosmos_public_network_access_enabled" {
 module "cosmosdb_account" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.3.0"
 
-  name                = "${local.project}-cosmos-${var.application_basename}"
+  name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   offer_type          = "Standard"
@@ -19,7 +19,7 @@ module "cosmosdb_account" {
   kind                = "GlobalDocumentDB"
 
   # TODO: verify it's really needed
-  domain = "${local.project}-${var.application_basename}"
+  domain = "${local.project}-${local.application_basename}"
 
   public_network_access_enabled     = var.cosmos_public_network_access_enabled
   private_endpoint_enabled          = var.cosmos_private_endpoint_enabled

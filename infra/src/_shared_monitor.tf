@@ -2,7 +2,6 @@
 variable "application_insights_name" {
   type        = string
   description = "The common Application Insights name"
-  default     = ""
 }
 
 variable "monitor_resource_group_name" {

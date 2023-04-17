@@ -1,7 +1,7 @@
 module "storage_account" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//storage_account?ref=v6.3.0"
 
-  name                          = replace("${local.project}-${var.application_basename}-st", "-", "")
+  name                          = replace("${local.project}-${local.application_basename}-st", "-", "")
   account_kind                  = "StorageV2"
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"

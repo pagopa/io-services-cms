@@ -14,7 +14,7 @@ variable "cidr_subnet" {
 
 module "app_snet" {
   source               = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.3.0"
-  name                 = "${local.project}-${var.application_basename}-snet"
+  name                 = "${local.project}-${local.application_basename}-snet"
   address_prefixes     = [var.cidr_subnet]
   resource_group_name  = data.azurerm_resource_group.vnet_common_rg.name
   virtual_network_name = data.azurerm_virtual_network.vnet_common.name

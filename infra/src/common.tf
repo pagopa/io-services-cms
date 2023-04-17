@@ -24,11 +24,6 @@ variable "location" {
   default = "westeurope"
 }
 
-variable "application_basename" {
-  type    = string
-  default = "servicescms"
-}
-
 variable "tags" {
   type = map(any)
   default = {
@@ -37,6 +32,7 @@ variable "tags" {
 }
 
 locals {
-  project = "${var.prefix}-${var.env_short}"
-  is_prod = var.env_short == "p" ? true : false
+  project              = "${var.prefix}-${var.env_short}"
+  is_prod              = var.env_short == "p" ? true : false
+  application_basename = "servicescms"
 }

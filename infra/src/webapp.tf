@@ -71,7 +71,7 @@ module "webapp_functions_app" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.3.0"
 
   resource_group_name = azurerm_resource_group.rg.name
-  name                = "${local.project}-${var.application_basename}-webapp-fn"
+  name                = "${local.project}-${local.application_basename}-webapp-fn"
   location            = var.location
   health_check_path   = "/api/v1/info"
 
