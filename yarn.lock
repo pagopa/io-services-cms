@@ -732,12 +732,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/express-azure-functions@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@pagopa/express-azure-functions@npm:4.0.0"
+"@pagopa/express-azure-functions@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@pagopa/express-azure-functions@npm:4.0.1"
   peerDependencies:
     express: ^4.17.2
-  checksum: 575b8f10edabf189444dcf9213f0ae74005a6e21ebd6a36f82947256f13474bc022544885c7460f20012396c3675af8161746e35eedb2ef6468246ab71508732
+  checksum: c5541d81cc0f713abc8d75231f611ae3cc438c1e39ff2a46ddc744b43b92a57079bb32ca9806b6984ea0b3b1a8b29d113bffb9fa56861beaa227947def618bdb
   languageName: node
   linkType: hard
 
@@ -3947,7 +3947,7 @@ __metadata:
   dependencies:
     "@azure/functions": ^3.5.1
     "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/express-azure-functions": ^4.0.0
+    "@pagopa/express-azure-functions": ^4.0.1
     "@pagopa/io-functions-commons": ^28.1.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
