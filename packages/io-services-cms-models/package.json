@@ -1,5 +1,6 @@
 {
   "name": "io-services-cms-models",
+  "version": "0.0.0",
   "main": "./dist/index.js",
   "typesVersions": {
     "*": {
@@ -22,6 +23,7 @@
     "lint:fix": "eslint --fix \"src/**\""
   },
   "dependencies": {
+    "@pagopa/ts-commons": "^11.0.0",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20"
   },

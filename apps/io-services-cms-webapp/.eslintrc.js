@@ -6,7 +6,13 @@ module.exports = {
     node: true,
   },
   extends: ["@pagopa/eslint-config/recommended"],
-  ignorePatterns: ["**/models/*.ts", "*.yaml", "**/*.test.ts"],
+  ignorePatterns: [
+    "**/models/*.ts",
+    "*.yaml",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.test-d.ts",
+  ],
   rules: {
     "max-classes-per-file": "off",
   },
