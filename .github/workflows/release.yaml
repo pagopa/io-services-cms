@@ -25,6 +25,6 @@ jobs:
         run: yarn
 
       - name: Create Release Pull Request
-        uses: changesets/action@v1.4.1
+        uses: changesets/action@e9cc34b540dd3ad1b030c57fd97269e8f6ad905a #v1.4.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
