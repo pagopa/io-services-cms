@@ -1,0 +1,33 @@
+{
+    "version": "2.0",
+    "logging": {
+        "logLevel": {
+            "default": "Information"
+        },
+        "applicationInsights": {
+            "samplingSettings": {
+                "isEnabled": true,
+                "maxTelemetryItemsPerSecond": 5,
+                "includedTypes": "PageView;Trace;Dependency;Request",
+                "excludedTypes": "Exception;Event;CustomEvent"
+            }
+        }
+    },
+    "extensions": {
+        "http": {
+            "routePrefix": "api/v1"
+        },
+        "storageProvider": {
+            "connectionStringName": "INTERNAL_STORAGE_CONNECTION_STRING",
+            "partitionCount": 4
+        },
+        "tracing": {
+            "traceInputsAndOutputs": false,
+            "traceReplayEvents": false
+        }
+    },
+    "extensionBundle": {
+        "id": "Microsoft.Azure.Functions.ExtensionBundle",
+        "version": "[3.3.0, 4.0.0)"
+    }
+}

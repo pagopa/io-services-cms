@@ -26,6 +26,31 @@ tags:
   - name: organizations
     description: Organizations API specification
 paths:
+  /info:
+    get: 
+      description: Get runtime status information about the application
+      operationId: info
+      security: [] # public endpoint
+      responses:
+        '200': 
+          description: The application is up and running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version: 
+                    type: string
+                    description: the application version
+                  name:
+                    type: string
+                    description: the application name
+        '500': 
+          description: The fails to startup due to misconfiguration or unreachable dependencies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseError"
   /services:
     post:
       tags:
