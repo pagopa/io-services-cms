@@ -24,7 +24,7 @@ variable "env_short" {
 }
 
 variable "domain" {
-  type = string
+  type        = string
   description = "The applicative domain"
   validation {
     condition = (
@@ -42,7 +42,7 @@ variable "github" {
   description = "GitHub Organization and repository name"
   default = {
     org        = "pagopa"
-    repository = "io-sign"
+    repository = "io-services-cms"
   }
 }
 
