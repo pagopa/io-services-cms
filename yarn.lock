@@ -3931,6 +3931,7 @@ __metadata:
   resolution: "io-services-cms-models@workspace:packages/io-services-cms-models"
   dependencies:
     "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
     eslint: ^8.38.0
     fp-ts: ^2.13.1
