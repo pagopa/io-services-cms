@@ -8,14 +8,36 @@
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import {
+  errorsToReadableMessages,
+  readableReport,
+} from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
+import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.interface({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
 });
+
+// Jira configuration
+export const JiraConfig = t.interface({
+  JIRA_NAMESPACE_URL: NonEmptyString,
+  JIRA_PROJECT_NAME: NonEmptyString,
+  JIRA_TOKEN: NonEmptyString,
+  JIRA_USERNAME: EmailAddress,
+});
+export type JiraConfig = t.TypeOf<typeof JiraConfig>;
+
+export const getJiraConfigOrThrow = () =>
+  pipe(
+    process.env,
+    JiraConfig.decode,
+    E.getOrElseW((err) => {
+      throw new Error(errorsToReadableMessages(err).join("|"));
+    })
+  );
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;

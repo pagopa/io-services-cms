@@ -29,7 +29,8 @@
     "dotenv-cli": "^7.2.1",
     "express": "^4.18.2",
     "fp-ts": "^2.13.1",
-    "io-ts": "^2.2.20"
+    "io-ts": "^2.2.20",
+    "node-fetch": "^3.3.1"
   },
   "imports": {
     "#package.json": "./package.json"
