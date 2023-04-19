@@ -8,10 +8,7 @@
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
-import {
-  errorsToReadableMessages,
-  readableReport,
-} from "@pagopa/ts-commons/lib/reporters";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
@@ -30,20 +27,12 @@ export const JiraConfig = t.interface({
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
-export const getJiraConfigOrThrow = () =>
-  pipe(
-    process.env,
-    JiraConfig.decode,
-    E.getOrElseW((err) => {
-      throw new Error(errorsToReadableMessages(err).join("|"));
-    })
-  );
-
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.type({ isProduction: t.boolean }),
   InternalStorageAccount,
+  JiraConfig,
 ]);
 
 export const envConfig = {

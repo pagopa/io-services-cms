@@ -1,27 +1,53 @@
-import { toError } from "fp-ts/lib/Either";
+import { Either, toError } from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import nodeFetch from "node-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { JiraConfig } from "./config";
 
-const JIRA_ISSUE_REST_API_PATH = "/rest/api/3/issue";
-
-export type jiraConfig = {
-  readonly projectName: NonEmptyString;
-  readonly jiraUsername: EmailAddress;
-  readonly token: NonEmptyString;
-};
+const JIRA_REST_API_PATH = "/rest/api/2/";
 
 export const CreateJiraIssueResponse = t.interface({
   id: NonEmptyString,
   key: NonEmptyString,
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
+
+export const SearchJiraIssuesResponse = t.interface({
+  startAt: t.number,
+  total: t.number,
+  issues: t.readonlyArray(
+    t.interface({
+      id: NonEmptyString,
+      key: NonEmptyString,
+      fields: t.interface({
+        comment: t.interface({
+          comments: t.readonlyArray(t.interface({ body: t.string })),
+        }),
+        status: t.interface({
+          name: t.string,
+        }),
+      }),
+    })
+  ),
+});
+export type SearchJiraIssuesResponse = t.TypeOf<
+  typeof SearchJiraIssuesResponse
+>;
+
+const SearchJiraIssuesPayload = t.interface({
+  fields: t.array(t.string),
+  fieldsByKeys: t.boolean,
+  jql: t.string,
+  maxResults: t.number,
+  startAt: t.number,
+});
+type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
 export type jiraAPIClient = {
   readonly createJiraIssue: (
@@ -30,6 +56,9 @@ export type jiraAPIClient = {
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, CreateJiraIssueResponse>;
+  readonly searchJiraIssues: (
+    bodyData: SearchJiraIssuesPayload
+  ) => TaskEither<Error, SearchJiraIssuesResponse>;
 };
 
 export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
@@ -42,15 +71,28 @@ export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
     )
   );
 
+const checkJiraResponse = (response: Response): Either<Error, Response> => {
+  if (response.status === 200 || response.status === 201) {
+    return E.right(response);
+  } else if (response.status === 400) {
+    return E.left(new Error("Invalid request"));
+  } else if (response.status === 401) {
+    return E.left(new Error("Jira secrets misconfiguration"));
+  } else if (response.status >= 500) {
+    return E.left(new Error("Jira API returns an error"));
+  } else {
+    return E.left(new Error("Unknown status code response error"));
+  }
+};
+
 export const JiraAPIClient = (
-  baseUrl: NonEmptyString,
-  config: jiraConfig,
+  config: JiraConfig,
   fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
 ): jiraAPIClient => {
   const jiraHeaders = {
     Accept: "application/json",
     Authorization: `Basic ${Buffer.from(
-      `${config.jiraUsername}:${config.token}`
+      `${config.JIRA_USERNAME}:${config.JIRA_TOKEN}`
     ).toString("base64")}`,
     "Content-Type": "application/json",
   };
@@ -64,7 +106,7 @@ export const JiraAPIClient = (
     pipe(
       TE.tryCatch(
         () =>
-          fetchApi(`${baseUrl}${JIRA_ISSUE_REST_API_PATH}`, {
+          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue`, {
             body: JSON.stringify({
               fields: {
                 ...fromMapToObject(customFields),
@@ -78,7 +120,7 @@ export const JiraAPIClient = (
                 },
                 labels: labels || [],
                 project: {
-                  key: config.projectName,
+                  key: config.JIRA_PROJECT_NAME,
                 },
                 summary: title,
               },
@@ -88,34 +130,45 @@ export const JiraAPIClient = (
           }),
         toError
       ),
-      TE.chain((_) => {
-        if (_.status >= 500) {
-          return TE.left(new Error("Jira API returns an error"));
-        }
-        if (_.status === 401) {
-          return TE.left(new Error("Jira secrets misconfiguration"));
-        }
-        if (_.status === 400) {
-          return TE.left(new Error("Invalid request"));
-        }
-        if (_.status !== 201) {
-          return TE.left(new Error("Unknown status code response error"));
-        }
-        return pipe(
-          TE.tryCatch(() => _.json(), toError),
-          TE.chain((responseBody) =>
-            pipe(
-              responseBody,
-              CreateJiraIssueResponse.decode,
-              TE.fromEither,
-              TE.mapLeft((errors) => toError(readableReport(errors)))
-            )
-          )
-        );
-      })
+      TE.chainEitherK(checkJiraResponse),
+      TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
+      TE.chain((responseBody) =>
+        pipe(
+          responseBody,
+          CreateJiraIssueResponse.decode,
+          TE.fromEither,
+          TE.mapLeft((errors) => toError(readableReport(errors)))
+        )
+      )
+    );
+
+  const searchJiraIssues = (
+    bodyData: SearchJiraIssuesPayload
+  ): TaskEither<Error, SearchJiraIssuesResponse> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`, {
+            body: JSON.stringify(bodyData),
+            headers: jiraHeaders,
+            method: "POST",
+          }),
+        toError
+      ),
+      TE.chainEitherK(checkJiraResponse),
+      TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
+      TE.chain((responseBody) =>
+        pipe(
+          responseBody,
+          SearchJiraIssuesResponse.decode,
+          TE.fromEither,
+          TE.mapLeft((errors) => toError(readableReport(errors)))
+        )
+      )
     );
 
   return {
     createJiraIssue,
+    searchJiraIssues,
   };
 };
