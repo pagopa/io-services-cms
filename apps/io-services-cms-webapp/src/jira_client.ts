@@ -47,12 +47,12 @@ const SearchJiraIssuesPayload = t.interface({
   maxResults: t.number,
   startAt: t.number,
 });
-type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
+export type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
 export type jiraAPIClient = {
   readonly createJiraIssue: (
     title: NonEmptyString,
-    description: ReadonlyArray<unknown>,
+    description: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, CreateJiraIssueResponse>;
@@ -99,7 +99,7 @@ export const JiraAPIClient = (
 
   const createJiraIssue = (
     title: NonEmptyString,
-    description: ReadonlyArray<unknown>,
+    description: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, CreateJiraIssueResponse> =>
@@ -110,11 +110,7 @@ export const JiraAPIClient = (
             body: JSON.stringify({
               fields: {
                 ...fromMapToObject(customFields),
-                description: {
-                  version: 1,
-                  type: "doc",
-                  content: description,
-                },
+                description,
                 issuetype: {
                   name: "Task",
                 },
