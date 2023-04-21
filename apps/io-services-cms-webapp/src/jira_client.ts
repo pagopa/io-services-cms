@@ -50,6 +50,7 @@ const SearchJiraIssuesPayload = t.interface({
 export type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
 export type jiraAPIClient = {
+  readonly config: JiraConfig;
   readonly createJiraIssue: (
     title: NonEmptyString,
     description: NonEmptyString,
@@ -164,6 +165,7 @@ export const JiraAPIClient = (
     );
 
   return {
+    config,
     createJiraIssue,
     searchJiraIssues,
   };
