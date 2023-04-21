@@ -16,6 +16,8 @@
     "@pagopa/eslint-config": "^3.0.0",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/express": "^4.17.17",
+    "@types/pg": "^8.6.6",
+    "@types/pg-cursor": "^2.7.0",
     "eslint": "^8.38.0",
     "prettier": "^2.8.7",
     "typescript": "^5.0.4",
@@ -33,7 +35,10 @@
     "fp-ts": "^2.13.1",
     "io-services-cms-models": "workspace:^",
     "io-ts": "^2.2.20",
-    "node-fetch": "^3.3.1"
+    "knex": "^2.4.2",
+    "node-fetch": "^3.3.1",
+    "pg": "^8.10.0",
+    "pg-cursor": "^2.9.0"
   },
   "imports": {
     "#package.json": "./package.json"
