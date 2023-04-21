@@ -22,7 +22,9 @@
     "vitest": "^0.30.1"
   },
   "dependencies": {
+    "@azure/arm-apimanagement": "^9.0.0",
     "@azure/functions": "^3.5.1",
+    "@azure/identity": "^3.1.4",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^28.1.0",
     "@pagopa/ts-commons": "^11.0.0",
