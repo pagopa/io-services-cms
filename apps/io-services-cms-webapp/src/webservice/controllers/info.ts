@@ -11,7 +11,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
-import { envConfig, IConfig } from "../config";
+import { envConfig, IConfig } from "../../config";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const packageJson = require("../../package.json");
