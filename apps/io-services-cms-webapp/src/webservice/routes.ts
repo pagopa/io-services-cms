@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { makeInfoHandler } from "./functions/info";
+import { makeInfoHandler } from "./controllers/info";
 
 const router = Router();
 
