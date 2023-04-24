@@ -1,5 +1,6 @@
 import {
   ApiManagementClient,
+  GroupContract,
   SubscriptionGetResponse,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
@@ -96,6 +97,32 @@ export function getUser(
       identity
     ),
     chainApimMappedError
+  );
+}
+
+export function getUserGroups(
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  userName: string
+): TE.TaskEither<Error, ReadonlyArray<GroupContract>> {
+  return pipe(
+    TE.tryCatch(async () => {
+      const groupListResponse = apimClient.userGroup.list(
+        apimResourceGroup,
+        apim,
+        userName
+      );
+      // eslint-disable-next-line functional/immutable-data
+      const groupList: GroupContract[] = [];
+
+      for await (const x of groupListResponse) {
+        // eslint-disable-next-line functional/immutable-data
+        groupList.push(x);
+      }
+
+      return groupList;
+    }, E.toError)
   );
 }
 

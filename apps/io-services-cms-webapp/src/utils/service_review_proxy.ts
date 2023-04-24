@@ -1,5 +1,6 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { Service } from "io-services-cms-models";
 import {
   CreateJiraIssueResponse,
   SearchJiraIssuesPayload,
@@ -7,25 +8,30 @@ import {
   jiraAPIClient,
 } from "../jira_client";
 // TODO: check Service model import
-import { Service } from "../../../../packages/io-services-cms-models/dist/service-lifecycle/types";
 
 const formatOptionalStringValue = (value?: NonEmptyString) =>
   value || `* {color:#FF991F}*[ DATO MANCANTE ]*{color}`;
 
-export type serviceReviewProxy = {
+export type ServiceReviewProxy = {
   readonly createJiraIssue: (
     service: Service,
-    delegate: unknown
+    delegate: Delegate
   ) => TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKey: (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>
   ) => TaskEither<Error, SearchJiraIssuesResponse>;
 };
 
+export type Delegate = {
+  delegate_name: string;
+  delegate_email: string;
+  delegate_auth: string[];
+};
+
 export const ServiceReviewProxy = (
   jiraClient: jiraAPIClient
-): serviceReviewProxy => {
-  const buildIssueCustomFields = (service: Service, _delegate: unknown) => {
+): ServiceReviewProxy => {
+  const buildIssueCustomFields = (service: Service, _delegate: Delegate) => {
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD,
@@ -49,7 +55,7 @@ export const ServiceReviewProxy = (
     return customFields;
   };
 
-  const buildIssueDescription = (service: Service, _delegate: unknown) =>
+  const buildIssueDescription = (service: Service, delegate: Delegate) =>
     `Effettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
@@ -68,13 +74,15 @@ export const ServiceReviewProxy = (
       service.data.metadata.privacyUrl
     )}
     \n\nh3. _Dati account ({account_type}):_
-    \n\n{delegate_email}
+    \n\n${delegate.delegate_email}
     \n\n*Limitato:* {is_limited}
-    \n\n*Autorizzazioni:* {account_permissions}` as NonEmptyString;
+    \n\n*Autorizzazioni:* ${delegate.delegate_auth.join(
+      ", "
+    )}` as NonEmptyString;
 
   const createJiraIssue = (
     service: Service,
-    delegate: unknown
+    delegate: Delegate
   ): TaskEither<Error, CreateJiraIssueResponse> =>
     jiraClient.createJiraIssue(
       `Review #${service.id}` as NonEmptyString,

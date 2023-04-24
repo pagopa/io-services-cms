@@ -1,7 +1,7 @@
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../config";
 import { ServiceReviewProxy } from "../service_review_proxy";
-import { Service } from "../../../../../packages/io-services-cms-models/dist/service-lifecycle/types";
+import { Service } from "io-services-cms-models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import {
@@ -55,8 +55,9 @@ const aService = {
   },
 } as unknown as Service;
 const aDelegate = {
-  name: "Mario Rossi",
-  email: "mario.rossi@email.it",
+  delegate_name: "Mario Rossi",
+  delegate_email: "mario.rossi@email.it",
+  delegate_auth: ["apiservicewrite"],
 };
 
 const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
