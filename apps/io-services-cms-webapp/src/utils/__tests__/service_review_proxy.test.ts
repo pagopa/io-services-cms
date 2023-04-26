@@ -58,7 +58,13 @@ const aService = {
 const aDelegate = {
   name: "Mario Rossi",
   email: "mario.rossi@email.it",
-  permissions: ["apiservicewrite"],
+  permissions: [
+    "apiservicewrite",
+    "apilimitedmessagewrite",
+    "apiinforead",
+    "apimessageread",
+    "apilimitedprofileread",
+  ],
 } as Delegate;
 
 const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {

@@ -62,8 +62,7 @@ export const ServiceReviewProxy = (
     }]
     \n\nh2. *${service.data.name} (${service.data.metadata.scope})*
     \n\n${formatOptionalStringValue(service.data.description)}
-    \n\n----
-    \n\nh3. _Contatti:_
+    \n\n----\n\nh3. _Contatti:_
     \n\n*Url di supporto:* ${formatOptionalStringValue(
       service.data.metadata.supportUrl
     )}
