@@ -18,24 +18,29 @@ export const CreateJiraIssueResponse = t.interface({
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
-export const SearchJiraIssuesResponse = t.interface({
-  startAt: t.number,
-  total: t.number,
-  issues: t.readonlyArray(
-    t.interface({
-      id: NonEmptyString,
-      key: NonEmptyString,
-      fields: t.interface({
-        comment: t.interface({
-          comments: t.readonlyArray(t.interface({ body: t.string })),
+export const SearchJiraIssuesResponse = t.intersection([
+  t.interface({
+    startAt: t.number,
+    total: t.number,
+    issues: t.readonlyArray(
+      t.interface({
+        id: NonEmptyString,
+        key: NonEmptyString,
+        fields: t.interface({
+          comment: t.interface({
+            comments: t.readonlyArray(t.interface({ body: t.string })),
+          }),
+          status: t.interface({
+            name: t.string,
+          }),
         }),
-        status: t.interface({
-          name: t.string,
-        }),
-      }),
-    })
-  ),
-});
+      })
+    ),
+  }),
+  t.partial({
+    warningMessages: t.readonlyArray(t.string),
+  }),
+]);
 export type SearchJiraIssuesResponse = t.TypeOf<
   typeof SearchJiraIssuesResponse
 >;
