@@ -1,13 +1,13 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Service } from "io-services-cms-models/service-lifecycle/types";
+import * as t from "io-ts";
 import {
   CreateJiraIssueResponse,
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
   jiraAPIClient,
 } from "../jira_client";
-// TODO: check Service model import
 
 const formatOptionalStringValue = (value?: NonEmptyString) =>
   value || `* {color:#FF991F}*[ DATO MANCANTE ]*{color}`;
@@ -22,20 +22,21 @@ export type ServiceReviewProxy = {
   ) => TaskEither<Error, SearchJiraIssuesResponse>;
 };
 
-export type Delegate = {
-  delegate_name: string;
-  delegate_email: string;
-  delegate_auth: string[];
-};
+export type Delegate = t.TypeOf<typeof Delegate>;
+export const Delegate = t.type({
+  name: NonEmptyString,
+  email: NonEmptyString,
+  permissions: t.array(t.string),
+});
 
 export const ServiceReviewProxy = (
   jiraClient: jiraAPIClient
 ): ServiceReviewProxy => {
-  const buildIssueCustomFields = (service: Service, _delegate: Delegate) => {
+  const buildIssueCustomFields = (service: Service, delegate: Delegate) => {
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD,
-      "12345678901"
+      service.data.organization.fiscal_code
     );
     customFields.set(jiraClient.config.JIRA_CONTRACT_CUSTOM_FIELD, {
       value: "Assente",
@@ -46,11 +47,11 @@ export const ServiceReviewProxy = (
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_NAME_CUSTOM_FIELD,
-      "${delegate_name}"
+      delegate.name
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_EMAIL_CUSTOM_FIELD,
-      "${delegate_email}"
+      delegate.email
     );
     return customFields;
   };
@@ -74,11 +75,11 @@ export const ServiceReviewProxy = (
       service.data.metadata.privacyUrl
     )}
     \n\nh3. _Dati account ({account_type}):_
-    \n\n${delegate.delegate_email}
-    \n\n*Limitato:* {is_limited}
-    \n\n*Autorizzazioni:* ${delegate.delegate_auth.join(
-      ", "
-    )}` as NonEmptyString;
+    \n\n${delegate.email}
+    \n\n*Limitato:* ${
+      delegate.permissions.indexOf("apimessagewrite") !== -1 ? "NO" : "SI"
+    }
+    \n\n*Autorizzazioni:* ${delegate.permissions.join(", ")}` as NonEmptyString;
 
   const createJiraIssue = (
     service: Service,
