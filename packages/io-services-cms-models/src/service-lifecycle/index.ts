@@ -207,6 +207,8 @@ const FSM: FSM = {
   ],
 };
 
+type LifecycleStore = FSMStore<States[number]>;
+
 // TODO: apply function is meant to be agnostic on the FSM defintion.
 // Unfortunately, we didn't achieve the result yet, hence we opted for an actual implementation.
 // The algorithm itself is not related to the current FSM implementation, but the type system is
@@ -227,50 +229,30 @@ function apply(
   appliedAction: "create" | "edit",
   id: ServiceId,
   args: { data: Service }
-): ReaderTaskEither<
-  FSMStore<keyof FSM["states"]>,
-  Error,
-  WithState<"draft", Service>
->;
+): ReaderTaskEither<LifecycleStore, Error, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
   id: ServiceId
-): ReaderTaskEither<
-  FSMStore<keyof FSM["states"]>,
-  Error,
-  WithState<"submitted", Service>
->;
+): ReaderTaskEither<LifecycleStore, Error, WithState<"submitted", Service>>;
 function apply(
   appliedAction: "approve",
   id: ServiceId,
   args: { approvalDate: string }
-): ReaderTaskEither<
-  FSMStore<keyof FSM["states"]>,
-  Error,
-  WithState<"approved", Service>
->;
+): ReaderTaskEither<LifecycleStore, Error, WithState<"approved", Service>>;
 function apply(
   appliedAction: "reject",
   id: ServiceId,
   args: { reason: string }
-): ReaderTaskEither<
-  FSMStore<keyof FSM["states"]>,
-  Error,
-  WithState<"rejected", Service>
->;
+): ReaderTaskEither<LifecycleStore, Error, WithState<"rejected", Service>>;
 function apply(
   appliedAction: "delete",
   id: ServiceId
-): ReaderTaskEither<
-  FSMStore<keyof FSM["states"]>,
-  Error,
-  WithState<"deleted", Service>
->;
+): ReaderTaskEither<LifecycleStore, Error, WithState<"deleted", Service>>;
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
-): ReaderTaskEither<FSMStore<keyof FSM["states"]>, Error, AllResults> {
+): ReaderTaskEither<LifecycleStore, Error, AllResults> {
   return (store) => {
     // select transitions for the action to apply
     const applicableTransitions = FSM.transitions.filter(

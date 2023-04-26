@@ -34,14 +34,13 @@ export const EmptyState = "*";
 /**
  * The interface of a store for persisting data
  */
-export type FSMStore<S extends string> = {
-  fetch: <T extends StateMetadata<S>>(
-    id: string
-  ) => TE.TaskEither<Error, O.Option<T>>;
-  save: <T extends StateMetadata<S>>(
-    id: string,
-    data: T
-  ) => TE.TaskEither<Error, T>;
+export type FSMStore<
+  TT extends WithState<S, T>,
+  S extends string = string,
+  T extends Record<string, unknown> = Record<string, unknown>
+> = {
+  fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
+  save: (id: string, data: TT) => TE.TaskEither<Error, TT>;
 };
 
 export type StateSet<
