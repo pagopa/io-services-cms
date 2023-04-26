@@ -10,7 +10,7 @@ import {
 } from "../jira_client";
 
 const formatOptionalStringValue = (value?: NonEmptyString) =>
-  value || `* {color:#FF991F}*[ DATO MANCANTE ]*{color}`;
+  value || `{color:#FF991F}*[ DATO MANCANTE ]*{color}`;
 
 export type ServiceReviewProxy = {
   readonly createJiraIssue: (
