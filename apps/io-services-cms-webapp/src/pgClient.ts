@@ -10,14 +10,14 @@ let singletonPool: Pool;
 export const getPool = (config: IDecodableConfigPostgreSQL): Pool => {
   if (!singletonPool) {
     singletonPool = new Pool({
-      database: config.DB_NAME,
-      host: config.DB_HOST,
-      idleTimeoutMillis: config.DB_IDLE_TIMEOUT,
+      database: config.REVIEWER_DB_NAME,
+      host: config.REVIEWER_DB_HOST,
+      idleTimeoutMillis: config.REVIEWER_DB_IDLE_TIMEOUT,
       max: 20,
-      password: config.DB_PASSWORD,
-      port: config.DB_PORT,
+      password: config.REVIEWER_DB_PASSWORD,
+      port: config.REVIEWER_DB_PORT,
       ssl: true,
-      user: config.DB_USER,
+      user: config.REVIEWER_DB_USER,
     });
   }
   return singletonPool;

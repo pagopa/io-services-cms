@@ -38,14 +38,14 @@ export type IDecodableConfigPostgreSQL = t.TypeOf<
   typeof IDecodableConfigPostgreSQL
 >;
 export const IDecodableConfigPostgreSQL = t.interface({
-  DB_HOST: NonEmptyString,
-  DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
-  DB_NAME: NonEmptyString,
-  DB_PASSWORD: NonEmptyString,
-  DB_PORT: NumberFromString,
-  DB_SCHEMA: NonEmptyString,
-  DB_TABLE: NonEmptyString,
-  DB_USER: NonEmptyString,
+  REVIEWER_DB_HOST: NonEmptyString,
+  REVIEWER_DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
+  REVIEWER_DB_NAME: NonEmptyString,
+  REVIEWER_DB_PASSWORD: NonEmptyString,
+  REVIEWER_DB_PORT: NumberFromString,
+  REVIEWER_DB_SCHEMA: NonEmptyString,
+  REVIEWER_DB_TABLE: NonEmptyString,
+  REVIEWER_DB_USER: NonEmptyString,
 });
 
 // global app configuration

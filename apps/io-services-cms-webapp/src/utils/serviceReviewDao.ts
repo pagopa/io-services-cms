@@ -28,9 +28,14 @@ export const ServiceReviewRowDataTable = t.type({
 });
 
 const createInsertSql = (
-  { DB_SCHEMA, DB_TABLE }: IDecodableConfigPostgreSQL,
+  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: IDecodableConfigPostgreSQL,
   data: ServiceReviewRowDataTable
-): string => knex.withSchema(DB_SCHEMA).table(DB_TABLE).insert(data).toQuery();
+): string =>
+  knex
+    .withSchema(REVIEWER_DB_SCHEMA)
+    .table(REVIEWER_DB_TABLE)
+    .insert(data)
+    .toQuery();
 
 const insert =
   (pool: Pool, dbConfig: IDecodableConfigPostgreSQL) =>
@@ -40,12 +45,12 @@ const insert =
     pipe(createInsertSql(dbConfig, data), queryDataTable(pool));
 
 const createReadSql = ({
-  DB_SCHEMA,
-  DB_TABLE,
+  REVIEWER_DB_SCHEMA,
+  REVIEWER_DB_TABLE,
 }: IDecodableConfigPostgreSQL): string =>
   knex
-    .withSchema(DB_SCHEMA)
-    .table(DB_TABLE)
+    .withSchema(REVIEWER_DB_SCHEMA)
+    .table(REVIEWER_DB_TABLE)
     .select(["serviceId", "serviceVersion", "status", "scope", "extraData"])
     .where("status", "PENDING")
     .toQuery();
