@@ -24,6 +24,11 @@ export const JiraConfig = t.interface({
   JIRA_PROJECT_NAME: NonEmptyString,
   JIRA_TOKEN: NonEmptyString,
   JIRA_USERNAME: EmailAddress,
+  JIRA_CONTRACT_CUSTOM_FIELD: NonEmptyString,
+  JIRA_DELEGATE_EMAIL_CUSTOM_FIELD: NonEmptyString,
+  JIRA_DELEGATE_NAME_CUSTOM_FIELD: NonEmptyString,
+  JIRA_ORGANIZATION_CF_CUSTOM_FIELD: NonEmptyString,
+  JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
