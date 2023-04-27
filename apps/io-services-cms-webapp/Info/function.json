@@ -16,5 +16,6 @@
             "name": "res"
         }
     ],
-    "scriptFile": "../dist/main.js"
+    "scriptFile": "../dist/main.js",
+    "entryPoint": "httpEntryPoint"
 }
