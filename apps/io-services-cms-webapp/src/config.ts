@@ -14,6 +14,7 @@ import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
+  IntegerFromString,
   NonNegativeInteger,
   NumberFromString,
 } from "@pagopa/ts-commons/lib/numbers";
@@ -47,7 +48,7 @@ export const PostgreSqlConfig = t.interface({
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
-  REVIEWER_DB_READ_MAX_ROW: NonNegativeInteger,
+  REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
 });
 
 // global app configuration
