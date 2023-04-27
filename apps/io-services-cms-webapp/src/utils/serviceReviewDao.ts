@@ -1,11 +1,12 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool, QueryResult } from "pg";
 import { IDecodableConfigPostgreSQL } from "../config";
-import { getPool, queryDataTable } from "../pgClient";
+import { createCursor, getPool, queryDataTable } from "../pgClient";
 
 const knex = knexBase({
   client: "pg",
@@ -55,13 +56,33 @@ const createReadSql = ({
     .where("status", "PENDING")
     .toQuery();
 
-const readPending =
+const executeOnPending =
   (pool: Pool, dbConfig: IDecodableConfigPostgreSQL) =>
-  (): TE.TaskEither<DatabaseError, QueryResult> =>
-    pipe(dbConfig, createReadSql, queryDataTable(pool));
+  (
+    fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
+  ): TE.TaskEither<Error, void> =>
+    pipe(dbConfig, createReadSql, (sql) =>
+      TE.tryCatch(async () => {
+        const poolClient = await pool.connect();
+        const cursor = createCursor(poolClient)(sql);
+        // eslint-disable-next-line functional/no-let
+        let length: number;
+        do {
+          const rows = await cursor.read(dbConfig.REVIEWER_DB_READ_MAX_ROW);
+          length = rows.length;
+          pipe(
+            rows,
+            t.array(ServiceReviewRowDataTable).decode,
+            E.mapLeft(E.toError),
+            TE.fromEither,
+            TE.map(fn)
+          );
+        } while (length > 0);
+      }, E.toError)
+    );
 
 export const getDao = (dbConfig: IDecodableConfigPostgreSQL) =>
   pipe(getPool(dbConfig), (pool) => ({
     insert: insert(pool, dbConfig),
-    readPending: readPending(pool, dbConfig),
+    executeOnPending: executeOnPending(pool, dbConfig),
   }));

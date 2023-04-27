@@ -13,7 +13,10 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NumberFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.interface({
@@ -46,6 +49,7 @@ export const IDecodableConfigPostgreSQL = t.interface({
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
+  REVIEWER_DB_READ_MAX_ROW: NonNegativeInteger,
 });
 
 // global app configuration

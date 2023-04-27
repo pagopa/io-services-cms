@@ -50,5 +50,3 @@ export const ResultSet = t.interface({
   rows: t.readonlyArray(ResultRow),
 });
 export type ResultSet = t.TypeOf<typeof ResultSet>;
-
-// export default getPool;
