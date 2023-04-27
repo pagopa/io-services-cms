@@ -1,4 +1,3 @@
-domain    = "services-cms"
 env       = "prod"
 env_short = "p"
 prefix    = "io"
@@ -10,6 +9,7 @@ environment_cd_roles = {
   resource_groups = {
     io-p-services-cms-rg = [
       "Website Contributor",
+      "Key Vault Secrets User"
     ]
   }
 }
