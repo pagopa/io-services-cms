@@ -18,18 +18,7 @@ import {
 import { parse } from "fp-ts/lib/Json";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
-
-export interface IServicePrincipalCreds {
-  readonly clientId: string;
-  readonly secret: string;
-  readonly tenantId: string;
-}
-
-export interface IAzureApimConfig {
-  readonly subscriptionId: string;
-  readonly apimResourceGroup: string;
-  readonly apim: string;
-}
+import { ServicePrincipalConfig } from "./config";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -69,14 +58,14 @@ export const chainApimMappedError = <T>(
   );
 
 export function getApimClient(
-  servicePrincipalCreds: IServicePrincipalCreds,
+  servicePrincipalCreds: ServicePrincipalConfig,
   subscriptionId: string
 ): ApiManagementClient {
   return new ApiManagementClient(
     new ClientSecretCredential(
-      servicePrincipalCreds.tenantId,
-      servicePrincipalCreds.clientId,
-      servicePrincipalCreds.secret,
+      servicePrincipalCreds.SERVICE_PRINCIPAL_TENANT_ID,
+      servicePrincipalCreds.SERVICE_PRINCIPAL_CLIENT_ID,
+      servicePrincipalCreds.SERVICE_PRINCIPAL_SECRET,
       {
         authorityHost: AzureAuthorityHosts.AzurePublicCloud,
       }

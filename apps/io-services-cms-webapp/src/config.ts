@@ -32,12 +32,30 @@ export const JiraConfig = t.interface({
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
-// global app configuration
+// Service Principal Creds configuration
+export const ServicePrincipalConfig = t.interface({
+  SERVICE_PRINCIPAL_CLIENT_ID: NonEmptyString,
+  SERVICE_PRINCIPAL_SECRET: NonEmptyString,
+  SERVICE_PRINCIPAL_TENANT_ID: NonEmptyString,
+});
+export type ServicePrincipalConfig = t.TypeOf<typeof ServicePrincipalConfig>;
+
+// Apim configuration
+export const ApimConfig = t.interface({
+  AZURE_APIM: NonEmptyString,
+  AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
+  AZURE_SUBSCRIPTION_ID: NonEmptyString,
+});
+export type ApimConfig = t.TypeOf<typeof ApimConfig>;
+
+// Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.type({ isProduction: t.boolean }),
   InternalStorageAccount,
   JiraConfig,
+  ServicePrincipalConfig,
+  ApimConfig,
 ]);
 
 export const envConfig = {
