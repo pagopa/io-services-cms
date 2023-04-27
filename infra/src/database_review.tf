@@ -55,7 +55,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "privatelink_postgres_d
 # https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server
 module "postgres_flexible_server_private" {
 
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v3.15.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v6.3.0"
 
   name                = "${local.project}-${local.application_basename}-private-pgflex"
   location            = azurerm_resource_group.rg.location
