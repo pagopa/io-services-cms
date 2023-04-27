@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import * as express from "express";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson,
@@ -11,13 +8,13 @@ import { pipe } from "fp-ts/lib/function";
 
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
-import { envConfig, IConfig } from "../config";
+import { envConfig, IConfig } from "../../config";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const packageJson = require("../../package.json");
 
-export const makeInfoHandler = (): express.RequestHandler => {
-  const handler = pipe(
+export const makeInfoHandler = () =>
+  pipe(
     envConfig,
     healthcheck.checkApplicationHealth(IConfig, [
       (c) =>
@@ -34,6 +31,3 @@ export const makeInfoHandler = (): express.RequestHandler => {
     ),
     TE.toUnion
   );
-
-  return wrapRequestHandler(handler);
-};

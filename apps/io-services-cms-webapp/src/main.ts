@@ -1,21 +1,13 @@
-import { AzureFunction, Context } from "@azure/functions";
-import * as express from "express";
-import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
-import router from "./routes";
+import { pipe } from "fp-ts/lib/function";
+import { createWebServer } from "./webservice";
+import { expressToAzureFunction } from "./lib/azure/adapters";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 
-const app = express();
-secureExpressApp(app);
-
-app.use(`/${BASE_PATH}`, router);
-
-const httpStart: AzureFunction = (context: Context): void => {
-  setAppContext(app, context);
-  createAzureFunctionHandler(app)(context);
-};
-
-export default httpStart;
+// entrypoint for all http functions
+export const httpEntryPoint = pipe(
+  { basePath: BASE_PATH },
+  createWebServer,
+  expressToAzureFunction
+);
