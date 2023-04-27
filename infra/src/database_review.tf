@@ -67,8 +67,8 @@ module "postgres_flexible_server_private" {
   delegated_subnet_id      = module.postgres_flexible_snet.id
 
   ### Admin
-  administrator_login    = "ioServicesCMS"
-  administrator_password = "Password123!"
+  administrator_login    = data.azurerm_key_vault_secret.pgres_flex_admin_login.value
+  administrator_password = data.azurerm_key_vault_secret.pgres_flex_admin_pwd.value
 
   sku_name   = "B_Standard_B1ms"
   db_version = "13"
