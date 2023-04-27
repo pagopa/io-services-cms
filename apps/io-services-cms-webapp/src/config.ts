@@ -37,10 +37,8 @@ export const JiraConfig = t.interface({
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
-export type IDecodableConfigPostgreSQL = t.TypeOf<
-  typeof IDecodableConfigPostgreSQL
->;
-export const IDecodableConfigPostgreSQL = t.interface({
+export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
+export const PostgreSqlConfig = t.interface({
   REVIEWER_DB_HOST: NonEmptyString,
   REVIEWER_DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
   REVIEWER_DB_NAME: NonEmptyString,
@@ -58,7 +56,7 @@ export const IConfig = t.intersection([
   t.type({ isProduction: t.boolean }),
   InternalStorageAccount,
   JiraConfig,
-  IDecodableConfigPostgreSQL,
+  PostgreSqlConfig,
 ]);
 
 export const envConfig = {

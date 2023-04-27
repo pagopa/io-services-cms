@@ -5,8 +5,8 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool, QueryResult } from "pg";
-import { IDecodableConfigPostgreSQL } from "../config";
-import { createCursor, getPool, queryDataTable } from "../pgClient";
+import { PostgreSqlConfig } from "../config";
+import { createCursor, getPool, queryDataTable } from "../pg-client";
 
 const knex = knexBase({
   client: "pg",
@@ -29,7 +29,7 @@ export const ServiceReviewRowDataTable = t.type({
 });
 
 const createInsertSql = (
-  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: IDecodableConfigPostgreSQL,
+  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
   data: ServiceReviewRowDataTable
 ): string =>
   knex
@@ -39,7 +39,7 @@ const createInsertSql = (
     .toQuery();
 
 const insert =
-  (pool: Pool, dbConfig: IDecodableConfigPostgreSQL) =>
+  (pool: Pool, dbConfig: PostgreSqlConfig) =>
   (
     data: ServiceReviewRowDataTable
   ): TE.TaskEither<DatabaseError, QueryResult> =>
@@ -48,7 +48,7 @@ const insert =
 const createReadSql = ({
   REVIEWER_DB_SCHEMA,
   REVIEWER_DB_TABLE,
-}: IDecodableConfigPostgreSQL): string =>
+}: PostgreSqlConfig): string =>
   knex
     .withSchema(REVIEWER_DB_SCHEMA)
     .table(REVIEWER_DB_TABLE)
@@ -57,7 +57,7 @@ const createReadSql = ({
     .toQuery();
 
 const executeOnPending =
-  (pool: Pool, dbConfig: IDecodableConfigPostgreSQL) =>
+  (pool: Pool, dbConfig: PostgreSqlConfig) =>
   (
     fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
   ): TE.TaskEither<Error, void> =>
@@ -81,7 +81,7 @@ const executeOnPending =
       }, E.toError)
     );
 
-export const getDao = (dbConfig: IDecodableConfigPostgreSQL) =>
+export const getDao = (dbConfig: PostgreSqlConfig) =>
   pipe(getPool(dbConfig), (pool) => ({
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),

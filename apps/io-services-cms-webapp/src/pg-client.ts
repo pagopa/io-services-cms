@@ -3,11 +3,11 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import * as Cursor from "pg-cursor";
-import { IDecodableConfigPostgreSQL } from "./config";
+import { PostgreSqlConfig } from "./config";
 
 // eslint-disable-next-line functional/no-let
 let singletonPool: Pool;
-export const getPool = (config: IDecodableConfigPostgreSQL): Pool => {
+export const getPool = (config: PostgreSqlConfig): Pool => {
   if (!singletonPool) {
     singletonPool = new Pool({
       database: config.REVIEWER_DB_NAME,
