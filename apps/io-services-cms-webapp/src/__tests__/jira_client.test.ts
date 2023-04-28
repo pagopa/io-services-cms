@@ -19,7 +19,7 @@ const getMockFetchWithStatus = (status: number) =>
   }));
 
 const aJiraIssueSummary = "Titolo della Card" as NonEmptyString;
-const aJiraIssueDescription = [] as ReadonlyArray<unknown>;
+const aJiraIssueDescription = "aDescription" as NonEmptyString;
 const aJiraIssueId = "1" as NonEmptyString;
 const aCreateJiraIssueResponse = {
   id: aJiraIssueId,
@@ -153,10 +153,9 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     const mockFetch = getMockFetchWithStatus(201);
     const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
 
-    let customFields: Map<string, unknown> = new Map<string, unknown>();
+    const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set("customfield_10364", "12345678901");
     customFields.set("customfield_10365", {
-      id: "10549",
       value: "Assente",
     });
 

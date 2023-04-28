@@ -18,24 +18,29 @@ export const CreateJiraIssueResponse = t.interface({
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
-export const SearchJiraIssuesResponse = t.interface({
-  startAt: t.number,
-  total: t.number,
-  issues: t.readonlyArray(
-    t.interface({
-      id: NonEmptyString,
-      key: NonEmptyString,
-      fields: t.interface({
-        comment: t.interface({
-          comments: t.readonlyArray(t.interface({ body: t.string })),
+export const SearchJiraIssuesResponse = t.intersection([
+  t.interface({
+    startAt: t.number,
+    total: t.number,
+    issues: t.readonlyArray(
+      t.interface({
+        id: NonEmptyString,
+        key: NonEmptyString,
+        fields: t.interface({
+          comment: t.interface({
+            comments: t.readonlyArray(t.interface({ body: t.string })),
+          }),
+          status: t.interface({
+            name: t.string,
+          }),
         }),
-        status: t.interface({
-          name: t.string,
-        }),
-      }),
-    })
-  ),
-});
+      })
+    ),
+  }),
+  t.partial({
+    warningMessages: t.readonlyArray(t.string),
+  }),
+]);
 export type SearchJiraIssuesResponse = t.TypeOf<
   typeof SearchJiraIssuesResponse
 >;
@@ -47,12 +52,13 @@ const SearchJiraIssuesPayload = t.interface({
   maxResults: t.number,
   startAt: t.number,
 });
-type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
+export type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
 export type jiraAPIClient = {
+  readonly config: JiraConfig;
   readonly createJiraIssue: (
     title: NonEmptyString,
-    description: ReadonlyArray<unknown>,
+    description: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, CreateJiraIssueResponse>;
@@ -99,7 +105,7 @@ export const JiraAPIClient = (
 
   const createJiraIssue = (
     title: NonEmptyString,
-    description: ReadonlyArray<unknown>,
+    description: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, CreateJiraIssueResponse> =>
@@ -110,11 +116,7 @@ export const JiraAPIClient = (
             body: JSON.stringify({
               fields: {
                 ...fromMapToObject(customFields),
-                description: {
-                  version: 1,
-                  type: "doc",
-                  content: description,
-                },
+                description,
                 issuetype: {
                   name: "Task",
                 },
@@ -168,6 +170,7 @@ export const JiraAPIClient = (
     );
 
   return {
+    config,
     createJiraIssue,
     searchJiraIssues,
   };

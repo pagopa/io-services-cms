@@ -22,13 +22,16 @@
     "vitest": "^0.30.1"
   },
   "dependencies": {
+    "@azure/arm-apimanagement": "^9.0.0",
     "@azure/functions": "^3.5.1",
+    "@azure/identity": "^3.1.4",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^28.1.0",
     "@pagopa/ts-commons": "^11.0.0",
     "dotenv-cli": "^7.2.1",
     "express": "^4.18.2",
     "fp-ts": "^2.13.1",
+    "io-services-cms-models": "workspace:^",
     "io-ts": "^2.2.20",
     "node-fetch": "^3.3.1"
   },
