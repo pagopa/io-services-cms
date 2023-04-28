@@ -1,7 +1,6 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Service } from "io-services-cms-models/service-lifecycle/types";
-import * as t from "io-ts";
 import {
   CreateJiraIssueResponse,
   SearchJiraIssuesPayload,
@@ -9,7 +8,7 @@ import {
   jiraAPIClient,
 } from "../jira_client";
 
-const formatOptionalStringValue = (value?: NonEmptyString) =>
+const formatOptionalStringValue = (value?: string) =>
   value || `{color:#FF991F}*[ DATO MANCANTE ]*{color}`;
 
 export type ServiceReviewProxy = {
@@ -22,12 +21,12 @@ export type ServiceReviewProxy = {
   ) => TaskEither<Error, SearchJiraIssuesResponse>;
 };
 
-export type Delegate = t.TypeOf<typeof Delegate>;
-export const Delegate = t.type({
-  name: NonEmptyString,
-  email: NonEmptyString,
-  permissions: t.array(t.string),
-});
+export type Delegate = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  permissions: Array<string | undefined>;
+};
 
 export const ServiceReviewProxy = (
   jiraClient: jiraAPIClient
@@ -47,11 +46,11 @@ export const ServiceReviewProxy = (
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_NAME_CUSTOM_FIELD,
-      delegate.name
+      `${delegate.firstName || ""} ${delegate.lastName || ""}`
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_EMAIL_CUSTOM_FIELD,
-      delegate.email
+      `${delegate.email || ""}`
     );
     return customFields;
   };
@@ -74,7 +73,7 @@ export const ServiceReviewProxy = (
       service.data.metadata.privacyUrl
     )}
     \n\nh3. _Dati account ({account_type}):_
-    \n\n${delegate.email}
+    \n\n${formatOptionalStringValue(delegate.email)}
     \n\n*Limitato:* ${
       delegate.permissions.indexOf("apimessagewrite") !== -1 ? "NO" : "SI"
     }
