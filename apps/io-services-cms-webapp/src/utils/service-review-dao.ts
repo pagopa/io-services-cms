@@ -16,16 +16,16 @@ export type ServiceReviewRowDataTable = t.TypeOf<
   typeof ServiceReviewRowDataTable
 >;
 export const ServiceReviewRowDataTable = t.type({
-  serviceId: NonEmptyString,
-  serviceVersion: NonEmptyString,
-  ticketId: NonEmptyString, // TODO: save only the id or some other ticket related infos?
+  service_id: NonEmptyString,
+  service_version: NonEmptyString,
+  ticket_id: NonEmptyString, // TODO: save only the id or some other ticket related infos?
   status: t.union([
     t.literal("PENDING"),
     t.literal("APPROVED"),
     t.literal("REJECTED"),
     t.literal("ABORTED"),
   ]),
-  extraData: NonEmptyString, // TODO: how to type a generic object/json
+  extra_data: NonEmptyString, // TODO: how to type a generic object/json
 });
 
 const createInsertSql = (
@@ -52,7 +52,6 @@ const createReadSql = ({
   knex
     .withSchema(REVIEWER_DB_SCHEMA)
     .table(REVIEWER_DB_TABLE)
-    .select(["serviceId", "serviceVersion", "status", "scope", "extraData"])
     .where("status", "PENDING")
     .toQuery();
 
@@ -70,14 +69,16 @@ const executeOnPending =
         do {
           const rows = await cursor.read(dbConfig.REVIEWER_DB_READ_MAX_ROW);
           length = rows.length;
-          pipe(
+          const handler = pipe(
             rows,
             t.array(ServiceReviewRowDataTable).decode,
             E.mapLeft(E.toError),
             TE.fromEither,
-            TE.map(fn)
+            TE.chain(fn)
           );
+          await handler(); // TODO: manage error (at least write a log)
         } while (length > 0);
+        poolClient.release();
       }, E.toError)
     );
 

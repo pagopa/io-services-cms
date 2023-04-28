@@ -1,6 +1,5 @@
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import * as Cursor from "pg-cursor";
 import { PostgreSqlConfig } from "./config";
@@ -35,18 +34,5 @@ export const queryDataTable =
       TE.tryCatch(
         () => pool.query(query),
         (error) => error as DatabaseError
-      ),
-      TE.mapLeft((e) => e)
+      )
     );
-
-export const ResultRow = t.interface({
-  count: t.string,
-  status: t.string,
-});
-export type ResultRow = t.TypeOf<typeof ResultRow>;
-
-export const ResultSet = t.interface({
-  rowCount: t.number,
-  rows: t.readonlyArray(ResultRow),
-});
-export type ResultSet = t.TypeOf<typeof ResultSet>;
