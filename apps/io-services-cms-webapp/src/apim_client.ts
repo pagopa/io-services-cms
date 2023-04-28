@@ -58,14 +58,14 @@ export const chainApimMappedError = <T>(
   );
 
 export function getApimClient(
-  servicePrincipalCreds: AzureClientSecretCredential,
+  clientSecretCreds: AzureClientSecretCredential,
   subscriptionId: string
 ): ApiManagementClient {
   return new ApiManagementClient(
     new ClientSecretCredential(
-      servicePrincipalCreds.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-      servicePrincipalCreds.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
-      servicePrincipalCreds.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
+      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
+      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
+      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
       {
         authorityHost: AzureAuthorityHosts.AzurePublicCloud,
       }
