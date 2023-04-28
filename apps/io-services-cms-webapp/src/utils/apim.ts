@@ -31,14 +31,12 @@ export const getDelegateFromServiceId = (
               apim,
               user.name as NonEmptyString
             ),
-            TE.map(
-              (userGroups) =>
-                ({
-                  name: `${user.firstName} ${user.lastName}`,
-                  email: user.email,
-                  permissions: userGroups.map((group) => group.name),
-                } as Delegate)
-            )
+            TE.map((userGroups) => ({
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              permissions: userGroups.map((group) => group.name),
+            }))
           )
         )
       )
