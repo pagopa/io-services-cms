@@ -5,21 +5,25 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import * as E from "fp-ts/lib/Either";
-import * as t from "io-ts";
-
+import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import {
+  IntegerFromString,
+  NumberFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import * as t from "io-ts";
 
 // used for internal job dispatch, temporary files, etc...
-const InternalStorageAccount = t.interface({
+const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
 });
 
 // Jira configuration
-export const JiraConfig = t.interface({
+export const JiraConfig = t.type({
   JIRA_NAMESPACE_URL: NonEmptyString,
   JIRA_PROJECT_NAME: NonEmptyString,
   JIRA_TOKEN: NonEmptyString,
@@ -32,7 +36,20 @@ export const JiraConfig = t.interface({
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
-export const AzureClientSecretCredential = t.interface({
+export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
+export const PostgreSqlConfig = t.type({
+  REVIEWER_DB_HOST: NonEmptyString,
+  REVIEWER_DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
+  REVIEWER_DB_NAME: NonEmptyString,
+  REVIEWER_DB_PASSWORD: NonEmptyString,
+  REVIEWER_DB_PORT: NumberFromString,
+  REVIEWER_DB_SCHEMA: NonEmptyString,
+  REVIEWER_DB_TABLE: NonEmptyString,
+  REVIEWER_DB_USER: NonEmptyString,
+  REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
+});
+
+export const AzureClientSecretCredential = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
@@ -42,7 +59,7 @@ export type AzureClientSecretCredential = t.TypeOf<
 >;
 
 // Apim configuration
-export const ApimConfig = t.interface({
+export const ApimConfig = t.type({
   AZURE_APIM: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
@@ -52,9 +69,12 @@ export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
-  t.type({ isProduction: t.boolean }),
-  InternalStorageAccount,
-  JiraConfig,
+  t.intersection([
+    t.type({ isProduction: t.boolean }),
+    InternalStorageAccount,
+    JiraConfig,
+    PostgreSqlConfig,
+  ]),
   AzureClientSecretCredential,
   ApimConfig,
 ]);
