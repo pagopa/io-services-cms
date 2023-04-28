@@ -23,17 +23,6 @@ variable "env_short" {
   }
 }
 
-variable "domain" {
-  type        = string
-  description = "The applicative domain"
-  validation {
-    condition = (
-      length(var.domain) < 6
-    )
-    error_message = "Max length is 6 chars."
-  }
-}
-
 variable "github" {
   type = object({
     org        = string
