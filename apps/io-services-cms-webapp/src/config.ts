@@ -32,13 +32,12 @@ export const JiraConfig = t.interface({
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
-// Service Principal Creds configuration
-export const ServicePrincipalConfig = t.interface({
+export const ServicePrincipalCreds = t.interface({
   SERVICE_PRINCIPAL_CLIENT_ID: NonEmptyString,
   SERVICE_PRINCIPAL_SECRET: NonEmptyString,
   SERVICE_PRINCIPAL_TENANT_ID: NonEmptyString,
 });
-export type ServicePrincipalConfig = t.TypeOf<typeof ServicePrincipalConfig>;
+export type ServicePrincipalCreds = t.TypeOf<typeof ServicePrincipalCreds>;
 
 // Apim configuration
 export const ApimConfig = t.interface({
@@ -54,7 +53,7 @@ export const IConfig = t.intersection([
   t.type({ isProduction: t.boolean }),
   InternalStorageAccount,
   JiraConfig,
-  ServicePrincipalConfig,
+  ServicePrincipalCreds,
   ApimConfig,
 ]);
 

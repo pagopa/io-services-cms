@@ -18,7 +18,7 @@ import {
 import { parse } from "fp-ts/lib/Json";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
-import { ServicePrincipalConfig } from "./config";
+import { ServicePrincipalCreds } from "./config";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -58,7 +58,7 @@ export const chainApimMappedError = <T>(
   );
 
 export function getApimClient(
-  servicePrincipalCreds: ServicePrincipalConfig,
+  servicePrincipalCreds: ServicePrincipalCreds,
   subscriptionId: string
 ): ApiManagementClient {
   return new ApiManagementClient(
