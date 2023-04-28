@@ -7,7 +7,6 @@ variable "cidr_subnet" {
   description = "Subnet address space."
 }
 
-
 #
 # SNET definition
 #
