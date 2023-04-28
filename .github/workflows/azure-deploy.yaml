@@ -50,11 +50,7 @@ jobs:
           # Parse the release artifact name to extract type, domain and name
           set -euo pipefail
 
-          echo type=$(echo "${{ github.event.release.assets[0].name }}" | sed -En "s/^io-([a-z0-9]+)-([a-z0-9]+)-([a-z0-9]+)-.+$/\1/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
-
-          echo domain=$(echo "${{ github.event.release.assets[0].name }}" | sed -En "s/^io-([a-z0-9]+)-([a-z0-9]+)-([a-z0-9]+)-.+$/\2/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
-
-          echo name=$(echo "${{ github.event.release.assets[0].name }}" | sed -En "s/^io-([a-z0-9]+)-([a-z0-9]+)-([a-z0-9]+)-.+$/\3/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
+          echo name=$(echo "${{ github.event.release.assets[0].name }}" | sed -En "s/^([a-z0-9\-]+).+$/\3/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
 
       - name: Login
         id: login
@@ -71,7 +67,7 @@ jobs:
         run: |
           az webapp deploy \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --name ${{ env.PREFIX }}-${{ env.ENV_SHORT }}-${{ steps.workload.outputs.domain }}-${{ steps.workload.outputs.name }}-${{ steps.workload.outputs.type }} \
+            --name ${{ env.PREFIX }}-${{ env.ENV_SHORT }}-servicescms-${{ steps.workload.outputs.name }} \
             --slot ${{ env.FUNCTION_SLOT }} \
             --type zip \
             --src-path artifact.zip
