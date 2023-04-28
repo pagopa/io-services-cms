@@ -739,6 +739,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@io-services-cms/models@workspace:^, @io-services-cms/models@workspace:packages/models":
+  version: 0.0.0-use.local
+  resolution: "@io-services-cms/models@workspace:packages/models"
+  dependencies:
+    "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/ts-commons": ^11.0.0
+    "@rushstack/eslint-patch": ^1.2.0
+    eslint: ^8.38.0
+    fp-ts: ^2.13.1
+    io-ts: ^2.2.20
+    prettier: ^2.8.7
+    typescript: ^5.0.4
+    vitest: ^0.30.1
+  languageName: unknown
+  linkType: soft
+
 "@jridgewell/sourcemap-codec@npm:^1.4.13":
   version: 1.4.15
   resolution: "@jridgewell/sourcemap-codec@npm:1.4.15"
@@ -4090,48 +4106,6 @@ __metadata:
   checksum: 97e84046bf9e7574d0956bd98d7162313ce7057883b6db6c5c7b5e5f05688864b0978ba07610c726d15d66544ffe4b1050107d93f8a39ebc59b15d8b429b497a
   languageName: node
   linkType: hard
-
-"io-services-cms-models@workspace:^, io-services-cms-models@workspace:packages/io-services-cms-models":
-  version: 0.0.0-use.local
-  resolution: "io-services-cms-models@workspace:packages/io-services-cms-models"
-  dependencies:
-    "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/ts-commons": ^11.0.0
-    "@rushstack/eslint-patch": ^1.2.0
-    eslint: ^8.38.0
-    fp-ts: ^2.13.1
-    io-ts: ^2.2.20
-    prettier: ^2.8.7
-    typescript: ^5.0.4
-    vitest: ^0.30.1
-  languageName: unknown
-  linkType: soft
-
-"io-services-cms-webapp@workspace:apps/io-services-cms-webapp":
-  version: 0.0.0-use.local
-  resolution: "io-services-cms-webapp@workspace:apps/io-services-cms-webapp"
-  dependencies:
-    "@azure/arm-apimanagement": ^9.0.0
-    "@azure/functions": ^3.5.1
-    "@azure/identity": ^3.1.4
-    "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/express-azure-functions": ^4.0.1
-    "@pagopa/io-functions-commons": ^28.1.0
-    "@pagopa/ts-commons": ^11.0.0
-    "@rushstack/eslint-patch": ^1.2.0
-    "@types/express": ^4.17.17
-    dotenv-cli: ^7.2.1
-    eslint: ^8.38.0
-    express: ^4.18.2
-    fp-ts: ^2.13.1
-    io-services-cms-models: "workspace:^"
-    io-ts: ^2.2.20
-    node-fetch: ^3.3.1
-    prettier: ^2.8.7
-    typescript: ^5.0.4
-    vitest: ^0.30.1
-  languageName: unknown
-  linkType: soft
 
 "io-services-cms@workspace:.":
   version: 0.0.0-use.local
@@ -7730,6 +7704,32 @@ __metadata:
   checksum: b119c78574b6d65935e35098c2afdcd752b84268e18746606af149e3c424e15621b6f1ff0b42b2676dc012fc4f0d313f964b41a4b5031e525faa03997457da02
   languageName: node
   linkType: hard
+
+"webapp-fn@workspace:apps/webapp-fn":
+  version: 0.0.0-use.local
+  resolution: "webapp-fn@workspace:apps/webapp-fn"
+  dependencies:
+    "@azure/arm-apimanagement": ^9.0.0
+    "@azure/functions": ^3.5.1
+    "@azure/identity": ^3.1.4
+    "@io-services-cms/models": "workspace:^"
+    "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/express-azure-functions": ^4.0.1
+    "@pagopa/io-functions-commons": ^28.1.0
+    "@pagopa/ts-commons": ^11.0.0
+    "@rushstack/eslint-patch": ^1.2.0
+    "@types/express": ^4.17.17
+    dotenv-cli: ^7.2.1
+    eslint: ^8.38.0
+    express: ^4.18.2
+    fp-ts: ^2.13.1
+    io-ts: ^2.2.20
+    node-fetch: ^3.3.1
+    prettier: ^2.8.7
+    typescript: ^5.0.4
+    vitest: ^0.30.1
+  languageName: unknown
+  linkType: soft
 
 "webidl-conversions@npm:^3.0.0":
   version: 3.0.1

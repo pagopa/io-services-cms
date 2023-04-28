@@ -1,5 +1,5 @@
 ---
-"io-services-cms-webapp": major
+"webapp-fn": major
 ---
 
 Web application first release

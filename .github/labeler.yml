@@ -1,5 +1,5 @@
 internal: packages/**/*
-webapp: apps/io-services-cms-webapp/**/*
+webapp: apps/webapp-fn/**/*
 docs: docs/**/*
 ci: .github/workflows/**/*
 infra: infra/**/*
