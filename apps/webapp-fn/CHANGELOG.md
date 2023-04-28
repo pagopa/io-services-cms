@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.0.1
+
+### Patch Changes
+
+- bb8b273: added build script
+
 ## 1.0.0
 
 ### Major Changes
