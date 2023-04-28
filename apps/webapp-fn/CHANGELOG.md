@@ -4,6 +4,17 @@
 
 ### Major Changes
 
+- 3bab5ad: Renamed packages
+
+### Patch Changes
+
+- Updated dependencies [3bab5ad]
+  - @io-services-cms/models@1.0.0
+
+## 1.0.0
+
+### Major Changes
+
 - 0dff02c: Web application first release
 
 ### Patch Changes
