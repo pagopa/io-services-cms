@@ -14,7 +14,8 @@ vnet_common_rg = "io-p-rg-common"
 vnet_name      = "io-p-vnet-common"
 # refer to https://github.com/pagopa/io-infra/blob/main/src/core/env/prod/terraform.tfvars#L26
 #  for availble netowrk spaces
-cidr_subnet = "10.0.135.0/26"
+cidr_subnet       = "10.0.135.0/26"
+cidr_subnet_pgres = "10.0.135.64/26"
 
 ## Functions
 functions_kind              = "Linux"
