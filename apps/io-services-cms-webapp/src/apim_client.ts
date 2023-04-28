@@ -104,14 +104,14 @@ export function getUserGroups(
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apim: string,
-  userName: string
-): TE.TaskEither<Error, ReadonlyArray<GroupContract>> {
+  userId: string
+): TE.TaskEither<ApimRestError, ReadonlyArray<GroupContract>> {
   return pipe(
     TE.tryCatch(async () => {
       const groupListResponse = apimClient.userGroup.list(
         apimResourceGroup,
         apim,
-        userName
+        userId
       );
       // eslint-disable-next-line functional/immutable-data
       const groupList: GroupContract[] = [];
@@ -120,9 +120,9 @@ export function getUserGroups(
         // eslint-disable-next-line functional/immutable-data
         groupList.push(x);
       }
-
       return groupList;
-    }, E.toError)
+    }, E.toError),
+    chainApimMappedError
   );
 }
 
