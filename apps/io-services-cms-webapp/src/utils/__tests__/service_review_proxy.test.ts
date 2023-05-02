@@ -167,7 +167,7 @@ describe("Service Review Proxy", () => {
       body:
         expect.any(String) &&
         expect.stringContaining(
-          `"jql":"project = ${aJiraClient.config.JIRA_PROJECT_NAME} AND summary ~ Review #aServiceId`
+          `"jql":"project = ${aJiraClient.config.JIRA_PROJECT_NAME} AND summary ~ 'Review #aServiceId'`
         ),
       headers: expect.any(Object),
       method: "POST",

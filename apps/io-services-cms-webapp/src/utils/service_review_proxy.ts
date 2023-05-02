@@ -131,7 +131,7 @@ export const ServiceReviewProxy = (
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
-      } AND summary ~ ${formatIssueTitle(serviceId)}`
+      } AND summary ~ '${formatIssueTitle(serviceId)}'`
     ),
   });
 
