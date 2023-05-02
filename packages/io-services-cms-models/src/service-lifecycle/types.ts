@@ -65,7 +65,7 @@ const ServiceMetadata = t.intersection([
 ]);
 
 export type ServiceId = t.TypeOf<typeof ServiceId>;
-export const ServiceId = t.string;
+export const ServiceId = NonEmptyString;
 
 export type Service = t.TypeOf<typeof Service>;
 export const Service = t.type({
