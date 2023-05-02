@@ -87,3 +87,5 @@ export const getDao = (dbConfig: PostgreSqlConfig) =>
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),
   }));
+
+export type ServiceReviewDao = ReturnType<typeof getDao>;
