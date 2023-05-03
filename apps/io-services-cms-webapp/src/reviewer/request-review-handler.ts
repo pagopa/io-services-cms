@@ -1,10 +1,10 @@
+import { Service } from "@io-services-cms/models/service-lifecycle/types";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { Service } from "io-services-cms-models/service-lifecycle/types";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
 import { ApimProxy } from "../utils/apim-proxy";
