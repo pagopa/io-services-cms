@@ -12,3 +12,18 @@ module "key_vault_domain" {
 
   tags = var.tags
 }
+
+data "azurerm_key_vault_secret" "jira_token" {
+  name         = "JIRA-TOKEN"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
+  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
+  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
+  key_vault_id = module.key_vault_domain.id
+}

@@ -34,3 +34,22 @@ application_insights_name       = "io-p-ai-common"
 monitor_resource_group_name     = "io-p-rg-common"
 monitor_action_group_email_name = "EmailPagoPA"
 monitor_action_group_slack_name = "SlackPagoPA"
+
+## Jira
+jira_namespace_url                  = "https://pagopa.atlassian.net"
+jira_project_name                   = "IES"
+jira_username                       = "github-bot@pagopa.it"
+jira_contract_custom_field          = ""
+jira_delegate_email_custom_field    = "customfield_10084"
+jira_delegate_name_custom_field     = "customfield_10087"
+jira_organization_cf_custom_field   = ""
+jira_organization_name_custom_field = "customfield_10088"
+
+## Apim
+azure_apim                = "io-p-apim-api"
+azure_apim_resource_group = "io-p-rg-internal"
+
+## PostgreSQL
+reviewer_db_name   = "reviewer"
+reviewer_db_schema = "reviewer"
+reviewer_db_table  = "service_review"
