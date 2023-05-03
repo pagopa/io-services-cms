@@ -38,6 +38,19 @@ variable "functions_autoscale_default" {
 }
 
 #
+# Data
+#
+data "azurerm_key_vault_secret" "jira_token" {
+  name         = "JIRA-TOKEN"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
+  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
+  key_vault_id = module.key_vault_domain.id
+}
+
+#
 # Function app definition
 #
 
@@ -63,6 +76,35 @@ locals {
     COSMOSDB_KEY              = module.cosmosdb_account.primary_key
 
     INTERNAL_STORAGE_CONNECTION_STRING = module.storage_account.primary_connection_string
+
+    # JIRA integration for Service review workflow
+    JIRA_NAMESPACE_URL = "https://pagopa.atlassian.net"
+    JIRA_PROJECT_NAME = "IES"
+    JIRA_TOKEN = data.azurerm_key_vault_secret.jira_token.value
+    JIRA_USERNAME  = "github-bot@pagopa.it"
+    JIRA_CONTRACT_CUSTOM_FIELD = ""
+    JIRA_DELEGATE_EMAIL_CUSTOM_FIELD = "customfield_10084"
+    JIRA_DELEGATE_NAME_CUSTOM_FIELD = "customfield_10087"
+    JIRA_ORGANIZATION_CF_CUSTOM_FIELD = ""
+    JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = "customfield_10088"
+
+    # Apim connection
+    AZURE_APIM                    = "io-p-apim-api"
+    AZURE_APIM_RESOURCE_GROUP     = "io-p-rg-internal"
+    AZURE_SUBSCRIPTION_ID         = data.azurerm_subscription.current.subscription_id
+    
+    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = "bdb26925-f0de-4c7e-915f-26604f9b7baf"
+    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
+    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
+
+    # PostgreSQL 
+    REVIEWER_DB_HOST = module.postgres_flexible_server_private.fqdn
+    REVIEWER_DB_NAME = "reviewer"
+    REVIEWER_DB_PASSWORD = module.postgres_flexible_server_private.administrator_password
+    REVIEWER_DB_PORT = module.postgres_flexible_server_private.connection_port
+    REVIEWER_DB_SCHEMA = "reviewer"
+    REVIEWER_DB_TABLE = "service_review"
+    REVIEWER_DB_USER = module.postgres_flexible_server_private.administrator_login
 
   }
 }
