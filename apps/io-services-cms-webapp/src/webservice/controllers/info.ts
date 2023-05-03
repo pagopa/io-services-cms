@@ -10,8 +10,8 @@ import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/health
 
 import { envConfig, IConfig } from "../../config";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const packageJson = require("../../package.json");
+// TODO: read these values from package json
+const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
 
 export const makeInfoHandler = () =>
   pipe(
