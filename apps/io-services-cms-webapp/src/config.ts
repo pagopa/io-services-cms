@@ -17,10 +17,6 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-const AzureFunctionConfig = t.type({
-  AzureWebJobsStorage: NonEmptyString,
-});
-
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
@@ -81,7 +77,6 @@ export const IConfig = t.intersection([
   ]),
   AzureClientSecretCredential,
   ApimConfig,
-  AzureFunctionConfig,
 ]);
 
 export const envConfig = {
