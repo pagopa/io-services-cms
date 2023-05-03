@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.0.2
+
+### Patch Changes
+
+- 162ef57: Fix package script
+
 ## 1.0.1
 
 ### Patch Changes
