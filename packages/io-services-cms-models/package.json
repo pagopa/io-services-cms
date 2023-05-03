@@ -19,12 +19,14 @@
     "build": "rm -rf ./dist & tsc",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:integrations": "vitest run -c __integrations__/vitest.config.ts",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\""
   },
   "dependencies": {
+    "@azure/cosmos": "^3.17.3",
     "@pagopa/ts-commons": "^11.0.0",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20"
