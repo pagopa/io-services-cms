@@ -18,7 +18,7 @@ jobs:
       - name: init_terraform_folders
         env:
           FOLDERS: >
-            infra
+            infra/src
             .identity
         run: |
           pids=()
@@ -26,7 +26,7 @@ jobs:
           TAG=$(cat .terraform-version)
           for f in $FOLDERS; do
             pushd "$(pwd)/${f}"
-              sed -i -e 's/  backend "azurerm" {}//g' 99_main.tf # use local backend
+              sed -i -e 's/  backend "azurerm" {}//g' main.tf # use local backend
               docker run -v $(pwd):/tmp -w /tmp hashicorp/terraform:$TAG init &
               pids+=($!)
             popd
