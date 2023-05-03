@@ -1,6 +1,6 @@
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Service } from "io-services-cms-models/service-lifecycle/types";
+import { Service } from "@io-services-cms/models/service-lifecycle/types";
 import {
   CreateJiraIssueResponse,
   SearchJiraIssuesPayload,
