@@ -2,7 +2,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { Service } from "io-services-cms-models/service-lifecycle/types";
+import { Service } from "@io-services-cms/models/service-lifecycle/types";
 import {
   CreateJiraIssueResponse,
   JiraIssue,

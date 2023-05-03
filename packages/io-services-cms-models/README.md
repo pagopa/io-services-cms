@@ -35,7 +35,7 @@ The `apply` function accepts three arguments:
 
 
 ```ts
-import { ServiceLifecycle } from "io-services-cms-models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 
 const MyStore /* define a store to persist data */
 const service /* incoming service data */
