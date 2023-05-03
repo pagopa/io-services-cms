@@ -1,8 +1,11 @@
-import { TaskEither } from "fp-ts/lib/TaskEither";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { Service } from "io-services-cms-models/service-lifecycle/types";
 import {
   CreateJiraIssueResponse,
+  JiraIssue,
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
   jiraAPIClient,
@@ -11,14 +14,20 @@ import {
 const formatOptionalStringValue = (value?: string) =>
   value || `{color:#FF991F}*[ DATO MANCANTE ]*{color}`;
 
+const formatIssueTitle = (serviceId: NonEmptyString) =>
+  `Review #${serviceId}` as NonEmptyString;
+
 export type ServiceReviewProxy = {
   readonly createJiraIssue: (
     service: Service,
     delegate: Delegate
-  ) => TaskEither<Error, CreateJiraIssueResponse>;
+  ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKey: (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>
-  ) => TaskEither<Error, SearchJiraIssuesResponse>;
+  ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
+  readonly getJiraIssueByServiceId: (
+    serviceId: NonEmptyString
+  ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
 };
 
 export type Delegate = {
@@ -82,33 +91,65 @@ export const ServiceReviewProxy = (
   const createJiraIssue = (
     service: Service,
     delegate: Delegate
-  ): TaskEither<Error, CreateJiraIssueResponse> =>
+  ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     jiraClient.createJiraIssue(
-      `Review #${service.id}` as NonEmptyString,
+      formatIssueTitle(service.id),
       buildIssueDescription(service, delegate),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );
 
-  const buildSearchIssuesPayload = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+  const buildSearchIssuesBasePayload = (
+    jql: string
   ): SearchJiraIssuesPayload => ({
     fields: ["status", "comment"],
     fieldsByKeys: false,
-    maxResults: jiraIssueKeys.length,
+    maxResults: 1,
     startAt: 0,
-    jql: `project = ${
-      jiraClient.config.JIRA_PROJECT_NAME
-    } AND key IN(${jiraIssueKeys.join(",")})`,
+    jql,
+  });
+
+  const buildSearchJiraIssuesByKeyPayload = (
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+  ) => ({
+    ...buildSearchIssuesBasePayload(
+      `project = ${
+        jiraClient.config.JIRA_PROJECT_NAME
+      } AND key IN(${jiraIssueKeys.join(",")})`
+    ),
+    maxResults: jiraIssueKeys.length,
   });
 
   const searchJiraIssuesByKey = (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>
-  ): TaskEither<Error, SearchJiraIssuesResponse> =>
-    jiraClient.searchJiraIssues(buildSearchIssuesPayload(jiraIssueKeys));
+  ): TE.TaskEither<Error, SearchJiraIssuesResponse> =>
+    jiraClient.searchJiraIssues(
+      buildSearchJiraIssuesByKeyPayload(jiraIssueKeys)
+    );
+
+  const buildGetJiraIssueByServiceIdPayload = (serviceId: NonEmptyString) => ({
+    ...buildSearchIssuesBasePayload(
+      `project = ${
+        jiraClient.config.JIRA_PROJECT_NAME
+      } AND summary ~ '${formatIssueTitle(serviceId)}'`
+    ),
+  });
+
+  const getJiraIssueByServiceId = (
+    serviceId: NonEmptyString
+  ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
+    pipe(
+      jiraClient.searchJiraIssues(
+        buildGetJiraIssueByServiceIdPayload(serviceId)
+      ),
+      TE.map((response) =>
+        response.issues.length > 0 ? O.some(response.issues[0]) : O.none
+      )
+    );
 
   return {
     createJiraIssue,
     searchJiraIssuesByKey,
+    getJiraIssueByServiceId,
   };
 };
