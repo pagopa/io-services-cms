@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.0.1
+
+### Patch Changes
+
+- d9c7a04: First release
+- Updated dependencies [d9c7a04]
+- Updated dependencies [932f4e4]
+  - @io-services-cms/models@1.0.0
+
 ## 1.0.0
 
 ### Major Changes
