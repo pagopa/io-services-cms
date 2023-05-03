@@ -6,7 +6,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Service } from "io-services-cms-models/service-lifecycle/types";
 import { Json } from "io-ts-types";
-import { JiraIssue } from "../jira_client";
 import { withJsonInput } from "../lib/azure/misc";
 import { ApimProxy } from "../utils/apim-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
@@ -18,13 +17,6 @@ const parseIncomingMessage = (queueItem: Json): E.Either<Error, Service> =>
     Service.decode,
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
-
-// FIXME: remove this mock after implementation from jira proxy
-const searchTicketByServiceId = (
-  serviceId: string
-): TE.TaskEither<Error, O.Option<JiraIssue>> => {
-  throw new Error("mock");
-};
 
 export const handleRequestReview = (
   dao: ServiceReviewDao,
@@ -39,7 +31,7 @@ export const handleRequestReview = (
       TE.chain((service) =>
         pipe(
           service.id,
-          searchTicketByServiceId,
+          jiraProxy.getJiraIssueByServiceId,
           TE.chain(
             flow(
               O.fold(
