@@ -2,26 +2,55 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "inputs": ["src/**/*.ts"],
-      "outputs": ["dist/**"],
-      "dependsOn": ["^build"]
+      "inputs": [
+        "src/**/*.ts"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "dependsOn": [
+        "^build"
+      ]
     },
     "typecheck": {
-      "inputs": ["src/**/*.ts"],
+      "inputs": [
+        "src/**/*.ts"
+      ],
       "outputs": [],
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "format": {},
     "lint": {
-      "inputs": ["src/**/*.ts"],
+      "inputs": [
+        "src/**/*.ts"
+      ],
       "outputs": [],
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     },
     "test": {
-      "inputs": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+      "inputs": [
+        "src/**/*.spec.ts",
+        "src/**/*.test.ts"
+      ],
       "outputs": [],
       "outputMode": "hash-only",
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
+    },
+    "test:integrations": {
+      "inputs": [
+        "__integrations__/**/*"
+      ],
+      "outputs": [],
+      "outputMode": "errors-only",
+      "dependsOn": [
+        "^build"
+      ]
     }
   }
 }

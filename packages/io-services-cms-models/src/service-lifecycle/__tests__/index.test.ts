@@ -3,40 +3,16 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import { describe, it, expect } from "vitest";
-import { FSMStore, WithState } from "../../lib/fsm";
-import { apply, FSM } from "..";
+import { stores } from "../../lib/fsm";
+import { apply } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../types";
-import {
-  NonEmptyString,
-  OrganizationFiscalCode,
-} from "@pagopa/ts-commons/lib/strings";
-
-// a simple in-memory store
-const createMapStore = (): FSMStore<keyof FSM["states"]> => {
-  const m = new Map<string, WithState<keyof FSM["states"], unknown>>();
-
-  return {
-    // @ts-ignore
-    fetch: (id: string) =>
-      pipe(
-        m.has(id)
-          ? O.some<WithState<keyof FSM["states"], unknown>>(
-              m.get(id) as WithState<keyof FSM["states"], unknown>
-            )
-          : O.none,
-        TE.right
-      ),
-    save: (id: string, value) => pipe(m.set(id, value), (_) => TE.right(value)),
-    // for testing
-    inspect: () => m,
-  };
-};
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // helper to check the result of a sequence of actions
 const expectSuccess = async ({ id, actions, expected }) => {
-  const store = createMapStore();
+  const store = stores.createMemoryStore();
 
   const applyTask = pipe(
     actions,
@@ -60,7 +36,7 @@ const expectSuccess = async ({ id, actions, expected }) => {
 
 // helper to check the result of an invalid sequence of actions
 const expectFailure = async ({ id, actions, expected }) => {
-  const store = createMapStore();
+  const store = stores.createMemoryStore();
 
   const applyTask = pipe(
     actions,
