@@ -1,7 +1,8 @@
 name: Static Analysis
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize]
     paths:
       - infra/**
       - .identity/**
