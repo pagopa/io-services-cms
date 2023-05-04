@@ -63,7 +63,6 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Function
-        if: steps.workload.outputs.type == 'func'
         shell: bash
         run: |
           az webapp deploy \
