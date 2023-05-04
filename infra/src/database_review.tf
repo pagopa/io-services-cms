@@ -80,3 +80,10 @@ module "postgres_flexible_server_private" {
   #   diagnostic_setting_destination_storage_id = data.azurerm_storage_account.security_monitoring_storage.id
 
 }
+
+resource "azurerm_postgresql_flexible_server_database" "reviewer_database" {
+  name      = var.reviewer_db_name
+  server_id = module.postgres_flexible_server_private.id
+  collation = "en_US.utf8"
+  charset   = "utf8"
+}
