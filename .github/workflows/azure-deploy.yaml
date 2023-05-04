@@ -67,7 +67,7 @@ jobs:
         run: |
           az webapp deploy \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --name ${{ env.PREFIX }}-${{ env.ENV_SHORT }}-servicescms-webapp-fn \
+            --name ${{ env.PREFIX }}-${{ env.ENV_SHORT }}-services-cms-webapp-fn \
             --slot ${{ env.FUNCTION_SLOT }} \
             --type zip \
             --src-path artifact.zip
