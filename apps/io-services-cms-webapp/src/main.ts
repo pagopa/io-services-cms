@@ -3,7 +3,7 @@ import { getApimClient } from "./apim_client";
 import { getConfigOrThrow } from "./config";
 import { JiraAPIClient } from "./jira_client";
 import { expressToAzureFunction } from "./lib/azure/adapters";
-import { handleRequestReview } from "./reviewer/request-review-handler";
+import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
 import { ServiceReviewProxy } from "./utils/service_review_proxy";
@@ -21,7 +21,7 @@ export const httpEntryPoint = pipe(
 
 const config = getConfigOrThrow();
 
-export const queueEntryPoint = handleRequestReview(
+export const queueEntryPoint = createRequestReviewHandler(
   getDao(config),
   ServiceReviewProxy(JiraAPIClient(config)),
   apimProxy(

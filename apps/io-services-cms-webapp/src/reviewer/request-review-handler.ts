@@ -18,7 +18,7 @@ const parseIncomingMessage = (queueItem: Json): E.Either<Error, Service> =>
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
-export const handleRequestReview = (
+export const createRequestReviewHandler = (
   dao: ServiceReviewDao,
   jiraProxy: ServiceReviewProxy,
   apimProxy: ApimProxy
