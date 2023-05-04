@@ -37,13 +37,13 @@ monitor_action_group_slack_name = "SlackPagoPA"
 
 ## Jira
 jira_namespace_url                  = "https://pagopa.atlassian.net"
-jira_project_name                   = "IES"
+jira_project_name                   = "IEST"
 jira_username                       = "github-bot@pagopa.it"
-jira_contract_custom_field          = ""
-jira_delegate_email_custom_field    = "customfield_10084"
-jira_delegate_name_custom_field     = "customfield_10087"
-jira_organization_cf_custom_field   = ""
-jira_organization_name_custom_field = "customfield_10088"
+jira_contract_custom_field          = "customfield_10365"
+jira_delegate_email_custom_field    = "customfield_10383"
+jira_delegate_name_custom_field     = "customfield_10382"
+jira_organization_cf_custom_field   = "customfield_10364"
+jira_organization_name_custom_field = "customfield_10381"
 
 ## Apim
 azure_apim                = "io-p-apim-api"
