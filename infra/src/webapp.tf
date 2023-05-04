@@ -37,6 +37,84 @@ variable "functions_autoscale_default" {
   default     = 1
 }
 
+variable "jira_namespace_url" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_project_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_username" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_contract_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_delegate_email_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_delegate_name_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_organization_cf_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_organization_name_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "azure_apim" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "azure_apim_resource_group" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_schema" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_table" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 #
 # Function app definition
 #
@@ -64,6 +142,34 @@ locals {
 
     INTERNAL_STORAGE_CONNECTION_STRING = module.storage_account.primary_connection_string
 
+    # JIRA integration for Service review workflow
+    JIRA_NAMESPACE_URL                  = var.jira_namespace_url
+    JIRA_PROJECT_NAME                   = var.jira_project_name
+    JIRA_TOKEN                          = data.azurerm_key_vault_secret.jira_token.value
+    JIRA_USERNAME                       = var.jira_username
+    JIRA_CONTRACT_CUSTOM_FIELD          = var.jira_contract_custom_field
+    JIRA_DELEGATE_EMAIL_CUSTOM_FIELD    = var.jira_delegate_email_custom_field
+    JIRA_DELEGATE_NAME_CUSTOM_FIELD     = var.jira_delegate_name_custom_field
+    JIRA_ORGANIZATION_CF_CUSTOM_FIELD   = var.jira_organization_cf_custom_field
+    JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
+
+    # Apim connection
+    AZURE_APIM                = var.azure_apim
+    AZURE_APIM_RESOURCE_GROUP = var.azure_apim_resource_group
+    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
+
+    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
+    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
+    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
+
+    # PostgreSQL 
+    REVIEWER_DB_HOST     = module.postgres_flexible_server_private.fqdn
+    REVIEWER_DB_NAME     = var.reviewer_db_name
+    REVIEWER_DB_PASSWORD = module.postgres_flexible_server_private.administrator_password
+    REVIEWER_DB_PORT     = module.postgres_flexible_server_private.connection_port
+    REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
+    REVIEWER_DB_TABLE    = var.reviewer_db_table
+    REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
   }
 }
 

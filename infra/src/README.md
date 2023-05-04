@@ -40,6 +40,9 @@
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/client_config) | data source |
+| [azurerm_key_vault_secret.azure_client_secret_credential_client_id](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.azure_client_secret_credential_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.jira_token](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_monitor_action_group.email](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.slack](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
@@ -55,6 +58,8 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_insights_name"></a> [application\_insights\_name](#input\_application\_insights\_name) | The common Application Insights name | `string` | n/a | yes |
+| <a name="input_azure_apim"></a> [azure\_apim](#input\_azure\_apim) | n/a | `string` | `null` | no |
+| <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | n/a | `string` | `null` | no |
 | <a name="input_cidr_subnet"></a> [cidr\_subnet](#input\_cidr\_subnet) | Subnet address space. | `string` | n/a | yes |
 | <a name="input_cidr_subnet_pgres"></a> [cidr\_subnet\_pgres](#input\_cidr\_subnet\_pgres) | Subnet address space. | `string` | n/a | yes |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
@@ -66,12 +71,23 @@
 | <a name="input_functions_kind"></a> [functions\_kind](#input\_functions\_kind) | App service plan kind | `string` | `null` | no |
 | <a name="input_functions_sku_size"></a> [functions\_sku\_size](#input\_functions\_sku\_size) | App service plan sku size | `string` | `null` | no |
 | <a name="input_functions_sku_tier"></a> [functions\_sku\_tier](#input\_functions\_sku\_tier) | App service plan sku tier | `string` | `null` | no |
+| <a name="input_jira_contract_custom_field"></a> [jira\_contract\_custom\_field](#input\_jira\_contract\_custom\_field) | n/a | `string` | `null` | no |
+| <a name="input_jira_delegate_email_custom_field"></a> [jira\_delegate\_email\_custom\_field](#input\_jira\_delegate\_email\_custom\_field) | n/a | `string` | `null` | no |
+| <a name="input_jira_delegate_name_custom_field"></a> [jira\_delegate\_name\_custom\_field](#input\_jira\_delegate\_name\_custom\_field) | n/a | `string` | `null` | no |
+| <a name="input_jira_namespace_url"></a> [jira\_namespace\_url](#input\_jira\_namespace\_url) | n/a | `string` | `null` | no |
+| <a name="input_jira_organization_cf_custom_field"></a> [jira\_organization\_cf\_custom\_field](#input\_jira\_organization\_cf\_custom\_field) | n/a | `string` | `null` | no |
+| <a name="input_jira_organization_name_custom_field"></a> [jira\_organization\_name\_custom\_field](#input\_jira\_organization\_name\_custom\_field) | n/a | `string` | `null` | no |
+| <a name="input_jira_project_name"></a> [jira\_project\_name](#input\_jira\_project\_name) | n/a | `string` | `null` | no |
+| <a name="input_jira_username"></a> [jira\_username](#input\_jira\_username) | n/a | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |
 | <a name="input_monitor_action_group_email_name"></a> [monitor\_action\_group\_email\_name](#input\_monitor\_action\_group\_email\_name) | The email to send alerts to | `string` | n/a | yes |
 | <a name="input_monitor_action_group_slack_name"></a> [monitor\_action\_group\_slack\_name](#input\_monitor\_action\_group\_slack\_name) | The slack channel to send alerts to | `string` | n/a | yes |
 | <a name="input_monitor_resource_group_name"></a> [monitor\_resource\_group\_name](#input\_monitor\_resource\_group\_name) | Monitor resource group name | `string` | n/a | yes |
 | <a name="input_postgres_admin_credentials_rotation_id"></a> [postgres\_admin\_credentials\_rotation\_id](#input\_postgres\_admin\_credentials\_rotation\_id) | You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"io"` | no |
+| <a name="input_reviewer_db_name"></a> [reviewer\_db\_name](#input\_reviewer\_db\_name) | n/a | `string` | `null` | no |
+| <a name="input_reviewer_db_schema"></a> [reviewer\_db\_schema](#input\_reviewer\_db\_schema) | n/a | `string` | `null` | no |
+| <a name="input_reviewer_db_table"></a> [reviewer\_db\_table](#input\_reviewer\_db\_table) | n/a | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
 | <a name="input_vnet_common_rg"></a> [vnet\_common\_rg](#input\_vnet\_common\_rg) | Common Virtual network resource group name. | `string` | `""` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Common Virtual network resource name. | `string` | `""` | no |
