@@ -11,36 +11,51 @@ import {
 } from "../apim_client";
 import { Delegate } from "./service_review_proxy";
 
+/**
+ * Service review specific wrapper utility
+ *
+ * Apim client is used to retrieve information about subscription's owner
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apim
+ * @returns instance of `apimProxy`
+ */
 export const apimProxy = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apim: string
 ) => ({
+  /**
+   * Retrieve service delegate _(owner of the subscription to which the service refers)_
+   * @param serviceId
+   * @returns delegate information _(name, email, authorizations)_ for specified service id
+   */
   getDelegateFromServiceId: (
     serviceId: NonEmptyString
   ): TE.TaskEither<ApimRestError, Delegate> =>
     pipe(
       getSubscription(apimClient, apimResourceGroup, apim, serviceId),
-      TE.chain((subscription) =>
+      TE.map((subscription) =>
+        parseOwnerIdFullPath(subscription.ownerId as NonEmptyString)
+      ),
+      TE.chain((ownerId) =>
+        getUser(apimClient, apimResourceGroup, apim, ownerId)
+      ),
+      TE.chainW((user) =>
         pipe(
-          parseOwnerIdFullPath(subscription.ownerId as NonEmptyString),
-          (ownerId) => getUser(apimClient, apimResourceGroup, apim, ownerId),
-          TE.chainW((user) =>
-            pipe(
-              getUserGroups(
-                apimClient,
-                apimResourceGroup,
-                apim,
-                user.name as NonEmptyString
-              ),
-              TE.map((userGroups) => ({
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                permissions: userGroups.map((group) => group.name),
-              }))
-            )
-          )
+          getUserGroups(
+            apimClient,
+            apimResourceGroup,
+            apim,
+            user.name as NonEmptyString
+          ),
+          TE.map((userGroups) => ({
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            permissions: userGroups.map((group) => group.name),
+          }))
         )
       )
     ),
