@@ -1,8 +1,14 @@
-name: "Azure Deploy"
+name: "Azure Deploy Manual"
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      package_url:
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -42,7 +48,7 @@ jobs:
     needs: create_runner
     steps:
       - name: Download artifact
-        run: "curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}"
+        run: "curl --output artifact.zip --location ${{ github.event.inputs.package_url }}"
 
       #      - name: Identify workload
       #        id: workload
@@ -51,7 +57,7 @@ jobs:
       #          # Parse the release artifact name to extract type, domain and name
       #          set -euo pipefail
       #
-      #          echo name=$(echo "${{ github.event.release.assets[0].name }}" | sed -En "s/^([a-z0-9\-]+).+$/\3/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
+      #          echo name=$(echo "${{ github.event.inputs.name }}" | sed -En "s/^([a-z0-9\-]+).+$/\3/p" | tr -d '\n') >> "$GITHUB_OUTPUT"
 
       - name: Login
         id: login
