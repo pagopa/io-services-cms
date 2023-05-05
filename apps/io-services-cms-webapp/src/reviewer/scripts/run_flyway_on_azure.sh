@@ -25,8 +25,9 @@ AZ_SUBSCRIPTION=$3
 AZ_POSTGRES_RESOURCE_NAME="io-p-services-cms-private-pgflex"
 # KeyVault info to fetch server credentials
 KV_NAME="io-p-services-cms-kv"
-KV_LOGIN_PASSWORD_KEY="pgres-flex-admin-pwd"
-DB_LOGIN_USER="pgadminusr"
+KV_DB_ADMIN_PASSWORD_KEY="pgres-flex-admin-pwd"
+KV_DB_USER_APP_PASSWORD_KEY="pgres-flex-reviewer-usr-pwd"
+DB_ADMIN_USER="pgadminusr"
 
 # Directory containing migrations for ALL databases.
 #  Relative to the project root, the actual sql scripts will be in ${SQL_MIGRATIONS_DIR}/${DB_NAME}
@@ -35,8 +36,11 @@ SQL_MIGRATIONS_DIR=$4
 # Miscellaneos values to be used as placeholders by Flyway for sql scripts
 VAR_SCHEMA_NAME=$5
 
+# DB User used by the app with reand and write permission over the DB resources used by the app
+DB_USER_APP=$6
+
 # Get all other parametemeters, so we can append them to Flyway command
-shift 5
+shift 6
 other=$@
 
 #-------
@@ -68,12 +72,15 @@ printf "Server name: %s\n" "${psql_server_name}"
 printf "Server FQDN: %s\n" "${psql_server_private_fqdn}"
 printf "KeyVault name: %s\n" "${keyvault_name}"
 
-administrator_login=${DB_LOGIN_USER}
-administrator_login_password=$(az keyvault secret show --name ${KV_LOGIN_PASSWORD_KEY} --vault-name "${keyvault_name}" -o tsv --query value)
+administrator_login=${DB_ADMIN_USER}
+administrator_login_password=$(az keyvault secret show --name ${KV_DB_ADMIN_PASSWORD_KEY} --vault-name "${keyvault_name}" -o tsv --query value)
 
 # in widows, even if using cygwin, these variables will contain a landing \r character
 administrator_login=${administrator_login//[$'\r']}
 administrator_login_password=${administrator_login_password//[$'\r']}
+
+user_app_password=$(az keyvault secret show --name ${KV_DB_USER_APP_PASSWORD_KEY} --vault-name "${keyvault_name}" -o tsv --query value)
+user_app_password=${user_app_password//[$'\r']}
 
 #-------
 
@@ -97,6 +104,7 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   flyway/flyway:"${FLYWAY_DOCKER_TAG}" \
   -url="${DB_URL}" -user="${FLYWAY_USER}" -password="${FLYWAY_PASSWORD}" \
   -validateMigrationNaming=true \
-  -placeholders.databaseName="${DB_NAME}" \
-  -placeholders.schemaName="${VAR_SCHEMA_NAME}" \
+  -placeholders.schemaName=${VAR_SCHEMA_NAME} \
+  -placeholders.appUser=${DB_USER_APP} \
+  -placeholders.appUserPassword=${user_app_password} \
   "${FLYWAY_COMMAND}" ${other}
