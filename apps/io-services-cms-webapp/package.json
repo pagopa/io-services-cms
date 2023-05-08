@@ -40,6 +40,7 @@
     "@azure/identity": "^3.1.4",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",
+    "@pagopa/io-functions-commons": "^28.2.0",
     "@pagopa/ts-commons": "^11.0.0",
     "dotenv-cli": "^7.2.1",
     "express": "^4.18.2",
