@@ -12,6 +12,8 @@ module.exports = {
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/*.test-d.ts",
+    "*.sh",
+    "*.sql",
   ],
   rules: {
     "max-classes-per-file": "off",
