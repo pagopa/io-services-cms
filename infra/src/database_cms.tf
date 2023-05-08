@@ -52,15 +52,15 @@ resource "azurerm_cosmosdb_sql_database" "db_cms" {
 locals {
   database_containers = [
     {
-      name               = "services-lifecycles"
+      name               = local.cosmos_containers.services_lifecycles
       partition_key_path = "/id"
     },
     {
-      name               = "services-pubblications"
+      name               = local.cosmos_containers.services_pubblications
       partition_key_path = "/id"
     },
     {
-      name               = "services-history"
+      name               = local.cosmos_containers.services_history
       partition_key_path = "/serviceId"
     },
   ]
