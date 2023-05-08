@@ -107,7 +107,7 @@ const aDbInsertData = {
   service_version: aService.id,
   ticket_id: aCreateJiraIssueResponse.key,
   status: "PENDING",
-  extra_data: "d" as NonEmptyString,
+  extra_data: {},
 };
 
 const aVoidFn = () => console.log("");
@@ -190,13 +190,7 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.getJiraIssueByServiceId).toBeCalledWith(aService.id);
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
-    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
-      service_id: aService.id,
-      service_version: aService.id,
-      ticket_id: aCreateJiraIssueResponse.key,
-      status: "PENDING",
-      extra_data: "d" as NonEmptyString,
-    });
+    expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(result).toBe(anInsertQueryResult);
   });
 

@@ -25,7 +25,7 @@ export const ServiceReviewRowDataTable = t.type({
     t.literal("REJECTED"),
     t.literal("ABORTED"),
   ]),
-  extra_data: NonEmptyString, // TODO: how to type a generic object/json
+  extra_data: t.record(t.string, t.unknown),
 });
 
 const createInsertSql = (

@@ -1,6 +1,5 @@
 import { Service } from "@io-services-cms/models/service-lifecycle/types";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -58,7 +57,7 @@ export const createRequestReviewHandler = (
                 service_version: service.id,
                 ticket_id: ticket.key,
                 status: "PENDING",
-                extra_data: "d" as NonEmptyString,
+                extra_data: {},
               }),
               TE.mapLeft(E.toError)
             )
