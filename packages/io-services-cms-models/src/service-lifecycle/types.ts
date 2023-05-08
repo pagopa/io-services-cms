@@ -30,18 +30,16 @@ const OrganizationData = t.intersection([
   }),
 ]);
 
-const ServiceData = t.intersection([
-  t.type({
-    name: NonEmptyString,
-    require_secure_channel: withDefault(t.boolean, false),
-    authorized_recipients: withDefault(t.array(t.string), []),
-    max_allowed_payment_amount: withDefault(
-      MaxAllowedAmount,
-      0 as MaxAllowedAmount
-    ),
-  }),
-  t.partial({ description: NonEmptyString }),
-]);
+const ServiceData = t.type({
+  name: NonEmptyString,
+  description: NonEmptyString,
+  require_secure_channel: withDefault(t.boolean, false),
+  authorized_recipients: withDefault(t.array(t.string), []),
+  max_allowed_payment_amount: withDefault(
+    MaxAllowedAmount,
+    0 as MaxAllowedAmount
+  ),
+});
 
 const ServiceMetadata = t.intersection([
   t.type({

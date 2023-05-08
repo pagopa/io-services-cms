@@ -65,6 +65,7 @@ const aService = pipe(
     id: aServiceId,
     data: {
       name: "a service",
+      description: "a description",
       organization: {
         name: "org",
         fiscal_code: "00000000000",
