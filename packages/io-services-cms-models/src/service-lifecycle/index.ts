@@ -19,7 +19,7 @@ import { Service, ServiceId } from "./types";
 type ToRecord<Q> = Q extends []
   ? {} // eslint-disable-line @typescript-eslint/ban-types
   : Q extends [WithState<infer State, infer T>, ...infer Rest extends unknown[]]
-  ? { [K in State]: T } & ToRecord<Rest>
+  ? { [K in State]: Omit<T, "fsm"> } & ToRecord<Rest>
   : never;
 
 // commodity aliases
@@ -27,13 +27,14 @@ type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
 
 // All the states admitted by the FSM
-type States = [
-  WithState<"draft", Service>,
-  WithState<"submitted", Service /* TODO: refine with valid service only */>,
-  WithState<"approved", Service /* TODO: refine with valid service only */>,
-  WithState<"rejected", Service>,
-  WithState<"deleted", Service>
-];
+type States = t.TypeOf<typeof States>;
+const States = t.tuple([
+  WithState("draft", Service),
+  WithState("submitted", Service /* TODO: refine with valid service only */),
+  WithState("approved", Service /* TODO: refine with valid service only */),
+  WithState("rejected", Service),
+  WithState("deleted", Service),
+]);
 
 type Actions = {
   create: { data: Service };
@@ -363,4 +364,6 @@ function apply(
   };
 }
 
-export { apply, FSM };
+type ItemType = t.TypeOf<typeof ItemType>;
+const ItemType = t.union(States.types);
+export { apply, FSM, ItemType };

@@ -26,7 +26,11 @@ export const StateMetadata = <S extends string>(state: S) =>
     ]),
   });
 
-export type WithState<S extends string, T> = T & StateMetadata<S>;
+export type WithState<S extends string, T> = t.TypeOf<
+  ReturnType<typeof WithState<S, T>>
+>;
+export const WithState = <S extends string, T>(state: S, codec: t.Type<T>) =>
+  t.intersection([codec, StateMetadata(state)]);
 
 export type EmptyState = void;
 export const EmptyState = "*";
