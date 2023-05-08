@@ -1,8 +1,6 @@
 import { afterEach, describe, expect, it, vi, vitest } from "vitest";
-import * as config from "../../config";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
@@ -20,25 +18,6 @@ afterEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
 });
-
-const POSTGRESQL_CONFIG = {
-  REVIEWER_DB_HOST: "NonEmptyString",
-  REVIEWER_DB_IDLE_TIMEOUT: 30000,
-  REVIEWER_DB_NAME: "NonEmptyString",
-  REVIEWER_DB_PASSWORD: "NonEmptyString",
-  REVIEWER_DB_PORT: "5432",
-  REVIEWER_DB_SCHEMA: "NonEmptyString",
-  REVIEWER_DB_TABLE: "NonEmptyString",
-  REVIEWER_DB_USER: "NonEmptyString",
-  REVIEWER_DB_READ_MAX_ROW: 50,
-} as unknown as config.PostgreSqlConfig;
-
-const JIRA_CONFIG = {
-  JIRA_NAMESPACE_URL: "anUrl",
-  JIRA_PROJECT_NAME: "BOARD",
-  JIRA_TOKEN: "token",
-  JIRA_USERNAME: "aJiraUsername",
-} as config.JiraConfig;
 
 const createContext = () =>
   ({
@@ -188,7 +167,7 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
-    expect(E.isRight(E.of(result)));
+    expect(result).toBe(anInsertQueryResult);
   });
 
   it("should insert pending review only on db if service already exist on Jira", async () => {
@@ -218,7 +197,7 @@ describe("Service Review Handler", () => {
       status: "PENDING",
       extra_data: "d" as NonEmptyString,
     });
-    expect(E.isRight(E.of(result)));
+    expect(result).toBe(anInsertQueryResult);
   });
 
   it("should have a generic error if getJiraIssueByServiceId returns an Error", async () => {
@@ -236,13 +215,16 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    try {
+      await handler(context, JSON.stringify(aService));
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
 
     expect(mockJiraProxy.getJiraIssueByServiceId).toBeCalledWith(aService.id);
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
-    expect(E.isLeft(E.of(result)));
   });
 
   it("should have a generic error if getDelegateFromServiceId returns an ApimError", async () => {
@@ -259,7 +241,11 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    try {
+      await handler(context, JSON.stringify(aService));
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
 
     expect(mainMockJiraProxy.getJiraIssueByServiceId).toBeCalledWith(
       aService.id
@@ -267,7 +253,6 @@ describe("Service Review Handler", () => {
     expect(mockApimProxy.getDelegateFromServiceId).toBeCalledWith(aService.id);
     expect(mainMockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
-    expect(E.isLeft(E.of(result)));
   });
 
   it("should have a generic error if createJiraIssue returns an Error", async () => {
@@ -285,7 +270,11 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    try {
+      await handler(context, JSON.stringify(aService));
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
 
     expect(mockJiraProxy.getJiraIssueByServiceId).toBeCalledWith(aService.id);
     expect(mainMockApimProxy.getDelegateFromServiceId).toBeCalledWith(
@@ -293,7 +282,6 @@ describe("Service Review Handler", () => {
     );
     expect(mockJiraProxy.createJiraIssue).toBeCalledWith(aService, aDelegate);
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
-    expect(E.isLeft(E.of(result)));
   });
 
   it("should have a generic error if insert on db returns an Error", async () => {
@@ -311,7 +299,11 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    try {
+      await handler(context, JSON.stringify(aService));
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
 
     expect(mainMockJiraProxy.getJiraIssueByServiceId).toBeCalledWith(
       aService.id
@@ -324,6 +316,5 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
-    expect(E.isLeft(E.of(result)));
   });
 });

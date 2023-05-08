@@ -64,6 +64,9 @@ export const createRequestReviewHandler = (
             )
           )
         )
-      )
+      ),
+      TE.getOrElse((e) => {
+        throw e;
+      })
     )()
   );
