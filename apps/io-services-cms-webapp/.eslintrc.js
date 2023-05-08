@@ -12,6 +12,7 @@ module.exports = {
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/*.test-d.ts",
+    "generated/**/*",
   ],
   rules: {
     "max-classes-per-file": "off",

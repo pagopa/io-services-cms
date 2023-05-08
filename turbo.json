@@ -1,6 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
+    "generate": {
+      "inputs": [
+        "../../openapi.yaml",
+        "src/generated/**/*"
+      ],
+      "outputMode": "errors-only"
+    },
     "build": {
       "inputs": [
         "src/**/*.ts"
@@ -9,6 +16,7 @@
         "dist/**"
       ],
       "dependsOn": [
+        "generate",
         "^build"
       ]
     },
