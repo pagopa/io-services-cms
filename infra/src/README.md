@@ -12,7 +12,7 @@
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.42.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
 
@@ -37,6 +37,8 @@
 | [azurerm_monitor_autoscale_setting.webapp_functions_app_autoscale](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_autoscale_setting) | resource |
 | [azurerm_monitor_metric_alert.webapp_functions_app_health_check](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/resource_group) | resource |
+| [azurerm_storage_queue.request-review](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
+| [azurerm_storage_queue.request-review-poison](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/client_config) | data source |
