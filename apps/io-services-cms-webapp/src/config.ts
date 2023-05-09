@@ -49,6 +49,17 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
 });
 
+export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
+export const CosmosConfig = t.type({
+  COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+  COSMOSDB_URI: NonEmptyString,
+  COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_KEY: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICE_LIFECYCLE: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICE_PUBBLICATIONS: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICE_HISTORY: NonEmptyString,
+});
+
 export const AzureClientSecretCredential = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
@@ -63,6 +74,7 @@ export const ApimConfig = t.type({
   AZURE_APIM: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
+  AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
@@ -75,6 +87,7 @@ export const IConfig = t.intersection([
     JiraConfig,
     PostgreSqlConfig,
   ]),
+  CosmosConfig,
   AzureClientSecretCredential,
   ApimConfig,
 ]);

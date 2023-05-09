@@ -134,10 +134,13 @@ locals {
     FETCH_KEEPALIVE_TIMEOUT             = "60000"
 
     # Source data
-    COSMOSDB_CONNECTIONSTRING = format("AccountEndpoint=%s;AccountKey=%s;", module.cosmosdb_account.endpoint, module.cosmosdb_account.primary_key)
-    COSMOSDB_NAME             = azurerm_cosmosdb_sql_database.db_cms.name
-    COSMOSDB_URI              = module.cosmosdb_account.endpoint
-    COSMOSDB_KEY              = module.cosmosdb_account.primary_key
+    COSMOSDB_CONNECTIONSTRING                = format("AccountEndpoint=%s;AccountKey=%s;", module.cosmosdb_account.endpoint, module.cosmosdb_account.primary_key)
+    COSMOSDB_NAME                            = azurerm_cosmosdb_sql_database.db_cms.name
+    COSMOSDB_URI                             = module.cosmosdb_account.endpoint
+    COSMOSDB_KEY                             = module.cosmosdb_account.primary_key
+    COSMOSDB_CONTAINER_SERVICE_LIFECYCLE     = local.cosmos_containers.services_lifecycles
+    COSMOSDB_CONTAINER_SERVICE_PUBBLICATIONS = local.cosmos_containers.services_pubblications
+    COSMOSDB_CONTAINER_SERVICE_HISTORY       = local.cosmos_containers.services_history
 
     INTERNAL_STORAGE_CONNECTION_STRING = module.storage_account.primary_connection_string
 

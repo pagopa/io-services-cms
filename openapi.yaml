@@ -534,8 +534,10 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
         description:
           type: string
+          minLength: 1
         organization:
           $ref: '#/components/schemas/Organization'
         require_secure_channel:
@@ -543,10 +545,13 @@ components:
         authorized_recipients:
           type: array
           items:
-            $ref: '#/components/schemas/FiscalCode'
+            $ref: '#/components/schemas/OrganizationFiscalCode'
         max_allowed_payment_amount:
           type: integer
           format: int32
+          minimum: 0
+          maximum: 9999999999
+          default: 0
         metadata:
           $ref: '#/components/schemas/ServiceMetadata'
       required: 
@@ -656,15 +661,20 @@ components:
       properties: 
         name:
           type: string
+          minLength: 1
         fiscal_code:
-          $ref: '#/components/schemas/FiscalCode'
+          $ref: '#/components/schemas/OrganizationFiscalCode'
         department_name:
           type: string
-    FiscalCode:
+          minLength: 1
+      required:
+        - name
+        - fiscal_code
+    OrganizationFiscalCode:
       type: string
       description: User's fiscal code.
-      pattern: ^(?:[A-Z][AEIOU][AEIOUX]|[AEIOU]X{2}|[B-DF-HJ-NP-TV-Z]{2}[A-Z]){2}(?:[\dLMNP-V]{2}(?:[A-EHLMPR-T](?:[04LQ][1-9MNP-V]|[15MR][\dLMNP-V]|[26NS][0-8LMNP-U])|[DHPS][37PT][0L]|[ACELMRT][37PT][01LM]|[AC-EHLMPR-T][26NS][9V])|(?:[02468LNQSU][048LQU]|[13579MPRTV][26NS])B[26NS][9V])(?:[A-MZ][1-9MNP-V][\dLMNP-V]{2}|[A-M][0L](?:[1-9MNP-V][\dLMNP-V]|[0L][1-9MNP-V]))[A-Z]$
-      example: SPNDNL80R13C555X
+      pattern: "^[0-9]{11}$"
+      example: 01234567890
     Logo:
       description: A base64 string representation of the logo PNG image.
       type: object

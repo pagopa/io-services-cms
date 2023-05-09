@@ -12,6 +12,7 @@ module.exports = {
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/*.test-d.ts",
+    "src/generated/**/*",
     "*.sh",
     "*.sql",
   ],
