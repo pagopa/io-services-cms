@@ -15,9 +15,9 @@ import {
   getUserByEmail,
   getProductByName,
   upsertSubscription,
-} from "../../apim_client";
+} from "../../lib/clients/apim-client";
 
-vi.mock("../../apim_client", async () => {
+vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
 
   return {

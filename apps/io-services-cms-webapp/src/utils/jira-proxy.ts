@@ -9,7 +9,7 @@ import {
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
   jiraAPIClient,
-} from "../jira_client";
+} from "../lib/clients/jira-client";
 
 const formatOptionalStringValue = (value?: string) =>
   value || `{color:#FF991F}*[ DATO MANCANTE ]*{color}`;

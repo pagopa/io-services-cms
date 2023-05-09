@@ -1,9 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions":{
-    "rootDir": "src",
+  "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "dist",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "moduleResolution": "node"
   },
   "exclude": ["node_modules", "**/__tests__/*", "vitest.config.ts", "dist"]
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../config";
-import { Delegate, ServiceReviewProxy } from "../service_review_proxy";
+import { Delegate, ServiceReviewProxy } from "../jira-proxy";
 import { Service } from "@io-services-cms/models/service-lifecycle/types";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -10,7 +10,7 @@ import {
   JiraIssue,
   SearchJiraIssuesResponse,
   jiraAPIClient,
-} from "../../jira_client";
+} from "../../lib/clients/jira-client";
 
 const JIRA_CONFIG = {
   JIRA_NAMESPACE_URL: "anUrl",

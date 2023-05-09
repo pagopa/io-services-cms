@@ -8,7 +8,7 @@ import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
 import { ApimProxy } from "../utils/apim-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
-import { ServiceReviewProxy } from "../utils/service_review_proxy";
+import { ServiceReviewProxy } from "../utils/jira-proxy";
 
 const parseIncomingMessage = (
   queueItem: Json
