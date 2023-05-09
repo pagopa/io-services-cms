@@ -1,4 +1,4 @@
-import * as express from "express";
+import express from "express";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { pipe } from "fp-ts/lib/function";
