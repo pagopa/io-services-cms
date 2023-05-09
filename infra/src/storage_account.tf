@@ -14,3 +14,13 @@ module "storage_account" {
 
   tags = var.tags
 }
+
+resource "azurerm_storage_queue" "request-review" {
+  name                 = "request-review"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-review-poison" {
+  name                 = "request-review-poison"
+  storage_account_name = module.storage_account.name
+}

@@ -5,7 +5,7 @@ tags = {
   CreatedBy   = "Terraform"
   Environment = "Prod"
   Owner       = "IO"
-  Source      = "https://github.com/pagopa/io-selfcare-importadesioni"
+  Source      = "https://github.com/pagopa/io-services-cms"
   CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
 }
 

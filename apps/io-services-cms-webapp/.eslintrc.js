@@ -13,6 +13,8 @@ module.exports = {
     "**/*.spec.ts",
     "**/*.test-d.ts",
     "src/generated/**/*",
+    "*.sh",
+    "*.sql",
   ],
   rules: {
     "max-classes-per-file": "off",

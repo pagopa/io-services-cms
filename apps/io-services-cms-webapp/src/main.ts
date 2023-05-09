@@ -5,6 +5,11 @@ import { expressToAzureFunction } from "./lib/azure/adapters";
 import { getConfigOrThrow } from "./config";
 import { getApimClient } from "./apim_client";
 import { getDatabase } from "./lib/azure/cosmos";
+import { JiraAPIClient } from "./jira_client";
+import { createRequestReviewHandler } from "./reviewer/request-review-handler";
+import { apimProxy } from "./utils/apim-proxy";
+import { getDao } from "./utils/service-review-dao";
+import { ServiceReviewProxy } from "./utils/service_review_proxy";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -15,7 +20,7 @@ const config = getConfigOrThrow();
 // client to interact with Api Management
 const apimClient = getApimClient(config, config.AZURE_SUBSCRIPTION_ID);
 
-// client to interact woth cms db
+// client to interact with cms db
 const cosmos = getDatabase(config);
 
 // create a store for the ServiceLifecycle finite state machine
@@ -34,4 +39,14 @@ export const httpEntryPoint = pipe(
   },
   createWebServer,
   expressToAzureFunction
+);
+
+export const queueEntryPoint = createRequestReviewHandler(
+  getDao(config),
+  ServiceReviewProxy(JiraAPIClient(config)),
+  apimProxy(
+    getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
+    config.AZURE_APIM_RESOURCE_GROUP,
+    config.AZURE_APIM
+  )
 );
