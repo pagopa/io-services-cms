@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.0.2
+
+### Patch Changes
+
+- 884f845: Implement CreateService operation
+
 ## 1.0.1
 
 ### Patch Changes

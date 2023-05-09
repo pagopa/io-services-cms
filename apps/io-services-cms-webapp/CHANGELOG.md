@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.2.0
+
+### Minor Changes
+
+- 884f845: Implement CreateService operation
+
+### Patch Changes
+
+- Updated dependencies [884f845]
+  - @io-services-cms/models@1.0.2
+
 ## 1.1.0
 
 ### Minor Changes
