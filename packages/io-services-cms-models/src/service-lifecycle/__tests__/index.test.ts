@@ -7,7 +7,7 @@ import { stores } from "../../lib/fsm";
 import { apply } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
-import { Service } from "../types";
+import { Service } from "../definitions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // helper to check the result of a sequence of actions

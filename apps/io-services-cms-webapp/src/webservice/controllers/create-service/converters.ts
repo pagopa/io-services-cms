@@ -1,5 +1,4 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { Service } from "@io-services-cms/models/service-lifecycle/types";
 
 import { Service as ServiceResponsePayload } from "../../../generated/api/Service";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
@@ -10,7 +9,7 @@ import {
 import { ScopeEnum } from "../../../generated/api/ServiceMetadata";
 
 export const payloadToItem = (
-  id: Service["id"],
+  id: ServiceLifecycle.definitions.Service["id"],
   {
     require_secure_channel = false,
     max_allowed_payment_amount = 0 as NonNullable<
@@ -18,7 +17,7 @@ export const payloadToItem = (
     >,
     ...data
   }: ServiceRequestPayload
-): Service => ({
+): ServiceLifecycle.definitions.Service => ({
   id,
   data: {
     ...data,

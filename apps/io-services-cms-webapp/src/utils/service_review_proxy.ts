@@ -2,7 +2,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { Service } from "@io-services-cms/models/service-lifecycle/types";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   CreateJiraIssueResponse,
   JiraIssue,
@@ -19,7 +19,7 @@ const formatIssueTitle = (serviceId: NonEmptyString) =>
 
 export type ServiceReviewProxy = {
   readonly createJiraIssue: (
-    service: Service,
+    service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKey: (
@@ -40,7 +40,10 @@ export type Delegate = {
 export const ServiceReviewProxy = (
   jiraClient: jiraAPIClient
 ): ServiceReviewProxy => {
-  const buildIssueCustomFields = (service: Service, delegate: Delegate) => {
+  const buildIssueCustomFields = (
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ) => {
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD,
@@ -64,7 +67,10 @@ export const ServiceReviewProxy = (
     return customFields;
   };
 
-  const buildIssueDescription = (service: Service, delegate: Delegate) =>
+  const buildIssueDescription = (
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ) =>
     `Effettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
@@ -89,7 +95,7 @@ export const ServiceReviewProxy = (
     \n\n*Autorizzazioni:* ${delegate.permissions.join(", ")}` as NonEmptyString;
 
   const createJiraIssue = (
-    service: Service,
+    service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     jiraClient.createJiraIssue(
