@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions":{
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "esModuleInterop": true
   },
   "exclude": ["node_modules", "**/__tests__/*", "vitest.config.ts", "dist"]
 }
