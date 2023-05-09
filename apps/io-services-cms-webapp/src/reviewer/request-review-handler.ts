@@ -55,7 +55,8 @@ export const createRequestReviewHandler = (
               dao.insert({
                 service_id: service.id,
                 service_version: service.id,
-                ticket_id: ticket.key,
+                ticket_id: ticket.id,
+                ticket_key: ticket.key,
                 status: "PENDING",
                 extra_data: {},
               }),

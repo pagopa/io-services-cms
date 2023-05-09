@@ -26,13 +26,6 @@ const createContext = () =>
     log: { ...console, verbose: console.log },
   } as unknown as Context);
 
-const mockFetchJson = vitest.fn();
-const getMockFetchWithStatus = (status: number) =>
-  vitest.fn().mockImplementation(async () => ({
-    json: mockFetchJson,
-    status,
-  }));
-
 const aJiraIssue: JiraIssue = {
   id: "aJiraIssueId" as NonEmptyString,
   key: "anIssueKey" as NonEmptyString,
@@ -54,11 +47,6 @@ const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
   startAt: 0,
   total: 12,
   issues: [aJiraIssue],
-};
-
-const anEmptySearchJiraIssuesResponse: SearchJiraIssuesResponse = {
-  ...aSearchJiraIssuesResponse,
-  issues: [],
 };
 
 const aCreateJiraIssueResponse = {
@@ -102,10 +90,11 @@ const anInsertQueryResult: QueryResult = {
   rows: [],
 };
 
-const aDbInsertData = {
+const aDbInsertData: ServiceReviewRowDataTable = {
   service_id: aService.id,
   service_version: aService.id,
-  ticket_id: aCreateJiraIssueResponse.key,
+  ticket_id: aCreateJiraIssueResponse.id,
+  ticket_key: aCreateJiraIssueResponse.key,
   status: "PENDING",
   extra_data: {},
 };
