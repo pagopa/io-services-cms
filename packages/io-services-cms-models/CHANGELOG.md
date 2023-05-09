@@ -1,5 +1,12 @@
 # io-services-cms-models
 
+## 1.0.1
+
+### Patch Changes
+
+- 76e988b: Fix package configuration and exported types
+- fc75ecc: Service review handler
+
 ## 1.0.0
 
 ### Major Changes
