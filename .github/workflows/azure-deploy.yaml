@@ -25,7 +25,7 @@ jobs:
       - name: Create GitHub Runner
         id: create_github_runner
         # from https://github.com/pagopa/github-self-hosted-runner-azure-create-action/commits/main
-        uses: pagopa/github-self-hosted-runner-azure-create-action@63534a04613b420ce6474ccbb52ac7884129ff6f
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@0ee2f58fd46d10ac7f00bce4304b98db3dbdbe9a
         with:
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant_id: ${{ secrets.AZURE_TENANT_ID }}
@@ -80,7 +80,7 @@ jobs:
       - name: Cleanup GitHub Runner
         id: cleanup_github_runner
         # from https://github.com/pagopa/github-self-hosted-runner-azure-cleanup-action/commits/main
-        uses: pagopa/github-self-hosted-runner-azure-cleanup-action@d4c7a8dc3e8ca7be7b71358fdeee17429e28fcc4
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-cleanup-action@0ee2f58fd46d10ac7f00bce4304b98db3dbdbe9a
         with:
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant_id: ${{ secrets.AZURE_TENANT_ID }}
