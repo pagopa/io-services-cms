@@ -13,7 +13,7 @@ import {
   WithState,
   StateSet,
 } from "../lib/fsm";
-import { Service, ServiceId } from "./types";
+import { Service, ServiceId } from "./definitions";
 
 // utility type: turn a list of states into a record
 type ToRecord<Q> = Q extends []
@@ -364,3 +364,4 @@ function apply(
 }
 
 export { apply, FSM };
+export * as definitions from "./definitions";

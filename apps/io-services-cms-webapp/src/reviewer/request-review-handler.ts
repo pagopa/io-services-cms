@@ -1,4 +1,4 @@
-import { Service } from "@io-services-cms/models/service-lifecycle/types";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -10,10 +10,12 @@ import { ApimProxy } from "../utils/apim-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 import { ServiceReviewProxy } from "../utils/service_review_proxy";
 
-const parseIncomingMessage = (queueItem: Json): E.Either<Error, Service> =>
+const parseIncomingMessage = (
+  queueItem: Json
+): E.Either<Error, ServiceLifecycle.definitions.Service> =>
   pipe(
     queueItem,
-    Service.decode,
+    ServiceLifecycle.definitions.Service.decode,
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
