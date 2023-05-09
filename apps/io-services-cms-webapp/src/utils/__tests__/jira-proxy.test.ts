@@ -1,7 +1,7 @@
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../config";
-import { Delegate, ServiceReviewProxy } from "../service_review_proxy";
-import { Service } from "@io-services-cms/models/service-lifecycle/types";
+import { Delegate, ServiceReviewProxy } from "../jira-proxy";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -10,7 +10,7 @@ import {
   JiraIssue,
   SearchJiraIssuesResponse,
   jiraAPIClient,
-} from "../../jira_client";
+} from "../../lib/clients/jira-client";
 
 const JIRA_CONFIG = {
   JIRA_NAMESPACE_URL: "anUrl",
@@ -55,7 +55,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as Service;
+} as unknown as ServiceLifecycle.definitions.Service;
 
 const aDelegate = {
   name: "Mario Rossi",

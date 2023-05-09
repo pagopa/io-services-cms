@@ -2,7 +2,7 @@ import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import Cursor from "pg-cursor";
-import { PostgreSqlConfig } from "./config";
+import { PostgreSqlConfig } from "../../config";
 
 // eslint-disable-next-line functional/no-let
 let singletonPool: Pool;

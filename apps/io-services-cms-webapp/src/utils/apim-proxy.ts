@@ -8,8 +8,8 @@ import {
   getUser,
   getUserGroups,
   parseOwnerIdFullPath,
-} from "../apim_client";
-import { Delegate } from "./service_review_proxy";
+} from "../lib/clients/apim-client";
+import { Delegate } from "./jira-proxy";
 
 /**
  * Service review specific wrapper utility

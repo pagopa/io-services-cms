@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
-import * as config from "../config";
-import { JiraAPIClient, SearchJiraIssuesResponse } from "../jira_client";
+import * as config from "../../../config";
+import { JiraAPIClient, SearchJiraIssuesResponse } from "../jira-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 

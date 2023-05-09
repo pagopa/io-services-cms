@@ -8,7 +8,7 @@ import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import nodeFetch from "node-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { JiraConfig } from "./config";
+import { JiraConfig } from "../../config";
 
 const JIRA_REST_API_PATH = "/rest/api/2/";
 

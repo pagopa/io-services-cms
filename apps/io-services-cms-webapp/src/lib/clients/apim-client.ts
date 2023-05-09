@@ -21,7 +21,7 @@ import {
 import { parse } from "fp-ts/lib/Json";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
-import { AzureClientSecretCredential } from "./config";
+import { AzureClientSecretCredential } from "../../config";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 

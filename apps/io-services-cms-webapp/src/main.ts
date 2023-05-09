@@ -3,13 +3,13 @@ import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { createWebServer } from "./webservice";
 import { expressToAzureFunction } from "./lib/azure/adapters";
 import { getConfigOrThrow } from "./config";
-import { getApimClient } from "./apim_client";
+import { getApimClient } from "./lib/clients/apim-client";
 import { getDatabase } from "./lib/azure/cosmos";
-import { JiraAPIClient } from "./jira_client";
+import { JiraAPIClient } from "./lib/clients/jira-client";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
-import { ServiceReviewProxy } from "./utils/service_review_proxy";
+import { ServiceReviewProxy } from "./utils/jira-proxy";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
