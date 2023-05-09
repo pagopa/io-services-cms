@@ -20,5 +20,5 @@ Move into `reviewer/` folder and run `./scripts/run_flyway_on_<azure|server>.sh`
 
 `run_flyway_on_server.sh` usage example:
 ```
-./scripts/run_flyway_on_server.sh migrate reviewer localhost 5432 postgres admin reviewerusr UsrPassword schema/migrations reviewer
+./scripts/run_flyway_on_server.sh migrate reviewer localhost 5432 AdminUser AdminPassword reviewerusr UsrPassword schema/migrations reviewer
 ```
