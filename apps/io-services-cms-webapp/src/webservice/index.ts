@@ -1,12 +1,12 @@
 import express from "express";
-import { Container } from "@azure/cosmos";
+import bodyParser from "body-parser";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 
 import { pipe } from "fp-ts/lib/function";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle, FSMStore } from "@io-services-cms/models";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IConfig } from "../config";
 import { makeInfoHandler } from "./controllers/info";
 import {
   makeCreateServiceHandler,
@@ -15,25 +15,21 @@ import {
 
 type Dependencies = {
   basePath: string;
-  serviceLifecycleContainer: Container;
+  serviceLifecycleStore: FSMStore<ServiceLifecycle.ItemType>;
   apimClient: ApiManagementClient;
-  apimProductName: NonEmptyString;
+  config: IConfig;
 };
 
 export const createWebServer = ({
   basePath,
-  serviceLifecycleContainer,
+  serviceLifecycleStore,
   apimClient,
-  apimProductName,
+  config,
 }: Dependencies) => {
-  // create a store
-  const serviceLifecycleStore = stores.createCosmosStore(
-    serviceLifecycleContainer,
-    ServiceLifecycle.ItemType
-  );
-
   // mount all routers on router
   const router = express.Router();
+  router.use(bodyParser.json());
+
   router.get("/info", pipe(makeInfoHandler(), wrapRequestHandler));
 
   router.post(
@@ -42,7 +38,7 @@ export const createWebServer = ({
       makeCreateServiceHandler({
         store: serviceLifecycleStore,
         apimClient,
-        apimProductName,
+        apimConfig: config,
       }),
       applyRequestMiddelwares,
       wrapRequestHandler

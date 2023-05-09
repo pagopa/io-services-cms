@@ -1,4 +1,5 @@
 import { pipe } from "fp-ts/lib/function";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { createWebServer } from "./webservice";
 import { expressToAzureFunction } from "./lib/azure/adapters";
 import { getConfigOrThrow } from "./config";
@@ -17,15 +18,19 @@ const apimClient = getApimClient(config, config.AZURE_SUBSCRIPTION_ID);
 // client to interact woth cms db
 const cosmos = getDatabase(config);
 
+// create a store for the ServiceLifecycle finite state machine
+const serviceLifecycleStore = stores.createCosmosStore(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICE_LIFECYCLE),
+  ServiceLifecycle.ItemType
+);
+
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
     basePath: BASE_PATH,
     apimClient,
-    apimProductName: config.AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME,
-    serviceLifecycleContainer: cosmos.container(
-      config.COSMOSDB_CONTAINER_SERVICE_LIFECYCLE
-    ),
+    config,
+    serviceLifecycleStore,
   },
   createWebServer,
   expressToAzureFunction
