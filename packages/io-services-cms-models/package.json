@@ -1,9 +1,6 @@
 {
   "name": "@io-services-cms/models",
   "version": "1.0.0",
-  "exports": {
-    "./": "./dist/"
-  },
   "typesVersions": {
     "*": {
       "*": [
@@ -12,7 +9,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "index.js"
   ],
   "packageManager": "yarn@3.3.0",
   "scripts": {
