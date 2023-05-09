@@ -1,7 +1,7 @@
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
-import * as Cursor from "pg-cursor";
+import Cursor from "pg-cursor";
 import { PostgreSqlConfig } from "./config";
 
 // eslint-disable-next-line functional/no-let
