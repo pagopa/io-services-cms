@@ -1,5 +1,19 @@
 # io-services-cms-webapp
 
+## 1.1.0
+
+### Minor Changes
+
+- 552ab4f: Add DB migration for PostgreSQL
+- fc75ecc: Service review handler
+
+### Patch Changes
+
+- 214be58: use exModuleInterop for typescript module resolution
+- Updated dependencies [76e988b]
+- Updated dependencies [fc75ecc]
+  - @io-services-cms/models@1.0.1
+
 ## 1.0.2
 
 ### Patch Changes
