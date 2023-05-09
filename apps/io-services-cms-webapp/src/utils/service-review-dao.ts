@@ -15,18 +15,24 @@ const knex = knexBase({
 export type ServiceReviewRowDataTable = t.TypeOf<
   typeof ServiceReviewRowDataTable
 >;
-export const ServiceReviewRowDataTable = t.type({
-  service_id: NonEmptyString,
-  service_version: NonEmptyString,
-  ticket_id: NonEmptyString, // TODO: save only the id or some other ticket related infos?
-  status: t.union([
-    t.literal("PENDING"),
-    t.literal("APPROVED"),
-    t.literal("REJECTED"),
-    t.literal("ABORTED"),
-  ]),
-  extra_data: t.record(t.string, t.unknown),
-});
+
+export const ServiceReviewRowDataTable = t.intersection([
+  t.type({
+    service_id: NonEmptyString,
+    service_version: NonEmptyString,
+    ticket_id: NonEmptyString,
+    ticket_key: NonEmptyString,
+    status: t.union([
+      t.literal("PENDING"),
+      t.literal("APPROVED"),
+      t.literal("REJECTED"),
+      t.literal("ABORTED"),
+    ]),
+  }),
+  t.partial({
+    extra_data: t.record(t.string, t.unknown),
+  }),
+]);
 
 const createInsertSql = (
   { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
