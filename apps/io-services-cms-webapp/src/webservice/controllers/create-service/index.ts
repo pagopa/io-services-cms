@@ -8,10 +8,7 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { pipe } from "fp-ts/lib/function";
-import { Context } from "@azure/functions";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
-import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -20,15 +17,26 @@ import {
 import { stores, ServiceLifecycle } from "@io-services-cms/models";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { ApiManagementClient, Subscription } from "@azure/arm-apimanagement";
+import {
+  ApiManagementClient,
+  SubscriptionContract,
+} from "@azure/arm-apimanagement";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
-
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import { sequenceS } from "fp-ts/lib/Apply";
+import * as t from "io-ts";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserEmailMiddleware } from "../../../lib/middlewares/user-email-middleware";
 import { Service as ServiceResponsePayload } from "../../../generated/api/Service";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
+import { ApimConfig } from "../../../config";
+import {
+  getProductByName,
+  getUserByEmail,
+  upsertSubscription,
+} from "../../../apim_client";
 import { payloadToItem, itemToResponse } from "./converters";
 
 type HandlerResponseTypes =
@@ -39,7 +47,6 @@ type HandlerResponseTypes =
   | IResponseErrorInternal;
 
 type ICreateServiceHandler = (
-  context: Context,
   auth: IAzureApiAuthorization,
   userEmail: EmailAddress,
   servicePayload: ServiceRequestPayload
@@ -50,31 +57,101 @@ type Dependencies = {
   store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
   // An instance of APIM Client
   apimClient: ApiManagementClient;
-  // The APIM product subscription are created into
-  apimProductName: NonEmptyString;
+  // The APIM configuration
+  apimConfig: ApimConfig;
 };
 
+// utility to extract a non-empty id from an object
+const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
+  pipe(
+    obj,
+    t.type({ id: NonEmptyString }).decode,
+    TE.fromEither,
+    TE.mapLeft(
+      (err) =>
+        new Error(`Cannot decode object to get id, ${readableReport(err)}`)
+    ),
+    TE.map((_) => _.id)
+  );
+
 const createSubscriptionTask = (
-  _apimClient: ApiManagementClient,
-  _userEmail: EmailString,
-  _subscriptionId: NonEmptyString,
-  _productName: NonEmptyString
-): TE.TaskEither<Error, Subscription> =>
-  ({
-    /* to be implemented */
-  } as unknown as TE.TaskEither<Error, Subscription>);
+  apimClient: ApiManagementClient,
+  userEmail: EmailString,
+  subscriptionId: NonEmptyString,
+  apimConfig: ApimConfig
+): TE.TaskEither<Error, SubscriptionContract> => {
+  const getUserId = pipe(
+    getUserByEmail(
+      apimClient,
+      apimConfig.AZURE_APIM_RESOURCE_GROUP,
+      apimConfig.AZURE_APIM,
+      userEmail
+    ),
+    TE.mapLeft(
+      (err) =>
+        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
+    ),
+    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
+    TE.chain(pickId)
+  );
+
+  const getProductId = pipe(
+    getProductByName(
+      apimClient,
+      apimConfig.AZURE_APIM_RESOURCE_GROUP,
+      apimConfig.AZURE_APIM,
+      apimConfig.AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME
+    ),
+    TE.mapLeft(
+      (err) =>
+        new Error(
+          `Failed to fetch product by its name, code: ${err.statusCode}`
+        )
+    ),
+    TE.chain(TE.fromOption(() => new Error(`Cannot find product`))),
+    TE.chain(pickId)
+  );
+
+  const createSubscription = ({
+    userId,
+    productId,
+  }: {
+    userId: NonEmptyString;
+    productId: NonEmptyString;
+  }) =>
+    pipe(
+      upsertSubscription(
+        apimClient,
+        apimConfig.AZURE_APIM_RESOURCE_GROUP,
+        apimConfig.AZURE_APIM,
+        productId,
+        userId,
+        subscriptionId
+      ),
+      TE.mapLeft(
+        (err) =>
+          new Error(
+            `Failed to fetch create subcription, code: ${err.statusCode}`
+          )
+      )
+    );
+
+  return pipe(
+    sequenceS(TE.ApplicativePar)({
+      userId: getUserId,
+      productId: getProductId,
+    }),
+    TE.chain(createSubscription)
+  );
+};
 
 export const makeCreateServiceHandler =
-  ({
-    store,
-    apimClient,
-    apimProductName,
-  }: Dependencies): ICreateServiceHandler =>
-  (_context, _auth, userEmail, servicePayload) => {
+  ({ store, apimClient, apimConfig }: Dependencies): ICreateServiceHandler =>
+  (_auth, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimClient, userEmail, serviceId, apimProductName),
+      createSubscriptionTask(apimClient, userEmail, serviceId, apimConfig),
       RTE.fromTaskEither<Error, unknown, Dependencies["store"]>,
       RTE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
@@ -102,8 +179,6 @@ export const applyRequestMiddelwares = (handler: ICreateServiceHandler) =>
     // (handler) =>
     //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
     withRequestMiddlewares(
-      // inject the Azure context
-      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
       // extract the user email from the request headers

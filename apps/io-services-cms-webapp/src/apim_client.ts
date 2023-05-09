@@ -1,12 +1,15 @@
 import {
   ApiManagementClient,
   GroupContract,
-  SubscriptionGetResponse,
+  ProductContract,
+  SubscriptionContract,
+  UserContract,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/Either";
 
 import {
@@ -16,7 +19,7 @@ import {
   ResponseErrorNotFound,
 } from "@pagopa/ts-commons/lib/responses";
 import { parse } from "fp-ts/lib/Json";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
 import { AzureClientSecretCredential } from "./config";
 
@@ -89,6 +92,37 @@ export function getUser(
   );
 }
 
+/**
+ * Retrieve the APIM user by its email
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apim
+ * @param userEmail
+ * @returns
+ */
+export function getUserByEmail(
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  userEmail: EmailString
+): TE.TaskEither<ApimRestError, O.Option<UserContract>> {
+  return pipe(
+    apimClient.user.listByService(apimResourceGroup, apim, {
+      filter: `email eq '${userEmail}'`,
+    }),
+    // the first element does the job
+    (userListResponse) =>
+      TE.tryCatch(async () => {
+        for await (const x of userListResponse) {
+          return O.some(x);
+        }
+        return O.none;
+      }, identity),
+    chainApimMappedError
+  );
+}
+
 export function getUserGroups(
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
@@ -120,7 +154,7 @@ export const getSubscription = (
   apimResourceGroup: string,
   apim: string,
   serviceId: string
-): TE.TaskEither<ApimRestError, SubscriptionGetResponse> =>
+) =>
   pipe(
     TE.tryCatch(
       () => apimClient.subscription.get(apimResourceGroup, apim, serviceId),
@@ -128,6 +162,75 @@ export const getSubscription = (
     ),
     chainApimMappedError
   );
+
+/**
+ * Create or updates a subscription for a given user
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apim
+ * @param productId
+ * @param ownerId
+ * @param subscriptionId
+ * @returns
+ */
+export const upsertSubscription = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  productId: string,
+  ownerId: string,
+  subscriptionId: string
+): TE.TaskEither<ApimRestError, SubscriptionContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.createOrUpdate(
+          apimResourceGroup,
+          apim,
+          subscriptionId,
+          {
+            displayName: subscriptionId,
+            ownerId,
+            scope: `/products/${productId}`,
+            state: "active",
+          }
+        ),
+      identity
+    ),
+    chainApimMappedError
+  );
+
+/**
+ * Get a APIM product by its name
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apim
+ * @param productName
+ * @returns
+ */
+export function getProductByName(
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  productName: NonEmptyString
+): TE.TaskEither<ApimRestError, O.Option<ProductContract>> {
+  return pipe(
+    apimClient.product.listByService(apimResourceGroup, apim, {
+      filter: `name eq '${productName}'`,
+    }),
+    // the first element does the job
+    (productListResponse) =>
+      TE.tryCatch(async () => {
+        for await (const x of productListResponse) {
+          return O.some(x);
+        }
+        return O.none;
+      }, identity),
+    chainApimMappedError
+  );
+}
 
 /*
  ** The right full path for ownerID is in this kind of format:
