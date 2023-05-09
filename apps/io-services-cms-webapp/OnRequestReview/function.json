@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "request-review",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestReviewItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "queueEntryPoint"
+}

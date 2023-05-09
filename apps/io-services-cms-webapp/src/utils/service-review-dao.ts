@@ -15,6 +15,7 @@ const knex = knexBase({
 export type ServiceReviewRowDataTable = t.TypeOf<
   typeof ServiceReviewRowDataTable
 >;
+
 export const ServiceReviewRowDataTable = t.intersection([
   t.type({
     service_id: NonEmptyString,
@@ -29,7 +30,7 @@ export const ServiceReviewRowDataTable = t.intersection([
     ]),
   }),
   t.partial({
-    extra_data: NonEmptyString, // TODO: how to type a generic object/json
+    extra_data: t.record(t.string, t.unknown),
   }),
 ]);
 
@@ -92,3 +93,5 @@ export const getDao = (dbConfig: PostgreSqlConfig) =>
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),
   }));
+
+export type ServiceReviewDao = ReturnType<typeof getDao>;

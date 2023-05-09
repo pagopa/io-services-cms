@@ -39,6 +39,8 @@
 | [azurerm_monitor_metric_alert.webapp_functions_app_health_check](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server_database.reviewer_database](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/resource_group) | resource |
+| [azurerm_storage_queue.request-review](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
+| [azurerm_storage_queue.request-review-poison](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_reviewer_usr_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
