@@ -122,7 +122,6 @@ variable "reviewer_db_table" {
 locals {
   webapp_functions_app_settings = {
     FUNCTIONS_WORKER_RUNTIME       = "node"
-    WEBSITE_VNET_ROUTE_ALL         = "1"
     FUNCTIONS_WORKER_PROCESS_COUNT = "4"
     NODE_ENV                       = "production"
 
