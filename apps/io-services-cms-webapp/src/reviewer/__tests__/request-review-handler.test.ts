@@ -7,11 +7,11 @@ import {
   CreateJiraIssueResponse,
   JiraIssue,
   SearchJiraIssuesResponse,
-} from "../../jira_client";
-import { Delegate } from "../../utils/service_review_proxy";
+} from "../../lib/clients/jira-client";
+import { Delegate } from "../../utils/jira-proxy";
 import { createRequestReviewHandler } from "../request-review-handler";
 import { Context } from "@azure/functions";
-import { Service } from "@io-services-cms/models/service-lifecycle/types";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { DatabaseError, QueryResult } from "pg";
 
 afterEach(() => {
@@ -73,7 +73,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as Service;
+} as unknown as ServiceLifecycle.definitions.Service;
 
 const aDelegate = {
   firstName: "aName",
@@ -115,9 +115,11 @@ const mainMockServiceReviewDao = {
 };
 
 const mainMockJiraProxy = {
-  createJiraIssue: vi.fn((service: Service, delegate: Delegate) => {
-    return TE.of(aCreateJiraIssueResponse);
-  }),
+  createJiraIssue: vi.fn(
+    (service: ServiceLifecycle.definitions.Service, delegate: Delegate) => {
+      return TE.of(aCreateJiraIssueResponse);
+    }
+  ),
   searchJiraIssuesByKey: vi.fn(
     (jiraIssueKeys: ReadonlyArray<NonEmptyString>) => {
       return TE.of(aSearchJiraIssuesResponse);
@@ -241,9 +243,11 @@ describe("Service Review Handler", () => {
   it("should have a generic error if createJiraIssue returns an Error", async () => {
     const mockJiraProxy = {
       ...mainMockJiraProxy,
-      createJiraIssue: vi.fn((service: Service, delegate: Delegate) => {
-        return TE.left(new Error());
-      }),
+      createJiraIssue: vi.fn(
+        (service: ServiceLifecycle.definitions.Service, delegate: Delegate) => {
+          return TE.left(new Error());
+        }
+      ),
     };
 
     const handler = createRequestReviewHandler(

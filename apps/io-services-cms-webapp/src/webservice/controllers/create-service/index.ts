@@ -36,7 +36,7 @@ import {
   getProductByName,
   getUserByEmail,
   upsertSubscription,
-} from "../../../apim_client";
+} from "../../../lib/clients/apim-client";
 import { payloadToItem, itemToResponse } from "./converters";
 
 type HandlerResponseTypes =

@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
-import * as config from "../config";
-import { JiraAPIClient, SearchJiraIssuesResponse } from "../jira_client";
+import * as config from "../../../config";
+import { SearchJiraIssuesResponse, jiraClient } from "../jira-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
@@ -58,7 +58,7 @@ const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
 describe("[JiraAPIClient] createJiraIssue", () => {
   it("should return a generic error if createJiraIssue returns a status code 500 or above", async () => {
     const mockFetch = getMockFetchWithStatus(500);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
@@ -79,7 +79,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
   it("should return a misconfiguration error if createJiraIssue returns a status code 401", async () => {
     const mockFetch = getMockFetchWithStatus(401);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
@@ -103,7 +103,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
   it("should return an invalid request error if createJiraIssue returns a status code 400", async () => {
     const mockFetch = getMockFetchWithStatus(400);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
@@ -124,7 +124,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
   it("should return an unknown status code response error if createJiraIssue returns a not expected status code", async () => {
     const mockFetch = getMockFetchWithStatus(123);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
@@ -151,7 +151,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
       Promise.resolve(aCreateJiraIssueResponse)
     );
     const mockFetch = getMockFetchWithStatus(201);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set("customfield_10364", "12345678901");
@@ -185,7 +185,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 describe("[JiraAPIClient] searchJiraIssues", () => {
   it("should return a generic error if createJiraIssue returns a status code 500 or above", async () => {
     const mockFetch = getMockFetchWithStatus(500);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssues(aSearchIssuesPayload)();
 
@@ -209,7 +209,7 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
       Promise.resolve(aSearchJiraIssuesResponse)
     );
     const mockFetch = getMockFetchWithStatus(200);
-    const client = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssues(aSearchIssuesPayload)();
 

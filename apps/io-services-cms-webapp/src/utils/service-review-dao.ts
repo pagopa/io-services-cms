@@ -6,7 +6,11 @@ import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool, QueryResult } from "pg";
 import { PostgreSqlConfig } from "../config";
-import { createCursor, getPool, queryDataTable } from "../pg-client";
+import {
+  createCursor,
+  getPool,
+  queryDataTable,
+} from "../lib/clients/pg-client";
 
 const knex = knexBase({
   client: "pg",

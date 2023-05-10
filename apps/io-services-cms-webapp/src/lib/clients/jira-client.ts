@@ -8,7 +8,7 @@ import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import nodeFetch from "node-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { JiraConfig } from "./config";
+import { JiraConfig } from "../../config";
 
 const JIRA_REST_API_PATH = "/rest/api/2/";
 
@@ -55,7 +55,7 @@ const SearchJiraIssuesPayload = t.interface({
 });
 export type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
-export type jiraAPIClient = {
+export type JiraAPIClient = {
   readonly config: JiraConfig;
   readonly createJiraIssue: (
     title: NonEmptyString,
@@ -92,10 +92,10 @@ const checkJiraResponse = (response: Response): Either<Error, Response> => {
   }
 };
 
-export const JiraAPIClient = (
+export const jiraClient = (
   config: JiraConfig,
   fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
-): jiraAPIClient => {
+): JiraAPIClient => {
   const jiraHeaders = {
     Accept: "application/json",
     Authorization: `Basic ${Buffer.from(

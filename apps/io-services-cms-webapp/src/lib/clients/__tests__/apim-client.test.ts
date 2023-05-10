@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { parseOwnerIdFullPath } from "../apim_client";
+import { parseOwnerIdFullPath } from "../apim-client";
 
 describe("Get Owner Id from Full Path", () => {
   it("should retrieve the ID", () => {
