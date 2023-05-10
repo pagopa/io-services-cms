@@ -17,7 +17,7 @@ const formatOptionalStringValue = (value?: string) =>
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
 
-export type ServiceReviewProxy = {
+export type JiraProxy = {
   readonly createJiraIssue: (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
@@ -37,9 +37,7 @@ export type Delegate = {
   permissions: Array<string | undefined>;
 };
 
-export const ServiceReviewProxy = (
-  jiraClient: jiraAPIClient
-): ServiceReviewProxy => {
+export const jiraProxy = (jiraClient: jiraAPIClient): JiraProxy => {
   const buildIssueCustomFields = (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate

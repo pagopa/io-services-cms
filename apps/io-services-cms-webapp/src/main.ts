@@ -9,7 +9,7 @@ import { JiraAPIClient } from "./lib/clients/jira-client";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
-import { ServiceReviewProxy } from "./utils/jira-proxy";
+import { jiraProxy } from "./utils/jira-proxy";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -43,7 +43,7 @@ export const httpEntryPoint = pipe(
 
 export const queueEntryPoint = createRequestReviewHandler(
   getDao(config),
-  ServiceReviewProxy(JiraAPIClient(config)),
+  jiraProxy(JiraAPIClient(config)),
   apimProxy(
     getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
     config.AZURE_APIM_RESOURCE_GROUP,

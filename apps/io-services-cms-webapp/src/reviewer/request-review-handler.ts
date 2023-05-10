@@ -8,7 +8,7 @@ import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
 import { ApimProxy } from "../utils/apim-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
-import { ServiceReviewProxy } from "../utils/jira-proxy";
+import { JiraProxy } from "../utils/jira-proxy";
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -21,7 +21,7 @@ const parseIncomingMessage = (
 
 export const createRequestReviewHandler = (
   dao: ServiceReviewDao,
-  jiraProxy: ServiceReviewProxy,
+  jiraProxy: JiraProxy,
   apimProxy: ApimProxy
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((_context, queueItem) =>
