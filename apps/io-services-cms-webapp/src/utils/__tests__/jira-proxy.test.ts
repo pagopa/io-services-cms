@@ -9,7 +9,7 @@ import {
   JiraAPIClient,
   JiraIssue,
   SearchJiraIssuesResponse,
-  jiraAPIClient,
+  jiraClient,
 } from "../../lib/clients/jira-client";
 
 const JIRA_CONFIG = {
@@ -104,7 +104,7 @@ describe("Service Review Proxy", () => {
     );
     const mockFetch = getMockFetchWithStatus(201);
 
-    const aJiraClient: jiraAPIClient = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
     const serviceReviewTicket = await proxy.createJiraIssue(
       aService,
@@ -129,7 +129,7 @@ describe("Service Review Proxy", () => {
     );
     const mockFetch = getMockFetchWithStatus(200);
 
-    const aJiraClient: jiraAPIClient = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
     const searchKeys = [
       "anIssueKey-1" as NonEmptyString,
@@ -157,7 +157,7 @@ describe("Service Review Proxy", () => {
     );
     const mockFetch = getMockFetchWithStatus(200);
 
-    const aJiraClient: jiraAPIClient = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
     const serviceReview = await proxy.getJiraIssueByServiceId(
       "aServiceId" as NonEmptyString
@@ -189,7 +189,7 @@ describe("Service Review Proxy", () => {
     );
     const mockFetch = getMockFetchWithStatus(200);
 
-    const aJiraClient: jiraAPIClient = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
     const serviceReview = await proxy.getJiraIssueByServiceId(
       "aWrongServiceId" as NonEmptyString
@@ -215,7 +215,7 @@ describe("Service Review Proxy", () => {
     );
     const mockFetch = getMockFetchWithStatus(500);
 
-    const aJiraClient: jiraAPIClient = JiraAPIClient(JIRA_CONFIG, mockFetch);
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
     const serviceReview = await proxy.getJiraIssueByServiceId(
       "aServiceId" as NonEmptyString
