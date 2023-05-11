@@ -1,15 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import request from "supertest";
-import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { createWebServer } from "../index";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { IConfig } from "../../config";
-//import { Service } from "@io-services-cms/models/service-lifecycle/types";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import {
   getUserByEmail,

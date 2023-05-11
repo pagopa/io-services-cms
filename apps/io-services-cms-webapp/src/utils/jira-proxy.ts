@@ -5,10 +5,10 @@ import { pipe } from "fp-ts/lib/function";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   CreateJiraIssueResponse,
+  JiraAPIClient,
   JiraIssue,
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
-  jiraAPIClient,
 } from "../lib/clients/jira-client";
 
 const formatOptionalStringValue = (value?: string) =>
@@ -17,7 +17,7 @@ const formatOptionalStringValue = (value?: string) =>
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
 
-export type ServiceReviewProxy = {
+export type JiraProxy = {
   readonly createJiraIssue: (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
@@ -37,9 +37,7 @@ export type Delegate = {
   permissions: Array<string | undefined>;
 };
 
-export const ServiceReviewProxy = (
-  jiraClient: jiraAPIClient
-): ServiceReviewProxy => {
+export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
   const buildIssueCustomFields = (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
