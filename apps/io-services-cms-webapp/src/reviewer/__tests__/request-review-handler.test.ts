@@ -38,7 +38,7 @@ const aJiraIssue: JiraIssue = {
       ],
     },
     status: {
-      name: "aStatusValue",
+      name: "REVIEW",
     },
   },
 };

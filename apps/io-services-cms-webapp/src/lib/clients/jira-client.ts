@@ -18,6 +18,15 @@ export const CreateJiraIssueResponse = t.interface({
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
+export const JiraIssueStatus = t.union([
+  // TODO: maybe get these literal values from config?
+  t.literal("NEW"),
+  t.literal("REVIEW"),
+  t.literal("REJECTED"),
+  t.literal("APPROVED"),
+]);
+export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
+
 export const JiraIssue = t.interface({
   id: NonEmptyString,
   key: NonEmptyString,
@@ -26,7 +35,7 @@ export const JiraIssue = t.interface({
       comments: t.readonlyArray(t.interface({ body: t.string })),
     }),
     status: t.interface({
-      name: t.string,
+      name: JiraIssueStatus,
     }),
   }),
 });
