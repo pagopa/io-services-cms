@@ -10,6 +10,7 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
 import { jiraProxy } from "./utils/jira-proxy";
+import { createReviewCheckerHandler } from "./review-checker-handler-mock";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -49,4 +50,10 @@ export const queueEntryPoint = createRequestReviewHandler(
     config.AZURE_APIM_RESOURCE_GROUP,
     config.AZURE_APIM
   )
+);
+
+export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
+  getDao(config),
+  jiraProxy(jiraClient(config)),
+  serviceLifecycleStore
 );

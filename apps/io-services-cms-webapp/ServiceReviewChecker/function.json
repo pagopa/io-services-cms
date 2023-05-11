@@ -1,0 +1,13 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "schedule": "%SERVICE_REVIEW_CHECKER_SCHEDULE%",
+      "name": "serviceReviewCheckerTimer",
+      "type": "timerTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "serviceReviewCheckerEntryPoint"
+}
