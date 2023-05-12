@@ -276,4 +276,43 @@ describe("[Service Review Checker Handler] updateReview", () => {
       }
     }
   });
+  it("should not change service review status (db and FSM) if it receives an empty issueItemPair", async () => {
+    serviceLifecycleStore.save(aService.id, {
+      ...aService,
+      fsm: { state: "submitted" },
+    });
+    serviceLifecycleStore.save(aService2.id, {
+      ...aService2,
+      fsm: { state: "submitted" },
+    });
+    const result = await updateReview(
+      mainMockServiceReviewDao,
+      serviceLifecycleStore
+    )(TE.of([] as unknown as IssueItemPair[]))();
+
+    // updateReview result
+    expect(E.isRight(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and insert values
+    expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+
+    const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
+    const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
+
+    // fsm apply transitions
+    expect(E.isRight(fsmServiceResult)).toBeTruthy();
+    if (E.isRight(fsmServiceResult)) {
+      expect(O.isSome(fsmServiceResult.right)).toBeTruthy();
+      if (O.isSome(fsmServiceResult.right)) {
+        expect(fsmServiceResult.right.value.fsm.state).toBe("submitted");
+      }
+    }
+    expect(E.isRight(fsmService2Result)).toBeTruthy();
+    if (E.isRight(fsmService2Result)) {
+      expect(O.isSome(fsmService2Result.right)).toBeTruthy();
+      if (O.isSome(fsmService2Result.right)) {
+        expect(fsmService2Result.right.value.fsm.state).toBe("submitted");
+      }
+    }
+  });
 });
