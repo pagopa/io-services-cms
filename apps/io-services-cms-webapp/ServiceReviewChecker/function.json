@@ -2,7 +2,7 @@
   "disabled": false,
   "bindings": [
     {
-      "schedule": "%SERVICE_REVIEW_CHECKER_SCHEDULE%",
+      "schedule": "0 30 21 * * *",
       "name": "serviceReviewCheckerTimer",
       "type": "timerTrigger",
       "direction": "in"

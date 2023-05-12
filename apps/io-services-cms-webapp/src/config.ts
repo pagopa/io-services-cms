@@ -78,17 +78,6 @@ export const ApimConfig = t.type({
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
-// Apim configuration
-export const ServiceReviewCheckerConfig = t.type({
-  SERVICE_REVIEW_CHECKER_SCHEDULE: withDefault(
-    NonEmptyString,
-    "0 30 21 * * *" as NonEmptyString // every day at 21:30:00
-  ),
-});
-export type ServiceReviewCheckerConfig = t.TypeOf<
-  typeof ServiceReviewCheckerConfig
->;
-
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -101,7 +90,6 @@ export const IConfig = t.intersection([
   CosmosConfig,
   AzureClientSecretCredential,
   ApimConfig,
-  ServiceReviewCheckerConfig,
 ]);
 
 export const envConfig = {
