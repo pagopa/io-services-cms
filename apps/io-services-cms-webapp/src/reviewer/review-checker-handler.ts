@@ -28,12 +28,13 @@ const makeServiceLifecycleApply = (
   switch (jiraIssue.fields.status.name) {
     case "REJECTED":
       return ServiceLifecycle.apply("reject", serviceReview.service_id, {
-        reason: jiraIssue.fields.comment.comments.join("|"),
+        reason: jiraIssue.fields.comment.comments
+          .map((value) => value.body)
+          .join("|"),
       });
     case "APPROVED":
       return ServiceLifecycle.apply("approve", serviceReview.service_id, {
-        // TODO: quale data?
-        approvalDate: "aDate",
+        approvalDate: jiraIssue.fields.statuscategorychangedate,
       });
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

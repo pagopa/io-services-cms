@@ -78,6 +78,7 @@ const aJiraIssue1: JiraIssue = {
     status: {
       name: "APPROVED",
     },
+    statuscategorychangedate: "2023-05-12T15:10:05.173+0200" as NonEmptyString,
   },
 };
 const aJiraIssue2: JiraIssue = {
@@ -90,6 +91,7 @@ const aJiraIssue2: JiraIssue = {
     status: {
       name: "REJECTED",
     },
+    statuscategorychangedate: "2023-05-12T15:24:09.173+0200" as NonEmptyString,
   },
 };
 
@@ -266,6 +268,9 @@ describe("[Service Review Checker Handler] updateReview", () => {
       expect(O.isSome(fsmServiceResult.right)).toBeTruthy();
       if (O.isSome(fsmServiceResult.right)) {
         expect(fsmServiceResult.right.value.fsm.state).toBe("approved");
+        expect(fsmServiceResult.right.value.fsm.approvalDate).toBe(
+          aJiraIssue1.fields.statuscategorychangedate
+        );
       }
     }
     expect(E.isRight(fsmService2Result)).toBeTruthy();
@@ -273,6 +278,11 @@ describe("[Service Review Checker Handler] updateReview", () => {
       expect(O.isSome(fsmService2Result.right)).toBeTruthy();
       if (O.isSome(fsmService2Result.right)) {
         expect(fsmService2Result.right.value.fsm.state).toBe("rejected");
+        expect(fsmService2Result.right.value.fsm.reason).toBe(
+          aJiraIssue2.fields.comment.comments
+            .map((value) => value.body)
+            .join("|")
+        );
       }
     }
   });

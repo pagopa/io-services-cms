@@ -40,6 +40,7 @@ const aJiraIssue: JiraIssue = {
     status: {
       name: "REVIEW",
     },
+    statuscategorychangedate: "2023-05-10T14:00:15.173+0200" as NonEmptyString,
   },
 };
 

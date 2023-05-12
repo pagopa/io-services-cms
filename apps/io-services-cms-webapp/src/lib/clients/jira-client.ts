@@ -37,6 +37,7 @@ export const JiraIssue = t.interface({
     status: t.interface({
       name: JiraIssueStatus,
     }),
+    statuscategorychangedate: NonEmptyString,
   }),
 });
 export type JiraIssue = t.TypeOf<typeof JiraIssue>;
