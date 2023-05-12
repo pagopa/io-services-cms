@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
+import { JiraIssue } from "../../lib/clients/jira-client";
 import {
-  JiraIssue,
-  SearchJiraIssuesResponse,
-} from "../../lib/clients/jira-client";
-import { createReviewCheckerHandler } from "../review-checker-handler";
+  IssueItemPair,
+  buildIssueItemPairs,
+  updateReview,
+} from "../review-checker-handler";
 import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { QueryResult } from "pg";
 
@@ -19,27 +20,50 @@ afterEach(() => {
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 
-const aJiraIssue: JiraIssue = {
-  id: "aJiraIssueId" as NonEmptyString,
-  key: "anIssueKey" as NonEmptyString,
+const anItem1: ServiceReviewRowDataTable = {
+  service_id: "s1" as NonEmptyString,
+  service_version: "v1" as NonEmptyString,
+  ticket_id: "tid1" as NonEmptyString,
+  ticket_key: "tk1" as NonEmptyString,
+  status: "PENDING",
+};
+
+const anItem2: ServiceReviewRowDataTable = {
+  service_id: "s2" as NonEmptyString,
+  service_version: "v2" as NonEmptyString,
+  ticket_id: "tid2" as NonEmptyString,
+  ticket_key: "tk2" as NonEmptyString,
+  status: "PENDING",
+};
+
+const anItemList: ServiceReviewRowDataTable[] = [anItem1, anItem2];
+
+const aJiraIssue1: JiraIssue = {
+  id: anItem1.ticket_id,
+  key: anItem1.ticket_key,
   fields: {
     comment: {
       comments: [
         { body: "comment 1" },
-        { body: "comment 2" },
         { body: "a *formatted* comment … {{some code}} ." },
       ],
     },
     status: {
-      name: "REVIEW",
+      name: "APPROVED",
     },
   },
 };
-
-const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
-  startAt: 0,
-  total: 1,
-  issues: [aJiraIssue],
+const aJiraIssue2: JiraIssue = {
+  id: anItem2.ticket_id,
+  key: anItem2.ticket_key,
+  fields: {
+    comment: {
+      comments: [{ body: "reason comment 1" }, { body: "reason comment 2" }],
+    },
+    status: {
+      name: "REJECTED",
+    },
+  },
 };
 
 const anInsertQueryResult: QueryResult = {
@@ -50,45 +74,118 @@ const anInsertQueryResult: QueryResult = {
   rows: [],
 };
 
-const aVoidFn = () => console.log("");
-
 const mainMockServiceReviewDao = {
   insert: vi.fn((data: ServiceReviewRowDataTable) => {
     return TE.of(anInsertQueryResult);
   }),
-  executeOnPending: vi.fn(
-    (
-      fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
-    ) => {
-      return TE.of(aVoidFn());
-    }
-  ),
+  executeOnPending: vi.fn(),
 };
 
 const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
-  searchJiraIssuesByKey: vi.fn(
-    (jiraIssueKeys: ReadonlyArray<NonEmptyString>) => {
-      return TE.of(aSearchJiraIssuesResponse);
-    }
-  ),
+  searchJiraIssuesByKey: vi.fn(),
   getJiraIssueByServiceId: vi.fn(),
 };
 
-describe("Service Review Checker Handler", () => {
-  it("should check a NEW|REVIEW service review", async () => {
-    const handler = createReviewCheckerHandler(
-      mainMockServiceReviewDao,
-      mainMockJiraProxy,
-      serviceLifecycleStore
+describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
+  it("should build TWO IssueItemPairs given 2 jira issues, an APPROVED one and a REJECTED one", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+      TE.of({
+        startAt: 0,
+        total: 2,
+        issues: [aJiraIssue1, aJiraIssue2],
+      })
     );
 
-    const result = await handler;
+    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
 
-    expect(mainMockServiceReviewDao.executeOnPending).toBeCalled();
-    //expect(mainMockJiraProxy.searchJiraIssuesByKey).toBeCalled();
-    // todo: FSM
-    //expect(mainMockServiceReviewDao.insert).toBeCalled();
-    // console.log(result);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+        {
+          issue: aJiraIssue2,
+          item: anItem2,
+        },
+      ]);
+    }
+  });
+
+  it("should build ONE IssueItemPair given TWO jira issues, an APPROVED one and a NEW one", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+      TE.of({
+        startAt: 0,
+        total: 2,
+        issues: [
+          aJiraIssue1,
+          { ...aJiraIssue2, fields: { status: { name: "NEW" } } },
+        ],
+      })
+    );
+
+    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ]);
+    }
+  });
+
+  it("should build EMPTY IssueItemPair given TWO jira issues with status different from APPROVED or REJECTED", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+      TE.of({
+        startAt: 0,
+        total: 2,
+        issues: [
+          { ...aJiraIssue1, fields: { status: { name: "REVIEW" } } },
+          { ...aJiraIssue2, fields: { status: { name: "NEW" } } },
+        ],
+      })
+    );
+
+    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual([]);
+    }
+  });
+
+  it("should build EMPTY IssueItemPair given EMPTY jira issues response", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+      TE.of({
+        startAt: 0,
+        total: 0,
+        issues: [],
+      })
+    );
+
+    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual([]);
+    }
+  });
+
+  it("should return Error if searchJiraIssuesByKey returns an error", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+      TE.left(new Error())
+    );
+
+    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left).toStrictEqual(new Error());
+    }
   });
 });
