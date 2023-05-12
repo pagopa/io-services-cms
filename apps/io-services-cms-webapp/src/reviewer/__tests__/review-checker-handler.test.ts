@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { JiraIssue } from "../../lib/clients/jira-client";
 import {
@@ -16,6 +17,32 @@ afterEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
 });
+
+const aService = {
+  id: "s1",
+  data: {
+    name: "aServiceName" as NonEmptyString,
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      address: "via tal dei tali 123",
+      email: "service@email.it",
+      pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+  },
+} as unknown as ServiceLifecycle.definitions.Service;
+
+const aService2 = {
+  ...aService,
+  id: "s2",
+} as unknown as ServiceLifecycle.definitions.Service;
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -186,6 +213,67 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
       expect(result.left).toStrictEqual(new Error());
+    }
+  });
+});
+
+describe("[Service Review Checker Handler] updateReview", () => {
+  it("should update TWO PENDING service review given TWO IssueItemPairs, one with APPROVED jira status and one with REJECTED jira status", async () => {
+    serviceLifecycleStore.save(aService.id, {
+      ...aService,
+      fsm: { state: "submitted" },
+    });
+    serviceLifecycleStore.save(aService2.id, {
+      ...aService2,
+      fsm: { state: "submitted" },
+    });
+    const result = await updateReview(
+      mainMockServiceReviewDao,
+      serviceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+        {
+          issue: aJiraIssue2,
+          item: anItem2,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isRight(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and insert values
+    expect(mainMockServiceReviewDao.insert).toBeCalledTimes(2);
+    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+      ...anItem1,
+      status: "APPROVED",
+    });
+    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+      ...anItem2,
+      status: "REJECTED",
+    });
+
+    const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
+    const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
+
+    // fsm apply transitions
+    expect(E.isRight(fsmServiceResult)).toBeTruthy();
+    if (E.isRight(fsmServiceResult)) {
+      expect(O.isSome(fsmServiceResult.right)).toBeTruthy();
+      if (O.isSome(fsmServiceResult.right)) {
+        expect(fsmServiceResult.right.value.fsm.state).toBe("approved");
+      }
+    }
+    expect(E.isRight(fsmService2Result)).toBeTruthy();
+    if (E.isRight(fsmService2Result)) {
+      expect(O.isSome(fsmService2Result.right)).toBeTruthy();
+      if (O.isSome(fsmService2Result.right)) {
+        expect(fsmService2Result.right.value.fsm.state).toBe("rejected");
+      }
     }
   });
 });
