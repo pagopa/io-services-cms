@@ -1,7 +1,13 @@
 import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
+import * as RA from "fp-ts/ReadonlyArray";
+import * as RR from "fp-ts/ReadonlyRecord";
 import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { createWebServer } from "./webservice";
-import { expressToAzureFunction } from "./lib/azure/adapters";
+import {
+  expressToAzureFunction,
+  toAzureFunctionHandler,
+} from "./lib/azure/adapters";
 import { getConfigOrThrow } from "./config";
 import { getApimClient } from "./lib/clients/apim-client";
 import { getDatabase } from "./lib/azure/cosmos";
@@ -10,6 +16,8 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
 import { jiraProxy } from "./utils/jira-proxy";
+import { processBatchOf, setBindings } from "./lib/azure/misc";
+import { onServiceLifecycleChangeHandler } from "./watchers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -49,4 +57,18 @@ export const queueEntryPoint = createRequestReviewHandler(
     config.AZURE_APIM_RESOURCE_GROUP,
     config.AZURE_APIM
   )
+);
+
+export const onServiceLifecycleChangeEntryPoint = pipe(
+  onServiceLifecycleChangeHandler,
+  processBatchOf(ServiceLifecycle.ItemType),
+  setBindings((results) => ({
+    foo: pipe(
+      results,
+      RA.map(RR.lookup("foo")),
+      RA.filter(O.isSome),
+      RA.map(JSON.stringify)
+    ),
+  })),
+  toAzureFunctionHandler
 );
