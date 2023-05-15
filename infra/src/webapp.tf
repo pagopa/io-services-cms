@@ -172,6 +172,9 @@ locals {
     REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
     REVIEWER_DB_TABLE    = var.reviewer_db_table
     REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
+
+    # Disable functions
+    "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
   }
 }
 
