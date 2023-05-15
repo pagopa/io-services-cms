@@ -1,4 +1,4 @@
-import { Context, AzureFunction } from "@azure/functions";
+import { Context } from "@azure/functions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -7,6 +7,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
+import { AzureFunctionCall } from "./adapters";
 
 /**
  * Trace an incoming error and return it. To be added in a pipeline for not interrupt the flow.
@@ -75,75 +76,106 @@ export const withJsonInput =
       (parsedInputs) => handler(context, ...parsedInputs)
     );
 
-type ProcessBatchOptions = {
-  // process each document in parallel
-  parallel: boolean;
-  // ignore documents that don't parse according to the provided schema
-  // if true, well-formed documents will be processed anyway
-  // if false, the whole batch fails if at lease one document is malfomed
-  ignoreMalformedDocuments: boolean;
-};
-
+/**
+ * Given a procedure that elaborates a single, well-shaped item, it is applied to a batch of items of unknown shape.
+ * Items are initially parsed and then passed to the procedure, in sequence or in parallel according to options.
+ * The result of the batch is either the array of the results of all called procedures or an Error.
+ * The procedure has the form of a ReaderTaskEither expecting the item as a state.
+ *
+ * The usage is intended for azure functions that has batched inputs such as CosmosDB-triggered functions.
+ *
+ * @param itemShape A io-ts codec defining the expected shape of an item
+ * @param options.parallel Process each items in parallel. Default: true
+ * @param options.ignoreMalformedItems Ignore items that don't parse according to the provided schema.
+ *                                     If true, well-formed items will be processed anyway.
+ *                                     If false, the whole batch fails if at lease one item is malfomed
+ * @returns Either an error or all the results of the procedure applied on every item,
+ *          collected into an array
+ */
 export const processBatchOf =
   <T>(
-    codec: t.Type<T>,
-    options: ProcessBatchOptions = {
-      parallel: true,
-      ignoreMalformedDocuments: false,
-    }
+    itemShape: t.Type<T>,
+    {
+      parallel = true,
+      ignoreMalformedItems = false,
+    }: {
+      parallel?: boolean;
+      ignoreMalformedItems?: boolean;
+    } = {}
   ) =>
+  /**
+   * @param processSingleItem the procedure that elaborate the single item
+   * @returns Either an error or all the results of the procedure applied on every item,
+   *          collected into an array
+   */
   <R>(
-    processSingleDocument: RTE.ReaderTaskEither<{ document: T }, Error, R>
-  ): RTE.ReaderTaskEither<
-    { context: Context; documents: unknown },
-    Error,
-    ReadonlyArray<R>
-  > =>
-  ({ context, documents }): TE.TaskEither<Error, ReadonlyArray<R>> =>
+    processSingleItem: RTE.ReaderTaskEither<{ item: T }, Error, R>
+  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, ReadonlyArray<R>> =>
+  ({
+    context,
+    inputs: [items],
+    ...rest
+  }): TE.TaskEither<Error, ReadonlyArray<R>> =>
     pipe(
-      Array.isArray(documents) ? documents : [documents],
+      Array.isArray(items) ? items : [items],
       // Parse all elements to match the expected type
-      RA.map(codec.decode),
+      RA.map(itemShape.decode),
       RA.separate,
       ({ left, right }) => {
         // either there are not malformed documents or we decided to ignore them,
         //   we can process all well-formed documents
-        if (options.ignoreMalformedDocuments || left.length === 0) {
+        if (ignoreMalformedItems || left.length === 0) {
           left.map((i) =>
             log(
               context,
               `Ignoring document, failed to parse: ${JSON.stringify(i)}`
             )
           );
-          log(context, `Processing ${right.length} documents`);
+          log(context, `Processing ${right.length} items`);
           return TE.right(right);
         }
-        // else, fail the whole batch if at least one document is malformed
-        const msg = `Failed parsing the batch of documents. Found errors in ${
+        // else, fail the whole batch if at least one item is malformed
+        const msg = `Failed parsing the batch of items. Found errors in ${
           left.length
         } out of ${right.length + left.length} items.`;
         log(context, msg, "error");
         return TE.left<Error, ReadonlyArray<T>>(new Error());
       },
-      TE.map(RA.map((document) => processSingleDocument({ document }))),
-      TE.chain(
-        RA.sequence(options.parallel ? TE.ApplicativePar : TE.ApplicativeSeq)
-      )
+      TE.map(RA.map((item) => processSingleItem({ item, ...rest }))),
+      TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq))
     );
 
+/**
+ * A utility function that assigns a set of values to Azure Functions output bindings.
+ * The aim of the utility is to allow a procedure to interact with bindings seamlessly,
+ * without having to know the context of the Azure Function nor to deal with wiring code needed.
+ * It takes a formatter function that creates a key/value record,
+ * being each key the name of an output binding to be assigned.
+ *
+ * It does not alter the procedure as it passes the original result forward.
+ *
+ * @param formatter Takes the result value of the procedure and create a record
+ *                  that describes what to assign to bindings.
+ * @param procedure the procedure to get results from
+ * @returns the provided procedure, untouched.
+ */
 export const setBindings =
-  <E, L, R>(fn: (a: R) => Record<string, unknown>) =>
+  <E, L, R>(formatter: (a: R) => Record<string, unknown>) =>
+  /**
+   * @param procedure the procedure to get results from
+   * @returns the provided procedure, untouched.
+   */
   (
-    rte: RTE.ReaderTaskEither<E & { context: Context }, L, R>
-  ): RTE.ReaderTaskEither<E & { context: Context }, L, R> =>
+    procedure: RTE.ReaderTaskEither<E & AzureFunctionCall, L, R>
+  ): RTE.ReaderTaskEither<E & AzureFunctionCall, L, R> =>
     pipe(
-      rte,
+      procedure,
       RTE.chain(
         (results) =>
           ({ context }) =>
             pipe(
               results,
-              fn,
+              formatter,
               Object.entries,
               RA.map(
                 ([key, value]) =>
