@@ -117,7 +117,11 @@ export const processBatchOf =
     ...rest
   }): TE.TaskEither<Error, ReadonlyArray<R>> =>
     pipe(
-      Array.isArray(items) ? items : [items],
+      typeof items === "undefined"
+        ? []
+        : Array.isArray(items)
+        ? items
+        : [items],
       // Parse all elements to match the expected type
       RA.map(itemShape.decode),
       RA.separate,
