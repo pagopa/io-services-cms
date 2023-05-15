@@ -9,5 +9,5 @@
     }
   ],
   "scriptFile": "../dist/main.js",
-  "entryPoint": "queueEntryPoint"
+  "entryPoint": "createRequestReviewEntryPoint"
 }

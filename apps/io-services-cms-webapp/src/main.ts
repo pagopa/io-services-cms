@@ -1,16 +1,16 @@
-import { pipe } from "fp-ts/lib/function";
 import { ServiceLifecycle, stores } from "@io-services-cms/models";
-import { createWebServer } from "./webservice";
-import { expressToAzureFunction } from "./lib/azure/adapters";
+import { pipe } from "fp-ts/lib/function";
 import { getConfigOrThrow } from "./config";
-import { getApimClient } from "./lib/clients/apim-client";
+import { expressToAzureFunction } from "./lib/azure/adapters";
 import { getDatabase } from "./lib/azure/cosmos";
+import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
+import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
-import { getDao } from "./utils/service-review-dao";
 import { jiraProxy } from "./utils/jira-proxy";
-import { createReviewCheckerHandler } from "./review-checker-handler-mock";
+import { getDao } from "./utils/service-review-dao";
+import { createWebServer } from "./webservice";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -42,7 +42,7 @@ export const httpEntryPoint = pipe(
   expressToAzureFunction
 );
 
-export const queueEntryPoint = createRequestReviewHandler(
+export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
   apimProxy(

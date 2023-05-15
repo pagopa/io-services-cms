@@ -1,5 +1,5 @@
 {
-  "disabled": true,
+  "disabled": false,
   "bindings": [
     {
       "schedule": "0 30 21 * * *",
