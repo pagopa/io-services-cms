@@ -17,7 +17,7 @@ import { apimProxy } from "./utils/apim-proxy";
 import { getDao } from "./utils/service-review-dao";
 import { jiraProxy } from "./utils/jira-proxy";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
-import { onServiceLifecycleChangeHandler } from "./watchers";
+import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
