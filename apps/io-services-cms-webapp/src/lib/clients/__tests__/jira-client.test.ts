@@ -50,6 +50,8 @@ const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
         status: {
           name: "NEW",
         },
+        statuscategorychangedate:
+          "2023-05-12T15:24:09.173+0200" as NonEmptyString,
       },
     },
   ],
