@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.3.0
+
+### Minor Changes
+
+- 43727f2: add timerTrigger fn and its entryPoint to poll PendingReview data from Postgres and Jira
+- 9534d3b: Service review checker handler
+
 ## 1.2.0
 
 ### Minor Changes
