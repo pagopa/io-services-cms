@@ -1,14 +1,13 @@
-import { pipe } from "fp-ts/lib/function";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
-import { createWebServer } from "./webservice";
+import { pipe } from "fp-ts/lib/function";
+import { getConfigOrThrow } from "./config";
 import {
   expressToAzureFunction,
   toAzureFunctionHandler,
 } from "./lib/azure/adapters";
-import { getConfigOrThrow } from "./config";
 import { getDatabase } from "./lib/azure/cosmos";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
@@ -16,6 +15,7 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
+import { createWebServer } from "./webservice";
 
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
@@ -72,9 +72,9 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler,
   processBatchOf(ServiceLifecycle.ItemType),
   setBindings((results) => ({
-    foo: pipe(
+    requestReview: pipe(
       results,
-      RA.map(RR.lookup("foo")),
+      RA.map(RR.lookup("requestReview")),
       RA.filter(O.isSome),
       RA.map(JSON.stringify)
     ),
