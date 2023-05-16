@@ -1,13 +1,16 @@
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import { describe, it, expect } from "vitest";
 import { stores } from "../../lib/fsm";
-import { apply } from "..";
+import { FSM, apply } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
-import { Service } from "../definitions";
+import {
+  FsmNoApplicableTransitionError,
+  FsmNoTransitionMatchedError,
+  FsmTooManyTransitionsError,
+  Service,
+} from "../definitions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // helper to check the result of a sequence of actions
@@ -35,8 +38,19 @@ const expectSuccess = async ({ id, actions, expected }) => {
 };
 
 // helper to check the result of an invalid sequence of actions
-const expectFailure = async ({ id, actions, expected }) => {
+const expectFailure = async ({
+  id,
+  actions,
+  expected,
+  errorType,
+  additionalCall,
+}) => {
   const store = stores.createMemoryStore();
+
+  // to run some useful code for testing purposes
+  if (additionalCall) {
+    additionalCall();
+  }
 
   const applyTask = pipe(
     actions,
@@ -51,7 +65,7 @@ const expectFailure = async ({ id, actions, expected }) => {
   }
   const { left: value } = result;
 
-  expect(value).toBeInstanceOf(Error);
+  expect(value).toBeInstanceOf(errorType);
 
   // check what's inside the store
   // @ts-ignore
@@ -85,6 +99,20 @@ const changeName = ({ data, ...rest }: Service, name: string): Service => ({
   data: { ...data, name: name as NonEmptyString },
   ...rest,
 });
+
+const addDuplicatedCreateTransition = () => {
+  FSM.transitions.push({
+    id: "apply create on *",
+    action: "create",
+    to: "draft",
+    from: "*",
+    exec: ({ args: { data: service } }) =>
+      E.right({
+        ...service,
+        fsm: { state: "draft", lastTransition: "apply create on *" },
+      }),
+  });
+};
 
 describe("apply", () => {
   // valid sequences
@@ -120,6 +148,16 @@ describe("apply", () => {
       id: aServiceId,
       actions: [apply("submit", aServiceId)],
       expected: undefined,
+      errorType: FsmNoTransitionMatchedError,
+      additionalCall: undefined,
+    },
+    {
+      title: "on invalid appliedAction",
+      id: aServiceId,
+      actions: [apply("invalidActionName" as any, aServiceId)],
+      expected: undefined,
+      errorType: FsmNoApplicableTransitionError,
+      additionalCall: undefined,
     },
     {
       title: "on invalid sequence of actions",
@@ -135,6 +173,16 @@ describe("apply", () => {
         ...aService, // we expect the first create to have succeeded
         fsm: expect.objectContaining({ state: "draft" }),
       }),
+      errorType: FsmNoTransitionMatchedError,
+      additionalCall: undefined,
+    },
+    {
+      title: "on undeterministic call",
+      id: aServiceId,
+      actions: [apply("create", aServiceId, { data: aService })],
+      expected: undefined,
+      errorType: FsmTooManyTransitionsError,
+      additionalCall: addDuplicatedCreateTransition,
     },
   ])("should fail $title", expectFailure);
 });
