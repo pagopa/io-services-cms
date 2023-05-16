@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, assert } from "vitest";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -7,11 +7,6 @@ import * as t from "io-ts";
 
 import { processBatchOf, setBindings } from "../misc";
 import { Context } from "@azure/functions";
-
-const shouldNotBeHere = (_: unknown) => {
-  console.error("FAIL >>", _);
-  throw new Error(`Unexpected execution`);
-};
 
 const mockContext = {
   log: console,
@@ -42,7 +37,7 @@ describe(`processBatchOf`, () => {
       const result = await pipe(
         aProcedure,
         processBatchOf(aShape, { ignoreMalformedItems }),
-        RTE.getOrElseW(shouldNotBeHere)
+        RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`))
       )({ context: mockContext, inputs: [items] })();
 
       expect(result).toEqual(expected);
@@ -85,7 +80,7 @@ describe("setBindings", () => {
     const result = await pipe(
       aProcedure,
       setBindings(aFormatter),
-      RTE.getOrElseW(shouldNotBeHere)
+      RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`))
     )({ context, inputs: [] })();
 
     // @ts-ignore

@@ -1,12 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, assert } from "vitest";
 import * as TE from "fp-ts/lib/TaskEither";
 import { toAzureFunctionHandler } from "../adapters";
 import { Context } from "@azure/functions";
-
-const shouldNotBeHere = (_?: unknown) => {
-  console.error("FAIL >>", _);
-  throw new Error(`Unexpected execution`);
-};
 
 const mockContext = {
   log: console,
@@ -53,7 +48,9 @@ describe(`toAzureFunctionHandler`, () => {
 
     try {
       const result = await handler(mockContext);
-      shouldNotBeHere(result);
+      assert.fail(
+        `It's not supposed to be here, result: ${JSON.stringify(result)}`
+      );
     } catch (error) {
       expect(aFailingProcedure).toHaveBeenCalledWith({
         context: mockContext,
