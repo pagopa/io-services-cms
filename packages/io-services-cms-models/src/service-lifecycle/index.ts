@@ -32,10 +32,10 @@ type ToRecord<Q> = Q extends []
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
 type AllFsmErrors =
-  | Error
-  | FsmNoApplicableTransitionError
-  | FsmNoTransitionMatchedError
-  | FsmTooManyTransitionsError;
+  //| Error
+  //| FsmNoApplicableTransitionError
+  //| FsmNoTransitionMatchedError
+  FsmTooManyTransitionsError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
