@@ -204,7 +204,12 @@ module "webapp_functions_app" {
 
   always_on = "true"
 
-  app_settings = local.webapp_functions_app_settings
+  app_settings = merge(
+    local.webapp_functions_app_settings,
+    {
+      "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
+    }
+  )
 
   subnet_id = module.app_snet.id
 
@@ -231,7 +236,12 @@ module "webapp_functions_app_staging_slot" {
 
   always_on = "true"
 
-  app_settings = local.webapp_functions_app_settings
+  app_settings = merge(
+    local.webapp_functions_app_settings,
+    {
+      "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
+    }
+  )
 
   storage_account_name = module.storage_account.name
 

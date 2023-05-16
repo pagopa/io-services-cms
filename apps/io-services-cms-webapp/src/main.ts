@@ -11,6 +11,7 @@ import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { getDao } from "./utils/service-review-dao";
 import { createWebServer } from "./webservice";
+import { handler as OnLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -57,3 +58,5 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   jiraProxy(jiraClient(config)),
   serviceLifecycleStore
 );
+
+export const onLegacyServiceChangeEntryPoint = OnLegacyServiceChangeHandler;
