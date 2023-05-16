@@ -173,6 +173,12 @@ locals {
     REVIEWER_DB_TABLE    = var.reviewer_db_table
     REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
 
+    # Legacy data
+    LEGACY_COSMOSDB_CONNECTIONSTRING          = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
+    LEGACY_COSMOSDB_NAME                      = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_SERVICES_COLLECTION       = var.legacy_cosmosdb_services_collection
+    LEGACY_COSMOSDB_SERVICES_LEASE_COLLECTION = var.legacy_cosmosdb_services_lease_collection
+
     # Disable functions
     "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
   }
