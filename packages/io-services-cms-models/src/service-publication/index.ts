@@ -6,14 +6,14 @@ import * as RA from "fp-ts/ReadonlyArray";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
 import { pipe, flow } from "fp-ts/function";
 import {
-  EmptyState,
   FSMStore,
   StateMetadata,
   Transition,
   WithState,
   StateSet,
+  EmptyState,
 } from "../lib/fsm";
-import { Service, ServiceId } from "./definitions";
+import { Service, ServiceId } from "../service-lifecycle/definitions";
 
 // utility type: turn a list of states into a record
 type ToRecord<Q> = Q extends []
@@ -29,192 +29,121 @@ type AllResults = States[number];
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
 const States = t.tuple([
-  WithState("draft", Service),
-  WithState("submitted", Service /* TODO: refine with valid service only */),
-  WithState("approved", Service /* TODO: refine with valid service only */),
-  WithState("rejected", Service),
-  WithState("deleted", Service),
+  WithState("published", Service),
+  WithState("unpublished", Service),
 ]);
 
 type Actions = {
-  create: { data: Service };
-  edit: { data: Service };
-  delete: void;
-  submit: void;
-  abort: void;
-  reject: { reason: string };
-  approve: { approvalDate: string };
+  override: { data: Service };
+  publish: void;
+  unpublish: void;
 };
 
 // helpers
 type Action<S extends keyof Actions> = [S, Actions[S]];
 type State<S extends keyof ToRecord<States>> = [S, ToRecord<States>[S]];
 
-// Definition of the FSM for service lifecycle
+// Definition of the FSM for service publication
 type FSM = {
   states: StateSet<ToRecord<States>>;
   transitions: [
-    Transition<Action<"create">, void, State<"draft">>,
-    Transition<Action<"edit">, State<"draft">, State<"draft">>,
-    Transition<Action<"delete">, State<"draft">, State<"deleted">>,
-    Transition<Action<"submit">, State<"draft">, State<"submitted">>,
-    Transition<Action<"abort">, State<"submitted">, State<"draft">>,
-    Transition<Action<"approve">, State<"submitted">, State<"approved">>,
-    Transition<Action<"reject">, State<"submitted">, State<"rejected">>,
-    Transition<Action<"delete">, State<"rejected">, State<"deleted">>,
-    Transition<Action<"delete">, State<"approved">, State<"deleted">>,
-    Transition<Action<"edit">, State<"rejected">, State<"draft">>
+    Transition<Action<"override">, void, State<"unpublished">>,
+    Transition<Action<"override">, State<"unpublished">, State<"unpublished">>,
+    Transition<Action<"override">, State<"published">, State<"published">>,
+    Transition<Action<"publish">, State<"unpublished">, State<"published">>,
+    Transition<Action<"unpublish">, State<"published">, State<"unpublished">>
   ];
 };
 
 // implementation
 /**
- * WARNING: Service Lifecycle FSM implementation
+ * WARNING: Service Publication FSM implementation
  *
- * The current implementation is temporary identical to Service Publication FSM.
+ * The current implementation is temporary identical to Service Lifecycle FSM.
  * We will attempt to resolve this duplication in the near future.
  */
 const FSM: FSM = {
   states: {
-    draft: Service,
-    submitted: Service,
-    approved: Service,
-    rejected: Service,
-    deleted: Service,
+    published: Service,
+    unpublished: Service,
   },
   transitions: [
     {
-      id: "apply create on *",
-      action: "create",
-      to: "draft",
+      id: "apply override on *",
+      action: "override",
       from: "*",
-      exec: ({ args: { data: service } }) =>
+      to: "unpublished",
+      exec: ({ args: { data } }) =>
         E.right({
-          ...service,
-          fsm: { state: "draft", lastTransition: "apply create on *" },
+          ...data,
+          fsm: {
+            state: "unpublished",
+            lastTransition: "apply override on empty",
+          },
         }),
     },
     {
-      id: "apply edit on draft",
-      action: "edit",
-      from: "draft",
-      to: "draft",
+      id: "apply override on unpublished",
+      action: "override",
+      from: "unpublished",
+      to: "unpublished",
       exec: ({ current, args: { data } }) =>
         E.right({
           ...current,
           ...data,
-          fsm: { state: "draft", lastTransition: "apply edit on draft" },
-        }),
-    },
-    {
-      id: "apply delete on draft",
-      action: "delete",
-      from: "draft",
-      to: "deleted",
-      exec: ({ current }) =>
-        E.right({
-          ...current,
-          fsm: { state: "deleted", lastTransition: "apply delete on draft" },
-        }),
-    },
-    {
-      id: "apply submit on draft",
-      action: "submit",
-      from: "draft",
-      to: "submitted",
-      exec: ({ current }) =>
-        E.right({
-          ...current,
-          fsm: { state: "submitted", lastTransition: "apply submit on draft" },
-        }),
-    },
-    {
-      id: "apply abort on submitted",
-      action: "abort",
-      from: "submitted",
-      to: "draft",
-      exec: ({ current }) =>
-        E.right({
-          ...current,
-          fsm: { state: "draft", lastTransition: "apply abort on submitted" },
-        }),
-    },
-    {
-      id: "apply approve on submitted",
-      action: "approve",
-      from: "submitted",
-      to: "approved",
-      exec: ({ current, args: { approvalDate } }) =>
-        E.right({
-          ...current,
           fsm: {
-            state: "approved",
-            approvalDate,
-            lastTransition: "apply approve on submitted",
+            state: "unpublished",
+            lastTransition: "apply override on unpublished",
           },
         }),
     },
     {
-      id: "apply reject on submitted",
-      action: "reject",
-      from: "submitted",
-      to: "rejected",
-      exec: ({ current, args: { reason } }) =>
+      id: "apply override on published",
+      action: "override",
+      from: "published",
+      to: "published",
+      exec: ({ current, args: { data } }) =>
         E.right({
           ...current,
+          ...data,
           fsm: {
-            state: "rejected",
-            reason,
-            lastTransition: "apply reject on submitted",
+            state: "published",
+            lastTransition: "apply override on published",
           },
         }),
     },
     {
-      id: "apply delete on rejected",
-      action: "delete",
-      from: "rejected",
-      to: "deleted",
+      id: "apply publish on unpublished",
+      action: "publish",
+      from: "unpublished",
+      to: "published",
       exec: ({ current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "deleted",
-            lastTransition: "apply delete on rejected",
+            state: "published",
+            lastTransition: "apply publish on unpublished",
           },
         }),
     },
     {
-      id: "apply delete on approved",
-      action: "delete",
-      from: "approved",
-      to: "deleted",
+      id: "apply unpublish on published",
+      action: "unpublish",
+      from: "published",
+      to: "unpublished",
       exec: ({ current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "deleted",
-            lastTransition: "apply delete on approved",
-          },
-        }),
-    },
-    {
-      id: "apply edit on rejected",
-      action: "edit",
-      from: "rejected",
-      to: "draft",
-      exec: ({ current }) =>
-        E.right({
-          ...current,
-          fsm: {
-            state: "draft",
-            lastTransition: "apply edit on rejected",
+            state: "unpublished",
+            lastTransition: "apply unpublish on published",
           },
         }),
     },
   ],
 };
 
-type LifecycleStore = FSMStore<States[number]>;
+type PublicationStore = FSMStore<States[number]>;
 
 // TODO: apply function is meant to be agnostic on the FSM defintion.
 // Unfortunately, we didn't achieve the result yet, hence we opted for an actual implementation.
@@ -233,33 +162,27 @@ type LifecycleStore = FSMStore<States[number]>;
  * @returns either an error or the element in the new state
  */
 function apply(
-  appliedAction: "create" | "edit",
+  appliedAction: "override",
   id: ServiceId,
   args: { data: Service }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"draft", Service>>;
+): ReaderTaskEither<
+  PublicationStore,
+  Error,
+  WithState<"published", Service> | WithState<"unpublished", Service>
+>;
 function apply(
-  appliedAction: "submit",
+  appliedAction: "unpublish",
   id: ServiceId
-): ReaderTaskEither<LifecycleStore, Error, WithState<"submitted", Service>>;
+): ReaderTaskEither<PublicationStore, Error, WithState<"unpublished", Service>>;
 function apply(
-  appliedAction: "approve",
-  id: ServiceId,
-  args: { approvalDate: string }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"approved", Service>>;
-function apply(
-  appliedAction: "reject",
-  id: ServiceId,
-  args: { reason: string }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"rejected", Service>>;
-function apply(
-  appliedAction: "delete",
+  appliedAction: "publish",
   id: ServiceId
-): ReaderTaskEither<LifecycleStore, Error, WithState<"deleted", Service>>;
+): ReaderTaskEither<PublicationStore, Error, WithState<"published", Service>>;
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
-): ReaderTaskEither<LifecycleStore, Error, AllResults> {
+): ReaderTaskEither<PublicationStore, Error, AllResults> {
   return (store) => {
     // select transitions for the action to apply
     const applicableTransitions = FSM.transitions.filter(
@@ -373,4 +296,3 @@ function apply(
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
 export { apply, FSM, ItemType };
-export * as definitions from "./definitions";
