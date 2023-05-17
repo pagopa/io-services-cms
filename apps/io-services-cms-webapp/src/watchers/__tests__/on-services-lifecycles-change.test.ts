@@ -22,14 +22,21 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as ServiceLifecycle.definitions.Service;
+} as unknown as ServiceLifecycle.ItemType;
 
 describe("On Service Lifecycle Change Handler", () => {
-  it("should map a Service type to a RequestReview type and set to a requestReview key object", async () => {
-    const res = await handler({ item: aService })();
+  it.each`
+    scenario                  | item                                            | expected
+    ${"request-review"}       | ${{ ...aService, fsm: { state: "submitted" } }} | ${{ requestReview: aService }}
+    ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "draft" } }}     | ${{}}
+    ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "approved" } }}  | ${{}}
+    ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "rejected" } }}  | ${{}}
+    ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "deleted" } }}   | ${{}}
+  `("should map an item to a $scenario action", async ({ item, expected }) => {
+    const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
-      expect(res.right).toStrictEqual({ requestReview: aService });
+      expect(res.right).toStrictEqual(expected);
     }
   });
 });
