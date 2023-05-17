@@ -2,9 +2,9 @@ import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as RTE from "fp-ts/ReaderTaskEither";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, assert } from "vitest";
 import { stores } from "../../lib/fsm";
-import { apply } from "..";
+import { ItemType, apply } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../definitions";
@@ -87,6 +87,29 @@ const changeName = ({ data, ...rest }: Service, name: string): Service => ({
 });
 
 describe("apply", () => {
+  it("should ", async () => {
+    const store = stores.createMemoryStore<ItemType>();
+    const rte = apply("create", aServiceId, { data: aService });
+
+    const task = rte(store);
+
+    const result = await task();
+
+    if (E.isLeft(result)) {
+      const error = result.left;
+
+      if (error instanceof Error) {
+        // do something
+      }
+
+      // this should be ok as error should have been narrowed.
+      // however, it's not
+      const _: never = "";
+
+      console.log(_);
+    }
+  });
+
   // valid sequences
   it.each([
     {
