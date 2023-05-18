@@ -173,6 +173,8 @@ locals {
     REVIEWER_DB_TABLE    = var.reviewer_db_table
     REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
 
+    REQUEST_REVIEW_QUEUE = azurerm_storage_queue.request-review.name
+
     # Disable functions
     "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
   }
