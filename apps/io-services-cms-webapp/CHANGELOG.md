@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.4.0
+
+### Minor Changes
+
+- bade172: add an handler in order to dispatch to proper queue/action each service lifecycle changes
+
+### Patch Changes
+
+- Updated dependencies [89e5bbb]
+- Updated dependencies [bade172]
+  - @io-services-cms/models@1.1.0
+
 ## 1.3.0
 
 ### Minor Changes
