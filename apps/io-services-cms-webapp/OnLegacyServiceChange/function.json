@@ -1,0 +1,18 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "direction": "in",
+      "name": "documents",
+      "connectionStringSetting": "LEGACY_COSMOSDB_CONNECTIONSTRING",
+      "databaseName": "%LEGACY_COSMOSDB_NAME%",
+      "collectionName": "%LEGACY_COSMOSDB_SERVICES_COLLECTION%",
+      "leaseCollectionName": "%LEGACY_COSMOSDB_SERVICES_LEASE_COLLECTION%",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onLegacyServiceChangeEntryPoint"
+}

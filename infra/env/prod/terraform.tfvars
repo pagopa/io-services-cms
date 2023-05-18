@@ -53,3 +53,6 @@ azure_apim_resource_group = "io-p-rg-internal"
 reviewer_db_name   = "reviewer"
 reviewer_db_schema = "reviewer"
 reviewer_db_table  = "service_review"
+
+# Legacy data
+legacy_cosmosdb_name = "io-p-cosmos-api"
