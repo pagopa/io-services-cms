@@ -84,6 +84,13 @@ export const buildIssueItemPairs =
       )
     );
 
+export class UpdateReviewError extends Error {
+  public kind = "UpdateReviewError";
+  constructor() {
+    super(`Error while updating a review`);
+  }
+}
+
 /**
  * For each pair, compose a sub-procedure of actions to be executed one after another
  * first we want to apply the transition to the service
@@ -101,15 +108,18 @@ export const updateReview =
         issuesAndItems.map(({ issue, item }) =>
           sequenceT(TE.ApplicativeSeq)(
             makeServiceLifecycleApply(item, issue)(store),
-            dao.insert({
-              ...item,
-              status: issue.fields.status.name,
-            })
+            pipe(
+              dao.insert({
+                ...item,
+                status: issue.fields.status.name,
+              }),
+              TE.mapLeft((_) => new UpdateReviewError())
+            )
           )
         )
       ),
       // execute each sub-procedure in parallel
-      TE.chain(RA.sequence(TE.ApplicativePar)),
+      TE.chainW(RA.sequence(TE.ApplicativePar)),
       // we don't need data as result, just return void
       TE.map((_) => void 0)
     );

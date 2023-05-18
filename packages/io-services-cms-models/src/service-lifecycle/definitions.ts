@@ -73,22 +73,3 @@ export const Service = t.type({
     t.type({ organization: OrganizationData, metadata: ServiceMetadata }),
   ]),
 });
-
-export class FsmNoApplicableTransitionError extends Error {
-  constructor(appliedAction: string) {
-    const formattedMessage = `No transition has been declared for the action ${appliedAction}`;
-    super(formattedMessage);
-  }
-}
-
-export class FsmNoTransitionMatchedError extends Error {
-  constructor() {
-    super(`No transition matched`);
-  }
-}
-
-export class FsmTooManyTransitionsError extends Error {
-  constructor() {
-    super(`Too many transitions`);
-  }
-}

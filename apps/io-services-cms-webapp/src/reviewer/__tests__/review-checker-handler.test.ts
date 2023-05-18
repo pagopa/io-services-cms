@@ -7,11 +7,12 @@ import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { JiraIssue } from "../../lib/clients/jira-client";
 import {
   IssueItemPair,
+  UpdateReviewError,
   buildIssueItemPairs,
   updateReview,
 } from "../review-checker-handler";
 import { ServiceLifecycle, stores } from "@io-services-cms/models";
-import { QueryResult } from "pg";
+import { DatabaseError, QueryResult } from "pg";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -286,6 +287,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
       }
     }
   });
+
   it("should not change service review status (db and FSM) if it receives an empty issueItemPair", async () => {
     serviceLifecycleStore.save(aService.id, {
       ...aService,
@@ -323,6 +325,38 @@ describe("[Service Review Checker Handler] updateReview", () => {
       if (O.isSome(fsmService2Result.right)) {
         expect(fsmService2Result.right.value.fsm.state).toBe("submitted");
       }
+    }
+  });
+
+  it("should return UpdateReviewError if insert on DB returns a DatabaseError", async () => {
+    serviceLifecycleStore.save(aService.id, {
+      ...aService,
+      fsm: { state: "submitted" },
+    });
+
+    const mockServiceReviewDao = {
+      insert: vi.fn(() => {
+        return TE.left(new DatabaseError("aMessage", 1, "error"));
+      }),
+      executeOnPending: vi.fn(),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      serviceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left).toBeInstanceOf(UpdateReviewError);
     }
   });
 });

@@ -12,14 +12,14 @@ import {
   Transition,
   WithState,
   StateSet,
-} from "../lib/fsm";
-import {
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
+  FsmStoreFetchError,
+  FsmStoreSaveError,
   FsmTooManyTransitionsError,
-  Service,
-  ServiceId,
-} from "./definitions";
+  FsmTransitionExecutionError,
+} from "../lib/fsm";
+import { Service, ServiceId } from "./definitions";
 
 // utility type: turn a list of states into a record
 type ToRecord<Q> = Q extends []
@@ -32,10 +32,12 @@ type ToRecord<Q> = Q extends []
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
 type AllFsmErrors =
-  | Error
   | FsmNoApplicableTransitionError
   | FsmNoTransitionMatchedError
-  | FsmTooManyTransitionsError;
+  | FsmTooManyTransitionsError
+  | FsmTransitionExecutionError
+  | FsmStoreFetchError
+  | FsmStoreSaveError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
@@ -299,7 +301,7 @@ function apply(
     return pipe(
       // fetch the item from the store by its id
       store.fetch(id),
-
+      TE.mapLeft((_) => new FsmStoreFetchError()),
       // filter transitions that can be applied to the current item status
       TE.map(
         flow(
@@ -324,7 +326,7 @@ function apply(
                 ),
                 // bind all data into a lazy implementation of exec
                 RA.map((tr) => ({
-                  exec: (): E.Either<AllFsmErrors, AllResults> =>
+                  exec: (): E.Either<FsmTransitionExecutionError, AllResults> =>
                     // FIXME: avoid this forcing
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
@@ -355,7 +357,10 @@ function apply(
                     // for those transitions whose from state has been matched,
                     //  bind all data into a lazy implementation of exec
                     E.map((current) => ({
-                      exec: (): E.Either<AllFsmErrors, AllResults> =>
+                      exec: (): E.Either<
+                        FsmTransitionExecutionError,
+                        AllResults
+                      > =>
                         tr.exec({
                           // FIXME: avoid this forcing
                           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -388,7 +393,12 @@ function apply(
       TE.map((_) => _[0].right.exec()),
       TE.chain(TE.fromEither),
       // save new status in the store
-      TE.chain((newItem) => store.save(id, newItem))
+      TE.chain((newItem) =>
+        pipe(
+          store.save(id, newItem),
+          TE.mapLeft((_) => new FsmStoreSaveError())
+        )
+      )
     );
   };
 }
