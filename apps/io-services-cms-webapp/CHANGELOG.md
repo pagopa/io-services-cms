@@ -1,5 +1,24 @@
 # io-services-cms-webapp
 
+## 1.4.0
+
+### Minor Changes
+
+- bade172: add an handler in order to dispatch to proper queue/action each service lifecycle changes
+
+### Patch Changes
+
+- Updated dependencies [89e5bbb]
+- Updated dependencies [bade172]
+  - @io-services-cms/models@1.1.0
+
+## 1.3.0
+
+### Minor Changes
+
+- 43727f2: add timerTrigger fn and its entryPoint to poll PendingReview data from Postgres and Jira
+- 9534d3b: Service review checker handler
+
 ## 1.2.0
 
 ### Minor Changes
