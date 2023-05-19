@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.5.1
+
+### Patch Changes
+
+- fc06a0c: Fix broken configuration
+- 8d1169d: Fix broken entrypoint
+- 20dbb3b: Fix broken configuration
+
 ## 1.5.0
 
 ### Minor Changes
