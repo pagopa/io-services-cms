@@ -1,40 +1,36 @@
 {
-    "version": "2.0",
-    "logging": {
-        "logLevel": {
-            "default": "Information"
-        },
-        "applicationInsights": {
-            "samplingSettings": {
-                "isEnabled": true,
-                "maxTelemetryItemsPerSecond": 5,
-                "includedTypes": "PageView;Trace;Dependency;Request",
-                "excludedTypes": "Exception;Event;CustomEvent"
-            }
-        }
+  "version": "2.0",
+  "logging": {
+    "logLevel": {
+      "default": "Information"
     },
-    "extensions": {
-        "http": {
-            "routePrefix": "api/v1"
-        },
-        "storageProvider": {
-            "connectionStringName": "INTERNAL_STORAGE_CONNECTION_STRING",
-            "partitionCount": 4
-        },
-        "tracing": {
-            "traceInputsAndOutputs": false,
-            "traceReplayEvents": false
-        },
-        "queues": {
-            "maxPollingInterval": "00:01:00",
-            "visibilityTimeout": "00:00:05",
-            "batchSize": 1,
-            "maxDequeueCount": 5,
-            "newBatchThreshold": 1
-        }
-    },
-    "extensionBundle": {
-        "id": "Microsoft.Azure.Functions.ExtensionBundle",
-        "version": "[3.3.0, 4.0.0)"
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 5,
+        "includedTypes": "PageView;Trace;Dependency;Request",
+        "excludedTypes": "Exception;Event;CustomEvent"
+      }
     }
+  },
+  "extensions": {
+    "http": {
+      "routePrefix": "api/v1"
+    },
+    "storageProvider": {
+      "connectionStringName": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "partitionCount": 4
+    },
+    "tracing": {
+      "traceInputsAndOutputs": false,
+      "traceReplayEvents": false
+    },
+    "queues": {
+      "maxPollingInterval": "00:01:00",
+      "visibilityTimeout": "00:00:05",
+      "batchSize": 1,
+      "maxDequeueCount": 5,
+      "newBatchThreshold": 1
+    }
+  }
 }
