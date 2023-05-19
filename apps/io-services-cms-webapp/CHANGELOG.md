@@ -1,5 +1,31 @@
 # io-services-cms-webapp
 
+## 1.5.2
+
+### Patch Changes
+
+- 950d715: Fix healthcheck
+
+## 1.5.1
+
+### Patch Changes
+
+- fc06a0c: Fix broken configuration
+- 8d1169d: Fix broken entrypoint
+- 20dbb3b: Fix broken configuration
+
+## 1.5.0
+
+### Minor Changes
+
+- 9088413: Add Review Service Controller
+- 6d7940f: Add watcher on ServiceLifecycle updates to handle service submission and dispatch review jobs
+
+### Patch Changes
+
+- Updated dependencies [9088413]
+  - @io-services-cms/models@1.2.0
+
 ## 1.4.0
 
 ### Minor Changes

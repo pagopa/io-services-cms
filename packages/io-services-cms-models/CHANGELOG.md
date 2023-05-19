@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.2.0
+
+### Minor Changes
+
+- 9088413: Add Review Service Controller
+
 ## 1.1.0
 
 ### Minor Changes
