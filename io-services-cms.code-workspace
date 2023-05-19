@@ -1,0 +1,18 @@
+{
+    "folders": [
+      {
+        "path": "."
+      },
+      {
+        "path": "apps/io-services-cms-webapp"
+      },
+      {
+        "path": "packages/io-services-cms-models",
+        "name": "@io-services-cms/models"
+      },
+    ],
+    "settings": {
+      "azureFunctions.funcCliPath": "../../node_modules/.bin/func"
+    }
+  }
+  
