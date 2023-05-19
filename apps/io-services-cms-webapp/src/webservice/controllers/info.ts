@@ -21,7 +21,8 @@ export const makeInfoHandler = () =>
         healthcheck.checkAzureStorageHealth(
           c.INTERNAL_STORAGE_CONNECTION_STRING
         ),
-      (c) => healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_CONNECTIONSTRING),
+      (c) =>
+        healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_URI, c.COSMOSDB_KEY),
     ]),
     TE.mapLeft((problems) => ResponseErrorInternal(problems.join("\n\n"))),
     TE.map((_) =>
