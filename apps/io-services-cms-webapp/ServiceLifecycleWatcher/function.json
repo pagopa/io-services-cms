@@ -5,7 +5,7 @@
       "type": "cosmosDBTrigger",
       "direction": "in",
       "name": "documents",
-      "connectionStringSetting": "%COSMOSDB_CONNECTIONSTRING%",
+      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "%COSMOSDB_CONTAINER_SERVICE_LIFECYCLE%",
       "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICE_LIFECYCLE%-lease",
