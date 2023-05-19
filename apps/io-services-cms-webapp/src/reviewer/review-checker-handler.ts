@@ -43,12 +43,14 @@ const makeServiceLifecycleApply = (
   }
 };
 
-export const createReviewCheckerHandler = (
-  dao: ServiceReviewDao,
-  jiraProxy: JiraProxy,
-  store: FSMStore<ServiceLifecycle.ItemType>
-): Promise<unknown> =>
-  dao.executeOnPending(processBatchOfReviews(dao, jiraProxy, store))();
+export const createReviewCheckerHandler =
+  (
+    dao: ServiceReviewDao,
+    jiraProxy: JiraProxy,
+    store: FSMStore<ServiceLifecycle.ItemType>
+  ) =>
+  (): Promise<unknown> =>
+    dao.executeOnPending(processBatchOfReviews(dao, jiraProxy, store))();
 
 /**
  * Build an array of Issue/Item pairs
