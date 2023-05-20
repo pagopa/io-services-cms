@@ -15,7 +15,7 @@
     },
     {
       "queueName": "%REQUEST_REVIEW_QUEUE%",
-      "connection": "%INTERNAL_STORAGE_CONNECTION_STRING%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestReview",
       "type": "queue",
       "direction": "out"
