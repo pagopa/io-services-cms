@@ -262,62 +262,124 @@ describe("WebService", () => {
       },
     } as unknown as ServicePublication.ItemType;
 
-    it("should fail when cannot find requested service", async () => {
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", "any-user-id")
-        .set("x-subscription-id", "any-subscription-id");
+    describe("publish a service", () => {
+      it("should fail when cannot find requested service", async () => {
+        const response = await request(app)
+          .post("/api/services/s1/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
-    });
-
-    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-      servicePublicationStore.save("s1", {
-        ...aService,
-        fsm: { state: "published" },
+        expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
       });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", "any-user-id")
-        .set("x-subscription-id", "any-subscription-id");
+      it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+        servicePublicationStore.save("s1", {
+          ...aService,
+          fsm: { state: "published" },
+        });
 
-      expect(response.statusCode).toBe(500); // FIXME: should be 409
-    });
+        const response = await request(app)
+          .post("/api/services/s1/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
 
-    it("should not allow the operation without right group", async () => {
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", "OtherGroup")
-        .set("x-user-id", "any-user-id")
-        .set("x-subscription-id", "any-subscription-id");
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    it("should publish a service", async () => {
-      servicePublicationStore.save("s1", {
-        ...aService,
-        fsm: { state: "unpublished" },
+        expect(response.statusCode).toBe(500); // FIXME: should be 409
       });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", "any-user-id")
-        .set("x-subscription-id", "any-subscription-id");
+      it("should not allow the operation without right group", async () => {
+        const response = await request(app)
+          .post("/api/services/s1/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", "OtherGroup")
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(204);
+        expect(response.statusCode).toBe(403);
+      });
+
+      it("should publish a service", async () => {
+        servicePublicationStore.save("s1", {
+          ...aService,
+          fsm: { state: "unpublished" },
+        });
+
+        const response = await request(app)
+          .post("/api/services/s1/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(204);
+      });
+    });
+
+    describe("unpublish a service", () => {
+      it("should fail when cannot find requested service", async () => {
+        const response = await request(app)
+          .delete("/api/services/s2/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+      });
+
+      it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+        servicePublicationStore.save("s2", {
+          ...aService,
+          fsm: { state: "unpublished" },
+        });
+
+        const response = await request(app)
+          .delete("/api/services/s2/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(500); // FIXME: should be 409
+      });
+
+      it("should not allow the operation without right group", async () => {
+        const response = await request(app)
+          .delete("/api/services/s2/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", "OtherGroup")
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(403);
+      });
+
+      it("should publish a service", async () => {
+        servicePublicationStore.save("s2", {
+          ...aService,
+          fsm: { state: "published" },
+        });
+
+        const response = await request(app)
+          .delete("/api/services/s2/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(204);
+      });
     });
   });
 });

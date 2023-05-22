@@ -54,6 +54,16 @@ export const makePublishServiceHandler =
       RTE.toUnion
     )(store)();
 
+export const makeUnpublishServiceHandler =
+  ({ store }: Dependencies): PublishServiceHandler =>
+  (_auth, serviceId) =>
+    pipe(
+      ServicePublication.apply("unpublish", serviceId),
+      RTE.map(ResponseSuccessNoContent),
+      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      RTE.toUnion
+    )(store)();
+
 export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
   pipe(
     handler,
