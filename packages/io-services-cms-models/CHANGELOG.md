@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.2.1
+
+### Patch Changes
+
+- 8d101f4: fix web app config and startup problems
+
 ## 1.2.0
 
 ### Minor Changes
