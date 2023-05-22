@@ -16,12 +16,17 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 type Dependencies = {
@@ -32,6 +37,7 @@ type Dependencies = {
 };
 
 type HandlerResponseTypes =
+  | IResponseSuccessJson<ServicePublication.ItemType>
   | IResponseSuccessNoContent
   | IResponseErrorForbiddenNotAuthorized
   | IResponseErrorNotFound
@@ -63,6 +69,33 @@ export const makeUnpublishServiceHandler =
       RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
       RTE.toUnion
     )(store)();
+
+export const makeGetServiceHandler =
+  ({ store }: Dependencies): PublishServiceHandler =>
+  (_auth, serviceId) =>
+    pipe(
+      serviceId,
+      store.fetch,
+      TE.bimap(
+        (teErr) => ResponseErrorInternal(teErr.message),
+        (teCont) =>
+          pipe(
+            teCont,
+            O.fold(
+              () =>
+                ResponseErrorNotFound(
+                  "not found",
+                  "service not found"
+                ) as HandlerResponseTypes,
+              (optCont) =>
+                ResponseSuccessJson<ServicePublication.ItemType>(
+                  optCont
+                ) as HandlerResponseTypes
+            )
+          )
+      ),
+      TE.toUnion
+    )();
 
 export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
   pipe(
