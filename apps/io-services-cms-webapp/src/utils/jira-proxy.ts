@@ -106,7 +106,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
   const buildSearchIssuesBasePayload = (
     jql: string
   ): SearchJiraIssuesPayload => ({
-    fields: ["status", "comment"],
+    fields: ["status", "comment", "statuscategorychangedate"],
     fieldsByKeys: false,
     maxResults: 1,
     startAt: 0,

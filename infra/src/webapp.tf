@@ -167,7 +167,7 @@ locals {
     # PostgreSQL 
     REVIEWER_DB_HOST     = module.postgres_flexible_server_private.fqdn
     REVIEWER_DB_NAME     = var.reviewer_db_name
-    REVIEWER_DB_PASSWORD = module.postgres_flexible_server_private.administrator_password
+    REVIEWER_DB_PASSWORD = azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
     REVIEWER_DB_PORT     = module.postgres_flexible_server_private.connection_port
     REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
     REVIEWER_DB_TABLE    = var.reviewer_db_table
