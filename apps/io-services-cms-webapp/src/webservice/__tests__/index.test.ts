@@ -335,11 +335,13 @@ describe("WebService", () => {
         expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
       });
 
-      it("should publish a service", async () => {
-        servicePublicationStore.save("s3", {
-          ...aService,
-          fsm: { state: "published" },
-        });
+      const asServiceWithStatus = {
+        ...aService,
+        fsm: { state: "published" },
+      } as unknown as ServicePublication.ItemType;
+
+      it("should retrieve a service", async () => {
+        servicePublicationStore.save("s3", asServiceWithStatus);
 
         const response = await request(app)
           .get("/api/services/s3/release")
@@ -349,6 +351,7 @@ describe("WebService", () => {
           .set("x-user-id", "any-user-id")
           .set("x-subscription-id", "any-subscription-id");
 
+        expect(JSON.stringify(response.body)).toBe(JSON.stringify(asServiceWithStatus))
         expect(response.statusCode).toBe(200);
       });
 
