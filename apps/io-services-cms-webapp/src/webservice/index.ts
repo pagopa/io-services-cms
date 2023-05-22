@@ -4,7 +4,11 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
+import {
+  FSMStore,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -16,10 +20,15 @@ import {
   applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
   makeReviewServiceHandler,
 } from "./controllers/review-service";
+import {
+  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makePublishServiceHandler,
+} from "./controllers/publish-service";
 
 type Dependencies = {
   basePath: string;
   serviceLifecycleStore: FSMStore<ServiceLifecycle.ItemType>;
+  servicePublicationStore: FSMStore<ServicePublication.ItemType>;
   apimClient: ApiManagementClient;
   config: IConfig;
 };
@@ -27,6 +36,7 @@ type Dependencies = {
 export const createWebServer = ({
   basePath,
   serviceLifecycleStore,
+  servicePublicationStore,
   apimClient,
   config,
 }: Dependencies) => {
@@ -56,6 +66,17 @@ export const createWebServer = ({
         store: serviceLifecycleStore,
       }),
       applyReviewServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.post(
+    "/services/:serviceId/release",
+    pipe(
+      makePublishServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyPublishServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );

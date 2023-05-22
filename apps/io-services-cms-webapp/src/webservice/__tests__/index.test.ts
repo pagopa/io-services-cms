@@ -1,5 +1,9 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import {
+  ServiceLifecycle,
+  ServicePublication,
+  stores,
+} from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -27,6 +31,9 @@ vi.mock("../../lib/clients/apim-client", async () => {
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 
+const servicePublicationStore =
+  stores.createMemoryStore<ServicePublication.ItemType>();
+
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -40,6 +47,7 @@ describe("WebService", () => {
     apimClient: mockApimClient,
     config: mockConfig,
     serviceLifecycleStore,
+    servicePublicationStore,
   });
 
   describe("createService", () => {
