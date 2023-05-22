@@ -20,7 +20,7 @@ export const createCosmosStore = <
     pipe(
       // fetch the item by its id
       TE.tryCatch(
-        () => container.item(id).read(),
+        () => container.item(id, id).read(),
         (err) =>
           new Error(
             `Failed to read item id#${id} from database, ${

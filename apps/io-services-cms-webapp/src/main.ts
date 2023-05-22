@@ -76,7 +76,7 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestReview")),
       RA.filter(O.isSome),
-      RA.map(JSON.stringify)
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
   toAzureFunctionHandler

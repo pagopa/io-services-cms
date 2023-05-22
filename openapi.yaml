@@ -674,7 +674,7 @@ components:
       type: string
       description: User's fiscal code.
       pattern: "^[0-9]{11}$"
-      example: 01234567890
+      example: 012345678901
     Logo:
       description: A base64 string representation of the logo PNG image.
       type: object
