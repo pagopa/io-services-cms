@@ -181,7 +181,7 @@ describe("WebService", () => {
       },
     } as unknown as ServiceLifecycle.ItemType;
 
-    it("hould fail when cannot find requested service", async () => {
+    it("should fail when cannot find requested service", async () => {
       const response = await request(app)
         .put("/api/services/s1/review")
         .send()
@@ -193,7 +193,7 @@ describe("WebService", () => {
       expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
     });
 
-    it("hould fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
       serviceLifecycleStore.save("s1", {
         ...aService,
         fsm: { state: "approved" },
@@ -230,6 +230,87 @@ describe("WebService", () => {
 
       const response = await request(app)
         .put("/api/services/s1/review")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(204);
+    });
+  });
+
+  describe("publishService", () => {
+    const aService = {
+      id: "aServiceId",
+      data: {
+        name: "aServiceName",
+        description: "aServiceDescription",
+        authorized_recipients: [],
+        max_allowed_payment_amount: 123,
+        metadata: {
+          address: "via tal dei tali 123",
+          email: "service@email.it",
+          pec: "service@pec.it",
+          scope: "LOCAL",
+        },
+        organization: {
+          name: "anOrganizationName",
+          fiscal_code: "12345678901",
+        },
+        require_secure_channel: false,
+      },
+    } as unknown as ServicePublication.ItemType;
+
+    it("should fail when cannot find requested service", async () => {
+      const response = await request(app)
+        .post("/api/services/s1/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+    });
+
+    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+      servicePublicationStore.save("s1", {
+        ...aService,
+        fsm: { state: "published" },
+      });
+
+      const response = await request(app)
+        .post("/api/services/s1/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(500); // FIXME: should be 409
+    });
+
+    it("should not allow the operation without right group", async () => {
+      const response = await request(app)
+        .post("/api/services/s1/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", "OtherGroup")
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should publish a service", async () => {
+      servicePublicationStore.save("s1", {
+        ...aService,
+        fsm: { state: "unpublished" },
+      });
+
+      const response = await request(app)
+        .post("/api/services/s1/release")
         .send()
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", UserGroup.ApiServiceWrite)
