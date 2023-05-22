@@ -322,6 +322,50 @@ describe("WebService", () => {
       });
     });
 
+    describe("retrieve service pubblication information", () => {
+      it("should fail when cannot find requested service", async () => {
+        const response = await request(app)
+          .delete("/api/services/s3/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+      });
+
+      it("should publish a service", async () => {
+        servicePublicationStore.save("s3", {
+          ...aService,
+          fsm: { state: "published" },
+        });
+
+        const response = await request(app)
+          .get("/api/services/s3/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", UserGroup.ApiServiceWrite)
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(200);
+      });
+
+      it("should not allow the operation without right group", async () => {
+        const response = await request(app)
+          .get("/api/services/s3/release")
+          .send()
+          .set("x-user-email", "example@email.com")
+          .set("x-user-groups", "OtherGroup")
+          .set("x-user-id", "any-user-id")
+          .set("x-subscription-id", "any-subscription-id");
+
+        expect(response.statusCode).toBe(403);
+      });
+
+    });
+
     describe("unpublish a service", () => {
       it("should fail when cannot find requested service", async () => {
         const response = await request(app)
