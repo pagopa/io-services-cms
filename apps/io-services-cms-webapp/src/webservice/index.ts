@@ -17,14 +17,17 @@ import {
 } from "./controllers/create-service";
 import { makeInfoHandler } from "./controllers/info";
 import {
-  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
-  makeReviewServiceHandler,
-} from "./controllers/review-service";
-import {
   applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makeGetServiceHandler,
   makePublishServiceHandler,
   makeUnpublishServiceHandler,
 } from "./controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "./controllers/review-service";
+
+const servicePublicationPath: string = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
@@ -72,7 +75,7 @@ export const createWebServer = ({
   );
 
   router.post(
-    "/services/:serviceId/release",
+    servicePublicationPath,
     pipe(
       makePublishServiceHandler({
         store: servicePublicationStore,
@@ -82,8 +85,19 @@ export const createWebServer = ({
     )
   );
 
+  router.get(
+    servicePublicationPath,
+    pipe(
+      makeGetServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyPublishServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
   router.delete(
-    "/services/:serviceId/release",
+    servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
         store: servicePublicationStore,
