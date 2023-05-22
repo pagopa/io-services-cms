@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.5.3
+
+### Patch Changes
+
+- a038797: Update package.json: replace node-fetch with node-fetch-commonjs
+- 8d101f4: fix web app config and startup problems
+- Updated dependencies [8d101f4]
+  - @io-services-cms/models@1.2.1
+
 ## 1.5.2
 
 ### Patch Changes
