@@ -1,11 +1,11 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 
-import { Service as ServiceResponsePayload } from "../../../generated/api/Service";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
 import {
-  ServiceStatusType,
-  ServiceStatusTypeEnum,
-} from "../../../generated/api/ServiceStatusType";
+  ServiceLifecycleStatusType,
+  ServiceLifecycleStatusTypeEnum,
+} from "../../../generated/api/ServiceLifecycleStatusType";
 import { ScopeEnum } from "../../../generated/api/ServiceMetadata";
 
 export const payloadToItem = (
@@ -42,18 +42,18 @@ export const itemToResponse = ({
 
 export const toServiceStatusType = (
   s: ServiceLifecycle.ItemType["fsm"]["state"]
-): ServiceStatusType => {
+): ServiceLifecycleStatusType => {
   switch (s) {
     case "approved":
     case "deleted":
     case "draft":
     case "rejected":
     case "submitted":
-      return ServiceStatusTypeEnum[s];
+      return ServiceLifecycleStatusTypeEnum[s];
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = s;
-      return ServiceStatusTypeEnum[s];
+      return ServiceLifecycleStatusTypeEnum[s];
   }
 };
 
