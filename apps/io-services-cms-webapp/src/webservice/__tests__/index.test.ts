@@ -16,7 +16,7 @@ import {
   upsertSubscription,
 } from "../../lib/clients/apim-client";
 import { createWebServer } from "../index";
-import { itemToResponse as getPublicationStatusItemToResponse } from "../controllers/get-service-publication/converters";
+import { itemToResponse as getPublicationItemToResponse } from "../controllers/get-service-publication/converters";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -352,7 +352,7 @@ describe("WebService", () => {
         .set("x-subscription-id", "any-subscription-id");
 
       expect(JSON.stringify(response.body)).toBe(
-        JSON.stringify(getPublicationStatusItemToResponse(asServiceWithStatus))
+        JSON.stringify(getPublicationItemToResponse(asServiceWithStatus))
       );
       expect(response.statusCode).toBe(200);
     });

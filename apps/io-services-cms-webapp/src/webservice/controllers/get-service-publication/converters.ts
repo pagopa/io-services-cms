@@ -1,10 +1,10 @@
 import { ServicePublication } from "@io-services-cms/models";
-import { Service as ServiceResponsePayload } from "../../../generated/api/Service";
-import {
-  ServiceVisibility,
-  ServiceVisibilityEnum,
-} from "../../../generated/api/ServiceVisibility";
+import { ServicePublication as ServiceResponsePayload } from "../../../generated/api/ServicePublication";
 import { toScopeType } from "../create-service/converters";
+import {
+  ServicePublicationStatusType,
+  ServicePublicationStatusTypeEnum,
+} from "../../../generated/api/ServicePublicationStatusType";
 
 export const itemToResponse = ({
   fsm: { state },
@@ -12,23 +12,23 @@ export const itemToResponse = ({
   id,
 }: ServicePublication.ItemType): ServiceResponsePayload => ({
   id,
-  visibility: toVisibilityStatusType(state),
+  status: toServiceStatusType(state),
   name: data.name,
   description: data.description,
   organization: data.organization,
   metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
 });
 
-export const toVisibilityStatusType = (
+export const toServiceStatusType = (
   s: ServicePublication.ItemType["fsm"]["state"]
-): ServiceVisibility => {
+): ServicePublicationStatusType => {
   switch (s) {
     case "published":
     case "unpublished":
-      return ServiceVisibilityEnum[s];
+      return ServicePublicationStatusTypeEnum[s];
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = s;
-      return ServiceVisibilityEnum[s];
+      return ServicePublicationStatusTypeEnum[s];
   }
 };
