@@ -322,7 +322,7 @@ describe("WebService", () => {
     });
   });
 
-  describe("getPublicationStatusService", () => {
+  describe("getServicePublication", () => {
     it("should fail when cannot find requested service", async () => {
       const response = await request(app)
         .delete("/api/services/s3/release")
