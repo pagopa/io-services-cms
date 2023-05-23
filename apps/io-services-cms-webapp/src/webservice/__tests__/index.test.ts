@@ -16,7 +16,7 @@ import {
   upsertSubscription,
 } from "../../lib/clients/apim-client";
 import { createWebServer } from "../index";
-import { itemToResponse as getPublicationStatusItemToResponse } from "../controllers/get-publication-status-service/converters";
+import { itemToResponse as getPublicationStatusItemToResponse } from "../controllers/get-service-publication/converters";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };

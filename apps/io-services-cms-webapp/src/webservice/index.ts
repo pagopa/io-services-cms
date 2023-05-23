@@ -31,7 +31,7 @@ import {
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
-} from "./controllers/get-publication-status-service";
+} from "./controllers/get-service-publication";
 
 const servicePublicationPath: string = "/services/:serviceId/release";
 
