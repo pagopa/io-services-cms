@@ -24,6 +24,10 @@ import {
   applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
   makePublishServiceHandler,
 } from "./controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "./controllers/unpublish-service";
 
 type Dependencies = {
   basePath: string;
@@ -77,6 +81,17 @@ export const createWebServer = ({
         store: servicePublicationStore,
       }),
       applyPublishServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.delete(
+    "/services/:serviceId/release",
+    pipe(
+      makeUnpublishServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyUnpublishServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );
