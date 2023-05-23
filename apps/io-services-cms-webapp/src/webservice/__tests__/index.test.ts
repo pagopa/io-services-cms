@@ -16,6 +16,7 @@ import {
   upsertSubscription,
 } from "../../lib/clients/apim-client";
 import { createWebServer } from "../index";
+import { itemToResponse as getPublicationStatusItemToResponse } from "../controllers/get-publication-status-service/converters";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -318,6 +319,54 @@ describe("WebService", () => {
         .set("x-subscription-id", "any-subscription-id");
 
       expect(response.statusCode).toBe(204);
+    });
+  });
+
+  describe("getPublicationStatusService", () => {
+    it("should fail when cannot find requested service", async () => {
+      const response = await request(app)
+        .delete("/api/services/s3/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+    });
+
+    const asServiceWithStatus = {
+      ...aService,
+      fsm: { state: "published" },
+    } as unknown as ServicePublication.ItemType;
+
+    it("should retrieve a service", async () => {
+      servicePublicationStore.save("s3", asServiceWithStatus);
+
+      const response = await request(app)
+        .get("/api/services/s3/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(JSON.stringify(response.body)).toBe(
+        JSON.stringify(getPublicationStatusItemToResponse(asServiceWithStatus))
+      );
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("should not allow the operation without right group", async () => {
+      const response = await request(app)
+        .get("/api/services/s3/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", "OtherGroup")
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(403);
     });
   });
 
