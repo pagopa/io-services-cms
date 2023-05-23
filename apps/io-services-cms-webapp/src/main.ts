@@ -1,4 +1,8 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import {
+  ServiceLifecycle,
+  ServicePublication,
+  stores,
+} from "@io-services-cms/models";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
@@ -40,6 +44,12 @@ const serviceLifecycleStore = stores.createCosmosStore(
   ServiceLifecycle.ItemType
 );
 
+// create a store for the ServicePublication finite state machine
+const servicePublicationStore = stores.createCosmosStore(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICE_PUBBLICATIONS),
+  ServicePublication.ItemType
+);
+
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
@@ -47,6 +57,7 @@ export const httpEntryPoint = pipe(
     apimClient,
     config,
     serviceLifecycleStore,
+    servicePublicationStore,
   },
   createWebServer,
   expressToAzureFunction
