@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.6.0
+
+### Minor Changes
+
+- 08ada79: ADD Get service publication API
+- 0d50104: Add Unpublish Service API
+- e598011: OpenAPI Service status update
+- ed1bbdb: Publish Service API
+
 ## 1.5.3
 
 ### Patch Changes
