@@ -6,7 +6,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import nodeFetch from "node-fetch";
+import nodeFetch from "node-fetch-commonjs";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { JiraConfig } from "../../config";
 
