@@ -29,7 +29,7 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import * as t from "io-ts";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { UserEmailMiddleware } from "../../../lib/middlewares/user-email-middleware";
-import { Service as ServiceResponsePayload } from "../../../generated/api/Service";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
 import { ApimConfig } from "../../../config";
 import {

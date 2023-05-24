@@ -10,7 +10,7 @@ module "storage_account" {
   resource_group_name           = azurerm_resource_group.rg.name
   location                      = var.location
   advanced_threat_protection    = false
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   tags = var.tags
 }

@@ -57,3 +57,27 @@ const result = await applyTask(MyStore)();
 |reject|* `reason`: a message to comment the rejection | Reject a service due to validation issues|
 |approve|* `approvalDate`: the timestamp of the approvation | Approve a submitted service |
 |delete| - |Delete a service|
+
+### ServicePublication
+A finite state machine (FSM) that defines the publication of a Service
+
+```mermaid
+stateDiagram-v2
+    * --> unpublished: override
+    unpublished --> unpublished: override
+    published --> published: override
+    unpublished --> published: publish
+    published --> unpublished: unpublish
+```
+
+#### Usage
+
+See the [ServiceLifecycle > Usage](#usage) section above.
+
+#### Actions
+
+|action|arguments|description|
+|-|-|-|
+|override|* `data`: the service object to be overrided, with its `id`|Override service with a new version|
+|publish| - |Publish a service|
+|unpublish| - |Undo the last service publication and leave it in an unpublished state|

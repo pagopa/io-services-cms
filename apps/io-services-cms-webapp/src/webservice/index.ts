@@ -1,21 +1,44 @@
-import express from "express";
-import bodyParser from "body-parser";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import bodyParser from "body-parser";
+import express from "express";
 
-import { pipe } from "fp-ts/lib/function";
-import { ServiceLifecycle, FSMStore } from "@io-services-cms/models";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import {
+  FSMStore,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
+import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
+import {
+  applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
+  makeCreateServiceHandler,
+} from "./controllers/create-service";
 import { makeInfoHandler } from "./controllers/info";
 import {
-  makeCreateServiceHandler,
-  applyRequestMiddelwares,
-} from "./controllers/create-service";
+  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "./controllers/review-service";
+import {
+  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makePublishServiceHandler,
+} from "./controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "./controllers/unpublish-service";
+import {
+  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
+  makeGetServiceHandler,
+} from "./controllers/get-service-publication";
+
+const servicePublicationPath: string = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
   serviceLifecycleStore: FSMStore<ServiceLifecycle.ItemType>;
+  servicePublicationStore: FSMStore<ServicePublication.ItemType>;
   apimClient: ApiManagementClient;
   config: IConfig;
 };
@@ -23,6 +46,7 @@ type Dependencies = {
 export const createWebServer = ({
   basePath,
   serviceLifecycleStore,
+  servicePublicationStore,
   apimClient,
   config,
 }: Dependencies) => {
@@ -40,7 +64,51 @@ export const createWebServer = ({
         apimClient,
         apimConfig: config,
       }),
-      applyRequestMiddelwares,
+      applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.put(
+    "/services/:serviceId/review",
+    pipe(
+      makeReviewServiceHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyReviewServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.post(
+    servicePublicationPath,
+    pipe(
+      makePublishServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyPublishServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.get(
+    servicePublicationPath,
+    pipe(
+      makeGetServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyGetPublicationStatusServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.delete(
+    servicePublicationPath,
+    pipe(
+      makeUnpublishServiceHandler({
+        store: servicePublicationStore,
+      }),
+      applyUnpublishServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );

@@ -11,7 +11,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.8.0
+  version: 0.9.0
 servers:
   - url: https://url
 tags:
@@ -71,7 +71,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Service'
+                $ref: '#/components/schemas/ServiceLifecycle'
         '400':
           description: Invalid payload
         '401':
@@ -140,7 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Service'
+                $ref: '#/components/schemas/ServiceLifecycle'
         '401':
           description: Unauthorized
         '403':
@@ -179,7 +179,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Service'
+                $ref: '#/components/schemas/ServiceLifecycle'
         '400':
           description: Invalid payload
         '401':
@@ -422,7 +422,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Service'
+                $ref: '#/components/schemas/ServicePublication'
         '401':
           description: Unauthorized
         '403':
@@ -503,17 +503,15 @@ paths:
         - api_key: []
 components:
   schemas:
-    Service:
-      description: Service model data
+    ServiceLifecycle:
+      description: Service Lifecycle model data
       allOf:
         - type: object
           properties:
             id:
               type: string
             status:
-              $ref: '#/components/schemas/ServiceStatus'
-            visibility:
-              $ref: '#/components/schemas/ServiceVisibility'
+              $ref: '#/components/schemas/ServiceLifecycleStatus'
             version:
               type: integer
             last_update:
@@ -522,7 +520,24 @@ components:
       required: 
         - id
         - status
-        - visibility
+        - last_update
+    ServicePublication:
+      description: Service Publication model data
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+            status:
+              $ref: '#/components/schemas/ServicePublicationStatusType'
+            version:
+              type: integer
+            last_update:
+              $ref: '#/components/schemas/Timestamp'
+        - $ref: '#/components/schemas/ServiceData'
+      required: 
+        - id
+        - status
         - last_update
     ServicePayload:
       description: A payload used to create or update a service.
@@ -604,19 +619,19 @@ components:
           enum: [NATIONAL, LOCAL]
       required: 
         - scope
-    ServiceStatus:
+    ServiceLifecycleStatus:
       type: object
       properties: 
         value:
-            $ref: '#/components/schemas/ServiceStatusType'
+            $ref: '#/components/schemas/ServiceLifecycleStatusType'
         reason:
           description: Reason for status value
           type: string
       required: 
         - value
-    ServiceStatusType:
+    ServiceLifecycleStatusType:
       description: |
-        Service status lifecycle<br>
+        Service lifecycle status<br>
         - _draft_: A new draft of the service has been created, filled in completely or partially and saved by the system.
         - _submitted_: The draft has been sent for internal validation to PagoPA and the response is awaited. In this state, the service is
         immutable and is frozen in the shipped version.
@@ -626,22 +641,21 @@ components:
         - _deleted_: The service is permanently deleted from the Back-Office.
       type: string
       enum: [draft, submitted, approved, rejected, deleted]
-    ServiceVisibility:
+    ServicePublicationStatusType:
       description: |
         Service publication status<br>
-        - _empty_: Initial state, i.e. the service has never been approved
         - _published_: The service is visible in _IO App_ to users
         - _unpublished_: The service is no longer visible in _IO App_ to users, but remains in the institution's Back-Office, which can
         later choose to publish it again.
       type: string
-      enum: [empty, published, unpublished]
+      enum: [published, unpublished]
     ServicePagination:
       type: object
       properties: 
         value:
           type: array
           items:
-            $ref: '#/components/schemas/Service'
+            $ref: '#/components/schemas/ServiceLifecycle'
         pagination:
           $ref: '#/components/schemas/PaginationResultSet'
     PaginationResultSet:
@@ -674,7 +688,7 @@ components:
       type: string
       description: User's fiscal code.
       pattern: "^[0-9]{11}$"
-      example: 01234567890
+      example: 012345678901
     Logo:
       description: A base64 string representation of the logo PNG image.
       type: object

@@ -1,5 +1,68 @@
 # io-services-cms-webapp
 
+## 1.6.0
+
+### Minor Changes
+
+- 08ada79: ADD Get service publication API
+- 0d50104: Add Unpublish Service API
+- e598011: OpenAPI Service status update
+- ed1bbdb: Publish Service API
+
+## 1.5.3
+
+### Patch Changes
+
+- a038797: Update package.json: replace node-fetch with node-fetch-commonjs
+- 8d101f4: fix web app config and startup problems
+- Updated dependencies [8d101f4]
+  - @io-services-cms/models@1.2.1
+
+## 1.5.2
+
+### Patch Changes
+
+- 950d715: Fix healthcheck
+
+## 1.5.1
+
+### Patch Changes
+
+- fc06a0c: Fix broken configuration
+- 8d1169d: Fix broken entrypoint
+- 20dbb3b: Fix broken configuration
+
+## 1.5.0
+
+### Minor Changes
+
+- 9088413: Add Review Service Controller
+- 6d7940f: Add watcher on ServiceLifecycle updates to handle service submission and dispatch review jobs
+
+### Patch Changes
+
+- Updated dependencies [9088413]
+  - @io-services-cms/models@1.2.0
+
+## 1.4.0
+
+### Minor Changes
+
+- bade172: add an handler in order to dispatch to proper queue/action each service lifecycle changes
+
+### Patch Changes
+
+- Updated dependencies [89e5bbb]
+- Updated dependencies [bade172]
+  - @io-services-cms/models@1.1.0
+
+## 1.3.0
+
+### Minor Changes
+
+- 43727f2: add timerTrigger fn and its entryPoint to poll PendingReview data from Postgres and Jira
+- 9534d3b: Service review checker handler
+
 ## 1.2.0
 
 ### Minor Changes

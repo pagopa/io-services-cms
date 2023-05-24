@@ -1,5 +1,24 @@
 # io-services-cms-models
 
+## 1.2.1
+
+### Patch Changes
+
+- 8d101f4: fix web app config and startup problems
+
+## 1.2.0
+
+### Minor Changes
+
+- 9088413: Add Review Service Controller
+
+## 1.1.0
+
+### Minor Changes
+
+- 89e5bbb: Service Publication FSM
+- bade172: add an handler in order to dispatch to proper queue/action each service lifecycle changes
+
 ## 1.0.2
 
 ### Patch Changes

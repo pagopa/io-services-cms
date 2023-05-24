@@ -68,6 +68,12 @@ type FSM = {
 };
 
 // implementation
+/**
+ * WARNING: Service Lifecycle FSM implementation
+ *
+ * The current implementation is temporary identical to Service Publication FSM.
+ * We will attempt to resolve this duplication in the near future.
+ */
 const FSM: FSM = {
   states: {
     draft: Service,
