@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.7.0
+
+### Minor Changes
+
+- b217670: Custom Errors on FSM and updateReview
+
+### Patch Changes
+
+- Updated dependencies [b217670]
+  - @io-services-cms/models@1.3.0
+
 ## 1.6.0
 
 ### Minor Changes
