@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.3.0
+
+### Minor Changes
+
+- b217670: Custom Errors on FSM and updateReview
+
 ## 1.2.1
 
 ### Patch Changes
