@@ -82,5 +82,48 @@ export type Transition<
         ? { args: Action[1] }
         : { args: undefined }) &
       Record<string, never>
-  ) => E.Either<Error, WithState<ToState[0], ToState[1]>>;
+  ) => E.Either<FsmTransitionExecutionError, WithState<ToState[0], ToState[1]>>;
 };
+
+export class FsmNoApplicableTransitionError extends Error {
+  public kind = "FsmNoApplicableTransitionError";
+  constructor(appliedAction: string) {
+    const formattedMessage = `No transition has been declared for the action ${appliedAction}`;
+    super(formattedMessage);
+  }
+}
+
+export class FsmNoTransitionMatchedError extends Error {
+  public kind = "FsmNoTransitionMatchedError";
+  constructor() {
+    super(`No transition matched`);
+  }
+}
+
+export class FsmTooManyTransitionsError extends Error {
+  public kind = "FsmTooManyTransitionsError";
+  constructor() {
+    super(`Too many transitions`);
+  }
+}
+
+export class FsmTransitionExecutionError extends Error {
+  public kind = "FsmTransitionExecutionError";
+  constructor() {
+    super(`Error while executing transition`);
+  }
+}
+
+export class FsmStoreFetchError extends Error {
+  public kind = "FsmStoreFetchError";
+  constructor() {
+    super(`Error retrieving data from the store`);
+  }
+}
+
+export class FsmStoreSaveError extends Error {
+  public kind = "FsmStoreSaveError";
+  constructor() {
+    super(`Error while saving data in the store`);
+  }
+}

@@ -12,6 +12,12 @@ import {
   Transition,
   WithState,
   StateSet,
+  FsmNoApplicableTransitionError,
+  FsmNoTransitionMatchedError,
+  FsmStoreFetchError,
+  FsmStoreSaveError,
+  FsmTooManyTransitionsError,
+  FsmTransitionExecutionError,
 } from "../lib/fsm";
 import { Service, ServiceId } from "./definitions";
 
@@ -25,6 +31,13 @@ type ToRecord<Q> = Q extends []
 // commodity aliases
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
+type AllFsmErrors =
+  | FsmNoApplicableTransitionError
+  | FsmNoTransitionMatchedError
+  | FsmTooManyTransitionsError
+  | FsmTransitionExecutionError
+  | FsmStoreFetchError
+  | FsmStoreSaveError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
@@ -236,47 +249,59 @@ function apply(
   appliedAction: "create" | "edit",
   id: ServiceId,
   args: { data: Service }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"draft", Service>>;
+): ReaderTaskEither<LifecycleStore, AllFsmErrors, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
   id: ServiceId
-): ReaderTaskEither<LifecycleStore, Error, WithState<"submitted", Service>>;
+): ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"submitted", Service>
+>;
 function apply(
   appliedAction: "approve",
   id: ServiceId,
   args: { approvalDate: string }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"approved", Service>>;
+): ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"approved", Service>
+>;
 function apply(
   appliedAction: "reject",
   id: ServiceId,
   args: { reason: string }
-): ReaderTaskEither<LifecycleStore, Error, WithState<"rejected", Service>>;
+): ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"rejected", Service>
+>;
 function apply(
   appliedAction: "delete",
   id: ServiceId
-): ReaderTaskEither<LifecycleStore, Error, WithState<"deleted", Service>>;
+): ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"deleted", Service>
+>;
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
-): ReaderTaskEither<LifecycleStore, Error, AllResults> {
+): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
   return (store) => {
     // select transitions for the action to apply
     const applicableTransitions = FSM.transitions.filter(
       ({ action }) => action === appliedAction
     );
     if (!applicableTransitions.length) {
-      return TE.left(
-        new Error(
-          `No transition has been declared for the action ${appliedAction}`
-        )
-      );
+      return TE.left(new FsmNoApplicableTransitionError(appliedAction));
     }
 
     return pipe(
       // fetch the item from the store by its id
       store.fetch(id),
-
+      TE.mapLeft((_) => new FsmStoreFetchError()),
       // filter transitions that can be applied to the current item status
       TE.map(
         flow(
@@ -301,7 +326,7 @@ function apply(
                 ),
                 // bind all data into a lazy implementation of exec
                 RA.map((tr) => ({
-                  exec: (): E.Either<Error, AllResults> =>
+                  exec: (): E.Either<FsmTransitionExecutionError, AllResults> =>
                     // FIXME: avoid this forcing
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
@@ -332,7 +357,10 @@ function apply(
                     // for those transitions whose from state has been matched,
                     //  bind all data into a lazy implementation of exec
                     E.map((current) => ({
-                      exec: (): E.Either<Error, AllResults> =>
+                      exec: (): E.Either<
+                        FsmTransitionExecutionError,
+                        AllResults
+                      > =>
                         tr.exec({
                           // FIXME: avoid this forcing
                           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -358,14 +386,19 @@ function apply(
         (matchedTransitions) => matchedTransitions.length === 1,
         (matchedTransitions) =>
           matchedTransitions.length === 0
-            ? new Error("no transition matched")
-            : new Error("too many transitions")
+            ? new FsmNoTransitionMatchedError()
+            : new FsmTooManyTransitionsError()
       ),
       // apply the only transition to turn the element in the new state
       TE.map((_) => _[0].right.exec()),
       TE.chain(TE.fromEither),
       // save new status in the store
-      TE.chain((newItem) => store.save(id, newItem))
+      TE.chain((newItem) =>
+        pipe(
+          store.save(id, newItem),
+          TE.mapLeft((_) => new FsmStoreSaveError())
+        )
+      )
     );
   };
 }

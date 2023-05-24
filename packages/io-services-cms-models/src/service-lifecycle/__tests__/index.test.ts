@@ -1,10 +1,17 @@
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
+import * as O from "fp-ts/Option";
 import * as RTE from "fp-ts/ReaderTaskEither";
-import { describe, it, expect } from "vitest";
-import { stores } from "../../lib/fsm";
-import { apply } from "..";
+import * as TE from "fp-ts/TaskEither";
+import { describe, it, expect, vi } from "vitest";
+import {
+  FsmNoApplicableTransitionError,
+  FsmNoTransitionMatchedError,
+  FsmStoreFetchError,
+  FsmStoreSaveError,
+  FsmTooManyTransitionsError,
+  stores,
+} from "../../lib/fsm";
+import { FSM, apply } from "..";
 import { pipe } from "fp-ts/lib/function";
 import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../definitions";
@@ -35,8 +42,20 @@ const expectSuccess = async ({ id, actions, expected }) => {
 };
 
 // helper to check the result of an invalid sequence of actions
-const expectFailure = async ({ id, actions, expected }) => {
+const expectFailure = async ({
+  id,
+  actions,
+  expected,
+  errorType,
+  additionalPreTestFn,
+  additionalPostTestFn,
+}) => {
   const store = stores.createMemoryStore();
+
+  // run some useful code before assertion
+  if (additionalPreTestFn) {
+    additionalPreTestFn();
+  }
 
   const applyTask = pipe(
     actions,
@@ -51,12 +70,17 @@ const expectFailure = async ({ id, actions, expected }) => {
   }
   const { left: value } = result;
 
-  expect(value).toBeInstanceOf(Error);
+  expect(value).toBeInstanceOf(errorType);
 
   // check what's inside the store
   // @ts-ignore
   const stored = store.inspect().get(id);
   expect(stored).toEqual(expected);
+
+  // run some clearing code after assertion
+  if (additionalPostTestFn) {
+    additionalPostTestFn();
+  }
 };
 
 const aServiceId = "my-id" as NonEmptyString;
@@ -85,6 +109,23 @@ const changeName = ({ data, ...rest }: Service, name: string): Service => ({
   data: { ...data, name: name as NonEmptyString },
   ...rest,
 });
+
+const addDuplicatedCreateTransition = () => {
+  FSM.transitions.push({
+    id: "apply create on *",
+    action: "create",
+    to: "draft",
+    from: "*",
+    exec: ({ args: { data: service } }) =>
+      E.right({
+        ...service,
+        fsm: { state: "draft", lastTransition: "apply create on *" },
+      }),
+  });
+};
+const removeDuplicatedCreateTransition = () => {
+  FSM.transitions.pop();
+};
 
 describe("apply", () => {
   // valid sequences
@@ -120,6 +161,18 @@ describe("apply", () => {
       id: aServiceId,
       actions: [apply("submit", aServiceId)],
       expected: undefined,
+      errorType: FsmNoTransitionMatchedError,
+      additionalPreTestFn: undefined,
+      additionalPostTestFn: undefined,
+    },
+    {
+      title: "on invalid appliedAction",
+      id: aServiceId,
+      actions: [apply("invalidActionName" as any, aServiceId)],
+      expected: undefined,
+      errorType: FsmNoApplicableTransitionError,
+      additionalPreTestFn: undefined,
+      additionalPostTestFn: undefined,
     },
     {
       title: "on invalid sequence of actions",
@@ -135,6 +188,58 @@ describe("apply", () => {
         ...aService, // we expect the first create to have succeeded
         fsm: expect.objectContaining({ state: "draft" }),
       }),
+      errorType: FsmNoTransitionMatchedError,
+      additionalPreTestFn: undefined,
+      additionalPostTestFn: undefined,
+    },
+    {
+      title: "on undeterministic call",
+      id: aServiceId,
+      actions: [apply("create", aServiceId, { data: aService })],
+      expected: undefined,
+      errorType: FsmTooManyTransitionsError,
+      additionalPreTestFn: addDuplicatedCreateTransition,
+      additionalPostTestFn: removeDuplicatedCreateTransition,
     },
   ])("should fail $title", expectFailure);
+
+  it("should fail with FsmStoreFetchError if fetch on store return an Error", async () => {
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.left(new Error());
+      }),
+      save: vi.fn(),
+    };
+
+    const result = await apply("create", aServiceId, { data: aService })(
+      mockStore
+    )();
+
+    if (E.isRight(result)) {
+      throw new Error(`Expecting a failure`);
+    }
+    const { left: value } = result;
+    expect(value).toBeInstanceOf(FsmStoreFetchError);
+  });
+
+  it("should fail with FsmStoreSaveError if save on store return an Error", async () => {
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.none);
+      }),
+      save: vi.fn(() => {
+        return TE.left(new Error());
+      }),
+    };
+
+    const result = await apply("create", aServiceId, { data: aService })(
+      mockStore
+    )();
+
+    if (E.isRight(result)) {
+      throw new Error(`Expecting a failure`);
+    }
+    const { left: value } = result;
+    expect(value).toBeInstanceOf(FsmStoreSaveError);
+  });
 });
