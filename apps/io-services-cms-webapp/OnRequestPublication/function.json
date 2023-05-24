@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "request-publication",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestPublicationItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestPublicationEntryPoint"
+}
