@@ -36,7 +36,7 @@ import {
   applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
   makeEditServiceHandler,
 } from "./controllers/edit-service";
-
+import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";

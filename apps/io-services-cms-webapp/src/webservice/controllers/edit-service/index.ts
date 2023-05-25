@@ -23,7 +23,10 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
-import { itemToResponse, payloadToItem } from "./converters";
+import {
+  itemToResponse,
+  payloadToItem,
+} from "../../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
   // A store of ServicePublication objects
