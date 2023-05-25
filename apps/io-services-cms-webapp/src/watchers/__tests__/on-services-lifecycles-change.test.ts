@@ -29,7 +29,7 @@ describe("On Service Lifecycle Change Handler", () => {
     scenario                  | item                                            | expected
     ${"request-review"}       | ${{ ...aService, fsm: { state: "submitted" } }} | ${{ requestReview: aService }}
     ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "draft" } }}     | ${{}}
-    ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "approved" } }}  | ${{ requestPublication: aService }}
+    ${"request-publication"} | ${{ ...aService, fsm: { state: "approved" } }}  | ${{ requestPublication: aService }}
     ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "rejected" } }}  | ${{}}
     ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "deleted" } }}   | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
