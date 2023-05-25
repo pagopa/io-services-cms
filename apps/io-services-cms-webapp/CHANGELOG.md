@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.8.0
+
+### Minor Changes
+
+- b540ebc: add edit service and transaction on fsm
+- fbbd8c8: ADD Get Service Lifecycle API
+
+### Patch Changes
+
+- Updated dependencies [b540ebc]
+  - @io-services-cms/models@1.4.0
+
 ## 1.7.0
 
 ### Minor Changes
