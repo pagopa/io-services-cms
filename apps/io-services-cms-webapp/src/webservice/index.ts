@@ -32,6 +32,10 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
+import {
+  applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
+  makeDeleteServiceHandler,
+} from "./controllers/delete-service";
 
 const servicePublicationPath: string = "/services/:serviceId/release";
 
@@ -65,6 +69,17 @@ export const createWebServer = ({
         apimConfig: config,
       }),
       applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.delete(
+    "/services/:serviceId",
+    pipe(
+      makeDeleteServiceHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyDeleteServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );
