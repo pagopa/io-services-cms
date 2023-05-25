@@ -111,7 +111,7 @@ export const updateReview =
           sequenceT(TE.ApplicativeSeq)(
             makeServiceLifecycleApply(item, issue)(store),
             pipe(
-              dao.insert({
+              dao.updateStatus({
                 ...item,
                 status: issue.fields.status.name,
               }),

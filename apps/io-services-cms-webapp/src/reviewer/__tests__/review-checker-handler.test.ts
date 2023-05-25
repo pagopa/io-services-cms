@@ -105,10 +105,11 @@ const anInsertQueryResult: QueryResult = {
 };
 
 const mainMockServiceReviewDao = {
-  insert: vi.fn((data: ServiceReviewRowDataTable) => {
+  insert: vi.fn(),
+  executeOnPending: vi.fn(),
+  updateStatus: vi.fn((data: ServiceReviewRowDataTable) => {
     return TE.of(anInsertQueryResult);
   }),
-  executeOnPending: vi.fn(),
 };
 
 const mainMockJiraProxy = {
@@ -249,13 +250,13 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and insert values
-    expect(mainMockServiceReviewDao.insert).toBeCalledTimes(2);
-    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem1,
       status: "APPROVED",
     });
-    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem2,
       status: "REJECTED",
     });
@@ -305,8 +306,8 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and insert values
-    expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mainMockServiceReviewDao.updateStatus).not.toBeCalled();
 
     const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
     const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
@@ -328,17 +329,18 @@ describe("[Service Review Checker Handler] updateReview", () => {
     }
   });
 
-  it("should return UpdateReviewError if insert on DB returns a DatabaseError", async () => {
+  it("should return UpdateReviewError if updateStatus on DB returns a DatabaseError", async () => {
     serviceLifecycleStore.save(aService.id, {
       ...aService,
       fsm: { state: "submitted" },
     });
 
     const mockServiceReviewDao = {
-      insert: vi.fn(() => {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn(() => {
         return TE.left(new DatabaseError("aMessage", 1, "error"));
       }),
-      executeOnPending: vi.fn(),
     };
 
     const result = await updateReview(
