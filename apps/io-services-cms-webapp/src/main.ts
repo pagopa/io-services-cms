@@ -23,6 +23,7 @@ import { createWebServer } from "./webservice";
 
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
+import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 
 import { getDao } from "./utils/service-review-dao";
 
@@ -86,6 +87,20 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
     requestReview: pipe(
       results,
       RA.map(RR.lookup("requestReview")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServicePublicationChangeEntryPoint = pipe(
+  onServicePublicationChangeHandler,
+  processBatchOf(ServicePublication.ItemType),
+  setBindings((results) => ({
+    requestHistory: pipe(
+      results,
+      RA.map(RR.lookup("requestHistory")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),
