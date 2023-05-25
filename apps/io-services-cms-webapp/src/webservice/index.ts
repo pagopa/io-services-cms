@@ -32,6 +32,14 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
+import {
+  applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
+  makeEditServiceHandler,
+} from "./controllers/edit-service";
+import {
+  applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
+  makeGetServiceLifecycleHandler,
+} from "./controllers/get-service-lifecycle";
 
 const servicePublicationPath: string = "/services/:serviceId/release";
 
@@ -65,6 +73,28 @@ export const createWebServer = ({
         apimConfig: config,
       }),
       applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.get(
+    "/services/:serviceId",
+    pipe(
+      makeGetServiceLifecycleHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyGetServiceLifecycleRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.put(
+    "/services/:serviceId",
+    pipe(
+      makeEditServiceHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyEditServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );

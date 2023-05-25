@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-webapp",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "packageManager": "yarn@3.3.0",
   "files": [
     "**/function.json",

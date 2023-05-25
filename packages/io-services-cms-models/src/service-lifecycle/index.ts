@@ -76,7 +76,8 @@ type FSM = {
     Transition<Action<"reject">, State<"submitted">, State<"rejected">>,
     Transition<Action<"delete">, State<"rejected">, State<"deleted">>,
     Transition<Action<"delete">, State<"approved">, State<"deleted">>,
-    Transition<Action<"edit">, State<"rejected">, State<"draft">>
+    Transition<Action<"edit">, State<"rejected">, State<"draft">>,
+    Transition<Action<"edit">, State<"approved">, State<"draft">>
   ];
 };
 
@@ -215,13 +216,23 @@ const FSM: FSM = {
       action: "edit",
       from: "rejected",
       to: "draft",
-      exec: ({ current }) =>
+      exec: ({ current, args: { data } }) =>
         E.right({
           ...current,
-          fsm: {
-            state: "draft",
-            lastTransition: "apply edit on rejected",
-          },
+          ...data,
+          fsm: { state: "draft", lastTransition: "apply edit on reject" },
+        }),
+    },
+    {
+      id: "apply edit on approved",
+      action: "edit",
+      from: "approved",
+      to: "draft",
+      exec: ({ current, args: { data } }) =>
+        E.right({
+          ...current,
+          ...data,
+          fsm: { state: "draft", lastTransition: "apply edit on approved" },
         }),
     },
   ],

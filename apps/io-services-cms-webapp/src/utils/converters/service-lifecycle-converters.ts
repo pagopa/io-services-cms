@@ -1,12 +1,12 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 
-import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
-import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
+import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import {
   ServiceLifecycleStatusType,
   ServiceLifecycleStatusTypeEnum,
-} from "../../../generated/api/ServiceLifecycleStatusType";
-import { ScopeEnum } from "../../../generated/api/ServiceMetadata";
+} from "../../generated/api/ServiceLifecycleStatusType";
+import { ScopeEnum } from "../../generated/api/ServiceMetadata";
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],

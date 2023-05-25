@@ -37,7 +37,10 @@ import {
   getUserByEmail,
   upsertSubscription,
 } from "../../../lib/clients/apim-client";
-import { payloadToItem, itemToResponse } from "./converters";
+import {
+  payloadToItem,
+  itemToResponse,
+} from "../../../utils/converters/service-lifecycle-converters";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>

@@ -19,6 +19,7 @@ stateDiagram-v2
     rejected --> deleted: delete
     rejected --> draft: edit
     approved --> deleted: delete
+    approved --> draft: edit
 ```
 
 #### Usage
