@@ -1,8 +1,4 @@
-import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -25,16 +21,9 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-import { ServicePublication as ServiceResponsePayload } from "../../../generated/api/ServicePublication";
-import { itemToResponse } from "../../../utils/converters/service-publication-converters";
-
-type Dependencies = {
-  // A store of ServicePublication objects
-  store: ReturnType<
-    typeof stores.createCosmosStore<ServicePublication.ItemType>
-  >;
-};
+import { flow, pipe } from "fp-ts/lib/function";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
+import { itemToResponse } from "../../../utils/converters/service-lifecycle-converters";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
@@ -45,28 +34,38 @@ type HandlerResponseTypes =
   | IResponseErrorTooManyRequests
   | IResponseErrorInternal;
 
-type PublishServiceHandler = (
+type CreateServiceHandler = (
   auth: IAzureApiAuthorization,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  servicePayload: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
-export const makeGetServiceHandler =
-  ({ store }: Dependencies): PublishServiceHandler =>
+type Dependencies = {
+  // A store od ServiceLifecycle objects
+  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+};
+
+export const makeGetServiceLifecycleHandler =
+  ({ store }: Dependencies): CreateServiceHandler =>
   (_auth, serviceId) =>
     pipe(
-      store.fetch(serviceId),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      TE.map((res) =>
-        O.isSome(res)
-          ? ResponseSuccessJson<ServiceResponsePayload>(
-              itemToResponse(res.value)
-            )
-          : ResponseErrorNotFound("Not found", `${serviceId} not found`)
+      serviceId,
+      store.fetch,
+      TE.bimap(
+        (err) => ResponseErrorInternal(err.message),
+        flow(
+          O.foldW(
+            () => ResponseErrorNotFound("Not found", `${serviceId} not found`),
+            (content) =>
+              ResponseSuccessJson<ServiceResponsePayload>(
+                itemToResponse(content)
+              )
+          )
+        )
       ),
       TE.toUnion
     )();
 
-export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
+export const applyRequestMiddelwares = (handler: CreateServiceHandler) =>
   pipe(
     handler,
     // TODO: implement ip filter
