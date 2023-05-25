@@ -1,18 +1,17 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
+import * as TE from "fp-ts/lib/TaskEither";
+import { DatabaseError, QueryResult } from "pg";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { JiraIssue } from "../../lib/clients/jira-client";
+import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
   IssueItemPair,
-  UpdateReviewError,
   buildIssueItemPairs,
   updateReview,
 } from "../review-checker-handler";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
-import { DatabaseError, QueryResult } from "pg";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -329,7 +328,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     }
   });
 
-  it("should return UpdateReviewError if updateStatus on DB returns a DatabaseError", async () => {
+  it("should return a generic Error if updateStatus on DB returns a DatabaseError", async () => {
     serviceLifecycleStore.save(aService.id, {
       ...aService,
       fsm: { state: "submitted" },
@@ -358,7 +357,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
-      expect(result.left).toBeInstanceOf(UpdateReviewError);
+      expect(result.left.message).eq("aMessage");
     }
   });
 });
