@@ -13,15 +13,17 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorInternal,
-  ResponseSuccessNoContent,
+  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
-import { payloadToItem } from "./converters";
+import { itemToResponse, payloadToItem } from "./converters";
 
 type Dependencies = {
   // A store of ServicePublication objects
@@ -29,6 +31,7 @@ type Dependencies = {
 };
 
 type HandlerResponseTypes =
+  | IResponseSuccessJson<ServiceResponsePayload>
   | IResponseSuccessNoContent
   | IResponseErrorForbiddenNotAuthorized
   | IResponseErrorNotFound
@@ -49,7 +52,8 @@ export const makeEditServiceHandler =
       ServiceLifecycle.apply("edit", serviceId, {
         data: payloadToItem(serviceId, servicePayload),
       }),
-      RTE.map(ResponseSuccessNoContent),
+      RTE.map(itemToResponse),
+      RTE.map(ResponseSuccessJson),
       RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
       RTE.toUnion
     )(store)();
