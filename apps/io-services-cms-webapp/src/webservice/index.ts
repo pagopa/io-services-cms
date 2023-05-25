@@ -37,6 +37,10 @@ import {
   makeEditServiceHandler,
 } from "./controllers/edit-service";
 
+  applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
+  makeGetServiceLifecycleHandler,
+} from "./controllers/get-service-lifecycle";
+
 const servicePublicationPath: string = "/services/:serviceId/release";
 
 type Dependencies = {
@@ -69,6 +73,17 @@ export const createWebServer = ({
         apimConfig: config,
       }),
       applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.get(
+    "/services/:serviceId",
+    pipe(
+      makeGetServiceLifecycleHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyGetServiceLifecycleRequestMiddelwares,
       wrapRequestHandler
     )
   );
