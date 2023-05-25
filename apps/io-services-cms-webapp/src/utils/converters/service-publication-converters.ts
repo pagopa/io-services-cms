@@ -1,10 +1,10 @@
 import { ServicePublication } from "@io-services-cms/models";
-import { ServicePublication as ServiceResponsePayload } from "../../../generated/api/ServicePublication";
-import { toScopeType } from "../create-service/converters";
+import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   ServicePublicationStatusType,
   ServicePublicationStatusTypeEnum,
-} from "../../../generated/api/ServicePublicationStatusType";
+} from "../../generated/api/ServicePublicationStatusType";
+import { toScopeType } from "./service-lifecycle-converters";
 
 export const itemToResponse = ({
   fsm: { state },

@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.4.0
+
+### Minor Changes
+
+- b540ebc: add edit service and transaction on fsm
+
 ## 1.3.0
 
 ### Minor Changes
