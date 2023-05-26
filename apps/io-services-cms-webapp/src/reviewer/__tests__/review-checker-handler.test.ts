@@ -1,18 +1,17 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { FSMStore, ServiceLifecycle, stores } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
+import * as TE from "fp-ts/lib/TaskEither";
+import { DatabaseError, QueryResult } from "pg";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { JiraIssue } from "../../lib/clients/jira-client";
+import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
   IssueItemPair,
-  UpdateReviewError,
   buildIssueItemPairs,
   updateReview,
 } from "../review-checker-handler";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
-import { DatabaseError, QueryResult } from "pg";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -105,10 +104,11 @@ const anInsertQueryResult: QueryResult = {
 };
 
 const mainMockServiceReviewDao = {
-  insert: vi.fn((data: ServiceReviewRowDataTable) => {
+  insert: vi.fn(),
+  executeOnPending: vi.fn(),
+  updateStatus: vi.fn((data: ServiceReviewRowDataTable) => {
     return TE.of(anInsertQueryResult);
   }),
-  executeOnPending: vi.fn(),
 };
 
 const mainMockJiraProxy = {
@@ -249,13 +249,13 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and insert values
-    expect(mainMockServiceReviewDao.insert).toBeCalledTimes(2);
-    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem1,
       status: "APPROVED",
     });
-    expect(mainMockServiceReviewDao.insert).toBeCalledWith({
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem2,
       status: "REJECTED",
     });
@@ -305,8 +305,8 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and insert values
-    expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mainMockServiceReviewDao.updateStatus).not.toBeCalled();
 
     const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
     const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
@@ -328,17 +328,96 @@ describe("[Service Review Checker Handler] updateReview", () => {
     }
   });
 
-  it("should return UpdateReviewError if insert on DB returns a DatabaseError", async () => {
+  it("should not execute update pending review when FSM apply fails", async () => {
+    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
+      fetch: vi.fn((_: string) => {
+        return TE.left(new Error());
+      }),
+      save: vi.fn,
+    };
+    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+      Promise.resolve({} as QueryResult)
+    );
+    const mockServiceReviewDao = {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+      ),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      mockServiceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isLeft(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mockServiceLifecycleStore.fetch).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
+  });
+
+  it("should not execute update pending review when requested transition is not applicable", async () => {
+    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
+      fetch: vi.fn((_: string) => {
+        return TE.right(O.none);
+      }),
+      save: vi.fn,
+    };
+    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+      Promise.resolve({} as QueryResult)
+    );
+    const mockServiceReviewDao = {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+      ),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      mockServiceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isRight(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mockServiceLifecycleStore.fetch).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
+  });
+
+  it("should return a generic Error if updateStatus on DB returns a DatabaseError", async () => {
     serviceLifecycleStore.save(aService.id, {
       ...aService,
       fsm: { state: "submitted" },
     });
 
     const mockServiceReviewDao = {
-      insert: vi.fn(() => {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn(() => {
         return TE.left(new DatabaseError("aMessage", 1, "error"));
       }),
-      executeOnPending: vi.fn(),
     };
 
     const result = await updateReview(
@@ -356,7 +435,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     // updateReview result
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
-      expect(result.left).toBeInstanceOf(UpdateReviewError);
+      expect(result.left.message).eq("aMessage");
     }
   });
 });

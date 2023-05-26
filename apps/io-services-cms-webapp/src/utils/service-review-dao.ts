@@ -19,7 +19,6 @@ const knex = knexBase({
 export type ServiceReviewRowDataTable = t.TypeOf<
   typeof ServiceReviewRowDataTable
 >;
-
 export const ServiceReviewRowDataTable = t.intersection([
   t.type({
     service_id: NonEmptyString,
@@ -65,6 +64,27 @@ const createReadSql = ({
     .where("status", "PENDING")
     .toQuery();
 
+const createUpdateStatusSql = (
+  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
+  service: ServiceReviewRowDataTable
+): string =>
+  knex
+    .withSchema(REVIEWER_DB_SCHEMA)
+    .table(REVIEWER_DB_TABLE)
+    .update("status", service.status)
+    .where({
+      service_id: service.service_id,
+      service_version: service.service_version,
+    })
+    .toQuery();
+
+const updateStatus =
+  (pool: Pool, dbConfig: PostgreSqlConfig) =>
+  (
+    data: ServiceReviewRowDataTable
+  ): TE.TaskEither<DatabaseError, QueryResult> =>
+    pipe(createUpdateStatusSql(dbConfig, data), queryDataTable(pool));
+
 const executeOnPending =
   (pool: Pool, dbConfig: PostgreSqlConfig) =>
   (
@@ -74,21 +94,26 @@ const executeOnPending =
       TE.tryCatch(async () => {
         const poolClient = await pool.connect();
         const cursor = createCursor(poolClient)(sql);
-        // eslint-disable-next-line functional/no-let
-        let length: number;
-        do {
-          const rows = await cursor.read(dbConfig.REVIEWER_DB_READ_MAX_ROW);
-          length = rows.length;
-          const handler = pipe(
-            rows,
-            t.array(ServiceReviewRowDataTable).decode,
-            E.mapLeft(E.toError),
-            TE.fromEither,
-            TE.chain(fn)
-          );
-          await handler(); // TODO: manage error (at least write a log)
-        } while (length > 0);
-        poolClient.release();
+        try {
+          // eslint-disable-next-line functional/no-let
+          let length: number;
+          do {
+            const rows = await cursor.read(dbConfig.REVIEWER_DB_READ_MAX_ROW);
+            length = rows.length;
+            const handler = pipe(
+              rows,
+              t.array(ServiceReviewRowDataTable).decode,
+              E.mapLeft(E.toError),
+              TE.fromEither,
+              TE.chain(fn)
+            );
+            await handler(); // TODO: manage error (at least write a log)
+          } while (length > 0);
+        } finally {
+          cursor.close(() => {
+            poolClient.release();
+          });
+        }
       }, E.toError)
     );
 
@@ -96,6 +121,7 @@ export const getDao = (dbConfig: PostgreSqlConfig) =>
   pipe(getPool(dbConfig), (pool) => ({
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),
+    updateStatus: updateStatus(pool, dbConfig),
   }));
 
 export type ServiceReviewDao = ReturnType<typeof getDao>;

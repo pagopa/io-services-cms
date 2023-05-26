@@ -47,6 +47,10 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
+  REVIEWER_DB_APP_NAME: withDefault(
+    NonEmptyString,
+    "reviewer" as NonEmptyString
+  ),
 });
 
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
