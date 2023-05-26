@@ -36,6 +36,14 @@ import {
   applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
   makeDeleteServiceHandler,
 } from "./controllers/delete-service";
+import {
+  applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
+  makeEditServiceHandler,
+} from "./controllers/edit-service";
+import {
+  applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
+  makeGetServiceLifecycleHandler,
+} from "./controllers/get-service-lifecycle";
 
 const servicePublicationPath: string = "/services/:serviceId/release";
 
@@ -73,6 +81,28 @@ export const createWebServer = ({
     )
   );
 
+  router.get(
+    "/services/:serviceId",
+    pipe(
+      makeGetServiceLifecycleHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyGetServiceLifecycleRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.put(
+    "/services/:serviceId",
+    pipe(
+      makeEditServiceHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyEditServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+  
   router.delete(
     "/services/:serviceId",
     pipe(

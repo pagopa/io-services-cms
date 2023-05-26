@@ -15,8 +15,9 @@ import {
   getUserByEmail,
   upsertSubscription,
 } from "../../lib/clients/apim-client";
+import { itemToResponse as getLifecycleItemToResponse } from "../../utils/converters/service-lifecycle-converters";
+import { itemToResponse as getPublicationItemToResponse } from "../../utils/converters/service-publication-converters";
 import { createWebServer } from "../index";
-import { itemToResponse as getPublicationItemToResponse } from "../controllers/get-service-publication/converters";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -240,29 +241,77 @@ describe("WebService", () => {
       expect(response.statusCode).toBe(204);
     });
   });
-
-  describe("reviewService", () => {
-    const aService = {
-      id: "aServiceId",
-      data: {
-        name: "aServiceName",
-        description: "aServiceDescription",
-        authorized_recipients: [],
-        max_allowed_payment_amount: 123,
-        metadata: {
-          address: "via tal dei tali 123",
-          email: "service@email.it",
-          pec: "service@pec.it",
-          scope: "LOCAL",
-        },
-        organization: {
-          name: "anOrganizationName",
-          fiscal_code: "12345678901",
-        },
-        require_secure_channel: false,
+  
+  const aServiceLifecycle = {
+    id: "aServiceId",
+    data: {
+      name: "aServiceName",
+      description: "aServiceDescription",
+      authorized_recipients: [],
+      max_allowed_payment_amount: 123,
+      metadata: {
+        address: "via tal dei tali 123",
+        email: "service@email.it",
+        pec: "service@pec.it",
+        scope: "LOCAL",
       },
+      organization: {
+        name: "anOrganizationName",
+        fiscal_code: "12345678901",
+      },
+      require_secure_channel: false,
+    },
+  } as unknown as ServiceLifecycle.ItemType;
+
+  describe("getServiceLifecycle", () => {
+    it("should fail when cannot find requested service", async () => {
+      const response = await request(app)
+        .get("/api/services/s12")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(404); // FIXME: should be 404 (or 409)
+    });
+
+    const asServiceLifecycleWithStatus = {
+      ...aServiceLifecycle,
+      fsm: { state: "published" },
     } as unknown as ServiceLifecycle.ItemType;
 
+    it("should retrieve a service", async () => {
+      serviceLifecycleStore.save("s12", asServiceLifecycleWithStatus);
+
+      const response = await request(app)
+        .get("/api/services/s12")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(JSON.stringify(response.body)).toBe(
+        JSON.stringify(getLifecycleItemToResponse(asServiceLifecycleWithStatus))
+      );
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("should not allow the operation without right group", async () => {
+      const response = await request(app)
+        .get("/api/services/s12")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", "OtherGroup")
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe("reviewService", () => {
     it("should fail when cannot find requested service", async () => {
       const response = await request(app)
         .put("/api/services/s1/review")
@@ -277,7 +326,7 @@ describe("WebService", () => {
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
       serviceLifecycleStore.save("s1", {
-        ...aService,
+        ...aServiceLifecycle,
         fsm: { state: "approved" },
       });
 
@@ -306,7 +355,7 @@ describe("WebService", () => {
 
     it("should submit a service", async () => {
       serviceLifecycleStore.save("s1", {
-        ...aService,
+        ...aServiceLifecycle,
         fsm: { state: "draft" },
       });
 
@@ -322,7 +371,7 @@ describe("WebService", () => {
     });
   });
 
-  const aService = {
+  const aServicePub = {
     id: "aServiceId",
     data: {
       name: "aServiceName",
@@ -358,7 +407,7 @@ describe("WebService", () => {
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
       servicePublicationStore.save("s1", {
-        ...aService,
+        ...aServicePub,
         fsm: { state: "published" },
       });
 
@@ -387,7 +436,7 @@ describe("WebService", () => {
 
     it("should publish a service", async () => {
       servicePublicationStore.save("s1", {
-        ...aService,
+        ...aServicePub,
         fsm: { state: "unpublished" },
       });
 
@@ -406,18 +455,18 @@ describe("WebService", () => {
   describe("getServicePublication", () => {
     it("should fail when cannot find requested service", async () => {
       const response = await request(app)
-        .delete("/api/services/s3/release")
+        .get("/api/services/s3/release")
         .send()
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", UserGroup.ApiServiceWrite)
         .set("x-user-id", "any-user-id")
         .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+      expect(response.statusCode).toBe(404); // FIXME: should be 404 (or 409)
     });
 
     const asServiceWithStatus = {
-      ...aService,
+      ...aServicePub,
       fsm: { state: "published" },
     } as unknown as ServicePublication.ItemType;
 
@@ -466,7 +515,7 @@ describe("WebService", () => {
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
       servicePublicationStore.save("s2", {
-        ...aService,
+        ...aServicePub,
         fsm: { state: "unpublished" },
       });
 
@@ -495,7 +544,7 @@ describe("WebService", () => {
 
     it("should unpublish a service", async () => {
       servicePublicationStore.save("s2", {
-        ...aService,
+        ...aServicePub,
         fsm: { state: "published" },
       });
 
@@ -508,6 +557,117 @@ describe("WebService", () => {
         .set("x-subscription-id", "any-subscription-id");
 
       expect(response.statusCode).toBe(204);
+    });
+  });
+
+  describe("editService", () => {
+    const aServicePayload = {
+      name: "string",
+      description: "string",
+      organization: {
+        name: "string",
+        fiscal_code: "12345678901",
+        department_name: "string",
+      },
+      require_secure_channel: true,
+      authorized_recipients: ["12345678901"],
+      max_allowed_payment_amount: 0,
+      metadata: {
+        web_url: "string",
+        app_ios: "string",
+        app_android: "string",
+        tos_url: "string",
+        privacy_url: "string",
+        address: "via casa mia 245",
+        phone: "string",
+        email: "string",
+        pec: "string",
+        cta: "string",
+        token_name: "string",
+        support_url: "string",
+        scope: "NATIONAL",
+      },
+    };
+
+    const aService = {
+      id: "aServiceId",
+      data: {
+        name: "aServiceName",
+        description: "aServiceDescription",
+        authorized_recipients: [],
+        max_allowed_payment_amount: 123,
+        metadata: {
+          address: "via tal dei tali 123",
+          email: "service@email.it",
+          pec: "service@pec.it",
+          scope: "LOCAL",
+        },
+        organization: {
+          name: "anOrganizationName",
+          fiscal_code: "12345678901",
+        },
+        require_secure_channel: false,
+      },
+    } as unknown as ServiceLifecycle.ItemType;
+
+    it("should fail when cannot find requested service", async () => {
+      const response = await request(app)
+        .put("/api/services/s4")
+        .send(aServicePayload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+    });
+
+    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+      serviceLifecycleStore.save("s1", {
+        ...aService,
+        fsm: { state: "deleted" },
+      });
+
+      const response = await request(app)
+        .put("/api/services/s4")
+        .send(aServicePayload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(500); // FIXME: should be 409
+    });
+
+    it("should not allow the operation without right group", async () => {
+      const response = await request(app)
+        .put("/api/services/s4")
+        .send(aServicePayload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", "OtherGroup")
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should edit a service", async () => {
+      serviceLifecycleStore.save("s4", {
+        ...aService,
+        fsm: { state: "rejected" },
+      });
+
+      const response = await request(app)
+        .put("/api/services/s4")
+        .send(aServicePayload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.status.value).toBe("draft");
+      expect(response.body.metadata.address).toBe("via casa mia 245");
     });
   });
 });

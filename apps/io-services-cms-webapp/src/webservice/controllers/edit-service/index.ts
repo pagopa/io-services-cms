@@ -1,8 +1,4 @@
-import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -10,6 +6,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -19,21 +16,21 @@ import {
   IResponseSuccessJson,
   IResponseSuccessNoContent,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ServicePublication as ServiceResponsePayload } from "../../../generated/api/ServicePublication";
-import { itemToResponse } from "../../../utils/converters/service-publication-converters";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
+import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
+import {
+  itemToResponse,
+  payloadToItem,
+} from "../../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
   // A store of ServicePublication objects
-  store: ReturnType<
-    typeof stores.createCosmosStore<ServicePublication.ItemType>
-  >;
+  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
 };
 
 type HandlerResponseTypes =
@@ -45,28 +42,26 @@ type HandlerResponseTypes =
   | IResponseErrorTooManyRequests
   | IResponseErrorInternal;
 
-type PublishServiceHandler = (
+type EditServiceHandler = (
   auth: IAzureApiAuthorization,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  serviceId: ServiceLifecycle.definitions.ServiceId,
+  servicePayload: ServiceRequestPayload
 ) => Promise<HandlerResponseTypes>;
 
-export const makeGetServiceHandler =
-  ({ store }: Dependencies): PublishServiceHandler =>
-  (_auth, serviceId) =>
+export const makeEditServiceHandler =
+  ({ store }: Dependencies): EditServiceHandler =>
+  (_auth, serviceId, servicePayload) =>
     pipe(
-      store.fetch(serviceId),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      TE.map((res) =>
-        O.isSome(res)
-          ? ResponseSuccessJson<ServiceResponsePayload>(
-              itemToResponse(res.value)
-            )
-          : ResponseErrorNotFound("Not found", `${serviceId} not found`)
-      ),
-      TE.toUnion
-    )();
+      ServiceLifecycle.apply("edit", serviceId, {
+        data: payloadToItem(serviceId, servicePayload),
+      }),
+      RTE.map(itemToResponse),
+      RTE.map(ResponseSuccessJson),
+      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      RTE.toUnion
+    )(store)();
 
-export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
+export const applyRequestMiddelwares = (handler: EditServiceHandler) =>
   pipe(
     handler,
     // TODO: implement ip filter
@@ -76,6 +71,8 @@ export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
+      RequiredParamMiddleware("serviceId", NonEmptyString),
+      // validate the reuqest body to be in the expected shape
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
     )
   );
