@@ -45,7 +45,8 @@ import {
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
 
-const servicePublicationPath: string = "/services/:serviceId/release";
+const serviceLifecyclePath = "/services/:serviceId";
+const servicePublicationPath = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
@@ -82,7 +83,7 @@ export const createWebServer = ({
   );
 
   router.get(
-    "/services/:serviceId",
+    serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
         store: serviceLifecycleStore,
@@ -93,7 +94,7 @@ export const createWebServer = ({
   );
 
   router.put(
-    "/services/:serviceId",
+    serviceLifecyclePath,
     pipe(
       makeEditServiceHandler({
         store: serviceLifecycleStore,
@@ -102,9 +103,9 @@ export const createWebServer = ({
       wrapRequestHandler
     )
   );
-  
+
   router.delete(
-    "/services/:serviceId",
+    serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
         store: serviceLifecycleStore,
