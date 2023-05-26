@@ -1,4 +1,4 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { FSMStore, ServiceLifecycle, stores } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -326,6 +326,84 @@ describe("[Service Review Checker Handler] updateReview", () => {
         expect(fsmService2Result.right.value.fsm.state).toBe("submitted");
       }
     }
+  });
+
+  it("should not execute update pending review when FSM apply fails", async () => {
+    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
+      fetch: vi.fn((_: string) => {
+        return TE.left(new Error());
+      }),
+      save: vi.fn,
+    };
+    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+      Promise.resolve({} as QueryResult)
+    );
+    const mockServiceReviewDao = {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+      ),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      mockServiceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isLeft(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mockServiceLifecycleStore.fetch).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
+  });
+
+  it("should not execute update pending review when requested transition is not applicable", async () => {
+    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
+      fetch: vi.fn((_: string) => {
+        return TE.right(O.none);
+      }),
+      save: vi.fn,
+    };
+    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+      Promise.resolve({} as QueryResult)
+    );
+    const mockServiceReviewDao = {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+      ),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      mockServiceLifecycleStore
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isRight(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mockServiceLifecycleStore.fetch).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
   });
 
   it("should return a generic Error if updateStatus on DB returns a DatabaseError", async () => {

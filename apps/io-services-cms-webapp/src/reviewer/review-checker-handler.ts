@@ -108,7 +108,7 @@ export const buildIssueItemPairs =
  */
 export const updateReview =
   (dao: ServiceReviewDao, store: FSMStore<ServiceLifecycle.ItemType>) =>
-  (data: TE.TaskEither<Error, IssueItemPair[]>) =>
+  (data: TE.TaskEither<Error, IssueItemPair[]>): TE.TaskEither<Error, void> =>
     pipe(
       data,
       TE.map((issuesAndItems) =>
@@ -117,9 +117,9 @@ export const updateReview =
             pipe(
               makeServiceLifecycleApply(item, issue)(store),
               TE.orElse((fsmError) => {
+                // eslint-disable-next-line sonarjs/no-small-switch
                 switch (fsmError.kind) {
                   case "FsmNoTransitionMatchedError":
-                  case "FsmTooManyTransitionsError":
                     // eslint-disable-next-line no-console
                     console.warn(fsmError.message); // FIXME: is it correct to log via console?
                     return TE.right(void 0);
