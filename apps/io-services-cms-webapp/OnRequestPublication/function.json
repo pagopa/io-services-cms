@@ -1,7 +1,7 @@
 {
   "bindings": [
     {
-      "queueName": "request-publication",
+      "queueName": "%REQUEST_PUBLICATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestPublicationItem",
       "type": "queueTrigger",

@@ -3,7 +3,7 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-type Actions = "requestReview" | "requestPublication" | "other";
+type Actions = "requestReview" | "requestPublication";
 
 type NoAction = typeof noAction;
 type Action<A extends Actions, B> = Record<A, B>;

@@ -78,6 +78,13 @@ export const ApimConfig = t.type({
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
+// Queue configuration
+export const QueueConfig = t.type({
+  REQUEST_REVIEW_QUEUE: NonEmptyString,
+  REQUEST_PUBLICATION_QUEUE: NonEmptyString,
+});
+export type QueueConfig = t.TypeOf<typeof QueueConfig>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -90,6 +97,7 @@ export const IConfig = t.intersection([
   CosmosConfig,
   AzureClientSecretCredential,
   ApimConfig,
+  QueueConfig,
 ]);
 
 export const envConfig = {

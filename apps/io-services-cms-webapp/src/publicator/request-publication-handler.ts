@@ -19,13 +19,6 @@ const parseIncomingMessage = (
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
-export class RequestPublicationParseError extends Error {
-  public kind = "RequestPublicationParseError";
-  constructor() {
-    super(`Error while parsing incoming message`);
-  }
-}
-
 export const createRequestPublicationHandler = (
   store: FSMStore<ServicePublication.ItemType>
 ): ReturnType<typeof withJsonInput> =>
@@ -34,8 +27,8 @@ export const createRequestPublicationHandler = (
       queueItem,
       parseIncomingMessage,
       TE.fromEither,
-      TE.mapLeft((_) => new RequestPublicationParseError()),
-      TE.chain((service) =>
+      TE.mapLeft((_) => new Error("Error while parsing incoming message")),
+      TE.chainW((service) =>
         ServicePublication.apply("override", service.id, { data: service })(
           store
         )

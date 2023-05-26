@@ -1,7 +1,7 @@
 {
   "bindings": [
     {
-      "queueName": "request-review",
+      "queueName": "%REQUEST_REVIEW_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestReviewItem",
       "type": "queueTrigger",
