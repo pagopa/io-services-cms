@@ -26,8 +26,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ServicePublication as ServiceResponsePayload } from "../../../generated/api/ServicePublication";
-import { itemToResponse } from "../../../utils/converters/service-publication-converters";
+import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
+import { itemToResponse } from "../../utils/converters/service-publication-converters";
 
 type Dependencies = {
   // A store of ServicePublication objects
