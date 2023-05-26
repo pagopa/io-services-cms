@@ -33,6 +33,10 @@ import {
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
 import {
+  applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
+  makeDeleteServiceHandler,
+} from "./controllers/delete-service";
+import {
   applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
   makeEditServiceHandler,
 } from "./controllers/edit-service";
@@ -41,7 +45,8 @@ import {
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
 
-const servicePublicationPath: string = "/services/:serviceId/release";
+const serviceLifecyclePath = "/services/:serviceId";
+const servicePublicationPath = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
@@ -78,7 +83,7 @@ export const createWebServer = ({
   );
 
   router.get(
-    "/services/:serviceId",
+    serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
         store: serviceLifecycleStore,
@@ -89,12 +94,23 @@ export const createWebServer = ({
   );
 
   router.put(
-    "/services/:serviceId",
+    serviceLifecyclePath,
     pipe(
       makeEditServiceHandler({
         store: serviceLifecycleStore,
       }),
       applyEditServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.delete(
+    serviceLifecyclePath,
+    pipe(
+      makeDeleteServiceHandler({
+        store: serviceLifecycleStore,
+      }),
+      applyDeleteServiceRequestMiddelwares,
       wrapRequestHandler
     )
   );
