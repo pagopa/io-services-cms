@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.5.0
+
+### Minor Changes
+
+- c58013f: Make approved service as publicable
+
 ## 1.4.0
 
 ### Minor Changes
