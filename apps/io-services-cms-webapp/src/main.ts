@@ -17,6 +17,7 @@ import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
+import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { createWebServer } from "./webservice";
@@ -73,6 +74,9 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   )
 );
 
+export const createRequestPublicationEntryPoint =
+  createRequestPublicationHandler(servicePublicationStore);
+
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
@@ -86,6 +90,12 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
     requestReview: pipe(
       results,
       RA.map(RR.lookup("requestReview")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+    requestPublication: pipe(
+      results,
+      RA.map(RR.lookup("requestPublication")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

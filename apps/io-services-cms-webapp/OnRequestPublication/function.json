@@ -1,13 +1,13 @@
 {
   "bindings": [
     {
-      "queueName": "%REQUEST_REVIEW_QUEUE%",
+      "queueName": "%REQUEST_PUBLICATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
-      "name": "requestReviewItem",
+      "name": "requestPublicationItem",
       "type": "queueTrigger",
       "direction": "in"
     }
   ],
   "scriptFile": "../dist/main.js",
-  "entryPoint": "createRequestReviewEntryPoint"
+  "entryPoint": "createRequestPublicationEntryPoint"
 }
