@@ -47,6 +47,10 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
+  REVIEWER_DB_APP_NAME: withDefault(
+    NonEmptyString,
+    "reviewer" as NonEmptyString
+  ),
 });
 
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
@@ -78,6 +82,13 @@ export const ApimConfig = t.type({
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
+// Queue configuration
+export const QueueConfig = t.type({
+  REQUEST_REVIEW_QUEUE: NonEmptyString,
+  REQUEST_PUBLICATION_QUEUE: NonEmptyString,
+});
+export type QueueConfig = t.TypeOf<typeof QueueConfig>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -90,6 +101,7 @@ export const IConfig = t.intersection([
   CosmosConfig,
   AzureClientSecretCredential,
   ApimConfig,
+  QueueConfig,
 ]);
 
 export const envConfig = {

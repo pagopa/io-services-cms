@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.9.0
+
+### Minor Changes
+
+- c58013f: Make approved service as publicable
+
+### Patch Changes
+
+- Updated dependencies [c58013f]
+  - @io-services-cms/models@1.5.0
+
 ## 1.8.0
 
 ### Minor Changes
