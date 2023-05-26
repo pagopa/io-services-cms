@@ -1,5 +1,4 @@
 import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import Cursor from "pg-cursor";
 import { PostgreSqlConfig } from "../../config";
@@ -17,6 +16,7 @@ export const getPool = (config: PostgreSqlConfig): Pool => {
       port: config.REVIEWER_DB_PORT,
       ssl: true,
       user: config.REVIEWER_DB_USER,
+      application_name: config.REVIEWER_DB_APP_NAME,
     });
   }
   return singletonPool;
@@ -30,9 +30,7 @@ export const createCursor =
 export const queryDataTable =
   (pool: Pool) =>
   (query: string): TE.TaskEither<DatabaseError, QueryResult> =>
-    pipe(
-      TE.tryCatch(
-        () => pool.query(query),
-        (error) => error as DatabaseError
-      )
+    TE.tryCatch(
+      () => pool.query(query),
+      (error) => error as DatabaseError
     );

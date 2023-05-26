@@ -1,14 +1,16 @@
 import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
+import { sequenceT } from "fp-ts/lib/Apply";
+import * as E from "fp-ts/lib/Either";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { sequenceT } from "fp-ts/lib/Apply";
+import { JiraIssue } from "../lib/clients/jira-client";
 import { JiraProxy } from "../utils/jira-proxy";
 import {
   ServiceReviewDao,
   ServiceReviewRowDataTable,
 } from "../utils/service-review-dao";
-import { JiraIssue } from "../lib/clients/jira-client";
 
 export type ProcessedJiraIssue = JiraIssue & {
   fields: JiraIssue["fields"] & {
@@ -27,15 +29,25 @@ const makeServiceLifecycleApply = (
 ) => {
   switch (jiraIssue.fields.status.name) {
     case "REJECTED":
-      return ServiceLifecycle.apply("reject", serviceReview.service_id, {
-        reason: jiraIssue.fields.comment.comments
-          .map((value) => value.body)
-          .join("|"),
-      });
+      return pipe(
+        {
+          reason: jiraIssue.fields.comment.comments
+            .map((value) => value.body)
+            .join("|"),
+        },
+        (data) =>
+          ServiceLifecycle.apply("reject", serviceReview.service_id, data),
+        RTE.map((_) => void 0)
+      );
     case "APPROVED":
-      return ServiceLifecycle.apply("approve", serviceReview.service_id, {
-        approvalDate: jiraIssue.fields.statuscategorychangedate,
-      });
+      return pipe(
+        {
+          approvalDate: jiraIssue.fields.statuscategorychangedate,
+        },
+        (data) =>
+          ServiceLifecycle.apply("approve", serviceReview.service_id, data),
+        RTE.map((_) => void 0)
+      );
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = jiraIssue.fields.status.name;
@@ -86,13 +98,6 @@ export const buildIssueItemPairs =
       )
     );
 
-export class UpdateReviewError extends Error {
-  public kind = "UpdateReviewError";
-  constructor() {
-    super(`Error while updating a review`);
-  }
-}
-
 /**
  * For each pair, compose a sub-procedure of actions to be executed one after another
  * first we want to apply the transition to the service
@@ -103,25 +108,44 @@ export class UpdateReviewError extends Error {
  */
 export const updateReview =
   (dao: ServiceReviewDao, store: FSMStore<ServiceLifecycle.ItemType>) =>
-  (data: TE.TaskEither<Error, IssueItemPair[]>) =>
+  (data: TE.TaskEither<Error, IssueItemPair[]>): TE.TaskEither<Error, void> =>
     pipe(
       data,
       TE.map((issuesAndItems) =>
         issuesAndItems.map(({ issue, item }) =>
           sequenceT(TE.ApplicativeSeq)(
-            makeServiceLifecycleApply(item, issue)(store),
             pipe(
-              dao.insert({
+              makeServiceLifecycleApply(item, issue)(store),
+              TE.orElse((fsmError) => {
+                // eslint-disable-next-line sonarjs/no-small-switch
+                switch (fsmError.kind) {
+                  case "FsmNoTransitionMatchedError":
+                    // eslint-disable-next-line no-console
+                    console.warn(fsmError.message); // FIXME: is it correct to log via console?
+                    return TE.right(void 0);
+                  default:
+                    // eslint-disable-next-line no-console
+                    console.error(fsmError.message); // FIXME: is it correct to log via console?
+                    return pipe(fsmError, E.toError, TE.left);
+                }
+              })
+            ),
+            pipe(
+              dao.updateStatus({
                 ...item,
                 status: issue.fields.status.name,
               }),
-              TE.mapLeft((_) => new UpdateReviewError())
+              TE.mapLeft((err) => {
+                // eslint-disable-next-line no-console
+                console.error(err.message); // FIXME: is it correct to log via console?
+                return E.toError(err);
+              })
             )
           )
         )
       ),
       // execute each sub-procedure in parallel
-      TE.chainW(RA.sequence(TE.ApplicativePar)),
+      TE.chain(RA.sequence(TE.ApplicativePar)),
       // we don't need data as result, just return void
       TE.map((_) => void 0)
     );
