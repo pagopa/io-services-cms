@@ -23,7 +23,8 @@ export type JiraProxy = {
     delegate: Delegate
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKeyAndStatus: (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<NonEmptyString>
   ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
   readonly getJiraIssueByServiceId: (
     serviceId: NonEmptyString
@@ -114,23 +115,28 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
   });
 
   const buildSearchJiraIssuesByKeyAndStatusPayload = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<NonEmptyString>
   ) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
       } AND key IN(${jiraIssueKeys.join(
         ","
-      )}) AND status IN (APPROVED,REJECTED)`
+      )}) AND status IN (${jiraIssueStatuses.join(",")})`
     ),
     maxResults: jiraIssueKeys.length,
   });
 
   const searchJiraIssuesByKeyAndStatus = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<NonEmptyString>
   ): TE.TaskEither<Error, SearchJiraIssuesResponse> =>
     jiraClient.searchJiraIssues(
-      buildSearchJiraIssuesByKeyAndStatusPayload(jiraIssueKeys)
+      buildSearchJiraIssuesByKeyAndStatusPayload(
+        jiraIssueKeys,
+        jiraIssueStatuses
+      )
     );
 
   const buildGetJiraIssueByServiceIdPayload = (serviceId: NonEmptyString) => ({

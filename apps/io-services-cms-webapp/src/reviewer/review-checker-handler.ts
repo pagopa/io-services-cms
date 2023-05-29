@@ -5,6 +5,7 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { JiraIssue } from "../lib/clients/jira-client";
 import { JiraProxy } from "../utils/jira-proxy";
 import {
@@ -74,22 +75,29 @@ export const buildIssueItemPairs =
     pipe(
       // from pending items to their relative jira issues
       jiraProxy.searchJiraIssuesByKeyAndStatus(
-        items.map((item) => item.ticket_key)
+        items.map((item) => item.ticket_key),
+        ["APPROVED" as NonEmptyString, "REJECTED" as NonEmptyString]
       ),
       TE.map((jiraResponse) => jiraResponse.issues),
       // consider only the issues associated with a pending review
       // is it needed? searchJiraIssuesByKey should not give issues unrelate to pending reviews
-      TE.map((issues) =>
-        issues
-          // associate each issue with its pending review
-          .map((issue) => ({
-            issue,
-            item: items.find((item) => item.ticket_id === issue.id),
-          }))
-          // be sure the pending review is not undefined
-          .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
-      )
+      TE.map((issues) => {
+        const itemsMap = itemsListToMap(items);
+        return (
+          issues
+            // associate each issue with its pending review
+            .map((issue) => ({
+              issue,
+              item: itemsMap.get(issue.id),
+            }))
+            // be sure the pending review is not undefined
+            .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
+        );
+      })
     );
+
+const itemsListToMap = (items: ServiceReviewRowDataTable[]) =>
+  new Map(items.map((i) => [i.ticket_id, i]));
 
 /**
  * For each pair, compose a sub-procedure of actions to be executed one after another
