@@ -52,11 +52,11 @@ resource "azurerm_cosmosdb_sql_database" "db_cms" {
 locals {
   database_containers = [
     {
-      name               = local.cosmos_containers.services_lifecycles
+      name               = local.cosmos_containers.services_lifecycle
       partition_key_path = "/id"
     },
     {
-      name               = local.cosmos_containers.services_pubblications
+      name               = local.cosmos_containers.services_publication
       partition_key_path = "/id"
     },
     {
