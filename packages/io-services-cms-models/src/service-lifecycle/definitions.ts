@@ -73,3 +73,23 @@ export const Service = t.type({
     t.type({ organization: OrganizationData, metadata: ServiceMetadata }),
   ]),
 });
+
+/**
+ * **io-ts** definition of `@azure/cosmos` **Resource**
+ */
+export type Resource = t.TypeOf<typeof Resource>;
+export const Resource = t.type({
+  /** Required. User settable property. Unique name that identifies the item, that is, no two items share the same ID within a database. The id must not exceed 255 characters. */
+  id: NonEmptyString,
+  /** System generated property. The resource ID (_rid) is a unique identifier that is also hierarchical per the resource stack on the resource model. It is used internally for placement and navigation of the item resource. */
+  _rid: NonEmptyString,
+  /** System generated property. Specifies the last updated timestamp of the resource. The value is a timestamp. */
+  _ts: t.number,
+  /** System generated property. The unique addressable URI for the resource. */
+  _self: NonEmptyString,
+  /** System generated property. Represents the resource etag required for optimistic concurrency control. */
+  _etag: NonEmptyString,
+});
+
+export type ServiceResource = t.TypeOf<typeof ServiceResource>;
+export const ServiceResource = t.intersection([Service, Resource]);

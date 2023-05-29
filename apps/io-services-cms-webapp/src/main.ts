@@ -7,6 +7,7 @@ import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
+import { ServiceResource } from "@io-services-cms/models/service-lifecycle/definitions";
 import { getConfigOrThrow } from "./config";
 import {
   expressToAzureFunction,
@@ -15,17 +16,19 @@ import {
 import { getDatabase } from "./lib/azure/cosmos";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
+import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
-import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { createWebServer } from "./webservice";
 
 import { processBatchOf, setBindings } from "./lib/azure/misc";
-import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 
+import { createRequestHistoryHandler } from "./historicizer/request-history-handler";
+import { cosmosClient } from "./lib/clients/cosmos-client";
 import { getDao } from "./utils/service-review-dao";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -50,6 +53,12 @@ const serviceLifecycleStore = stores.createCosmosStore(
 const servicePublicationStore = stores.createCosmosStore(
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
   ServicePublication.ItemType
+);
+
+// get cosmos db client to interact with services-history container
+const serviceHistoryDbClient = cosmosClient(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
+  ServiceResource
 );
 
 // entrypoint for all http functions
@@ -77,6 +86,10 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(servicePublicationStore);
+
+export const createRequestHistoryEntryPoint = createRequestHistoryHandler(
+  serviceHistoryDbClient
+);
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),

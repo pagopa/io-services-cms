@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_HISTORY_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestHistoryItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestHistoryEntryPoint"
+}
