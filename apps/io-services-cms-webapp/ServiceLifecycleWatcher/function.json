@@ -7,8 +7,8 @@
       "name": "documents",
       "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "%COSMOSDB_CONTAINER_SERVICE_LIFECYCLE%",
-      "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICE_LIFECYCLE%-lease",
+      "collectionName": "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
+      "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-lease",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true,
       "maxItemsPerInvocation": 30
