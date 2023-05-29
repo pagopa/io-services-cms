@@ -59,9 +59,9 @@ export const CosmosConfig = t.type({
   COSMOSDB_URI: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICE_LIFECYCLE: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICE_PUBLICATION: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICE_HISTORY: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
 });
 
 export const AzureClientSecretCredential = t.type({

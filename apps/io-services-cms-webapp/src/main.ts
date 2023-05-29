@@ -41,13 +41,13 @@ const cosmos = getDatabase(config);
 
 // create a store for the ServiceLifecycle finite state machine
 const serviceLifecycleStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICE_LIFECYCLE),
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
   ServiceLifecycle.ItemType
 );
 
 // create a store for the ServicePublication finite state machine
 const servicePublicationStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICE_PUBLICATION),
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
   ServicePublication.ItemType
 );
 
