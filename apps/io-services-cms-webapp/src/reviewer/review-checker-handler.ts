@@ -73,17 +73,10 @@ export const buildIssueItemPairs =
   (jiraProxy: JiraProxy) => (items: ServiceReviewRowDataTable[]) =>
     pipe(
       // from pending items to their relative jira issues
-      jiraProxy.searchJiraIssuesByKey(items.map((item) => item.ticket_key)),
-      TE.map((jiraResponse) => jiraResponse.issues),
-
-      // from all jira issues, to the processed issues only
-      TE.map((issues) =>
-        issues.filter(
-          (issue): issue is ProcessedJiraIssue =>
-            issue.fields.status.name === "APPROVED" ||
-            issue.fields.status.name === "REJECTED"
-        )
+      jiraProxy.searchJiraIssuesByKeyAndStatus(
+        items.map((item) => item.ticket_key)
       ),
+      TE.map((jiraResponse) => jiraResponse.issues),
       // consider only the issues associated with a pending review
       // is it needed? searchJiraIssuesByKey should not give issues unrelate to pending reviews
       TE.map((issues) =>
