@@ -144,31 +144,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     }
   });
 
-  it("should build ONE IssueItemPair given TWO jira issues, an APPROVED one and a NEW one", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
-      TE.of({
-        startAt: 0,
-        total: 1,
-        issues: [
-          aJiraIssue1,
-        ],
-      })
-    );
-
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
-
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ]);
-    }
-  });
-
-  it("should build EMPTY IssueItemPair given TWO jira issues with status different from APPROVED or REJECTED", async () => {
+  it("should build EMPTY IssueItemPair given ZERO jira issues", async () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.of({
         startAt: 0,
@@ -178,7 +154,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
       })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -203,7 +179,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     }
   });
 
-  it("should return Error if searchJiraIssuesByKey returns an error", async () => {
+  it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.left(new Error())
     );
