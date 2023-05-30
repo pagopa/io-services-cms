@@ -73,29 +73,26 @@ export const buildIssueItemPairs =
   (jiraProxy: JiraProxy) => (items: ServiceReviewRowDataTable[]) =>
     pipe(
       // from pending items to their relative jira issues
-      jiraProxy.searchJiraIssuesByKey(items.map((item) => item.ticket_key)),
-      TE.map((jiraResponse) => jiraResponse.issues),
-
-      // from all jira issues, to the processed issues only
-      TE.map((issues) =>
-        issues.filter(
-          (issue): issue is ProcessedJiraIssue =>
-            issue.fields.status.name === "APPROVED" ||
-            issue.fields.status.name === "REJECTED"
-        )
+      jiraProxy.searchJiraIssuesByKeyAndStatus(
+        items.map((item) => item.ticket_key),
+        ["APPROVED", "REJECTED"]
       ),
+      TE.map((jiraResponse) => jiraResponse.issues),
       // consider only the issues associated with a pending review
       // is it needed? searchJiraIssuesByKey should not give issues unrelate to pending reviews
-      TE.map((issues) =>
-        issues
-          // associate each issue with its pending review
-          .map((issue) => ({
-            issue,
-            item: items.find((item) => item.ticket_id === issue.id),
-          }))
-          // be sure the pending review is not undefined
-          .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
-      )
+      TE.map((issues) => {
+        const itemsMap = new Map(items.map((i) => [i.ticket_id, i]));
+        return (
+          issues
+            // associate each issue with its pending review
+            .map((issue) => ({
+              issue,
+              item: itemsMap.get(issue.id),
+            }))
+            // be sure the pending review is not undefined
+            .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
+        );
+      })
     );
 
 /**

@@ -136,7 +136,14 @@ describe("Service Review Proxy", () => {
       "anIssueKey-1" as NonEmptyString,
       "anIssueKey-2" as NonEmptyString,
     ];
-    const serviceReviews = await proxy.searchJiraIssuesByKey(searchKeys)();
+    const searchStatuses = [
+      "APPROVED",
+      "REJECTED",
+    ];
+    const serviceReviews = await proxy.searchJiraIssuesByKeyAndStatus(
+      searchKeys,
+      searchStatuses
+    )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body:
@@ -144,7 +151,9 @@ describe("Service Review Proxy", () => {
         expect.stringContaining(
           `"jql":"project = ${
             aJiraClient.config.JIRA_PROJECT_NAME
-          } AND key IN(${searchKeys.join(",")})"`
+          } AND key IN(${searchKeys.join(
+            ","
+          )}) AND status IN (APPROVED,REJECTED)"`
         ),
       headers: expect.any(Object),
       method: "POST",

@@ -113,13 +113,13 @@ const mainMockServiceReviewDao = {
 
 const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
-  searchJiraIssuesByKey: vi.fn(),
+  searchJiraIssuesByKeyAndStatus: vi.fn(),
   getJiraIssueByServiceId: vi.fn(),
 };
 
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   it("should build TWO IssueItemPairs given 2 jira issues, an APPROVED one and a REJECTED one", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.of({
         startAt: 0,
         total: 2,
@@ -144,44 +144,17 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     }
   });
 
-  it("should build ONE IssueItemPair given TWO jira issues, an APPROVED one and a NEW one", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+  it("should build EMPTY IssueItemPair given ZERO jira issues", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.of({
         startAt: 0,
-        total: 2,
+        total: 0,
         issues: [
-          aJiraIssue1,
-          { ...aJiraIssue2, fields: { status: { name: "NEW" } } },
         ],
       })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
-
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ]);
-    }
-  });
-
-  it("should build EMPTY IssueItemPair given TWO jira issues with status different from APPROVED or REJECTED", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
-      TE.of({
-        startAt: 0,
-        total: 2,
-        issues: [
-          { ...aJiraIssue1, fields: { status: { name: "REVIEW" } } },
-          { ...aJiraIssue2, fields: { status: { name: "NEW" } } },
-        ],
-      })
-    );
-
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -190,7 +163,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   });
 
   it("should build EMPTY IssueItemPair given EMPTY jira issues response", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.of({
         startAt: 0,
         total: 0,
@@ -206,8 +179,8 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     }
   });
 
-  it("should return Error if searchJiraIssuesByKey returns an error", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKey.mockImplementationOnce(() =>
+  it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
       TE.left(new Error())
     );
 

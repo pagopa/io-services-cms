@@ -7,6 +7,7 @@ import {
   CreateJiraIssueResponse,
   JiraAPIClient,
   JiraIssue,
+  JiraIssueStatus,
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
 } from "../lib/clients/jira-client";
@@ -22,8 +23,9 @@ export type JiraProxy = {
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
-  readonly searchJiraIssuesByKey: (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+  readonly searchJiraIssuesByKeyAndStatus: (
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
   ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
   readonly getJiraIssueByServiceId: (
     serviceId: NonEmptyString
@@ -113,22 +115,29 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     jql,
   });
 
-  const buildSearchJiraIssuesByKeyPayload = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+  const buildSearchJiraIssuesByKeyAndStatusPayload = (
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
   ) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
-      } AND key IN(${jiraIssueKeys.join(",")})`
+      } AND key IN(${jiraIssueKeys.join(
+        ","
+      )}) AND status IN (${jiraIssueStatuses.join(",")})`
     ),
     maxResults: jiraIssueKeys.length,
   });
 
-  const searchJiraIssuesByKey = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>
+  const searchJiraIssuesByKeyAndStatus = (
+    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
   ): TE.TaskEither<Error, SearchJiraIssuesResponse> =>
     jiraClient.searchJiraIssues(
-      buildSearchJiraIssuesByKeyPayload(jiraIssueKeys)
+      buildSearchJiraIssuesByKeyAndStatusPayload(
+        jiraIssueKeys,
+        jiraIssueStatuses
+      )
     );
 
   const buildGetJiraIssueByServiceIdPayload = (serviceId: NonEmptyString) => ({
@@ -153,7 +162,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
 
   return {
     createJiraIssue,
-    searchJiraIssuesByKey,
+    searchJiraIssuesByKeyAndStatus,
     getJiraIssueByServiceId,
   };
 };
