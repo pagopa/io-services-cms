@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.9.1
+
+### Patch Changes
+
+- 04f4dca: Refactor Review Checker Handler in order to improve performance
+- 18bea6a: Moved controllers tests from general file under src/webservice/**test**/index.test.ts -> specific src/webservice/controllers/**test**/<controller>.test.ts
+- fe0b37b: fix update service serview and add error management on service-review-checker
+
 ## 1.9.0
 
 ### Minor Changes
