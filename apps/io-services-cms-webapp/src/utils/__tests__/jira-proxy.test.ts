@@ -137,8 +137,8 @@ describe("Service Review Proxy", () => {
       "anIssueKey-2" as NonEmptyString,
     ];
     const searchStatuses = [
-      "APPROVED" as NonEmptyString,
-      "REJECTED" as NonEmptyString,
+      "APPROVED",
+      "REJECTED",
     ];
     const serviceReviews = await proxy.searchJiraIssuesByKeyAndStatus(
       searchKeys,
