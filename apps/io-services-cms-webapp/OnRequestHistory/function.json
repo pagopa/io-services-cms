@@ -6,6 +6,15 @@
       "name": "requestHistoryItem",
       "type": "queueTrigger",
       "direction": "in"
+    },
+    {
+      "name": "serviceHistoryDocument",
+      "type": "cosmosDB",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+      "createIfNotExists": true,
+      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
+      "direction": "out"
     }
   ],
   "scriptFile": "../dist/main.js",

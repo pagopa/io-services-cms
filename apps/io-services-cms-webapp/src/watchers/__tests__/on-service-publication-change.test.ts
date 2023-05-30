@@ -27,8 +27,8 @@ const aService = {
 describe("On Service Publication Change Handler", () => {
   it.each`
     scenario             | item                                              | expected
-    ${"request-history"} | ${{ ...aService, fsm: { state: "unpublished" } }} | ${{ requestHistory: aService }}
-    ${"request-history"} | ${{ ...aService, fsm: { state: "published" } }}   | ${{ requestHistory: aService }}
+    ${"request-history"} | ${{ ...aService, fsm: { state: "unpublished" } }} | ${{ requestHistory: { ...aService, fsm: { state: "unpublished" } } }}
+    ${"request-history"} | ${{ ...aService, fsm: { state: "published" } }}   | ${{ requestHistory: { ...aService, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

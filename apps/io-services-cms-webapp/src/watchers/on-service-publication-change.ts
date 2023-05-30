@@ -15,7 +15,9 @@ const noAction = {};
 const onReleaseHandler = (
   item: ServicePublication.ItemType
 ): RequestHistoryAction => ({
-  requestHistory: { id: item.id, data: item.data },
+  requestHistory: {
+    ...item,
+  },
 });
 
 export const handler: RTE.ReaderTaskEither<
