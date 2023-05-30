@@ -28,19 +28,19 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { sequenceS } from "fp-ts/lib/Apply";
 import * as t from "io-ts";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { UserEmailMiddleware } from "../../../lib/middlewares/user-email-middleware";
-import { ServiceLifecycle as ServiceResponsePayload } from "../../../generated/api/ServiceLifecycle";
-import { ServicePayload as ServiceRequestPayload } from "../../../generated/api/ServicePayload";
-import { ApimConfig } from "../../../config";
+import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
+import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { ApimConfig } from "../../config";
 import {
   getProductByName,
   getUserByEmail,
   upsertSubscription,
-} from "../../../lib/clients/apim-client";
+} from "../../lib/clients/apim-client";
 import {
   payloadToItem,
   itemToResponse,
-} from "../../../utils/converters/service-lifecycle-converters";
+} from "../../utils/converters/service-lifecycle-converters";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
