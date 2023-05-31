@@ -37,7 +37,7 @@ export const createCosmosStore = <
               {
                 ...rr.resource,
                 // eslint-disable-next-line no-underscore-dangle
-                last_update: new Date(rr.resource._ts * 1000).toISOString(), // Unix timestamp
+                last_update: new Date(rr.resource._ts * 1000), // Unix timestamp
                 version: rr.etag,
               },
               codec.decode,
@@ -70,7 +70,7 @@ export const createCosmosStore = <
         ...value,
         last_update: itemResponse.resource
           ? // eslint-disable-next-line no-underscore-dangle
-            new Date(itemResponse.resource._ts * 1000).toISOString() // Unix timestamp
+            new Date(itemResponse.resource._ts * 1000) // Unix timestamp
           : undefined,
         version: itemResponse.etag,
       }))

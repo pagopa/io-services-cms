@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import { Service } from "../service-lifecycle/definitions";
 
 export type RequestReviewItem = t.TypeOf<typeof RequestReviewItem>;
@@ -8,4 +9,9 @@ export type RequestPublicationItem = t.TypeOf<typeof RequestPublicationItem>;
 export const RequestPublicationItem = Service;
 
 export type RequestHistoryItem = t.TypeOf<typeof RequestHistoryItem>;
-export const RequestHistoryItem = Service;
+export const RequestHistoryItem = t.intersection([
+  Service,
+  t.type({
+    last_update: tt.date, // last_update required
+  }),
+]);

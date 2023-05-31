@@ -17,6 +17,7 @@ const onReleaseHandler = (
 ): RequestHistoryAction => ({
   requestHistory: {
     ...item,
+    last_update: item.last_update ?? new Date(), // last_update fallback (value is always set by persistence layer)
   },
 });
 

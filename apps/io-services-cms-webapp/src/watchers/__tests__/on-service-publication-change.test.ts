@@ -22,6 +22,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
+  last_update: new Date(),
 } as unknown as ServicePublication.ItemType;
 
 describe("On Service Publication Change Handler", () => {

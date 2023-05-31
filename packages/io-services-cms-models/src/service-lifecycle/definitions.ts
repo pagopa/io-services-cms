@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import * as tt from "io-ts-types";
 import {
   NonEmptyString,
   OrganizationFiscalCode,
@@ -76,6 +77,6 @@ export const Service = t.intersection([
   }),
   t.partial({
     version: NonEmptyString,
-    last_update: NonEmptyString,
+    last_update: tt.date,
   }),
 ]);

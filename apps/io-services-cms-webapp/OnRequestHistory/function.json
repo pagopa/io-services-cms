@@ -12,7 +12,7 @@
       "type": "cosmosDB",
       "databaseName": "%COSMOSDB_NAME%",
       "collectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
-      "createIfNotExists": true,
+      "createIfNotExists": false,
       "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
       "direction": "out"
     }

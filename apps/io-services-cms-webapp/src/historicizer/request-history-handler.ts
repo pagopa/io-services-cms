@@ -4,7 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-import { IsoDateFromString } from "@pagopa/ts-commons/lib/dates";
+import { Context } from "@azure/functions";
 import { withJsonInput } from "../lib/azure/misc";
 
 const parseIncomingMessage = (
@@ -13,35 +13,32 @@ const parseIncomingMessage = (
   pipe(
     queueItem,
     ServiceLifecycle.definitions.Service.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
+    E.mapLeft(flow(readableReport, E.toError))
+  );
+
+export const buildDocument = (service: ServiceLifecycle.definitions.Service) =>
+  JSON.stringify({
+    ...service,
+    id: service.last_update?.getTime().toString(),
+    serviceId: service.id,
+  });
+
+export const handleQueueItem = (context: Context, queueItem: Json) =>
+  pipe(
+    queueItem,
+    parseIncomingMessage,
+    TE.fromEither,
+    TE.mapLeft((_) => new Error("Error while parsing incoming message")),
+    TE.map((service) => {
+      // eslint-disable-next-line functional/immutable-data
+      context.bindings.serviceHistoryDocument = buildDocument(service);
+    }),
+    TE.getOrElse((e) => {
+      throw e;
+    })
   );
 
 export const createRequestHistoryHandler = (): ReturnType<
   typeof withJsonInput
 > =>
-  withJsonInput((context, queueItem) =>
-    pipe(
-      queueItem,
-      parseIncomingMessage,
-      TE.fromEither,
-      TE.mapLeft((_) => new Error("Error while parsing incoming message")),
-      TE.map((service) => {
-        // eslint-disable-next-line functional/immutable-data
-        context.bindings.serviceHistoryDocument = JSON.stringify({
-          ...service,
-          id: pipe(
-            service.last_update,
-            IsoDateFromString.decode,
-            E.fold(
-              (_) => undefined,
-              (date) => date.getTime().toString()
-            )
-          ),
-          serviceId: service.id,
-        });
-      }),
-      TE.getOrElse((e) => {
-        throw e;
-      })
-    )()
-  );
+  withJsonInput((context, queueItem) => handleQueueItem(context, queueItem)());
