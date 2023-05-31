@@ -6,6 +6,7 @@ import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
   CreateJiraIssueResponse,
   JiraIssue,
+  JiraIssueStatus,
   SearchJiraIssuesResponse,
 } from "../../lib/clients/jira-client";
 import { Delegate } from "../../utils/jira-proxy";
@@ -113,6 +114,7 @@ const mainMockServiceReviewDao = {
       return TE.of(aVoidFn());
     }
   ),
+  updateStatus: vi.fn(),
 };
 
 const mainMockJiraProxy = {
@@ -121,8 +123,11 @@ const mainMockJiraProxy = {
       return TE.of(aCreateJiraIssueResponse);
     }
   ),
-  searchJiraIssuesByKey: vi.fn(
-    (jiraIssueKeys: ReadonlyArray<NonEmptyString>) => {
+  searchJiraIssuesByKeyAndStatus: vi.fn(
+    (
+      jiraIssueKeys: ReadonlyArray<NonEmptyString>,
+      jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
+    ) => {
       return TE.of(aSearchJiraIssuesResponse);
     }
   ),
