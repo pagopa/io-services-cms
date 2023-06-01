@@ -3,6 +3,11 @@ data "azurerm_resource_group" "environment_cd_resource_groups" {
   name     = each.value
 }
 
+data "azurerm_resource_group" "environment_ci_resource_groups" {
+  for_each = toset([for rg, role_list in var.environment_ci_roles.resource_groups : rg])
+  name     = each.value
+}
+
 data "azurerm_resource_group" "github_runner_rg" {
   name = "${var.prefix}-${var.env_short}-github-runner-rg"
 }
