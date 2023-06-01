@@ -19,7 +19,9 @@ const parseIncomingMessage = (
 export const buildDocument = (service: ServiceLifecycle.definitions.Service) =>
   JSON.stringify({
     ...service,
-    id: service.last_update?.getTime().toString(),
+    id: service.last_update
+      ? new Date(service.last_update).getTime().toString()
+      : new Date().getTime().toString(),
     serviceId: service.id,
   });
 

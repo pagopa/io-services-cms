@@ -2,11 +2,9 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
-import {
-  ServiceLifecycleStatusType,
-  ServiceLifecycleStatusTypeEnum,
-} from "../../generated/api/ServiceLifecycleStatusType";
+import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import { ScopeEnum } from "../../generated/api/ServiceMetadata";
+import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],
@@ -28,32 +26,54 @@ export const payloadToItem = (
 });
 
 export const itemToResponse = ({
-  fsm: { state },
+  fsm,
   data,
   id,
 }: ServiceLifecycle.ItemType): ServiceResponsePayload => ({
   id,
-  status: { value: toServiceStatusType(state) },
+  status: toServiceStatus(fsm),
   name: data.name,
   description: data.description,
   organization: data.organization,
   metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
 });
 
-export const toServiceStatusType = (
-  s: ServiceLifecycle.ItemType["fsm"]["state"]
-): ServiceLifecycleStatusType => {
-  switch (s) {
+// export const toServiceStatusType = (
+//   s: ServiceLifecycle.ItemType["fsm"]["state"]
+// ): ServiceLifecycleStatusType => {
+//   switch (s) {
+//     case "approved":
+//     case "deleted":
+//     case "draft":
+//     case "rejected":
+//     case "submitted":
+//       return ServiceLifecycleStatusTypeEnum[s];
+//     default:
+//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//       const _: never = s;
+//       return ServiceLifecycleStatusTypeEnum[s];
+//   }
+// };
+
+export const toServiceStatus = (
+  fsm: ServiceLifecycle.ItemType["fsm"]
+): ServiceLifecycleStatus => {
+  switch (fsm.state) {
     case "approved":
     case "deleted":
     case "draft":
-    case "rejected":
     case "submitted":
-      return ServiceLifecycleStatusTypeEnum[s];
+      return { value: ServiceLifecycleStatusTypeEnum[fsm.state] };
+    case "rejected":
+      return {
+        value: ServiceLifecycleStatusTypeEnum[fsm.state],
+        reason: (fsm.reason as string) ?? undefined, // FIXME
+      };
+
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _: never = s;
-      return ServiceLifecycleStatusTypeEnum[s];
+      const _: never = fsm;
+      return ServiceLifecycleStatusTypeEnum[fsm];
   }
 };
 

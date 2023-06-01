@@ -2,6 +2,7 @@ import { Queue, ServicePublication } from "@io-services-cms/models";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 type Actions = "requestHistory";
 
@@ -17,7 +18,8 @@ const onReleaseHandler = (
 ): RequestHistoryAction => ({
   requestHistory: {
     ...item,
-    last_update: item.last_update ?? new Date(), // last_update fallback (value is always set by persistence layer)
+    last_update:
+      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
   },
 });
 

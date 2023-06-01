@@ -32,7 +32,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
-  last_update: new Date(atimestamp),
+  last_update: new Date(atimestamp).toISOString(),
 } as unknown as ServiceLifecycle.definitions.Service;
 
 const aQueueItem = aService as unknown as Json;
