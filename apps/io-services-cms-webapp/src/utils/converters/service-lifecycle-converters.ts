@@ -38,23 +38,6 @@ export const itemToResponse = ({
   metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
 });
 
-// export const toServiceStatusType = (
-//   s: ServiceLifecycle.ItemType["fsm"]["state"]
-// ): ServiceLifecycleStatusType => {
-//   switch (s) {
-//     case "approved":
-//     case "deleted":
-//     case "draft":
-//     case "rejected":
-//     case "submitted":
-//       return ServiceLifecycleStatusTypeEnum[s];
-//     default:
-//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//       const _: never = s;
-//       return ServiceLifecycleStatusTypeEnum[s];
-//   }
-// };
-
 export const toServiceStatus = (
   fsm: ServiceLifecycle.ItemType["fsm"]
 ): ServiceLifecycleStatus => {
