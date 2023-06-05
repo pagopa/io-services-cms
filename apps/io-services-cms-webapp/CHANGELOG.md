@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.10.0
+
+### Minor Changes
+
+- 5abd2c4: Service Publication Watcher
+
+### Patch Changes
+
+- Updated dependencies [5abd2c4]
+  - @io-services-cms/models@1.6.0
+
 ## 1.9.1
 
 ### Patch Changes
