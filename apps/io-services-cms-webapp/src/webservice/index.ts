@@ -15,23 +15,6 @@ import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
 } from "./controllers/create-service";
-import { makeInfoHandler } from "./controllers/info";
-import {
-  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
-  makeReviewServiceHandler,
-} from "./controllers/review-service";
-import {
-  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
-  makePublishServiceHandler,
-} from "./controllers/publish-service";
-import {
-  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
-  makeUnpublishServiceHandler,
-} from "./controllers/unpublish-service";
-import {
-  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
-  makeGetServiceHandler,
-} from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
   makeDeleteServiceHandler,
@@ -44,6 +27,23 @@ import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
+import {
+  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
+  makeGetServiceHandler,
+} from "./controllers/get-service-publication";
+import { makeInfoHandler } from "./controllers/info";
+import {
+  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makePublishServiceHandler,
+} from "./controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "./controllers/review-service";
+import {
+  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "./controllers/unpublish-service";
 
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
@@ -63,6 +63,11 @@ export const createWebServer = ({
   apimClient,
   config,
 }: Dependencies) => {
+  // Get an instance of ServiceLifecycle
+  const fsmLifecycleClient = ServiceLifecycle.getFsmClient(
+    serviceLifecycleStore
+  );
+
   // mount all routers on router
   const router = express.Router();
   router.use(bodyParser.json());
@@ -73,7 +78,7 @@ export const createWebServer = ({
     "/services",
     pipe(
       makeCreateServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
         apimClient,
         apimConfig: config,
       }),
@@ -97,7 +102,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeEditServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyEditServiceRequestMiddelwares,
       wrapRequestHandler
@@ -108,7 +113,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyDeleteServiceRequestMiddelwares,
       wrapRequestHandler
@@ -119,7 +124,7 @@ export const createWebServer = ({
     "/services/:serviceId/review",
     pipe(
       makeReviewServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyReviewServiceRequestMiddelwares,
       wrapRequestHandler

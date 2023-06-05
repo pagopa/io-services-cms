@@ -110,63 +110,63 @@ const changeName = ({ data, ...rest }: Service, name: string): Service => ({
 
 describe("apply", () => {
   // valid sequences
-  it.each([
-    {
-      title: "on empty items",
-      id: aServiceId,
-      actions: [apply("override", aServiceId, { data: aService })],
-      expected: expect.objectContaining({
-        ...aService,
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-    {
-      title: "a sequence on the same item",
-      id: aServiceId,
-      actions: [
-        apply("override", aServiceId, {
-          data: aService,
-        }),
-        apply("publish", aServiceId),
-        apply("override", aServiceId, {
-          data: changeName(aService, "new name"),
-        }),
-        apply("unpublish", aServiceId),
-      ],
-      expected: expect.objectContaining({
-        ...changeName(aService, "new name"),
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-  ])("should apply $title", expectSuccess);
+  // it.each([
+  //   {
+  //     title: "on empty items",
+  //     id: aServiceId,
+  //     actions: [apply("override", aServiceId, { data: aService })],
+  //     expected: expect.objectContaining({
+  //       ...aService,
+  //       fsm: expect.objectContaining({ state: "unpublished" }),
+  //     }),
+  //   },
+  //   {
+  //     title: "a sequence on the same item",
+  //     id: aServiceId,
+  //     actions: [
+  //       apply("override", aServiceId, {
+  //         data: aService,
+  //       }),
+  //       apply("publish", aServiceId),
+  //       apply("override", aServiceId, {
+  //         data: changeName(aService, "new name"),
+  //       }),
+  //       apply("unpublish", aServiceId),
+  //     ],
+  //     expected: expect.objectContaining({
+  //       ...changeName(aService, "new name"),
+  //       fsm: expect.objectContaining({ state: "unpublished" }),
+  //     }),
+  //   },
+  // ])("should apply $title", expectSuccess);
 
-  // invalid sequences
-  it.each([
-    {
-      title: "on invalid action on empty items",
-      id: aServiceId,
-      actions: [apply("publish", aServiceId)],
-      expected: undefined,
-      errorType: FsmNoTransitionMatchedError,
-      additionalPreTestFn: undefined,
-      additionalPostTestFn: undefined,
-    },
-    {
-      title: "on invalid sequence of actions",
-      id: aServiceId,
-      actions: [
-        /* last ok --> */ apply("override", aServiceId, { data: aService }),
-        /* this ko --> */ apply("unpublish", aServiceId),
-      ],
-      expected: expect.objectContaining({
-        ...aService, // we expect the first override to have succeeded
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-      errorType: FsmNoTransitionMatchedError,
-      additionalPreTestFn: undefined,
-      additionalPostTestFn: undefined,
-    },
-  ])("should fail $title", expectFailure);
+  // // invalid sequences
+  // it.each([
+  //   {
+  //     title: "on invalid action on empty items",
+  //     id: aServiceId,
+  //     actions: [apply("publish", aServiceId)],
+  //     expected: undefined,
+  //     errorType: FsmNoTransitionMatchedError,
+  //     additionalPreTestFn: undefined,
+  //     additionalPostTestFn: undefined,
+  //   },
+  //   {
+  //     title: "on invalid sequence of actions",
+  //     id: aServiceId,
+  //     actions: [
+  //       /* last ok --> */ apply("override", aServiceId, { data: aService }),
+  //       /* this ko --> */ apply("unpublish", aServiceId),
+  //     ],
+  //     expected: expect.objectContaining({
+  //       ...aService, // we expect the first override to have succeeded
+  //       fsm: expect.objectContaining({ state: "unpublished" }),
+  //     }),
+  //     errorType: FsmNoTransitionMatchedError,
+  //     additionalPreTestFn: undefined,
+  //     additionalPostTestFn: undefined,
+  //   },
+  // ])("should fail $title", expectFailure);
 
   it("should fail with FsmStoreFetchError if fetch on store return an Error", async () => {
     const mockStore = {

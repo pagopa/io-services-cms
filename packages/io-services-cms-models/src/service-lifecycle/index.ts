@@ -1,23 +1,23 @@
-import * as t from "io-ts";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/function";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
-import { pipe, flow } from "fp-ts/function";
+import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
-  StateMetadata,
-  Transition,
-  WithState,
-  StateSet,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
   FsmTooManyTransitionsError,
   FsmTransitionExecutionError,
+  StateMetadata,
+  StateSet,
+  Transition,
+  WithState,
 } from "../lib/fsm";
 import { Service, ServiceId } from "./definitions";
 
@@ -240,6 +240,50 @@ const FSM: FSM = {
 
 type LifecycleStore = FSMStore<States[number]>;
 
+type ApplyCreateOrEdit = (
+  appliedAction: "create" | "edit",
+  id: ServiceId,
+  args: { data: Service }
+) => ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"draft", Service>
+>;
+type ApplySubmit = (
+  appliedAction: "submit",
+  id: ServiceId
+) => ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"submitted", Service>
+>;
+type ApplyApprove = (
+  appliedAction: "approve",
+  id: ServiceId,
+  args: { approvalDate: string }
+) => ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"approved", Service>
+>;
+type ApplyReject = (
+  appliedAction: "reject",
+  id: ServiceId,
+  args: { reason: string }
+) => ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"rejected", Service>
+>;
+type ApplyDelete = (
+  appliedAction: "delete",
+  id: ServiceId
+) => ReaderTaskEither<
+  LifecycleStore,
+  AllFsmErrors,
+  WithState<"deleted", Service>
+>;
+
 // TODO: apply function is meant to be agnostic on the FSM defintion.
 // Unfortunately, we didn't achieve the result yet, hence we opted for an actual implementation.
 // The algorithm itself is not related to the current FSM implementation, but the type system is
@@ -301,14 +345,12 @@ function apply(
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
   return (store) => {
-    // select transitions for the action to apply
-    const applicableTransitions = FSM.transitions.filter(
-      ({ action }) => action === appliedAction
-    );
-    if (!applicableTransitions.length) {
+    const isAppliedAction = ({ action }: FSM["transitions"][number]) =>
+      action === appliedAction;
+    // check transitions for the action to apply
+    if (!FSM.transitions.filter(isAppliedAction).length) {
       return TE.left(new FsmNoApplicableTransitionError(appliedAction));
     }
-
     return pipe(
       // fetch the item from the store by its id
       store.fetch(id),
@@ -328,7 +370,7 @@ function apply(
           O.fold(
             () =>
               pipe(
-                applicableTransitions,
+                FSM.transitions.filter(isAppliedAction),
                 // this filter is also a type guard to narrow possible from states to EmptyState only
                 RA.filter(
                   <T extends FSM["transitions"][number]>(
@@ -348,7 +390,7 @@ function apply(
               ),
             (item) =>
               pipe(
-                applicableTransitions,
+                FSM.transitions.filter(isAppliedAction),
                 // this filter is also a type guard to narrow possible from states to any state but EmptyState
                 RA.filter(
                   <T extends FSM["transitions"][number]>(
@@ -414,7 +456,34 @@ function apply(
   };
 }
 
+const getFsmClient = (store: LifecycleStore) => ({
+  create: (
+    id: ServiceId,
+    args: { data: Service }
+  ): ReturnType<ReturnType<ApplyCreateOrEdit>> =>
+    apply("create", id, args)(store),
+  edit: (
+    id: ServiceId,
+    args: { data: Service }
+  ): ReturnType<ReturnType<ApplyCreateOrEdit>> =>
+    apply("edit", id, args)(store),
+  submit: (id: ServiceId): ReturnType<ReturnType<ApplySubmit>> =>
+    apply("submit", id)(store),
+  approve: (
+    id: ServiceId,
+    args: { approvalDate: string }
+  ): ReturnType<ReturnType<ApplyApprove>> => apply("approve", id, args)(store),
+  reject: (
+    id: ServiceId,
+    args: { reason: string }
+  ): ReturnType<ReturnType<ApplyReject>> => apply("reject", id, args)(store),
+  delete: (id: ServiceId): ReturnType<ReturnType<ApplyDelete>> =>
+    apply("delete", id)(store),
+});
+type FsmClient = ReturnType<typeof getFsmClient>;
+
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
-export { apply, FSM, ItemType };
+
 export * as definitions from "./definitions";
+export { getFsmClient, FsmClient, FSM, ItemType };

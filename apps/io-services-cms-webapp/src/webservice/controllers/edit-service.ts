@@ -1,12 +1,12 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -19,7 +19,7 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
@@ -29,8 +29,8 @@ import {
 } from "../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
-  // A store of ServicePublication objects
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+  // An instance of ServicePublication
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
 };
 
 type HandlerResponseTypes =
@@ -49,17 +49,19 @@ type EditServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
-  ({ store }: Dependencies): EditServiceHandler =>
+  ({
+    fsmLifecycleClient: fsmLifecycleClient,
+  }: Dependencies): EditServiceHandler =>
   (_auth, serviceId, servicePayload) =>
     pipe(
-      ServiceLifecycle.apply("edit", serviceId, {
+      fsmLifecycleClient.edit(serviceId, {
         data: payloadToItem(serviceId, servicePayload),
       }),
-      RTE.map(itemToResponse),
-      RTE.map(ResponseSuccessJson),
-      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      RTE.toUnion
-    )(store)();
+      TE.map(itemToResponse),
+      TE.map(ResponseSuccessJson),
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.toUnion
+    )();
 
 export const applyRequestMiddelwares = (handler: EditServiceHandler) =>
   pipe(

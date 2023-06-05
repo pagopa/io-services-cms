@@ -85,7 +85,7 @@ export const createRequestHistoricizationEntryPoint =
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
-  serviceLifecycleStore
+  ServiceLifecycle.getFsmClient(serviceLifecycleStore)
 );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
