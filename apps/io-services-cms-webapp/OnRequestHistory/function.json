@@ -1,9 +1,9 @@
 {
   "bindings": [
     {
-      "queueName": "%REQUEST_HISTORY_QUEUE%",
+      "queueName": "%REQUEST_HISTORICIZATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
-      "name": "requestHistoryItem",
+      "name": "requestHistoricizationItem",
       "type": "queueTrigger",
       "direction": "in"
     },
@@ -18,5 +18,5 @@
     }
   ],
   "scriptFile": "../dist/main.js",
-  "entryPoint": "createRequestHistoryEntryPoint"
+  "entryPoint": "createRequestHistoricizationEntryPoint"
 }

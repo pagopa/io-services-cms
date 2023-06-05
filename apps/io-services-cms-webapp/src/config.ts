@@ -86,7 +86,7 @@ export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 export const QueueConfig = t.type({
   REQUEST_REVIEW_QUEUE: NonEmptyString,
   REQUEST_PUBLICATION_QUEUE: NonEmptyString,
-  REQUEST_HISTORY_QUEUE: NonEmptyString,
+  REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 

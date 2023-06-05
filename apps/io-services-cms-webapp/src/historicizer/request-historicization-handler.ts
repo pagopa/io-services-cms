@@ -40,7 +40,7 @@ export const handleQueueItem = (context: Context, queueItem: Json) =>
     })
   );
 
-export const createRequestHistoryHandler = (): ReturnType<
+export const createRequestHistoricizationHandler = (): ReturnType<
   typeof withJsonInput
 > =>
   withJsonInput((context, queueItem) => handleQueueItem(context, queueItem)());

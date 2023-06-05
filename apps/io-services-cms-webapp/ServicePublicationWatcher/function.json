@@ -14,9 +14,9 @@
       "maxItemsPerInvocation": 30
     },
     {
-      "queueName": "%REQUEST_HISTORY_QUEUE%",
+      "queueName": "%REQUEST_HISTORICIZATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
-      "name": "requestHistory",
+      "name": "requestHistoricization",
       "type": "queue",
       "direction": "out"
     }

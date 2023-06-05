@@ -26,7 +26,7 @@ import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 
-import { createRequestHistoryHandler } from "./historicizer/request-history-handler";
+import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { getDao } from "./utils/service-review-dao";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -79,7 +79,8 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(servicePublicationStore);
 
-export const createRequestHistoryEntryPoint = createRequestHistoryHandler();
+export const createRequestHistoricizationEntryPoint =
+  createRequestHistoricizationHandler();
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),
@@ -111,9 +112,9 @@ export const onServicePublicationChangeEntryPoint = pipe(
   onServicePublicationChangeHandler,
   processBatchOf(ServicePublication.ItemType),
   setBindings((results) => ({
-    requestHistory: pipe(
+    requestHistoricization: pipe(
       results,
-      RA.map(RR.lookup("requestHistory")),
+      RA.map(RR.lookup("requestHistoricization")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

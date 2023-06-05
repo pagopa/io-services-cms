@@ -180,9 +180,9 @@ locals {
     LEGACY_COSMOSDB_SERVICES_LEASE_COLLECTION = var.legacy_cosmosdb_services_lease_collection
 
     # Queues
-    REQUEST_REVIEW_QUEUE      = azurerm_storage_queue.request-review.name
-    REQUEST_PUBLICATION_QUEUE = azurerm_storage_queue.request-publication.name
-    REQUEST_HISTORY_QUEUE     = azurerm_storage_queue.request-history.name
+    REQUEST_REVIEW_QUEUE          = azurerm_storage_queue.request-review.name
+    REQUEST_PUBLICATION_QUEUE     = azurerm_storage_queue.request-publication.name
+    REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
 
     # Disable functions
     "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"

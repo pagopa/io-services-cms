@@ -2,7 +2,10 @@ import { describe, it, expect } from "vitest";
 import { Context } from "@azure/functions";
 import { Json } from "io-ts-types";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { buildDocument, handleQueueItem } from "../request-history-handler";
+import {
+  buildDocument,
+  handleQueueItem,
+} from "../request-historicization-handler";
 import { ServiceLifecycle } from "@io-services-cms/models";
 
 const createContext = () =>
@@ -38,7 +41,7 @@ const aService = {
 const aQueueItem = aService as unknown as Json;
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
 
-describe("Service History Handler", () => {
+describe("Service Historicization Handler", () => {
   it("[handleQueueItem] should return an Error if queueItem is invalid", async () => {
     const context = createContext();
 

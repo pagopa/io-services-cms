@@ -4,19 +4,22 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-type Actions = "requestHistory";
+type Actions = "requestHistoricization";
 
 type NoAction = typeof noAction;
 type Action<A extends Actions, B> = Record<A, B>;
-type RequestHistoryAction = Action<"requestHistory", Queue.RequestHistoryItem>;
-type OnReleaseActions = RequestHistoryAction;
+type RequestHistoricizationAction = Action<
+  "requestHistoricization",
+  Queue.RequestHistoricizationItem
+>;
+type OnReleaseActions = RequestHistoricizationAction;
 
 const noAction = {};
 
 const onReleaseHandler = (
   item: ServicePublication.ItemType
-): RequestHistoryAction => ({
-  requestHistory: {
+): RequestHistoricizationAction => ({
+  requestHistoricization: {
     ...item,
     last_update:
       item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log

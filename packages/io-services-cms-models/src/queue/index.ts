@@ -13,8 +13,10 @@ export const RequestReviewItem = t.intersection([
 export type RequestPublicationItem = t.TypeOf<typeof RequestPublicationItem>;
 export const RequestPublicationItem = Service;
 
-export type RequestHistoryItem = t.TypeOf<typeof RequestHistoryItem>;
-export const RequestHistoryItem = t.intersection([
+export type RequestHistoricizationItem = t.TypeOf<
+  typeof RequestHistoricizationItem
+>;
+export const RequestHistoricizationItem = t.intersection([
   Service,
   t.type({
     last_update: NonEmptyString, // last_update required
