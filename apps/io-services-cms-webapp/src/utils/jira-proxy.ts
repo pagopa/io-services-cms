@@ -30,6 +30,9 @@ export type JiraProxy = {
   readonly getJiraIssueByServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
+  readonly getPendingJiraIssueByServiceId: (
+    serviceId: NonEmptyString
+  ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
 };
 
 export type Delegate = {
@@ -148,6 +151,18 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     ),
   });
 
+  const buildGetPendingJiraIssueByServiceIdPayload = (
+    serviceId: NonEmptyString
+  ) => ({
+    ...buildSearchIssuesBasePayload(
+      `project = ${
+        jiraClient.config.JIRA_PROJECT_NAME
+      } AND summary ~ '${formatIssueTitle(
+        serviceId
+      )}' AND status IN (NEW , REVIEW)`
+    ),
+  });
+
   const getJiraIssueByServiceId = (
     serviceId: NonEmptyString
   ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
@@ -160,9 +175,22 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       )
     );
 
+  const getPendingJiraIssueByServiceId = (
+    serviceId: NonEmptyString
+  ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
+    pipe(
+      jiraClient.searchJiraIssues(
+        buildGetPendingJiraIssueByServiceIdPayload(serviceId)
+      ),
+      TE.map((response) =>
+        response.issues.length > 0 ? O.some(response.issues[0]) : O.none
+      )
+    );
+
   return {
     createJiraIssue,
     searchJiraIssuesByKeyAndStatus,
     getJiraIssueByServiceId,
+    getPendingJiraIssueByServiceId,
   };
 };

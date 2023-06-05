@@ -15,16 +15,18 @@ import {
 import { getDatabase } from "./lib/azure/cosmos";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
+import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
-import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { createWebServer } from "./webservice";
 
 import { processBatchOf, setBindings } from "./lib/azure/misc";
+import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 
+import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { getDao } from "./utils/service-review-dao";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -77,6 +79,9 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(servicePublicationStore);
 
+export const createRequestHistoricizationEntryPoint =
+  createRequestHistoricizationHandler();
+
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
@@ -96,6 +101,20 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
     requestPublication: pipe(
       results,
       RA.map(RR.lookup("requestPublication")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServicePublicationChangeEntryPoint = pipe(
+  onServicePublicationChangeHandler,
+  processBatchOf(ServicePublication.ItemType),
+  setBindings((results) => ({
+    requestHistoricization: pipe(
+      results,
+      RA.map(RR.lookup("requestHistoricization")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

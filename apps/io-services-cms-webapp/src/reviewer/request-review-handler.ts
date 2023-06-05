@@ -1,4 +1,4 @@
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { Queue } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -12,10 +12,10 @@ import { JiraProxy } from "../utils/jira-proxy";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, ServiceLifecycle.definitions.Service> =>
+): E.Either<Error, Queue.RequestReviewItem> =>
   pipe(
     queueItem,
-    ServiceLifecycle.definitions.Service.decode,
+    Queue.RequestReviewItem.decode,
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
@@ -32,7 +32,7 @@ export const createRequestReviewHandler = (
       TE.chain((service) =>
         pipe(
           service.id,
-          jiraProxy.getJiraIssueByServiceId,
+          jiraProxy.getPendingJiraIssueByServiceId,
           TE.chain(
             flow(
               O.fold(
@@ -56,7 +56,7 @@ export const createRequestReviewHandler = (
             pipe(
               dao.insert({
                 service_id: service.id,
-                service_version: service.id,
+                service_version: service.version,
                 ticket_id: ticket.id,
                 ticket_key: ticket.key,
                 status: "PENDING",

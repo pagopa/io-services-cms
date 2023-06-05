@@ -34,7 +34,12 @@ export const createCosmosStore = <
             TE.right(O.none)
           : // if present, try to decode in the expected shape
             pipe(
-              rr.resource,
+              {
+                ...rr.resource,
+                // eslint-disable-next-line no-underscore-dangle
+                last_update: new Date(rr.resource._ts * 1000).toISOString(), // Unix timestamp
+                version: rr.etag,
+              },
               codec.decode,
               E.map(O.some),
               TE.fromEither,
@@ -61,7 +66,14 @@ export const createCosmosStore = <
             }`
           )
       ),
-      TE.map((_) => value)
+      TE.map((itemResponse) => ({
+        ...value,
+        last_update: itemResponse.resource
+          ? // eslint-disable-next-line no-underscore-dangle
+            new Date(itemResponse.resource._ts * 1000).toISOString() // Unix timestamp
+          : undefined,
+        version: itemResponse.etag,
+      }))
     );
 
   return { fetch, save };

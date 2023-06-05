@@ -66,10 +66,16 @@ export type ServiceId = t.TypeOf<typeof ServiceId>;
 export const ServiceId = NonEmptyString;
 
 export type Service = t.TypeOf<typeof Service>;
-export const Service = t.type({
-  id: ServiceId,
-  data: t.intersection([
-    ServiceData,
-    t.type({ organization: OrganizationData, metadata: ServiceMetadata }),
-  ]),
-});
+export const Service = t.intersection([
+  t.type({
+    id: ServiceId,
+    data: t.intersection([
+      ServiceData,
+      t.type({ organization: OrganizationData, metadata: ServiceMetadata }),
+    ]),
+  }),
+  t.partial({
+    version: NonEmptyString,
+    last_update: NonEmptyString,
+  }),
+]);
