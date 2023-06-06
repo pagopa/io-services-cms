@@ -345,10 +345,11 @@ function apply(
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
   return (store) => {
-    const isAppliedAction = ({ action }: FSM["transitions"][number]) =>
-      action === appliedAction;
     // check transitions for the action to apply
-    if (!FSM.transitions.filter(isAppliedAction).length) {
+    const applicableTransitions = FSM.transitions.filter(
+      ({ action }) => action === appliedAction
+    );
+    if (!applicableTransitions.length) {
       return TE.left(new FsmNoApplicableTransitionError(appliedAction));
     }
     return pipe(
@@ -370,7 +371,7 @@ function apply(
           O.fold(
             () =>
               pipe(
-                FSM.transitions.filter(isAppliedAction),
+                applicableTransitions,
                 // this filter is also a type guard to narrow possible from states to EmptyState only
                 RA.filter(
                   <T extends FSM["transitions"][number]>(
@@ -390,7 +391,7 @@ function apply(
               ),
             (item) =>
               pipe(
-                FSM.transitions.filter(isAppliedAction),
+                applicableTransitions,
                 // this filter is also a type guard to narrow possible from states to any state but EmptyState
                 RA.filter(
                   <T extends FSM["transitions"][number]>(

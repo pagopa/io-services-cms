@@ -1,6 +1,7 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { sequence } from "fp-ts/lib/Array";
 import { pipe } from "fp-ts/lib/function";
@@ -20,14 +21,22 @@ const store = stores.createMemoryStore();
 const fsmClient = getFsmClient(store as unknown as FSMStore<ItemType>);
 
 // helper to check the result of a sequence of actions
-const expectSuccess = async ({ id, actions, expected }) => {
+const expectSuccess = async ({
+  id,
+  actions,
+  expected,
+}: {
+  id: NonEmptyString;
+  actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
+  expected: unknown;
+}) => {
   const applyTask = pipe(
     actions,
-    sequence(TE.ApplicativeSeq),
-    TE.map((a) => a[a.length - 1])
+    sequence(RTE.ApplicativeSeq),
+    RTE.map((a) => a[a.length - 1])
   );
 
-  const result = await applyTask();
+  const result = await applyTask()();
 
   if (E.isLeft(result)) {
     throw result.left;
@@ -49,6 +58,13 @@ const expectFailure = async ({
   errorType,
   additionalPreTestFn,
   additionalPostTestFn,
+}: {
+  id: NonEmptyString;
+  actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
+  expected: Vi.ExpectStatic | undefined;
+  errorType: unknown;
+  additionalPreTestFn: Function | undefined;
+  additionalPostTestFn: Function | undefined;
 }) => {
   // run some useful code before assertion
   if (additionalPreTestFn) {
@@ -57,12 +73,12 @@ const expectFailure = async ({
 
   const applyTask = pipe(
     actions,
-    sequence(TE.ApplicativeSeq),
-    TE.map((a) => a[a.length - 1])
+    sequence(RTE.ApplicativeSeq),
+    RTE.map((a) => a[a.length - 1])
   );
 
   try {
-    const result = await applyTask();
+    const result = await applyTask()();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);
@@ -137,7 +153,7 @@ describe("apply", () => {
     {
       title: "on empty items",
       id: aServiceId,
-      actions: [fsmClient.create(aServiceId, { data: aService })],
+      actions: [() => fsmClient.create(aServiceId, { data: aService })],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "draft" }),
@@ -147,9 +163,12 @@ describe("apply", () => {
       title: "a sequence on the same item",
       id: aServiceId,
       actions: [
-        fsmClient.create(aServiceId, { data: aService }),
-        fsmClient.edit(aServiceId, { data: changeName(aService, "new name") }),
-        fsmClient.submit(aServiceId),
+        () => fsmClient.create(aServiceId, { data: aService }),
+        () =>
+          fsmClient.edit(aServiceId, {
+            data: changeName(aService, "new name"),
+          }),
+        () => fsmClient.submit(aServiceId),
       ],
       expected: expect.objectContaining({
         ...changeName(aService, "new name"),
@@ -163,30 +182,23 @@ describe("apply", () => {
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [fsmClient.submit(aServiceId)],
+      actions: [() => fsmClient.submit(aServiceId)],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,
       additionalPostTestFn: undefined,
     },
-    // {
-    //   title: "on invalid appliedAction",
-    //   id: aServiceId,
-    //   actions: [apply("invalidActionName" as any, aServiceId)],
-    //   expected: undefined,
-    //   errorType: FsmNoApplicableTransitionError,
-    //   additionalPreTestFn: undefined,
-    //   additionalPostTestFn: undefined,
-    // },
     {
       title: "on invalid sequence of actions",
       id: aServiceId,
       actions: [
-        /* last ok --> */ fsmClient.create(aServiceId, { data: aService }),
-        /* this ko --> */ fsmClient.create(aServiceId, {
-          data: changeName(aService, "new name"),
-        }),
-        fsmClient.submit(aServiceId),
+        /* last ok --> */ () =>
+          fsmClient.create(aServiceId, { data: aService }),
+        /* this ko --> */ () =>
+          fsmClient.create(aServiceId, {
+            data: changeName(aService, "new name"),
+          }),
+        () => fsmClient.submit(aServiceId),
       ],
       expected: expect.objectContaining({
         ...aService, // we expect the first create to have succeeded
@@ -199,7 +211,7 @@ describe("apply", () => {
     {
       title: "on undeterministic call",
       id: aServiceId,
-      actions: [fsmClient.create(aServiceId, { data: aService })],
+      actions: [() => fsmClient.create(aServiceId, { data: aService })],
       expected: undefined,
       errorType: FsmTooManyTransitionsError,
       additionalPreTestFn: addDuplicatedCreateTransition,
@@ -213,10 +225,8 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
       save: vi.fn(),
-    };
-    const mockFsmClient = getFsmClient(
-      mockStore as unknown as FSMStore<ItemType>
-    );
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.create(aServiceId, { data: aService })();
 
@@ -235,10 +245,8 @@ describe("apply", () => {
       save: vi.fn(() => {
         return TE.left(new Error());
       }),
-    };
-    const mockFsmClient = getFsmClient(
-      mockStore as unknown as FSMStore<ItemType>
-    );
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.create(aServiceId, { data: aService })();
 
