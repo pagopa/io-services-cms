@@ -29,7 +29,6 @@ import {
 } from "../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
-  // An instance of ServicePublication
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
 };
 

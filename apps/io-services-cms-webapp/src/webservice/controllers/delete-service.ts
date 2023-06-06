@@ -21,7 +21,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 type Dependencies = {
-  // An instance of ServiceLifecycle client
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
 };
 

@@ -6,9 +6,10 @@ import {
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+import * as TE from "fp-ts/lib/TaskEither";
 
 // memory implementation, for testing
 const serviceLifecycleStore =
@@ -19,6 +20,9 @@ const servicePublicationStore =
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
+const mockFmsLifecycleClient = {
+  edit: vi.fn(() => TE.left(new Error())),
+} as unknown as ServiceLifecycle.FsmClient;
 
 describe("editService", () => {
   const app = createWebServer({
