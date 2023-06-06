@@ -195,28 +195,18 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
 describe("[Service Review Checker Handler] updateReview", () => {
   it("should update TWO PENDING service review given TWO IssueItemPairs, one with APPROVED jira status and one with REJECTED jira status", async () => {
     const mockFsmLifecycleClient = {
-      approve: vi.fn((id: ServiceLifecycle.definitions.ServiceId) => {
-        if (aService.id === id) {
-          return TE.right({
-            ...aService,
-            fsm: { state: "approved" },
-          });
-        } else {
-          // return TE.left({ kind: "FsmNoTransitionMatchedError" });
-          return TE.left(new Error("It should not happen"));
-        }
-      }),
-      reject: vi.fn((id: ServiceLifecycle.definitions.ServiceId) => {
-        if (aService2.id === id) {
-          return TE.right({
-            ...aService2,
-            fsm: { state: "rejected" },
-          });
-        } else {
-          // return TE.left({ kind: "GenericError" });
-          return TE.left(new Error("It should not happen"));
-        }
-      }),
+      approve: vi.fn(() =>
+        TE.right({
+          ...aService,
+          fsm: { state: "approved" },
+        })
+      ),
+      reject: vi.fn(() =>
+        TE.right({
+          ...aService2,
+          fsm: { state: "rejected" },
+        })
+      ),
     } as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
       mainMockServiceReviewDao,
