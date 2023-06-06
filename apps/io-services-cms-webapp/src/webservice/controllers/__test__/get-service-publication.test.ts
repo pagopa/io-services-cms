@@ -30,6 +30,8 @@ const serviceLifecycleStore =
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -63,7 +65,7 @@ describe("WebService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 
@@ -86,7 +88,7 @@ describe("WebService", () => {
     } as unknown as ServicePublication.ItemType;
 
     it("should retrieve a service", async () => {
-      servicePublicationStore.save("s3", asServiceWithStatus);
+      await servicePublicationStore.save("s3", asServiceWithStatus)();
 
       const response = await request(app)
         .get("/api/services/s3/release")

@@ -5,11 +5,11 @@ import {
   stores,
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
-import * as TE from "fp-ts/lib/TaskEither";
 
 // memory implementation, for testing
 const serviceLifecycleStore =
@@ -17,6 +17,8 @@ const serviceLifecycleStore =
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
+
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -29,7 +31,7 @@ describe("editService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 
@@ -95,10 +97,10 @@ describe("editService", () => {
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-    serviceLifecycleStore.save("s1", {
+    await serviceLifecycleStore.save("s1", {
       ...aService,
       fsm: { state: "deleted" },
-    });
+    })();
 
     const response = await request(app)
       .put("/api/services/s4")
@@ -124,10 +126,10 @@ describe("editService", () => {
   });
 
   it("should edit a service", async () => {
-    serviceLifecycleStore.save("s4", {
+    await serviceLifecycleStore.save("s4", {
       ...aService,
       fsm: { state: "rejected" },
-    });
+    })();
 
     const response = await request(app)
       .put("/api/services/s4")

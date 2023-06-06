@@ -29,6 +29,7 @@ const serviceLifecycleStore =
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -62,7 +63,7 @@ describe("WebService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 
@@ -80,10 +81,10 @@ describe("WebService", () => {
     });
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-      serviceLifecycleStore.save("s1", {
+      await serviceLifecycleStore.save("s1", {
         ...aServiceLifecycle,
         fsm: { state: "approved" },
-      });
+      })();
 
       const response = await request(app)
         .put("/api/services/s1/review")
@@ -109,10 +110,10 @@ describe("WebService", () => {
     });
 
     it("should submit a service", async () => {
-      serviceLifecycleStore.save("s1", {
+      await serviceLifecycleStore.save("s1", {
         ...aServiceLifecycle,
         fsm: { state: "draft" },
-      });
+      })();
 
       const response = await request(app)
         .put("/api/services/s1/review")

@@ -29,6 +29,8 @@ const serviceLifecycleStore =
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -62,7 +64,7 @@ describe("WebService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 
@@ -80,10 +82,10 @@ describe("WebService", () => {
     });
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-      servicePublicationStore.save("s1", {
+      await servicePublicationStore.save("s1", {
         ...aServicePub,
         fsm: { state: "published" },
-      });
+      })();
 
       const response = await request(app)
         .post("/api/services/s1/release")
@@ -109,10 +111,10 @@ describe("WebService", () => {
     });
 
     it("should publish a service", async () => {
-      servicePublicationStore.save("s1", {
+      await servicePublicationStore.save("s1", {
         ...aServicePub,
         fsm: { state: "unpublished" },
-      });
+      })();
 
       const response = await request(app)
         .post("/api/services/s1/release")

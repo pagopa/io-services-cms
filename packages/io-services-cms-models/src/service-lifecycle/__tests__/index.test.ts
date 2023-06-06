@@ -84,7 +84,6 @@ const expectFailure = async ({
 };
 
 beforeEach(() => {
-  console.log("Clear store before each tests");
   store.clear();
 });
 

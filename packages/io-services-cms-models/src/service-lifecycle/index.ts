@@ -457,6 +457,7 @@ function apply(
 }
 
 const getFsmClient = (store: LifecycleStore) => ({
+  getStore: () => store,
   create: (
     id: ServiceId,
     args: { data: Service }

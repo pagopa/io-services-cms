@@ -34,6 +34,8 @@ const serviceLifecycleStore =
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -46,7 +48,7 @@ describe("createService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 

@@ -50,7 +50,7 @@ const servicePublicationPath = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
-  serviceLifecycleStore: FSMStore<ServiceLifecycle.ItemType>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   servicePublicationStore: FSMStore<ServicePublication.ItemType>;
   apimClient: ApiManagementClient;
   config: IConfig;
@@ -58,16 +58,11 @@ type Dependencies = {
 
 export const createWebServer = ({
   basePath,
-  serviceLifecycleStore,
+  fsmLifecycleClient,
   servicePublicationStore,
   apimClient,
   config,
 }: Dependencies) => {
-  // Get an instance of ServiceLifecycle
-  const fsmLifecycleClient = ServiceLifecycle.getFsmClient(
-    serviceLifecycleStore
-  );
-
   // mount all routers on router
   const router = express.Router();
   router.use(bodyParser.json());
@@ -91,7 +86,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        store: serviceLifecycleStore,
+        store: fsmLifecycleClient.getStore(),
       }),
       applyGetServiceLifecycleRequestMiddelwares,
       wrapRequestHandler

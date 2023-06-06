@@ -1,8 +1,8 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
 import {
-    ServiceLifecycle,
-    ServicePublication,
-    stores,
+  ServiceLifecycle,
+  ServicePublication,
+  stores,
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import request from "supertest";
@@ -18,6 +18,8 @@ const serviceLifecycleStore =
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
@@ -26,7 +28,7 @@ describe("getServiceLifecycle", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
+    fsmLifecycleClient,
     servicePublicationStore,
   });
 
@@ -69,7 +71,7 @@ describe("getServiceLifecycle", () => {
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should retrieve a service", async () => {
-    serviceLifecycleStore.save("s12", asServiceLifecycleWithStatus);
+    await serviceLifecycleStore.save("s12", asServiceLifecycleWithStatus)();
 
     const response = await request(app)
       .get("/api/services/s12")
