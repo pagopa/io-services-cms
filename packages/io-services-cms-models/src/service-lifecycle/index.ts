@@ -168,6 +168,7 @@ const FSM: FSM = {
           fsm: {
             state: "approved",
             approvalDate,
+            autoPublish: current.fsm.autoPublish ?? false,
             lastTransition: "apply approve on submitted",
           },
         }),
