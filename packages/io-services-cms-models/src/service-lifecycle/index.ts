@@ -409,14 +409,12 @@ function apply(
       TE.map((_) => _[0].right.exec()),
       TE.chain(TE.fromEither),
       // save new status in the store
-      TE.chain((newItem) => {
-        // eslint-disable-next-line no-console
-        console.log(`AFTER exec submit => ${JSON.stringify(newItem)}`);
-        return pipe(
+      TE.chain((newItem) =>
+        pipe(
           store.save(id, newItem),
           TE.mapLeft((_) => new FsmStoreSaveError())
-        );
-      })
+        )
+      )
     );
   };
 }
