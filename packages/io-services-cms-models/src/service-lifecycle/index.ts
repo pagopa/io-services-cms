@@ -53,7 +53,7 @@ type Actions = {
   create: { data: Service };
   edit: { data: Service };
   delete: void;
-  submit: void;
+  submit: { autoPublish: boolean };
   abort: void;
   reject: { reason: string };
   approve: { approvalDate: string };
@@ -136,10 +136,14 @@ const FSM: FSM = {
       action: "submit",
       from: "draft",
       to: "submitted",
-      exec: ({ current }) =>
+      exec: ({ current, args: { autoPublish } }) =>
         E.right({
           ...current,
-          fsm: { state: "submitted", lastTransition: "apply submit on draft" },
+          fsm: {
+            state: "submitted",
+            autoPublish,
+            lastTransition: "apply submit on draft",
+          },
         }),
     },
     {
@@ -263,7 +267,8 @@ function apply(
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
-  id: ServiceId
+  id: ServiceId,
+  args: { autoPublish: boolean }
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -404,12 +409,14 @@ function apply(
       TE.map((_) => _[0].right.exec()),
       TE.chain(TE.fromEither),
       // save new status in the store
-      TE.chain((newItem) =>
-        pipe(
+      TE.chain((newItem) => {
+        // eslint-disable-next-line no-console
+        console.log(`AFTER exec submit => ${JSON.stringify(newItem)}`);
+        return pipe(
           store.save(id, newItem),
           TE.mapLeft((_) => new FsmStoreSaveError())
-        )
-      )
+        );
+      })
     );
   };
 }

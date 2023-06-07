@@ -27,30 +27,30 @@ tags:
     description: Organizations API specification
 paths:
   /info:
-    get: 
+    get:
       description: Get runtime status information about the application
       operationId: info
       security: [] # public endpoint
       responses:
-        '200': 
+        '200':
           description: The application is up and running
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  version: 
+                  version:
                     type: string
                     description: the application version
                   name:
                     type: string
                     description: the application name
-        '500': 
+        '500':
           description: The fails to startup due to misconfiguration or unreachable dependencies
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseError"
+                $ref: '#/components/schemas/ResponseError'
   /services:
     post:
       tags:
@@ -90,7 +90,7 @@ paths:
       summary: Retrieve all services
       description: Retrieve all services owned by the calling user
       operationId: getServices
-      parameters: 
+      parameters:
         - name: limit
           in: query
           description: Number of services per request
@@ -303,7 +303,7 @@ paths:
       security:
         - api_key: []
   /services/{serviceId}/review:
-    put: 
+    put:
       tags:
         - service-review
       summary: Send service to review
@@ -316,6 +316,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: Review Request option
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+        required: true
       responses:
         '204':
           description: Service revirew taken in charge
@@ -333,7 +340,7 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-    patch: 
+    patch:
       tags:
         - service-review
       summary: Explain service review
@@ -373,7 +380,7 @@ paths:
       security:
         - api_key: []
   /services/{serviceId}/release:
-    post: 
+    post:
       tags:
         - service-release
       summary: Publish service on IO
@@ -403,7 +410,7 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-    get: 
+    get:
       tags:
         - service-release
       summary: Retrieve last published version of service
@@ -435,7 +442,7 @@ paths:
           description: Internal server error
       security:
         - api_key: []
-    delete: 
+    delete:
       tags:
         - service-release
       summary: Unpublish service from IO
@@ -517,7 +524,7 @@ components:
             last_update:
               $ref: '#/components/schemas/Timestamp'
         - $ref: '#/components/schemas/ServiceData'
-      required: 
+      required:
         - id
         - status
         - last_update
@@ -535,7 +542,7 @@ components:
             last_update:
               $ref: '#/components/schemas/Timestamp'
         - $ref: '#/components/schemas/ServiceData'
-      required: 
+      required:
         - id
         - status
         - last_update
@@ -569,7 +576,7 @@ components:
           default: 0
         metadata:
           $ref: '#/components/schemas/ServiceMetadata'
-      required: 
+      required:
         - name
         - description
         - organization
@@ -617,17 +624,17 @@ components:
         scope:
           type: string
           enum: [NATIONAL, LOCAL]
-      required: 
+      required:
         - scope
     ServiceLifecycleStatus:
       type: object
-      properties: 
+      properties:
         value:
-            $ref: '#/components/schemas/ServiceLifecycleStatusType'
+          $ref: '#/components/schemas/ServiceLifecycleStatusType'
         reason:
           description: Reason for status value
           type: string
-      required: 
+      required:
         - value
     ServiceLifecycleStatusType:
       description: |
@@ -651,7 +658,7 @@ components:
       enum: [published, unpublished]
     ServicePagination:
       type: object
-      properties: 
+      properties:
         value:
           type: array
           items:
@@ -672,7 +679,7 @@ components:
           description: total record count
     Organization:
       type: object
-      properties: 
+      properties:
         name:
           type: string
           minLength: 1
@@ -687,7 +694,7 @@ components:
     OrganizationFiscalCode:
       type: string
       description: User's fiscal code.
-      pattern: "^[0-9]{11}$"
+      pattern: '^[0-9]{11}$'
       example: 012345678901
     Logo:
       description: A base64 string representation of the logo PNG image.
@@ -763,6 +770,15 @@ components:
         comment:
           type: string
           example: This is an explanation comment
+    ReviewRequest:
+      type: object
+      properties:
+        auto_publish:
+          type: boolean
+          description: Flag to request an automatic service publication on service approval.
+          example: true
+      required:
+        - auto_publish
     Timestamp:
       type: string
       description: A date-time field in ISO-8601 format and UTC timezone.
