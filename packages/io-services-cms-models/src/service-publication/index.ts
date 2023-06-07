@@ -1,23 +1,23 @@
-import * as t from "io-ts";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/function";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
-import { pipe, flow } from "fp-ts/function";
+import * as t from "io-ts";
 import {
-  FSMStore,
-  StateMetadata,
-  Transition,
-  WithState,
-  StateSet,
   EmptyState,
+  FSMStore,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
   FsmTooManyTransitionsError,
   FsmTransitionExecutionError,
+  StateMetadata,
+  StateSet,
+  Transition,
+  WithState,
 } from "../lib/fsm";
 import { Service, ServiceId } from "../service-lifecycle/definitions";
 
@@ -318,6 +318,15 @@ function apply(
   };
 }
 
+const getFsmClient = (store: PublicationStore) => ({
+  getStore: () => store,
+  override: (id: ServiceId, args: { data: Service }) =>
+    apply("override", id, args)(store),
+  unpublish: (id: ServiceId) => apply("unpublish", id)(store),
+  publish: (id: ServiceId) => apply("publish", id)(store),
+});
+type FsmClient = ReturnType<typeof getFsmClient>;
+
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
-export { apply, FSM, ItemType };
+export { getFsmClient, FsmClient, FSM, ItemType };
