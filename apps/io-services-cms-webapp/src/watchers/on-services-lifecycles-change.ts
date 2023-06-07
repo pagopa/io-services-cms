@@ -4,6 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { IWithinRangeIntegerTag } from "@pagopa/ts-commons/lib/numbers";
 
 type Actions = "requestReview" | "requestPublication";
 
@@ -34,7 +35,14 @@ const onSubmitHandler = (
 const onApproveHandler = (
   item: ServiceLifecycle.ItemType
 ): RequestPublicationAction => ({
-  requestPublication: { id: item.id, data: item.data },
+  requestPublication: {
+    id: item.id,
+    data: {
+      ...item.data,
+      max_allowed_payment_amount: 1000000 as number &
+        IWithinRangeIntegerTag<0, 9999999999>,
+    },
+  },
 });
 
 export const handler: RTE.ReaderTaskEither<
