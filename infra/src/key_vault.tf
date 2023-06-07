@@ -57,7 +57,7 @@ resource "azurerm_key_vault_access_policy" "github_action_ci" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azuread_service_principal.github_action_iac_ci.object_id
 
-  secret_permissions      = ["Get", "List",]
+  secret_permissions      = ["Get", "List", ]
   storage_permissions     = []
   certificate_permissions = []
   key_permissions         = []
@@ -68,7 +68,7 @@ resource "azurerm_key_vault_access_policy" "github_action_cd" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = data.azuread_service_principal.github_action_iac_cd.object_id
 
-  secret_permissions      = ["Get", "List", "Set",]
+  secret_permissions      = ["Get", "List", "Set", ]
   storage_permissions     = []
   certificate_permissions = []
   key_permissions         = []
