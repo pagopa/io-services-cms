@@ -145,7 +145,7 @@ describe("apply", () => {
       actions: [
         apply("create", aServiceId, { data: aService }),
         apply("edit", aServiceId, { data: changeName(aService, "new name") }),
-        apply("submit", aServiceId),
+        apply("submit", aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...changeName(aService, "new name"),
@@ -159,7 +159,7 @@ describe("apply", () => {
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [apply("submit", aServiceId)],
+      actions: [apply("submit", aServiceId, { autoPublish: false })],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,
@@ -182,7 +182,7 @@ describe("apply", () => {
         /* this ko --> */ apply("create", aServiceId, {
           data: changeName(aService, "new name"),
         }),
-        apply("submit", aServiceId),
+        apply("submit", aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...aService, // we expect the first create to have succeeded
