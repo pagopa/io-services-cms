@@ -240,50 +240,6 @@ const FSM: FSM = {
 
 type LifecycleStore = FSMStore<States[number]>;
 
-type ApplyCreateOrEdit = (
-  appliedAction: "create" | "edit",
-  id: ServiceId,
-  args: { data: Service }
-) => ReaderTaskEither<
-  LifecycleStore,
-  AllFsmErrors,
-  WithState<"draft", Service>
->;
-type ApplySubmit = (
-  appliedAction: "submit",
-  id: ServiceId
-) => ReaderTaskEither<
-  LifecycleStore,
-  AllFsmErrors,
-  WithState<"submitted", Service>
->;
-type ApplyApprove = (
-  appliedAction: "approve",
-  id: ServiceId,
-  args: { approvalDate: string }
-) => ReaderTaskEither<
-  LifecycleStore,
-  AllFsmErrors,
-  WithState<"approved", Service>
->;
-type ApplyReject = (
-  appliedAction: "reject",
-  id: ServiceId,
-  args: { reason: string }
-) => ReaderTaskEither<
-  LifecycleStore,
-  AllFsmErrors,
-  WithState<"rejected", Service>
->;
-type ApplyDelete = (
-  appliedAction: "delete",
-  id: ServiceId
-) => ReaderTaskEither<
-  LifecycleStore,
-  AllFsmErrors,
-  WithState<"deleted", Service>
->;
-
 // TODO: apply function is meant to be agnostic on the FSM defintion.
 // Unfortunately, we didn't achieve the result yet, hence we opted for an actual implementation.
 // The algorithm itself is not related to the current FSM implementation, but the type system is
@@ -459,28 +415,16 @@ function apply(
 
 const getFsmClient = (store: LifecycleStore) => ({
   getStore: () => store,
-  create: (
-    id: ServiceId,
-    args: { data: Service }
-  ): ReturnType<ReturnType<ApplyCreateOrEdit>> =>
+  create: (id: ServiceId, args: { data: Service }) =>
     apply("create", id, args)(store),
-  edit: (
-    id: ServiceId,
-    args: { data: Service }
-  ): ReturnType<ReturnType<ApplyCreateOrEdit>> =>
+  edit: (id: ServiceId, args: { data: Service }) =>
     apply("edit", id, args)(store),
-  submit: (id: ServiceId): ReturnType<ReturnType<ApplySubmit>> =>
-    apply("submit", id)(store),
-  approve: (
-    id: ServiceId,
-    args: { approvalDate: string }
-  ): ReturnType<ReturnType<ApplyApprove>> => apply("approve", id, args)(store),
-  reject: (
-    id: ServiceId,
-    args: { reason: string }
-  ): ReturnType<ReturnType<ApplyReject>> => apply("reject", id, args)(store),
-  delete: (id: ServiceId): ReturnType<ReturnType<ApplyDelete>> =>
-    apply("delete", id)(store),
+  submit: (id: ServiceId) => apply("submit", id)(store),
+  approve: (id: ServiceId, args: { approvalDate: string }) =>
+    apply("approve", id, args)(store),
+  reject: (id: ServiceId, args: { reason: string }) =>
+    apply("reject", id, args)(store),
+  delete: (id: ServiceId) => apply("delete", id)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 

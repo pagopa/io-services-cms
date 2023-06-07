@@ -1,7 +1,7 @@
 import {
+  FSMStore,
   ServiceLifecycle,
   ServicePublication,
-  stores,
 } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
@@ -31,9 +31,7 @@ import { itemToResponse } from "../../utils/converters/service-publication-conve
 
 type Dependencies = {
   // A store of ServicePublication objects
-  store: ReturnType<
-    typeof stores.createCosmosStore<ServicePublication.ItemType>
-  >;
+  store: FSMStore<ServicePublication.ItemType>;
 };
 
 type HandlerResponseTypes =

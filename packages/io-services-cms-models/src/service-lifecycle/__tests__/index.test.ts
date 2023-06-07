@@ -20,6 +20,10 @@ import { Service } from "../definitions";
 const store = stores.createMemoryStore();
 const fsmClient = getFsmClient(store as unknown as FSMStore<ItemType>);
 
+beforeEach(() => {
+  store.clear();
+});
+
 // helper to check the result of a sequence of actions
 const expectSuccess = async ({
   id,
@@ -98,10 +102,6 @@ const expectFailure = async ({
     }
   }
 };
-
-beforeEach(() => {
-  store.clear();
-});
 
 const aServiceId = "my-id" as NonEmptyString;
 const aService = pipe(

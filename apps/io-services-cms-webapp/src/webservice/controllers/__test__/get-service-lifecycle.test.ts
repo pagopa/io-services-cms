@@ -11,14 +11,15 @@ import { IConfig } from "../../../config";
 import { itemToResponse as getLifecycleItemToResponse } from "../../../utils/converters/service-lifecycle-converters";
 import { createWebServer } from "../../index";
 
-// memory implementation, for testing
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
-
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -29,7 +30,7 @@ describe("getServiceLifecycle", () => {
     apimClient: mockApimClient,
     config: mockConfig,
     fsmLifecycleClient,
-    servicePublicationStore,
+    fsmPublicationClient,
   });
 
   const aServiceLifecycle = {

@@ -22,14 +22,15 @@ vi.mock("../../lib/clients/apim-client", async () => {
   };
 });
 
-// memory implementation, for testing
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
-
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -65,7 +66,7 @@ describe("WebService", () => {
     apimClient: mockApimClient,
     config: mockConfig,
     fsmLifecycleClient,
-    servicePublicationStore,
+    fsmPublicationClient,
   });
 
   describe("unPublishService", () => {

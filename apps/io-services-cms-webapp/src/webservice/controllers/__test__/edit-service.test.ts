@@ -5,26 +5,23 @@ import {
   stores,
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
 
-// memory implementation, for testing
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
-
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
-const mockFmsLifecycleClient = {
-  edit: vi.fn(() => TE.left(new Error())),
-} as unknown as ServiceLifecycle.FsmClient;
 
 describe("editService", () => {
   const app = createWebServer({
@@ -32,7 +29,7 @@ describe("editService", () => {
     apimClient: mockApimClient,
     config: mockConfig,
     fsmLifecycleClient,
-    servicePublicationStore,
+    fsmPublicationClient,
   });
 
   const aServicePayload = {

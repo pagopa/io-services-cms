@@ -4,11 +4,7 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import {
-  FSMStore,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -51,7 +47,7 @@ const servicePublicationPath = "/services/:serviceId/release";
 type Dependencies = {
   basePath: string;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  servicePublicationStore: FSMStore<ServicePublication.ItemType>;
+  fsmPublicationClient: ServicePublication.FsmClient;
   apimClient: ApiManagementClient;
   config: IConfig;
 };
@@ -59,7 +55,7 @@ type Dependencies = {
 export const createWebServer = ({
   basePath,
   fsmLifecycleClient,
-  servicePublicationStore,
+  fsmPublicationClient,
   apimClient,
   config,
 }: Dependencies) => {
@@ -130,7 +126,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makePublishServiceHandler({
-        store: servicePublicationStore,
+        fsmPublicationClient,
       }),
       applyPublishServiceRequestMiddelwares,
       wrapRequestHandler
@@ -141,7 +137,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        store: servicePublicationStore,
+        store: fsmPublicationClient.getStore(),
       }),
       applyGetPublicationStatusServiceRequestMiddelwares,
       wrapRequestHandler
@@ -152,7 +148,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
-        store: servicePublicationStore,
+        fsmPublicationClient,
       }),
       applyUnpublishServiceRequestMiddelwares,
       wrapRequestHandler
