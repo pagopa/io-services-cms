@@ -115,6 +115,7 @@ const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
   searchJiraIssuesByKeyAndStatus: vi.fn(),
   getJiraIssueByServiceId: vi.fn(),
+  getPendingJiraIssueByServiceId: vi.fn(),
 };
 
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
