@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.6.0
+
+### Minor Changes
+
+- 5abd2c4: Service Publication Watcher
+
 ## 1.5.0
 
 ### Minor Changes

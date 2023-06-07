@@ -1,0 +1,22 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_HISTORICIZATION_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestHistoricizationItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    },
+    {
+      "name": "serviceHistoryDocument",
+      "type": "cosmosDB",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+      "createIfNotExists": false,
+      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestHistoricizationEntryPoint"
+}

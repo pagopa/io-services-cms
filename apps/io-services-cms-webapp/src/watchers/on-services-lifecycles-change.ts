@@ -2,6 +2,8 @@ import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 type Actions = "requestReview" | "requestPublication";
 
@@ -22,7 +24,11 @@ const noAction = {};
 const onSubmitHandler = (
   item: ServiceLifecycle.ItemType
 ): RequestReviewAction => ({
-  requestReview: { id: item.id, data: item.data },
+  requestReview: {
+    id: item.id,
+    data: item.data,
+    version: item.version ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
+  },
 });
 
 const onApproveHandler = (
