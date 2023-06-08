@@ -1,8 +1,4 @@
-import {
-  FSMStore,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -20,7 +16,7 @@ const parseIncomingMessage = (
   );
 
 export const createRequestPublicationHandler = (
-  store: FSMStore<ServicePublication.ItemType>
+  fsmPublicationClient: ServicePublication.FsmClient
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((_context, queueItem) =>
     pipe(
@@ -29,9 +25,7 @@ export const createRequestPublicationHandler = (
       TE.fromEither,
       TE.mapLeft((_) => new Error("Error while parsing incoming message")),
       TE.chainW((service) =>
-        ServicePublication.apply("override", service.id, { data: service })(
-          store
-        )
+        fsmPublicationClient.override(service.id, { data: service })
       ),
       TE.getOrElse((e) => {
         throw e;

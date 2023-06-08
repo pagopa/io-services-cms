@@ -1,12 +1,14 @@
-import { pipe } from "fp-ts/lib/function";
-import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
+import * as T from "fp-ts/Task";
+import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { FSMStore, WithState } from "./types";
 
 type MemoryStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T> & {
     // expose the whole store for testing
     inspect: () => Map<string, T>;
+    clear: () => void;
   };
 
 export const createMemoryStore = <
@@ -15,9 +17,20 @@ export const createMemoryStore = <
   const m = new Map<string, T>();
 
   return {
-    fetch: (id: string) => pipe(m.get(id), O.fromNullable, TE.right),
-    save: (id: string, value) => pipe(m.set(id, value), (_) => TE.right(value)),
+    fetch: (id: string) =>
+      pipe(
+        () => Promise.resolve(m.get(id)),
+        T.map(O.fromNullable),
+        TE.fromTask
+      ),
+    save: (id: string, value) =>
+      pipe(
+        () => Promise.resolve(m.set(id, value)),
+        T.map((_) => value),
+        TE.fromTask
+      ),
     // for testing
     inspect: () => m,
+    clear: () => m.clear(),
   };
 };

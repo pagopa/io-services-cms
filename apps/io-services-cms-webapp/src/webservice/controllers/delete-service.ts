@@ -1,4 +1,4 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -17,12 +17,11 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 type Dependencies = {
-  // A store of ServiceLifecycle objects
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
 };
 
 type HandlerResponseTypes =
@@ -39,14 +38,16 @@ type DeleteServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeDeleteServiceHandler =
-  ({ store }: Dependencies): DeleteServiceHandler =>
+  ({
+    fsmLifecycleClient: fsmLifecycleClient,
+  }: Dependencies): DeleteServiceHandler =>
   (_auth, serviceId) =>
     pipe(
-      ServiceLifecycle.apply("delete", serviceId),
-      RTE.map(ResponseSuccessNoContent),
-      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      RTE.toUnion
-    )(store)();
+      fsmLifecycleClient.delete(serviceId),
+      TE.map(ResponseSuccessNoContent),
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.toUnion
+    )();
 
 export const applyRequestMiddelwares = (handler: DeleteServiceHandler) =>
   pipe(

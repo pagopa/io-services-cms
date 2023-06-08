@@ -4,11 +4,7 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import {
-  FSMStore,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -30,7 +26,6 @@ import {
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
-} from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
   makeGetServicesHandler,
@@ -54,16 +49,16 @@ const servicePublicationPath = "/services/:serviceId/release";
 
 type Dependencies = {
   basePath: string;
-  serviceLifecycleStore: FSMStore<ServiceLifecycle.ItemType>;
-  servicePublicationStore: FSMStore<ServicePublication.ItemType>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmPublicationClient: ServicePublication.FsmClient;
   apimClient: ApiManagementClient;
   config: IConfig;
 };
 
 export const createWebServer = ({
   basePath,
-  serviceLifecycleStore,
-  servicePublicationStore,
+  fsmLifecycleClient,
+  fsmPublicationClient,
   apimClient,
   config,
 }: Dependencies) => {
@@ -77,7 +72,7 @@ export const createWebServer = ({
     "/services",
     pipe(
       makeCreateServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
         apimClient,
         apimConfig: config,
       }),
@@ -90,7 +85,7 @@ export const createWebServer = ({
     "/services",
     pipe(
       makeGetServicesHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
         apimClient,
         apimConfig: config,
       }),
@@ -103,7 +98,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        store: serviceLifecycleStore,
+        store: fsmLifecycleClient.getStore(),
       }),
       applyGetServiceLifecycleRequestMiddelwares,
       wrapRequestHandler
@@ -114,7 +109,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeEditServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyEditServiceRequestMiddelwares,
       wrapRequestHandler
@@ -125,7 +120,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyDeleteServiceRequestMiddelwares,
       wrapRequestHandler
@@ -136,7 +131,7 @@ export const createWebServer = ({
     "/services/:serviceId/review",
     pipe(
       makeReviewServiceHandler({
-        store: serviceLifecycleStore,
+        fsmLifecycleClient,
       }),
       applyReviewServiceRequestMiddelwares,
       wrapRequestHandler
@@ -147,7 +142,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makePublishServiceHandler({
-        store: servicePublicationStore,
+        fsmPublicationClient,
       }),
       applyPublishServiceRequestMiddelwares,
       wrapRequestHandler
@@ -158,7 +153,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        store: servicePublicationStore,
+        store: fsmPublicationClient.getStore(),
       }),
       applyGetPublicationStatusServiceRequestMiddelwares,
       wrapRequestHandler
@@ -169,7 +164,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
-        store: servicePublicationStore,
+        fsmPublicationClient,
       }),
       applyUnpublishServiceRequestMiddelwares,
       wrapRequestHandler

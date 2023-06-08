@@ -8,6 +8,7 @@ import * as O from "fp-ts/lib/Option";
 import {
   JiraAPIClient,
   JiraIssue,
+  JiraIssueStatus,
   SearchJiraIssuesResponse,
   jiraClient,
 } from "../../lib/clients/jira-client";
@@ -136,7 +137,7 @@ describe("Service Review Proxy", () => {
       "anIssueKey-1" as NonEmptyString,
       "anIssueKey-2" as NonEmptyString,
     ];
-    const searchStatuses = [
+    const searchStatuses: JiraIssueStatus[] = [
       "APPROVED",
       "REJECTED",
     ];
@@ -201,7 +202,7 @@ describe("Service Review Proxy", () => {
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
-    const serviceReview = await proxy.getJiraIssueByServiceId(
+    const serviceReview = await proxy.getPendingJiraIssueByServiceId(
       "aWrongServiceId" as NonEmptyString
     )();
 
@@ -236,4 +237,5 @@ describe("Service Review Proxy", () => {
       expect(serviceReview.left.message).toBe("Jira API returns an error");
     }
   });
+
 });

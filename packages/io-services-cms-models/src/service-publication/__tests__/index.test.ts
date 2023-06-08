@@ -1,31 +1,45 @@
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
-import { describe, it, expect, vi } from "vitest";
+import { sequence } from "fp-ts/lib/Array";
+import { pipe } from "fp-ts/lib/function";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ItemType, getFsmClient } from "..";
 import {
+  FSMStore,
   FsmNoTransitionMatchedError,
-  stores,
   FsmStoreFetchError,
   FsmStoreSaveError,
+  stores,
 } from "../../lib/fsm";
-import { apply } from "..";
-import { pipe } from "fp-ts/lib/function";
-import { sequence } from "fp-ts/lib/Array";
 import { Service } from "../../service-lifecycle/definitions";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
+const store = stores.createMemoryStore();
+const fsmClient = getFsmClient(store as unknown as FSMStore<ItemType>);
+
+beforeEach(() => {
+  store.clear();
+});
 
 // helper to check the result of a sequence of actions
-const expectSuccess = async ({ id, actions, expected }) => {
-  const store = stores.createMemoryStore();
-
+const expectSuccess = async ({
+  id,
+  actions,
+  expected,
+}: {
+  id: NonEmptyString;
+  actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
+  expected: unknown;
+}) => {
   const applyTask = pipe(
     actions,
     sequence(RTE.ApplicativeSeq),
     RTE.map((a) => a[a.length - 1])
   );
 
-  const result = await applyTask(store)();
+  const result = await applyTask()();
 
   if (E.isLeft(result)) {
     throw result.left;
@@ -47,9 +61,14 @@ const expectFailure = async ({
   errorType,
   additionalPreTestFn,
   additionalPostTestFn,
+}: {
+  id: NonEmptyString;
+  actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
+  expected: Vi.ExpectStatic | undefined;
+  errorType: unknown;
+  additionalPreTestFn: Function | undefined;
+  additionalPostTestFn: Function | undefined;
 }) => {
-  const store = stores.createMemoryStore();
-
   // run some useful code before assertion
   if (additionalPreTestFn) {
     additionalPreTestFn();
@@ -61,23 +80,25 @@ const expectFailure = async ({
     RTE.map((a) => a[a.length - 1])
   );
 
-  const result = await applyTask(store)();
+  try {
+    const result = await applyTask()();
 
-  if (E.isRight(result)) {
-    throw new Error(`Expecting a failure`);
-  }
-  const { left: value } = result;
+    if (E.isRight(result)) {
+      throw new Error(`Expecting a failure`);
+    }
+    const { left: value } = result;
 
-  expect(value).toBeInstanceOf(errorType);
+    expect(value).toBeInstanceOf(errorType);
 
-  // check what's inside the store
-  // @ts-ignore
-  const stored = store.inspect().get(id);
-  expect(stored).toEqual(expected);
-
-  // run some clearing code after assertion
-  if (additionalPostTestFn) {
-    additionalPostTestFn();
+    // check what's inside the store
+    // @ts-ignore
+    const stored = store.inspect().get(id);
+    expect(stored).toEqual(expected);
+  } finally {
+    // run some clearing code after assertion
+    if (additionalPostTestFn) {
+      additionalPostTestFn();
+    }
   }
 };
 
@@ -114,7 +135,7 @@ describe("apply", () => {
     {
       title: "on empty items",
       id: aServiceId,
-      actions: [apply("override", aServiceId, { data: aService })],
+      actions: [() => fsmClient.override(aServiceId, { data: aService })],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "unpublished" }),
@@ -124,14 +145,16 @@ describe("apply", () => {
       title: "a sequence on the same item",
       id: aServiceId,
       actions: [
-        apply("override", aServiceId, {
-          data: aService,
-        }),
-        apply("publish", aServiceId),
-        apply("override", aServiceId, {
-          data: changeName(aService, "new name"),
-        }),
-        apply("unpublish", aServiceId),
+        () =>
+          fsmClient.override(aServiceId, {
+            data: aService,
+          }),
+        () => fsmClient.publish(aServiceId),
+        () =>
+          fsmClient.override(aServiceId, {
+            data: changeName(aService, "new name"),
+          }),
+        () => fsmClient.unpublish(aServiceId),
       ],
       expected: expect.objectContaining({
         ...changeName(aService, "new name"),
@@ -145,7 +168,7 @@ describe("apply", () => {
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [apply("publish", aServiceId)],
+      actions: [() => fsmClient.publish(aServiceId)],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,
@@ -155,8 +178,9 @@ describe("apply", () => {
       title: "on invalid sequence of actions",
       id: aServiceId,
       actions: [
-        /* last ok --> */ apply("override", aServiceId, { data: aService }),
-        /* this ko --> */ apply("unpublish", aServiceId),
+        /* last ok --> */ () =>
+          fsmClient.override(aServiceId, { data: aService }),
+        /* this ko --> */ () => fsmClient.unpublish(aServiceId),
       ],
       expected: expect.objectContaining({
         ...aService, // we expect the first override to have succeeded
@@ -175,10 +199,11 @@ describe("apply", () => {
       }),
       save: vi.fn(),
     };
+    const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await apply("override", aServiceId, { data: aService })(
-      mockStore
-    )();
+    const result = await mockFsmClient.override(aServiceId, {
+      data: aService,
+    })();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);
@@ -196,10 +221,11 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
     };
+    const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await apply("override", aServiceId, { data: aService })(
-      mockStore
-    )();
+    const result = await mockFsmClient.override(aServiceId, {
+      data: aService,
+    })();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);

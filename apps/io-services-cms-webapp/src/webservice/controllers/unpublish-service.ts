@@ -1,8 +1,4 @@
-import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -21,14 +17,11 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 type Dependencies = {
-  // A store of ServicePublication objects
-  store: ReturnType<
-    typeof stores.createCosmosStore<ServicePublication.ItemType>
-  >;
+  fsmPublicationClient: ServicePublication.FsmClient;
 };
 
 type HandlerResponseTypes =
@@ -45,14 +38,14 @@ type PublishServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeUnpublishServiceHandler =
-  ({ store }: Dependencies): PublishServiceHandler =>
+  ({ fsmPublicationClient }: Dependencies): PublishServiceHandler =>
   (_auth, serviceId) =>
     pipe(
-      ServicePublication.apply("unpublish", serviceId),
-      RTE.map(ResponseSuccessNoContent),
-      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      RTE.toUnion
-    )(store)();
+      fsmPublicationClient.unpublish(serviceId),
+      TE.map(ResponseSuccessNoContent),
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.toUnion
+    )();
 
 export const applyRequestMiddelwares = (handler: PublishServiceHandler) =>
   pipe(
