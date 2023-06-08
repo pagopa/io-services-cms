@@ -49,8 +49,8 @@ const result = await applyTask(MyStore)();
 #### Actions
 
 | action  | arguments                                                                | description                               |
-| ------- | ------------------------------------------------------------------------ | ----------------------------------------- | --- |
-| create  | \* `data`: the service object to be created, with its `id`               | Create a new service from scratch         | -   |
+| ------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| create  | \* `data`: the service object to be created, with its `id`               | Create a new service from scratch         |
 | edit    | \* `data`: the service object to be created, with its `id`               | Modify an existing service                |
 | submit  | \* `autoPublish`: Flag to automatic publish a service on review approval | Submit a service for review               |
 | abort   | -                                                                        | Undo a review submission                  |
@@ -78,8 +78,8 @@ See the [ServiceLifecycle > Usage](#usage) section above.
 
 #### Actions
 
-| action    | arguments                                                                                        | description                                                            |
-| --------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| override  | \* `data`: the service object to be overrided, with its `id`                                     | Override service with a new version                                    |
-| publish   | _ `data`: the service object to be published (required only for \___ -> \_published_ transition) | Publish a service                                                      |
-| unpublish | -                                                                                                | Undo the last service publication and leave it in an unpublished state |
+| action    | arguments                                                                                   | description                                                            |
+| --------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| override  | \* `data`: the service object to be overrided, with its `id`                                | Override service with a new version                                    |
+| publish   | \* `data`: the service object to be published (required only for \*-> published transition) | Publish a service                                                      |
+| unpublish | -                                                                                           | Undo the last service publication and leave it in an unpublished state |
