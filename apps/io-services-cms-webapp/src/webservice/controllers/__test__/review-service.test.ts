@@ -152,5 +152,35 @@ describe("WebService", () => {
 
       expect(response.statusCode).toBe(204);
     });
+
+    it("should fail on no body payload", async () => {
+      await serviceLifecycleStore.save("s2", serviceToSubmit)();
+
+      const response = await request(app)
+        .put("/api/services/s2/review")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      const serviceAfterApply = await serviceLifecycleStore.fetch("s2")();
+
+      let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
+
+      expect(E.isRight(serviceAfterApply)).toBeTruthy();
+      if (E.isRight(serviceAfterApply)) {
+        optionValue = serviceAfterApply.right;
+      }
+
+      expect(O.isSome(optionValue)).toBeTruthy();
+      if (O.isSome(optionValue)) {
+        const finalValue = optionValue.value;
+        expect(finalValue.fsm).not.toHaveProperty("autoPublish");
+        expect(finalValue.fsm.state).toBe("draft");
+      }
+
+      expect(response.statusCode).toBe(400);
+    });
   });
 });
