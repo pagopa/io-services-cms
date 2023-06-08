@@ -15,23 +15,6 @@ import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
 } from "./controllers/create-service";
-import { makeInfoHandler } from "./controllers/info";
-import {
-  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
-  makeReviewServiceHandler,
-} from "./controllers/review-service";
-import {
-  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
-  makePublishServiceHandler,
-} from "./controllers/publish-service";
-import {
-  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
-  makeUnpublishServiceHandler,
-} from "./controllers/unpublish-service";
-import {
-  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
-  makeGetServiceHandler,
-} from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
   makeDeleteServiceHandler,
@@ -44,6 +27,27 @@ import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
+import {
+  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
+  makeGetServiceHandler,
+} from "./controllers/get-service-publication";
+import {
+  applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
+  makeGetServicesHandler,
+} from "./controllers/get-services";
+import { makeInfoHandler } from "./controllers/info";
+import {
+  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makePublishServiceHandler,
+} from "./controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "./controllers/review-service";
+import {
+  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "./controllers/unpublish-service";
 
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
@@ -78,6 +82,19 @@ export const createWebServer = ({
         apimConfig: config,
       }),
       applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.get(
+    "/services",
+    pipe(
+      makeGetServicesHandler({
+        store: serviceLifecycleStore,
+        apimClient,
+        apimConfig: config,
+      }),
+      applyGetServicesRequestMiddelwares,
       wrapRequestHandler
     )
   );
