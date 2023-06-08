@@ -27,7 +27,7 @@ export const createRequestPublicationHandler = (
       TE.chainW((service) =>
         service.autoPublish
           ? fsmPublicationClient.override(service.id, { data: service })
-          : fsmPublicationClient.publish(service.id)
+          : fsmPublicationClient.publish(service.id, { data: service })
       ),
       TE.getOrElse((e) => {
         throw e;
