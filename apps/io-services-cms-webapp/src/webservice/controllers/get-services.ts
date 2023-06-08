@@ -2,7 +2,7 @@ import {
   ApiManagementClient,
   SubscriptionContract,
 } from "@azure/arm-apimanagement";
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
   AzureApiAuthMiddleware,
@@ -58,8 +58,8 @@ type GetServicesHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  // A store od ServiceLifecycle objects
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+  // An instance of ServiceLifecycle client
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimClient: ApiManagementClient;
   // The APIM configuration
@@ -118,12 +118,12 @@ const buildServicePagination = (
 });
 
 const getServices = (
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>,
+  fsmLifecycleClient: ServiceLifecycle.FsmClient,
   subscriptions: ReadonlyArray<SubscriptionContract>
 ) =>
   pipe(
     subscriptions.map((subscription) =>
-      store.fetch(subscription.name as NonEmptyString)
+      fsmLifecycleClient.getStore().fetch(subscription.name as NonEmptyString)
     ),
     RA.sequence(TE.ApplicativePar),
     TE.map((maybeServiceList) =>
@@ -163,7 +163,11 @@ export const buildServiceSubscriptionPairs = (
     );
 
 export const makeGetServicesHandler =
-  ({ store, apimClient, apimConfig }: Dependencies): GetServicesHandler =>
+  ({
+    fsmLifecycleClient,
+    apimClient,
+    apimConfig,
+  }: Dependencies): GetServicesHandler =>
   (_auth, userEmail, limit, offset) =>
     pipe(
       getUserIdTask(apimClient, userEmail, apimConfig),
@@ -182,7 +186,7 @@ export const makeGetServicesHandler =
       ),
       TE.chain((subscriptions) =>
         pipe(
-          getServices(store, subscriptions),
+          getServices(fsmLifecycleClient, subscriptions),
           TE.map((services) =>
             buildServiceSubscriptionPairs(subscriptions, services)
           )

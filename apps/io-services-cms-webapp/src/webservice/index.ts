@@ -26,6 +26,7 @@ import {
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
+} from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
   makeGetServicesHandler,
