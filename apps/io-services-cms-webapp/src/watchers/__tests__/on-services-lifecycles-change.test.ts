@@ -25,24 +25,8 @@ const aService = {
 } as unknown as ServiceLifecycle.ItemType;
 
 const aPublicationService = {
-  id: "aServiceId",
-  data: {
-    name: "aServiceName",
-    description: "aServiceDescription",
-    authorized_recipients: [],
-    max_allowed_payment_amount: 1000000,
-    metadata: {
-      address: "via tal dei tali 123",
-      email: "service@email.it",
-      pec: "service@pec.it",
-      scope: "LOCAL",
-    },
-    organization: {
-      name: "anOrganizationName",
-      fiscal_code: "12345678901",
-    },
-    require_secure_channel: false,
-  },
+  ...aService,
+  data: { ...aService.data, max_allowed_payment_amount: 1000000 },
 } as unknown as ServicePublication.ItemType;
 
 describe("On Service Lifecycle Change Handler", () => {
