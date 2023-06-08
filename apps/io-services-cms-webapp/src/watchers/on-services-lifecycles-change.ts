@@ -25,7 +25,8 @@ const onSubmitHandler = (
   item: ServiceLifecycle.ItemType
 ): RequestReviewAction => ({
   requestReview: {
-    ...item,
+    id: item.id,
+    data: item.data,
     version: item.version ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
   },
 });
@@ -34,7 +35,8 @@ const onApproveHandler = (
   item: ServiceLifecycle.ItemType
 ): RequestPublicationAction => ({
   requestPublication: {
-    ...item,
+    id: item.id,
+    data: item.data,
     autoPublish: (item.fsm.autoPublish as boolean) ?? false,
   },
 });
