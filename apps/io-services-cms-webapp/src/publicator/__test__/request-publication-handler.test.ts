@@ -92,7 +92,7 @@ describe("Service Historicization Handler", () => {
     });
   });
 
-  it("handleQueueItem should publish on autoPublish false", async () => {
+  it("handleQueueItem should override on autoPublish false", async () => {
     const autoPublishQueueItem = {
       ...aService,
       autoPublish: false,
