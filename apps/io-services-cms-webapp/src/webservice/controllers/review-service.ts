@@ -1,4 +1,4 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -18,13 +18,12 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 
 type Dependencies = {
-  // A store of ServiceLifecycle objects
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
 };
 
 type HandlerResponseTypes =
@@ -42,16 +41,18 @@ type ReviewServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeReviewServiceHandler =
-  ({ store }: Dependencies): ReviewServiceHandler =>
+  ({
+    fsmLifecycleClient: fsmLifecycleClient,
+  }: Dependencies): ReviewServiceHandler =>
   (_auth, serviceId, body) =>
     pipe(
-      ServiceLifecycle.apply("submit", serviceId, {
+      fsmLifecycleClient.submit(serviceId, {
         autoPublish: body.auto_publish ?? false,
       }),
-      RTE.map(ResponseSuccessNoContent),
-      RTE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      RTE.toUnion
-    )(store)();
+      TE.map(ResponseSuccessNoContent),
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.toUnion
+    )();
 
 export const applyRequestMiddelwares = (handler: ReviewServiceHandler) =>
   pipe(
