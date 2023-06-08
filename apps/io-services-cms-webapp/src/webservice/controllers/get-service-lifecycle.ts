@@ -1,4 +1,4 @@
-import { ServiceLifecycle, stores } from "@io-services-cms/models";
+import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -41,7 +41,7 @@ type CreateServiceHandler = (
 
 type Dependencies = {
   // A store od ServiceLifecycle objects
-  store: ReturnType<typeof stores.createCosmosStore<ServiceLifecycle.ItemType>>;
+  store: FSMStore<ServiceLifecycle.ItemType>;
 };
 
 export const makeGetServiceLifecycleHandler =

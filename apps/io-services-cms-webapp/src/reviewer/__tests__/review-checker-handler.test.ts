@@ -1,9 +1,8 @@
-import { FSMStore, ServiceLifecycle, stores } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { DatabaseError, QueryResult } from "pg";
+import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { JiraIssue } from "../../lib/clients/jira-client";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
@@ -43,9 +42,6 @@ const aService2 = {
   ...aService,
   id: "s2",
 } as unknown as ServiceLifecycle.definitions.Service;
-
-const serviceLifecycleStore =
-  stores.createMemoryStore<ServiceLifecycle.ItemType>();
 
 const anItem1: ServiceReviewRowDataTable = {
   service_id: "s1" as NonEmptyString,
@@ -120,12 +116,13 @@ const mainMockJiraProxy = {
 
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   it("should build TWO IssueItemPairs given 2 jira issues, an APPROVED one and a REJECTED one", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
-      TE.of({
-        startAt: 0,
-        total: 2,
-        issues: [aJiraIssue1, aJiraIssue2],
-      })
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
+      () =>
+        TE.of({
+          startAt: 0,
+          total: 2,
+          issues: [aJiraIssue1, aJiraIssue2],
+        })
     );
 
     const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -146,13 +143,13 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   });
 
   it("should build EMPTY IssueItemPair given ZERO jira issues", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
-      TE.of({
-        startAt: 0,
-        total: 0,
-        issues: [
-        ],
-      })
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
+      () =>
+        TE.of({
+          startAt: 0,
+          total: 0,
+          issues: [],
+        })
     );
 
     const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
@@ -164,12 +161,13 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   });
 
   it("should build EMPTY IssueItemPair given EMPTY jira issues response", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
-      TE.of({
-        startAt: 0,
-        total: 0,
-        issues: [],
-      })
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
+      () =>
+        TE.of({
+          startAt: 0,
+          total: 0,
+          issues: [],
+        })
     );
 
     const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -181,8 +179,8 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   });
 
   it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
-    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(() =>
-      TE.left(new Error())
+    mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
+      () => TE.left(new Error())
     );
 
     const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -196,17 +194,23 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
 
 describe("[Service Review Checker Handler] updateReview", () => {
   it("should update TWO PENDING service review given TWO IssueItemPairs, one with APPROVED jira status and one with REJECTED jira status", async () => {
-    serviceLifecycleStore.save(aService.id, {
-      ...aService,
-      fsm: { state: "submitted" },
-    });
-    serviceLifecycleStore.save(aService2.id, {
-      ...aService2,
-      fsm: { state: "submitted" },
-    });
+    const mockFsmLifecycleClient = {
+      approve: vi.fn(() =>
+        TE.right({
+          ...aService,
+          fsm: { state: "approved" },
+        })
+      ),
+      reject: vi.fn(() =>
+        TE.right({
+          ...aService2,
+          fsm: { state: "rejected" },
+        })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
       mainMockServiceReviewDao,
-      serviceLifecycleStore
+      mockFsmLifecycleClient
     )(
       TE.of([
         {
@@ -220,95 +224,56 @@ describe("[Service Review Checker Handler] updateReview", () => {
       ] as unknown as IssueItemPair[])
     )();
 
-    // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and updateStatus values
+    expect(mockFsmLifecycleClient.approve).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.approve).toBeCalledWith(aService.id, {
+      approvalDate: aJiraIssue1.fields.statuscategorychangedate,
+    });
+
+    expect(mockFsmLifecycleClient.reject).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.reject).toBeCalledWith(aService2.id, {
+      reason: aJiraIssue2.fields.comment.comments
+        .map((value) => value.body)
+        .join("|"),
+    });
+
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem1,
-      status: "APPROVED",
+      status: aJiraIssue1.fields.status.name,
     });
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem2,
-      status: "REJECTED",
+      status: aJiraIssue2.fields.status.name,
     });
-
-    const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
-    const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
-
-    // fsm apply transitions
-    expect(E.isRight(fsmServiceResult)).toBeTruthy();
-    if (E.isRight(fsmServiceResult)) {
-      expect(O.isSome(fsmServiceResult.right)).toBeTruthy();
-      if (O.isSome(fsmServiceResult.right)) {
-        expect(fsmServiceResult.right.value.fsm.state).toBe("approved");
-        expect(fsmServiceResult.right.value.fsm.approvalDate).toBe(
-          aJiraIssue1.fields.statuscategorychangedate
-        );
-      }
-    }
-    expect(E.isRight(fsmService2Result)).toBeTruthy();
-    if (E.isRight(fsmService2Result)) {
-      expect(O.isSome(fsmService2Result.right)).toBeTruthy();
-      if (O.isSome(fsmService2Result.right)) {
-        expect(fsmService2Result.right.value.fsm.state).toBe("rejected");
-        expect(fsmService2Result.right.value.fsm.reason).toBe(
-          aJiraIssue2.fields.comment.comments
-            .map((value) => value.body)
-            .join("|")
-        );
-      }
-    }
   });
 
-  it("should not change service review status (db and FSM) if it receives an empty issueItemPair", async () => {
-    serviceLifecycleStore.save(aService.id, {
-      ...aService,
-      fsm: { state: "submitted" },
-    });
-    serviceLifecycleStore.save(aService2.id, {
-      ...aService2,
-      fsm: { state: "submitted" },
-    });
+  it("should not change service review status if it receives an empty issueItemPair", async () => {
+    const mockFsmLifecycleClient =
+      vi.fn() as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
       mainMockServiceReviewDao,
-      serviceLifecycleStore
+      mockFsmLifecycleClient
     )(TE.of([] as unknown as IssueItemPair[]))();
 
-    // updateReview result
     expect(E.isRight(result)).toBeTruthy();
 
-    // serviceReviewDao number of calls and updateStatus values
+    expect(mockFsmLifecycleClient).not.toBeCalled();
+
     expect(mainMockServiceReviewDao.updateStatus).not.toBeCalled();
-
-    const fsmServiceResult = await serviceLifecycleStore.fetch(aService.id)();
-    const fsmService2Result = await serviceLifecycleStore.fetch(aService2.id)();
-
-    // fsm apply transitions
-    expect(E.isRight(fsmServiceResult)).toBeTruthy();
-    if (E.isRight(fsmServiceResult)) {
-      expect(O.isSome(fsmServiceResult.right)).toBeTruthy();
-      if (O.isSome(fsmServiceResult.right)) {
-        expect(fsmServiceResult.right.value.fsm.state).toBe("submitted");
-      }
-    }
-    expect(E.isRight(fsmService2Result)).toBeTruthy();
-    if (E.isRight(fsmService2Result)) {
-      expect(O.isSome(fsmService2Result.right)).toBeTruthy();
-      if (O.isSome(fsmService2Result.right)) {
-        expect(fsmService2Result.right.value.fsm.state).toBe("submitted");
-      }
-    }
   });
 
-  it("should not execute update pending review when FSM apply fails", async () => {
-    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
-      fetch: vi.fn((_: string) => {
-        return TE.left(new Error());
-      }),
-      save: vi.fn,
-    };
+  it("should return a generic Error when FSM apply fails (all AllFsmErrors but FsmNoTransitionMatchedError)", async () => {
+    class FSMError extends Error {
+      public kind = "GenericError";
+      constructor() {
+        super(`aMessage`);
+      }
+    }
+    const mockFsmLifecycleClient = {
+      approve: vi.fn(() => TE.left(new FSMError())),
+    } as unknown as ServiceLifecycle.FsmClient;
     const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
       Promise.resolve({} as QueryResult)
     );
@@ -322,7 +287,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
 
     const result = await updateReview(
       mockServiceReviewDao,
-      mockServiceLifecycleStore
+      mockFsmLifecycleClient
     )(
       TE.of([
         {
@@ -332,84 +297,52 @@ describe("[Service Review Checker Handler] updateReview", () => {
       ] as unknown as IssueItemPair[])
     )();
 
-    // updateReview result
-    expect(E.isLeft(result)).toBeTruthy();
-
-    // serviceReviewDao number of calls and updateStatus values
-    expect(mockServiceLifecycleStore.fetch).toBeCalled();
-    expect(mockServiceReviewDao.updateStatus).toBeCalled();
-    expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
-  });
-
-  it("should not execute update pending review when requested transition is not applicable", async () => {
-    const mockServiceLifecycleStore: FSMStore<ServiceLifecycle.ItemType> = {
-      fetch: vi.fn((_: string) => {
-        return TE.right(O.none);
-      }),
-      save: vi.fn,
-    };
-    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-      Promise.resolve({} as QueryResult)
-    );
-    const mockServiceReviewDao = {
-      insert: vi.fn(),
-      executeOnPending: vi.fn(),
-      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
-      ),
-    };
-
-    const result = await updateReview(
-      mockServiceReviewDao,
-      mockServiceLifecycleStore
-    )(
-      TE.of([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ] as unknown as IssueItemPair[])
-    )();
-
-    // updateReview result
-    expect(E.isRight(result)).toBeTruthy();
-
-    // serviceReviewDao number of calls and updateStatus values
-    expect(mockServiceLifecycleStore.fetch).toBeCalled();
-    expect(mockServiceReviewDao.updateStatus).toBeCalled();
-    expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
-  });
-
-  it("should return a generic Error if updateStatus on DB returns a DatabaseError", async () => {
-    serviceLifecycleStore.save(aService.id, {
-      ...aService,
-      fsm: { state: "submitted" },
-    });
-
-    const mockServiceReviewDao = {
-      insert: vi.fn(),
-      executeOnPending: vi.fn(),
-      updateStatus: vi.fn(() => {
-        return TE.left(new DatabaseError("aMessage", 1, "error"));
-      }),
-    };
-
-    const result = await updateReview(
-      mockServiceReviewDao,
-      serviceLifecycleStore
-    )(
-      TE.of([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ] as unknown as IssueItemPair[])
-    )();
-
-    // updateReview result
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
       expect(result.left.message).eq("aMessage");
     }
+
+    expect(mockFsmLifecycleClient.approve).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
+  });
+
+  it("should not fails when requested transition is not applicable", async () => {
+    class FSMError extends Error {
+      public kind = "FsmNoTransitionMatchedError";
+    }
+    const mockFsmLifecycleClient = {
+      approve: vi.fn(() => TE.left(new FSMError())),
+    } as unknown as ServiceLifecycle.FsmClient;
+    const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+      Promise.resolve({} as QueryResult)
+    );
+    const mockServiceReviewDao = {
+      insert: vi.fn(),
+      executeOnPending: vi.fn(),
+      updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+      ),
+    };
+
+    const result = await updateReview(
+      mockServiceReviewDao,
+      mockFsmLifecycleClient
+    )(
+      TE.of([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])
+    )();
+
+    // updateReview result
+    expect(E.isRight(result)).toBeTruthy();
+
+    // serviceReviewDao number of calls and updateStatus values
+    expect(mockFsmLifecycleClient.approve).toBeCalled();
+    expect(mockServiceReviewDao.updateStatus).toBeCalled();
+    expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
   });
 });

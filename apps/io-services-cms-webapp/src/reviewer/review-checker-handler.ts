@@ -1,7 +1,6 @@
-import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -25,7 +24,8 @@ export type IssueItemPair = {
 
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
-  jiraIssue: ProcessedJiraIssue
+  jiraIssue: ProcessedJiraIssue,
+  fsmLifecycleClient: ServiceLifecycle.FsmClient
 ) => {
   switch (jiraIssue.fields.status.name) {
     case "REJECTED":
@@ -35,18 +35,16 @@ const makeServiceLifecycleApply = (
             .map((value) => value.body)
             .join("|"),
         },
-        (data) =>
-          ServiceLifecycle.apply("reject", serviceReview.service_id, data),
-        RTE.map((_) => void 0)
+        (data) => fsmLifecycleClient.reject(serviceReview.service_id, data),
+        TE.map((_) => void 0)
       );
     case "APPROVED":
       return pipe(
         {
           approvalDate: jiraIssue.fields.statuscategorychangedate,
         },
-        (data) =>
-          ServiceLifecycle.apply("approve", serviceReview.service_id, data),
-        RTE.map((_) => void 0)
+        (data) => fsmLifecycleClient.approve(serviceReview.service_id, data),
+        TE.map((_) => void 0)
       );
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -59,10 +57,12 @@ export const createReviewCheckerHandler =
   (
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    store: FSMStore<ServiceLifecycle.ItemType>
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
   (): Promise<unknown> =>
-    dao.executeOnPending(processBatchOfReviews(dao, jiraProxy, store))();
+    dao.executeOnPending(
+      processBatchOfReviews(dao, jiraProxy, fsmLifecycleClient)
+    )();
 
 /**
  * Build an array of Issue/Item pairs
@@ -104,7 +104,7 @@ export const buildIssueItemPairs =
  * @returns
  */
 export const updateReview =
-  (dao: ServiceReviewDao, store: FSMStore<ServiceLifecycle.ItemType>) =>
+  (dao: ServiceReviewDao, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
   (data: TE.TaskEither<Error, IssueItemPair[]>): TE.TaskEither<Error, void> =>
     pipe(
       data,
@@ -112,7 +112,7 @@ export const updateReview =
         issuesAndItems.map(({ issue, item }) =>
           sequenceT(TE.ApplicativeSeq)(
             pipe(
-              makeServiceLifecycleApply(item, issue)(store),
+              makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
               TE.orElse((fsmError) => {
                 // eslint-disable-next-line sonarjs/no-small-switch
                 switch (fsmError.kind) {
@@ -151,7 +151,11 @@ export const processBatchOfReviews =
   (
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    store: FSMStore<ServiceLifecycle.ItemType>
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
   (items: ServiceReviewRowDataTable[]) =>
-    pipe(items, buildIssueItemPairs(jiraProxy), updateReview(dao, store));
+    pipe(
+      items,
+      buildIssueItemPairs(jiraProxy),
+      updateReview(dao, fsmLifecycleClient)
+    );

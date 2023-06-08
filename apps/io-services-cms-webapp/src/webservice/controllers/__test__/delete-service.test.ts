@@ -10,12 +10,15 @@ import { describe, expect, it } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
 
-// memory implementation, for testing
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -25,8 +28,8 @@ describe("deleteService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
-    servicePublicationStore,
+    fsmLifecycleClient,
+    fsmPublicationClient,
   });
 
   const aService = {
@@ -63,10 +66,10 @@ describe("deleteService", () => {
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-    serviceLifecycleStore.save(aService.id, {
+    await serviceLifecycleStore.save(aService.id, {
       ...aService,
       fsm: { state: "deleted" },
-    });
+    })();
 
     const response = await request(app)
       .delete(`/api/services/${aService.id}`)
@@ -92,10 +95,10 @@ describe("deleteService", () => {
   });
 
   it("should delete a service", async () => {
-    serviceLifecycleStore.save(aService.id, {
+    await serviceLifecycleStore.save(aService.id, {
       ...aService,
       fsm: { state: "draft" },
-    });
+    })();
 
     const response = await request(app)
       .delete(`/api/services/${aService.id}`)

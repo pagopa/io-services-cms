@@ -1,23 +1,23 @@
-import * as t from "io-ts";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
 import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/function";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
-import { pipe, flow } from "fp-ts/function";
+import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
-  StateMetadata,
-  Transition,
-  WithState,
-  StateSet,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
   FsmTooManyTransitionsError,
   FsmTransitionExecutionError,
+  StateMetadata,
+  StateSet,
+  Transition,
+  WithState,
 } from "../lib/fsm";
 import { Service, ServiceId } from "./definitions";
 
@@ -301,14 +301,13 @@ function apply(
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
   return (store) => {
-    // select transitions for the action to apply
+    // check transitions for the action to apply
     const applicableTransitions = FSM.transitions.filter(
       ({ action }) => action === appliedAction
     );
     if (!applicableTransitions.length) {
       return TE.left(new FsmNoApplicableTransitionError(appliedAction));
     }
-
     return pipe(
       // fetch the item from the store by its id
       store.fetch(id),
@@ -414,7 +413,23 @@ function apply(
   };
 }
 
+const getFsmClient = (store: LifecycleStore) => ({
+  getStore: () => store,
+  create: (id: ServiceId, args: { data: Service }) =>
+    apply("create", id, args)(store),
+  edit: (id: ServiceId, args: { data: Service }) =>
+    apply("edit", id, args)(store),
+  submit: (id: ServiceId) => apply("submit", id)(store),
+  approve: (id: ServiceId, args: { approvalDate: string }) =>
+    apply("approve", id, args)(store),
+  reject: (id: ServiceId, args: { reason: string }) =>
+    apply("reject", id, args)(store),
+  delete: (id: ServiceId) => apply("delete", id)(store),
+});
+type FsmClient = ReturnType<typeof getFsmClient>;
+
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
-export { apply, FSM, ItemType };
+
 export * as definitions from "./definitions";
+export { getFsmClient, FsmClient, FSM, ItemType };
