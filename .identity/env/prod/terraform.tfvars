@@ -4,17 +4,14 @@ prefix    = "io"
 
 environment_cd_roles = {
   subscription = [
-    "Reader",
-    "DocumentDB Account Contributor", # remove after services collection migration from io-p-cosmos-api
+    "Contributor",
+    "Storage Account Contributor",
+    "Storage Blob Data Contributor",
+    "Storage File Data SMB Share Contributor",
+    "Storage Queue Data Contributor",
+    "Storage Table Data Contributor",
   ]
-  resource_groups = {
-    terraform-state-rg = [
-      "Storage Blob Data Contributor",
-    ],
-    io-p-services-cms-rg = [
-      "Contributor",
-    ]
-  }
+  resource_groups = {}
 }
 
 environment_ci_roles = {
