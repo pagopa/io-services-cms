@@ -28,8 +28,8 @@ environment_ci_roles = {
       "Storage Blob Data Reader",
     ],
     io-p-services-cms-rg = [
+      "Reader and Data Access",
       "DocumentDB Account Contributor",
-      # "Website Contributor",
     ]
   }
 }
