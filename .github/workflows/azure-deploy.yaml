@@ -48,31 +48,31 @@ jobs:
   #         resource-group-name: ${{ env.RESOURCE_GROUP }}
   #         slot-name: staging
 
-  deploy_staging:
-    name: Create Runner
-    runs-on: ubuntu-22.04
-    environment: prod-app-cd
-    steps:
-      - name: Download artifact
-        id: download_artifact
-        run: "curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}"
+  # deploy_staging:
+  #   name: Create Runner
+  #   runs-on: ubuntu-22.04
+  #   environment: prod-app-cd
+  #   steps:
+  #     - name: Download artifact
+  #       id: download_artifact
+  #       run: "curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}"
 
-      - name: Login
-        id: login
-        # from https://github.com/Azure/login/commits/master
-        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  #     - name: Login
+  #       id: login
+  #       # from https://github.com/Azure/login/commits/master
+  #       uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to staging
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          resource-group-name: ${{ env.RESOURCE_GROUP }}
-          package: artifact.zip
-          slot-name: staging
+  #     - name: Deploy to staging
+  #       uses: azure/webapps-deploy@v2
+  #       with:
+  #         app-name: ${{ env.AZURE_WEBAPP_NAME }}
+  #         resource-group-name: ${{ env.RESOURCE_GROUP }}
+  #         package: artifact.zip
+  #         slot-name: staging
 
   create_runner:
     name: Create Runner
@@ -98,9 +98,13 @@ jobs:
     name: Runner Job
     runs-on: [self-hosted, "${{ needs.create_runner.outputs.runner_name }}"]
     environment: prod-app-cd
-    needs: [create_runner, deploy_staging]
+    needs: [create_runner]
 
     steps:
+      - name: Download artifact
+        id: download_artifact
+        run: "curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}"
+      
       - name: Login
         id: login
         # from https://github.com/Azure/login/commits/master
@@ -109,6 +113,14 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to staging
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          resource-group-name: ${{ env.RESOURCE_GROUP }}
+          package: artifact.zip
+          slot-name: staging
 
       # healthcheck
       - name: "Healthcheck"
