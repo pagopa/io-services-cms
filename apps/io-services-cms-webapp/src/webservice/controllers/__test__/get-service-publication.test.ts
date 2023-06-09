@@ -23,12 +23,15 @@ vi.mock("../../lib/clients/apim-client", async () => {
   };
 });
 
-// memory implementation, for testing
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
 
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -63,8 +66,8 @@ describe("WebService", () => {
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
-    serviceLifecycleStore,
-    servicePublicationStore,
+    fsmLifecycleClient,
+    fsmPublicationClient,
   });
 
   describe("getServicePublication", () => {
@@ -86,7 +89,7 @@ describe("WebService", () => {
     } as unknown as ServicePublication.ItemType;
 
     it("should retrieve a service", async () => {
-      servicePublicationStore.save("s3", asServiceWithStatus);
+      await servicePublicationStore.save("s3", asServiceWithStatus)();
 
       const response = await request(app)
         .get("/api/services/s3/release")

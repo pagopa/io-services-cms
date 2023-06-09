@@ -53,14 +53,22 @@ const servicePublicationStore = stores.createCosmosStore(
   ServicePublication.ItemType
 );
 
+// Get an instance of ServiceLifecycle client
+const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+
+// Get an instance of ServicePublication client
+const fsmPublicationClient = ServicePublication.getFsmClient(
+  servicePublicationStore
+);
+
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
     basePath: BASE_PATH,
     apimClient,
     config,
-    serviceLifecycleStore,
-    servicePublicationStore,
+    fsmLifecycleClient,
+    fsmPublicationClient,
   },
   createWebServer,
   expressToAzureFunction
@@ -77,7 +85,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 );
 
 export const createRequestPublicationEntryPoint =
-  createRequestPublicationHandler(servicePublicationStore);
+  createRequestPublicationHandler(fsmPublicationClient);
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
@@ -85,7 +93,7 @@ export const createRequestHistoricizationEntryPoint =
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
-  serviceLifecycleStore
+  fsmLifecycleClient
 );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
