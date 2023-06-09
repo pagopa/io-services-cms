@@ -51,7 +51,6 @@ variable "github_repository_environment_ci" {
   description = "GitHub Continous Integration roles"
 }
 
-
 variable "environment_cd_roles" {
   type = object({
     subscription    = list(string)
@@ -65,6 +64,22 @@ variable "github_repository_environment_cd" {
     protected_branches     = bool
     custom_branch_policies = bool
     reviewers_teams        = list(string)
+  })
+  description = "GitHub Continous Delivery roles"
+}
+
+variable "environment_app_cd_roles" {
+  type = object({
+    subscription    = list(string)
+    resource_groups = map(list(string))
+  })
+  description = "GitHub Continous Delivery roles"
+}
+
+variable "github_repository_environment_app_cd" {
+  type = object({
+    protected_branches     = bool
+    custom_branch_policies = bool
   })
   description = "GitHub Continous Delivery roles"
 }
