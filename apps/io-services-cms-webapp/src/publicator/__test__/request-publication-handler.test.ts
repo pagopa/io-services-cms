@@ -38,7 +38,7 @@ const aService = {
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
 
-describe("Service Historicization Handler", () => {
+describe("Service Publication Handler", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -48,15 +48,9 @@ describe("Service Historicization Handler", () => {
     const mockFsmLifecycleClient =
       {} as unknown as ServicePublication.FsmClient;
 
-    try {
-      await handleQueueItem(
-        context,
-        anInvalidQueueItem,
-        mockFsmLifecycleClient
-      )();
-    } catch (error) {
-      expect(error).toHaveProperty("message");
-    }
+    await expect(() =>
+      handleQueueItem(context, anInvalidQueueItem, mockFsmLifecycleClient)()
+    ).rejects.toThrowError("Error while parsing incoming message");
   });
 
   it("handleQueueItem should publish on autoPublish true", async () => {
