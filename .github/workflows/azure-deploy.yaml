@@ -11,6 +11,7 @@ permissions:
 env:
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
   RESOURCE_GROUP: io-p-services-cms-rg
+  HEALTHCHECK_PATH: "api/v1/info"
 
 jobs:
   # runner_job:
@@ -114,7 +115,7 @@ jobs:
         id: healthcheck
         run: |
           # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/$(HEALTHCHECK_PATH)'
+          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.HEALTHCHECK_PATH }}'
 
       # swap staging to production
       - name: "Swap staging to production"
