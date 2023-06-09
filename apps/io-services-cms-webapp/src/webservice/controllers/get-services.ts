@@ -13,8 +13,10 @@ import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/
 import { RequiredQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_query_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
+  IWithinRangeIntegerTag,
   IntegerFromString,
   NonNegativeInteger,
+  WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
@@ -28,7 +30,6 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -53,9 +54,15 @@ type HandlerResponseTypes =
 type GetServicesHandler = (
   auth: IAzureApiAuthorization,
   userEmail: EmailAddress,
-  limit: NonNegativeInteger,
+  limit: MaxAllowedQueryLimit,
   offset: O.Option<NonNegativeInteger>
 ) => Promise<HandlerResponseTypes>;
+
+type MaxAllowedQueryLimit = t.TypeOf<typeof MaxAllowedQueryLimit>;
+const MaxAllowedQueryLimit = t.union([
+  WithinRangeInteger<1, 100, IWithinRangeIntegerTag<1, 100>>(1, 100),
+  t.literal(100),
+]);
 
 type Dependencies = {
   // An instance of ServiceLifecycle client
@@ -122,10 +129,11 @@ const getServices = (
   subscriptions: ReadonlyArray<SubscriptionContract>
 ) =>
   pipe(
-    subscriptions.map((subscription) =>
-      fsmLifecycleClient.getStore().fetch(subscription.name as NonEmptyString)
-    ),
-    RA.sequence(TE.ApplicativePar),
+    fsmLifecycleClient
+      .getStore()
+      .bulkFetch(
+        subscriptions.map((subscription) => subscription.name as NonEmptyString)
+      ),
     TE.map((maybeServiceList) =>
       // eslint-disable-next-line sonarjs/no-all-duplicated-branches
       maybeServiceList.map((maybeService) =>
@@ -219,7 +227,7 @@ export const applyRequestMiddelwares = (handler: GetServicesHandler) =>
       // extract limit as number of records to return from query params
       RequiredQueryParamMiddleware(
         "limit",
-        IntegerFromString.pipe(NonNegativeInteger)
+        IntegerFromString.pipe(MaxAllowedQueryLimit)
       ),
       // extract offset as number of records to skip from query params
       OptionalQueryParamMiddleware(
