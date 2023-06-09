@@ -11,6 +11,7 @@
 
 | Name | Version |
 |------|---------|
+| <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 2.33.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.42.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
 
@@ -33,6 +34,10 @@
 | Name | Type |
 |------|------|
 | [azurerm_cosmosdb_sql_database.db_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/cosmosdb_sql_database) | resource |
+| [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.github_action_cd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.github_action_ci](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_secret.pgres_flex_admin_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_monitor_autoscale_setting.webapp_functions_app_autoscale](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_autoscale_setting) | resource |
@@ -47,6 +52,14 @@
 | [azurerm_storage_queue.request-review-poison](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_reviewer_usr_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
+| [azuread_group.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_group.adgroup_contributors](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_group.adgroup_developers](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_group.adgroup_externals](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_group.adgroup_security](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_group.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
+| [azuread_service_principal.github_action_iac_cd](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/service_principal) | data source |
+| [azuread_service_principal.github_action_iac_ci](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/service_principal) | data source |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/client_config) | data source |
 | [azurerm_key_vault_secret.azure_client_secret_credential_client_id](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |

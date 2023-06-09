@@ -23,10 +23,10 @@ fi
 here=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 # The directory where terraform code is
-SOURCE_DIR="$here/src"
+SOURCE_DIR="$here"
 # The directory where config for the given environment is found
 #  relative to SOURCE_DIR
-ENV_DIR="../env/$env"
+ENV_DIR="./env/$env"
 
 echo ""
 echo "📁 Source is at $SOURCE_DIR"
