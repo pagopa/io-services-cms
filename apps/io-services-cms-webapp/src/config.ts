@@ -5,6 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
   IntegerFromString,
@@ -20,6 +21,13 @@ import * as t from "io-ts";
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
+});
+
+const max_allowed_payment_amount = t.type({
+  MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
+    ServiceLifecycle.definitions.MaxAllowedAmount,
+    1000000 as ServiceLifecycle.definitions.MaxAllowedAmount
+  ),
 });
 
 // Jira configuration
@@ -98,6 +106,7 @@ export const IConfig = t.intersection([
     InternalStorageAccount,
     JiraConfig,
     PostgreSqlConfig,
+    max_allowed_payment_amount,
   ]),
   CosmosConfig,
   AzureClientSecretCredential,

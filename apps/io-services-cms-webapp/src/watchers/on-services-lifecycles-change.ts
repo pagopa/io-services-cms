@@ -4,7 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { IWithinRangeIntegerTag } from "@pagopa/ts-commons/lib/numbers";
+import { IConfig } from "../config";
 
 type Actions = "requestReview" | "requestPublication";
 
@@ -32,31 +32,34 @@ const onSubmitHandler = (
   },
 });
 
-const onApproveHandler = (
-  item: ServiceLifecycle.ItemType
-): RequestPublicationAction => ({
-  requestPublication: {
-    id: item.id,
-    data: {
-      ...item.data,
-      max_allowed_payment_amount: 1000000 as number &
-        IWithinRangeIntegerTag<0, 9999999999>,
+const onApproveHandler =
+  ({ MAX_ALLOWED_PAYMENT_AMOUNT }: IConfig) =>
+  (item: ServiceLifecycle.ItemType): RequestPublicationAction => ({
+    requestPublication: {
+      id: item.id,
+      data: {
+        ...item.data,
+        max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
+      },
     },
-  },
-});
+  });
 
-export const handler: RTE.ReaderTaskEither<
-  { item: ServiceLifecycle.ItemType },
-  Error,
-  NoAction | OnSubmitActions | OnApproveActions
-> = ({ item }) => {
-  // eslint-disable-next-line sonarjs/no-small-switch
-  switch (item.fsm.state) {
-    case "submitted":
-      return pipe(item, onSubmitHandler, TE.right);
-    case "approved":
-      return pipe(item, onApproveHandler, TE.right);
-    default:
-      return TE.right(noAction);
-  }
-};
+export const handler =
+  (
+    config: IConfig
+  ): RTE.ReaderTaskEither<
+    { item: ServiceLifecycle.ItemType },
+    Error,
+    NoAction | OnSubmitActions | OnApproveActions
+  > =>
+  ({ item }) => {
+    // eslint-disable-next-line sonarjs/no-small-switch
+    switch (item.fsm.state) {
+      case "submitted":
+        return pipe(item, onSubmitHandler, TE.right);
+      case "approved":
+        return pipe(item, onApproveHandler(config), TE.right);
+      default:
+        return TE.right(noAction);
+    }
+  };
