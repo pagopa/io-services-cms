@@ -2,6 +2,11 @@ resource "azuread_directory_role" "directory_readers" {
   display_name = "Directory Readers"
 }
 
+data "azurerm_resource_group" "environment_app_cd_resource_groups" {
+  for_each = toset([for rg, role_list in var.environment_app_cd_roles.resource_groups : rg])
+  name     = each.value
+}
+
 data "azurerm_resource_group" "environment_cd_resource_groups" {
   for_each = toset([for rg, role_list in var.environment_cd_roles.resource_groups : rg])
   name     = each.value

@@ -41,3 +41,17 @@ github_repository_environment_cd = {
   custom_branch_policies = false
   reviewers_teams        = ["io-platform-green-unit"]
 }
+
+github_repository_environment_app_cd = {
+  protected_branches     = true
+  custom_branch_policies = false
+}
+
+environment_app_cd_roles = {
+  subscription = []
+  resource_groups = {
+    io-p-services-cms-rg = [
+      "Website Contributor",
+    ]
+  }
+}
