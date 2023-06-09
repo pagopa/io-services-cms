@@ -9,4 +9,13 @@ locals {
       }
     ]
   ]))
+
+  environment_ci_resource_group_roles = distinct(flatten([
+    for rg, role_list in var.environment_ci_roles.resource_groups : [
+      for role in role_list : {
+        resource_group = rg
+        role           = role
+      }
+    ]
+  ]))
 }
