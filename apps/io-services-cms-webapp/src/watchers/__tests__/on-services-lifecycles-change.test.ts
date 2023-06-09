@@ -2,6 +2,7 @@ import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
 import { handler } from "../on-services-lifecycles-change";
+import { IConfig } from "../../config";
 
 const aService = {
   id: "aServiceId",
@@ -38,7 +39,11 @@ describe("On Service Lifecycle Change Handler", () => {
     ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "rejected" } }}                       | ${{}}
     ${"no-op (empty object)"} | ${{ ...aService, fsm: { state: "deleted" } }}                        | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler({ item })();
+    const res = await handler({
+      MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
+    } as unknown as IConfig)({
+      item,
+    })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual(expected);
