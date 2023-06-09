@@ -22,7 +22,7 @@ environment_ci_roles = {
   ]
   resource_groups = {
     terraform-state-rg = [
-      "Storage Blob Data Reader",
+      "Storage Blob Data Contributor",
     ],
     io-p-services-cms-rg = [
       "Reader and Data Access",
