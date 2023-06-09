@@ -44,6 +44,7 @@ export type FSMStore<
   T extends Record<string, unknown> = Record<string, unknown>
 > = {
   fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
+  bulkFetch: (id: string[]) => TE.TaskEither<Error, Array<O.Option<TT>>>;
   save: (id: string, data: TT) => TE.TaskEither<Error, TT>;
 };
 

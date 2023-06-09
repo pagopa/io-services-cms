@@ -84,3 +84,41 @@ it<CosmosContext>("should retrieve document that exists", async ({
     })
   );
 });
+
+it<CosmosContext>("should retrieve documents that exist with a bulk read", async ({
+  container,
+}) => {
+  const store = stores.createCosmosStore(container, Codec);
+
+  const aDoc0 = {
+    id: "my-id-0",
+    value: "a value",
+    fsm: { state: "on" as const },
+  };
+  const aDoc1 = {
+    ...aDoc0,
+    id: "my-id-1",
+  };
+  const aDoc2 = {
+    ...aDoc0,
+    id: "my-id-2",
+  };
+  const aDocArray = [aDoc0, aDoc1, aDoc2];
+
+  await store.save(aDoc0.id, aDoc0)();
+  await store.save(aDoc1.id, aDoc1)();
+  await store.save(aDoc2.id, aDoc2)();
+
+  const bulkFetchResult = await pipe(
+    store.bulkFetch([aDoc0.id, aDoc1.id, aDoc2.id]),
+    TE.getOrElse((_) => {
+      throw new Error("unexpected error");
+    })
+  )();
+
+  pipe(
+    bulkFetchResult.forEach((result, index) => {
+      expect(result).toEqual(expect.objectContaining(aDocArray[index]));
+    })
+  );
+});
