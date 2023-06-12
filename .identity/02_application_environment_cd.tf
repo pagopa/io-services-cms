@@ -15,6 +15,11 @@ resource "azuread_application_federated_identity_credential" "environment_cd" {
   subject               = "repo:${var.github.org}/${var.github.repository}:environment:${var.env}-cd"
 }
 
+resource "azuread_directory_role_assignment" "environment_cd_directory_readers" {
+  role_id             = azuread_directory_role.directory_readers.template_id
+  principal_object_id = azuread_service_principal.environment_cd.object_id
+}
+
 resource "azurerm_role_assignment" "environment_cd_subscription" {
   for_each             = toset(var.environment_cd_roles.subscription)
   scope                = data.azurerm_subscription.current.id

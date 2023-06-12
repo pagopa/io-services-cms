@@ -1,6 +1,9 @@
 # IO Services CMS
 Manages Service lifecycle and publication.
 
+[![Infra Drift Detection](https://github.com/pagopa/io-services-cms/actions/workflows/infra-drift-detection.yml/badge.svg?branch=master)](https://github.com/pagopa/io-services-cms/actions/workflows/infra-drift-detection.yml)
+[![Infra Continuous Delivery](https://github.com/pagopa/io-services-cms/actions/workflows/infra-cd.yml/badge.svg?branch=master)](https://github.com/pagopa/io-services-cms/actions/workflows/infra-cd.yml)
+
 ---
 
 ## Architecture

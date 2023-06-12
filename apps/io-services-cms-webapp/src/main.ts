@@ -97,7 +97,7 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
 );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
-  onServiceLifecycleChangeHandler,
+  onServiceLifecycleChangeHandler(config),
   processBatchOf(ServiceLifecycle.ItemType),
   setBindings((results) => ({
     requestReview: pipe(

@@ -1,7 +1,8 @@
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
 import { handler } from "../on-services-lifecycles-change";
+import { IConfig } from "../../config";
 
 const aService = {
   id: "aServiceId",
@@ -24,17 +25,26 @@ const aService = {
   },
 } as unknown as ServiceLifecycle.ItemType;
 
+const aPublicationService = {
+  ...aService,
+  data: { ...aService.data, max_allowed_payment_amount: 1000000 },
+} as unknown as ServicePublication.ItemType;
+
 describe("On Service Lifecycle Change Handler", () => {
   it.each`
     scenario                                     | item                                                                 | expected
     ${"request-review"}                          | ${{ ...aService, version: "aVersion", fsm: { state: "submitted" } }} | ${{ requestReview: { ...aService, version: "aVersion" } }}
     ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "draft" } }}                          | ${{}}
-    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}    | ${{ requestPublication: { ...aService, autoPublish: true } }}
-    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                       | ${{ requestPublication: { ...aService, autoPublish: false } }}
+    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}    | ${{ requestPublication: { ...aPublicationService, autoPublish: true } }}
+    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                       | ${{ requestPublication: { ...aPublicationService, autoPublish: false } }}
     ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "rejected" } }}                       | ${{}}
     ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "deleted" } }}                        | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler({ item })();
+    const res = await handler({
+      MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
+    } as unknown as IConfig)({
+      item,
+    })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual(expected);

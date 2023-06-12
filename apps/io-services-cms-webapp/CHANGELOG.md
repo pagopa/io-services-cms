@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.10.1
+
+### Patch Changes
+
+- 4940ccb: test deploy app
+
 ## 1.10.0
 
 ### Minor Changes

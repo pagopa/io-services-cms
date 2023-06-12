@@ -4,6 +4,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { IConfig } from "../config";
 
 type Actions = "requestReview" | "requestPublication";
 
@@ -31,28 +32,35 @@ const onSubmitHandler = (
   },
 });
 
-const onApproveHandler = (
-  item: ServiceLifecycle.ItemType
-): RequestPublicationAction => ({
-  requestPublication: {
-    id: item.id,
-    data: item.data,
-    autoPublish: ServiceLifecycle.getAutoPublish(item),
-  },
-});
+const onApproveHandler =
+  ({ MAX_ALLOWED_PAYMENT_AMOUNT }: IConfig) =>
+  (item: ServiceLifecycle.ItemType): RequestPublicationAction => ({
+    requestPublication: {
+      id: item.id,
+      data: {
+        ...item.data,
+        max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
+      },
+      autoPublish: ServiceLifecycle.getAutoPublish(item),
+    },
+  });
 
-export const handler: RTE.ReaderTaskEither<
-  { item: ServiceLifecycle.ItemType },
-  Error,
-  NoAction | OnSubmitActions | OnApproveActions
-> = ({ item }) => {
-  // eslint-disable-next-line sonarjs/no-small-switch
-  switch (item.fsm.state) {
-    case "submitted":
-      return pipe(item, onSubmitHandler, TE.right);
-    case "approved":
-      return pipe(item, onApproveHandler, TE.right);
-    default:
-      return TE.right(noAction);
-  }
-};
+export const handler =
+  (
+    config: IConfig
+  ): RTE.ReaderTaskEither<
+    { item: ServiceLifecycle.ItemType },
+    Error,
+    NoAction | OnSubmitActions | OnApproveActions
+  > =>
+  ({ item }) => {
+    // eslint-disable-next-line sonarjs/no-small-switch
+    switch (item.fsm.state) {
+      case "submitted":
+        return pipe(item, onSubmitHandler, TE.right);
+      case "approved":
+        return pipe(item, onApproveHandler(config), TE.right);
+      default:
+        return TE.right(noAction);
+    }
+  };
