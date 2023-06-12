@@ -9,8 +9,8 @@ import {
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 
-type MaxAllowedAmount = t.TypeOf<typeof MaxAllowedAmount>;
-const MaxAllowedAmount = t.union([
+export type MaxAllowedAmount = t.TypeOf<typeof MaxAllowedAmount>;
+export const MaxAllowedAmount = t.union([
   WithinRangeInteger<0, 9999999999, IWithinRangeIntegerTag<0, 9999999999>>(
     0,
     9999999999
