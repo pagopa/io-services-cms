@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.11.1
+
+### Patch Changes
+
+- f4a44d1: Test CD pipeline
+- bc96b10: Test deploy action
+
 ## 1.11.0
 
 ### Minor Changes
