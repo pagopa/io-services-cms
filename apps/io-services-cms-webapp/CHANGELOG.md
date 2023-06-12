@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.11.0
+
+### Minor Changes
+
+- 4627c8b: set max amount on publication
+
+### Patch Changes
+
+- Updated dependencies [4627c8b]
+  - @io-services-cms/models@1.6.1
+
 ## 1.10.1
 
 ### Patch Changes
