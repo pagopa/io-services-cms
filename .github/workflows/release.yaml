@@ -5,9 +5,7 @@ on:
     branches:
       - master
     paths:
-      - apps/**
-      - packages/**
-      - package.json
+      - .changeset/**
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
