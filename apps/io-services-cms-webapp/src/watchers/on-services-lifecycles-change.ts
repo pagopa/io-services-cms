@@ -37,7 +37,7 @@ const onApproveHandler = (
   requestPublication: {
     id: item.id,
     data: item.data,
-    autoPublish: (item.fsm.autoPublish as boolean) ?? false,
+    autoPublish: ServiceLifecycle.getAutoPublish(item),
   },
 });
 

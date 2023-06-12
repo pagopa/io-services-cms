@@ -14,7 +14,7 @@ export type RequestPublicationItem = t.TypeOf<typeof RequestPublicationItem>;
 export const RequestPublicationItem = t.intersection([
   Service,
   t.type({
-    autoPublish: t.boolean, // version required
+    autoPublish: t.boolean, // autoPublish required
   }),
 ]);
 

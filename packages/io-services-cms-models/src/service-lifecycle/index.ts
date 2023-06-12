@@ -168,7 +168,7 @@ const FSM: FSM = {
           fsm: {
             state: "approved",
             approvalDate,
-            autoPublish: current.fsm.autoPublish ?? false,
+            autoPublish: getAutoPublish(current),
             lastTransition: "apply approve on submitted",
           },
         }),
@@ -418,6 +418,9 @@ function apply(
     );
   };
 }
+
+export const getAutoPublish = (service: ItemType): boolean =>
+  (service.fsm.autoPublish as boolean) ?? false;
 
 const getFsmClient = (store: LifecycleStore) => ({
   getStore: () => store,

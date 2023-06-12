@@ -25,21 +25,20 @@ export const handleQueueItem = (
     queueItem,
     parseIncomingMessage,
     TE.fromEither,
-    TE.mapLeft((_) => new Error("Error while parsing incoming message")),
+    TE.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.chainW((service) =>
-      service.autoPublish
-        ? fsmPublicationClient.publish(service.id, {
-            data: {
-              id: service.id,
-              data: service.data,
-            },
-          })
-        : fsmPublicationClient.override(service.id, {
-            data: {
-              id: service.id,
-              data: service.data,
-            },
-          })
+      pipe(
+        {
+          data: {
+            id: service.id,
+            data: service.data,
+          },
+        },
+        (publicationArgs) =>
+          service.autoPublish
+            ? fsmPublicationClient.publish(service.id, publicationArgs)
+            : fsmPublicationClient.override(service.id, publicationArgs)
+      )
     ),
     TE.getOrElse((e) => {
       throw e;
