@@ -64,9 +64,9 @@ A finite state machine (FSM) that defines the publication of a Service
 
 ```mermaid
 stateDiagram-v2
-    * --> unpublished: override
-    unpublished --> unpublished: override
-    published --> published: override
+    * --> unpublished: release
+    unpublished --> unpublished: release
+    published --> published: release
     * --> published: publish
     unpublished --> published: publish
     published --> unpublished: unpublish
@@ -80,6 +80,6 @@ See the [ServiceLifecycle > Usage](#usage) section above.
 
 | action    | arguments                                                                                   | description                                                            |
 | --------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| override  | \* `data`: the service object to be overrided, with its `id`                                | Override service with a new version                                    |
+| release   | \* `data`: the service object to be released, with its `id`                                 | Release service with a new version                                     |
 | publish   | \* `data`: the service object to be published (required only for \*-> published transition) | Publish a service                                                      |
 | unpublish | -                                                                                           | Undo the last service publication and leave it in an unpublished state |
