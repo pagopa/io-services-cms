@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.11.1
+
+### Patch Changes
+
+- f4a44d1: Test CD pipeline
+- bc96b10: Test deploy action
+
+## 1.11.0
+
+### Minor Changes
+
+- 4627c8b: set max amount on publication
+
+### Patch Changes
+
+- Updated dependencies [4627c8b]
+  - @io-services-cms/models@1.6.1
+
 ## 1.10.1
 
 ### Patch Changes
