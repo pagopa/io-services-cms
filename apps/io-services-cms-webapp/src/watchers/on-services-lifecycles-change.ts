@@ -1,9 +1,9 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IConfig } from "../config";
 
 type Actions = "requestReview" | "requestPublication";
@@ -12,13 +12,13 @@ type NoAction = typeof noAction;
 type Action<A extends Actions, B> = Record<A, B>;
 
 type RequestReviewAction = Action<"requestReview", Queue.RequestReviewItem>;
-type OnSubmitActions = RequestReviewAction;
+type OnSubmitActions = Action<"requestReview", unknown>;
 
 type RequestPublicationAction = Action<
   "requestPublication",
   Queue.RequestPublicationItem
 >;
-type OnApproveActions = RequestPublicationAction;
+type OnApproveActions = Action<"requestPublication", unknown>;
 
 const noAction = {};
 
@@ -41,6 +41,7 @@ const onApproveHandler =
         ...item.data,
         max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
       },
+      autoPublish: ServiceLifecycle.getAutoPublish(item),
     },
   });
 

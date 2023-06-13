@@ -48,7 +48,7 @@ const States = t.tuple([
 
 type Actions = {
   override: { data: Service };
-  publish: void;
+  publish: { data: Service };
   unpublish: void;
 };
 
@@ -63,6 +63,7 @@ type FSM = {
     Transition<Action<"override">, void, State<"unpublished">>,
     Transition<Action<"override">, State<"unpublished">, State<"unpublished">>,
     Transition<Action<"override">, State<"published">, State<"published">>,
+    Transition<Action<"publish">, void, State<"published">>,
     Transition<Action<"publish">, State<"unpublished">, State<"published">>,
     Transition<Action<"unpublish">, State<"published">, State<"unpublished">>
   ];
@@ -122,6 +123,20 @@ const FSM: FSM = {
           fsm: {
             state: "published",
             lastTransition: "apply override on published",
+          },
+        }),
+    },
+    {
+      id: "apply publish on *",
+      action: "publish",
+      from: "*",
+      to: "published",
+      exec: ({ args: { data } }) =>
+        E.right({
+          ...data,
+          fsm: {
+            state: "published",
+            lastTransition: "apply publish on empty",
           },
         }),
     },
@@ -193,7 +208,8 @@ function apply(
 >;
 function apply(
   appliedAction: "publish",
-  id: ServiceId
+  id: ServiceId,
+  args?: { data: Service }
 ): ReaderTaskEither<
   PublicationStore,
   AllFsmErrors,
@@ -323,7 +339,8 @@ const getFsmClient = (store: PublicationStore) => ({
   override: (id: ServiceId, args: { data: Service }) =>
     apply("override", id, args)(store),
   unpublish: (id: ServiceId) => apply("unpublish", id)(store),
-  publish: (id: ServiceId) => apply("publish", id)(store),
+  publish: (id: ServiceId, args?: { data: Service }) =>
+    apply("publish", id, args)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 

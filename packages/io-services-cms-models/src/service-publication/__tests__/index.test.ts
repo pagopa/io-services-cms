@@ -163,12 +163,43 @@ describe("apply", () => {
     },
   ])("should apply $title", expectSuccess);
 
+  it.each([
+    {
+      title: "on empty items with autoPublish",
+      id: aServiceId,
+      actions: [() => fsmClient.override(aServiceId, { data: aService })],
+      expected: expect.objectContaining({
+        ...aService,
+        fsm: expect.objectContaining({ state: "unpublished" }),
+      }),
+    },
+    {
+      title: "a sequence on the same item",
+      id: aServiceId,
+      actions: [
+        () =>
+          fsmClient.publish(aServiceId, {
+            data: aService,
+          }),
+        () =>
+          fsmClient.override(aServiceId, {
+            data: changeName(aService, "new name after autoPublish"),
+          }),
+        () => fsmClient.unpublish(aServiceId),
+      ],
+      expected: expect.objectContaining({
+        ...changeName(aService, "new name after autoPublish"),
+        fsm: expect.objectContaining({ state: "unpublished" }),
+      }),
+    },
+  ])("should apply $title", expectSuccess);
+
   // invalid sequences
   it.each([
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.publish(aServiceId)],
+      actions: [() => fsmClient.unpublish(aServiceId)],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,

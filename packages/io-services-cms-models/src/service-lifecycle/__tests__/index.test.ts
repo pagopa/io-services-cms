@@ -168,7 +168,7 @@ describe("apply", () => {
           fsmClient.edit(aServiceId, {
             data: changeName(aService, "new name"),
           }),
-        () => fsmClient.submit(aServiceId),
+        () => fsmClient.submit(aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...changeName(aService, "new name"),
@@ -182,7 +182,7 @@ describe("apply", () => {
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.submit(aServiceId)],
+      actions: [() => fsmClient.submit(aServiceId, { autoPublish: false })],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,
@@ -198,7 +198,7 @@ describe("apply", () => {
           fsmClient.create(aServiceId, {
             data: changeName(aService, "new name"),
           }),
-        () => fsmClient.submit(aServiceId),
+        () => fsmClient.submit(aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...aService, // we expect the first create to have succeeded
