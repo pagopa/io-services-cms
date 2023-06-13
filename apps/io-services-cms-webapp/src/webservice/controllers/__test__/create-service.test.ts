@@ -38,7 +38,9 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 );
 
 const mockApimClient = {} as unknown as ApiManagementClient;
-const mockConfig = {} as unknown as IConfig;
+const mockConfig = {
+  SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
+} as unknown as IConfig;
 
 describe("createService", () => {
   afterEach(() => {
@@ -63,6 +65,7 @@ describe("createService", () => {
     metadata: {
       scope: "LOCAL",
     },
+    authorized_recipients: ["BBBBBB99C88D555I"],
   };
 
   it("should not accept invalid payloads", async () => {
@@ -98,6 +101,7 @@ describe("createService", () => {
       .set("x-user-id", "any-user-id")
       .set("x-subscription-id", "any-subscription-id");
 
+    console.log(`CREATE RESONSE: ${JSON.stringify(response.body)}`);
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
     expect(response.body.id).toEqual(expect.any(String));

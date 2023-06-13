@@ -17,16 +17,21 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { FiscalCode } from "./generated/api/FiscalCode";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
 });
 
-const max_allowed_payment_amount = t.type({
+const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
     ServiceLifecycle.definitions.MaxAllowedAmount,
     1000000 as ServiceLifecycle.definitions.MaxAllowedAmount
+  ),
+  SANDBOX_FISCAL_CODE: withDefault(
+    FiscalCode,
+    "AAAAAA00A00A000A" as FiscalCode
   ),
 });
 
@@ -106,7 +111,7 @@ export const IConfig = t.intersection([
     InternalStorageAccount,
     JiraConfig,
     PostgreSqlConfig,
-    max_allowed_payment_amount,
+    ServicePayloadConfig,
   ]),
   CosmosConfig,
   AzureClientSecretCredential,
