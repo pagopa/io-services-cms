@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.7.0
+
+### Minor Changes
+
+- 646c1f1: ADDED automatic publication capability on submitted to review service
+
 ## 1.6.1
 
 ### Patch Changes
