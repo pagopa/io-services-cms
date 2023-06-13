@@ -42,8 +42,7 @@ export const itemToResponse = ({
   description: data.description,
   organization: data.organization,
   metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
-  authorized_recipients:
-    data.authorized_recipients as unknown as ReadonlyArray<FiscalCode>,
+  authorized_recipients: data.authorized_recipients,
 });
 
 export const toServiceStatus = (

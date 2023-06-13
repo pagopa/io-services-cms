@@ -699,7 +699,7 @@ components:
     FiscalCode:
       type: string
       description: User's fiscal code.
-      pattern: '^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$'
+      pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$'
       example: AAAAAA00A00A000A
     Logo:
       description: A base64 string representation of the logo PNG image.
