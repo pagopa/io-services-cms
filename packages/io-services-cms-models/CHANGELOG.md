@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.8.0
+
+### Minor Changes
+
+- 488f30a: Renamed FSM Publication Action 'override' in 'release'
+
 ## 1.7.0
 
 ### Minor Changes
