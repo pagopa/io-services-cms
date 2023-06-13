@@ -1,11 +1,10 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
-
+import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
-import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import { ScopeEnum } from "../../generated/api/ServiceMetadata";
-import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
-import { FiscalCode } from "../../generated/api/FiscalCode";
+import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],
@@ -24,10 +23,7 @@ export const payloadToItem = (
     ...data,
     require_secure_channel,
     max_allowed_payment_amount,
-    authorized_recipients: [
-      sandboxFiscalCode as FiscalCode,
-      ...authorized_recipients,
-    ],
+    authorized_recipients: [sandboxFiscalCode, ...authorized_recipients],
   },
 });
 
