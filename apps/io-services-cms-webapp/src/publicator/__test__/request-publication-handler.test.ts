@@ -61,7 +61,7 @@ describe("Service Publication Handler", () => {
     const context = createContext();
 
     const mockFsmLifecycleClient = {
-      override: vi.fn(() =>
+      release: vi.fn(() =>
         TE.right({
           ...aService,
           fsm: { state: "unpublished" },
@@ -86,7 +86,7 @@ describe("Service Publication Handler", () => {
     });
   });
 
-  it("handleQueueItem should override on autoPublish false", async () => {
+  it("handleQueueItem should release on autoPublish false", async () => {
     const autoPublishQueueItem = {
       ...aService,
       autoPublish: false,
@@ -94,7 +94,7 @@ describe("Service Publication Handler", () => {
     const context = createContext();
 
     const mockFsmLifecycleClient = {
-      override: vi.fn(() =>
+      release: vi.fn(() =>
         TE.right({
           ...aService,
           fsm: { state: "unpublished" },
@@ -113,8 +113,8 @@ describe("Service Publication Handler", () => {
       autoPublishQueueItem,
       mockFsmLifecycleClient
     )();
-    expect(mockFsmLifecycleClient.override).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.override).toBeCalledWith(aService.id, {
+    expect(mockFsmLifecycleClient.release).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.release).toBeCalledWith(aService.id, {
       data: aService,
     });
   });

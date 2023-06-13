@@ -47,7 +47,7 @@ const States = t.tuple([
 ]);
 
 type Actions = {
-  override: { data: Service };
+  release: { data: Service };
   publish: { data: Service };
   unpublish: void;
 };
@@ -60,9 +60,9 @@ type State<S extends keyof ToRecord<States>> = [S, ToRecord<States>[S]];
 type FSM = {
   states: StateSet<ToRecord<States>>;
   transitions: [
-    Transition<Action<"override">, void, State<"unpublished">>,
-    Transition<Action<"override">, State<"unpublished">, State<"unpublished">>,
-    Transition<Action<"override">, State<"published">, State<"published">>,
+    Transition<Action<"release">, void, State<"unpublished">>,
+    Transition<Action<"release">, State<"unpublished">, State<"unpublished">>,
+    Transition<Action<"release">, State<"published">, State<"published">>,
     Transition<Action<"publish">, void, State<"published">>,
     Transition<Action<"publish">, State<"unpublished">, State<"published">>,
     Transition<Action<"unpublish">, State<"published">, State<"unpublished">>
@@ -83,8 +83,8 @@ const FSM: FSM = {
   },
   transitions: [
     {
-      id: "apply override on *",
-      action: "override",
+      id: "apply release on *",
+      action: "release",
       from: "*",
       to: "unpublished",
       exec: ({ args: { data } }) =>
@@ -92,13 +92,13 @@ const FSM: FSM = {
           ...data,
           fsm: {
             state: "unpublished",
-            lastTransition: "apply override on empty",
+            lastTransition: "apply release on empty",
           },
         }),
     },
     {
-      id: "apply override on unpublished",
-      action: "override",
+      id: "apply release on unpublished",
+      action: "release",
       from: "unpublished",
       to: "unpublished",
       exec: ({ current, args: { data } }) =>
@@ -107,13 +107,13 @@ const FSM: FSM = {
           ...data,
           fsm: {
             state: "unpublished",
-            lastTransition: "apply override on unpublished",
+            lastTransition: "apply release on unpublished",
           },
         }),
     },
     {
-      id: "apply override on published",
-      action: "override",
+      id: "apply release on published",
+      action: "release",
       from: "published",
       to: "published",
       exec: ({ current, args: { data } }) =>
@@ -122,7 +122,7 @@ const FSM: FSM = {
           ...data,
           fsm: {
             state: "published",
-            lastTransition: "apply override on published",
+            lastTransition: "apply release on published",
           },
         }),
     },
@@ -190,7 +190,7 @@ type PublicationStore = FSMStore<States[number]>;
  * @returns either an error or the element in the new state
  */
 function apply(
-  appliedAction: "override",
+  appliedAction: "release",
   id: ServiceId,
   args: { data: Service }
 ): ReaderTaskEither<
@@ -336,8 +336,8 @@ function apply(
 
 const getFsmClient = (store: PublicationStore) => ({
   getStore: () => store,
-  override: (id: ServiceId, args: { data: Service }) =>
-    apply("override", id, args)(store),
+  release: (id: ServiceId, args: { data: Service }) =>
+    apply("release", id, args)(store),
   unpublish: (id: ServiceId) => apply("unpublish", id)(store),
   publish: (id: ServiceId, args?: { data: Service }) =>
     apply("publish", id, args)(store),
