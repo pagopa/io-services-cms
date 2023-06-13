@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.12.0
+
+### Minor Changes
+
+- 646c1f1: ADDED automatic publication capability on submitted to review service
+
+### Patch Changes
+
+- Updated dependencies [646c1f1]
+  - @io-services-cms/models@1.7.0
+
 ## 1.11.1
 
 ### Patch Changes
