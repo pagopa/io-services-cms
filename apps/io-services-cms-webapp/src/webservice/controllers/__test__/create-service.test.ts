@@ -101,7 +101,6 @@ describe("createService", () => {
       .set("x-user-id", "any-user-id")
       .set("x-subscription-id", "any-subscription-id");
 
-    console.log(`CREATE RESONSE: ${JSON.stringify(response.body)}`);
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
     expect(response.body.id).toEqual(expect.any(String));
