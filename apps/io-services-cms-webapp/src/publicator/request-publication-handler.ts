@@ -37,7 +37,7 @@ export const handleQueueItem = (
         (publicationArgs) =>
           service.autoPublish
             ? fsmPublicationClient.publish(service.id, publicationArgs)
-            : fsmPublicationClient.override(service.id, publicationArgs)
+            : fsmPublicationClient.release(service.id, publicationArgs)
       )
     ),
     TE.getOrElse((e) => {
