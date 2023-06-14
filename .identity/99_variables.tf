@@ -80,6 +80,7 @@ variable "github_repository_environment_app_cd" {
   type = object({
     protected_branches     = bool
     custom_branch_policies = bool
+    reviewers_teams        = list(string)
   })
   description = "GitHub Continous Delivery roles"
 }
