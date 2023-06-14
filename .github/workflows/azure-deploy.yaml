@@ -37,6 +37,7 @@ jobs:
   runner_job:
     name: Runner Job
     runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
+    environment: prod-app-cd
     needs: [create_runner]
 
     steps:
