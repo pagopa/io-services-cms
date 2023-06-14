@@ -72,6 +72,7 @@
 | [azurerm_private_dns_zone.privatelink_documents_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_private_dns_zone.privatelink_postgres_database_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_resource_group.vnet_common_rg](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/resource_group) | data source |
+| [azurerm_subnet.github_runner_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.private_endpoints_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subscription) | data source |
 | [azurerm_virtual_network.vnet_common](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/virtual_network) | data source |
