@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.13.2
+
+### Patch Changes
+
+- 6a2eae6: fix release action
+- ae61a44: fix
+
 ## 1.13.1
 
 ### Patch Changes
