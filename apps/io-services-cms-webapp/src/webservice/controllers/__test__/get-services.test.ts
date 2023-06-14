@@ -4,7 +4,7 @@ import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewar
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
 
@@ -72,7 +72,10 @@ vi.mock("../../../lib/clients/apim-client", async () => {
 });
 
 const mockApimClient = {} as unknown as ApiManagementClient;
-const mockConfig = {} as unknown as IConfig;
+const mockConfig = {
+  PAGINATION_DEFAULT_LIMIT: 20,
+  PAGINATION_MAX_LIMIT: 100,
+} as unknown as IConfig;
 
 // FSM client mock *******************************
 const aBulkFetchRightValue = TE.of(
@@ -96,18 +99,6 @@ describe("getServices", () => {
     config: mockConfig,
     fsmLifecycleClient: mockFsmLifecycleClient,
     fsmPublicationClient: mockFsmPublicationClient,
-  });
-
-  it("should return a Bad Request response when called without 'limit' queryparam", async () => {
-    const response = await request(app)
-      .get("/api/services")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
-
-    expect(response.statusCode).toBe(400);
   });
 
   it("should return a Bad Request response when called with a wrong 'limit' queryparam", async () => {
@@ -170,6 +161,35 @@ describe("getServices", () => {
 
   //   expect(response.statusCode).toBe(500);
   // });
+
+  it("should return an ok response and default limit when called without 'limit' queryparam", async () => {
+    const response = await request(app)
+      .get("/api/services")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", "any-user-id")
+      .set("x-subscription-id", "any-subscription-id");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.pagination).toHaveProperty(
+      "limit",
+      mockConfig.PAGINATION_DEFAULT_LIMIT
+    );
+  });
+
+  it("should return an ok response and offset equals to zero when called without 'offset' queryparam", async () => {
+    const response = await request(app)
+      .get("/api/services?limit=10")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", "any-user-id")
+      .set("x-subscription-id", "any-subscription-id");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.pagination).toHaveProperty("offset", 0);
+  });
 
   it("should return a list of user services", async () => {
     const anOffset = 0;

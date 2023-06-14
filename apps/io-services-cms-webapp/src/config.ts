@@ -9,6 +9,7 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
   IntegerFromString,
+  NonNegativeInteger,
   NumberFromString,
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -98,6 +99,19 @@ export const QueueConfig = t.type({
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
+// Services pagination configuration
+export const PaginationConfig = t.type({
+  PAGINATION_DEFAULT_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    20 as NonNegativeInteger
+  ),
+  PAGINATION_MAX_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    100 as NonNegativeInteger
+  ),
+});
+export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -108,10 +122,13 @@ export const IConfig = t.intersection([
     PostgreSqlConfig,
     max_allowed_payment_amount,
   ]),
-  CosmosConfig,
-  AzureClientSecretCredential,
-  ApimConfig,
-  QueueConfig,
+  t.intersection([
+    CosmosConfig,
+    AzureClientSecretCredential,
+    ApimConfig,
+    QueueConfig,
+    PaginationConfig,
+  ]),
 ]);
 
 export const envConfig = {

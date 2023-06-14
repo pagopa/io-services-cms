@@ -10,7 +10,6 @@ import {
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
-import { RequiredQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_query_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IWithinRangeIntegerTag,
@@ -33,7 +32,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { ApimConfig } from "../../config";
+import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePagination } from "../../generated/api/ServicePagination";
 import {
@@ -54,23 +53,17 @@ type HandlerResponseTypes =
 type GetServicesHandler = (
   auth: IAzureApiAuthorization,
   userEmail: EmailAddress,
-  limit: MaxAllowedQueryLimit,
-  offset: O.Option<NonNegativeInteger>
+  limit: O.Option<number>,
+  offset: O.Option<number>
 ) => Promise<HandlerResponseTypes>;
-
-type MaxAllowedQueryLimit = t.TypeOf<typeof MaxAllowedQueryLimit>;
-const MaxAllowedQueryLimit = t.union([
-  WithinRangeInteger<1, 100, IWithinRangeIntegerTag<1, 100>>(1, 100),
-  t.literal(100),
-]);
 
 type Dependencies = {
   // An instance of ServiceLifecycle client
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimClient: ApiManagementClient;
-  // The APIM configuration
-  apimConfig: ApimConfig;
+  // The app configuration
+  config: IConfig;
 };
 
 export type ServiceSubscriptionPair = {
@@ -94,13 +87,13 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 const getUserIdTask = (
   apimClient: ApiManagementClient,
   userEmail: EmailString,
-  apimConfig: ApimConfig
+  config: IConfig
 ) =>
   pipe(
     getUserByEmail(
       apimClient,
-      apimConfig.AZURE_APIM_RESOURCE_GROUP,
-      apimConfig.AZURE_APIM,
+      config.AZURE_APIM_RESOURCE_GROUP,
+      config.AZURE_APIM,
       userEmail
     ),
     TE.mapLeft(
@@ -114,7 +107,7 @@ const getUserIdTask = (
 const buildServicePagination = (
   serviceSubscriptionPairs: ServiceSubscriptionPair[],
   limit: number,
-  offset?: number
+  offset: number
 ): ServicePagination => ({
   value: serviceSubscriptionPairs.map((pair) => pair.service),
   pagination: {
@@ -144,7 +137,10 @@ const getServices = (
     )
   );
 
-const getOffset = (offset: O.Option<NonNegativeInteger>) =>
+const getLimit = (limit: O.Option<number>, defaultValue: number) =>
+  O.isSome(limit) ? limit.value : defaultValue;
+
+const getOffset = (offset: O.Option<number>) =>
   O.isSome(offset) ? offset.value : 0;
 
 /**
@@ -174,20 +170,20 @@ export const makeGetServicesHandler =
   ({
     fsmLifecycleClient,
     apimClient,
-    apimConfig,
+    config,
   }: Dependencies): GetServicesHandler =>
   (_auth, userEmail, limit, offset) =>
     pipe(
-      getUserIdTask(apimClient, userEmail, apimConfig),
+      getUserIdTask(apimClient, userEmail, config),
       TE.chainW((userId) =>
         pipe(
           getUserSubscriptions(
             apimClient,
-            apimConfig.AZURE_APIM_RESOURCE_GROUP,
-            apimConfig.AZURE_APIM,
+            config.AZURE_APIM_RESOURCE_GROUP,
+            config.AZURE_APIM,
             userId,
             getOffset(offset),
-            limit
+            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT)
           ),
           TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`))
         )
@@ -204,7 +200,7 @@ export const makeGetServicesHandler =
         ResponseSuccessJson<ServicePagination>(
           buildServicePagination(
             serviceSubscriptionPairs,
-            limit,
+            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
             getOffset(offset)
           )
         )
@@ -213,26 +209,33 @@ export const makeGetServicesHandler =
       TE.toUnion
     )();
 
-export const applyRequestMiddelwares = (handler: GetServicesHandler) =>
-  pipe(
-    handler,
-    // TODO: implement ip filter
-    // (handler) =>
-    //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-    withRequestMiddlewares(
-      // only allow requests by users belonging to certain groups
-      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-      // extract the user email from the request headers
-      UserEmailMiddleware(),
-      // extract limit as number of records to return from query params
-      RequiredQueryParamMiddleware(
-        "limit",
-        IntegerFromString.pipe(MaxAllowedQueryLimit)
-      ),
-      // extract offset as number of records to skip from query params
-      OptionalQueryParamMiddleware(
-        "offset",
-        IntegerFromString.pipe(NonNegativeInteger)
+export const applyRequestMiddelwares =
+  (config: IConfig) => (handler: GetServicesHandler) =>
+    pipe(
+      handler,
+      // TODO: implement ip filter
+      // (handler) =>
+      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
+      withRequestMiddlewares(
+        // only allow requests by users belonging to certain groups
+        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+        // extract the user email from the request headers
+        UserEmailMiddleware(),
+        // extract limit as number of records to return from query params
+        OptionalQueryParamMiddleware(
+          "limit",
+          IntegerFromString.pipe(
+            WithinRangeInteger<
+              1,
+              typeof config.PAGINATION_MAX_LIMIT,
+              IWithinRangeIntegerTag<1, typeof config.PAGINATION_MAX_LIMIT>
+            >(1, config.PAGINATION_MAX_LIMIT)
+          )
+        ),
+        // extract offset as number of records to skip from query params
+        OptionalQueryParamMiddleware(
+          "offset",
+          IntegerFromString.pipe(NonNegativeInteger)
+        )
       )
-    )
-  );
+    );

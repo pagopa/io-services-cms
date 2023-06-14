@@ -88,9 +88,9 @@ export const createWebServer = ({
       makeGetServicesHandler({
         fsmLifecycleClient,
         apimClient,
-        apimConfig: config,
+        config,
       }),
-      applyGetServicesRequestMiddelwares,
+      applyGetServicesRequestMiddelwares(config),
       wrapRequestHandler
     )
   );
