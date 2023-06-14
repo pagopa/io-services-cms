@@ -43,8 +43,9 @@ github_repository_environment_cd = {
 }
 
 github_repository_environment_app_cd = {
-  protected_branches     = true
-  custom_branch_policies = false
+  protected_branches     = false
+  custom_branch_policies = true
+  reviewers_teams        = ["io-platform-green-unit"]
 }
 
 environment_app_cd_roles = {
