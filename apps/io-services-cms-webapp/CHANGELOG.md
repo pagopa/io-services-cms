@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.13.1
+
+### Patch Changes
+
+- d5ae687: fix cd pipeline
+
 ## 1.13.0
 
 ### Minor Changes
