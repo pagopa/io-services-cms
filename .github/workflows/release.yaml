@@ -13,6 +13,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: release
     outputs:
       published: ${{ steps.release.outputs.published }}
       publishedPackages: ${{ steps.release.outputs.publishedPackages }}
