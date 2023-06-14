@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.13.4
+
+### Patch Changes
+
+- d0db5bc: restore deploy action
+
 ## 1.13.3
 
 ### Patch Changes
