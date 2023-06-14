@@ -9,11 +9,13 @@ on:
     paths:
       - apps/**
       - packages/**
+      - package.json
   pull_request:
     types: [opened, synchronize]
     paths:
       - apps/**
       - packages/**
+      - package.json
   workflow_dispatch: {}
 
 jobs:

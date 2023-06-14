@@ -7,10 +7,12 @@ import {
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+import { ReviewRequest } from "../../../generated/api/ReviewRequest";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -70,10 +72,14 @@ describe("WebService", () => {
   });
 
   describe("reviewService", () => {
+    const payload: ReviewRequest = {
+      auto_publish: true,
+    };
+
     it("should fail when cannot find requested service", async () => {
       const response = await request(app)
         .put("/api/services/s1/review")
-        .send()
+        .send(payload)
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", UserGroup.ApiServiceWrite)
         .set("x-user-id", "any-user-id")
@@ -90,7 +96,7 @@ describe("WebService", () => {
 
       const response = await request(app)
         .put("/api/services/s1/review")
-        .send()
+        .send(payload)
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", UserGroup.ApiServiceWrite)
         .set("x-user-id", "any-user-id")
@@ -102,7 +108,7 @@ describe("WebService", () => {
     it("should not allow the operation without right group", async () => {
       const response = await request(app)
         .put("/api/services/s1/review")
-        .send()
+        .send(payload)
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", "OtherGroup")
         .set("x-user-id", "any-user-id")
@@ -111,21 +117,70 @@ describe("WebService", () => {
       expect(response.statusCode).toBe(403);
     });
 
+    const serviceToSubmit: ServiceLifecycle.ItemType = {
+      ...aServiceLifecycle,
+      fsm: { state: "draft" },
+    };
+
     it("should submit a service", async () => {
-      await serviceLifecycleStore.save("s1", {
-        ...aServiceLifecycle,
-        fsm: { state: "draft" },
-      })();
+      await serviceLifecycleStore.save("s1", serviceToSubmit)();
 
       const response = await request(app)
         .put("/api/services/s1/review")
+        .send(payload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", "any-user-id")
+        .set("x-subscription-id", "any-subscription-id");
+
+      const serviceAfterApply = await serviceLifecycleStore.fetch("s1")();
+
+      let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
+
+      expect(E.isRight(serviceAfterApply)).toBeTruthy();
+      if (E.isRight(serviceAfterApply)) {
+        optionValue = serviceAfterApply.right;
+      }
+
+      expect(O.isSome(optionValue)).toBeTruthy();
+      if (O.isSome(optionValue)) {
+        const finalValue = optionValue.value;
+        expect(finalValue.fsm).toHaveProperty("autoPublish");
+        expect(finalValue.fsm.autoPublish).toBeTruthy();
+        expect(finalValue.fsm.state).toBe("submitted");
+      }
+
+      expect(response.statusCode).toBe(204);
+    });
+
+    it("should fail on no body payload", async () => {
+      await serviceLifecycleStore.save("s2", serviceToSubmit)();
+
+      const response = await request(app)
+        .put("/api/services/s2/review")
         .send()
         .set("x-user-email", "example@email.com")
         .set("x-user-groups", UserGroup.ApiServiceWrite)
         .set("x-user-id", "any-user-id")
         .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(204);
+      const serviceAfterApply = await serviceLifecycleStore.fetch("s2")();
+
+      let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
+
+      expect(E.isRight(serviceAfterApply)).toBeTruthy();
+      if (E.isRight(serviceAfterApply)) {
+        optionValue = serviceAfterApply.right;
+      }
+
+      expect(O.isSome(optionValue)).toBeTruthy();
+      if (O.isSome(optionValue)) {
+        const finalValue = optionValue.value;
+        expect(finalValue.fsm).not.toHaveProperty("autoPublish");
+        expect(finalValue.fsm.state).toBe("draft");
+      }
+
+      expect(response.statusCode).toBe(400);
     });
   });
 });

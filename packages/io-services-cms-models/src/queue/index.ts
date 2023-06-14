@@ -11,7 +11,12 @@ export const RequestReviewItem = t.intersection([
 ]);
 
 export type RequestPublicationItem = t.TypeOf<typeof RequestPublicationItem>;
-export const RequestPublicationItem = Service;
+export const RequestPublicationItem = t.intersection([
+  Service,
+  t.type({
+    autoPublish: t.boolean, // autoPublish required
+  }),
+]);
 
 export type RequestHistoricizationItem = t.TypeOf<
   typeof RequestHistoricizationItem

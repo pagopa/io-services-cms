@@ -1,5 +1,53 @@
 # io-services-cms-webapp
 
+## 1.13.3
+
+### Patch Changes
+
+- 0cc1c12: fix
+
+## 1.13.2
+
+### Patch Changes
+
+- 6a2eae6: fix release action
+- ae61a44: fix
+
+## 1.13.1
+
+### Patch Changes
+
+- d5ae687: fix cd pipeline
+
+## 1.13.0
+
+### Minor Changes
+
+- 488f30a: Renamed FSM Publication Action 'override' in 'release'
+
+### Patch Changes
+
+- Updated dependencies [488f30a]
+  - @io-services-cms/models@1.8.0
+
+## 1.12.0
+
+### Minor Changes
+
+- 646c1f1: ADDED automatic publication capability on submitted to review service
+
+### Patch Changes
+
+- Updated dependencies [646c1f1]
+  - @io-services-cms/models@1.7.0
+
+## 1.11.1
+
+### Patch Changes
+
+- f4a44d1: Test CD pipeline
+- bc96b10: Test deploy action
+
 ## 1.11.0
 
 ### Minor Changes

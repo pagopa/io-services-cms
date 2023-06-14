@@ -30,7 +30,7 @@ export const handleQueueItem = (context: Context, queueItem: Json) =>
     queueItem,
     parseIncomingMessage,
     TE.fromEither,
-    TE.mapLeft((_) => new Error("Error while parsing incoming message")),
+    TE.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.map((service) => {
       // eslint-disable-next-line functional/immutable-data
       context.bindings.serviceHistoryDocument = buildDocument(service);

@@ -135,7 +135,7 @@ describe("apply", () => {
     {
       title: "on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.override(aServiceId, { data: aService })],
+      actions: [() => fsmClient.release(aServiceId, { data: aService })],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "unpublished" }),
@@ -146,12 +146,12 @@ describe("apply", () => {
       id: aServiceId,
       actions: [
         () =>
-          fsmClient.override(aServiceId, {
+          fsmClient.release(aServiceId, {
             data: aService,
           }),
         () => fsmClient.publish(aServiceId),
         () =>
-          fsmClient.override(aServiceId, {
+          fsmClient.release(aServiceId, {
             data: changeName(aService, "new name"),
           }),
         () => fsmClient.unpublish(aServiceId),
@@ -163,12 +163,43 @@ describe("apply", () => {
     },
   ])("should apply $title", expectSuccess);
 
+  it.each([
+    {
+      title: "on empty items with autoPublish",
+      id: aServiceId,
+      actions: [() => fsmClient.release(aServiceId, { data: aService })],
+      expected: expect.objectContaining({
+        ...aService,
+        fsm: expect.objectContaining({ state: "unpublished" }),
+      }),
+    },
+    {
+      title: "a sequence on the same item",
+      id: aServiceId,
+      actions: [
+        () =>
+          fsmClient.publish(aServiceId, {
+            data: aService,
+          }),
+        () =>
+          fsmClient.release(aServiceId, {
+            data: changeName(aService, "new name after autoPublish"),
+          }),
+        () => fsmClient.unpublish(aServiceId),
+      ],
+      expected: expect.objectContaining({
+        ...changeName(aService, "new name after autoPublish"),
+        fsm: expect.objectContaining({ state: "unpublished" }),
+      }),
+    },
+  ])("should apply $title", expectSuccess);
+
   // invalid sequences
   it.each([
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.publish(aServiceId)],
+      actions: [() => fsmClient.unpublish(aServiceId)],
       expected: undefined,
       errorType: FsmNoTransitionMatchedError,
       additionalPreTestFn: undefined,
@@ -179,11 +210,11 @@ describe("apply", () => {
       id: aServiceId,
       actions: [
         /* last ok --> */ () =>
-          fsmClient.override(aServiceId, { data: aService }),
+          fsmClient.release(aServiceId, { data: aService }),
         /* this ko --> */ () => fsmClient.unpublish(aServiceId),
       ],
       expected: expect.objectContaining({
-        ...aService, // we expect the first override to have succeeded
+        ...aService, // we expect the first release to have succeeded
         fsm: expect.objectContaining({ state: "unpublished" }),
       }),
       errorType: FsmNoTransitionMatchedError,
@@ -201,7 +232,7 @@ describe("apply", () => {
     };
     const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.override(aServiceId, {
+    const result = await mockFsmClient.release(aServiceId, {
       data: aService,
     })();
 
@@ -223,7 +254,7 @@ describe("apply", () => {
     };
     const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.override(aServiceId, {
+    const result = await mockFsmClient.release(aServiceId, {
       data: aService,
     })();
 

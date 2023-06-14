@@ -53,7 +53,7 @@ type Actions = {
   create: { data: Service };
   edit: { data: Service };
   delete: void;
-  submit: void;
+  submit: { autoPublish: boolean };
   abort: void;
   reject: { reason: string };
   approve: { approvalDate: string };
@@ -136,10 +136,14 @@ const FSM: FSM = {
       action: "submit",
       from: "draft",
       to: "submitted",
-      exec: ({ current }) =>
+      exec: ({ current, args: { autoPublish } }) =>
         E.right({
           ...current,
-          fsm: { state: "submitted", lastTransition: "apply submit on draft" },
+          fsm: {
+            state: "submitted",
+            autoPublish,
+            lastTransition: "apply submit on draft",
+          },
         }),
     },
     {
@@ -164,6 +168,7 @@ const FSM: FSM = {
           fsm: {
             state: "approved",
             approvalDate,
+            autoPublish: getAutoPublish(current),
             lastTransition: "apply approve on submitted",
           },
         }),
@@ -263,7 +268,8 @@ function apply(
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
-  id: ServiceId
+  id: ServiceId,
+  args: { autoPublish: boolean }
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -413,13 +419,17 @@ function apply(
   };
 }
 
+export const getAutoPublish = (service: ItemType): boolean =>
+  (service.fsm.autoPublish as boolean) ?? false;
+
 const getFsmClient = (store: LifecycleStore) => ({
   getStore: () => store,
   create: (id: ServiceId, args: { data: Service }) =>
     apply("create", id, args)(store),
   edit: (id: ServiceId, args: { data: Service }) =>
     apply("edit", id, args)(store),
-  submit: (id: ServiceId) => apply("submit", id)(store),
+  submit: (id: ServiceId, args: { autoPublish: boolean }) =>
+    apply("submit", id, args)(store),
   approve: (id: ServiceId, args: { approvalDate: string }) =>
     apply("approve", id, args)(store),
   reject: (id: ServiceId, args: { reason: string }) =>

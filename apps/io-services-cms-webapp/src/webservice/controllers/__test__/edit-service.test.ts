@@ -41,7 +41,7 @@ describe("editService", () => {
       department_name: "string",
     },
     require_secure_channel: true,
-    authorized_recipients: ["12345678901"],
+    authorized_recipients: ["AAAAAA00A00A000A"],
     max_allowed_payment_amount: 0,
     metadata: {
       web_url: "string",
