@@ -1,4 +1,4 @@
-name: "Azure Deploy"
+name: 'Azure Deploy'
 
 on:
   release:
@@ -11,7 +11,7 @@ permissions:
 env:
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
   RESOURCE_GROUP: io-p-services-cms-rg
-  HEALTHCHECK_PATH: "api/v1/info"
+  HEALTHCHECK_PATH: 'api/v1/info'
 
 jobs:
   create_runner:
@@ -36,15 +36,14 @@ jobs:
 
   runner_job:
     name: Runner Job
-    runs-on: [self-hosted, "${{ needs.create_runner.outputs.runner_name }}"]
-    environment: prod-app-cd
+    runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
     needs: [create_runner]
 
     steps:
       - name: Download artifact
         id: download_artifact
-        run: "curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}"
-      
+        run: 'curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}'
+
       - name: Login
         id: login
         # from https://github.com/Azure/login/commits/master
@@ -63,14 +62,14 @@ jobs:
           slot-name: staging
 
       # healthcheck
-      - name: "Healthcheck"
+      - name: 'Healthcheck'
         id: healthcheck
         run: |
           # fails if response status is not 2xx
           curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.HEALTHCHECK_PATH }}'
 
       # swap staging to production
-      - name: "Swap staging to production"
+      - name: 'Swap staging to production'
         id: swap_to_production
         run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
 
