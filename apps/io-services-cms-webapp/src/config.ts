@@ -26,8 +26,8 @@ const InternalStorageAccount = t.type({
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
-    ServiceLifecycle.definitions.MaxAllowedAmount,
-    1000000 as ServiceLifecycle.definitions.MaxAllowedAmount
+    IntegerFromString.pipe(ServiceLifecycle.definitions.MaxAllowedAmount),
+    "1000000" as unknown as ServiceLifecycle.definitions.MaxAllowedAmount
   ),
   SANDBOX_FISCAL_CODE: withDefault(
     FiscalCode,

@@ -13,6 +13,9 @@ const fsm: ServiceLifecycle.ItemType["fsm"] = {
   state: "rejected",
 };
 
+const anAutorizedFiscalCode = "BBBBBB99C88D555I";
+const aSandboxFiscalCode = "AAAAAA00A00A000A";
+
 describe("test service-lifecycle-converters", () => {
   test("test service-lifecycle-converters", () => {
     const result = toServiceStatus(fsm);
@@ -30,17 +33,17 @@ describe("test service-lifecycle-converters", () => {
       metadata: {
         scope: "LOCAL",
       },
-      authorized_recipients: ["BBBBBB99C88D555I"],
+      authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
 
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      "AAAAAA00A00A000A" as FiscalCode
+      aSandboxFiscalCode as FiscalCode
     );
     expect(result.data.authorized_recipients).toBeDefined();
-    expect(result.data.authorized_recipients).toContain("AAAAAA00A00A000A");
-    expect(result.data.authorized_recipients).toContain("BBBBBB99C88D555I");
+    expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
+    expect(result.data.authorized_recipients).toContain(anAutorizedFiscalCode);
     expect(result.data.authorized_recipients).toHaveLength(2);
   });
 });

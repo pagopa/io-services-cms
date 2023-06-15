@@ -51,10 +51,7 @@ type EditServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
-  ({
-    fsmLifecycleClient: fsmLifecycleClient,
-    config,
-  }: Dependencies): EditServiceHandler =>
+  ({ fsmLifecycleClient, config }: Dependencies): EditServiceHandler =>
   (_auth, serviceId, servicePayload) =>
     pipe(
       fsmLifecycleClient.edit(serviceId, {
