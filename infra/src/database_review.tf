@@ -41,7 +41,7 @@ module "postgres_flexible_server_private" {
   administrator_login    = local.postgres_admin_username
   administrator_password = random_password.postgres_admin_password[var.postgres_admin_credentials_rotation_id].result
 
-  sku_name   = "B_Standard_B1ms"
+  sku_name   = "GP_Standard_D2ds_v5"
   db_version = "13"
   # Possible values are 32768, 65536, 131072, 262144, 524288, 1048576,
   # 2097152, 4194304, 8388608, 16777216, and 33554432.
@@ -62,7 +62,7 @@ module "postgres_flexible_server_private" {
   backup_retention_days        = 7
   geo_redundant_backup_enabled = false
 
-  pgbouncer_enabled = false
+  pgbouncer_enabled = true
 
   custom_metric_alerts = null
   alerts_enabled       = true
