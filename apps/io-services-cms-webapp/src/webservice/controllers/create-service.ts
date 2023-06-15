@@ -59,7 +59,6 @@ type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimClient: ApiManagementClient;
-  // Configuration
   config: IConfig;
 };
 

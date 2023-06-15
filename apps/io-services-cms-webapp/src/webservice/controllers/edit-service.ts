@@ -31,7 +31,6 @@ import { IConfig } from "../../config";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  // Configuration
   config: IConfig;
 };
 
