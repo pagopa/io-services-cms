@@ -9,7 +9,7 @@ variable "cosmos_public_network_access_enabled" {
 }
 
 module "cosmosdb_account" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.19.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.19.1"
 
   name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
@@ -73,7 +73,7 @@ locals {
 }
 
 module "db_cms_containers" {
-  source   = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v6.19.0"
+  source   = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v6.19.1"
   for_each = { for c in local.database_containers : c.name => c }
 
   name                = each.value.name
