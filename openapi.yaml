@@ -93,16 +93,21 @@ paths:
       parameters:
         - name: limit
           in: query
-          description: Number of services per request
-          required: true
-          schema:
-            type: number
-        - name: offset
-          in: query
-          description: Offset services number
+          description: The number of services to return
           required: false
           schema:
             type: number
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: The number of services to skip before starting to collect the result set
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            default: 0
       responses:
         '200':
           description: Services fetched successfully
