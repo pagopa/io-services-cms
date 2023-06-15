@@ -1,5 +1,30 @@
 # io-services-cms-webapp
 
+## 1.13.4
+
+### Patch Changes
+
+- d0db5bc: restore deploy action
+
+## 1.13.3
+
+### Patch Changes
+
+- 0cc1c12: fix
+
+## 1.13.2
+
+### Patch Changes
+
+- 6a2eae6: fix release action
+- ae61a44: fix
+
+## 1.13.1
+
+### Patch Changes
+
+- d5ae687: fix cd pipeline
+
 ## 1.13.0
 
 ### Minor Changes
