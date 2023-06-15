@@ -73,7 +73,7 @@ locals {
 }
 
 module "db_cms_containers" {
-  source   = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v6.3.0"
+  source   = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v6.19.0"
   for_each = { for c in local.database_containers : c.name => c }
 
   name                = each.value.name
@@ -81,8 +81,5 @@ module "db_cms_containers" {
   account_name        = module.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.db_cms.name
   partition_key_path  = each.value.partition_key_path
-
-  autoscale_settings {
-    max_throughput = each.value.max_throughput
-  }
+  autoscale_settings  = each.value.max_throughput
 }
