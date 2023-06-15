@@ -81,5 +81,5 @@ module "db_cms_containers" {
   account_name        = module.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.db_cms.name
   partition_key_path  = each.value.partition_key_path
-  autoscale_settings  = each.value.max_throughput
+  autoscale_settings  = { max_throughput = each.value.max_throughput }
 }
