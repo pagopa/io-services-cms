@@ -5,7 +5,7 @@ variable "cidr_subnet_pgres" {
 }
 
 module "postgres_flexible_snet" {
-  source                                    = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.19.0"
+  source                                    = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.19.1"
   name                                      = "${local.project}-${local.application_basename}-pgres-flexible-snet"
   address_prefixes                          = [var.cidr_subnet_pgres]
   resource_group_name                       = var.vnet_common_rg
@@ -26,7 +26,7 @@ module "postgres_flexible_snet" {
 
 # https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server
 module "postgres_flexible_server_private" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v6.19.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v6.19.1"
 
   name                = "${local.project}-${local.application_basename}-private-pgflex"
   location            = azurerm_resource_group.rg.location
