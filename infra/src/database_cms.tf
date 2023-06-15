@@ -9,7 +9,7 @@ variable "cosmos_public_network_access_enabled" {
 }
 
 module "cosmosdb_account" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.3.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.19.0"
 
   name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
@@ -18,7 +18,6 @@ module "cosmosdb_account" {
   enable_free_tier    = false
   kind                = "GlobalDocumentDB"
 
-  # TODO: verify it's really needed
   domain = "${local.project}-${local.application_basename}"
 
   public_network_access_enabled     = var.cosmos_public_network_access_enabled
@@ -28,16 +27,20 @@ module "cosmosdb_account" {
   is_virtual_network_filter_enabled = false
 
   main_geo_location_location       = azurerm_resource_group.rg.location
-  main_geo_location_zone_redundant = false
+  main_geo_location_zone_redundant = true
+  enable_automatic_failover        = true
+
+  additional_geo_locations = [{
+    location          = "northeurope"
+    failover_priority = 1
+    zone_redundant    = false
+  }]
+
   consistency_policy = {
     consistency_level       = "Session"
     max_interval_in_seconds = null
     max_staleness_prefix    = null
   }
-
-  capabilities = [
-    "EnableServerless"
-  ]
 
   tags = var.tags
 }
