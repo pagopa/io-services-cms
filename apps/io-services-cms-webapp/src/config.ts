@@ -103,11 +103,11 @@ export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 export const PaginationConfig = t.type({
   PAGINATION_DEFAULT_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    20 as NonNegativeInteger
+    "20" as unknown as NonNegativeInteger
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    100 as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger
   ),
 });
 export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
