@@ -19,8 +19,8 @@ cidr_subnet_pgres = "10.0.135.64/26"
 
 ## Functions
 functions_kind              = "Linux"
-functions_sku_tier          = "Standard"
-functions_sku_size          = "S1"
+functions_sku_tier          = "PremiumV3"
+functions_sku_size          = "P1v3"
 functions_autoscale_minimum = 1
 functions_autoscale_maximum = 3
 functions_autoscale_default = 1
