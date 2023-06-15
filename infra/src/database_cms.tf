@@ -57,17 +57,17 @@ locals {
     {
       name               = local.cosmos_containers.services_lifecycle
       partition_key_path = "/id"
-      max_throughput     = 100
+      max_throughput     = 1000
     },
     {
       name               = local.cosmos_containers.services_publication
       partition_key_path = "/id"
-      max_throughput     = 100
+      max_throughput     = 1000
     },
     {
       name               = local.cosmos_containers.services_history
       partition_key_path = "/serviceId"
-      max_throughput     = 100
+      max_throughput     = 1000
     },
   ]
 }
