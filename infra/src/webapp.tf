@@ -193,7 +193,7 @@ locals {
 }
 
 module "webapp_functions_app" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.3.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.19.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
@@ -204,6 +204,8 @@ module "webapp_functions_app" {
     kind                         = var.functions_kind
     sku_tier                     = var.functions_sku_tier
     sku_size                     = var.functions_sku_size
+    zone_balancing_enabled       = false
+    worker_count                 = 0
     maximum_elastic_worker_count = 0
   }
 
@@ -216,8 +218,18 @@ module "webapp_functions_app" {
     local.webapp_functions_app_settings,
     {
       "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
+      "ServiceLifecycleWatcher.Disabled"            = "0"
+      "ServicePublicationWatcher.Disabled"          = "0"
+      "ServiceReviewChecker.Disabled"               = "0"
     }
   )
+
+  sticky_app_setting_names = [
+    "AzureWebJobs.OnLegacyServiceChange.Disabled",
+    "ServiceLifecycleWatcher.Disabled",
+    "ServicePublicationWatcher.Disabled",
+    "ServiceReviewChecker.Disabled",
+  ]
 
   subnet_id = module.app_snet.id
 
@@ -230,7 +242,7 @@ module "webapp_functions_app" {
 
 
 module "webapp_functions_app_staging_slot" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.3.0"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.19.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
@@ -248,6 +260,9 @@ module "webapp_functions_app_staging_slot" {
     local.webapp_functions_app_settings,
     {
       "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
+      "ServiceLifecycleWatcher.Disabled"            = "1"
+      "ServicePublicationWatcher.Disabled"          = "1"
+      "ServiceReviewChecker.Disabled"               = "1"
     }
   )
 

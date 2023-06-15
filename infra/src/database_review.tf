@@ -8,8 +8,8 @@ module "postgres_flexible_snet" {
   source                                    = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.3.0"
   name                                      = "${local.project}-${local.application_basename}-pgres-flexible-snet"
   address_prefixes                          = [var.cidr_subnet_pgres]
-  resource_group_name                       = data.azurerm_resource_group.vnet_common_rg.name
-  virtual_network_name                      = data.azurerm_virtual_network.vnet_common.name
+  resource_group_name                       = var.vnet_common_rg
+  virtual_network_name                      = var.vnet_name
   service_endpoints                         = ["Microsoft.Storage"]
   private_endpoint_network_policies_enabled = true
 
@@ -24,14 +24,8 @@ module "postgres_flexible_snet" {
   }
 }
 
-data "azurerm_private_dns_zone" "privatelink_postgres_database_azure_com" {
-  name                = "privatelink.postgres.database.azure.com"
-  resource_group_name = data.azurerm_resource_group.vnet_common_rg.name
-}
-
 # https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server
 module "postgres_flexible_server_private" {
-
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v6.3.0"
 
   name                = "${local.project}-${local.application_basename}-private-pgflex"
@@ -39,8 +33,8 @@ module "postgres_flexible_server_private" {
   resource_group_name = azurerm_resource_group.rg.name
 
   ### Network
-  private_endpoint_enabled = false
-  private_dns_zone_id      = data.azurerm_private_dns_zone.privatelink_postgres_database_azure_com.id
+  private_endpoint_enabled = true
+  private_dns_zone_id      = local.is_prod ? data.azurerm_private_dns_zone.privatelink_postgres_database_azure_com[0].id : null
   delegated_subnet_id      = module.postgres_flexible_snet.id
 
   ### Admin
@@ -68,17 +62,12 @@ module "postgres_flexible_server_private" {
   backup_retention_days        = 7
   geo_redundant_backup_enabled = false
 
-  pgbouncer_enabled = false
-
-  tags = var.tags
+  pgbouncer_enabled = true
 
   custom_metric_alerts = null
   alerts_enabled       = true
 
-  diagnostic_settings_enabled = false
-  #   log_analytics_workspace_id                = data.azurerm_log_analytics_workspace.log_analytics_workspace.id
-  #   diagnostic_setting_destination_storage_id = data.azurerm_storage_account.security_monitoring_storage.id
-
+  tags = var.tags
 }
 
 resource "azurerm_postgresql_flexible_server_database" "reviewer_database" {
