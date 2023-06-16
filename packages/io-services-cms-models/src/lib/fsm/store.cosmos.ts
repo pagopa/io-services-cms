@@ -1,9 +1,13 @@
-import { Container } from "@azure/cosmos";
+import {
+  BulkOperationType,
+  Container,
+  ReadOperationInput,
+} from "@azure/cosmos";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FSMStore, WithState } from "./types";
 
@@ -55,6 +59,52 @@ export const createCosmosStore = <
       )
     );
 
+  const buildReadOperations = (ids: string[]): ReadOperationInput[] =>
+    ids.map((id) => ({
+      partitionKey: id,
+      operationType: BulkOperationType.Read,
+      id,
+    }));
+
+  const bulkFetch = (ids: string[]) =>
+    pipe(
+      // bulk fetch of items by id
+      TE.tryCatch(
+        () =>
+          container.items.bulk(buildReadOperations(ids), {
+            continueOnError: true,
+          }),
+        (err) =>
+          new Error(
+            `Failed to bulk read items from database, ${E.toError(err).message}`
+          )
+      ),
+      TE.map((operationResponses) =>
+        operationResponses.map(
+          flow(
+            O.fromPredicate((res) => res.statusCode === 404),
+            // if present, try to decode in the expected shape
+            O.chain((res) =>
+              pipe(
+                {
+                  ...res.resourceBody,
+                  last_update: res.resourceBody
+                    ? new Date(
+                        // eslint-disable-next-line no-underscore-dangle
+                        (res.resourceBody._ts as number) * 1000
+                      ).toISOString() // Unix timestamp
+                    : new Date().toISOString(),
+                  version: res.eTag,
+                },
+                codec.decode,
+                E.fold(() => O.none, O.some)
+              )
+            )
+          )
+        )
+      )
+    );
+
   const save = (id: string, value: T) =>
     pipe(
       TE.tryCatch(
@@ -76,5 +126,5 @@ export const createCosmosStore = <
       }))
     );
 
-  return { fetch, save };
+  return { fetch, bulkFetch, save };
 };
