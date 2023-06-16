@@ -29,8 +29,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -72,16 +73,15 @@ export type ServiceSubscriptionPair = {
 };
 
 // utility to extract a non-empty id from an object
-const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
+const pickId = (obj: unknown): E.Either<Error, NonEmptyString> =>
   pipe(
     obj,
     t.type({ id: NonEmptyString }).decode,
-    TE.fromEither,
-    TE.mapLeft(
+    E.bimap(
       (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`)
-    ),
-    TE.map((_) => parseOwnerIdFullPath(_.id))
+        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
+      ({ id }) => parseOwnerIdFullPath(id)
+    )
   );
 
 const getUserIdTask = (
@@ -101,7 +101,7 @@ const getUserIdTask = (
         new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
     ),
     TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-    TE.chain(pickId)
+    TE.chain(flow(pickId, TE.fromEither))
   );
 
 const buildServicePagination = (
@@ -129,19 +129,28 @@ const getServices = (
       ),
     TE.map((maybeServiceList) =>
       // eslint-disable-next-line sonarjs/no-all-duplicated-branches
-      maybeServiceList.map((maybeService) =>
-        O.isSome(maybeService)
-          ? (itemToResponse(maybeService.value) as ServiceResponsePayload)
-          : ({} as ServiceResponsePayload)
+      maybeServiceList.map(
+        flow(
+          O.fold(
+            () => ({} as ServiceResponsePayload),
+            (service) => itemToResponse(service) as ServiceResponsePayload
+          )
+        )
       )
     )
   );
 
 const getLimit = (limit: O.Option<number>, defaultValue: number) =>
-  O.isSome(limit) ? limit.value : defaultValue;
+  pipe(
+    limit,
+    O.getOrElse(() => defaultValue)
+  );
 
 const getOffset = (offset: O.Option<number>) =>
-  O.isSome(offset) ? offset.value : 0;
+  pipe(
+    offset,
+    O.getOrElse(() => 0)
+  );
 
 /**
  * Build an array of Service/Subscription pairs

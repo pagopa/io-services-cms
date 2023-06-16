@@ -1,4 +1,4 @@
-import { identity, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import {
   buildApimFilter,
@@ -30,5 +30,5 @@ export const subscriptionsExceptManageOneApimFilter = () =>
       inverse: true,
       value: MANAGE_APIKEY_PREFIX,
     }),
-    O.fold(() => "", identity)
+    O.getOrElse(() => "")
   );

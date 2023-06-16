@@ -1,6 +1,7 @@
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as t from "io-ts";
 
@@ -94,27 +95,30 @@ export interface FilterManipulationResultType {
 const fnBuildFilterManipulation = (
   decodedApimFilter: E.Either<t.Errors, ApimFilterType>
 ): E.Either<Error, FilterManipulationResultType> =>
-  E.isLeft(decodedApimFilter)
-    ? E.left(new Error("error"))
-    : E.right({
-        filter: decodedApimFilter.right,
-        result: "",
-      });
+  pipe(
+    decodedApimFilter,
+    E.bimap(flow(readableReport, E.toError), (filter) => ({
+      filter,
+      result: "",
+    }))
+  );
 
 /** Build `$filter` result string */
 const fnBuildFilterResult = (
   filterManipulation: E.Either<Error, FilterManipulationResultType>
 ): O.Option<string> =>
-  E.isLeft(filterManipulation)
-    ? O.none
-    : pipe(
-        filterManipulation.right,
+  flow(
+    E.fold(
+      (_) => O.none,
+      flow(
         fnComposeFilter,
         fnInverseFilter,
         fnCheckFilterType,
         fnInverseFilterCloseBrackets,
         fnEvaluateFilterResult
-      );
+      )
+    )
+  )(filterManipulation);
 
 /** fnComposeFilter */
 const fnComposeFilter = (
@@ -163,7 +167,7 @@ const fnCheckFilterType = (
 /** fnEvaluateFilterResult */
 const fnEvaluateFilterResult = (
   fm: FilterManipulationResultType
-): O.Option<string> => (fm.result ? O.some(fm.result) : O.none);
+): O.Option<string> => pipe(fm.result, O.fromNullable);
 
 /**
  * Utility for building API Management `$filter` property

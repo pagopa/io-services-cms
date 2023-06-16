@@ -7,7 +7,7 @@ import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { FSMStore, WithState } from "./types";
 
@@ -80,11 +80,11 @@ export const createCosmosStore = <
           )
       ),
       TE.map((operationResponses) =>
-        operationResponses.map((res) =>
-          res.statusCode === 404
-            ? // if the item isn't found, it's ok
-              O.none
-            : // if present, try to decode in the expected shape
+        operationResponses.map(
+          flow(
+            O.fromPredicate((res) => res.statusCode === 404),
+            // if present, try to decode in the expected shape
+            O.chain((res) =>
               pipe(
                 {
                   ...res.resourceBody,
@@ -97,11 +97,10 @@ export const createCosmosStore = <
                   version: res.eTag,
                 },
                 codec.decode,
-                E.fold(
-                  () => O.none,
-                  (a) => O.some(a)
-                )
+                E.fold(() => O.none, O.some)
               )
+            )
+          )
         )
       )
     );
