@@ -23,8 +23,8 @@ import { jiraProxy } from "./utils/jira-proxy";
 import { createWebServer } from "./webservice";
 
 import { processBatchOf, setBindings } from "./lib/azure/misc";
+import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
-import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { getDao } from "./utils/service-review-dao";
