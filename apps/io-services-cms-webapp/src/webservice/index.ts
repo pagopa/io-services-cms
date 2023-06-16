@@ -75,7 +75,7 @@ export const createWebServer = ({
       makeCreateServiceHandler({
         fsmLifecycleClient,
         apimClient,
-        apimConfig: config,
+        config,
       }),
       applyCreateServiceRequestMiddelwares,
       wrapRequestHandler
@@ -111,6 +111,7 @@ export const createWebServer = ({
     pipe(
       makeEditServiceHandler({
         fsmLifecycleClient,
+        config,
       }),
       applyEditServiceRequestMiddelwares,
       wrapRequestHandler

@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.9.0
+
+### Minor Changes
+
+- e54b0a2: Manage authorized_recipients and sandbox_fiscal_code
+
 ## 1.8.0
 
 ### Minor Changes

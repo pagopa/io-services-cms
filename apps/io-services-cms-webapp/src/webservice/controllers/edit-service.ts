@@ -27,9 +27,11 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
+import { IConfig } from "../../config";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  config: IConfig;
 };
 
 type HandlerResponseTypes =
@@ -48,13 +50,15 @@ type EditServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
-  ({
-    fsmLifecycleClient: fsmLifecycleClient,
-  }: Dependencies): EditServiceHandler =>
+  ({ fsmLifecycleClient, config }: Dependencies): EditServiceHandler =>
   (_auth, serviceId, servicePayload) =>
     pipe(
       fsmLifecycleClient.edit(serviceId, {
-        data: payloadToItem(serviceId, servicePayload),
+        data: payloadToItem(
+          serviceId,
+          servicePayload,
+          config.SANDBOX_FISCAL_CODE
+        ),
       }),
       TE.map(itemToResponse),
       TE.map(ResponseSuccessJson),

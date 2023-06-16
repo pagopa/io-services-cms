@@ -38,7 +38,9 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 );
 
 const mockApimClient = {} as unknown as ApiManagementClient;
-const mockConfig = {} as unknown as IConfig;
+const mockConfig = {
+  SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
+} as unknown as IConfig;
 
 describe("createService", () => {
   afterEach(() => {
@@ -63,6 +65,7 @@ describe("createService", () => {
     metadata: {
       scope: "LOCAL",
     },
+    authorized_recipients: ["BBBBBB99C88D555I"],
   };
 
   it("should not accept invalid payloads", async () => {
