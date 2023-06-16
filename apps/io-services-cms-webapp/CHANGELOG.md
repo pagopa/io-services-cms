@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.14.0
+
+### Minor Changes
+
+- e54b0a2: Manage authorized_recipients and sandbox_fiscal_code
+
+### Patch Changes
+
+- Updated dependencies [e54b0a2]
+  - @io-services-cms/models@1.9.0
+
 ## 1.13.4
 
 ### Patch Changes
