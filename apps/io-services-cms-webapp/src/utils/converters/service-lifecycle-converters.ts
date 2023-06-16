@@ -1,10 +1,10 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
-
+import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
-import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import { ScopeEnum } from "../../generated/api/ServiceMetadata";
-import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
+import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],
@@ -13,15 +13,17 @@ export const payloadToItem = (
     max_allowed_payment_amount = 0 as NonNullable<
       ServiceRequestPayload["max_allowed_payment_amount"]
     >,
+    authorized_recipients = [] as ReadonlyArray<FiscalCode>,
     ...data
-  }: ServiceRequestPayload
+  }: ServiceRequestPayload,
+  sandboxFiscalCode: FiscalCode
 ): ServiceLifecycle.definitions.Service => ({
   id,
   data: {
     ...data,
     require_secure_channel,
     max_allowed_payment_amount,
-    authorized_recipients: [],
+    authorized_recipients: [sandboxFiscalCode, ...authorized_recipients],
   },
 });
 
@@ -36,6 +38,7 @@ export const itemToResponse = ({
   description: data.description,
   organization: data.organization,
   metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
+  authorized_recipients: data.authorized_recipients,
 });
 
 export const toServiceStatus = (

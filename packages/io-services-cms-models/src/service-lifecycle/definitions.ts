@@ -1,5 +1,6 @@
 import * as t from "io-ts";
 import {
+  FiscalCode,
   NonEmptyString,
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
@@ -34,7 +35,7 @@ const ServiceData = t.type({
   name: NonEmptyString,
   description: NonEmptyString,
   require_secure_channel: withDefault(t.boolean, false),
-  authorized_recipients: withDefault(t.array(t.string), []),
+  authorized_recipients: withDefault(t.array(FiscalCode), []),
   max_allowed_payment_amount: withDefault(
     MaxAllowedAmount,
     0 as MaxAllowedAmount

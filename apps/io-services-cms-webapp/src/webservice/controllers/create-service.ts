@@ -27,7 +27,7 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { ApimConfig } from "../../config";
+import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import {
@@ -59,8 +59,7 @@ type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimClient: ApiManagementClient;
-  // The APIM configuration
-  apimConfig: ApimConfig;
+  config: IConfig;
 };
 
 // utility to extract a non-empty id from an object
@@ -80,13 +79,13 @@ const createSubscriptionTask = (
   apimClient: ApiManagementClient,
   userEmail: EmailString,
   subscriptionId: NonEmptyString,
-  apimConfig: ApimConfig
+  config: IConfig
 ): TE.TaskEither<Error, SubscriptionContract> => {
   const getUserId = pipe(
     getUserByEmail(
       apimClient,
-      apimConfig.AZURE_APIM_RESOURCE_GROUP,
-      apimConfig.AZURE_APIM,
+      config.AZURE_APIM_RESOURCE_GROUP,
+      config.AZURE_APIM,
       userEmail
     ),
     TE.mapLeft(
@@ -100,9 +99,9 @@ const createSubscriptionTask = (
   const getProductId = pipe(
     getProductByName(
       apimClient,
-      apimConfig.AZURE_APIM_RESOURCE_GROUP,
-      apimConfig.AZURE_APIM,
-      apimConfig.AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME
+      config.AZURE_APIM_RESOURCE_GROUP,
+      config.AZURE_APIM,
+      config.AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME
     ),
     TE.mapLeft(
       (err) =>
@@ -124,8 +123,8 @@ const createSubscriptionTask = (
     pipe(
       upsertSubscription(
         apimClient,
-        apimConfig.AZURE_APIM_RESOURCE_GROUP,
-        apimConfig.AZURE_APIM,
+        config.AZURE_APIM_RESOURCE_GROUP,
+        config.AZURE_APIM,
         productId,
         userId,
         subscriptionId
@@ -151,19 +150,23 @@ export const makeCreateServiceHandler =
   ({
     fsmLifecycleClient,
     apimClient,
-    apimConfig,
+    config,
   }: Dependencies): ICreateServiceHandler =>
   (_auth, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimClient, userEmail, serviceId, apimConfig),
+      createSubscriptionTask(apimClient, userEmail, serviceId, config),
       TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 
     const createServiceStep = pipe(
       fsmLifecycleClient.create(serviceId, {
-        data: payloadToItem(serviceId, servicePayload),
+        data: payloadToItem(
+          serviceId,
+          servicePayload,
+          config.SANDBOX_FISCAL_CODE
+        ),
       }),
       TE.map(itemToResponse),
       TE.map(ResponseSuccessJson),
