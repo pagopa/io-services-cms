@@ -1,8 +1,8 @@
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
-import { handler } from "../on-services-lifecycles-change";
 import { IConfig } from "../../config";
+import { handler } from "../on-service-lifecycle-change";
 
 const aService = {
   id: "aServiceId",
