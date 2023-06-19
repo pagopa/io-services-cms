@@ -53,14 +53,20 @@ export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
 export const PostgreSqlConfig = t.type({
   REVIEWER_DB_HOST: NonEmptyString,
-  REVIEWER_DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
+  REVIEWER_DB_IDLE_TIMEOUT: withDefault(
+    NumberFromString,
+    "30000" as unknown as number
+  ),
   REVIEWER_DB_NAME: NonEmptyString,
   REVIEWER_DB_PASSWORD: NonEmptyString,
   REVIEWER_DB_PORT: NumberFromString,
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
-  REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
+  REVIEWER_DB_READ_MAX_ROW: withDefault(
+    IntegerFromString,
+    "50" as unknown as number
+  ),
   REVIEWER_DB_APP_NAME: withDefault(
     NonEmptyString,
     "reviewer" as NonEmptyString
