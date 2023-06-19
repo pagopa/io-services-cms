@@ -4,11 +4,16 @@ import {
 } from "@azure/arm-apimanagement";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import {
+  AzureUserAttributesManageMiddleware,
+  IAzureUserAttributesManage,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
@@ -28,8 +33,8 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -53,6 +58,7 @@ type HandlerResponseTypes =
 
 type GetServicesHandler = (
   auth: IAzureApiAuthorization,
+  attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
   limit: O.Option<number>,
   offset: O.Option<number>
@@ -181,7 +187,7 @@ export const makeGetServicesHandler =
     apimClient,
     config,
   }: Dependencies): GetServicesHandler =>
-  (_auth, userEmail, limit, offset) =>
+  (_auth, attrs, userEmail, limit, offset) =>
     pipe(
       getUserIdTask(apimClient, userEmail, config),
       TE.chainW((userId) =>
@@ -219,7 +225,8 @@ export const makeGetServicesHandler =
     )();
 
 export const applyRequestMiddelwares =
-  (config: IConfig) => (handler: GetServicesHandler) =>
+  (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
+  (handler: GetServicesHandler) =>
     pipe(
       handler,
       // TODO: implement ip filter
@@ -228,6 +235,8 @@ export const applyRequestMiddelwares =
       withRequestMiddlewares(
         // only allow requests by users belonging to certain groups
         AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+        // check manage key
+        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
         // extract the user email from the request headers
         UserEmailMiddleware(),
         // extract limit as number of records to return from query params
