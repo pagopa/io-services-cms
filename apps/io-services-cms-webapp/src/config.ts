@@ -77,6 +77,13 @@ export const CosmosConfig = t.type({
   COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
 });
 
+export type CosmosLegacyConfig = t.TypeOf<typeof CosmosLegacyConfig>;
+export const CosmosLegacyConfig = t.type({
+  COSMOSDB_LEGACY_URI: NonEmptyString,
+  COSMOSDB_LEGACY_NAME: NonEmptyString,
+  COSMOSDB_LEGACY_KEY: NonEmptyString,
+});
+
 export const AzureClientSecretCredential = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
@@ -113,10 +120,13 @@ export const IConfig = t.intersection([
     PostgreSqlConfig,
     ServicePayloadConfig,
   ]),
-  CosmosConfig,
-  AzureClientSecretCredential,
-  ApimConfig,
-  QueueConfig,
+  t.intersection([
+    CosmosConfig,
+    AzureClientSecretCredential,
+    ApimConfig,
+    QueueConfig,
+    CosmosLegacyConfig,
+  ]),
 ]);
 
 export const envConfig = {
