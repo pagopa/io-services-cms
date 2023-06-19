@@ -16,6 +16,8 @@ import {
   upsertSubscription,
 } from "../../../lib/clients/apim-client";
 import { createWebServer } from "../../index";
+import { Container } from "@azure/cosmos";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -42,6 +44,30 @@ const mockConfig = {
   SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
 } as unknown as IConfig;
 
+const mockFetchAll = vi.fn();
+const mockGetAsyncIterator = vi.fn();
+const mockCreate = vi.fn();
+const mockUpsert = vi.fn();
+const mockPatch = vi.fn();
+const containerMock = {
+  items: {
+    readAll: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+      getAsyncIterator: mockGetAsyncIterator,
+    })),
+    create: mockCreate,
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
+    upsert: mockUpsert,
+  },
+  item: vi.fn((_, __) => ({
+    patch: mockPatch,
+  })),
+} as unknown as Container;
+
+const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
+
 describe("createService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -53,6 +79,7 @@ describe("createService", () => {
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
+    subscriptionCIDRsModel,
   });
 
   const aNewService = {

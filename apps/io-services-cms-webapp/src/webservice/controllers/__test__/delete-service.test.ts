@@ -6,9 +6,11 @@ import {
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+import { Container } from "@azure/cosmos";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -23,6 +25,29 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
 
+const mockFetchAll = vi.fn();
+const mockGetAsyncIterator = vi.fn();
+const mockCreate = vi.fn();
+const mockUpsert = vi.fn();
+const mockPatch = vi.fn();
+const containerMock = {
+  items: {
+    readAll: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+      getAsyncIterator: mockGetAsyncIterator,
+    })),
+    create: mockCreate,
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
+    upsert: mockUpsert,
+  },
+  item: vi.fn((_, __) => ({
+    patch: mockPatch,
+  })),
+} as unknown as Container;
+
+const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 describe("deleteService", () => {
   const app = createWebServer({
     basePath: "api",
@@ -30,6 +55,7 @@ describe("deleteService", () => {
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
+    subscriptionCIDRsModel,
   });
 
   const aService = {

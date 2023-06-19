@@ -11,6 +11,8 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+import { Container } from "@azure/cosmos";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -56,6 +58,30 @@ const aServicePub = {
   },
 } as unknown as ServicePublication.ItemType;
 
+const mockFetchAll = vi.fn();
+const mockGetAsyncIterator = vi.fn();
+const mockCreate = vi.fn();
+const mockUpsert = vi.fn();
+const mockPatch = vi.fn();
+const containerMock = {
+  items: {
+    readAll: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+      getAsyncIterator: mockGetAsyncIterator,
+    })),
+    create: mockCreate,
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
+    upsert: mockUpsert,
+  },
+  item: vi.fn((_, __) => ({
+    patch: mockPatch,
+  })),
+} as unknown as Container;
+
+const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
+
 describe("WebService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -67,6 +93,7 @@ describe("WebService", () => {
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
+    subscriptionCIDRsModel,
   });
 
   describe("unPublishService", () => {
