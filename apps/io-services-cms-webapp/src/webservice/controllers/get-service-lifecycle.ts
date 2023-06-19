@@ -61,31 +61,26 @@ export const makeGetServiceLifecycleHandler =
   ({ config, store, apimClient }: Dependencies): CreateServiceHandler =>
   (_auth, attrs, serviceId) =>
     pipe(
-      pipe(
-        serviceOwnerCheckManageTask(
-          config,
-          apimClient,
-          serviceId,
-          _auth.subscriptionId,
-          _auth.userId
-        ),
-        TE.chainW(
-          flow(
-            store.fetch,
-            TE.bimap(
-              (err) => ResponseErrorInternal(err.message),
-              flow(
-                O.foldW(
-                  () =>
-                    ResponseErrorNotFound(
-                      "Not found",
-                      `${serviceId} not found`
-                    ),
-                  (content) =>
-                    ResponseSuccessJson<ServiceResponsePayload>(
-                      itemToResponse(content)
-                    )
-                )
+      serviceOwnerCheckManageTask(
+        config,
+        apimClient,
+        serviceId,
+        _auth.subscriptionId,
+        _auth.userId
+      ),
+      TE.chainW(
+        flow(
+          store.fetch,
+          TE.bimap(
+            (err) => ResponseErrorInternal(err.message),
+            flow(
+              O.foldW(
+                () =>
+                  ResponseErrorNotFound("Not found", `${serviceId} not found`),
+                (content) =>
+                  ResponseSuccessJson<ServiceResponsePayload>(
+                    itemToResponse(content)
+                  )
               )
             )
           )
