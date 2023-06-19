@@ -1,3 +1,4 @@
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
@@ -334,6 +335,26 @@ function apply(
   };
 }
 
+function override(
+  id: ItemType["id"],
+  item: ItemType
+): ReaderTaskEither<PublicationStore, Error, ItemType> {
+  return (store) =>
+    pipe(
+      store.fetch(id),
+      TE.chain(
+        flow(
+          E.fromOption(() => new Error(`No item found with id = ${id}`)), // TODO: maybe we need to define a custom error
+          E.chain(
+            flow(ItemType.decode, E.mapLeft(flow(readableReport, E.toError)))
+          ),
+          TE.fromEither
+        )
+      ),
+      TE.chain((_) => store.save(id, item))
+    );
+}
+
 const getFsmClient = (store: PublicationStore) => ({
   getStore: () => store,
   release: (id: ServiceId, args: { data: Service }) =>
@@ -341,9 +362,10 @@ const getFsmClient = (store: PublicationStore) => ({
   unpublish: (id: ServiceId) => apply("unpublish", id)(store),
   publish: (id: ServiceId, args?: { data: Service }) =>
     apply("publish", id, args)(store),
+  override: (...args: Parameters<typeof override>) => override(...args)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
-export { getFsmClient, FsmClient, FSM, ItemType };
+export { FSM, FsmClient, ItemType, getFsmClient };
