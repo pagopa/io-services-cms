@@ -4,6 +4,7 @@ import {
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
@@ -18,8 +19,8 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 
 type Dependencies = {
@@ -66,6 +67,7 @@ export const applyRequestMiddelwares = (handler: ReviewServiceHandler) =>
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // extract and validate the request body
-      RequiredBodyPayloadMiddleware(ReviewRequestPayload)
+      RequiredBodyPayloadMiddleware(ReviewRequestPayload),
+      ClientIpMiddleware
     )
   );

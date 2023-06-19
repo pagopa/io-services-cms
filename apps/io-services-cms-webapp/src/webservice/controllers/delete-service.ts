@@ -19,6 +19,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
@@ -59,6 +60,7 @@ export const applyRequestMiddelwares = (handler: DeleteServiceHandler) =>
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
+      RequiredParamMiddleware("serviceId", NonEmptyString),
+      ClientIpMiddleware
     )
   );

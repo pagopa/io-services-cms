@@ -27,6 +27,7 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
@@ -192,6 +193,7 @@ export const applyRequestMiddelwares = (handler: ICreateServiceHandler) =>
       // extract the user email from the request headers
       UserEmailMiddleware(),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload),
+      ClientIpMiddleware
     )
   );

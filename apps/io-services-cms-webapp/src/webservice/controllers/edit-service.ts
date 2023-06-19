@@ -21,6 +21,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import {
@@ -47,6 +48,7 @@ type EditServiceHandler = (
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: ServiceRequestPayload
+  // clientIp: ClientIp
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
@@ -78,6 +80,7 @@ export const applyRequestMiddelwares = (handler: EditServiceHandler) =>
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload),
+      ClientIpMiddleware
     )
   );
