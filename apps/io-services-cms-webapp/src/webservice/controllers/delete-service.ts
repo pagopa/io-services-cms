@@ -1,9 +1,15 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import {
+  AzureUserAttributesManageMiddleware,
+  IAzureUserAttributesManage,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
@@ -18,10 +24,14 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
+import { IConfig } from "../../config";
+import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 type Dependencies = {
+  config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  apimClient: ApiManagementClient;
 };
 
 type HandlerResponseTypes =
@@ -34,31 +44,49 @@ type HandlerResponseTypes =
 
 type DeleteServiceHandler = (
   auth: IAzureApiAuthorization,
+  attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
 export const makeDeleteServiceHandler =
   ({
+    config,
     fsmLifecycleClient: fsmLifecycleClient,
+    apimClient,
   }: Dependencies): DeleteServiceHandler =>
-  (_auth, serviceId) =>
+  (_auth, attrs, serviceId) =>
     pipe(
-      fsmLifecycleClient.delete(serviceId),
-      TE.map(ResponseSuccessNoContent),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      serviceOwnerCheckManageTask(
+        config,
+        apimClient,
+        serviceId,
+        _auth.subscriptionId,
+        _auth.userId
+      ),
+      TE.chainW(
+        flow(
+          fsmLifecycleClient.delete,
+          TE.map(ResponseSuccessNoContent),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message))
+        )
+      ),
       TE.toUnion
     )();
 
-export const applyRequestMiddelwares = (handler: DeleteServiceHandler) =>
-  pipe(
-    handler,
-    // TODO: implement ip filter
-    // (handler) =>
-    //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-    withRequestMiddlewares(
-      // only allow requests by users belonging to certain groups
-      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-      // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
-    )
-  );
+export const applyRequestMiddelwares =
+  (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
+  (handler: DeleteServiceHandler) =>
+    pipe(
+      handler,
+      // TODO: implement ip filter
+      // (handler) =>
+      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
+      withRequestMiddlewares(
+        // only allow requests by users belonging to certain groups
+        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+        // check manage key
+        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+        // extract the service id from the path variables
+        RequiredParamMiddleware("serviceId", NonEmptyString)
+      )
+    );

@@ -1,16 +1,24 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Container } from "@azure/cosmos";
 import {
   ServiceLifecycle,
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
+import {
+  RetrievedSubscriptionCIDRs,
+  SubscriptionCIDRsModel,
+} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IPatternStringTag,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
-import { Container } from "@azure/cosmos";
-import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -22,29 +30,52 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
-const mockApimClient = {} as unknown as ApiManagementClient;
+const aManageSubscriptionId = "MANAGE-123";
+const anUserId = "123";
+
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        ownerId: anUserId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
 const mockConfig = {} as unknown as IConfig;
 
-const mockFetchAll = vi.fn();
-const mockGetAsyncIterator = vi.fn();
-const mockCreate = vi.fn();
-const mockUpsert = vi.fn();
-const mockPatch = vi.fn();
+const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
+  cidrs: [] as unknown as ReadonlySet<
+    string &
+      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+  >,
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "_self",
+  _ts: 1,
+  id: "xyz" as NonEmptyString,
+  kind: "IRetrievedSubscriptionCIDRs",
+  version: 0 as NonNegativeInteger,
+};
+
+const mockFetchAll = vi.fn(() =>
+  Promise.resolve({
+    resources: [aRetrievedSubscriptionCIDRs],
+  })
+);
 const containerMock = {
   items: {
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
-      getAsyncIterator: mockGetAsyncIterator,
+      getAsyncIterator: vi.fn(),
     })),
-    create: mockCreate,
     query: vi.fn(() => ({
       fetchAll: mockFetchAll,
     })),
-    upsert: mockUpsert,
   },
-  item: vi.fn((_, __) => ({
-    patch: mockPatch,
-  })),
 } as unknown as Container;
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
@@ -85,8 +116,8 @@ describe("deleteService", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
   });
@@ -102,8 +133,8 @@ describe("deleteService", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500); // FIXME: should be 409
   });
@@ -114,8 +145,8 @@ describe("deleteService", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(403);
   });
@@ -131,8 +162,8 @@ describe("deleteService", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(204);
   });
