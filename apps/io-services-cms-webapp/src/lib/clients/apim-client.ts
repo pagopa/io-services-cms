@@ -6,22 +6,22 @@ import {
   UserContract,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
-import { flow, identity, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/Either";
-
+import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   ResponseErrorInternal,
   ResponseErrorNotFound,
 } from "@pagopa/ts-commons/lib/responses";
-import { parse } from "fp-ts/lib/Json";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
+import * as E from "fp-ts/Either";
+import { parse } from "fp-ts/lib/Json";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { AzureClientSecretCredential } from "../../config";
+import { subscriptionsExceptManageOneApimFilter } from "../../utils/api-keys";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -228,6 +228,65 @@ export function getProductByName(
         }
         return O.none;
       }, identity),
+    chainApimMappedError
+  );
+}
+
+/**
+ * Lists the collection of subscriptions for the specified `userId`
+ *
+ * @param apimClient
+ * @param resourceGroupName
+ * @param serviceName
+ * @param userId Api Management User Id
+ * @param offset Number of records to skip
+ * @param limit Number of records to return
+ * @returns
+ */
+export function getUserSubscriptions(
+  apimClient: ApiManagementClient,
+  resourceGroupName: string,
+  serviceName: string,
+  userId: string,
+  offset?: number,
+  limit?: number
+): TE.TaskEither<ApimRestError, ReadonlyArray<SubscriptionContract>> {
+  return pipe(
+    TE.tryCatch(async () => {
+      const subscriptionListResponse = apimClient.userSubscription.list(
+        resourceGroupName,
+        serviceName,
+        userId,
+        {
+          filter: subscriptionsExceptManageOneApimFilter(),
+          top: limit,
+          skip: offset,
+        }
+      );
+
+      // eslint-disable-next-line functional/immutable-data
+      const subscriptionList: SubscriptionContract[] = [];
+
+      for await (const page of subscriptionListResponse.byPage({
+        maxPageSize: limit,
+      })) {
+        for (const subscription of page) {
+          // eslint-disable-next-line functional/immutable-data
+          subscriptionList.push(subscription);
+        }
+        /**
+         * FIXME: PagedAsyncIterableIterator returns:
+         * - first filtered page (what we are filtering)
+         * - all pages (starting from first value)
+         * For this reason the `break` below is used to get only the first page.
+         * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
+         * seems not to work, so we downgrade package to 8.x.x version.
+         */
+        break;
+      }
+
+      return subscriptionList;
+    }, E.toError),
     chainApimMappedError
   );
 }

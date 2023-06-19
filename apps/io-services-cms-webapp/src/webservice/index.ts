@@ -28,6 +28,10 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
+import {
+  applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
+  makeGetServicesHandler,
+} from "./controllers/get-services";
 import { makeInfoHandler } from "./controllers/info";
 import {
   applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
@@ -77,6 +81,19 @@ export const createWebServer = ({
         config,
       }),
       applyCreateServiceRequestMiddelwares,
+      wrapRequestHandler
+    )
+  );
+
+  router.get(
+    "/services",
+    pipe(
+      makeGetServicesHandler({
+        fsmLifecycleClient,
+        apimClient,
+        config,
+      }),
+      applyGetServicesRequestMiddelwares(config),
       wrapRequestHandler
     )
   );

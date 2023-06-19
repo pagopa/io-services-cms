@@ -23,6 +23,11 @@ export const createMemoryStore = <
         T.map(O.fromNullable),
         TE.fromTask
       ),
+    bulkFetch: (ids: string[]) =>
+      pipe(
+        ids.map((id) => m.get(id)),
+        (values) => TE.of(values.map((value) => O.fromNullable(value)))
+      ),
     save: (id: string, value) =>
       pipe(
         () => Promise.resolve(m.set(id, value)),

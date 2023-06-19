@@ -9,6 +9,7 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
   IntegerFromString,
+  NonNegativeInteger,
   NumberFromString,
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -52,14 +53,20 @@ export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
 export const PostgreSqlConfig = t.type({
   REVIEWER_DB_HOST: NonEmptyString,
-  REVIEWER_DB_IDLE_TIMEOUT: withDefault(NumberFromString, 30000),
+  REVIEWER_DB_IDLE_TIMEOUT: withDefault(
+    NumberFromString,
+    "30000" as unknown as number
+  ),
   REVIEWER_DB_NAME: NonEmptyString,
   REVIEWER_DB_PASSWORD: NonEmptyString,
   REVIEWER_DB_PORT: NumberFromString,
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
-  REVIEWER_DB_READ_MAX_ROW: withDefault(IntegerFromString, 50),
+  REVIEWER_DB_READ_MAX_ROW: withDefault(
+    IntegerFromString,
+    "50" as unknown as number
+  ),
   REVIEWER_DB_APP_NAME: withDefault(
     NonEmptyString,
     "reviewer" as NonEmptyString
@@ -110,6 +117,19 @@ export const QueueConfig = t.type({
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
+// Services pagination configuration
+export const PaginationConfig = t.type({
+  PAGINATION_DEFAULT_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "20" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "100" as unknown as NonNegativeInteger
+  ),
+});
+export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -125,8 +145,8 @@ export const IConfig = t.intersection([
     AzureClientSecretCredential,
     ApimConfig,
     QueueConfig,
-    CosmosLegacyConfig,
   ]),
+  t.intersection([CosmosLegacyConfig, PaginationConfig]),
 ]);
 
 export const envConfig = {

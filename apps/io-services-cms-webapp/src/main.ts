@@ -25,13 +25,14 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
-import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
-import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-services-lifecycles-change";
 import { createWebServer } from "./webservice";
 
+import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
+import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
-import { getDao } from "./utils/service-review-dao";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
+import { getDao } from "./utils/service-review-dao";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
