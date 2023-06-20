@@ -36,7 +36,6 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 

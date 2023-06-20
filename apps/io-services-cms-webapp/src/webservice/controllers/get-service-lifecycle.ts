@@ -39,7 +39,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";

@@ -171,7 +171,6 @@ export const makeCreateServiceHandler =
     config,
   }: Dependencies): ICreateServiceHandler =>
   (_auth, __, attrs, userEmail, servicePayload) => {
-
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(

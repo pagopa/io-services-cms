@@ -43,7 +43,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
@@ -88,17 +87,12 @@ export const makeGetServiceHandler =
         flow(
           store.fetch,
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.map(
-            flow(
-              O.foldW(
-                () =>
-                  ResponseErrorNotFound("Not found", `${serviceId} not found`),
-                flow(
-                  itemToResponse,
-                  ResponseSuccessJson<ServiceResponsePayload>
+          TE.map((res) =>
+            O.isSome(res)
+              ? ResponseSuccessJson<ServiceResponsePayload>(
+                  itemToResponse(res.value)
                 )
-              )
-            )
+              : ResponseErrorNotFound("Not found", `${serviceId} not found`)
           )
         )
       ),
