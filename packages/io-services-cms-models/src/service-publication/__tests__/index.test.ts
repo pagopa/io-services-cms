@@ -268,15 +268,6 @@ describe("apply", () => {
 });
 
 describe("override", () => {
-  it("should fails when item not exists", async () => {
-    const id = "non-existent_id" as NonEmptyString;
-    const item = {} as unknown as ItemType;
-    const result = await fsmClient.override(id, item)();
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left.message).eq(`No item found with id = ${id}`);
-    }
-  });
   it("should fails when stored item is not valid", async () => {
     store
       .inspect()
@@ -289,6 +280,20 @@ describe("override", () => {
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
       expect(result.left.message).not.empty;
+    }
+  });
+  it("should save item when not exists", async () => {
+    const id = "non-existent_id" as NonEmptyString;
+    const item = {
+      ...aService,
+      id,
+      fsm: { state: "unpublished" },
+    } as WithState<"unpublished", Service>;
+    const result = await fsmClient.override(id, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(store.inspect().get(id)).eq(result.right);
+      expect(result.right.fsm.state).eq("unpublished");
     }
   });
   it("should save a valid item", async () => {
