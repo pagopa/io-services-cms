@@ -56,7 +56,7 @@ describe("subscription", () => {
     expect(E.isLeft(result)).toBeTruthy();
   });
 
-  it("should fail in case of ivocation without manageKey", async () => {
+  it("should fail in case of invocation without manageKey", async () => {
     const aNotManageSubscriptionId = "NOTMANAGE456" as NonEmptyString;
     const aDifferentUserId = "456" as NonEmptyString;
 

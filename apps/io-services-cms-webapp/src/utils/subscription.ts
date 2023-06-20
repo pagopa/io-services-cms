@@ -13,6 +13,7 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { getSubscription } from "../lib/clients/apim-client";
+import { MANAGE_APIKEY_PREFIX } from "./api-keys";
 
 type ErrorResponses =
   | IResponseErrorNotFound
@@ -21,7 +22,7 @@ type ErrorResponses =
   | IResponseErrorTooManyRequests;
 
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
-  ownerSubscriptionId.startsWith("MANAGE-");
+  ownerSubscriptionId.startsWith(MANAGE_APIKEY_PREFIX);
 
 /**
  * Using the **API Manage key** as 'Ocp-Apim-Subscription-Key', the Subscription relating to this key will have a name starting with "MANAGE-"
@@ -47,7 +48,7 @@ export const serviceOwnerCheckManageTask = (
   pipe(
     ownerSubscriptionId,
     TE.fromPredicate(
-      (oSId: NonEmptyString) => isManageKey(oSId),
+      (ownSubId: NonEmptyString) => isManageKey(ownSubId),
       () => ResponseErrorForbiddenNotAuthorized
     ),
     TE.chainW(() =>
