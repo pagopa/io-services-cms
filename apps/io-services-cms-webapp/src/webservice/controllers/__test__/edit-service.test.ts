@@ -231,6 +231,7 @@ describe("editService", () => {
     expect(response.statusCode).toBe(403);
   });
 
+
   it("should edit a service if cidrs array contains 0.0.0.0/0", async () => {
     await serviceLifecycleStore.save("s4", {
       ...aService,
