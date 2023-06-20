@@ -259,4 +259,18 @@ describe("getServices", () => {
       offset: anOffset,
     });
   });
+
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+    const response = await request(app)
+      .get("/api/services")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(response.statusCode).toBe(403);
+  });
 });

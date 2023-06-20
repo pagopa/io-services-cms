@@ -6,7 +6,7 @@ import {
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
 import { Container } from "@azure/cosmos";
@@ -81,6 +81,10 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 describe("editService", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const app = createWebServer({
     basePath: "api",
     apimClient: mockApimClient,
@@ -197,5 +201,33 @@ describe("editService", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
     expect(response.body.metadata.address).toBe("via casa mia 245");
+  });
+  it("hould not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", aDifferentUserId)
+      .set("x-subscription-id", aDifferentManageSubscriptionId);
+
+    expect(response.statusCode).toBe(403);
+  });
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
   });
 });

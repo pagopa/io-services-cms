@@ -164,6 +164,20 @@ describe("createService", () => {
     expect(response.body.id).toEqual(expect.any(String));
   });
 
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-456";
+
+    const response = await request(app)
+      .post("/api/services")
+      .send(aNewService)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
+  });
+
   it("should fail when cannot find apim user", async () => {
     vi.mocked(getUserByEmail).mockImplementation(() =>
       TE.left({ statusCode: 500 })

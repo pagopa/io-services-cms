@@ -240,5 +240,35 @@ describe("WebService", () => {
 
       expect(response.statusCode).toBe(400);
     });
+
+    it("should not allow the operation without right userId", async () => {
+      const aDifferentManageSubscriptionId = "MANAGE-456";
+      const aDifferentUserId = "456";
+
+      const response = await request(app)
+        .put("/api/services/s1/review")
+        .send(payload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", aDifferentUserId)
+        .set("x-subscription-id", aDifferentManageSubscriptionId);
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should not allow the operation without manageKey", async () => {
+      const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+      const response = await request(app)
+        .put("/api/services/s1/review")
+        .send(payload)
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", anUserId)
+        .set("x-subscription-id", aNotManageSubscriptionId);
+
+      expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(403);
+    });
   });
 });

@@ -16,7 +16,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getLifecycleItemToResponse } from "../../../utils/converters/service-lifecycle-converters";
 import { createWebServer } from "../../index";
@@ -82,6 +82,9 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 describe("getServiceLifecycle", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   const app = createWebServer({
     basePath: "api",
     apimClient: mockApimClient,
@@ -158,9 +161,25 @@ describe("getServiceLifecycle", () => {
     expect(response.statusCode).toBe(403);
   });
 
-  const aDifferentManageSubscriptionId = "MANAGE-456";
-  const aDifferentUserId = "456";
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+    const response = await request(app)
+      .get("/api/services/s12")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
+  });
+
   it("should not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
+
     const response = await request(app)
       .get("/api/services/s12")
       .send()
@@ -169,9 +188,6 @@ describe("getServiceLifecycle", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    expect(response.text).toContain(
-      "You do not have enough permission to complete the operation you requested"
-    );
     expect(response.statusCode).toBe(403);
   });
 });

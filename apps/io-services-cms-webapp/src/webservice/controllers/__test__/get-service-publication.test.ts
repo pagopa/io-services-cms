@@ -175,9 +175,10 @@ describe("WebService", () => {
       expect(response.statusCode).toBe(403);
     });
 
-    const aDifferentManageSubscriptionId = "MANAGE-456";
-    const aDifferentUserId = "456";
     it("should not allow the operation without right userId", async () => {
+      const aDifferentManageSubscriptionId = "MANAGE-456";
+      const aDifferentUserId = "456";
+
       const response = await request(app)
         .get("/api/services/s3/release")
         .send()
@@ -189,6 +190,21 @@ describe("WebService", () => {
       expect(response.text).toContain(
         "You do not have enough permission to complete the operation you requested"
       );
+      expect(response.statusCode).toBe(403);
+    });
+
+    it("should not allow the operation without right userId", async () => {
+      const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+      const response = await request(app)
+        .get("/api/services/s3/release")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", anUserId)
+        .set("x-subscription-id", aNotManageSubscriptionId);
+
+      expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
       expect(response.statusCode).toBe(403);
     });
   });
