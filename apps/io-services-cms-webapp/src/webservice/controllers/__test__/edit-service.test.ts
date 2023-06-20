@@ -230,4 +230,135 @@ describe("editService", () => {
     expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
+
+  it("should edit a service if cidrs array contains 0.0.0.0/0", async () => {
+    await serviceLifecycleStore.save("s4", {
+      ...aService,
+      fsm: { state: "rejected" },
+    })();
+
+    const aNewRetrievedSubscriptionCIDRs = {
+      ...aRetrievedSubscriptionCIDRs,
+      cidrs: ["0.0.0.0/0"] as unknown as ReadonlySet<
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+      >,
+    };
+
+    mockFetchAll.mockImplementationOnce(() =>
+      Promise.resolve({
+        resources: [aNewRetrievedSubscriptionCIDRs],
+      })
+    );
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status.value).toBe("draft");
+  });
+
+  it("should edit a service if cidrs array contains only the IP address of the host", async () => {
+    await serviceLifecycleStore.save("s4", {
+      ...aService,
+      fsm: { state: "rejected" },
+    })();
+
+    const aNewRetrievedSubscriptionCIDRs = {
+      ...aRetrievedSubscriptionCIDRs,
+      cidrs: ["127.0.0.1/32"] as unknown as ReadonlySet<
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+      >,
+    };
+
+    mockFetchAll.mockImplementationOnce(() =>
+      Promise.resolve({
+        resources: [aNewRetrievedSubscriptionCIDRs],
+      })
+    );
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status.value).toBe("draft");
+  });
+
+  it("should not edit a service if cidrs array doesn't contains the IP address of the host", async () => {
+    await serviceLifecycleStore.save("s4", {
+      ...aService,
+      fsm: { state: "rejected" },
+    })();
+
+    const aNewRetrievedSubscriptionCIDRs = {
+      ...aRetrievedSubscriptionCIDRs,
+      cidrs: ["128.2.5.1/32"] as unknown as ReadonlySet<
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+      >,
+    };
+
+    mockFetchAll.mockImplementationOnce(() =>
+      Promise.resolve({
+        resources: [aNewRetrievedSubscriptionCIDRs],
+      })
+    );
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.statusCode).toBe(403);
+  });
+
+  it("should edit a service if cidrs array contains the IP address of the host", async () => {
+    await serviceLifecycleStore.save("s4", {
+      ...aService,
+      fsm: { state: "rejected" },
+    })();
+
+    const aNewRetrievedSubscriptionCIDRs = {
+      ...aRetrievedSubscriptionCIDRs,
+      cidrs: [
+        "128.2.5.1/32",
+        "127.0.0.1/32",
+        "192.168.4.7/8",
+      ] as unknown as ReadonlySet<
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+      >,
+    };
+
+    mockFetchAll.mockImplementationOnce(() =>
+      Promise.resolve({
+        resources: [aNewRetrievedSubscriptionCIDRs],
+      })
+    );
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status.value).toBe("draft");
+  });
 });
