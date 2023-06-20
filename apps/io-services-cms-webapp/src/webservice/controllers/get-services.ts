@@ -14,11 +14,22 @@ import {
   AzureUserAttributesManageMiddleware,
   IAzureUserAttributesManage,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
-import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
-import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
-  IWithinRangeIntegerTag,
+  ClientIp,
+  ClientIpMiddleware,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler,
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  checkSourceIpForHandler,
+  clientIPAndCidrTuple as ipTuple,
+} from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import {
   IntegerFromString,
+  IWithinRangeIntegerTag,
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
@@ -34,9 +45,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -58,6 +69,7 @@ type HandlerResponseTypes =
 
 type GetServicesHandler = (
   auth: IAzureApiAuthorization,
+  clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
   limit: O.Option<number>,
@@ -187,7 +199,7 @@ export const makeGetServicesHandler =
     apimClient,
     config,
   }: Dependencies): GetServicesHandler =>
-  (_auth, attrs, userEmail, limit, offset) =>
+  (_auth, __, attrs, userEmail, limit, offset) =>
     pipe(
       getUserIdTask(apimClient, userEmail, config),
       TE.chainW((userId) =>
@@ -226,34 +238,38 @@ export const makeGetServicesHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: GetServicesHandler) =>
-    pipe(
-      handler,
-      // TODO: implement ip filter
-      // (handler) =>
-      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-      withRequestMiddlewares(
-        // only allow requests by users belonging to certain groups
-        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-        // check manage key
-        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
-        // extract the user email from the request headers
-        UserEmailMiddleware(),
-        // extract limit as number of records to return from query params
-        OptionalQueryParamMiddleware(
-          "limit",
-          IntegerFromString.pipe(
-            WithinRangeInteger<
-              1,
-              typeof config.PAGINATION_MAX_LIMIT,
-              IWithinRangeIntegerTag<1, typeof config.PAGINATION_MAX_LIMIT>
-            >(1, config.PAGINATION_MAX_LIMIT)
-          )
-        ),
-        // extract offset as number of records to skip from query params
-        OptionalQueryParamMiddleware(
-          "offset",
-          IntegerFromString.pipe(NonNegativeInteger)
+  (handler: GetServicesHandler) => {
+    const middlewaresWrap = withRequestMiddlewares(
+      // only allow requests by users belonging to certain groups
+      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      ClientIpMiddleware,
+      // check manage key
+      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      // extract the user email from the request headers
+      UserEmailMiddleware(),
+      // extract limit as number of records to return from query params
+      OptionalQueryParamMiddleware(
+        "limit",
+        IntegerFromString.pipe(
+          WithinRangeInteger<
+            1,
+            typeof config.PAGINATION_MAX_LIMIT,
+            IWithinRangeIntegerTag<1, typeof config.PAGINATION_MAX_LIMIT>
+          >(1, config.PAGINATION_MAX_LIMIT)
+        )
+      ),
+      // extract offset as number of records to skip from query params
+      OptionalQueryParamMiddleware(
+        "offset",
+        IntegerFromString.pipe(NonNegativeInteger)
+      )
+    );
+    return wrapRequestHandler(
+      middlewaresWrap(
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, c, u, __, ___, ____) =>
+          ipTuple(c, u)
         )
       )
     );
+  };

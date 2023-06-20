@@ -80,8 +80,7 @@ export const createWebServer = ({
         apimClient,
         config,
       }),
-      applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -93,8 +92,7 @@ export const createWebServer = ({
         apimClient,
         config,
       }),
-      applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -106,8 +104,7 @@ export const createWebServer = ({
         store: fsmLifecycleClient.getStore(),
         apimClient,
       }),
-      applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -131,8 +128,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         apimClient,
       }),
-      applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -144,8 +140,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         apimClient,
       }),
-      applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -157,8 +152,7 @@ export const createWebServer = ({
         fsmPublicationClient,
         apimClient,
       }),
-      applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -170,10 +164,7 @@ export const createWebServer = ({
         store: fsmPublicationClient.getStore(),
         apimClient,
       }),
-      applyGetPublicationStatusServiceRequestMiddelwares(
-        subscriptionCIDRsModel
-      ),
-      wrapRequestHandler
+      applyGetPublicationStatusServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
@@ -185,8 +176,7 @@ export const createWebServer = ({
         fsmPublicationClient,
         apimClient,
       }),
-      applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
