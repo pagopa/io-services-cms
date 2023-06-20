@@ -1,1 +1,0 @@
-DROP USER IF EXISTS "${appUser}" WITH ENCRYPTED PASSWORD '${appUserPassword}';
