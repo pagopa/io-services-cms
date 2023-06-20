@@ -75,12 +75,17 @@ export const makeGetServiceHandler =
         flow(
           store.fetch,
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.map((res) =>
-            O.isSome(res)
-              ? ResponseSuccessJson<ServiceResponsePayload>(
-                  itemToResponse(res.value)
+          TE.map(
+            flow(
+              O.foldW(
+                () =>
+                  ResponseErrorNotFound("Not found", `${serviceId} not found`),
+                flow(
+                  itemToResponse,
+                  ResponseSuccessJson<ServiceResponsePayload>
                 )
-              : ResponseErrorNotFound("Not found", `${serviceId} not found`)
+              )
+            )
           )
         )
       ),
