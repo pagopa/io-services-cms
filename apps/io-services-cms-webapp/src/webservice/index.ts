@@ -119,8 +119,7 @@ export const createWebServer = ({
         config,
         apimClient,
       }),
-      applyEditServiceRequestMiddelwares(subscriptionCIDRsModel),
-      wrapRequestHandler
+      applyEditServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
