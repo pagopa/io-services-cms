@@ -14,11 +14,14 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { getSubscription } from "../lib/clients/apim-client";
 
-export type ErrorResponses =
+type ErrorResponses =
   | IResponseErrorNotFound
   | IResponseErrorForbiddenNotAuthorized
   | IResponseErrorInternal
   | IResponseErrorTooManyRequests;
+
+const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
+  ownerSubscriptionId.startsWith("MANAGE-");
 
 /**
  * Using the **API Manage key** as 'Ocp-Apim-Subscription-Key', the Subscription relating to this key will have a name starting with "MANAGE-"
@@ -42,23 +45,29 @@ export const serviceOwnerCheckManageTask = (
   userId: NonEmptyString
 ): TaskEither<ErrorResponses, NonEmptyString> =>
   pipe(
-    getSubscription(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM,
-      serviceId
+    ownerSubscriptionId,
+    TE.fromPredicate(
+      (oSId: NonEmptyString) => isManageKey(oSId),
+      () => ResponseErrorForbiddenNotAuthorized
     ),
-    TE.mapLeft(
-      () =>
-        ResponseErrorInternal(
-          `An error has occurred while retrieving service '${serviceId}'`
-        ) // FIXME: handle the error correctly
+    TE.chainW(() =>
+      pipe(
+        getSubscription(
+          apimClient,
+          config.AZURE_APIM_RESOURCE_GROUP,
+          config.AZURE_APIM,
+          serviceId
+        ),
+        TE.mapLeft(() =>
+          ResponseErrorInternal(
+            `An error has occurred while retrieving service '${serviceId}'`
+          )
+        )
+      )
     ),
     TE.chainW((serviceSubscription) =>
-      ownerSubscriptionId.startsWith("MANAGE-")
-        ? serviceSubscription.ownerId === userId
-          ? TE.of(serviceId)
-          : TE.left(ResponseErrorForbiddenNotAuthorized)
+      serviceSubscription.ownerId === userId
+        ? TE.of(serviceId)
         : TE.left(ResponseErrorForbiddenNotAuthorized)
     )
   );

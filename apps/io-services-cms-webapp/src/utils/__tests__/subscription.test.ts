@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { IConfig } from "../../config";
-import { serviceOwnerCheckManageTask } from "../subscription";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
+import { serviceOwnerCheckManageTask } from "../subscription";
 
 const mockConfig = {} as unknown as IConfig;
 
@@ -22,6 +22,9 @@ const mockApimClient = {
   },
 } as unknown as ApiManagementClient;
 describe("subscription", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   it("should return serviceId in case of valid subscription and userId for the requested service", async () => {
     const result = await serviceOwnerCheckManageTask(
       mockConfig,
@@ -64,7 +67,7 @@ describe("subscription", () => {
       aNotManageSubscriptionId,
       aDifferentUserId
     )();
-
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
     expect(E.isLeft(result)).toBeTruthy();
   });
 });
