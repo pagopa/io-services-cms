@@ -83,16 +83,16 @@ export const makeGetServiceLifecycleHandler =
       TE.chainW(
         flow(
           store.fetch,
-          TE.bimap(
-            (err) => ResponseErrorInternal(err.message),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+          TE.map(
             flow(
               O.foldW(
                 () =>
                   ResponseErrorNotFound("Not found", `${serviceId} not found`),
-                (content) =>
-                  ResponseSuccessJson<ServiceResponsePayload>(
-                    itemToResponse(content)
-                  )
+                flow(
+                  itemToResponse,
+                  ResponseSuccessJson<ServiceResponsePayload>
+                )
               )
             )
           )

@@ -47,10 +47,7 @@ export const serviceOwnerCheckManageTask = (
 ): TaskEither<ErrorResponses, NonEmptyString> =>
   pipe(
     ownerSubscriptionId,
-    TE.fromPredicate(
-      (ownSubId: NonEmptyString) => isManageKey(ownSubId),
-      () => ResponseErrorForbiddenNotAuthorized
-    ),
+    TE.fromPredicate(isManageKey, () => ResponseErrorForbiddenNotAuthorized),
     TE.chainW(() =>
       pipe(
         getSubscription(
@@ -68,7 +65,7 @@ export const serviceOwnerCheckManageTask = (
     ),
     TE.chainW((serviceSubscription) =>
       serviceSubscription.ownerId === userId
-        ? TE.of(serviceId)
+        ? TE.right(serviceId)
         : TE.left(ResponseErrorForbiddenNotAuthorized)
     )
   );
