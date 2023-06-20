@@ -230,7 +230,7 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
       save: vi.fn(),
-    };
+    } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.release(aServiceId, {
@@ -252,7 +252,7 @@ describe("apply", () => {
       save: vi.fn(() => {
         return TE.left(new Error());
       }),
-    };
+    } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.release(aServiceId, {
