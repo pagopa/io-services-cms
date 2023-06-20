@@ -6,9 +6,19 @@ import {
 } from "@io-services-cms/models";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+import { Container } from "@azure/cosmos";
+import {
+  RetrievedSubscriptionCIDRs,
+  SubscriptionCIDRsModel,
+} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import {
+  IPatternStringTag,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -20,16 +30,68 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
-const mockApimClient = {} as unknown as ApiManagementClient;
+const aManageSubscriptionId = "MANAGE-123";
+const anUserId = "123";
+
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        ownerId: anUserId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
 const mockConfig = {} as unknown as IConfig;
 
+const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
+  cidrs: [] as unknown as ReadonlySet<
+    string &
+      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+  >,
+  _etag: "_etag",
+  _rid: "_rid",
+  _self: "_self",
+  _ts: 1,
+  id: "xyz" as NonEmptyString,
+  kind: "IRetrievedSubscriptionCIDRs",
+  version: 0 as NonNegativeInteger,
+};
+
+const mockFetchAll = vi.fn(() =>
+  Promise.resolve({
+    resources: [aRetrievedSubscriptionCIDRs],
+  })
+);
+const containerMock = {
+  items: {
+    readAll: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+      getAsyncIterator: vi.fn(),
+    })),
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
+  },
+} as unknown as Container;
+
+const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
+
 describe("editService", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const app = createWebServer({
     basePath: "api",
     apimClient: mockApimClient,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
+    subscriptionCIDRsModel,
   });
 
   const aServicePayload = {
@@ -87,8 +149,8 @@ describe("editService", () => {
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
   });
@@ -104,8 +166,8 @@ describe("editService", () => {
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500); // FIXME: should be 409
   });
@@ -116,8 +178,8 @@ describe("editService", () => {
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(403);
   });
@@ -133,11 +195,39 @@ describe("editService", () => {
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", "any-user-id")
-      .set("x-subscription-id", "any-subscription-id");
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
     expect(response.body.metadata.address).toBe("via casa mia 245");
+  });
+  it("hould not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", aDifferentUserId)
+      .set("x-subscription-id", aDifferentManageSubscriptionId);
+
+    expect(response.statusCode).toBe(403);
+  });
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+    const response = await request(app)
+      .put("/api/services/s4")
+      .send(aServicePayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
   });
 });

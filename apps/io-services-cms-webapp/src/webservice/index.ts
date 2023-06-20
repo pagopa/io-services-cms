@@ -5,6 +5,7 @@ import express from "express";
 
 import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -54,6 +55,7 @@ type Dependencies = {
   fsmPublicationClient: ServicePublication.FsmClient;
   apimClient: ApiManagementClient;
   config: IConfig;
+  subscriptionCIDRsModel: SubscriptionCIDRsModel;
 };
 
 export const createWebServer = ({
@@ -62,6 +64,7 @@ export const createWebServer = ({
   fsmPublicationClient,
   apimClient,
   config,
+  subscriptionCIDRsModel,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -77,7 +80,7 @@ export const createWebServer = ({
         apimClient,
         config,
       }),
-      applyCreateServiceRequestMiddelwares,
+      applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -90,7 +93,7 @@ export const createWebServer = ({
         apimClient,
         config,
       }),
-      applyGetServicesRequestMiddelwares(config),
+      applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -99,9 +102,11 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
+        config,
         store: fsmLifecycleClient.getStore(),
+        apimClient,
       }),
-      applyGetServiceLifecycleRequestMiddelwares,
+      applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -112,8 +117,9 @@ export const createWebServer = ({
       makeEditServiceHandler({
         fsmLifecycleClient,
         config,
+        apimClient,
       }),
-      applyEditServiceRequestMiddelwares,
+      applyEditServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -122,9 +128,11 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
+        config,
         fsmLifecycleClient,
+        apimClient,
       }),
-      applyDeleteServiceRequestMiddelwares,
+      applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -133,9 +141,11 @@ export const createWebServer = ({
     "/services/:serviceId/review",
     pipe(
       makeReviewServiceHandler({
+        config,
         fsmLifecycleClient,
+        apimClient,
       }),
-      applyReviewServiceRequestMiddelwares,
+      applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -144,9 +154,11 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makePublishServiceHandler({
+        config,
         fsmPublicationClient,
+        apimClient,
       }),
-      applyPublishServiceRequestMiddelwares,
+      applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
@@ -155,9 +167,13 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
+        config,
         store: fsmPublicationClient.getStore(),
+        apimClient,
       }),
-      applyGetPublicationStatusServiceRequestMiddelwares,
+      applyGetPublicationStatusServiceRequestMiddelwares(
+        subscriptionCIDRsModel
+      ),
       wrapRequestHandler
     )
   );
@@ -166,9 +182,11 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
+        config,
         fsmPublicationClient,
+        apimClient,
       }),
-      applyUnpublishServiceRequestMiddelwares,
+      applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel),
       wrapRequestHandler
     )
   );
