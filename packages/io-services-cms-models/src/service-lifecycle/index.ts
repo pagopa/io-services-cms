@@ -9,6 +9,7 @@ import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
+  FsmItemValidationError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
@@ -429,9 +430,15 @@ function override(
       store.fetch(id),
       TE.chain(
         flow(
-          E.fromOption(() => new Error(`No item found with id = ${id}`)), // TODO: maybe we need to define a custom error
-          E.chain(
-            flow(ItemType.decode, E.mapLeft(flow(readableReport, E.toError)))
+          O.fold(
+            () => E.right(void 0),
+            flow(
+              ItemType.decode,
+              E.bimap(
+                flow(readableReport, (msg) => new FsmItemValidationError(msg)),
+                (_) => void 0
+              )
+            )
           ),
           TE.fromEither
         )
