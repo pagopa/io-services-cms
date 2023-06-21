@@ -304,7 +304,7 @@ describe("editService", () => {
 
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
-      cidrs: ["128.2.5.1/32"] as unknown as ReadonlySet<
+      cidrs: ["127.1.1.2/32"] as unknown as ReadonlySet<
         string &
           IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
       >,
@@ -336,9 +336,9 @@ describe("editService", () => {
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: [
-        "128.2.5.1/32",
+        "127.1.1.2/32",
         "127.0.0.1/32",
-        "192.168.4.7/8",
+        "127.2.2.3/32",
       ] as unknown as ReadonlySet<
         string &
           IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
