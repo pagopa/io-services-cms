@@ -46,9 +46,8 @@ jira_organization_cf_custom_field   = "customfield_10364"
 jira_organization_name_custom_field = "customfield_10381"
 
 ## Apim
-azure_apim                           = "io-p-apim-api"
-azure_apim_resource_group            = "io-p-rg-internal"
-azure_apim_subscription_product_name = "io-services-api"
+azure_apim                = "io-p-apim-api"
+azure_apim_resource_group = "io-p-rg-internal"
 
 ## PostgreSQL
 reviewer_db_name   = "reviewer"
