@@ -14,6 +14,7 @@ import {
   FsmStoreFetchError,
   FsmStoreSaveError,
   FsmTooManyTransitionsError,
+  WithState,
   stores,
 } from "../../lib/fsm";
 import { Service } from "../definitions";
@@ -256,5 +257,51 @@ describe("apply", () => {
     }
     const { left: value } = result;
     expect(value).toBeInstanceOf(FsmStoreSaveError);
+  });
+});
+
+describe("override", () => {
+  it("should fails when stored item is not valid", async () => {
+    store
+      .inspect()
+      .set(
+        aServiceId,
+        aService as unknown as WithState<string, Record<string, unknown>>
+      );
+    const item = {} as unknown as ItemType;
+    const result = await fsmClient.override(aServiceId, item)();
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left.message).not.empty;
+    }
+  });
+  it("should save item when not exists", async () => {
+    const id = "non-existent_id" as NonEmptyString;
+    const item = {
+      ...aService,
+      id,
+      fsm: { state: "submitted" },
+    } as WithState<"submitted", Service>;
+    const result = await fsmClient.override(id, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      console.log("result:", result.right);
+      expect(store.inspect().get(id)).eq(result.right);
+      expect(result.right.fsm.state).eq("submitted");
+    }
+  });
+  it("should save a valid item", async () => {
+    store.inspect().set(aServiceId, { ...aService, fsm: { state: "draft" } });
+    const item = {
+      ...aService,
+      fsm: { state: "approved", autoPublish: true },
+    } as WithState<"approved", Service>;
+    const result = await fsmClient.override(aServiceId, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(store.inspect().get(aServiceId)).eq(result.right);
+      expect(result.right.fsm.state).eq("approved");
+      expect(result.right.fsm.autoPublish).toBeTruthy();
+    }
   });
 });

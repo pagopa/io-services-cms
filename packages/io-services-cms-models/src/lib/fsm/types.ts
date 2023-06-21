@@ -136,3 +136,10 @@ export class FsmStoreSaveError extends Error {
     super(`Error while saving data in the store`);
   }
 }
+
+export class FsmItemValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FsmItemValidationError";
+  }
+}
