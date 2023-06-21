@@ -10,8 +10,19 @@ import {
   AzureUserAttributesManageMiddleware,
   IAzureUserAttributesManage,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
+import {
+  ClientIp,
+  ClientIpMiddleware,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler,
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  checkSourceIpForHandler,
+  clientIPAndCidrTuple as ipTuple,
+} from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -22,8 +33,8 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import { IConfig } from "../../config";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
@@ -44,6 +55,7 @@ type HandlerResponseTypes =
 
 type PublishServiceHandler = (
   auth: IAzureApiAuthorization,
+  clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
@@ -54,7 +66,7 @@ export const makePublishServiceHandler =
     fsmPublicationClient,
     apimClient,
   }: Dependencies): PublishServiceHandler =>
-  (_auth, attrs, serviceId) =>
+  (_auth, __, attrs, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
@@ -75,18 +87,20 @@ export const makePublishServiceHandler =
 
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: PublishServiceHandler) =>
-    pipe(
-      handler,
-      // TODO: implement ip filter
-      // (handler) =>
-      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-      withRequestMiddlewares(
-        // only allow requests by users belonging to certain groups
-        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-        // check manage key
-        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
-        // extract the service id from the path variables
-        RequiredParamMiddleware("serviceId", NonEmptyString)
+  (handler: PublishServiceHandler) => {
+    const middlewaresWrap = withRequestMiddlewares(
+      // only allow requests by users belonging to certain groups
+      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      ClientIpMiddleware,
+      // check manage key
+      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      // extract the service id from the path variables
+      RequiredParamMiddleware("serviceId", NonEmptyString)
+    );
+    return wrapRequestHandler(
+      middlewaresWrap(
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, c, u) => ipTuple(c, u))
       )
     );
+  };

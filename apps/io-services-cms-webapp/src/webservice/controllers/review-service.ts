@@ -10,9 +10,20 @@ import {
   AzureUserAttributesManageMiddleware,
   IAzureUserAttributesManage,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
+import {
+  ClientIp,
+  ClientIpMiddleware,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler,
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  checkSourceIpForHandler,
+  clientIPAndCidrTuple as ipTuple,
+} from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
   IResponseErrorConflict,
   IResponseErrorForbiddenNotAuthorized,
@@ -23,8 +34,8 @@ import {
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
@@ -46,6 +57,7 @@ type HandlerResponseTypes =
 
 type ReviewServiceHandler = (
   auth: IAzureApiAuthorization,
+  clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: ReviewRequestPayload
@@ -57,7 +69,7 @@ export const makeReviewServiceHandler =
     fsmLifecycleClient: fsmLifecycleClient,
     apimClient,
   }: Dependencies): ReviewServiceHandler =>
-  (_auth, attrs, serviceId, body) =>
+  (_auth, __, attrs, serviceId, body) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
@@ -80,20 +92,22 @@ export const makeReviewServiceHandler =
 
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: ReviewServiceHandler) =>
-    pipe(
-      handler,
-      // TODO: implement ip filter
-      // (handler) =>
-      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-      withRequestMiddlewares(
-        // only allow requests by users belonging to certain groups
-        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-        // check manage key
-        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
-        // extract the service id from the path variables
-        RequiredParamMiddleware("serviceId", NonEmptyString),
-        // extract and validate the request body
-        RequiredBodyPayloadMiddleware(ReviewRequestPayload)
+  (handler: ReviewServiceHandler) => {
+    const middlewaresWrap = withRequestMiddlewares(
+      // only allow requests by users belonging to certain groups
+      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      ClientIpMiddleware,
+      // check manage key
+      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      // extract the service id from the path variables
+      RequiredParamMiddleware("serviceId", NonEmptyString),
+      // extract and validate the request body
+      RequiredBodyPayloadMiddleware(ReviewRequestPayload)
+    );
+    return wrapRequestHandler(
+      middlewaresWrap(
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, c, u, __, ___) => ipTuple(c, u))
       )
     );
+  };
