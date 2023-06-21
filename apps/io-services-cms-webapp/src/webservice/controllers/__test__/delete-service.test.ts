@@ -123,7 +123,7 @@ describe("deleteService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+    expect(response.statusCode).toBe(404);
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
@@ -140,7 +140,7 @@ describe("deleteService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(500); // FIXME: should be 409
+    expect(response.statusCode).toBe(409);
   });
 
   it("should not allow the operation without right group", async () => {

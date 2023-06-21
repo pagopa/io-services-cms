@@ -32,7 +32,6 @@ import {
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -41,6 +40,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import {
   itemToResponse,
   payloadToItem,
@@ -96,7 +96,7 @@ export const makeEditServiceHandler =
           }),
           TE.map(itemToResponse),
           TE.map(ResponseSuccessJson),
-          TE.mapLeft((err) => ResponseErrorInternal(err.message))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion
