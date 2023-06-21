@@ -1,3 +1,4 @@
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
@@ -8,6 +9,7 @@ import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
+  FsmItemValidationError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
@@ -419,6 +421,32 @@ function apply(
   };
 }
 
+function override(
+  id: ItemType["id"],
+  item: ItemType
+): ReaderTaskEither<LifecycleStore, Error, ItemType> {
+  return (store) =>
+    pipe(
+      store.fetch(id),
+      TE.chain(
+        flow(
+          O.fold(
+            () => E.right(void 0),
+            flow(
+              ItemType.decode,
+              E.bimap(
+                flow(readableReport, (msg) => new FsmItemValidationError(msg)),
+                (_) => void 0
+              )
+            )
+          ),
+          TE.fromEither
+        )
+      ),
+      TE.chain((_) => store.save(id, item))
+    );
+}
+
 export const getAutoPublish = (service: ItemType): boolean =>
   (service.fsm.autoPublish as boolean) ?? false;
 
@@ -435,6 +463,7 @@ const getFsmClient = (store: LifecycleStore) => ({
   reject: (id: ServiceId, args: { reason: string }) =>
     apply("reject", id, args)(store),
   delete: (id: ServiceId) => apply("delete", id)(store),
+  override: (...args: Parameters<typeof override>) => override(...args)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 
@@ -442,4 +471,4 @@ type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
 
 export * as definitions from "./definitions";
-export { getFsmClient, FsmClient, FSM, ItemType };
+export { FSM, FsmClient, ItemType, getFsmClient };
