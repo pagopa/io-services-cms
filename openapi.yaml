@@ -11,7 +11,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.9.0
+  version: 0.10.0
 servers:
   - url: https://url
 tags:
@@ -23,8 +23,6 @@ tags:
     description: Service Release API specification
   - name: service-authorization
     description: Service Authorization API specification
-  - name: organizations
-    description: Organizations API specification
 paths:
   /info:
     get:
@@ -500,46 +498,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /organizations/{fiscalCode}/logo:
-    put:
-      tags:
-        - organizations
-      summary: Upload organization logo
-      description: Upload organization logo by fiscal code
-      operationId: uploadOrganizationLogo
-      parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: fiscalCode
-          in: path
-          description: Organization fiscal code
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: Organization logo payload _(base64 string representation)_
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Logo'
-        required: true
-      responses:
-        '204':
-          description: Organization logo updated successfully
-        '400':
-          description: Invalid payload
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not found
-        '429':
-          description: Too many requests
-        '500':
-          description: Internal server error
 components:
   parameters:
     UserEmail:
@@ -548,21 +506,18 @@ components:
       required: true
       schema:
         type: string
-
     UserGroups:
       in: header
       name: x-user-groups
       required: true
       schema:
         type: string
-
     UserID:
       in: header
       name: x-user-id
       required: true
       schema:
         type: string
-
     SubscriptionID:
       in: header
       name: x-subscription-id
