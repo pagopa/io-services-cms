@@ -442,15 +442,12 @@ function override(
       store.fetch(id),
       TE.chain(
         flow(
-          O.fold(
-            () => E.right(void 0),
-            flow(
-              ItemType.decode,
-              E.bimap(
-                flow(readableReport, (msg) => new FsmItemValidationError(msg)),
-                (_) => void 0
-              )
-            )
+          // if we found an item, we must validate by decode with ItemType
+          O.map(ItemType.decode),
+          // else, if no item is found we just assume it's ok
+          O.getOrElseW(() => E.right(void 0)),
+          E.mapLeft(
+            flow(readableReport, (msg) => new FsmItemValidationError(msg))
           ),
           TE.fromEither
         )
