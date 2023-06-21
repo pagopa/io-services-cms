@@ -8,9 +8,9 @@ import {
   FsmTransitionExecutionError,
 } from "@io-services-cms/models";
 import { describe, expect, test } from "vitest";
-import { fsmToApiError } from "../service-publication-converters";
+import { fsmToApiError } from "../fsm-error-converters";
 
-describe("test service-lifecycle-converters", () => {
+describe("FSM error converters", () => {
   test("fsmToApiError: should return a ResponseErrorConflict given a FsmNoApplicableTransitionError", () => {
     const err = new FsmNoApplicableTransitionError("anAppliedAction");
     const result = fsmToApiError(err);

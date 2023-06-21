@@ -27,7 +27,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
-import { fsmToApiError } from "../../utils/converters/service-lifecycle-converters";
+import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 type Dependencies = {
