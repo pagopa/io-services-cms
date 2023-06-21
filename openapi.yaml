@@ -58,6 +58,11 @@ paths:
       summary: Create a new service
       description: Create a new Service with the attributes provided in the request payload
       operationId: createService
+      parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
       requestBody:
         description: A service body payload
         content:
@@ -82,8 +87,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     get:
       tags:
         - services
@@ -91,6 +94,10 @@ paths:
       description: Retrieve all services owned by the calling user
       operationId: getServices
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: limit
           in: query
           description: The number of services to return
@@ -123,8 +130,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /services/{serviceId}:
     get:
       tags:
@@ -133,6 +138,10 @@ paths:
       description: Retrieve a service by ID
       operationId: getService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -156,8 +165,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     put:
       tags:
         - services
@@ -165,6 +172,10 @@ paths:
       description: Update an existing service by ID
       operationId: updateService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -197,8 +208,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     delete:
       tags:
         - services
@@ -206,6 +215,10 @@ paths:
       description: Delete a service by ID
       operationId: deleteService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -225,8 +238,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /services/{serviceId}/logo:
     put:
       tags:
@@ -235,6 +246,10 @@ paths:
       description: Upload service logo by service ID
       operationId: updateServiceLogo
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -263,8 +278,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /services/{serviceId}/key:
     put:
       tags:
@@ -273,6 +286,10 @@ paths:
       description: Regenerate service key by service ID
       operationId: regenerateServiceKey
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -305,8 +322,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /services/{serviceId}/review:
     put:
       tags:
@@ -315,6 +330,10 @@ paths:
       description: Send service to review by service ID
       operationId: reviewService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -343,8 +362,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     patch:
       tags:
         - service-review
@@ -352,6 +369,10 @@ paths:
       description: Explain service review by service ID
       operationId: explainService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -382,8 +403,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /services/{serviceId}/release:
     post:
       tags:
@@ -392,6 +411,10 @@ paths:
       description: Publish service by ID on __IO Platform__
       operationId: releaseService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -413,8 +436,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     get:
       tags:
         - service-release
@@ -422,6 +443,10 @@ paths:
       description: Retrieve last version of service published on __IO Platform__
       operationId: getPublishedService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -445,8 +470,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
     delete:
       tags:
         - service-release
@@ -454,6 +477,10 @@ paths:
       description: Unpublish service by ID from __IO Platform__
       operationId: unpublishService
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: serviceId
           in: path
           description: ID of the service
@@ -473,8 +500,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
   /organizations/{fiscalCode}/logo:
     put:
       tags:
@@ -483,6 +508,10 @@ paths:
       description: Upload organization logo by fiscal code
       operationId: uploadOrganizationLogo
       parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
         - name: fiscalCode
           in: path
           description: Organization fiscal code
@@ -511,9 +540,35 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-      security:
-        - api_key: []
 components:
+  parameters:
+    UserEmail:
+      in: header
+      name: x-user-email
+      required: true
+      schema:
+        type: string
+
+    UserGroups:
+      in: header
+      name: x-user-groups
+      required: true
+      schema:
+        type: string
+
+    UserID:
+      in: header
+      name: x-user-id
+      required: true
+      schema:
+        type: string
+
+    SubscriptionID:
+      in: header
+      name: x-subscription-id
+      required: true
+      schema:
+        type: string
   schemas:
     ServiceLifecycle:
       description: Service Lifecycle model data
@@ -793,9 +848,3 @@ components:
       type: string
       description: A date-time field in ISO-8601 format and UTC timezone.
       example: '2023-01-22T00:00:00.000Z'
-  securitySchemes:
-    api_key:
-      type: apiKey
-      name: X-CUSTOM-KEY
-      in: header
-      description: The Custom API key used for securing API calls.
