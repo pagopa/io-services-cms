@@ -84,7 +84,7 @@ export const makeReviewServiceHandler =
             autoPublish: body.auto_publish ?? false,
           }),
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft((err) => fsmToApiError(err))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion

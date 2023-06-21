@@ -79,7 +79,7 @@ export const makeDeleteServiceHandler =
         flow(
           fsmLifecycleClient.delete,
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft((err) => fsmToApiError(err))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion

@@ -79,7 +79,7 @@ export const makePublishServiceHandler =
         flow(
           fsmPublicationClient.publish,
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft((err) => fsmToApiError(err))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion

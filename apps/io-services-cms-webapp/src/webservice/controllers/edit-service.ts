@@ -96,7 +96,7 @@ export const makeEditServiceHandler =
           }),
           TE.map(itemToResponse),
           TE.map(ResponseSuccessJson),
-          TE.mapLeft((err) => fsmToApiError(err))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion
