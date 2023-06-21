@@ -1,4 +1,18 @@
-import { ServiceLifecycle } from "@io-services-cms/models";
+import {
+  FsmItemNotFoundError,
+  FsmNoApplicableTransitionError,
+  FsmNoTransitionMatchedError,
+  FsmStoreFetchError,
+  FsmStoreSaveError,
+  FsmTooManyTransitionsError,
+  FsmTransitionExecutionError,
+  ServiceLifecycle,
+} from "@io-services-cms/models";
+import {
+  ResponseErrorConflict,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+} from "@pagopa/ts-commons/lib/responses";
 import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
@@ -74,5 +88,27 @@ export const toScopeType = (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = s;
       return ScopeEnum[s];
+  }
+};
+
+/**
+ * Convert FSM error to API error
+ * @param err FSM custom error
+ * @returns API http error
+ */
+export const fsmToApiError = (err: ServiceLifecycle.AllFsmErrors) => {
+  switch (err.constructor) {
+    case FsmNoApplicableTransitionError:
+    case FsmNoTransitionMatchedError:
+    case FsmTooManyTransitionsError:
+      return ResponseErrorConflict(err.message);
+    case FsmTransitionExecutionError:
+    case FsmStoreFetchError:
+    case FsmStoreSaveError:
+      return ResponseErrorInternal(err.message);
+    case FsmItemNotFoundError:
+      return ResponseErrorNotFound("Not Found", err.message);
+    default:
+      return ResponseErrorInternal(err.message);
   }
 };
