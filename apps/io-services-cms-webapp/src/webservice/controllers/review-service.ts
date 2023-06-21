@@ -31,7 +31,6 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -39,6 +38,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
+import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 type Dependencies = {
@@ -84,7 +84,7 @@ export const makeReviewServiceHandler =
             autoPublish: body.auto_publish ?? false,
           }),
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft((err) => ResponseErrorInternal(err.message))
+          TE.mapLeft(fsmToApiError)
         )
       ),
       TE.toUnion

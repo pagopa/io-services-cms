@@ -138,7 +138,7 @@ describe("WebService", () => {
         .set("x-user-id", anUserId)
         .set("x-subscription-id", aManageSubscriptionId);
 
-      expect(response.statusCode).toBe(404); // FIXME: should be 404 (or 409)
+      expect(response.statusCode).toBe(404);
     });
 
     const asServiceWithStatus = {

@@ -1,3 +1,4 @@
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
@@ -8,6 +9,8 @@ import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
+  FsmItemNotFoundError,
+  FsmItemValidationError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
@@ -31,13 +34,14 @@ type ToRecord<Q> = Q extends []
 // commodity aliases
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
-type AllFsmErrors =
+export type AllFsmErrors =
   | FsmNoApplicableTransitionError
   | FsmNoTransitionMatchedError
   | FsmTooManyTransitionsError
   | FsmTransitionExecutionError
   | FsmStoreFetchError
-  | FsmStoreSaveError;
+  | FsmStoreSaveError
+  | FsmItemNotFoundError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
@@ -319,7 +323,7 @@ function apply(
       store.fetch(id),
       TE.mapLeft((_) => new FsmStoreFetchError()),
       // filter transitions that can be applied to the current item status
-      TE.map(
+      TE.chain(
         flow(
           // We can either find the element in the store or not
           //   we have a O.Some(item) or a O.none respectively
@@ -340,16 +344,23 @@ function apply(
                     tr: T
                   ): tr is T & { from: "*" } => tr.from === EmptyState
                 ),
+                E.fromPredicate(
+                  // we must have matched at least ONE transition
+                  (matchedTransitions) => matchedTransitions.length > 0,
+                  (_) => new FsmItemNotFoundError(id)
+                ),
                 // bind all data into a lazy implementation of exec
-                RA.map((tr) => ({
-                  exec: (): E.Either<FsmTransitionExecutionError, AllResults> =>
-                    // FIXME: avoid this forcing
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    tr.exec({ args }),
-                })),
-                // the following type lift is to keep the same interface with the Some branch
-                RA.map(E.right)
+                E.map(
+                  RA.map(
+                    (tr) =>
+                      (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                        // FIXME: avoid this forcing
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        tr.exec({ args })
+                  )
+                ),
+                TE.fromEither
               ),
             (item) =>
               pipe(
@@ -369,45 +380,48 @@ function apply(
                     ]),
                     // match&decode
                     (codec) => codec.decode(item),
-
                     // for those transitions whose from state has been matched,
                     //  bind all data into a lazy implementation of exec
-                    E.map((current) => ({
-                      exec: (): E.Either<
-                        FsmTransitionExecutionError,
-                        AllResults
-                      > =>
-                        tr.exec({
-                          // FIXME: avoid this forcing
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore
-                          args,
-                          // FIXME: avoid this forcing
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore
-                          current,
-                        }),
-                    }))
+                    E.map(
+                      (current) =>
+                        (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                          tr.exec({
+                            // FIXME: avoid this forcing
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            args,
+                            // FIXME: avoid this forcing
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            current,
+                          })
+                    )
                   )
-                )
+                ),
+                // skip unmatched transitions
+                RA.filter(E.isRight),
+                RA.map((matchedTransitions) => matchedTransitions.right),
+                E.fromPredicate(
+                  // we must have matched at least ONE transition
+                  (matchedTransitions) => matchedTransitions.length > 0,
+                  (_) => new FsmNoTransitionMatchedError()
+                ),
+                TE.fromEither
               )
-          ),
-          // skim unmatched transitions
-          RA.filter(E.isRight)
+          )
         )
       ),
       // avoid indeterminism: fail if more than a transition is applicable
       TE.filterOrElse(
-        // we must have matched exactly ONE transition
+        // we must have matched exactly ONE transition (no matched transitions condition has been verified above)
         (matchedTransitions) => matchedTransitions.length === 1,
-        (matchedTransitions) =>
-          matchedTransitions.length === 0
-            ? new FsmNoTransitionMatchedError()
-            : new FsmTooManyTransitionsError()
+        (_) => new FsmTooManyTransitionsError()
       ),
       // apply the only transition to turn the element in the new state
-      TE.map((_) => _[0].right.exec()),
-      TE.chain(TE.fromEither),
+      TE.map((matchedTransitions) => matchedTransitions[0]),
+      TE.map((exec) => exec()),
+      TE.map(TE.fromEither),
+      TE.flattenW,
       // save new status in the store
       TE.chain((newItem) =>
         pipe(
@@ -417,6 +431,29 @@ function apply(
       )
     );
   };
+}
+
+function override(
+  id: ItemType["id"],
+  item: ItemType
+): ReaderTaskEither<LifecycleStore, Error, ItemType> {
+  return (store) =>
+    pipe(
+      store.fetch(id),
+      TE.chain(
+        flow(
+          // if we found an item, we must validate by decode with ItemType
+          O.map(ItemType.decode),
+          // else, if no item is found we just assume it's ok
+          O.getOrElseW(() => E.right(void 0)),
+          E.mapLeft(
+            flow(readableReport, (msg) => new FsmItemValidationError(msg))
+          ),
+          TE.fromEither
+        )
+      ),
+      TE.chain((_) => store.save(id, item))
+    );
 }
 
 export const getAutoPublish = (service: ItemType): boolean =>
@@ -435,6 +472,7 @@ const getFsmClient = (store: LifecycleStore) => ({
   reject: (id: ServiceId, args: { reason: string }) =>
     apply("reject", id, args)(store),
   delete: (id: ServiceId) => apply("delete", id)(store),
+  override: (...args: Parameters<typeof override>) => override(...args)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 
@@ -442,4 +480,4 @@ type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
 
 export * as definitions from "./definitions";
-export { getFsmClient, FsmClient, FSM, ItemType };
+export { FSM, FsmClient, ItemType, getFsmClient };

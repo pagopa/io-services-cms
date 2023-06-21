@@ -86,6 +86,14 @@ export type Transition<
   ) => E.Either<FsmTransitionExecutionError, WithState<ToState[0], ToState[1]>>;
 };
 
+export class FsmItemNotFoundError extends Error {
+  public kind = "FsmItemNotFoundError";
+  constructor(id: string) {
+    const formattedMessage = `no item with id ${id} found`;
+    super(formattedMessage);
+  }
+}
+
 export class FsmNoApplicableTransitionError extends Error {
   public kind = "FsmNoApplicableTransitionError";
   constructor(appliedAction: string) {
@@ -126,5 +134,12 @@ export class FsmStoreSaveError extends Error {
   public kind = "FsmStoreSaveError";
   constructor() {
     super(`Error while saving data in the store`);
+  }
+}
+
+export class FsmItemValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FsmItemValidationError";
   }
 }
