@@ -86,6 +86,14 @@ export type Transition<
   ) => E.Either<FsmTransitionExecutionError, WithState<ToState[0], ToState[1]>>;
 };
 
+export class FsmItemNotFoundError extends Error {
+  public kind = "FsmItemNotFoundError";
+  constructor(id: string) {
+    const formattedMessage = `no item with id ${id} found`;
+    super(formattedMessage);
+  }
+}
+
 export class FsmNoApplicableTransitionError extends Error {
   public kind = "FsmNoApplicableTransitionError";
   constructor(appliedAction: string) {

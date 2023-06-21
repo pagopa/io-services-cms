@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ItemType, getFsmClient } from "..";
 import {
   FSMStore,
+  FsmItemNotFoundError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
@@ -202,7 +203,7 @@ describe("apply", () => {
       id: aServiceId,
       actions: [() => fsmClient.unpublish(aServiceId)],
       expected: undefined,
-      errorType: FsmNoTransitionMatchedError,
+      errorType: FsmItemNotFoundError,
       additionalPreTestFn: undefined,
       additionalPostTestFn: undefined,
     },
