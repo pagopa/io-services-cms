@@ -23,9 +23,9 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import { fsmToApiError } from "../../utils/converters/service-lifecycle-converters";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
+import { fsmToApiError } from "../../utils/converters/service-lifecycle-converters";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 type Dependencies = {
