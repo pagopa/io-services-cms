@@ -14,13 +14,13 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
+import { fsmToApiError } from "../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
@@ -50,7 +50,7 @@ export const makeReviewServiceHandler =
         autoPublish: body.auto_publish ?? false,
       }),
       TE.map(ResponseSuccessNoContent),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.mapLeft((err) => fsmToApiError(err)),
       TE.toUnion
     )();
 

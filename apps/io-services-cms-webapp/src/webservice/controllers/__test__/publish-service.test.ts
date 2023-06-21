@@ -79,7 +79,7 @@ describe("WebService", () => {
         .set("x-user-id", "any-user-id")
         .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+      expect(response.statusCode).toBe(500); // FIXME: the publish of a non-existing service is allowed by the 'autopublish' feature, so it is not possible to receive a 404 error.
     });
 
     it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
@@ -96,7 +96,7 @@ describe("WebService", () => {
         .set("x-user-id", "any-user-id")
         .set("x-subscription-id", "any-subscription-id");
 
-      expect(response.statusCode).toBe(500); // FIXME: should be 409
+      expect(response.statusCode).toBe(409);
     });
 
     it("should not allow the operation without right group", async () => {

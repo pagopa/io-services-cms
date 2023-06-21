@@ -13,12 +13,12 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { fsmToApiError } from "../../utils/converters/service-lifecycle-converters";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
@@ -45,7 +45,7 @@ export const makeDeleteServiceHandler =
     pipe(
       fsmLifecycleClient.delete(serviceId),
       TE.map(ResponseSuccessNoContent),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.mapLeft((err) => fsmToApiError(err)),
       TE.toUnion
     )();
 

@@ -63,7 +63,7 @@ describe("getServiceLifecycle", () => {
       .set("x-user-id", "any-user-id")
       .set("x-subscription-id", "any-subscription-id");
 
-    expect(response.statusCode).toBe(404); // FIXME: should be 404 (or 409)
+    expect(response.statusCode).toBe(404);
   });
 
   const asServiceLifecycleWithStatus = {

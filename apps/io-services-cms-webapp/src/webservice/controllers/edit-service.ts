@@ -15,7 +15,6 @@ import {
   IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -24,6 +23,7 @@ import { pipe } from "fp-ts/lib/function";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import {
+  fsmToApiError,
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
@@ -62,7 +62,7 @@ export const makeEditServiceHandler =
       }),
       TE.map(itemToResponse),
       TE.map(ResponseSuccessJson),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.mapLeft((err) => fsmToApiError(err)),
       TE.toUnion
     )();
 

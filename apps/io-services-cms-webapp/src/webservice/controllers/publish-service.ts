@@ -13,12 +13,12 @@ import {
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
   IResponseSuccessNoContent,
-  ResponseErrorInternal,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { fsmToApiError } from "../../utils/converters/service-publication-converters";
 
 type Dependencies = {
   fsmPublicationClient: ServicePublication.FsmClient;
@@ -43,7 +43,7 @@ export const makePublishServiceHandler =
     pipe(
       fsmPublicationClient.publish(serviceId),
       TE.map(ResponseSuccessNoContent),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.mapLeft((err) => fsmToApiError(err)),
       TE.toUnion
     )();
 
