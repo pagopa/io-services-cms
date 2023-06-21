@@ -97,6 +97,12 @@ variable "azure_apim_resource_group" {
   default     = null
 }
 
+variable "azure_apim_subscription_product_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 variable "reviewer_db_name" {
   type        = string
   description = ""
@@ -158,7 +164,7 @@ locals {
     # Apim connection
     AZURE_APIM                           = var.azure_apim
     AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
-    AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = "io-services-api" # FIXME: create and use variable
+    AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = var.azure_apim_subscription_product_name
     AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
