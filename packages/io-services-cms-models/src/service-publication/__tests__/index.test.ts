@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ItemType, getFsmClient } from "..";
 import {
   FSMStore,
+  FsmItemNotFoundError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
@@ -201,7 +202,7 @@ describe("apply", () => {
       id: aServiceId,
       actions: [() => fsmClient.unpublish(aServiceId)],
       expected: undefined,
-      errorType: FsmNoTransitionMatchedError,
+      errorType: FsmItemNotFoundError,
       additionalPreTestFn: undefined,
       additionalPostTestFn: undefined,
     },
@@ -229,6 +230,7 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
       save: vi.fn(),
+      bulkFetch: vi.fn(),
     };
     const mockFsmClient = getFsmClient(mockStore);
 
@@ -251,6 +253,7 @@ describe("apply", () => {
       save: vi.fn(() => {
         return TE.left(new Error());
       }),
+      bulkFetch: vi.fn(),
     };
     const mockFsmClient = getFsmClient(mockStore);
 
