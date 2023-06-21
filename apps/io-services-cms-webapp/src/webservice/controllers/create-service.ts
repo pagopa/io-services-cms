@@ -107,7 +107,7 @@ const createSubscriptionTask = (
       apimClient,
       config.AZURE_APIM_RESOURCE_GROUP,
       config.AZURE_APIM,
-      config.AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME
+      config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME
     ),
     TE.mapLeft(
       (err) =>
