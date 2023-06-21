@@ -321,7 +321,7 @@ function apply(
       store.fetch(id),
       TE.mapLeft((_) => new FsmStoreFetchError()),
       // filter transitions that can be applied to the current item status
-      TE.map(
+      TE.chain(
         flow(
           // We can either find the element in the store or not
           //   we have a O.Some(item) or a O.none respectively
@@ -342,31 +342,23 @@ function apply(
                     tr: T
                   ): tr is T & { from: "*" } => tr.from === EmptyState
                 ),
-                // if no transactions starting from the empty state are found:
-                // return a dummy transaction with the exec() containing a NotFound Error
-                // with the aim of differentiating from a NoTransitionMatched Error
-                (fromEmptyStateTransitions) =>
-                  fromEmptyStateTransitions.length === 0
-                    ? ([
-                        {
-                          exec: () => E.left(new FsmItemNotFoundError(id)),
-                        },
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      ] as any)
-                    : fromEmptyStateTransitions,
+                E.fromPredicate(
+                  // we must have matched at least ONE transition
+                  (matchedTransitions) => matchedTransitions.length > 0,
+                  (_) => new FsmItemNotFoundError(id)
+                ),
                 // bind all data into a lazy implementation of exec
-                RA.map((tr) => ({
-                  exec: (): E.Either<
-                    FsmTransitionExecutionError | FsmItemNotFoundError,
-                    AllResults
-                  > =>
-                    // FIXME: avoid this forcing
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    tr.exec({ args }),
-                })),
-                // the following type lift is to keep the same interface with the Some branch
-                RA.map(E.right)
+                E.map(
+                  RA.map(
+                    (tr) =>
+                      (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                        // FIXME: avoid this forcing
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        tr.exec({ args })
+                  )
+                ),
+                TE.fromEither
               ),
             (item) =>
               pipe(
@@ -386,45 +378,48 @@ function apply(
                     ]),
                     // match&decode
                     (codec) => codec.decode(item),
-
                     // for those transitions whose from state has been matched,
                     //  bind all data into a lazy implementation of exec
-                    E.map((current) => ({
-                      exec: (): E.Either<
-                        FsmTransitionExecutionError | FsmItemNotFoundError,
-                        AllResults
-                      > =>
-                        tr.exec({
-                          // FIXME: avoid this forcing
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore
-                          args,
-                          // FIXME: avoid this forcing
-                          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                          // @ts-ignore
-                          current,
-                        }),
-                    }))
+                    E.map(
+                      (current) =>
+                        (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                          tr.exec({
+                            // FIXME: avoid this forcing
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            args,
+                            // FIXME: avoid this forcing
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            current,
+                          })
+                    )
                   )
-                )
+                ),
+                // skip unmatched transitions
+                RA.filter(E.isRight),
+                RA.map((matchedTransitions) => matchedTransitions.right),
+                E.fromPredicate(
+                  // we must have matched at least ONE transition
+                  (matchedTransitions) => matchedTransitions.length > 0,
+                  (_) => new FsmNoTransitionMatchedError()
+                ),
+                TE.fromEither
               )
-          ),
-          // skip unmatched transitions
-          RA.filter(E.isRight)
+          )
         )
       ),
       // avoid indeterminism: fail if more than a transition is applicable
       TE.filterOrElse(
-        // we must have matched exactly ONE transition
+        // we must have matched exactly ONE transition (no matched transitions condition has been verified above)
         (matchedTransitions) => matchedTransitions.length === 1,
-        (matchedTransitions) =>
-          matchedTransitions.length === 0
-            ? new FsmNoTransitionMatchedError()
-            : new FsmTooManyTransitionsError()
+        (_) => new FsmTooManyTransitionsError()
       ),
       // apply the only transition to turn the element in the new state
-      TE.map((_) => _[0].right.exec()),
-      TE.chain(TE.fromEither),
+      TE.map((matchedTransitions) => matchedTransitions[0]),
+      TE.map((exec) => exec()),
+      TE.map(TE.fromEither),
+      TE.flattenW,
       // save new status in the store
       TE.chain((newItem) =>
         pipe(
