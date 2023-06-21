@@ -156,10 +156,9 @@ locals {
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
 
     # Apim connection
-    AZURE_APIM                                   = var.azure_apim
-    AZURE_APIM_RESOURCE_GROUP                    = var.azure_apim_resource_group
-    AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME = "io-services-api" # FIXME: create and use variable
-    AZURE_SUBSCRIPTION_ID                        = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM                = var.azure_apim
+    AZURE_APIM_RESOURCE_GROUP = var.azure_apim_resource_group
+    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
