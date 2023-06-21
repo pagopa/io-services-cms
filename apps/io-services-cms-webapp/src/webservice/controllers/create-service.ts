@@ -14,8 +14,19 @@ import {
   AzureUserAttributesManageMiddleware,
   IAzureUserAttributesManage,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
+import {
+  ClientIp,
+  ClientIpMiddleware,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
-import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  withRequestMiddlewares,
+  wrapRequestHandler,
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import {
+  checkSourceIpForHandler,
+  clientIPAndCidrTuple as ipTuple,
+} from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
@@ -29,8 +40,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
-import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -55,6 +66,7 @@ type HandlerResponseTypes =
 
 type ICreateServiceHandler = (
   auth: IAzureApiAuthorization,
+  clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
   servicePayload: ServiceRequestPayload
@@ -158,7 +170,7 @@ export const makeCreateServiceHandler =
     apimClient,
     config,
   }: Dependencies): ICreateServiceHandler =>
-  (_auth, attrs, userEmail, servicePayload) => {
+  (_auth, __, attrs, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
@@ -188,20 +200,22 @@ export const makeCreateServiceHandler =
 
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: ICreateServiceHandler) =>
-    pipe(
-      handler,
-      // TODO: implement ip filter
-      // (handler) =>
-      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-      withRequestMiddlewares(
-        // only allow requests by users belonging to certain groups
-        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-        // check manage key
-        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
-        // extract the user email from the request headers
-        UserEmailMiddleware(),
-        // validate the reuqest body to be in the expected shape
-        RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+  (handler: ICreateServiceHandler) => {
+    const middlewaresWrap = withRequestMiddlewares(
+      // only allow requests by users belonging to certain groups
+      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      ClientIpMiddleware,
+      // check manage key
+      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      // extract the user email from the request headers
+      UserEmailMiddleware(),
+      // validate the reuqest body to be in the expected shape
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+    );
+    return wrapRequestHandler(
+      middlewaresWrap(
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, c, u, __, ___) => ipTuple(c, u))
       )
     );
+  };
