@@ -3,6 +3,10 @@ import {
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
+import {
+  SUBSCRIPTION_CIDRS_COLLECTION_NAME,
+  SubscriptionCIDRsModel,
+} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
@@ -13,6 +17,7 @@ import {
   toAzureFunctionHandler,
 } from "./lib/azure/adapters";
 import { getDatabase } from "./lib/azure/cosmos";
+import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
@@ -22,11 +27,11 @@ import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { createWebServer } from "./webservice";
 
-import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
+import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -53,6 +58,10 @@ const servicePublicationStore = stores.createCosmosStore(
   ServicePublication.ItemType
 );
 
+const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
+  legacyCosmosDbInstance.container(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
+);
+
 // Get an instance of ServiceLifecycle client
 const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
@@ -69,6 +78,7 @@ export const httpEntryPoint = pipe(
     config,
     fsmLifecycleClient,
     fsmPublicationClient,
+    subscriptionCIDRsModel,
   },
   createWebServer,
   expressToAzureFunction

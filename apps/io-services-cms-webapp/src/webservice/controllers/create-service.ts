@@ -4,11 +4,16 @@ import {
 } from "@azure/arm-apimanagement";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import {
+  AzureUserAttributesManageMiddleware,
+  IAzureUserAttributesManage,
+} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { withRequestMiddlewares } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
@@ -50,6 +55,7 @@ type HandlerResponseTypes =
 
 type ICreateServiceHandler = (
   auth: IAzureApiAuthorization,
+  attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
   servicePayload: ServiceRequestPayload
 ) => Promise<HandlerResponseTypes>;
@@ -152,7 +158,7 @@ export const makeCreateServiceHandler =
     apimClient,
     config,
   }: Dependencies): ICreateServiceHandler =>
-  (_auth, userEmail, servicePayload) => {
+  (_auth, attrs, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
@@ -180,18 +186,22 @@ export const makeCreateServiceHandler =
     )();
   };
 
-export const applyRequestMiddelwares = (handler: ICreateServiceHandler) =>
-  pipe(
-    handler,
-    // TODO: implement ip filter
-    // (handler) =>
-    //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
-    withRequestMiddlewares(
-      // only allow requests by users belonging to certain groups
-      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-      // extract the user email from the request headers
-      UserEmailMiddleware(),
-      // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
-    )
-  );
+export const applyRequestMiddelwares =
+  (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
+  (handler: ICreateServiceHandler) =>
+    pipe(
+      handler,
+      // TODO: implement ip filter
+      // (handler) =>
+      //  checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
+      withRequestMiddlewares(
+        // only allow requests by users belonging to certain groups
+        AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+        // check manage key
+        AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+        // extract the user email from the request headers
+        UserEmailMiddleware(),
+        // validate the reuqest body to be in the expected shape
+        RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+      )
+    );
