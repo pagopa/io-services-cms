@@ -8,6 +8,7 @@ import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
+  FsmItemNotFoundError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
@@ -31,13 +32,14 @@ type ToRecord<Q> = Q extends []
 // commodity aliases
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
-type AllFsmErrors =
+export type AllFsmErrors =
   | FsmNoApplicableTransitionError
   | FsmNoTransitionMatchedError
   | FsmTooManyTransitionsError
   | FsmTransitionExecutionError
   | FsmStoreFetchError
-  | FsmStoreSaveError;
+  | FsmStoreSaveError
+  | FsmItemNotFoundError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
@@ -340,9 +342,24 @@ function apply(
                     tr: T
                   ): tr is T & { from: "*" } => tr.from === EmptyState
                 ),
+                // if no transactions starting from the empty state are found:
+                // return a dummy transaction with the exec() containing a NotFound Error
+                // with the aim of differentiating from a NoTransitionMatched Error
+                (fromEmptyStateTransitions) =>
+                  fromEmptyStateTransitions.length === 0
+                    ? ([
+                        {
+                          exec: () => E.left(new FsmItemNotFoundError(id)),
+                        },
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      ] as any)
+                    : fromEmptyStateTransitions,
                 // bind all data into a lazy implementation of exec
                 RA.map((tr) => ({
-                  exec: (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                  exec: (): E.Either<
+                    FsmTransitionExecutionError | FsmItemNotFoundError,
+                    AllResults
+                  > =>
                     // FIXME: avoid this forcing
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
@@ -374,7 +391,7 @@ function apply(
                     //  bind all data into a lazy implementation of exec
                     E.map((current) => ({
                       exec: (): E.Either<
-                        FsmTransitionExecutionError,
+                        FsmTransitionExecutionError | FsmItemNotFoundError,
                         AllResults
                       > =>
                         tr.exec({
@@ -392,7 +409,7 @@ function apply(
                 )
               )
           ),
-          // skim unmatched transitions
+          // skip unmatched transitions
           RA.filter(E.isRight)
         )
       ),
@@ -442,4 +459,4 @@ type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
 
 export * as definitions from "./definitions";
-export { getFsmClient, FsmClient, FSM, ItemType };
+export { FSM, FsmClient, ItemType, getFsmClient };
