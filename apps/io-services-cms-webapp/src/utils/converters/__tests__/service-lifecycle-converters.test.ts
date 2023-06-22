@@ -1,13 +1,12 @@
-import { test, expect, describe } from "vitest";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { describe, expect, test } from "vitest";
+import { FiscalCode } from "../../../generated/api/FiscalCode";
+import { ServicePayload } from "../../../generated/api/ServicePayload";
 import {
-  itemToResponse,
   payloadToItem,
   toServiceStatus,
 } from "../service-lifecycle-converters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ServicePayload } from "../../../generated/api/ServicePayload";
-import { FiscalCode } from "../../../generated/api/FiscalCode";
 
 const fsm: ServiceLifecycle.ItemType["fsm"] = {
   state: "rejected",

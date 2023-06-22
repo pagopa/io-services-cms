@@ -152,7 +152,7 @@ describe("editService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(500); // FIXME: should be 404 (or 409)
+    expect(response.statusCode).toBe(404);
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
@@ -162,19 +162,19 @@ describe("editService", () => {
     })();
 
     const response = await request(app)
-      .put("/api/services/s4")
+      .put("/api/services/s1")
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(500); // FIXME: should be 409
+    expect(response.statusCode).toBe(409);
   });
 
   it("should not allow the operation without right group", async () => {
     const response = await request(app)
-      .put("/api/services/s4")
+      .put("/api/services/s1")
       .send(aServicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", "OtherGroup")

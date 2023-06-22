@@ -9,9 +9,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ItemType, getFsmClient } from "..";
 import {
   FSMStore,
+  FsmItemNotFoundError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
+  WithState,
   stores,
 } from "../../lib/fsm";
 import { Service } from "../../service-lifecycle/definitions";
@@ -201,7 +203,7 @@ describe("apply", () => {
       id: aServiceId,
       actions: [() => fsmClient.unpublish(aServiceId)],
       expected: undefined,
-      errorType: FsmNoTransitionMatchedError,
+      errorType: FsmItemNotFoundError,
       additionalPreTestFn: undefined,
       additionalPostTestFn: undefined,
     },
@@ -229,7 +231,7 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
       save: vi.fn(),
-    };
+    } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.release(aServiceId, {
@@ -251,7 +253,7 @@ describe("apply", () => {
       save: vi.fn(() => {
         return TE.left(new Error());
       }),
-    };
+    } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
     const result = await mockFsmClient.release(aServiceId, {
@@ -263,5 +265,51 @@ describe("apply", () => {
     }
     const { left: value } = result;
     expect(value).toBeInstanceOf(FsmStoreSaveError);
+  });
+});
+
+describe("override", () => {
+  it("should fails when stored item is not valid", async () => {
+    store
+      .inspect()
+      .set(
+        aServiceId,
+        aService as unknown as WithState<string, Record<string, unknown>>
+      );
+    const item = {} as unknown as ItemType;
+    const result = await fsmClient.override(aServiceId, item)();
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left.message).not.empty;
+    }
+  });
+  it("should save item when not exists", async () => {
+    const id = "non-existent_id" as NonEmptyString;
+    const item = {
+      ...aService,
+      id,
+      fsm: { state: "unpublished" },
+    } as WithState<"unpublished", Service>;
+    const result = await fsmClient.override(id, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(store.inspect().get(id)).eq(result.right);
+      expect(result.right.fsm.state).eq("unpublished");
+    }
+  });
+  it("should save a valid item", async () => {
+    store
+      .inspect()
+      .set(aServiceId, { ...aService, fsm: { state: "unpublished" } });
+    const item = {
+      ...aService,
+      fsm: { state: "published" },
+    } as WithState<"published", Service>;
+    const result = await fsmClient.override(aServiceId, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(store.inspect().get(aServiceId)).eq(result.right);
+      expect(result.right.fsm.state).eq("published");
+    }
   });
 });

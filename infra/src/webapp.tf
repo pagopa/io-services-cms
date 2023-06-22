@@ -156,25 +156,22 @@ locals {
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
 
     # Apim connection
-    AZURE_APIM                                   = var.azure_apim
-    AZURE_APIM_RESOURCE_GROUP                    = var.azure_apim_resource_group
-    AZURE_APIM_DEFAULT_SUBSCRIPTION_PRODUCT_NAME = "io-services-api" # FIXME: create and use variable
-    AZURE_SUBSCRIPTION_ID                        = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM                = var.azure_apim
+    AZURE_APIM_RESOURCE_GROUP = var.azure_apim_resource_group
+    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
     AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
     # PostgreSQL 
-    REVIEWER_DB_HOST         = module.postgres_flexible_server_private.fqdn
-    REVIEWER_DB_NAME         = var.reviewer_db_name
-    REVIEWER_DB_PASSWORD     = azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
-    REVIEWER_DB_PORT         = module.postgres_flexible_server_private.connection_port
-    REVIEWER_DB_SCHEMA       = var.reviewer_db_schema
-    REVIEWER_DB_TABLE        = var.reviewer_db_table
-    REVIEWER_DB_USER         = module.postgres_flexible_server_private.administrator_login
-    REVIEWER_DB_IDLE_TIMEOUT = 30000 # FIXME: create and use variable
-    REVIEWER_DB_READ_MAX_ROW = 50    # FIXME: create and use variable
+    REVIEWER_DB_HOST     = module.postgres_flexible_server_private.fqdn
+    REVIEWER_DB_NAME     = var.reviewer_db_name
+    REVIEWER_DB_PASSWORD = azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
+    REVIEWER_DB_PORT     = module.postgres_flexible_server_private.connection_port
+    REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
+    REVIEWER_DB_TABLE    = var.reviewer_db_table
+    REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
 
     # Legacy data
     LEGACY_COSMOSDB_CONNECTIONSTRING          = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
