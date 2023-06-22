@@ -60,6 +60,8 @@ const ServiceMetadata = t.intersection([
     tokenName: NonEmptyString,
     tosUrl: NonEmptyString,
     webUrl: NonEmptyString,
+    category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
+    custom_special_flow: NonEmptyString,
   }),
 ]);
 
