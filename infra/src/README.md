@@ -66,6 +66,7 @@
 | [azurerm_key_vault_secret.azure_client_secret_credential_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.jira_token](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.legacy_cosmosdb_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_monitor_action_group.email](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.slack](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
@@ -101,9 +102,10 @@
 | <a name="input_jira_organization_name_custom_field"></a> [jira\_organization\_name\_custom\_field](#input\_jira\_organization\_name\_custom\_field) | n/a | `string` | `null` | no |
 | <a name="input_jira_project_name"></a> [jira\_project\_name](#input\_jira\_project\_name) | n/a | `string` | `null` | no |
 | <a name="input_jira_username"></a> [jira\_username](#input\_jira\_username) | n/a | `string` | `null` | no |
+| <a name="input_legacy_cosmosdb_container_services"></a> [legacy\_cosmosdb\_container\_services](#input\_legacy\_cosmosdb\_container\_services) | The collection of the database where legacy data is | `string` | `"services"` | no |
+| <a name="input_legacy_cosmosdb_container_services_lease"></a> [legacy\_cosmosdb\_container\_services\_lease](#input\_legacy\_cosmosdb\_container\_services\_lease) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |
 | <a name="input_legacy_cosmosdb_name"></a> [legacy\_cosmosdb\_name](#input\_legacy\_cosmosdb\_name) | The name of the database where legacy data is | `string` | n/a | yes |
-| <a name="input_legacy_cosmosdb_services_collection"></a> [legacy\_cosmosdb\_services\_collection](#input\_legacy\_cosmosdb\_services\_collection) | The collection of the database where legacy data is | `string` | `"services"` | no |
-| <a name="input_legacy_cosmosdb_services_lease_collection"></a> [legacy\_cosmosdb\_services\_lease\_collection](#input\_legacy\_cosmosdb\_services\_lease\_collection) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |
+| <a name="input_legacy_cosmosdb_uri"></a> [legacy\_cosmosdb\_uri](#input\_legacy\_cosmosdb\_uri) | The uri of the database where legacy data is | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |
 | <a name="input_monitor_action_group_email_name"></a> [monitor\_action\_group\_email\_name](#input\_monitor\_action\_group\_email\_name) | The email to send alerts to | `string` | n/a | yes |
 | <a name="input_monitor_action_group_slack_name"></a> [monitor\_action\_group\_slack\_name](#input\_monitor\_action\_group\_slack\_name) | The slack channel to send alerts to | `string` | n/a | yes |

@@ -56,3 +56,4 @@ reviewer_db_table  = "service_review"
 
 # Legacy data
 legacy_cosmosdb_name = "io-p-cosmos-api"
+legacy_cosmosdb_uri  = "https://io-p-cosmos-api.documents.azure.com:443/"
