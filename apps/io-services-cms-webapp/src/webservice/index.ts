@@ -42,6 +42,10 @@ import {
   makePublishServiceHandler,
 } from "./controllers/publish-service";
 import {
+  applyRequestMiddelwares as applyRegenerateServiceKeysRequestMiddelwares,
+  makeRegenerateServiceKeysHandler,
+} from "./controllers/regenerate-service-keys";
+import {
   applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
   makeReviewServiceHandler,
 } from "./controllers/review-service";
@@ -192,6 +196,17 @@ export const createWebServer = ({
         apimClient,
       }),
       applyGetServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
+    )
+  );
+
+  router.put(
+    "/services/:serviceId/keys/:keyType",
+    pipe(
+      makeRegenerateServiceKeysHandler({
+        config,
+        apimClient,
+      }),
+      applyRegenerateServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
