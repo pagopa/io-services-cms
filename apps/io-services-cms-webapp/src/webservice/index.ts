@@ -21,6 +21,10 @@ import {
   makeEditServiceHandler,
 } from "./controllers/edit-service";
 import {
+  applyRequestMiddelwares as applyGetServiceKeysRequestMiddelwares,
+  makeGetServiceKeysHandler,
+} from "./controllers/get-service-keys";
+import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
@@ -177,6 +181,17 @@ export const createWebServer = ({
         apimClient,
       }),
       applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel)
+    )
+  );
+
+  router.get(
+    "/services/:serviceId/keys",
+    pipe(
+      makeGetServiceKeysHandler({
+        config,
+        apimClient,
+      }),
+      applyGetServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
