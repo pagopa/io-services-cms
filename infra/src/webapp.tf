@@ -174,18 +174,17 @@ locals {
     REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
 
     # Legacy data
-    LEGACY_COSMOSDB_CONNECTIONSTRING          = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
-    LEGACY_COSMOSDB_NAME                      = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_SERVICES_COLLECTION       = var.legacy_cosmosdb_services_collection
-    LEGACY_COSMOSDB_SERVICES_LEASE_COLLECTION = var.legacy_cosmosdb_services_lease_collection
+    LEGACY_COSMOSDB_CONNECTIONSTRING         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
+    LEGACY_COSMOSDB_NAME                     = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI                      = var.legacy_cosmosdb_uri
+    LEGACY_COSMOSDB_KEY                      = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_CONTAINER_SERVICES       = var.legacy_cosmosdb_container_services
+    LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE = var.legacy_cosmosdb_container_services_lease
 
     # Queues
     REQUEST_REVIEW_QUEUE          = azurerm_storage_queue.request-review.name
     REQUEST_PUBLICATION_QUEUE     = azurerm_storage_queue.request-publication.name
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
-
-    # Disable functions
-    "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
   }
 }
 
@@ -214,18 +213,18 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
-      "ServiceLifecycleWatcher.Disabled"            = "0"
-      "ServicePublicationWatcher.Disabled"          = "0"
-      "ServiceReviewChecker.Disabled"               = "0"
+      "AzureWebJobs.OnLegacyServiceChange.Disabled"     = "1"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
     }
   )
 
   sticky_app_setting_names = [
     "AzureWebJobs.OnLegacyServiceChange.Disabled",
-    "ServiceLifecycleWatcher.Disabled",
-    "ServicePublicationWatcher.Disabled",
-    "ServiceReviewChecker.Disabled",
+    "AzureWebJobs.ServiceLifecycleWatcher.Disabled",
+    "AzureWebJobs.ServicePublicationWatcher.Disabled",
+    "AzureWebJobs.ServiceReviewChecker.Disabled",
   ]
 
   subnet_id = module.app_snet.id
@@ -256,10 +255,10 @@ module "webapp_functions_app_staging_slot" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.OnLegacyServiceChange.Disabled" = "1"
-      "ServiceLifecycleWatcher.Disabled"            = "1"
-      "ServicePublicationWatcher.Disabled"          = "1"
-      "ServiceReviewChecker.Disabled"               = "1"
+      "AzureWebJobs.OnLegacyServiceChange.Disabled"     = "1"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
     }
   )
 
