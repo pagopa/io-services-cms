@@ -1,7 +1,7 @@
 {
   "bindings": [
     {
-      "schedule": "* * * * *",
+      "schedule": "0 9-18 * * 1-5",
       "name": "serviceReviewCheckerTimer",
       "type": "timerTrigger",
       "direction": "in"
