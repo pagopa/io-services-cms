@@ -119,6 +119,7 @@ const aService = pipe(
       metadata: {
         scope: "LOCAL",
       },
+      authorized_cidrs:["127.0.0.1"],
     },
   },
   Service.decode,

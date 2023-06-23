@@ -617,6 +617,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FiscalCode'
+        authorized_cidrs:
+          description: >-
+            Allowed source IPs or CIDRs for this service.
+
+            When empty, every IP address it's authorized to call the IO API on
+            behalf of the service.
+          type: array
+          items:
+            $ref: '#/components/schemas/Cidr'
         max_allowed_payment_amount:
           type: integer
           format: int32
@@ -779,6 +788,10 @@ components:
     SubscriptionKeyType:
       type: string
       enum: [primary, secondary]
+    Cidr:
+      type: string
+      description: Describes a single IP or a range of IPs.
+      pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
     ResponseError:
       type: object
       properties:

@@ -22,6 +22,7 @@ export const itemToResponse = ({
     scope: toScopeType(data.metadata.scope),
     category: toCategoryType(data.metadata.category),
   },
+  authorized_cidrs: data.authorized_cidrs,
 });
 
 export const toServiceStatusType = (

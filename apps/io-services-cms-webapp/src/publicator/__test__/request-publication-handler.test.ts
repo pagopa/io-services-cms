@@ -33,6 +33,7 @@ const aService = {
       fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
 } as unknown as ServiceLifecycle.definitions.Service;
 

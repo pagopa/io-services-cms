@@ -34,6 +34,7 @@ const aService = {
       fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs:[],
   },
   last_update: new Date(atimestamp).toISOString(),
 } as unknown as ServiceLifecycle.definitions.Service;

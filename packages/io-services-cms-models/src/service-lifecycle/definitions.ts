@@ -3,6 +3,7 @@ import {
   FiscalCode,
   NonEmptyString,
   OrganizationFiscalCode,
+  PatternString,
 } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import {
@@ -18,6 +19,11 @@ export const MaxAllowedAmount = t.union([
   ),
   t.literal(9999999999),
 ]);
+
+export type Cidr = t.TypeOf<typeof Cidr>;
+export const Cidr = PatternString(
+  "^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+);
 
 const OrganizationData = t.intersection([
   t.type({
@@ -40,6 +46,7 @@ const ServiceData = t.type({
     MaxAllowedAmount,
     0 as MaxAllowedAmount
   ),
+  authorized_cidrs: withDefault(t.array(Cidr), []),
 });
 
 const ServiceMetadata = t.intersection([
