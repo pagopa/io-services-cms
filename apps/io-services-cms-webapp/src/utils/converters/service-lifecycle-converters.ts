@@ -3,7 +3,7 @@ import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
-import { ScopeEnum } from "../../generated/api/ServiceMetadata";
+import { CategoryEnum, ScopeEnum } from "../../generated/api/ServiceMetadata";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 
 export const payloadToItem = (
@@ -14,6 +14,7 @@ export const payloadToItem = (
       ServiceRequestPayload["max_allowed_payment_amount"]
     >,
     authorized_recipients = [] as ReadonlyArray<FiscalCode>,
+    metadata = {} as ServiceRequestPayload["metadata"],
     ...data
   }: ServiceRequestPayload,
   sandboxFiscalCode: FiscalCode
@@ -24,6 +25,7 @@ export const payloadToItem = (
     require_secure_channel,
     max_allowed_payment_amount,
     authorized_recipients: [sandboxFiscalCode, ...authorized_recipients],
+    metadata: { ...metadata, category: toCategoryType(metadata.category) },
   },
 });
 
@@ -37,7 +39,11 @@ export const itemToResponse = ({
   name: data.name,
   description: data.description,
   organization: data.organization,
-  metadata: { ...data.metadata, scope: toScopeType(data.metadata.scope) },
+  metadata: {
+    ...data.metadata,
+    scope: toScopeType(data.metadata.scope),
+    category: toCategoryType(data.metadata.category),
+  },
   authorized_recipients: data.authorized_recipients,
 });
 
@@ -74,5 +80,17 @@ export const toScopeType = (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = s;
       return ScopeEnum[s];
+  }
+};
+
+export const toCategoryType = (
+  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"]
+): CategoryEnum => {
+  switch (s) {
+    case "STANDARD":
+    case "SPECIAL":
+      return CategoryEnum[s];
+    default:
+      return CategoryEnum.STANDARD;
   }
 };
