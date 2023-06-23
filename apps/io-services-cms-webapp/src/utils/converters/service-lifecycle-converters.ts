@@ -1,4 +1,5 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { Cidr } from "../../generated/api/Cidr";
 import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
@@ -14,6 +15,7 @@ export const payloadToItem = (
       ServiceRequestPayload["max_allowed_payment_amount"]
     >,
     authorized_recipients = [] as ReadonlyArray<FiscalCode>,
+    authorized_cidrs = [] as ReadonlyArray<Cidr>,
     metadata = {} as ServiceRequestPayload["metadata"],
     ...data
   }: ServiceRequestPayload,
@@ -25,6 +27,7 @@ export const payloadToItem = (
     require_secure_channel,
     max_allowed_payment_amount,
     authorized_recipients: [sandboxFiscalCode, ...authorized_recipients],
+    authorized_cidrs: [...authorized_cidrs],
     metadata: { ...metadata, category: toCategoryType(metadata.category) },
   },
 });
@@ -45,6 +48,7 @@ export const itemToResponse = ({
     category: toCategoryType(data.metadata.category),
   },
   authorized_recipients: data.authorized_recipients,
+  authorized_cidrs: data.authorized_cidrs,
 });
 
 export const toServiceStatus = (
