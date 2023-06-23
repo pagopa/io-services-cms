@@ -21,6 +21,10 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { AzureClientSecretCredential } from "../../config";
+import {
+  SubscriptionKeyType,
+  SubscriptionKeyTypeEnum,
+} from "../../generated/api/SubscriptionKeyType";
 import { subscriptionsExceptManageOneApimFilter } from "../../utils/api-keys";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
@@ -287,6 +291,55 @@ export function getUserSubscriptions(
 
       return subscriptionList;
     }, E.toError),
+    chainApimMappedError
+  );
+}
+
+/**
+ * Regenerates primary or secondary key of an existing subscription
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apim
+ * @param serviceId
+ * @param keyType
+ * @returns updated subscription
+ */
+export function regenerateSubscriptionKey(
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  serviceId: string,
+  keyType: SubscriptionKeyType
+) {
+  return pipe(
+    TE.tryCatch(() => {
+      switch (keyType) {
+        case SubscriptionKeyTypeEnum.primary:
+          return apimClient.subscription.regeneratePrimaryKey(
+            apimResourceGroup,
+            apim,
+            serviceId
+          );
+        case SubscriptionKeyTypeEnum.secondary:
+          return apimClient.subscription.regenerateSecondaryKey(
+            apimResourceGroup,
+            apim,
+            serviceId
+          );
+        default:
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _: never = keyType;
+          throw new Error(`should not have executed this with ${keyType}`);
+      }
+    }, E.toError),
+    TE.chain(() =>
+      // retrieve updated subscription
+      TE.tryCatch(
+        () => apimClient.subscription.get(apimResourceGroup, apim, serviceId),
+        E.toError
+      )
+    ),
     chainApimMappedError
   );
 }
