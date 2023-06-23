@@ -74,6 +74,7 @@ const aService = {
       fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
   version: "aVersion",
 } as unknown as ServiceLifecycle.definitions.Service;
@@ -218,7 +219,9 @@ describe("Service Review Handler", () => {
       expect(error).toBeDefined();
     }
 
-    expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(aService.id);
+    expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
+      aService.id
+    );
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
