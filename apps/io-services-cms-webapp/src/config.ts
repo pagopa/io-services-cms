@@ -86,9 +86,12 @@ export const CosmosConfig = t.type({
 
 export type CosmosLegacyConfig = t.TypeOf<typeof CosmosLegacyConfig>;
 export const CosmosLegacyConfig = t.type({
-  COSMOSDB_LEGACY_URI: NonEmptyString,
-  COSMOSDB_LEGACY_NAME: NonEmptyString,
-  COSMOSDB_LEGACY_KEY: NonEmptyString,
+  LEGACY_COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+  LEGACY_COSMOSDB_NAME: NonEmptyString,
+  LEGACY_COSMOSDB_URI: NonEmptyString,
+  LEGACY_COSMOSDB_KEY: NonEmptyString,
+  LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
+  LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE: NonEmptyString,
 });
 
 export const AzureClientSecretCredential = t.type({
