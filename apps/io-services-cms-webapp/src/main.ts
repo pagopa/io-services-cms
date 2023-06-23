@@ -8,6 +8,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
@@ -145,6 +146,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 
 export const onLegacyServiceChangeEntryPoint = pipe(
   onLegacyServiceChangeHandler,
+  RTE.fromReaderEither,
   processBatchOf(LegacyService),
   setBindings((results) => ({
     requestSyncCms: pipe(

@@ -4,15 +4,15 @@ import {
   ServicePublication,
 } from "@io-services-cms/models";
 import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as E from "fp-ts/lib/Either";
+import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export const LegacyService = t.intersection([
   Service,
   t.partial({
-    csmTag: t.boolean,
+    cmsTag: t.boolean,
   }),
 ]);
 export type LegacyService = t.TypeOf<typeof LegacyService>;
@@ -35,14 +35,14 @@ const legacyToCms = (item: Service): Queue.RequestSyncCmsItem => {
   }
 };
 
-export const handler: RTE.ReaderTaskEither<
+export const handler: RE.ReaderEither<
   { item: LegacyService },
   Error,
   NoAction | RequestSyncCmsAction
 > = ({ item }) => {
-  if (!!item.csmTag && item.csmTag) {
-    return pipe(item, onLegacyServiceChangeHandler, TE.right);
+  if (item.cmsTag) {
+    return pipe(item, onLegacyServiceChangeHandler, E.right);
   } else {
-    return TE.right(noAction);
+    return E.right(noAction);
   }
 };
