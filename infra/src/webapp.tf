@@ -186,6 +186,7 @@ locals {
     REQUEST_PUBLICATION_QUEUE     = azurerm_storage_queue.request-publication.name
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
+    REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
 
     # Disable functions
     "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
