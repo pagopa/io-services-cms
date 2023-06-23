@@ -26,6 +26,13 @@
       "name": "requestPublication",
       "type": "queue",
       "direction": "out"
+    },
+    {
+      "queueName": "%REQUEST_HISTORICIZATION_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestHistoricization",
+      "type": "queue",
+      "direction": "out"
     }
   ],
   "retry": {
