@@ -44,3 +44,13 @@ resource "azurerm_storage_queue" "request-historicization-poison" {
   name                 = "request-historicization-poison"
   storage_account_name = module.storage_account.name
 }
+
+resource "azurerm_storage_queue" "request-sync-legacy" {
+  name                 = "request-sync-legacy"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-sync-legacy-poison" {
+  name                 = "request-sync-legacy-poison"
+  storage_account_name = module.storage_account.name
+}
