@@ -33,12 +33,12 @@ const aPublicationService = {
 describe("On Service Lifecycle Change Handler", () => {
   it.each`
     scenario                                     | item                                                                 | expected
-    ${"request-review"}                          | ${{ ...aService, version: "aVersion", fsm: { state: "submitted" } }} | ${{ requestReview: { ...aService, version: "aVersion" } }}
-    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "draft" } }}                          | ${{}}
-    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}    | ${{ requestPublication: { ...aPublicationService, autoPublish: true } }}
-    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                       | ${{ requestPublication: { ...aPublicationService, autoPublish: false } }}
-    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "rejected" } }}                       | ${{}}
-    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "deleted" } }}                        | ${{}}
+    ${"request-review"}                          | ${{ ...aService, version: "aVersion", fsm: { state: "submitted" } }} | ${{ requestReview: { ...aService, version: "aVersion" }, requestHistoricization: { ...aService, fsm: { state: "submitted" } } }}
+    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "draft" } }}                          | ${{ requestHistoricization: { ...aService, fsm: { state: "draft" } } }}
+    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}    | ${{ requestPublication: { ...aPublicationService, autoPublish: true }, requestHistoricization: { ...aService, fsm: { state: "approved", autoPublish: true } } }}
+    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                       | ${{ requestPublication: { ...aPublicationService, autoPublish: false }, requestHistoricization: { ...aService, fsm: { state: "approved" } } }}
+    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "rejected" } }}                       | ${{ requestHistoricization: { ...aService, fsm: { state: "rejected" } } }}
+    ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "deleted" } }}                        | ${{ requestHistoricization: { ...aService, fsm: { state: "deleted" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({
       MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
@@ -47,7 +47,31 @@ describe("On Service Lifecycle Change Handler", () => {
     })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
-      expect(res.right).toStrictEqual(expected);
+      const actual = res.right;
+      expect(actual.requestHistoricization.last_update).not.empty;
+      const {
+        requestHistoricization: { ...actualRequestHistoricization },
+        ...actualOthersActions
+      } = actual;
+      const {
+        requestHistoricization: { ...expectedRequestHistoricization },
+        ...expectedOthersActions
+      } = expected;
+      expect({
+        requestHistoricization: {
+          ...actualRequestHistoricization,
+          last_update: null,
+          version: null,
+        },
+        ...actualOthersActions,
+      }).toStrictEqual({
+        requestHistoricization: {
+          ...expectedRequestHistoricization,
+          last_update: null,
+          version: null,
+        },
+        ...expectedOthersActions,
+      });
     }
   });
 });

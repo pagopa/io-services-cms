@@ -126,6 +126,12 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),
+    requestHistoricization: pipe(
+      results,
+      RA.map(RR.lookup("requestHistoricization")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
   })),
   toAzureFunctionHandler
 );

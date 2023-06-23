@@ -6,9 +6,11 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 
-type Actions = "requestReview" | "requestPublication";
+type Actions =
+  | "requestReview"
+  | "requestPublication"
+  | "requestHistoricization";
 
-type NoAction = typeof noAction;
 type Action<A extends Actions, B> = Record<A, B>;
 
 type RequestReviewAction = Action<"requestReview", Queue.RequestReviewItem>;
@@ -20,7 +22,20 @@ type RequestPublicationAction = Action<
 >;
 type OnApproveActions = Action<"requestPublication", unknown>;
 
-const noAction = {};
+type RequestHistoricizationAction = Action<
+  "requestHistoricization",
+  Queue.RequestHistoricizationItem
+>;
+
+const onAnyChangesHandler = (
+  item: ServiceLifecycle.ItemType
+): RequestHistoricizationAction => ({
+  requestHistoricization: {
+    ...item,
+    last_update:
+      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
+  },
+});
 
 const onSubmitHandler = (
   item: ServiceLifecycle.ItemType
@@ -45,22 +60,35 @@ const onApproveHandler =
     },
   });
 
+// FIXME: fix request historicization action (avoid to call onAnyChangesHandler foreach case)
 export const handler =
   (
     config: IConfig
   ): RTE.ReaderTaskEither<
     { item: ServiceLifecycle.ItemType },
     Error,
-    NoAction | OnSubmitActions | OnApproveActions
+    | RequestHistoricizationAction
+    | ((OnSubmitActions | OnApproveActions) & RequestHistoricizationAction)
   > =>
   ({ item }) => {
     // eslint-disable-next-line sonarjs/no-small-switch
     switch (item.fsm.state) {
       case "submitted":
-        return pipe(item, onSubmitHandler, TE.right);
+        return pipe(
+          item,
+          onSubmitHandler,
+          (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
+          TE.right
+        );
       case "approved":
-        return pipe(item, onApproveHandler(config), TE.right);
+        return pipe(
+          item,
+          onApproveHandler(config),
+          (x) => x,
+          (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
+          TE.right
+        );
       default:
-        return TE.right(noAction);
+        return TE.right(onAnyChangesHandler(item));
     }
   };
