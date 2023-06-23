@@ -32,13 +32,14 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
+const ownerId = `/an/owner/${anUserId}`;
 
 const mockApimClient = {
   subscription: {
     get: vi.fn(() =>
       Promise.resolve({
         _etag: "_etag",
-        ownerId: "/an/owner/" + anUserId,
+        ownerId,
       })
     ),
   },
