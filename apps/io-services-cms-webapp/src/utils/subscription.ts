@@ -6,13 +6,20 @@ import {
   IResponseErrorTooManyRequests,
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import { getSubscription } from "../lib/clients/apim-client";
+import {
+  getSubscription,
+  parseOwnerIdFullPath,
+} from "../lib/clients/apim-client";
 import { MANAGE_APIKEY_PREFIX } from "./api-keys";
 
 type ErrorResponses =
@@ -23,6 +30,18 @@ type ErrorResponses =
 
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
   ownerSubscriptionId.startsWith(MANAGE_APIKEY_PREFIX);
+
+const extractOwnerId = (
+  fullPath?: string
+): Either<IResponseErrorNotFound, NonEmptyString> =>
+  pipe(
+    fullPath,
+    O.fromNullable,
+    O.foldW(
+      () => E.left(ResponseErrorNotFound("Not found", "ownerId not found")),
+      (f) => E.right(pipe(f as NonEmptyString, parseOwnerIdFullPath))
+    )
+  );
 
 /**
  * Using the **API Manage key** as 'Ocp-Apim-Subscription-Key', the Subscription relating to this key will have a name starting with "MANAGE-"
@@ -64,8 +83,15 @@ export const serviceOwnerCheckManageTask = (
       )
     ),
     TE.chainW((serviceSubscription) =>
-      serviceSubscription.ownerId === userId
-        ? TE.right(serviceId)
-        : TE.left(ResponseErrorForbiddenNotAuthorized)
+      pipe(
+        serviceSubscription.ownerId,
+        extractOwnerId,
+        TE.fromEither,
+        TE.chainW((ownerId) =>
+          ownerId === userId
+            ? TE.right(serviceId)
+            : TE.left(ResponseErrorForbiddenNotAuthorized)
+        )
+      )
     )
   );

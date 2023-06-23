@@ -36,7 +36,8 @@ vi.mock("../../../lib/clients/apim-client", async () => {
 
 const apiGetServiceKeysFullPath = "/api/services/aServiceId/keys";
 const aManageSubscriptionId = "MANAGE-123";
-const ownerId = "123";
+const userId = "123";
+const ownerId = `/an/owner/${userId}`;
 const primaryKey = "any-primary-key-value";
 const secondaryKey = "any-secondary-key-value";
 
@@ -120,7 +121,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(getSubscription).toHaveBeenCalledTimes(2);
@@ -148,7 +149,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(getSubscription).toHaveBeenCalledTimes(2);
@@ -170,7 +171,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(getSubscription).toHaveBeenCalledTimes(2);
@@ -188,7 +189,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(getSubscription).toHaveBeenCalledTimes(1);
@@ -201,7 +202,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(getSubscription).not.toHaveBeenCalled();
@@ -216,7 +217,7 @@ describe("getServiceKeys", () => {
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", ownerId)
+      .set("x-user-id", userId)
       .set("x-subscription-id", aNotManageSubscriptionId);
 
     expect(getSubscription).not.toHaveBeenCalled();
