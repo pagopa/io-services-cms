@@ -1,5 +1,15 @@
 # io-services-cms-models
 
+## 1.10.0
+
+### Minor Changes
+
+- c0b772f: ADD category and custom-special_flow parameter on service.metadata
+- 9ebf478: add override action to both Lifecycle and Publication FSM
+- 559fc1d: Add Legacy Service watcher entry point and its handler
+- 08047af: Improve APIs error response codes
+- 1c75484: GetServices with bulkFetch
+
 ## 1.9.0
 
 ### Minor Changes
