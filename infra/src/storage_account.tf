@@ -54,3 +54,13 @@ resource "azurerm_storage_queue" "request-sync-legacy-poison" {
   name                 = "request-sync-legacy-poison"
   storage_account_name = module.storage_account.name
 }
+
+resource "azurerm_storage_queue" "request-sync-cms" {
+  name                 = "request-sync-cms"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-sync-cms-poison" {
+  name                 = "request-sync-cms-poison"
+  storage_account_name = module.storage_account.name
+}
