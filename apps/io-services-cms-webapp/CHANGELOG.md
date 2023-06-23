@@ -1,5 +1,30 @@
 # io-services-cms-webapp
 
+## 1.15.0
+
+### Minor Changes
+
+- c0b772f: ADD category and custom-special_flow parameter on service.metadata
+- 03c7925: Add Manage Key Middleware in Controllers, check caller user request serviceId ownership
+- 559fc1d: Add Legacy Service watcher entry point and its handler
+- 3b8143f: check source ip
+- 08047af: Improve APIs error response codes
+- 23a35fa: Fix OwnerId match issue on serviceOwnerCheckManageTask
+- bbd4ae8: API Regenerate service keys
+- 1c75484: GetServices with bulkFetch
+- 319af84: API Get service keys
+
+### Patch Changes
+
+- 15446e3: Rename on-service-lifecycle-change watcher file
+- 7a74235: Update ServiceReviewChecker cron expression
+- Updated dependencies [c0b772f]
+- Updated dependencies [9ebf478]
+- Updated dependencies [559fc1d]
+- Updated dependencies [08047af]
+- Updated dependencies [1c75484]
+  - @io-services-cms/models@1.10.0
+
 ## 1.14.0
 
 ### Minor Changes
