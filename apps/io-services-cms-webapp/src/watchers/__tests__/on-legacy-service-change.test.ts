@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { LegacyService, handler } from "../on-legacy-service-change";
 
 const aLegacyService = {
-  authorized_cidrs: ["192.168.1.2"],
+  authorized_cidrs: ["127.0.0.1"],
   authorized_recipients: ["AAAAAA01B02C123D"],
   department_name: "department",
   organization_fiscal_code: "01234567890",
