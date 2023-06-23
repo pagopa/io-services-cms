@@ -7,8 +7,8 @@
       "name": "documents",
       "connectionStringSetting": "LEGACY_COSMOSDB_CONNECTIONSTRING",
       "databaseName": "%LEGACY_COSMOSDB_NAME%",
-      "collectionName": "%LEGACY_COSMOSDB_SERVICES_COLLECTION%",
-      "leaseCollectionName": "%LEGACY_COSMOSDB_SERVICES_LEASE_COLLECTION%",
+      "collectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES%",
+      "leaseCollectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
     }
