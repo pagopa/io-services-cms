@@ -8,6 +8,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
@@ -25,10 +26,13 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
-import { createWebServer } from "./webservice";
-
+import {
+  LegacyService,
+  handler as onLegacyServiceChangeHandler,
+} from "./watchers/on-legacy-service-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+import { createWebServer } from "./webservice";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
@@ -133,6 +137,21 @@ export const onServicePublicationChangeEntryPoint = pipe(
     requestHistoricization: pipe(
       results,
       RA.map(RR.lookup("requestHistoricization")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onLegacyServiceChangeEntryPoint = pipe(
+  onLegacyServiceChangeHandler,
+  RTE.fromReaderEither,
+  processBatchOf(LegacyService),
+  setBindings((results) => ({
+    requestSyncCms: pipe(
+      results,
+      RA.map(RR.lookup("requestSyncCms")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

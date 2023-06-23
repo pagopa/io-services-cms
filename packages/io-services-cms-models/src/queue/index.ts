@@ -1,6 +1,8 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import { Service } from "../service-lifecycle/definitions";
+import { ItemType as LifecycleItemType } from "../service-lifecycle";
+import { ItemType as PublicationItemType } from "../service-publication";
 
 export type RequestReviewItem = t.TypeOf<typeof RequestReviewItem>;
 export const RequestReviewItem = t.intersection([
@@ -27,3 +29,5 @@ export const RequestHistoricizationItem = t.intersection([
     last_update: NonEmptyString, // last_update required
   }),
 ]);
+
+export type RequestSyncCmsItem = LifecycleItemType | PublicationItemType;

@@ -11,6 +11,13 @@
       "leaseCollectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true
+    },
+    {
+      "queueName": "%REQUEST_SYNC_CMS_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestSyncCms",
+      "type": "queue",
+      "direction": "out"
     }
   ],
   "scriptFile": "../dist/main.js",

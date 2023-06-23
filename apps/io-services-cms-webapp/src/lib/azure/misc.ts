@@ -1,9 +1,9 @@
 import { Context } from "@azure/functions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
@@ -93,8 +93,8 @@ export const withJsonInput =
  *          collected into an array
  */
 export const processBatchOf =
-  <T>(
-    itemShape: t.Type<T>,
+  <T, U>(
+    itemShape: t.Type<T, U>,
     {
       parallel = true,
       ignoreMalformedItems = false,

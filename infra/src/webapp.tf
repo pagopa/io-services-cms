@@ -218,7 +218,7 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.OnLegacyServiceChange.Disabled"     = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
@@ -226,7 +226,7 @@ module "webapp_functions_app" {
   )
 
   sticky_app_setting_names = [
-    "AzureWebJobs.OnLegacyServiceChange.Disabled",
+    "AzureWebJobs.LegacyServiceWatcher.Disabled",
     "AzureWebJobs.ServiceLifecycleWatcher.Disabled",
     "AzureWebJobs.ServicePublicationWatcher.Disabled",
     "AzureWebJobs.ServiceReviewChecker.Disabled",
@@ -260,7 +260,7 @@ module "webapp_functions_app_staging_slot" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.OnLegacyServiceChange.Disabled"     = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
