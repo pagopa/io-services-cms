@@ -9,6 +9,8 @@ import {
   ResponseErrorNotFound,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { Either } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
@@ -29,20 +31,15 @@ type ErrorResponses =
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
   ownerSubscriptionId.startsWith(MANAGE_APIKEY_PREFIX);
 
-const areUserAndOwnerEquals = (
-  ownerId: NonEmptyString,
-  userId: NonEmptyString
-) => ownerId === userId;
-
 const extractOwnerId = (
   fullPath?: string
-): TaskEither<IResponseErrorNotFound, NonEmptyString> =>
+): Either<IResponseErrorNotFound, NonEmptyString> =>
   pipe(
     fullPath,
     O.fromNullable,
     O.foldW(
-      () => TE.left(ResponseErrorNotFound("Not found", "ownerId not found")),
-      (f) => TE.right(pipe(f as NonEmptyString, parseOwnerIdFullPath))
+      () => E.left(ResponseErrorNotFound("Not found", "ownerId not found")),
+      (f) => E.right(pipe(f as NonEmptyString, parseOwnerIdFullPath))
     )
   );
 
@@ -89,8 +86,9 @@ export const serviceOwnerCheckManageTask = (
       pipe(
         serviceSubscription.ownerId,
         extractOwnerId,
+        TE.fromEither,
         TE.chainW((ownerId) =>
-          areUserAndOwnerEquals(ownerId, userId)
+          ownerId === userId
             ? TE.right(serviceId)
             : TE.left(ResponseErrorForbiddenNotAuthorized)
         )
