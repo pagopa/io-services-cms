@@ -11,7 +11,7 @@ Manages Service lifecycle and publication.
 ![architecture](./docs/infra.drawio.svg)
 
 ## Folder structure
-TBD
+TBD need to clear
 
 ## Development
 
