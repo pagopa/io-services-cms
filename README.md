@@ -12,6 +12,7 @@ Manages Service lifecycle and publication.
 
 ## Folder structure
 TBD
+automation test
 
 ## Development
 
