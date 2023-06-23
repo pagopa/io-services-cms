@@ -51,7 +51,7 @@ const mockApimClient = {
     get: vi.fn(() =>
       Promise.resolve({
         _etag: "_etag",
-        ownerId: anUserId,
+        ownerId: "/an/owner/" + anUserId,
       })
     ),
   },

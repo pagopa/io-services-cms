@@ -38,7 +38,7 @@ const mockApimClient = {
     get: vi.fn(() =>
       Promise.resolve({
         _etag: "_etag",
-        ownerId: anUserId,
+        ownerId: "/an/owner/" + anUserId,
       })
     ),
   },
@@ -230,7 +230,6 @@ describe("editService", () => {
     expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
-
 
   it("should edit a service if cidrs array contains 0.0.0.0/0", async () => {
     await serviceLifecycleStore.save("s4", {
