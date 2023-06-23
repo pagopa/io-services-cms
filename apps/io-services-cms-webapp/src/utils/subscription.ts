@@ -29,7 +29,7 @@ type ErrorResponses =
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
   ownerSubscriptionId.startsWith(MANAGE_APIKEY_PREFIX);
 
-const isUserOwnerOfTheService = (
+const areUserAndOwnerEquals = (
   ownerId: NonEmptyString,
   userId: NonEmptyString
 ) => ownerId === userId;
@@ -90,7 +90,7 @@ export const serviceOwnerCheckManageTask = (
         serviceSubscription.ownerId,
         extractOwnerId,
         TE.chainW((ownerId) =>
-          isUserOwnerOfTheService(ownerId, userId)
+          areUserAndOwnerEquals(ownerId, userId)
             ? TE.right(serviceId)
             : TE.left(ResponseErrorForbiddenNotAuthorized)
         )
