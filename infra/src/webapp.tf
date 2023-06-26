@@ -85,18 +85,6 @@ variable "jira_organization_name_custom_field" {
   default     = null
 }
 
-variable "azure_apim" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "azure_apim_resource_group" {
-  type        = string
-  description = ""
-  default     = null
-}
-
 variable "reviewer_db_name" {
   type        = string
   description = ""
@@ -156,9 +144,10 @@ locals {
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
 
     # Apim connection
-    AZURE_APIM                = var.azure_apim
-    AZURE_APIM_RESOURCE_GROUP = var.azure_apim_resource_group
-    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM                           = var.azure_apim
+    AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
+    AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = var.azure_apim_product_id
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
@@ -191,7 +180,7 @@ locals {
 }
 
 module "webapp_functions_app" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.19.1"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.20.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
@@ -242,7 +231,7 @@ module "webapp_functions_app" {
 
 
 module "webapp_functions_app_staging_slot" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.19.1"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.20.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
@@ -280,4 +269,12 @@ module "webapp_functions_app_staging_slot" {
   application_insights_instrumentation_key = data.azurerm_application_insights.application_insights.instrumentation_key
 
   tags = var.tags
+}
+
+resource "azurerm_key_vault_secret" "webapp_fn_key" {
+  name            = "webapp-fn-key"
+  key_vault_id    = module.key_vault_domain.id
+  value           = module.webapp_functions_app.primary_key
+  content_type    = "string"
+  expiration_date = "2025-06-26T23:59:59Z"
 }
