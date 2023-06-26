@@ -1,5 +1,18 @@
 # io-services-cms-webapp
 
+## 1.16.0
+
+### Minor Changes
+
+- 2959721: Service authorized_cidrs
+
+### Patch Changes
+
+- e70a018: add request historicization action to on-service-lifecycle-change handler
+- Updated dependencies [2959721]
+- Updated dependencies [2a43386]
+  - @io-services-cms/models@1.11.0
+
 ## 1.15.0
 
 ### Minor Changes

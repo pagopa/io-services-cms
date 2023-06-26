@@ -1,5 +1,15 @@
 # io-services-cms-models
 
+## 1.11.0
+
+### Minor Changes
+
+- 2959721: Service authorized_cidrs
+
+### Patch Changes
+
+- 2a43386: Fix Store CosmosDB bulk fetch operation
+
 ## 1.10.0
 
 ### Minor Changes
