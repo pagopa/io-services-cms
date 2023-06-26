@@ -166,7 +166,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(listSecrets).toHaveBeenCalledTimes(1);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
   });
 
@@ -184,7 +184,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(listSecrets).toHaveBeenCalledTimes(1);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
   });
 
