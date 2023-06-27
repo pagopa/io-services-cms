@@ -24,7 +24,7 @@ export type RequestHistoricizationItem = t.TypeOf<
   typeof RequestHistoricizationItem
 >;
 export const RequestHistoricizationItem = t.intersection([
-  Service,
+  t.union([LifecycleItemType, PublicationItemType]),
   t.type({
     last_update: NonEmptyString, // last_update required
   }),

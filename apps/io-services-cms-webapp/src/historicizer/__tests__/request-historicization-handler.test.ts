@@ -6,7 +6,7 @@ import {
   buildDocument,
   handleQueueItem,
 } from "../request-historicization-handler";
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle, Queue } from "@io-services-cms/models";
 
 const createContext = () =>
   ({
@@ -16,7 +16,7 @@ const createContext = () =>
   } as unknown as Context);
 
 const atimestamp = 1685529694747;
-const aService = {
+const aGenericItemType = {
   id: "aServiceId",
   data: {
     name: "aServiceName" as NonEmptyString,
@@ -34,12 +34,14 @@ const aService = {
       fiscal_code: "12345678901",
     },
     require_secure_channel: false,
-    authorized_cidrs:[],
+    authorized_cidrs: [],
+  },
+  fsm: {
+    state: "published",
   },
   last_update: new Date(atimestamp).toISOString(),
-} as unknown as ServiceLifecycle.definitions.Service;
+} as unknown as Queue.RequestHistoricizationItem;
 
-const aQueueItem = aService as unknown as Json;
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
 
 describe("Service Historicization Handler", () => {
@@ -53,21 +55,28 @@ describe("Service Historicization Handler", () => {
     }
   });
 
-  it("[handleQueueItem] should handle queue item correctly", async () => {
-    const context = createContext();
+  it.each`
+    scenario         | item                                                    | expected
+    ${"lifecycle"}   | ${{ ...aGenericItemType, fms: { state: "approved" } }}  | ${{ ...aGenericItemType, fms: { state: "approved" } }}
+    ${"publication"} | ${{ ...aGenericItemType, fms: { state: "published" } }} | ${{ ...aGenericItemType, fms: { state: "published" } }}
+  `(
+    "[handleQueueItem] should handle $scenario queue item correctly",
+    async ({ item, expected }) => {
+      const context = createContext();
 
-    await handleQueueItem(context, aQueueItem)();
+      await handleQueueItem(context, item)();
 
-    expect(context.bindings.serviceHistoryDocument).toBe(
-      buildDocument(aService)
-    );
-  });
+      expect(context.bindings.serviceHistoryDocument).toBe(
+        buildDocument(expected)
+      );
+    }
+  );
 
   it("[buildDocument] should build document starting from a service", async () => {
-    const result = buildDocument(aService);
+    const result = buildDocument(aGenericItemType);
     const resultObj = JSON.parse(result);
 
     expect(resultObj.id).toBe(atimestamp.toString());
-    expect(resultObj.serviceId).toBe(aService.id);
+    expect(resultObj.serviceId).toBe(aGenericItemType.id);
   });
 });
