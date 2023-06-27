@@ -71,24 +71,27 @@ export const handler =
     | ((OnSubmitActions | OnApproveActions) & RequestHistoricizationAction)
   > =>
   ({ item }) => {
-    // eslint-disable-next-line sonarjs/no-small-switch
-    switch (item.fsm.state) {
-      case "submitted":
-        return pipe(
-          item,
-          onSubmitHandler,
-          (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
-          TE.right
-        );
-      case "approved":
-        return pipe(
-          item,
-          onApproveHandler(config),
-          (x) => x,
-          (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
-          TE.right
-        );
-      default:
-        return TE.right(onAnyChangesHandler(item));
+    if (item.fsm.lastTransition !== "from Legacy") {
+      switch (item.fsm.state) {
+        case "submitted":
+          return pipe(
+            item,
+            onSubmitHandler,
+            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
+            TE.right
+          );
+        case "approved":
+          return pipe(
+            item,
+            onApproveHandler(config),
+            (x) => x,
+            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
+            TE.right
+          );
+        default:
+          return TE.right(onAnyChangesHandler(item));
+      }
+    } else {
+      return TE.right(onAnyChangesHandler(item));
     }
   };
