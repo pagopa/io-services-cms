@@ -1,10 +1,6 @@
-import {
-  Queue,
-  ServiceHistory,
-  ServicePublication,
-} from "@io-services-cms/models";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { Queue, ServiceHistory } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
 
@@ -18,30 +14,28 @@ type RequestSyncLegacyAction = Action<
 >;
 const noAction = {};
 
-const onReleaseHandler = (
-  item: ServicePublication.ItemType
+const toLegacyService = (
+  serviceHistory: ServiceHistory
+): Queue.RequestSyncLegacyItem => {
+  // TODO: implement mapping
+  return {} as Queue.RequestSyncLegacyItem;
+};
+
+const toRequestSyncLegacyAction = (
+  serviceHistory: ServiceHistory
 ): RequestSyncLegacyAction => ({
-  requestSyncLegacy: {
-    ...item,
-    last_update:
-      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
-  },
+  requestSyncLegacy: toLegacyService(serviceHistory),
 });
 
 export const handler: RE.ReaderEither<
   { item: ServiceHistory },
   Error,
   NoAction | RequestSyncLegacyAction
-> = ({ item }) => {
-  if (item.fsm.lastTransition === "from Legacy") {
-    switch (item.fsm.state) {
-      case "unpublished":
-      case "published":
-        return pipe(item, onReleaseHandler, E.right);
-      default:
-        return E.right(noAction);
-    }
-  } else {
-    return E.right(noAction);
-  }
-};
+> = ({ item }) =>
+  pipe(
+    item,
+    O.fromPredicate((itm) => itm.fsm.lastTransition !== "from Legacy"),
+    O.map(toRequestSyncLegacyAction),
+    O.getOrElse(() => noAction),
+    E.right
+  );
