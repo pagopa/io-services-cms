@@ -187,6 +187,8 @@ module "webapp_functions_app" {
   location            = var.location
   health_check_path   = "/api/v1/info"
 
+  export_keys = true
+
   app_service_plan_info = {
     kind                         = var.functions_kind
     sku_tier                     = var.functions_sku_tier
@@ -271,10 +273,3 @@ module "webapp_functions_app_staging_slot" {
   tags = var.tags
 }
 
-resource "azurerm_key_vault_secret" "webapp_fn_key" {
-  name            = "webapp-fn-key"
-  key_vault_id    = module.key_vault_domain.id
-  value           = module.webapp_functions_app.primary_key
-  content_type    = "string"
-  expiration_date = "2025-06-26T23:59:59Z"
-}

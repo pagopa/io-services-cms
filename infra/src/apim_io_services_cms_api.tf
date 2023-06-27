@@ -13,7 +13,7 @@ resource "azurerm_api_management_named_value" "io_fn_services_cms_key" {
   api_management_name = data.azurerm_api_management.apim.name
   resource_group_name = data.azurerm_api_management.apim.resource_group_name
   display_name        = "io-fn-services-cms-key"
-  value               = azurerm_key_vault_secret.webapp_fn_key.value
+  value               = azurerm_key_vault_secret.webapp_fn_app_key.value
   secret              = "true"
 }
 
@@ -31,7 +31,7 @@ module "api_services_cms" {
   protocols   = ["http", "https"]
   product_ids = [data.azurerm_api_management_product.apim_product_services.product_id]
 
-  service_url = "https://io-p-services-cms-webapp-fn.azurewebsites.net/api/v1"
+  service_url = "https://${module.webapp_functions_app.default_hostname}/api/v1"
 
   subscription_required = true
 

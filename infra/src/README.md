@@ -43,7 +43,7 @@
 | [azurerm_key_vault_access_policy.github_action_ci](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_secret.pgres_flex_admin_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.webapp_fn_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.webapp_fn_app_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_monitor_autoscale_setting.webapp_functions_app_autoscale](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_autoscale_setting) | resource |
 | [azurerm_monitor_metric_alert.webapp_functions_app_health_check](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server_database.reviewer_database](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/postgresql_flexible_server_database) | resource |
@@ -92,7 +92,7 @@
 |------|-------------|------|---------|:--------:|
 | <a name="input_application_insights_name"></a> [application\_insights\_name](#input\_application\_insights\_name) | The common Application Insights name | `string` | n/a | yes |
 | <a name="input_azure_apim"></a> [azure\_apim](#input\_azure\_apim) | APIM resource name. | `string` | `null` | no |
-| <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `"io-services-api"` | no |
+| <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_cidr_subnet"></a> [cidr\_subnet](#input\_cidr\_subnet) | Subnet address space. | `string` | n/a | yes |
 | <a name="input_cidr_subnet_pgres"></a> [cidr\_subnet\_pgres](#input\_cidr\_subnet\_pgres) | Subnet address space. | `string` | n/a | yes |
