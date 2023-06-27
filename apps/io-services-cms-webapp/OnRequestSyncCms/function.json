@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_SYNC_CMS_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestSyncCmsItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onRequestSyncCmsEntryPoint"
+}

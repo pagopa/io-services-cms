@@ -38,6 +38,7 @@ import { createRequestHistoricizationHandler } from "./historicizer/request-hist
 import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
+import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -101,6 +102,11 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(fsmPublicationClient);
+
+export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
+  fsmLifecycleClient,
+  fsmPublicationClient
+);
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
