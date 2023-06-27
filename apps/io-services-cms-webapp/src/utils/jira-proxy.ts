@@ -81,14 +81,14 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     \n\n${formatOptionalStringValue(service.data.description)}
     \n\n----\n\nh3. _Contatti:_
     \n\n*Url di supporto:* ${formatOptionalStringValue(
-      service.data.metadata.supportUrl
+      service.data.metadata.support_url
     )}
     \n\n*Telefono:* ${formatOptionalStringValue(service.data.metadata.phone)}
     \n\n*E-mail:* ${formatOptionalStringValue(service.data.metadata.email)}
     \n\n*Pec:* ${formatOptionalStringValue(service.data.metadata.pec)}
     \n\nh3. _Sicurezza e Privacy:_
     \n\n*Privacy Url:* ${formatOptionalStringValue(
-      service.data.metadata.privacyUrl
+      service.data.metadata.privacy_url
     )}
     \n\nh3. _Dati account ({account_type}):_
     \n\n${formatOptionalStringValue(delegate.email)}
