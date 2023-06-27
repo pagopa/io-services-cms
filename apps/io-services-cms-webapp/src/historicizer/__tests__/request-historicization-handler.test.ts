@@ -1,12 +1,13 @@
-import { describe, it, expect } from "vitest";
 import { Context } from "@azure/functions";
-import { Json } from "io-ts-types";
+import { Queue, ServiceHistory } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
+import { Json } from "io-ts-types";
+import { assert, describe, expect, it } from "vitest";
 import {
-  buildDocument,
   handleQueueItem,
+  toServiceHistory,
 } from "../request-historicization-handler";
-import { ServiceLifecycle, Queue } from "@io-services-cms/models";
 
 const createContext = () =>
   ({
@@ -67,16 +68,19 @@ describe("Service Historicization Handler", () => {
       await handleQueueItem(context, item)();
 
       expect(context.bindings.serviceHistoryDocument).toBe(
-        buildDocument(expected)
+        JSON.stringify(toServiceHistory(expected))
       );
     }
   );
 
   it("[buildDocument] should build document starting from a service", async () => {
-    const result = buildDocument(aGenericItemType);
-    const resultObj = JSON.parse(result);
-
-    expect(resultObj.id).toBe(atimestamp.toString());
-    expect(resultObj.serviceId).toBe(aGenericItemType.id);
+    const result = toServiceHistory(aGenericItemType);
+    const res = ServiceHistory.decode(result);
+    if (E.isRight(res)) {
+      expect(res.right.id).toBe(atimestamp.toString());
+      expect(res.right.serviceId).toBe(aGenericItemType.id);
+    } else {
+      assert.fail("Expected right");
+    }
   });
 });

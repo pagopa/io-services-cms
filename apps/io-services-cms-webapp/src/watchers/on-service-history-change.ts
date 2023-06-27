@@ -29,15 +29,19 @@ const onReleaseHandler = (
 });
 
 export const handler: RE.ReaderEither<
-  { item: ServiceHistory.ServiceHistory },
+  { item: ServiceHistory },
   Error,
   NoAction | RequestSyncLegacyAction
 > = ({ item }) => {
-  switch (item.fsm.state) {
-    case "unpublished":
-    case "published":
-      return pipe(item, onReleaseHandler, E.right);
-    default:
-      return E.right(noAction);
+  if (item.fsm.lastTransition === "from Legacy") {
+    switch (item.fsm.state) {
+      case "unpublished":
+      case "published":
+        return pipe(item, onReleaseHandler, E.right);
+      default:
+        return E.right(noAction);
+    }
+  } else {
+    return E.right(noAction);
   }
 };
