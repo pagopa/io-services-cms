@@ -351,7 +351,12 @@ export function regenerateSubscriptionKey(
     TE.chain(() =>
       // retrieve updated subscription
       TE.tryCatch(
-        () => apimClient.subscription.get(apimResourceGroup, apim, serviceId),
+        () =>
+          apimClient.subscription.listSecrets(
+            apimResourceGroup,
+            apim,
+            serviceId
+          ),
         E.toError
       )
     ),
