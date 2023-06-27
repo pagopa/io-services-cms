@@ -19,7 +19,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { getSubscription } from "../../../lib/clients/apim-client";
+import { getSubscription, listSecrets } from "../../../lib/clients/apim-client";
 import { createWebServer } from "../../index";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
@@ -31,6 +31,7 @@ vi.mock("../../../lib/clients/apim-client", async () => {
   return {
     ...apimClient,
     getSubscription: vi.fn((_) => TE.right(anApimResource)),
+    listSecrets: vi.fn((_) => TE.right(anApimResource)),
   };
 });
 
@@ -63,6 +64,7 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const mockApimClient = {
   subscription: {
     get: vi.fn(() => Promise.resolve(anApimResource)),
+    listSecrets: vi.fn(() => Promise.resolve(anApimResource)),
   },
 } as unknown as ApiManagementClient;
 const mockConfig = {} as unknown as IConfig;
@@ -124,7 +126,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(getSubscription).toHaveBeenCalledTimes(2);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(JSON.stringify(response.body)).toBe(
       JSON.stringify({
@@ -135,12 +137,7 @@ describe("getServiceKeys", () => {
   });
 
   it("should fail with a not found error when cannot find requested service subscription", async () => {
-    // first getSubscription for manage key middleware
-    vi.mocked(getSubscription).mockImplementationOnce(() =>
-      TE.right(anApimResource)
-    );
-    // second getSubscription for get service subscription
-    vi.mocked(getSubscription).mockImplementationOnce(() =>
+    vi.mocked(listSecrets).mockImplementationOnce(() =>
       TE.left({ statusCode: 404 })
     );
 
@@ -152,17 +149,12 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(getSubscription).toHaveBeenCalledTimes(2);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(404);
   });
 
   it("should fail with a generic error if service subscription returns an error", async () => {
-    // first getSubscription for manage key middleware
-    vi.mocked(getSubscription).mockImplementationOnce(() =>
-      TE.right(anApimResource)
-    );
-    // second getSubscription for get service subscription
-    vi.mocked(getSubscription).mockImplementationOnce(() =>
+    vi.mocked(listSecrets).mockImplementationOnce(() =>
       TE.left({ statusCode: 500 })
     );
 
@@ -174,13 +166,13 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(getSubscription).toHaveBeenCalledTimes(2);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
   });
 
   it("should fail with a generic error if manage subscription returns an error", async () => {
     // first getSubscription for manage key middleware
-    vi.mocked(getSubscription).mockImplementationOnce(() =>
+    vi.mocked(listSecrets).mockImplementationOnce(() =>
       TE.left({ statusCode: 500 })
     );
 
@@ -192,7 +184,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(getSubscription).toHaveBeenCalledTimes(1);
+    expect(listSecrets).toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
   });
 
@@ -205,7 +197,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(getSubscription).not.toHaveBeenCalled();
+    expect(listSecrets).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 
@@ -220,7 +212,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", userId)
       .set("x-subscription-id", aNotManageSubscriptionId);
 
-    expect(getSubscription).not.toHaveBeenCalled();
+    expect(listSecrets).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 
@@ -236,7 +228,7 @@ describe("getServiceKeys", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    expect(getSubscription).toHaveBeenCalledTimes(1);
+    expect(listSecrets).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 });
