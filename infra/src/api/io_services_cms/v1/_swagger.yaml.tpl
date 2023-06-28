@@ -31,11 +31,6 @@ paths:
       summary: Create a new service
       description: Create a new Service with the attributes provided in the request payload
       operationId: createService
-      parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
       requestBody:
         description: A service body payload
         content:
@@ -67,10 +62,6 @@ paths:
       description: Retrieve all services owned by the calling user
       operationId: getServices
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
         - name: limit
           in: query
           description: The number of services to return
@@ -111,16 +102,7 @@ paths:
       description: Retrieve a service by ID
       operationId: getService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '200':
           description: Service fetched successfully
@@ -145,16 +127,7 @@ paths:
       description: Update an existing service by ID
       operationId: updateService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       requestBody:
         description: Updated service payload
         content:
@@ -188,16 +161,7 @@ paths:
       description: Delete a service by ID
       operationId: deleteService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '204':
           description: Service deleted successfully
@@ -219,16 +183,7 @@ paths:
       description: Upload service logo by service ID
       operationId: updateServiceLogo
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       requestBody:
         description: Service logo payload _(base64 string representation)_
         content:
@@ -259,16 +214,7 @@ paths:
       description: Retrieve service keys by service ID
       operationId: getServiceKeys
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '200':
           description: Service keys fetched successfully
@@ -294,16 +240,7 @@ paths:
       description: Regenerate service key by service ID and key type
       operationId: regenerateServiceKey
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
         - name: keyType
           in: path
           description: Key type
@@ -337,16 +274,7 @@ paths:
       description: Send service to review by service ID
       operationId: reviewService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       requestBody:
         description: Review Request option
         content:
@@ -376,16 +304,7 @@ paths:
       description: Explain service review by service ID
       operationId: explainService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       requestBody:
         description: An explanation comment
         content:
@@ -418,16 +337,7 @@ paths:
       description: Publish service by ID on __IO Platform__
       operationId: releaseService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '204':
           description: Service published successfully
@@ -450,16 +360,7 @@ paths:
       description: Retrieve last version of service published on __IO Platform__
       operationId: getPublishedService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '200':
           description: Fetched published service
@@ -484,16 +385,7 @@ paths:
       description: Unpublish service by ID from __IO Platform__
       operationId: unpublishService
       parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - name: serviceId
-          in: path
-          description: ID of the service
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ServiceId'
       responses:
         '204':
           description: Service unpublished successfully
@@ -509,27 +401,10 @@ paths:
           description: Internal server error
 components:
   parameters:
-    UserEmail:
-      in: header
-      name: x-user-email
-      required: true
-      schema:
-        type: string
-    UserGroups:
-      in: header
-      name: x-user-groups
-      required: true
-      schema:
-        type: string
-    UserID:
-      in: header
-      name: x-user-id
-      required: true
-      schema:
-        type: string
-    SubscriptionID:
-      in: header
-      name: x-subscription-id
+    ServiceId:
+      in: path
+      name: serviceId
+      description: ID of the service
       required: true
       schema:
         type: string
