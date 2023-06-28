@@ -10,9 +10,9 @@ import nodeFetch from "node-fetch-commonjs";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { JiraConfig } from "../../config";
 
-const JIRA_REST_API_PATH = "/rest/api/2/";
+export const JIRA_REST_API_PATH = "/rest/api/2/";
 
-export const CreateJiraIssueResponse = t.interface({
+export const CreateJiraIssueResponse = t.type({
   id: NonEmptyString,
   key: NonEmptyString,
 });
@@ -27,14 +27,14 @@ export const JiraIssueStatus = t.union([
 ]);
 export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
 
-export const JiraIssue = t.interface({
+export const JiraIssue = t.type({
   id: NonEmptyString,
   key: NonEmptyString,
-  fields: t.interface({
-    comment: t.interface({
-      comments: t.readonlyArray(t.interface({ body: t.string })),
+  fields: t.type({
+    comment: t.type({
+      comments: t.readonlyArray(t.type({ body: t.string })),
     }),
-    status: t.interface({
+    status: t.type({
       name: JiraIssueStatus,
     }),
     statuscategorychangedate: NonEmptyString,
@@ -43,7 +43,7 @@ export const JiraIssue = t.interface({
 export type JiraIssue = t.TypeOf<typeof JiraIssue>;
 
 export const SearchJiraIssuesResponse = t.intersection([
-  t.interface({
+  t.type({
     startAt: t.number,
     total: t.number,
     issues: t.readonlyArray(JiraIssue),
@@ -56,7 +56,7 @@ export type SearchJiraIssuesResponse = t.TypeOf<
   typeof SearchJiraIssuesResponse
 >;
 
-const SearchJiraIssuesPayload = t.interface({
+const SearchJiraIssuesPayload = t.type({
   fields: t.array(t.string),
   fieldsByKeys: t.boolean,
   jql: t.string,
@@ -88,7 +88,9 @@ export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
     )
   );
 
-const checkJiraResponse = (response: Response): Either<Error, Response> => {
+export const checkJiraResponse = (
+  response: Response
+): Either<Error, Response> => {
   if (response.status === 200 || response.status === 201) {
     return E.right(response);
   } else if (response.status === 400) {

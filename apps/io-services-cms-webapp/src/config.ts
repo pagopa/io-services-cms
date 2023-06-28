@@ -19,6 +19,7 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { FiscalCode } from "./generated/api/FiscalCode";
+import { CommaSeparatedListOf } from "./utils/comma-separated-list";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
@@ -49,6 +50,11 @@ export const JiraConfig = t.type({
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
+
+// Jira Legacy board
+export const JiraLegacyProjectName = t.type({
+  LEGACY_JIRA_PROJECT_NAME: NonEmptyString,
+});
 
 export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
 export const PostgreSqlConfig = t.type({
@@ -133,6 +139,14 @@ export const PaginationConfig = t.type({
 });
 export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
 
+// List of service ids for which quality control will be bypassed
+const ServiceIdQualityCheckExclusionList = t.type({
+  SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(ServiceLifecycle.definitions.ServiceId),
+    []
+  ),
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -148,8 +162,9 @@ export const IConfig = t.intersection([
     AzureClientSecretCredential,
     ApimConfig,
     QueueConfig,
+    ServiceIdQualityCheckExclusionList,
   ]),
-  t.intersection([CosmosLegacyConfig, PaginationConfig]),
+  t.intersection([CosmosLegacyConfig, PaginationConfig, JiraLegacyProjectName]),
 ]);
 
 export const envConfig = {

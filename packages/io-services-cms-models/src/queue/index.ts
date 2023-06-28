@@ -1,6 +1,5 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
-import { ServiceHistory } from "../service-history";
 import { LegacyService } from "../service-legacy";
 import { ItemType as LifecycleItemType } from "../service-lifecycle";
 import { Service } from "../service-lifecycle/definitions";
@@ -33,7 +32,10 @@ export const RequestHistoricizationItem = t.intersection([
 ]);
 
 export type RequestSyncCmsItem = t.TypeOf<typeof RequestSyncCmsItem>;
-export const RequestSyncCmsItem = ServiceHistory;
+export const RequestSyncCmsItem = t.union([
+  LifecycleItemType,
+  PublicationItemType,
+]);
 
 export type RequestSyncLegacyItem = t.TypeOf<typeof RequestSyncLegacyItem>;
 export const RequestSyncLegacyItem = LegacyService;

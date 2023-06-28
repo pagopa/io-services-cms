@@ -37,6 +37,7 @@ import { handler as onServicePublicationChangeHandler } from "./watchers/on-serv
 import { createWebServer } from "./webservice";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
+import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
 
@@ -153,8 +154,10 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler,
-  RTE.fromReaderEither,
+  onLegacyServiceChangeHandler(
+    jiraLegacyClient(config),
+    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+  ),
   processBatchOf(LegacyService),
   setBindings((results) => ({
     requestSyncCms: pipe(
