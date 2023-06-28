@@ -1,5 +1,17 @@
 # io-services-cms-models
 
+## 1.12.0
+
+### Minor Changes
+
+- 488c6be: CMS to Legacy mapping, LegacyService model update
+- 69dedc8: add on service history change handler (except mapping)
+- b2cde86: Legacy service watcher
+
+### Patch Changes
+
+- 6f98db8: jira description fix
+
 ## 1.11.0
 
 ### Minor Changes
