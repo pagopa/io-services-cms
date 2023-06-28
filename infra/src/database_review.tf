@@ -1,9 +1,4 @@
 # Postgres Flexible Server subnet
-variable "cidr_subnet_pgres" {
-  type        = string
-  description = "Subnet address space."
-}
-
 module "postgres_flexible_snet" {
   source                                    = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.19.1"
   name                                      = "${local.project}-${local.application_basename}-pgres-flexible-snet"
