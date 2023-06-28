@@ -1,8 +1,4 @@
-import {
-  Queue,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import {
   Service,
   ValidService,
@@ -72,10 +68,7 @@ const getLegacyToCmsStatus = (
   qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>,
   service: Service,
   issueStatus?: JiraLegacyIssueStatus
-): Array<
-  | ServiceLifecycle.ItemType["fsm"]["state"]
-  | ServicePublication.ItemType["fsm"]["state"]
-> => {
+): Array<Queue.RequestSyncCmsItem["fsm"]["state"]> => {
   if (isDeletedService(service)) {
     return ["deleted"];
   } else if (
@@ -92,10 +85,8 @@ const getLegacyToCmsStatus = (
 
 const fromLegacyToCmsService = (
   service: Service,
-  status:
-    | ServiceLifecycle.ItemType["fsm"]["state"]
-    | ServicePublication.ItemType["fsm"]["state"]
-): ServiceLifecycle.ItemType | ServicePublication.ItemType => ({
+  status: Queue.RequestSyncCmsItem["fsm"]["state"]
+): Queue.RequestSyncCmsItem => ({
   id: service.serviceId,
   data: {
     authorized_cidrs: Array.from(service.authorizedCIDRs.values()),
@@ -103,10 +94,10 @@ const fromLegacyToCmsService = (
     description: service.serviceMetadata?.description as NonEmptyString,
     max_allowed_payment_amount: service.maxAllowedPaymentAmount,
     metadata: {
-      scope: service.serviceMetadata?.scope ?? "LOCAL",
+      scope: service.serviceMetadata?.scope ?? "LOCAL", // FIXME: va bene come valore di default?
       address: service.serviceMetadata?.address,
-      appAndroid: service.serviceMetadata?.appAndroid,
-      appIos: service.serviceMetadata?.appIos,
+      app_android: service.serviceMetadata?.appAndroid,
+      app_ios: service.serviceMetadata?.appIos,
       category: service.serviceMetadata?.category,
       cta: service.serviceMetadata?.cta,
       custom_special_flow: service.serviceMetadata?.customSpecialFlow,
@@ -114,11 +105,11 @@ const fromLegacyToCmsService = (
       email: service.serviceMetadata?.email,
       pec: service.serviceMetadata?.pec,
       phone: service.serviceMetadata?.phone,
-      privacyUrl: service.serviceMetadata?.privacyUrl,
-      supportUrl: service.serviceMetadata?.supportUrl,
-      tokenName: service.serviceMetadata?.tokenName,
-      tosUrl: service.serviceMetadata?.tosUrl,
-      webUrl: service.serviceMetadata?.webUrl,
+      privacy_url: service.serviceMetadata?.privacyUrl,
+      support_url: service.serviceMetadata?.supportUrl,
+      token_name: service.serviceMetadata?.tokenName,
+      tos_url: service.serviceMetadata?.tosUrl,
+      web_url: service.serviceMetadata?.webUrl,
     },
     name: service.serviceName.replace("DELETED", "").trim() as NonEmptyString,
     organization: {
@@ -130,7 +121,7 @@ const fromLegacyToCmsService = (
   },
   fsm: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    state: status as any, // FIXME perchè non riesco ad utilizzare il tipo?
+    state: status as any, // FIXME provare ad eliminare l'any
   },
 });
 
