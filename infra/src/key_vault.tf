@@ -28,6 +28,11 @@ data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
   key_vault_id = module.key_vault_domain.id
 }
 
+data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
+  name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
+  key_vault_id = module.key_vault_domain.id
+}
+
 resource "azurerm_key_vault_access_policy" "adgroup_admin" {
   key_vault_id = module.key_vault_domain.id
 
