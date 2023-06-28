@@ -103,6 +103,12 @@ variable "reviewer_db_table" {
   default     = null
 }
 
+variable "legacy_jira_project_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 #
 # Function app definition
 #
@@ -143,6 +149,9 @@ locals {
     JIRA_ORGANIZATION_CF_CUSTOM_FIELD   = var.jira_organization_cf_custom_field
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
 
+    # JIRA Legacy board
+    LEGACY_JIRA_PROJECT_NAME = var.legacy_jira_project_name
+
     # Apim connection
     AZURE_APIM                           = var.azure_apim
     AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
@@ -162,7 +171,7 @@ locals {
     REVIEWER_DB_TABLE    = var.reviewer_db_table
     REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
 
-    # Legacy data
+    # Legacy source data
     LEGACY_COSMOSDB_CONNECTIONSTRING         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     LEGACY_COSMOSDB_NAME                     = var.legacy_cosmosdb_name
     LEGACY_COSMOSDB_URI                      = var.legacy_cosmosdb_uri
@@ -176,6 +185,9 @@ locals {
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
+
+    # List of service ids for which quality control will be bypassed
+    SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
   }
 }
 
