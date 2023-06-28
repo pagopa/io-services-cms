@@ -1,3 +1,8 @@
+import {
+  LegacyService,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -5,8 +10,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { JiraLegacyAPIClient } from "../../lib/clients/jira-legacy-client";
-import { LegacyService, handler } from "../on-legacy-service-change";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import { handler } from "../on-legacy-service-change";
 
 const mockJiraLegacyClient = {
   searchJiraIssueByServiceId: vi.fn((_) =>

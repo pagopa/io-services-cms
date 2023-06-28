@@ -1,4 +1,8 @@
-import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import {
+  LegacyService,
+  Queue,
+  ServiceLifecycle,
+} from "@io-services-cms/models";
 import {
   Service,
   ValidService,
@@ -9,19 +13,10 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import {
   JiraLegacyAPIClient,
   JiraLegacyIssueStatus,
 } from "../lib/clients/jira-legacy-client";
-
-export const LegacyService = t.intersection([
-  Service,
-  t.partial({
-    cmsTag: t.boolean,
-  }),
-]);
-export type LegacyService = t.TypeOf<typeof LegacyService>;
 
 const noAction = {};
 type NoAction = typeof noAction;
