@@ -36,10 +36,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
-import {
-  getSubscription,
-  mapApimRestError,
-} from "../../lib/clients/apim-client";
+import { listSecrets, mapApimRestError } from "../../lib/clients/apim-client";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 type HandlerResponseTypes =
@@ -74,7 +71,7 @@ export const makeGetServiceKeysHandler =
       ),
       TE.chainW(() =>
         pipe(
-          getSubscription(
+          listSecrets(
             apimClient,
             config.AZURE_APIM_RESOURCE_GROUP,
             config.AZURE_APIM,

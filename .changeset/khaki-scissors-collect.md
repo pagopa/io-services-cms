@@ -3,4 +3,4 @@
 "io-services-cms-webapp": minor
 ---
 
-Service authorized_cidrs
+add on service history change handler (except mapping)

@@ -38,7 +38,7 @@ monitor_action_group_slack_name = "SlackPagoPA"
 ## Jira
 jira_namespace_url                  = "https://pagopa.atlassian.net"
 jira_project_name                   = "IEST"
-jira_username                       = "github-bot@pagopa.it"
+jira_username                       = "io-pagopa-github-bot@pagopa.it"
 jira_contract_custom_field          = "customfield_10365"
 jira_delegate_email_custom_field    = "customfield_10383"
 jira_delegate_name_custom_field     = "customfield_10382"

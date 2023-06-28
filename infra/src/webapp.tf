@@ -187,9 +187,6 @@ locals {
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
-
-    # Disable functions
-    "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
   }
 }
 
@@ -222,6 +219,7 @@ module "webapp_functions_app" {
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "0"
     }
   )
 
@@ -230,6 +228,7 @@ module "webapp_functions_app" {
     "AzureWebJobs.ServiceLifecycleWatcher.Disabled",
     "AzureWebJobs.ServicePublicationWatcher.Disabled",
     "AzureWebJobs.ServiceReviewChecker.Disabled",
+    "AzureWebJobs.ServiceHistoryWatcher.Disabled",
   ]
 
   subnet_id = module.app_snet.id
@@ -264,6 +263,7 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
     }
   )
 

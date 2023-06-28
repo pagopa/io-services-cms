@@ -1,4 +1,5 @@
 import {
+  ServiceHistory,
   ServiceLifecycle,
   ServicePublication,
   stores,
@@ -29,6 +30,7 @@ import {
   LegacyService,
   handler as onLegacyServiceChangeHandler,
 } from "./watchers/on-legacy-service-change";
+import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
@@ -160,6 +162,21 @@ export const onLegacyServiceChangeEntryPoint = pipe(
     requestSyncCms: pipe(
       results,
       RA.map(RR.lookup("requestSyncCms")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceHistoryChangeEntryPoint = pipe(
+  onServiceHistoryHandler,
+  RTE.fromReaderEither,
+  processBatchOf(ServiceHistory),
+  setBindings((results) => ({
+    requestSyncLegacy: pipe(
+      results,
+      RA.map(RR.lookup("requestSyncLegacy")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

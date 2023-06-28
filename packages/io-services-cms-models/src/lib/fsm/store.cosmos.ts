@@ -82,7 +82,7 @@ export const createCosmosStore = <
       TE.map((operationResponses) =>
         operationResponses.map(
           flow(
-            O.fromPredicate((res) => res.statusCode === 404),
+            O.fromPredicate((res) => res.statusCode === 200),
             // if present, try to decode in the expected shape
             O.chain((res) =>
               pipe(
