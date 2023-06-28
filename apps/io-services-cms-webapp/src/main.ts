@@ -1,4 +1,5 @@
 import {
+  LegacyService,
   ServiceHistory,
   ServiceLifecycle,
   ServicePublication,
@@ -27,10 +28,7 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
-import {
-  LegacyService,
-  handler as onLegacyServiceChangeHandler,
-} from "./watchers/on-legacy-service-change";
+import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
