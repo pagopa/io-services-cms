@@ -1,5 +1,5 @@
+import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as t from "io-ts";
-import { Service } from "../service-lifecycle/definitions";
 
 export const LegacyService = t.intersection([
   Service,
