@@ -41,7 +41,7 @@ const expectSuccess = async ({
     RTE.map((a) => a[a.length - 1])
   );
 
-  const result = await applyTask()();
+  const result = await applyTask(void 0)();
 
   if (E.isLeft(result)) {
     throw result.left;
@@ -83,7 +83,7 @@ const expectFailure = async ({
   );
 
   try {
-    const result = await applyTask()();
+    const result = await applyTask(void 0)();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);
