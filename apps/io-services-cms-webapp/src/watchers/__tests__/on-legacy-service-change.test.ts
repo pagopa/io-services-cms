@@ -1,36 +1,279 @@
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import { describe, expect, it } from "vitest";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { describe, expect, it, vi } from "vitest";
+import { JiraLegacyAPIClient } from "../../lib/clients/jira-legacy-client";
 import { LegacyService, handler } from "../on-legacy-service-change";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 
+const mockJiraLegacyClient = {
+  searchJiraIssueByServiceId: vi.fn((_) =>
+    TE.right(O.of({ fields: { status: { name: "DONE" } } }))
+  ),
+} as unknown as JiraLegacyAPIClient;
+
+const qualityCheckExclusionList = ["aServiceId" as NonEmptyString];
+
+// Legacy Service: valid and visible
 const aLegacyService = {
-  authorized_cidrs: ["127.0.0.1"],
-  authorized_recipients: ["AAAAAA01B02C123D"],
-  department_name: "department",
-  organization_fiscal_code: "01234567890",
-  organization_name: "organization",
-  service_id: "SERVICE_ID",
-  service_name: "service name",
-
-  is_visible: false,
-  version: 1,
-
-  service_metadata: {
-    scope: ServiceScopeEnum.NATIONAL,
+  authorizedCIDRs: ["127.0.0.1"],
+  authorizedRecipients: ["AAAAAA01B02C123D"],
+  departmentName: "aDepartmentName",
+  isVisible: true,
+  maxAllowedPaymentAmount: 1000000,
+  organizationFiscalCode: "12345678901",
+  organizationName: "anOrganizationName",
+  requireSecureChannels: true,
+  serviceId: "aServiceId",
+  serviceName: "aServiceName",
+  cmsTag: true,
+  serviceMetadata: {
+    category: "aCategory",
+    scope: ServiceScopeEnum.LOCAL,
+    address: "anAddress",
+    appAndroid: "anAppAndroidUrl",
+    appIos: "anAppIosUrl",
+    cta: "aCta",
+    customSpecialFlow: "aCustomSpecialFlow",
+    description: "aDescription",
+    email: "anEmail",
+    pec: "aPec",
+    phone: "aPhone",
+    privacyUrl: "aPrivacyUrl",
+    supportUrl: "aSupportUrl",
+    tokenName: "aTokenName",
+    tosUrl: "aTosUrl",
+    webUrl: "aWebUrl",
   },
 } as unknown as LegacyService;
 
+const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
+  id: aLegacyService.serviceId,
+  data: {
+    authorized_cidrs: Array.from(aLegacyService.authorizedCIDRs.values()),
+    authorized_recipients: Array.from(
+      aLegacyService.authorizedRecipients.values()
+    ),
+    description: aLegacyService.serviceMetadata?.description as NonEmptyString,
+    max_allowed_payment_amount: aLegacyService.maxAllowedPaymentAmount,
+    metadata: {
+      scope: aLegacyService.serviceMetadata?.scope ?? "LOCAL",
+      address: aLegacyService.serviceMetadata?.address,
+      app_android: aLegacyService.serviceMetadata?.appAndroid,
+      app_ios: aLegacyService.serviceMetadata?.appIos,
+      category: aLegacyService.serviceMetadata?.category,
+      cta: aLegacyService.serviceMetadata?.cta,
+      custom_special_flow: aLegacyService.serviceMetadata?.customSpecialFlow,
+      description: aLegacyService.serviceMetadata?.description,
+      email: aLegacyService.serviceMetadata?.email,
+      pec: aLegacyService.serviceMetadata?.pec,
+      phone: aLegacyService.serviceMetadata?.phone,
+      privacy_url: aLegacyService.serviceMetadata?.privacyUrl,
+      support_url: aLegacyService.serviceMetadata?.supportUrl,
+      token_name: aLegacyService.serviceMetadata?.tokenName,
+      tos_url: aLegacyService.serviceMetadata?.tosUrl,
+      web_url: aLegacyService.serviceMetadata?.webUrl,
+    },
+    name: aLegacyService.serviceName,
+    organization: {
+      fiscal_code: aLegacyService.organizationFiscalCode,
+      name: aLegacyService.organizationName,
+      department_name: aLegacyService.departmentName,
+    },
+    require_secure_channel: aLegacyService.requireSecureChannels,
+  },
+  fsm: {
+    state: "approved",
+  },
+};
+const aServicePublicationItem: ServicePublication.ItemType = {
+  ...(aServiceLifecycleItem as any),
+  fsm: {
+    state: "published",
+  },
+};
+
 describe("On Legacy Service Change Handler", () => {
-  it.each`
-    scenario              | item                                    | expected
-    ${"request sync cms"} | ${{ ...aLegacyService, cmsTag: true }}  | ${{ requestSyncCms: {} }}
-    ${"no action"}        | ${{ ...aLegacyService, cmsTag: false }} | ${{}}
-  `("should map an item to a $scenario action", ({ item, expected }) => {
-    console.log("item:", item);
-    const res = handler({ item });
-    expect(E.isRight(res)).toBeTruthy();
-    if (E.isRight(res)) {
-      expect(res.right).toStrictEqual(expected);
+  it("should map a deleted item to a requestSyncCms action containing a service lifecycle with DELETED status", async () => {
+    const item = {
+      ...aLegacyService,
+      serviceName: "DELETED aServiceName",
+    } as unknown as LegacyService;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({
+        requestSyncCms: [
+          {
+            ...aServiceLifecycleItem,
+            fsm: {
+              state: "deleted",
+            },
+          },
+        ],
+      });
+    }
+  });
+
+  it("should map a valid item with pending review to a requestSyncCms action containing a service lifecycle with SUBMITTED status", async () => {
+    const mockJiraLegacyClient = {
+      searchJiraIssueByServiceId: vi.fn((_) =>
+        TE.right(O.of({ fields: { status: { name: "NEW" } } }))
+      ),
+    } as unknown as JiraLegacyAPIClient;
+
+    const item = {
+      ...aLegacyService,
+    } as unknown as LegacyService;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({
+        requestSyncCms: [
+          {
+            ...aServiceLifecycleItem,
+            fsm: {
+              state: "submitted",
+            },
+          },
+        ],
+      });
+    }
+  });
+
+  it("should map a valid and visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
+    const item = {
+      ...aLegacyService,
+    } as unknown as LegacyService;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({
+        requestSyncCms: [aServiceLifecycleItem, aServicePublicationItem],
+      });
+    }
+  });
+
+  it("should map a valid and not visible item to a requestSyncCms action containing a service lifecycle with APPROVED status", async () => {
+    const item = {
+      ...aLegacyService,
+      isVisible: false,
+    } as LegacyService;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({
+        requestSyncCms: [aServiceLifecycleItem],
+      });
+    }
+  });
+
+  it("should map an invalid item to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
+    const mockJiraLegacyClient = {
+      searchJiraIssueByServiceId: vi.fn((_) =>
+        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
+      ),
+    } as unknown as JiraLegacyAPIClient;
+
+    const item = {
+      ...aLegacyService,
+      isVisible: false,
+    } as LegacyService;
+
+    delete item["serviceMetadata"];
+
+    const result = await handler(mockJiraLegacyClient, [])({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          requestSyncCms: expect.arrayContaining([
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "draft" }),
+            }),
+          ]),
+        })
+      );
+    }
+  });
+
+  it("should map an invalid item in qualityCheckExclusionList to a requestSyncCms action containing a service lifecycle with APPROVED status", async () => {
+    const mockJiraLegacyClient = {
+      searchJiraIssueByServiceId: vi.fn((_) =>
+        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
+      ),
+    } as unknown as JiraLegacyAPIClient;
+
+    const item = {
+      ...aLegacyService,
+      isVisible: false,
+    } as LegacyService;
+
+    delete item["serviceMetadata"];
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          requestSyncCms: expect.arrayContaining([
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "approved" }),
+            }),
+          ]),
+        })
+      );
+    }
+  });
+
+  it("should map an item to a no action", async () => {
+    const item = {
+      ...aLegacyService,
+      cmsTag: false,
+    } as LegacyService;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      qualityCheckExclusionList
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({});
     }
   });
 });
