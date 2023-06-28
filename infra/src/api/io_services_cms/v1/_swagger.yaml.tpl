@@ -520,12 +520,6 @@ components:
         support_url:
           type: string
           minLength: 1
-        category:
-          type: string
-          enum: [SPECIAL, STANDARD]
-        custom_special_flow:
-          type: string
-          minLength: 1
         scope:
           type: string
           enum: [NATIONAL, LOCAL]
