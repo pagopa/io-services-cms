@@ -73,3 +73,11 @@ resource "azurerm_key_vault_access_policy" "github_action_cd" {
   certificate_permissions = []
   key_permissions         = []
 }
+
+resource "azurerm_key_vault_secret" "webapp_fn_app_key" {
+  name            = "webapp-fn-app-key"
+  key_vault_id    = module.key_vault_domain.id
+  value           = module.webapp_functions_app.primary_key
+  content_type    = "string"
+  expiration_date = "2025-06-26T23:59:59Z"
+}
