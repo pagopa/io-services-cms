@@ -10,6 +10,7 @@ environment_cd_roles = {
     "Storage File Data SMB Share Contributor",
     "Storage Queue Data Contributor",
     "Storage Table Data Contributor",
+    "API Management Service Contributor",
   ]
   resource_groups = {}
 }
