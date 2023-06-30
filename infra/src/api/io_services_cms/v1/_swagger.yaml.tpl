@@ -297,38 +297,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-    patch:
-      tags:
-        - service-review
-      summary: Explain service review
-      description: Explain service review by service ID
-      operationId: explainService
-      parameters:
-        - $ref: '#/components/parameters/ServiceId'
-      requestBody:
-        description: An explanation comment
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Comment'
-        required: true
-      responses:
-        '204':
-          description: Service explained successfully
-        '400':
-          description: Invalid payload
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '404':
-          description: Not found
-        '409':
-          description: Service status is incompatible with explain action request
-        '429':
-          description: Too many requests
-        '500':
-          description: Internal server error
   /services/{serviceId}/release:
     post:
       tags:
@@ -623,12 +591,6 @@ components:
     SubscriptionKeyType:
       type: string
       enum: [primary, secondary]
-    Comment:
-      type: object
-      properties:
-        comment:
-          type: string
-          example: This is an explanation comment
     ReviewRequest:
       type: object
       properties:
@@ -647,12 +609,12 @@ components:
       type: apiKey
       name: Ocp-Apim-Subscription-Key
       in: header
-      description: The MANAGE api-key
+      description: The `MANAGE` api-key
     apiKeyQuery:
       type: apiKey
       name: subscription-key
       in: query
-      description: The MANAGE api-key
+      description: The `MANAGE` api-key
 security:
   - apiKeyHeader: [ ]
   - apiKeyQuery: [ ]
