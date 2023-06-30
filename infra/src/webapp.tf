@@ -224,6 +224,8 @@ module "webapp_functions_app" {
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "0"
       "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
       "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"      = "0"
+      "AzureWebJobs.OnRequestReview.Disabled"           = "0"
     }
   )
 
@@ -234,6 +236,8 @@ module "webapp_functions_app" {
     "AzureWebJobs.ServiceReviewChecker.Disabled",
     "AzureWebJobs.ServiceHistoryWatcher.Disabled",
     "AzureWebJobs.OnRequestHistoricization.Disabled",
+    "AzureWebJobs.OnRequestPublication.Disabled",
+    "AzureWebJobs.OnRequestReview.Disabled",
   ]
 
   subnet_id = module.app_snet.id
@@ -273,6 +277,8 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
       "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
       "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"      = "1"
+      "AzureWebJobs.OnRequestReview.Disabled"           = "1"
     }
   )
 
