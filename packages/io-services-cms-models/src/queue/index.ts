@@ -33,8 +33,18 @@ export const RequestHistoricizationItem = t.intersection([
 
 export type RequestSyncCmsItem = t.TypeOf<typeof RequestSyncCmsItem>;
 export const RequestSyncCmsItem = t.union([
-  LifecycleItemType,
-  PublicationItemType,
+  t.intersection([
+    LifecycleItemType,
+    t.type({
+      kind: t.literal("LifecycleItemType"),
+    }),
+  ]),
+  t.intersection([
+    PublicationItemType,
+    t.type({
+      kind: t.literal("PublicationItemType"),
+    }),
+  ]),
 ]);
 
 export type RequestSyncLegacyItem = t.TypeOf<typeof RequestSyncLegacyItem>;

@@ -118,6 +118,10 @@ const fromLegacyToCmsService = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     state: status as any, // FIXME provare ad eliminare l'any
   },
+  kind:
+    status === "published" || status === "unpublished"
+      ? "PublicationItemType"
+      : "LifecycleItemType",
 });
 
 const legacyToCms = (
