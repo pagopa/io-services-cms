@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.17.1
+
+### Patch Changes
+
+- 68b835e: Add extensionBundle in host.json
+
 ## 1.17.0
 
 ### Minor Changes
