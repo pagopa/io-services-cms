@@ -17,10 +17,6 @@
     "http": {
       "routePrefix": "api/v1"
     },
-    "extensionBundle": {
-      "id": "Microsoft.Azure.Functions.ExtensionBundle",
-      "version": "[4.*, 5.0.0)"
-    },
     "storageProvider": {
       "connectionStringName": "INTERNAL_STORAGE_CONNECTION_STRING",
       "partitionCount": 4
@@ -36,5 +32,9 @@
       "maxDequeueCount": 5,
       "newBatchThreshold": 1
     }
+  },
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
   }
 }
