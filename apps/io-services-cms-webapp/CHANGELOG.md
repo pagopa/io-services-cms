@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.17.2
+
+### Patch Changes
+
+- 7e373b1: Change extensionBundle version
+
 ## 1.17.1
 
 ### Patch Changes
