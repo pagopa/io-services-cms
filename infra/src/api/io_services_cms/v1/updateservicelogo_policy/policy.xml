@@ -1,7 +1,11 @@
 <policies>
     <inbound>
-        <base/>
-        <!--Temporally (until we implement this functionality ex-novo) use "legacy" backend to manage update service logo request.-->
+        <base />
+        <!--Temporally (until we implement
+        this functionality ex-novo) use "legacy" backend to manage update service logo request.-->
+        <set-header name="x-functions-key" exists-action="override">
+            <value>{{io-fn3-services-key}}</value>
+        </set-header>
         <set-backend-service base-url="https://io-p-services-fn-1.azurewebsites.net/api/v1" />
     </inbound>
     <outbound>
