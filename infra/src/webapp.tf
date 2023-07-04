@@ -97,6 +97,12 @@ variable "reviewer_db_schema" {
   default     = null
 }
 
+variable "reviewer_db_user" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 variable "reviewer_db_table" {
   type        = string
   description = ""
@@ -169,7 +175,7 @@ locals {
     REVIEWER_DB_PORT     = module.postgres_flexible_server_private.connection_port
     REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
     REVIEWER_DB_TABLE    = var.reviewer_db_table
-    REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
+    REVIEWER_DB_USER     = var.reviewer_db_user
 
     # Legacy source data
     LEGACY_COSMOSDB_CONNECTIONSTRING         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
