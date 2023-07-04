@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { Container, ItemResponse } from "@azure/cosmos";
-import { ServiceLifecycle } from "../..";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { createCosmosStore } from "../fsm/store.cosmos";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import { describe, expect, it, vi } from "vitest";
+import { ServiceLifecycle } from "../..";
+import { createCosmosStore } from "../fsm/store.cosmos";
 
 const anItem = {
   id: "anItemId" as NonEmptyString,
@@ -24,21 +24,23 @@ const anItem = {
   fsm: { state: "approved" },
 } as unknown as ServiceLifecycle.ItemType;
 
-const aFetchElement = {
-  statusCode: 200,
-  resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
-} as unknown as ItemResponse<ServiceLifecycle.ItemType>;
-
 describe("store cosmos tests", () => {
   it("result should be some on fetch having status 200", async () => {
+    const aFetchElement = {
+      statusCode: 200,
+      resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
+    } as unknown as ItemResponse<ServiceLifecycle.ItemType>;
+
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
-        read: vi.fn().mockResolvedValue(aFetchElement),
+        read: vi.fn().mockResolvedValue({
+          statusCode: 200,
+          resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
+        }),
       })),
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.fetch("anItemId")();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -50,12 +52,14 @@ describe("store cosmos tests", () => {
   it("result should be none on fetch having status 404", async () => {
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
-        read: vi.fn().mockResolvedValue({ ...aFetchElement, statusCode: 404 }),
+        read: vi.fn().mockResolvedValue({
+          statusCode: 404,
+          resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
+        }),
       })),
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.fetch("anItemId")();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -75,7 +79,6 @@ describe("store cosmos tests", () => {
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.fetch("anItemId")();
 
     expect(E.isLeft(result)).toBeTruthy();
@@ -99,11 +102,9 @@ describe("store cosmos tests", () => {
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.bulkFetch(["anItemId"])();
 
     expect(E.isRight(result)).toBeTruthy();
-
     if (E.isRight(result)) {
       expect(result.right).toHaveLength(1);
       expect(O.isSome(result.right[0])).toBeTruthy();
@@ -123,14 +124,43 @@ describe("store cosmos tests", () => {
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.bulkFetch(["anItemId"])();
 
     expect(E.isRight(result)).toBeTruthy();
-
     if (E.isRight(result)) {
       expect(result.right).toHaveLength(1);
       expect(O.isNone(result.right[0])).toBeTruthy();
+    }
+  });
+
+  it("result should contain a none ad a some on bulkFetch result containing mixed element statuses 404", async () => {
+    const bulkFetchResult = [
+      {
+        statusCode: 404,
+      },
+      {
+        resourceBody: {
+          ...anItem,
+          _ts: 1687787624,
+          _etag: "anEtag",
+        },
+        statusCode: 200,
+      },
+    ];
+    const containerMock = {
+      items: {
+        bulk: vi.fn().mockResolvedValue(bulkFetchResult),
+      },
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+    const result = await store.bulkFetch(["otherItemId", "anItemId"])();
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toHaveLength(2);
+      expect(O.isNone(result.right[0])).toBeTruthy();
+      expect(O.isSome(result.right[1])).toBeTruthy();
     }
   });
 
@@ -152,13 +182,63 @@ describe("store cosmos tests", () => {
     } as unknown as Container;
 
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
-
     const result = await store.bulkFetch(["anItemId"])();
-    console.log(`result vvvv: ${JSON.stringify(result)}`);
 
+    expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(result.right).toHaveLength(1);
       expect(O.isNone(result.right[0])).toBeTruthy();
+    }
+  });
+
+  it("result save the element", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+    const aTs = 1687787624;
+    const anItemToBeSaved = {
+      data: {
+        name: "a service",
+        description: "a description",
+        organization: {
+          name: "org",
+          fiscal_code: "00000000000",
+        },
+        metadata: {
+          scope: "LOCAL",
+        },
+        authorized_recipients: ["AAAAAA00A00A000A"],
+        authorized_cidrs: [],
+      },
+      fsm: { state: "approved" },
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const containerMock = {
+      items: {
+        upsert: vi.fn().mockResolvedValue({
+          statusCode: 200,
+          resource: { _ts: aTs, _etag: anEtag },
+          etag: anEtag,
+        }),
+      },
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+    const result = await store.save(anItemId, anItemToBeSaved)();
+
+    console.log(result);
+
+    expect(containerMock.items.upsert).toBeCalledTimes(1);
+    expect(containerMock.items.upsert).toBeCalledWith({
+      ...anItemToBeSaved,
+      id: anItemId,
+    });
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toHaveProperty("last_update");
+      expect(result.right.last_update).toBe(new Date(aTs * 1000).toISOString());
+      expect(result.right).toHaveProperty("version");
+      expect(result.right.version).toBe(anEtag);
     }
   });
 });
