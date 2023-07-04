@@ -36,6 +36,7 @@ import { createWebServer } from "./webservice";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
+import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
 
@@ -101,6 +102,11 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(fsmPublicationClient);
+
+export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
+  fsmLifecycleClient,
+  fsmPublicationClient
+);
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();

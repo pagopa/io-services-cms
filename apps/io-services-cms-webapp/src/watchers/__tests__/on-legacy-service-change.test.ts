@@ -121,6 +121,7 @@ describe("On Legacy Service Change Handler", () => {
             fsm: {
               state: "deleted",
             },
+            kind: "LifecycleItemType",
           },
         ],
       });
@@ -153,6 +154,7 @@ describe("On Legacy Service Change Handler", () => {
             fsm: {
               state: "submitted",
             },
+            kind: "LifecycleItemType",
           },
         ],
       });
@@ -173,7 +175,10 @@ describe("On Legacy Service Change Handler", () => {
 
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({
-        requestSyncCms: [aServiceLifecycleItem, aServicePublicationItem],
+        requestSyncCms: [
+          { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
+          { ...aServicePublicationItem, kind: "PublicationItemType" },
+        ],
       });
     }
   });
@@ -193,7 +198,9 @@ describe("On Legacy Service Change Handler", () => {
 
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({
-        requestSyncCms: [aServiceLifecycleItem],
+        requestSyncCms: [
+          { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
+        ],
       });
     }
   });
@@ -222,6 +229,7 @@ describe("On Legacy Service Change Handler", () => {
           requestSyncCms: expect.arrayContaining([
             expect.objectContaining({
               fsm: expect.objectContaining({ state: "draft" }),
+              kind: "LifecycleItemType",
             }),
           ]),
         })
@@ -256,6 +264,7 @@ describe("On Legacy Service Change Handler", () => {
           requestSyncCms: expect.arrayContaining([
             expect.objectContaining({
               fsm: expect.objectContaining({ state: "approved" }),
+              kind: "LifecycleItemType",
             }),
           ]),
         })
