@@ -819,6 +819,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^3.17.3
     "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/io-functions-commons": ^28.2.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
     eslint: ^8.38.0

@@ -1,0 +1,10 @@
+import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
+import * as t from "io-ts";
+
+export const LegacyService = t.intersection([
+  Service,
+  t.partial({
+    cmsTag: t.boolean,
+  }),
+]);
+export type LegacyService = t.TypeOf<typeof LegacyService>;

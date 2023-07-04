@@ -85,18 +85,6 @@ variable "jira_organization_name_custom_field" {
   default     = null
 }
 
-variable "azure_apim" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "azure_apim_resource_group" {
-  type        = string
-  description = ""
-  default     = null
-}
-
 variable "reviewer_db_name" {
   type        = string
   description = ""
@@ -109,7 +97,19 @@ variable "reviewer_db_schema" {
   default     = null
 }
 
+variable "reviewer_db_user" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 variable "reviewer_db_table" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "legacy_jira_project_name" {
   type        = string
   description = ""
   default     = null
@@ -155,10 +155,14 @@ locals {
     JIRA_ORGANIZATION_CF_CUSTOM_FIELD   = var.jira_organization_cf_custom_field
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
 
+    # JIRA Legacy board
+    LEGACY_JIRA_PROJECT_NAME = var.legacy_jira_project_name
+
     # Apim connection
-    AZURE_APIM                = var.azure_apim
-    AZURE_APIM_RESOURCE_GROUP = var.azure_apim_resource_group
-    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM                           = var.azure_apim
+    AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
+    AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = var.azure_apim_product_id
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
@@ -171,9 +175,9 @@ locals {
     REVIEWER_DB_PORT     = module.postgres_flexible_server_private.connection_port
     REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
     REVIEWER_DB_TABLE    = var.reviewer_db_table
-    REVIEWER_DB_USER     = module.postgres_flexible_server_private.administrator_login
+    REVIEWER_DB_USER     = var.reviewer_db_user
 
-    # Legacy data
+    # Legacy source data
     LEGACY_COSMOSDB_CONNECTIONSTRING         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     LEGACY_COSMOSDB_NAME                     = var.legacy_cosmosdb_name
     LEGACY_COSMOSDB_URI                      = var.legacy_cosmosdb_uri
@@ -188,18 +192,20 @@ locals {
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
 
-    # Disable functions
-    "AzureWebJobs.ServiceReviewChecker.Disabled" = "1"
+    # List of service ids for which quality control will be bypassed
+    SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
   }
 }
 
 module "webapp_functions_app" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.19.1"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v6.20.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
   location            = var.location
   health_check_path   = "/api/v1/info"
+
+  export_keys = true
 
   app_service_plan_info = {
     kind                         = var.functions_kind
@@ -221,7 +227,12 @@ module "webapp_functions_app" {
       "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "0"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"      = "0"
+      "AzureWebJobs.OnRequestReview.Disabled"           = "0"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
     }
   )
 
@@ -230,11 +241,19 @@ module "webapp_functions_app" {
     "AzureWebJobs.ServiceLifecycleWatcher.Disabled",
     "AzureWebJobs.ServicePublicationWatcher.Disabled",
     "AzureWebJobs.ServiceReviewChecker.Disabled",
+    "AzureWebJobs.ServiceHistoryWatcher.Disabled",
+    "AzureWebJobs.OnRequestHistoricization.Disabled",
+    "AzureWebJobs.OnRequestPublication.Disabled",
+    "AzureWebJobs.OnRequestReview.Disabled",
+    "AzureWebJobs.OnRequestSyncCms.Disabled",
   ]
 
   subnet_id = module.app_snet.id
 
-  allowed_subnets = [module.app_snet.id]
+  allowed_subnets = [
+    module.app_snet.id,
+    data.azurerm_subnet.apim_snet[0].id
+  ]
 
   application_insights_instrumentation_key = data.azurerm_application_insights.application_insights.instrumentation_key
 
@@ -243,7 +262,7 @@ module "webapp_functions_app" {
 
 
 module "webapp_functions_app_staging_slot" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.19.1"
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v6.20.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
@@ -264,6 +283,11 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"      = "1"
+      "AzureWebJobs.OnRequestReview.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
     }
   )
 
@@ -281,3 +305,4 @@ module "webapp_functions_app_staging_slot" {
 
   tags = var.tags
 }
+

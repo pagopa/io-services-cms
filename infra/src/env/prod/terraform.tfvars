@@ -48,12 +48,15 @@ jira_organization_name_custom_field = "customfield_10381"
 ## Apim
 azure_apim                = "io-p-apim-api"
 azure_apim_resource_group = "io-p-rg-internal"
+azure_apim_product_id     = "io-services-api"
 
 ## PostgreSQL
 reviewer_db_name   = "reviewer"
 reviewer_db_schema = "reviewer"
+reviewer_db_user   = "reviewerusr"
 reviewer_db_table  = "service_review"
 
 # Legacy data
-legacy_cosmosdb_name = "db"
-legacy_cosmosdb_uri  = "https://io-p-cosmos-api.documents.azure.com:443/"
+legacy_cosmosdb_name     = "db"
+legacy_cosmosdb_uri      = "https://io-p-cosmos-api.documents.azure.com:443/"
+legacy_jira_project_name = "IES"

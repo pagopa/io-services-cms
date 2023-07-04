@@ -1,5 +1,36 @@
 # io-services-cms-webapp
 
+## 1.17.2
+
+### Patch Changes
+
+- 7e373b1: Change extensionBundle version
+
+## 1.17.1
+
+### Patch Changes
+
+- 68b835e: Add extensionBundle in host.json
+
+## 1.17.0
+
+### Minor Changes
+
+- 488c6be: CMS to Legacy mapping, LegacyService model update
+- 69dedc8: add on service history change handler (except mapping)
+- b2cde86: Legacy service watcher
+
+### Patch Changes
+
+- 4a692f1: Fix Get Service Keys API
+- 6f98db8: jira description fix
+- 9793553: add legacy filter on service lifecycle watcher to avoid sync loop
+- Updated dependencies [488c6be]
+- Updated dependencies [69dedc8]
+- Updated dependencies [b2cde86]
+- Updated dependencies [6f98db8]
+  - @io-services-cms/models@1.12.0
+
 ## 1.16.0
 
 ### Minor Changes

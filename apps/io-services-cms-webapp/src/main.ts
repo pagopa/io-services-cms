@@ -1,4 +1,6 @@
 import {
+  LegacyService,
+  ServiceHistory,
   ServiceLifecycle,
   ServicePublication,
   stores,
@@ -26,15 +28,15 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { apimProxy } from "./utils/apim-proxy";
 import { jiraProxy } from "./utils/jira-proxy";
-import {
-  LegacyService,
-  handler as onLegacyServiceChangeHandler,
-} from "./watchers/on-legacy-service-change";
+import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
+import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
+import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
+import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
 
@@ -101,6 +103,11 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(fsmPublicationClient);
 
+export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
+  fsmLifecycleClient,
+  fsmPublicationClient
+);
+
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
 
@@ -151,13 +158,30 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler,
-  RTE.fromReaderEither,
+  onLegacyServiceChangeHandler(
+    jiraLegacyClient(config),
+    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+  ),
   processBatchOf(LegacyService),
   setBindings((results) => ({
     requestSyncCms: pipe(
       results,
       RA.map(RR.lookup("requestSyncCms")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceHistoryChangeEntryPoint = pipe(
+  onServiceHistoryHandler,
+  RTE.fromReaderEither,
+  processBatchOf(ServiceHistory),
+  setBindings((results) => ({
+    requestSyncLegacy: pipe(
+      results,
+      RA.map(RR.lookup("requestSyncLegacy")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

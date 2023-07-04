@@ -28,6 +28,11 @@ data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
   key_vault_id = module.key_vault_domain.id
 }
 
+data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
+  name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
+  key_vault_id = module.key_vault_domain.id
+}
+
 resource "azurerm_key_vault_access_policy" "adgroup_admin" {
   key_vault_id = module.key_vault_domain.id
 
@@ -72,4 +77,12 @@ resource "azurerm_key_vault_access_policy" "github_action_cd" {
   storage_permissions     = []
   certificate_permissions = []
   key_permissions         = []
+}
+
+resource "azurerm_key_vault_secret" "webapp_fn_app_key" {
+  name            = "webapp-fn-app-key"
+  key_vault_id    = module.key_vault_domain.id
+  value           = module.webapp_functions_app.primary_key
+  content_type    = "string"
+  expiration_date = "2025-06-26T23:59:59Z"
 }

@@ -167,6 +167,21 @@ export const getSubscription = (
     chainApimMappedError
   );
 
+export const listSecrets = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  serviceId: string
+) =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.listSecrets(apimResourceGroup, apim, serviceId),
+      identity
+    ),
+    chainApimMappedError
+  );
+
 /**
  * Create or updates a subscription for a given user
  *
@@ -336,7 +351,12 @@ export function regenerateSubscriptionKey(
     TE.chain(() =>
       // retrieve updated subscription
       TE.tryCatch(
-        () => apimClient.subscription.get(apimResourceGroup, apim, serviceId),
+        () =>
+          apimClient.subscription.listSecrets(
+            apimResourceGroup,
+            apim,
+            serviceId
+          ),
         E.toError
       )
     ),

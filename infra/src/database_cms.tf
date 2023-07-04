@@ -1,13 +1,4 @@
 # Database instance
-
-variable "cosmos_private_endpoint_enabled" {
-  type = bool
-}
-
-variable "cosmos_public_network_access_enabled" {
-  type = bool
-}
-
 module "cosmosdb_account" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.19.1"
 
