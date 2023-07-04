@@ -131,6 +131,7 @@
 | <a name="input_reviewer_db_name"></a> [reviewer\_db\_name](#input\_reviewer\_db\_name) | n/a | `string` | `null` | no |
 | <a name="input_reviewer_db_schema"></a> [reviewer\_db\_schema](#input\_reviewer\_db\_schema) | n/a | `string` | `null` | no |
 | <a name="input_reviewer_db_table"></a> [reviewer\_db\_table](#input\_reviewer\_db\_table) | n/a | `string` | `null` | no |
+| <a name="input_reviewer_db_user"></a> [reviewer\_db\_user](#input\_reviewer\_db\_user) | n/a | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
 | <a name="input_vnet_common_rg"></a> [vnet\_common\_rg](#input\_vnet\_common\_rg) | Common Virtual network resource group name. | `string` | `""` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Common Virtual network resource name. | `string` | `""` | no |
