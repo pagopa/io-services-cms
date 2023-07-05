@@ -2,6 +2,7 @@ import {
   ApiManagementClient,
   SubscriptionContract,
 } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -18,6 +19,7 @@ import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import {
   withRequestMiddlewares,
@@ -57,6 +59,9 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
+import { ILogger, getLogger } from "../../utils/logging";
+
+const logPrefix = "CreateServiceHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
@@ -67,6 +72,7 @@ type HandlerResponseTypes =
 
 type ICreateServiceHandler = (
   auth: IAzureApiAuthorization,
+  context: Context,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
@@ -173,12 +179,18 @@ export const makeCreateServiceHandler =
     config,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
-  (_auth, __, attrs, userEmail, servicePayload) => {
+  (_auth, context, _, __, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
       createSubscriptionTask(apimClient, userEmail, serviceId, config),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message))
+      // TE.mapLeft(buildResponseErrorInternal(context, _auth.subscriptionId))
+      TE.mapLeft(
+        buildResponseErrorInternal(
+          getLogger(context, logPrefix, "CreateSubscriptionStep"),
+          _auth.subscriptionId
+        )
+      )
     );
 
     const createServiceStep = pipe(
@@ -196,20 +208,17 @@ export const makeCreateServiceHandler =
           properties: {
             requesterSubscriptionId: _auth.subscriptionId,
             serviceId,
+            serviceName: servicePayload.name,
           },
         });
         return ResponseSuccessJson(resp);
       }),
-      TE.mapLeft((err) => {
-        telemetryClient.trackException({
-          exception: err,
-          properties: {
-            requesterSubscriptionId: _auth.subscriptionId,
-            serviceId,
-          },
-        });
-        return ResponseErrorInternal(err.message);
-      })
+      TE.mapLeft(
+        buildResponseErrorInternal(
+          getLogger(context, logPrefix, "CreateServiceStep"),
+          _auth.subscriptionId
+        )
+      )
     );
 
     return pipe(
@@ -219,12 +228,34 @@ export const makeCreateServiceHandler =
     )();
   };
 
+const buildResponseErrorInternal =
+  (logger: ILogger, subscriptionId: NonEmptyString) => (err: Error) => {
+    logger.logError(
+      err,
+      `Failed to create subscription for requesterSubscriptionId: ${subscriptionId}`
+    );
+    return ResponseErrorInternal(err.message);
+  };
+// const buildResponseErrorInternal =
+//   (context: Context, subscriptionId: NonEmptyString) => (err: Error) => {
+//     logError(
+//       context,
+//       logPrefix
+//     )(
+//       `Failed to create subscription for requesterSubscriptionId: ${subscriptionId}, the reason was => ${err.message}`
+//     );
+//     return ResponseErrorInternal(err.message);
+//   };
+
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: ICreateServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+
+      ContextMiddleware(),
+
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -236,7 +267,9 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u, __, ___) => ipTuple(c, u))
+        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
+          ipTuple(c, u)
+        )
       )
     );
   };

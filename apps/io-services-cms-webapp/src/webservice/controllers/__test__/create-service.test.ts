@@ -26,6 +26,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -105,6 +106,13 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
+const mockContext = {
+  log: {
+    error: console.error,
+    info: console.info,
+  },
+} as any;
+
 describe("createService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -119,6 +127,8 @@ describe("createService", () => {
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
   });
+
+  setAppContext(app, mockContext);
 
   const aNewService = {
     name: "a service",

@@ -77,6 +77,7 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
+// AppInsights client for Telemetry
 const telemetryClient = initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
