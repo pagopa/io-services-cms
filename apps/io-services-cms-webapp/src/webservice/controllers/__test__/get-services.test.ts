@@ -139,6 +139,11 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
 describe("getServices", () => {
   const app = createWebServer({
     basePath: "api",
@@ -147,6 +152,7 @@ describe("getServices", () => {
     fsmLifecycleClient: mockFsmLifecycleClient,
     fsmPublicationClient: mockFsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
   it("should return a Bad Request response when called with a wrong 'limit' queryparam", async () => {

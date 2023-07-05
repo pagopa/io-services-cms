@@ -39,6 +39,7 @@ import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
 import { getDao } from "./utils/service-review-dao";
+import { initTelemetryClient } from "./utils/applicationinsight";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -76,6 +77,10 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
+const telemetryClient = initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
@@ -85,6 +90,7 @@ export const httpEntryPoint = pipe(
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient,
   },
   createWebServer,
   expressToAzureFunction

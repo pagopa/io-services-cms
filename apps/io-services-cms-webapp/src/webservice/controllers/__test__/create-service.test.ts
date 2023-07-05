@@ -100,6 +100,11 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
 describe("createService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -112,6 +117,7 @@ describe("createService", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
   const aNewService = {

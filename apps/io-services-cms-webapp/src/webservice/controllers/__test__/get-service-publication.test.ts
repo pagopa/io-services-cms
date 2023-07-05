@@ -115,6 +115,11 @@ const aServicePub = {
   },
 } as unknown as ServicePublication.ItemType;
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
 describe("WebService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -127,6 +132,7 @@ describe("WebService", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
   describe("getServicePublication", () => {

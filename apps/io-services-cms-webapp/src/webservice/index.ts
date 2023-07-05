@@ -6,6 +6,7 @@ import express from "express";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -64,6 +65,7 @@ type Dependencies = {
   apimClient: ApiManagementClient;
   config: IConfig;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const createWebServer = ({
@@ -73,6 +75,7 @@ export const createWebServer = ({
   apimClient,
   config,
   subscriptionCIDRsModel,
+  telemetryClient,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -87,6 +90,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         apimClient,
         config,
+        telemetryClient,
       }),
       applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel)
     )

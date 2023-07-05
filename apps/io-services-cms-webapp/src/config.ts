@@ -126,6 +126,11 @@ export const QueueConfig = t.type({
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
+// Application Insight configuration
+export const ApplicationInsightConfig = t.type({
+  APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+});
+
 // Services pagination configuration
 export const PaginationConfig = t.type({
   PAGINATION_DEFAULT_LIMIT: withDefault(
@@ -164,7 +169,12 @@ export const IConfig = t.intersection([
     QueueConfig,
     ServiceIdQualityCheckExclusionList,
   ]),
-  t.intersection([CosmosLegacyConfig, PaginationConfig, JiraLegacyProjectName]),
+  t.intersection([
+    CosmosLegacyConfig,
+    PaginationConfig,
+    JiraLegacyProjectName,
+    ApplicationInsightConfig,
+  ]),
 ]);
 
 export const envConfig = {

@@ -106,6 +106,11 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
 describe("regenerateSubscriptionKeys", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -118,6 +123,7 @@ describe("regenerateSubscriptionKeys", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
   it("should regenerate primary key", async () => {

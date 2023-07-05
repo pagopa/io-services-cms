@@ -28,6 +28,7 @@ import {
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorForbiddenNotAuthorized,
@@ -40,8 +41,8 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
-import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -78,6 +79,7 @@ type Dependencies = {
   // An instance of APIM Client
   apimClient: ApiManagementClient;
   config: IConfig;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 // utility to extract a non-empty id from an object
@@ -169,6 +171,7 @@ export const makeCreateServiceHandler =
     fsmLifecycleClient,
     apimClient,
     config,
+    telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
   (_auth, __, attrs, userEmail, servicePayload) => {
     const serviceId = ulidGenerator();
@@ -187,8 +190,26 @@ export const makeCreateServiceHandler =
         ),
       }),
       TE.map(itemToResponse),
-      TE.map(ResponseSuccessJson),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message))
+      TE.map((resp) => {
+        telemetryClient.trackEvent({
+          name: "api.manage.services.create",
+          properties: {
+            requesterSubscriptionId: _auth.subscriptionId,
+            serviceId,
+          },
+        });
+        return ResponseSuccessJson(resp);
+      }),
+      TE.mapLeft((err) => {
+        telemetryClient.trackException({
+          exception: err,
+          properties: {
+            requesterSubscriptionId: _auth.subscriptionId,
+            serviceId,
+          },
+        });
+        return ResponseErrorInternal(err.message);
+      })
     );
 
     return pipe(

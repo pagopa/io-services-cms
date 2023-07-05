@@ -103,6 +103,11 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
 describe("getServiceKeys", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -115,6 +120,7 @@ describe("getServiceKeys", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
   it("should retrieve service keys", async () => {
