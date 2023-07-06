@@ -84,7 +84,7 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 );
 
 const servicesContainer = cosmosdbClient
-  .database(config.COSMOSDB_NAME)
+  .database(config.LEGACY_COSMOSDB_NAME)
   .container(SERVICE_COLLECTION_NAME);
 
 const serviceModel = new ServiceModel(servicesContainer);
