@@ -29,6 +29,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -41,8 +42,12 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceHandler";
@@ -53,6 +58,7 @@ type Dependencies = {
   store: FSMStore<ServicePublication.ItemType>;
 
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes =
@@ -68,7 +74,12 @@ type PublishServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeGetServiceHandler =
-  ({ config, store, apimClient }: Dependencies): PublishServiceHandler =>
+  ({
+    config,
+    store,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -101,6 +112,16 @@ export const makeGetServiceHandler =
               )
             )
           )
+        )
+      ),
+      TE.map(
+        trackEventOnResponseOK(
+          telemetryClient,
+          EventNameEnum.GetServicePublication,
+          {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          }
         )
       ),
       TE.mapLeft((err) =>

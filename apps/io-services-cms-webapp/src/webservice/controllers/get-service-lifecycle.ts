@@ -35,12 +35,17 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "GetServiceLifecycleHandler";
 
@@ -60,12 +65,17 @@ type Dependencies = {
   config: IConfig;
   // A store od ServiceLifecycle objects
   store: FSMStore<ServiceLifecycle.ItemType>;
-
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeGetServiceLifecycleHandler =
-  ({ config, store, apimClient }: Dependencies): GetServiceLifecycleHandler =>
+  ({
+    config,
+    store,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): GetServiceLifecycleHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -98,6 +108,16 @@ export const makeGetServiceLifecycleHandler =
               )
             )
           )
+        )
+      ),
+      TE.map(
+        trackEventOnResponseOK(
+          telemetryClient,
+          EventNameEnum.GetServiceLifecycle,
+          {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          }
         )
       ),
       TE.mapLeft((err) =>

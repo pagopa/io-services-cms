@@ -25,6 +25,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseSuccessNoContent,
@@ -34,7 +35,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "PublishServiceHandler";
@@ -43,6 +44,7 @@ type Dependencies = {
   config: IConfig;
   fsmPublicationClient: ServicePublication.FsmClient;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
@@ -60,6 +62,7 @@ export const makePublishServiceHandler =
     config,
     fsmPublicationClient,
     apimClient,
+    telemetryClient,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
@@ -77,6 +80,16 @@ export const makePublishServiceHandler =
           TE.mapLeft(fsmToApiError)
         )
       ),
+      TE.map((resp) => {
+        telemetryClient.trackEvent({
+          name: "api.manage.services.publish",
+          properties: {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          },
+        });
+        return resp;
+      }),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,

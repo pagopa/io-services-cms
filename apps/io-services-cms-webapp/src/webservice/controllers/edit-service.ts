@@ -26,6 +26,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson,
@@ -41,8 +42,12 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "EditServiceHandler";
 
@@ -50,6 +55,7 @@ type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   config: IConfig;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes =
@@ -70,6 +76,7 @@ export const makeEditServiceHandler =
     fsmLifecycleClient,
     config,
     apimClient,
+    telemetryClient,
   }: Dependencies): EditServiceHandler =>
   (context, auth, __, ___, serviceId, servicePayload) =>
     pipe(
@@ -93,6 +100,12 @@ export const makeEditServiceHandler =
           TE.map(ResponseSuccessJson),
           TE.mapLeft(fsmToApiError)
         )
+      ),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.EditService, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {

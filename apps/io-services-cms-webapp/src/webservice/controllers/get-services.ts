@@ -29,6 +29,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IWithinRangeIntegerTag,
   IntegerFromString,
@@ -57,7 +58,11 @@ import {
 } from "../../lib/clients/apim-client";
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "GetServicesHandler";
 
@@ -82,6 +87,7 @@ type Dependencies = {
   apimClient: ApiManagementClient;
   // The app configuration
   config: IConfig;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export type ServiceSubscriptionPair = {
@@ -197,6 +203,7 @@ export const makeGetServicesHandler =
     fsmLifecycleClient,
     apimClient,
     config,
+    telemetryClient,
   }: Dependencies): GetServicesHandler =>
   (context, auth, __, ___, userEmail, limit, offset) =>
     pipe(
@@ -232,6 +239,13 @@ export const makeGetServicesHandler =
         )
       ),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServices, {
+          userSubscriptionId: auth.subscriptionId,
+          limit,
+          offset,
+        })
+      ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,

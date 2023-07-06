@@ -55,7 +55,11 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "CreateServiceHandler";
 
@@ -190,23 +194,20 @@ export const makeCreateServiceHandler =
         ),
       }),
       TE.map(itemToResponse),
-      TE.map((resp) => {
-        telemetryClient.trackEvent({
-          name: "api.manage.services.create",
-          properties: {
-            requesterSubscriptionId: auth.subscriptionId,
-            serviceId,
-            serviceName: servicePayload.name,
-          },
-        });
-        return ResponseSuccessJson(resp);
-      }),
+      TE.map(ResponseSuccessJson),
       TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 
     return pipe(
       createSubscriptionStep,
       TE.chain((_) => createServiceStep),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+          serviceName: servicePayload.name,
+        })
+      ),
       TE.mapLeft((err) =>
         logger.logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,

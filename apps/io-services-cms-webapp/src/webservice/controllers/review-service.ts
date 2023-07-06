@@ -26,6 +26,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseSuccessNoContent,
@@ -36,7 +37,7 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "ReviewServiceHandler";
@@ -45,6 +46,7 @@ type Dependencies = {
   config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
@@ -63,6 +65,7 @@ export const makeReviewServiceHandler =
     config,
     fsmLifecycleClient: fsmLifecycleClient,
     apimClient,
+    telemetryClient,
   }: Dependencies): ReviewServiceHandler =>
   (context, auth, __, ___, serviceId, body) =>
     pipe(
@@ -82,6 +85,17 @@ export const makeReviewServiceHandler =
           TE.mapLeft(fsmToApiError)
         )
       ),
+      TE.map((resp) => {
+        telemetryClient.trackEvent({
+          name: "api.manage.services.review",
+          properties: {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+            autoPublish: body.auto_publish,
+          },
+        });
+        return resp;
+      }),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,

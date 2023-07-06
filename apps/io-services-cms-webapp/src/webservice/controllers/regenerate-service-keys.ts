@@ -25,6 +25,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson,
@@ -39,7 +40,7 @@ import {
   mapApimRestError,
   regenerateSubscriptionKey,
 } from "../../lib/clients/apim-client";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "RegenerateServiceKeysHandler";
@@ -60,10 +61,15 @@ type RegenerateServiceKeysHandler = (
 type Dependencies = {
   config: IConfig;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeRegenerateServiceKeysHandler =
-  ({ config, apimClient }: Dependencies): RegenerateServiceKeysHandler =>
+  ({
+    config,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): RegenerateServiceKeysHandler =>
   (context, auth, __, ___, serviceId, keyType) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -91,6 +97,17 @@ export const makeRegenerateServiceKeysHandler =
           )
         )
       ),
+      TE.map((resp) => {
+        telemetryClient.trackEvent({
+          name: "api.manage.services.keys.regenerate",
+          properties: {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+            keyType,
+          },
+        });
+        return resp;
+      }),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,

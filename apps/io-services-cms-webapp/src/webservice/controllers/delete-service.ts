@@ -25,6 +25,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseSuccessNoContent,
@@ -34,8 +35,12 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "DeleteServiceHandler";
 
@@ -43,6 +48,7 @@ type Dependencies = {
   config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
@@ -60,6 +66,7 @@ export const makeDeleteServiceHandler =
     config,
     fsmLifecycleClient: fsmLifecycleClient,
     apimClient,
+    telemetryClient,
   }: Dependencies): DeleteServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
@@ -76,6 +83,12 @@ export const makeDeleteServiceHandler =
           TE.map(ResponseSuccessNoContent),
           TE.mapLeft(fsmToApiError)
         )
+      ),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.DeleteService, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {

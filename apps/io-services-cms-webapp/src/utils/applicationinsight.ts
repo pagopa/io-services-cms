@@ -24,3 +24,30 @@ export const initTelemetryClient = (
           E.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
         ),
       });
+
+export const trackEventOnResponseOK =
+  <R>(
+    telemetryClient: ReturnType<typeof initTelemetryClient>,
+    eventName: EventNameEnum,
+    eventProperties: Record<string, unknown>
+  ) =>
+  (response: R) => {
+    telemetryClient.trackEvent({
+      name: `api.manage.services.${eventName}`,
+      properties: eventProperties,
+    });
+    return response;
+  };
+
+export enum EventNameEnum {
+  CreateService = "create",
+  DeleteService = "delete",
+  EditService = "edit",
+  GetServiceKeys = "keys.get",
+  GetServiceLifecycle = "lifecycle.get",
+  GetServicePublication = "publication.get",
+  GetServices = "all.get",
+  PublishService = "publish",
+  RegenerateServiceKeys = "keys.regenerate",
+  UnpublishService = "unpublish",
+}

@@ -25,6 +25,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson,
@@ -35,8 +36,12 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
 import { listSecrets, mapApimRestError } from "../../lib/clients/apim-client";
-import { ErrorResponseTypes, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "GetServiceKeysHandler";
 
@@ -55,10 +60,15 @@ type GetServiceKeysHandler = (
 type Dependencies = {
   config: IConfig;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeGetServiceKeysHandler =
-  ({ config, apimClient }: Dependencies): GetServiceKeysHandler =>
+  ({
+    config,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): GetServiceKeysHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -84,6 +94,12 @@ export const makeGetServiceKeysHandler =
             })
           )
         )
+      ),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServiceKeys, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
