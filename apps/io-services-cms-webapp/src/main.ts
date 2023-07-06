@@ -83,11 +83,11 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
-const servicesContainer = cosmosdbClient
+const legacyServicesContainer = cosmosdbClient
   .database(config.LEGACY_COSMOSDB_NAME)
   .container(SERVICE_COLLECTION_NAME);
 
-const serviceModel = new ServiceModel(servicesContainer);
+const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
@@ -122,7 +122,7 @@ export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
 );
 
 export const onRequestSyncLegacyEntryPoint =
-  createRequestSyncLegacyHandler(serviceModel);
+  createRequestSyncLegacyHandler(legacyServiceModel);
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();

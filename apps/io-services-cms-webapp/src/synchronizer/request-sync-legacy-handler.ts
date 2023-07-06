@@ -21,7 +21,7 @@ const parseIncomingMessage = (
 export const handleQueueItem = (
   _context: Context,
   queueItem: Json,
-  serviceModel: ServiceModel
+  legacyServiceModel: ServiceModel
 ) =>
   pipe(
     queueItem,
@@ -37,7 +37,7 @@ export const handleQueueItem = (
     TE.fromEither,
     TE.chainW((item) =>
       pipe(
-        serviceModel.findOneByServiceId(item.serviceId),
+        legacyServiceModel.findOneByServiceId(item.serviceId),
         TE.chainW(
           O.fold(
             () =>
@@ -47,7 +47,7 @@ export const handleQueueItem = (
                   _context.log.info("create param:", x);
                   return x;
                 },
-                serviceModel.create
+                legacyServiceModel.create
               ),
             (existingService) =>
               pipe(
@@ -56,7 +56,7 @@ export const handleQueueItem = (
                   _context.log.info("update param:", x);
                   return x;
                 },
-                serviceModel.update
+                legacyServiceModel.update
               )
           )
         ),
@@ -86,8 +86,8 @@ export const handleQueueItem = (
   );
 
 export const createRequestSyncLegacyHandler = (
-  serviceModel: ServiceModel
+  legacyServiceModel: ServiceModel
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, queueItem, serviceModel)()
+    handleQueueItem(context, queueItem, legacyServiceModel)()
   );

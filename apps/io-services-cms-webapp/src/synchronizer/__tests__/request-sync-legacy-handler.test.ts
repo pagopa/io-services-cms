@@ -115,20 +115,20 @@ describe("Sync Legacy Handler", () => {
   it("should return an Error if queueItem is invalid", async () => {
     const context = createContext();
     const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
     await expect(() =>
-      handleQueueItem(context, anInvalidQueueItem, serviceModelMock)()
+      handleQueueItem(context, anInvalidQueueItem, legacyServiceModelMock)()
     ).rejects.toThrowError("Error while parsing incoming message");
   });
 
   it("should return an error if find legacy service fails", async () => {
     const context = createContext();
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(() => {
         return TE.left(CosmosEmptyResponse);
       }),
@@ -140,21 +140,21 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        serviceModelMock
+        legacyServiceModelMock
       )()
     ).rejects.toThrowError(CosmosEmptyResponse.kind);
 
-    expect(serviceModelMock.create).not.toBeCalled();
-    expect(serviceModelMock.update).not.toBeCalled();
-    expect(serviceModelMock.findOneByServiceId).toBeCalledTimes(1);
-    expect(serviceModelMock.findOneByServiceId).toBeCalledWith(
+    expect(legacyServiceModelMock.create).not.toBeCalled();
+    expect(legacyServiceModelMock.update).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
       aRequestSyncLegacyItem.serviceId
     );
   });
 
   it("should return an error if legacy service creation fails", async () => {
     const context = createContext();
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(() => {
         return TE.right(O.none);
       }),
@@ -168,21 +168,21 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        serviceModelMock
+        legacyServiceModelMock
       )()
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
-    expect(serviceModelMock.update).not.toBeCalled();
-    expect(serviceModelMock.findOneByServiceId).toBeCalledTimes(1);
-    expect(serviceModelMock.findOneByServiceId).toBeCalledWith(
+    expect(legacyServiceModelMock.update).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
       aRequestSyncLegacyItem.serviceId
     );
-    expect(serviceModelMock.create).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.create).toBeCalledTimes(1);
   });
 
   it("should return an error if legacy service update fails", async () => {
     const context = createContext();
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(() => {
         return TE.right(O.some(aRetrievedService));
       }),
@@ -196,21 +196,21 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        serviceModelMock
+        legacyServiceModelMock
       )()
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
-    expect(serviceModelMock.create).not.toBeCalled();
-    expect(serviceModelMock.findOneByServiceId).toBeCalledTimes(1);
-    expect(serviceModelMock.findOneByServiceId).toBeCalledWith(
+    expect(legacyServiceModelMock.create).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
       aRequestSyncLegacyItem.serviceId
     );
-    expect(serviceModelMock.update).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.update).toBeCalledTimes(1);
   });
 
   it("should create a new legacy service with CMS tag", async () => {
     const context = createContext();
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(() => {
         return TE.right(O.none);
       }),
@@ -223,24 +223,24 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      serviceModelMock
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
-    expect(serviceModelMock.update).not.toBeCalled();
-    expect(serviceModelMock.findOneByServiceId).toBeCalledTimes(1);
-    expect(serviceModelMock.findOneByServiceId).toBeCalledWith(
+    expect(legacyServiceModelMock.update).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
       aRequestSyncLegacyItem.serviceId
     );
-    expect(serviceModelMock.create).toBeCalledTimes(1);
-    expect(serviceModelMock.create).toBeCalledWith(
+    expect(legacyServiceModelMock.create).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.create).toBeCalledWith(
       expect.objectContaining({ cmsTag: true })
     );
   });
 
   it("should update a new legacy service with CMS tag", async () => {
     const context = createContext();
-    const serviceModelMock = {
+    const legacyServiceModelMock = {
       findOneByServiceId: vi.fn(() => {
         return TE.right(O.some(aRetrievedService));
       }),
@@ -256,16 +256,16 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      serviceModelMock
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
-    expect(serviceModelMock.create).not.toBeCalled();
-    expect(serviceModelMock.findOneByServiceId).toBeCalledTimes(1);
-    expect(serviceModelMock.findOneByServiceId).toBeCalledWith(
+    expect(legacyServiceModelMock.create).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
       aRequestSyncLegacyItem.serviceId
     );
-    expect(serviceModelMock.update).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.update).toBeCalledTimes(1);
     const expected = JSON.parse(
       JSON.stringify({
         ...aRetrievedService,
@@ -273,7 +273,7 @@ describe("Sync Legacy Handler", () => {
       })
     );
     console.log("expected:", expected);
-    expect(serviceModelMock.update).toBeCalledWith(
+    expect(legacyServiceModelMock.update).toBeCalledWith(
       expect.objectContaining({ cmsTag: true })
     );
   });
