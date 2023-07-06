@@ -33,10 +33,6 @@ import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strin
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson,
@@ -59,20 +55,17 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
-import { ILogger, getLogger } from "../../utils/logging";
+import { ErrorResponseTypes, getLogger } from "../../utils/logging";
 
 const logPrefix = "CreateServiceHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type ICreateServiceHandler = (
-  auth: IAzureApiAuthorization,
   context: Context,
+  auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
@@ -179,18 +172,13 @@ export const makeCreateServiceHandler =
     config,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
-  (_auth, context, _, __, userEmail, servicePayload) => {
+  (context, auth, _, __, userEmail, servicePayload) => {
+    const logger = getLogger(context, logPrefix);
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
       createSubscriptionTask(apimClient, userEmail, serviceId, config),
-      // TE.mapLeft(buildResponseErrorInternal(context, _auth.subscriptionId))
-      TE.mapLeft(
-        buildResponseErrorInternal(
-          getLogger(context, logPrefix, "CreateSubscriptionStep"),
-          _auth.subscriptionId
-        )
-      )
+      TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 
     const createServiceStep = pipe(
@@ -206,56 +194,37 @@ export const makeCreateServiceHandler =
         telemetryClient.trackEvent({
           name: "api.manage.services.create",
           properties: {
-            requesterSubscriptionId: _auth.subscriptionId,
+            requesterSubscriptionId: auth.subscriptionId,
             serviceId,
             serviceName: servicePayload.name,
           },
         });
         return ResponseSuccessJson(resp);
       }),
-      TE.mapLeft(
-        buildResponseErrorInternal(
-          getLogger(context, logPrefix, "CreateServiceStep"),
-          _auth.subscriptionId
-        )
-      )
+      TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 
     return pipe(
       createSubscriptionStep,
       TE.chain((_) => createServiceStep),
+      TE.mapLeft((err) =>
+        logger.logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+        })
+      ),
       TE.toUnion
     )();
   };
-
-const buildResponseErrorInternal =
-  (logger: ILogger, subscriptionId: NonEmptyString) => (err: Error) => {
-    logger.logError(
-      err,
-      `Failed to create subscription for requesterSubscriptionId: ${subscriptionId}`
-    );
-    return ResponseErrorInternal(err.message);
-  };
-// const buildResponseErrorInternal =
-//   (context: Context, subscriptionId: NonEmptyString) => (err: Error) => {
-//     logError(
-//       context,
-//       logPrefix
-//     )(
-//       `Failed to create subscription for requesterSubscriptionId: ${subscriptionId}, the reason was => ${err.message}`
-//     );
-//     return ResponseErrorInternal(err.message);
-//   };
 
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: ICreateServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
-
-      ContextMiddleware(),
-
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),

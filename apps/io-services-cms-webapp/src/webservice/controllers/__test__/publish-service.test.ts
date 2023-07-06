@@ -10,6 +10,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -118,7 +119,15 @@ const mockAppinsights = {
   trackEvent: vi.fn(),
   trackError: vi.fn(),
 } as any;
-describe("WebService", () => {
+
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
+describe("publishService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -133,93 +142,96 @@ describe("WebService", () => {
     telemetryClient: mockAppinsights,
   });
 
-  describe("publishService", () => {
-    it("should fail when cannot find requested service", async () => {
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  setAppContext(app, mockContext);
 
-      expect(response.statusCode).toBe(500); // FIXME: the publish of a non-existing service is allowed by the 'autopublish' feature, so it is not possible to receive a 404 error.
-    });
+  it("should fail when cannot find requested service", async () => {
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-      await servicePublicationStore.save("s1", {
-        ...aServicePub,
-        fsm: { state: "published" },
-      })();
+    expect(response.statusCode).toBe(500); // FIXME: the publish of a non-existing service is allowed by the 'autopublish' feature, so it is not possible to receive a 404 error.
+  });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+    await servicePublicationStore.save("s1", {
+      ...aServicePub,
+      fsm: { state: "published" },
+    })();
 
-      expect(response.statusCode).toBe(409);
-    });
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should not allow the operation without right group", async () => {
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", "OtherGroup")
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(409);
+  });
 
-      expect(response.statusCode).toBe(403);
-    });
+  it("should not allow the operation without right group", async () => {
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", "OtherGroup")
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should publish a service", async () => {
-      await servicePublicationStore.save("s1", {
-        ...aServicePub,
-        fsm: { state: "unpublished" },
-      })();
+    expect(response.statusCode).toBe(403);
+  });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  it("should publish a service", async () => {
+    await servicePublicationStore.save("s1", {
+      ...aServicePub,
+      fsm: { state: "unpublished" },
+    })();
 
-      expect(response.statusCode).toBe(204);
-    });
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should not allow the operation without right userId", async () => {
-      const aDifferentManageSubscriptionId = "MANAGE-456";
-      const aDifferentUserId = "456";
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(204);
+  });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", aDifferentUserId)
-        .set("x-subscription-id", aDifferentManageSubscriptionId);
+  it("should not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
 
-      expect(response.statusCode).toBe(403);
-    });
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", aDifferentUserId)
+      .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    it("should not allow the operation without manageKey", async () => {
-      const aNotManageSubscriptionId = "NOT-MANAGE-123";
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(403);
+  });
 
-      const response = await request(app)
-        .post("/api/services/s1/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aNotManageSubscriptionId);
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-      expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
-      expect(response.statusCode).toBe(403);
-    });
+    const response = await request(app)
+      .post("/api/services/s1/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
   });
 });

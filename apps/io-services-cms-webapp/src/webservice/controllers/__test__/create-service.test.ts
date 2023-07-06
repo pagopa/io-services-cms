@@ -108,8 +108,8 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: console.error,
-    info: console.info,
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
   },
 } as any;
 
@@ -178,6 +178,7 @@ describe("createService", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.id).toEqual(expect.any(String));
   });
 
@@ -191,7 +192,7 @@ describe("createService", () => {
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 
@@ -211,6 +212,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 
@@ -230,6 +232,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 
@@ -249,6 +252,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 });

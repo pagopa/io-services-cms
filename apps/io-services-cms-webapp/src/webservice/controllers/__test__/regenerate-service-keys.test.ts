@@ -10,6 +10,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -111,6 +112,13 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("regenerateSubscriptionKeys", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -126,6 +134,8 @@ describe("regenerateSubscriptionKeys", () => {
     telemetryClient: mockAppinsights,
   });
 
+  setAppContext(app, mockContext);
+
   it("should regenerate primary key", async () => {
     const response = await request(app)
       .put(apiFullPath)
@@ -136,6 +146,7 @@ describe("regenerateSubscriptionKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(regenerateSubscriptionKey).toHaveBeenCalled();
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(response.statusCode).toBe(200);
     expect(JSON.stringify(response.body)).toBe(
@@ -156,6 +167,7 @@ describe("regenerateSubscriptionKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(regenerateSubscriptionKey).toHaveBeenCalled();
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(response.statusCode).toBe(200);
     expect(JSON.stringify(response.body)).toBe(
@@ -195,6 +207,7 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(regenerateSubscriptionKey).toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -213,6 +226,7 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(regenerateSubscriptionKey).toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 
@@ -232,6 +246,7 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 
@@ -279,6 +294,7 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(getSubscription).toHaveBeenCalledTimes(1);
     expect(regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 });

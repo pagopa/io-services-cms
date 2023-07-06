@@ -1,4 +1,5 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -10,27 +11,12 @@ import {
   AzureUserAttributesManageMiddleware,
   IAzureUserAttributesManage,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
-import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
-  IResponseSuccessJson,
-  IResponseSuccessNoContent,
-  ResponseErrorInternal,
-  ResponseErrorNotFound,
-  ResponseSuccessJson,
-} from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
@@ -39,22 +25,31 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import {
+  IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+  ResponseSuccessJson,
+} from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
+import { ErrorResponseTypes, getLogger } from "../../utils/logging";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+
+const logPrefix = "GetServiceLifecycleHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
-  | IResponseSuccessNoContent
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorNotFound
-  | IResponseErrorConflict
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type GetServiceLifecycleHandler = (
+  context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -71,32 +66,45 @@ type Dependencies = {
 
 export const makeGetServiceLifecycleHandler =
   ({ config, store, apimClient }: Dependencies): GetServiceLifecycleHandler =>
-  (_auth, __, attrs, serviceId) =>
+  (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
         apimClient,
         serviceId,
-        _auth.subscriptionId,
-        _auth.userId
+        auth.subscriptionId,
+        auth.userId
       ),
       TE.chainW(
         flow(
           store.fetch,
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.map(
+          TE.chainW(
             flow(
               O.foldW(
                 () =>
-                  ResponseErrorNotFound("Not found", `${serviceId} not found`),
+                  pipe(
+                    ResponseErrorNotFound(
+                      "Not found",
+                      `${serviceId} not found`
+                    ),
+                    TE.left
+                  ),
                 flow(
                   itemToResponse,
-                  ResponseSuccessJson<ServiceResponsePayload>
+                  ResponseSuccessJson<ServiceResponsePayload>,
+                  TE.right
                 )
               )
             )
           )
         )
+      ),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
       ),
       TE.toUnion
     )();
@@ -105,8 +113,11 @@ export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: GetServiceLifecycleHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -116,7 +127,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u) => ipTuple(c, u))
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
       )
     );
   };

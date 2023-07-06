@@ -23,6 +23,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -121,7 +122,14 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-describe("WebService", () => {
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
+describe("ReviewService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -136,146 +144,150 @@ describe("WebService", () => {
     telemetryClient: mockAppinsights,
   });
 
-  describe("reviewService", () => {
-    const payload: ReviewRequest = {
-      auto_publish: true,
-    };
+  setAppContext(app, mockContext);
 
-    it("should fail when cannot find requested service", async () => {
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  const payload: ReviewRequest = {
+    auto_publish: true,
+  };
 
-      expect(response.statusCode).toBe(404);
-    });
+  it("should fail when cannot find requested service", async () => {
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-      await serviceLifecycleStore.save("s1", {
-        ...aServiceLifecycle,
-        fsm: { state: "approved" },
-      })();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(404);
+  });
 
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
-
-      expect(response.statusCode).toBe(409);
-    });
-
-    it("should not allow the operation without right group", async () => {
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", "OtherGroup")
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
-
-      expect(response.statusCode).toBe(403);
-    });
-
-    const serviceToSubmit: ServiceLifecycle.ItemType = {
+  it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+    await serviceLifecycleStore.save("s1", {
       ...aServiceLifecycle,
-      fsm: { state: "draft" },
-    };
+      fsm: { state: "approved" },
+    })();
 
-    it("should submit a service", async () => {
-      await serviceLifecycleStore.save("s1", serviceToSubmit)();
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(409);
+  });
 
-      const serviceAfterApply = await serviceLifecycleStore.fetch("s1")();
+  it("should not allow the operation without right group", async () => {
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", "OtherGroup")
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-      let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
+    expect(response.statusCode).toBe(403);
+  });
 
-      expect(E.isRight(serviceAfterApply)).toBeTruthy();
-      if (E.isRight(serviceAfterApply)) {
-        optionValue = serviceAfterApply.right;
-      }
+  const serviceToSubmit: ServiceLifecycle.ItemType = {
+    ...aServiceLifecycle,
+    fsm: { state: "draft" },
+  };
 
-      expect(O.isSome(optionValue)).toBeTruthy();
-      if (O.isSome(optionValue)) {
-        const finalValue = optionValue.value;
-        expect(finalValue.fsm).toHaveProperty("autoPublish");
-        expect(finalValue.fsm.autoPublish).toBeTruthy();
-        expect(finalValue.fsm.state).toBe("submitted");
-      }
+  it("should submit a service", async () => {
+    await serviceLifecycleStore.save("s1", serviceToSubmit)();
 
-      expect(response.statusCode).toBe(204);
-    });
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should fail on no body payload", async () => {
-      await serviceLifecycleStore.save("s2", serviceToSubmit)();
+    const serviceAfterApply = await serviceLifecycleStore.fetch("s1")();
 
-      const response = await request(app)
-        .put("/api/services/s2/review")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+    let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
 
-      const serviceAfterApply = await serviceLifecycleStore.fetch("s2")();
+    expect(E.isRight(serviceAfterApply)).toBeTruthy();
+    if (E.isRight(serviceAfterApply)) {
+      optionValue = serviceAfterApply.right;
+    }
 
-      let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
+    expect(O.isSome(optionValue)).toBeTruthy();
+    if (O.isSome(optionValue)) {
+      const finalValue = optionValue.value;
+      expect(finalValue.fsm).toHaveProperty("autoPublish");
+      expect(finalValue.fsm.autoPublish).toBeTruthy();
+      expect(finalValue.fsm.state).toBe("submitted");
+    }
 
-      expect(E.isRight(serviceAfterApply)).toBeTruthy();
-      if (E.isRight(serviceAfterApply)) {
-        optionValue = serviceAfterApply.right;
-      }
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(204);
+  });
 
-      expect(O.isSome(optionValue)).toBeTruthy();
-      if (O.isSome(optionValue)) {
-        const finalValue = optionValue.value;
-        expect(finalValue.fsm).not.toHaveProperty("autoPublish");
-        expect(finalValue.fsm.state).toBe("draft");
-      }
+  it("should fail on no body payload", async () => {
+    await serviceLifecycleStore.save("s2", serviceToSubmit)();
 
-      expect(response.statusCode).toBe(400);
-    });
+    const response = await request(app)
+      .put("/api/services/s2/review")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should not allow the operation without right userId", async () => {
-      const aDifferentManageSubscriptionId = "MANAGE-456";
-      const aDifferentUserId = "456";
+    const serviceAfterApply = await serviceLifecycleStore.fetch("s2")();
 
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", aDifferentUserId)
-        .set("x-subscription-id", aDifferentManageSubscriptionId);
+    let optionValue: O.Option<ServiceLifecycle.ItemType> = O.none;
 
-      expect(response.statusCode).toBe(403);
-    });
+    expect(E.isRight(serviceAfterApply)).toBeTruthy();
+    if (E.isRight(serviceAfterApply)) {
+      optionValue = serviceAfterApply.right;
+    }
 
-    it("should not allow the operation without manageKey", async () => {
-      const aNotManageSubscriptionId = "NOT-MANAGE-123";
+    expect(O.isSome(optionValue)).toBeTruthy();
+    if (O.isSome(optionValue)) {
+      const finalValue = optionValue.value;
+      expect(finalValue.fsm).not.toHaveProperty("autoPublish");
+      expect(finalValue.fsm.state).toBe("draft");
+    }
 
-      const response = await request(app)
-        .put("/api/services/s1/review")
-        .send(payload)
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aNotManageSubscriptionId);
+    expect(response.statusCode).toBe(400);
+  });
 
-      expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
-      expect(response.statusCode).toBe(403);
-    });
+  it("should not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
+
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", aDifferentUserId)
+      .set("x-subscription-id", aDifferentManageSubscriptionId);
+
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(403);
+  });
+
+  it("should not allow the operation without manageKey", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
+
+    const response = await request(app)
+      .put("/api/services/s1/review")
+      .send(payload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
   });
 });

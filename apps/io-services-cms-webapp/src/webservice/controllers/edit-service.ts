@@ -1,4 +1,5 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -14,6 +15,7 @@ import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -25,18 +27,12 @@ import {
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
-  IResponseSuccessNoContent,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
@@ -45,7 +41,10 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logging";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+
+const logPrefix = "EditServiceHandler";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
@@ -55,14 +54,10 @@ type Dependencies = {
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
-  | IResponseSuccessNoContent
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorNotFound
-  | IResponseErrorConflict
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type EditServiceHandler = (
+  context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -76,14 +71,14 @@ export const makeEditServiceHandler =
     config,
     apimClient,
   }: Dependencies): EditServiceHandler =>
-  (_auth, __, attrs, serviceId, servicePayload) =>
+  (context, auth, __, ___, serviceId, servicePayload) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
         apimClient,
         serviceId,
-        _auth.subscriptionId,
-        _auth.userId
+        auth.subscriptionId,
+        auth.userId
       ),
       TE.chainW((sId) =>
         pipe(
@@ -99,6 +94,12 @@ export const makeEditServiceHandler =
           TE.mapLeft(fsmToApiError)
         )
       ),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
+      ),
       TE.toUnion
     )();
 
@@ -106,8 +107,11 @@ export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: EditServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -119,7 +123,9 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u, __, ___) => ipTuple(c, u))
+        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
+          ipTuple(c, u)
+        )
       )
     );
   };

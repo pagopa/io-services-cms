@@ -10,6 +10,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -19,7 +20,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { getSubscription, listSecrets } from "../../../lib/clients/apim-client";
+import { listSecrets } from "../../../lib/clients/apim-client";
 import { createWebServer } from "../../index";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
@@ -108,6 +109,13 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("getServiceKeys", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -123,6 +131,8 @@ describe("getServiceKeys", () => {
     telemetryClient: mockAppinsights,
   });
 
+  setAppContext(app, mockContext);
+
   it("should retrieve service keys", async () => {
     const response = await request(app)
       .get(apiGetServiceKeysFullPath)
@@ -133,6 +143,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(listSecrets).toHaveBeenCalled();
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(JSON.stringify(response.body)).toBe(
       JSON.stringify({
@@ -156,6 +167,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(listSecrets).toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -173,6 +185,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(listSecrets).toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 
@@ -191,6 +204,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(listSecrets).toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 
@@ -235,6 +249,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
     expect(listSecrets).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 });

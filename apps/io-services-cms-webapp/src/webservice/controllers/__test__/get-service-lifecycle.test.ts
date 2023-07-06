@@ -10,6 +10,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -86,6 +87,14 @@ const mockAppinsights = {
   trackEvent: vi.fn(),
   trackError: vi.fn(),
 } as any;
+
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("getServiceLifecycle", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -99,6 +108,8 @@ describe("getServiceLifecycle", () => {
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
   });
+
+  setAppContext(app, mockContext);
 
   const aServiceLifecycle = {
     id: "aServiceId",
@@ -130,6 +141,7 @@ describe("getServiceLifecycle", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -152,6 +164,7 @@ describe("getServiceLifecycle", () => {
     expect(JSON.stringify(response.body)).toBe(
       JSON.stringify(getLifecycleItemToResponse(asServiceLifecycleWithStatus))
     );
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -194,6 +207,7 @@ describe("getServiceLifecycle", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 });

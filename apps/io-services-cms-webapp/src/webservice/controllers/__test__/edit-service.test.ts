@@ -1,24 +1,25 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Container } from "@azure/cosmos";
 import {
   ServiceLifecycle,
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
-import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { IConfig } from "../../../config";
-import { createWebServer } from "../../index";
-import { Container } from "@azure/cosmos";
 import {
   RetrievedSubscriptionCIDRs,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import request from "supertest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../../config";
+import { createWebServer } from "../../index";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -86,6 +87,13 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("editService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -100,6 +108,8 @@ describe("editService", () => {
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
   });
+
+  setAppContext(app, mockContext);
 
   const aServicePayload = {
     name: "string",
@@ -159,6 +169,7 @@ describe("editService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -176,6 +187,7 @@ describe("editService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(409);
   });
 
@@ -208,8 +220,9 @@ describe("editService", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
     expect(response.body.metadata.address).toBe("via casa mia 245");
+    expect(mockContext.log.error).not.toHaveBeenCalled();
   });
-  it("hould not allow the operation without right userId", async () => {
+  it("should not allow the operation without right userId", async () => {
     const aDifferentManageSubscriptionId = "MANAGE-456";
     const aDifferentUserId = "456";
 
@@ -221,6 +234,7 @@ describe("editService", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
   it("should not allow the operation without manageKey", async () => {
@@ -267,6 +281,7 @@ describe("editService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.status.value).toBe("draft");
   });
 
@@ -299,6 +314,7 @@ describe("editService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.status.value).toBe("draft");
   });
 
@@ -366,6 +382,7 @@ describe("editService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.status.value).toBe("draft");
   });
 });
