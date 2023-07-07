@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_SYNC_LEGACY_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestSyncLegacyItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onRequestSyncLegacyEntryPoint"
+}
