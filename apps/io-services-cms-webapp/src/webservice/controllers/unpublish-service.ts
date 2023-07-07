@@ -84,7 +84,12 @@ export const makeUnpublishServiceHandler =
           TE.mapLeft(fsmToApiError)
         )
       ),
-      TE.map(
+      TE.bimap(
+        (err) =>
+          getLogger(context, logPrefix).logErrorResponse(err, {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          }),
         trackEventOnResponseOK(
           telemetryClient,
           EventNameEnum.UnpublishService,
@@ -93,12 +98,6 @@ export const makeUnpublishServiceHandler =
             serviceId,
           }
         )
-      ),
-      TE.mapLeft((err) =>
-        getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
-          serviceId,
-        })
       ),
       TE.toUnion
     )();
