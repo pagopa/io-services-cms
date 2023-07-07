@@ -41,9 +41,9 @@ export const isUserEnabledForCmsToLegacySync = (
           `An error has occurred while retrieving service '${serviceId}'`
         )
     ),
-    TE.map((serviceSubscription) =>
+    TE.map(({ ownerId }) =>
       pipe(
-        serviceSubscription.ownerId as NonEmptyString,
+        ownerId as NonEmptyString,
         parseOwnerIdFullPath,
         isElementAllowedOnList(config.USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST)
       )
