@@ -37,6 +37,10 @@ import { IConfig } from "../../config";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 
 const logPrefix = "PublishServiceHandler";
 
@@ -80,16 +84,12 @@ export const makePublishServiceHandler =
           TE.mapLeft(fsmToApiError)
         )
       ),
-      TE.map((resp) => {
-        telemetryClient.trackEvent({
-          name: "api.manage.services.publish",
-          properties: {
-            userSubscriptionId: auth.subscriptionId,
-            serviceId,
-          },
-        });
-        return resp;
-      }),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.PublishService, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
+      ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,
