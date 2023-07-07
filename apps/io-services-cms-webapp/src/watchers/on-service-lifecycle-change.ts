@@ -5,6 +5,7 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
+import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions =
   | "requestReview"
@@ -71,7 +72,7 @@ export const handler =
     | ((OnSubmitActions | OnApproveActions) & RequestHistoricizationAction)
   > =>
   ({ item }) => {
-    if (item.fsm.lastTransition !== "from Legacy") {
+    if (item.fsm.lastTransition !== SYNC_FROM_LEGACY) {
       switch (item.fsm.state) {
         case "submitted":
           return pipe(

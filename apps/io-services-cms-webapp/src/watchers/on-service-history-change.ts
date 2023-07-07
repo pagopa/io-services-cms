@@ -11,6 +11,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
+import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions = "requestSyncLegacy";
 
@@ -107,7 +108,7 @@ export const handler: RE.ReaderEither<
 > = ({ item }) =>
   pipe(
     item,
-    O.fromPredicate((itm) => itm.fsm.lastTransition !== "from Legacy"),
+    O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
     O.map(toRequestSyncLegacyAction),
     O.getOrElse(() => noAction),
     E.right
