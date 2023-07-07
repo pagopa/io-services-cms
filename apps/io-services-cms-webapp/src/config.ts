@@ -152,6 +152,14 @@ const ServiceIdQualityCheckExclusionList = t.type({
   ),
 });
 
+const FeatureFlags = t.type({
+  // UserId List allowed to sync services from CMS to Legacy
+  USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -174,6 +182,7 @@ export const IConfig = t.intersection([
     PaginationConfig,
     JiraLegacyProjectName,
     ApplicationInsightConfig,
+    FeatureFlags,
   ]),
 ]);
 

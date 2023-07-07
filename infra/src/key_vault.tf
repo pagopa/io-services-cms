@@ -33,6 +33,11 @@ data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   key_vault_id = module.key_vault_domain.id
 }
 
+data "azurerm_key_vault_secret" "userid_cms_to_legacy_sync_inclusion_list" {
+  name         = "USERID-CMS-TO-LEGACY-SYNC-INCLUSION-LIST"
+  key_vault_id = module.key_vault_domain.id
+}
+
 resource "azurerm_key_vault_access_policy" "adgroup_admin" {
   key_vault_id = module.key_vault_domain.id
 
