@@ -1,3 +1,4 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { LegacyService, ServiceHistory } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
@@ -7,7 +8,8 @@ import {
   toAuthorizedRecipients,
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as E from "fp-ts/lib/Either";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
 import { handler } from "../on-service-history-change";
 
 const aServiceHistory = {
@@ -81,14 +83,31 @@ const aLegacyService = {
   },
 } as unknown as LegacyService;
 
+const anUserId = "123";
+const ownerId = `/an/owner/${anUserId}`;
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        ownerId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
+const mockConfig = {
+  USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: [anUserId],
+} as unknown as IConfig;
+
 describe("On Service History Change Handler", () => {
   it.each`
     scenario                             | item                                                                                      | expected
     ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                 | ${{ requestSyncLegacy: aLegacyService }}
     ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                        | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
     ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: "from Legacy" } }} | ${{}}
-  `("should map an item to a $scenario action", ({ item, expected }) => {
-    const res = handler({ item });
+  `("should map an item to a $scenario action", async ({ item, expected }) => {
+    const res = await handler(mockConfig, mockApimClient)({ item })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual(expected);
