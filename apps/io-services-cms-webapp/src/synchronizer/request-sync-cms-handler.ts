@@ -10,6 +10,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
+import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -27,7 +28,7 @@ const toServiceLifecycle = (
   id,
   data,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fsm: { state: state as any, lastTransition: "from Legacy" },
+  fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
 });
 
 const toServicePublication = (
@@ -38,7 +39,7 @@ ServicePublication.ItemType => ({
   id,
   data,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fsm: { state: state as any, lastTransition: "from Legacy" },
+  fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
 });
 
 export const handleQueueItem = (

@@ -13,8 +13,8 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
+import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions = "requestSyncLegacy";
 
@@ -120,7 +120,8 @@ export const handler =
         pipe(
           item,
           O.fromPredicate(
-            (itm) => isUserEnabled && itm.fsm.lastTransition !== "from Legacy"
+            (itm) =>
+              isUserEnabled && itm.fsm.lastTransition !== SYNC_FROM_LEGACY
           ),
           O.map(toRequestSyncLegacyAction),
           O.getOrElse(() => noAction),
