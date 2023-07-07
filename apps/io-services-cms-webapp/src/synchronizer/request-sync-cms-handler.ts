@@ -50,12 +50,9 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft((_) => {
-      _context.log.error(_.message);
-      return new Error("Error while parsing incoming message");
-    }), // TODO: map as _permanent_ error
+    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
-    TE.chainW((item) => {
+    TE.chain((item) => {
       switch (item.kind) {
         case "LifecycleItemType":
           return pipe(

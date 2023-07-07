@@ -6,6 +6,10 @@ import {
   stores,
 } from "@io-services-cms/models";
 import {
+  SERVICE_COLLECTION_NAME,
+  ServiceModel,
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import {
   SUBSCRIPTION_CIDRS_COLLECTION_NAME,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -15,6 +19,7 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
 import { getConfigOrThrow } from "./config";
+import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
   expressToAzureFunction,
   toAzureFunctionHandler,
@@ -23,11 +28,19 @@ import { getDatabase } from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
+import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
+import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
+import { createRequestSyncLegacyHandler } from "./synchronizer/request-sync-legacy-handler";
 import { apimProxy } from "./utils/apim-proxy";
+import {
+  cosmosdbClient,
+  cosmosdbInstance as legacyCosmosDbInstance,
+} from "./utils/cosmos-legacy";
 import { jiraProxy } from "./utils/jira-proxy";
+import { getDao } from "./utils/service-review-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
@@ -77,10 +90,18 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
+
 // AppInsights client for Telemetry
 const telemetryClient = initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
+
+const legacyServicesContainer = cosmosdbClient
+  .database(config.LEGACY_COSMOSDB_NAME)
+  .container(SERVICE_COLLECTION_NAME);
+
+const legacyServiceModel = new ServiceModel(legacyServicesContainer);
+
 
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
@@ -114,6 +135,9 @@ export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
   fsmLifecycleClient,
   fsmPublicationClient
 );
+
+export const onRequestSyncLegacyEntryPoint =
+  createRequestSyncLegacyHandler(legacyServiceModel);
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
