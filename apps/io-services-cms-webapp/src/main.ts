@@ -47,11 +47,6 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
-import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
-import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
-import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
-import { cosmosdbInstance as legacyCosmosDbInstance } from "./utils/cosmos-legacy";
-import { getDao } from "./utils/service-review-dao";
 import { initTelemetryClient } from "./utils/applicationinsight";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -90,7 +85,6 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
-
 // AppInsights client for Telemetry
 const telemetryClient = initTelemetryClient(
   config.APPINSIGHTS_INSTRUMENTATIONKEY
@@ -101,7 +95,6 @@ const legacyServicesContainer = cosmosdbClient
   .container(SERVICE_COLLECTION_NAME);
 
 const legacyServiceModel = new ServiceModel(legacyServicesContainer);
-
 
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
