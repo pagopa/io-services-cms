@@ -8,6 +8,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
+import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { handler } from "../on-service-history-change";
 
 const aServiceHistory = {
@@ -83,10 +84,10 @@ const aLegacyService = {
 
 describe("On Service History Change Handler", () => {
   it.each`
-    scenario                             | item                                                                                      | expected
-    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                 | ${{ requestSyncLegacy: aLegacyService }}
-    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                        | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
-    ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: "from Legacy" } }} | ${{}}
+    scenario                             | item                                                                                         | expected
+    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${{ requestSyncLegacy: aLegacyService }}
+    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
+    ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${{}}
   `("should map an item to a $scenario action", ({ item, expected }) => {
     const res = handler({ item });
     expect(E.isRight(res)).toBeTruthy();
