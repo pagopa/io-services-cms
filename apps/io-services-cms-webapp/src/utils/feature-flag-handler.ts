@@ -14,7 +14,7 @@ const wildcard = "*" as NonEmptyString;
 // Return True if the element is in the list or if the list contains the wildcard
 const isElementAllowedOnList =
   (list: ReadonlyArray<NonEmptyString>) => (element: NonEmptyString) =>
-    list.indexOf(wildcard) >= 0 || list.indexOf(element) >= 0;
+    list.include(swildcard) || list.includes(element);
 
 /**
  * Check if the owner of the service is enabled for CMS to Legacy Sync
