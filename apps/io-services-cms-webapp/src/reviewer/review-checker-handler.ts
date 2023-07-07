@@ -1,3 +1,4 @@
+import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
@@ -59,9 +60,9 @@ export const createReviewCheckerHandler =
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
-  (): Promise<unknown> =>
+  (context: Context): Promise<unknown> =>
     dao.executeOnPending(
-      processBatchOfReviews(dao, jiraProxy, fsmLifecycleClient)
+      processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient)
     )();
 
 /**
@@ -149,6 +150,7 @@ export const updateReview =
 
 export const processBatchOfReviews =
   (
+    context: Context,
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient

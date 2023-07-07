@@ -53,7 +53,7 @@ type Dependencies = {
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
 
-type PublishServiceHandler = (
+type UnPublishServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
@@ -67,7 +67,7 @@ export const makeUnpublishServiceHandler =
     fsmPublicationClient,
     apimClient,
     telemetryClient,
-  }: Dependencies): PublishServiceHandler =>
+  }: Dependencies): UnPublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -105,7 +105,7 @@ export const makeUnpublishServiceHandler =
 
 export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: PublishServiceHandler) => {
+  (handler: UnPublishServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),
