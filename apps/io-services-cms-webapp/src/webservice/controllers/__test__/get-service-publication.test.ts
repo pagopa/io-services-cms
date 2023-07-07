@@ -10,6 +10,12 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IPatternStringTag,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
@@ -17,11 +23,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { createWebServer } from "../../index";
-import {
-  IPatternStringTag,
-  NonEmptyString,
-} from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -115,7 +116,19 @@ const aServicePub = {
   },
 } as unknown as ServicePublication.ItemType;
 
-describe("WebService", () => {
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
+describe("getServicePublication", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -127,86 +140,90 @@ describe("WebService", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
 
-  describe("getServicePublication", () => {
-    it("should fail when cannot find requested service", async () => {
-      const response = await request(app)
-        .get("/api/services/s3/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  setAppContext(app, mockContext);
 
-      expect(response.statusCode).toBe(404);
-    });
+  it("should fail when cannot find requested service", async () => {
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    const asServiceWithStatus = {
-      ...aServicePub,
-      fsm: { state: "published" },
-    } as unknown as ServicePublication.ItemType;
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(404);
+  });
 
-    it("should retrieve a service", async () => {
-      await servicePublicationStore.save("s3", asServiceWithStatus)();
+  const asServiceWithStatus = {
+    ...aServicePub,
+    fsm: { state: "published" },
+  } as unknown as ServicePublication.ItemType;
 
-      const response = await request(app)
-        .get("/api/services/s3/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+  it("should retrieve a service", async () => {
+    await servicePublicationStore.save("s3", asServiceWithStatus)();
 
-      expect(JSON.stringify(response.body)).toBe(
-        JSON.stringify(getPublicationItemToResponse(asServiceWithStatus))
-      );
-      expect(response.statusCode).toBe(200);
-    });
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should not allow the operation without right group", async () => {
-      const response = await request(app)
-        .get("/api/services/s3/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", "OtherGroup")
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aManageSubscriptionId);
+    expect(JSON.stringify(response.body)).toBe(
+      JSON.stringify(getPublicationItemToResponse(asServiceWithStatus))
+    );
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
 
-      expect(response.statusCode).toBe(403);
-    });
+  it("should not allow the operation without right group", async () => {
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", "OtherGroup")
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    it("should not allow the operation without right userId", async () => {
-      const aDifferentManageSubscriptionId = "MANAGE-456";
-      const aDifferentUserId = "456";
+    expect(response.statusCode).toBe(403);
+  });
 
-      const response = await request(app)
-        .get("/api/services/s3/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", aDifferentUserId)
-        .set("x-subscription-id", aDifferentManageSubscriptionId);
+  it("should not allow the operation without right userId", async () => {
+    const aDifferentManageSubscriptionId = "MANAGE-456";
+    const aDifferentUserId = "456";
 
-      expect(response.text).toContain(
-        "You do not have enough permission to complete the operation you requested"
-      );
-      expect(response.statusCode).toBe(403);
-    });
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", aDifferentUserId)
+      .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    it("should not allow the operation without right userId", async () => {
-      const aNotManageSubscriptionId = "NOT-MANAGE-123";
+    expect(response.text).toContain(
+      "You do not have enough permission to complete the operation you requested"
+    );
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(403);
+  });
 
-      const response = await request(app)
-        .get("/api/services/s3/release")
-        .send()
-        .set("x-user-email", "example@email.com")
-        .set("x-user-groups", UserGroup.ApiServiceWrite)
-        .set("x-user-id", anUserId)
-        .set("x-subscription-id", aNotManageSubscriptionId);
+  it("should not allow the operation without right userId", async () => {
+    const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-      expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
-      expect(response.statusCode).toBe(403);
-    });
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aNotManageSubscriptionId);
+
+    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(403);
   });
 });

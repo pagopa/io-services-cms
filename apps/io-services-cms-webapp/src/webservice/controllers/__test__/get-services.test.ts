@@ -1,22 +1,23 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Container } from "@azure/cosmos";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import {
+  RetrievedSubscriptionCIDRs,
+  SubscriptionCIDRsModel,
+} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IPatternStringTag,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
-import { Container } from "@azure/cosmos";
-import {
-  RetrievedSubscriptionCIDRs,
-  SubscriptionCIDRsModel,
-} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
-import {
-  IPatternStringTag,
-  NonEmptyString,
-} from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 const aName1 = "a-name-1";
 const aName2 = "a-name-2";
@@ -139,6 +140,18 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("getServices", () => {
   const app = createWebServer({
     basePath: "api",
@@ -147,7 +160,10 @@ describe("getServices", () => {
     fsmLifecycleClient: mockFsmLifecycleClient,
     fsmPublicationClient: mockFsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
+
+  setAppContext(app, mockContext);
 
   it("should return a Bad Request response when called with a wrong 'limit' queryparam", async () => {
     const response = await request(app)
@@ -185,31 +201,6 @@ describe("getServices", () => {
     expect(response.statusCode).toBe(403);
   });
 
-  // it("should return an Internal Server Error if APIM 'getUserByEmail' returns an error", async () => {
-  //   vi.unmock("../../../lib/clients/apim-client");
-  //   vi.mock("../../../lib/clients/apim-client", async () => {
-  //     return {
-  //       getUserByEmail: vi.fn().mockReturnValueOnce(
-  //         TE.left({
-  //           statusCode: 500,
-  //         })
-  //       ),
-  //       getUserSubscriptions: vi.fn((_) => TE.right(aSubscriptionCollection)),
-  //       parseOwnerIdFullPath: vi.fn((_) => "a-user-id"),
-  //     };
-  //   });
-
-  //   const response = await request(app)
-  //     .get("/api/services?limit=1")
-  //     .send()
-  //     .set("x-user-email", "example@email.com")
-  //     .set("x-user-groups", UserGroup.ApiServiceWrite)
-  //     .set("x-user-id", anUserId)
-  //     .set("x-subscription-id", aManageSubscriptionId);
-
-  //   expect(response.statusCode).toBe(500);
-  // });
-
   it("should return an ok response and default limit when called without 'limit' queryparam", async () => {
     const response = await request(app)
       .get("/api/services")
@@ -220,6 +211,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty(
       "limit",
       mockConfig.PAGINATION_DEFAULT_LIMIT
@@ -236,6 +228,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty("offset", 0);
   });
 
@@ -252,6 +245,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.value.length).toBe(aServiceList.length);
     expect(response.body.pagination).toStrictEqual({
       count: aServiceList.length,

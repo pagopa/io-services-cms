@@ -47,6 +47,8 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
+import { initTelemetryClient } from "./utils/applicationinsight";
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 
@@ -83,6 +85,11 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
   servicePublicationStore
 );
 
+// AppInsights client for Telemetry
+const telemetryClient = initTelemetryClient(
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
+);
+
 const legacyServicesContainer = cosmosdbClient
   .database(config.LEGACY_COSMOSDB_NAME)
   .container(SERVICE_COLLECTION_NAME);
@@ -98,6 +105,7 @@ export const httpEntryPoint = pipe(
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient,
   },
   createWebServer,
   expressToAzureFunction

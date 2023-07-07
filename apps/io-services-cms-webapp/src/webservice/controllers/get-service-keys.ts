@@ -1,4 +1,5 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -14,6 +15,7 @@ import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
@@ -23,11 +25,8 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
@@ -37,16 +36,21 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
 import { listSecrets, mapApimRestError } from "../../lib/clients/apim-client";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
+
+const logPrefix = "GetServiceKeysHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<SubscriptionKeys>
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorNotFound
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type GetServiceKeysHandler = (
+  context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -56,11 +60,16 @@ type GetServiceKeysHandler = (
 type Dependencies = {
   config: IConfig;
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeGetServiceKeysHandler =
-  ({ config, apimClient }: Dependencies): GetServiceKeysHandler =>
-  (auth, __, attrs, serviceId) =>
+  ({
+    config,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): GetServiceKeysHandler =>
+  (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
@@ -86,6 +95,18 @@ export const makeGetServiceKeysHandler =
           )
         )
       ),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServiceKeys, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
+      ),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
+      ),
       TE.toUnion
     )();
 
@@ -93,8 +114,11 @@ export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: GetServiceKeysHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -104,7 +128,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u) => ipTuple(c, u))
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
       )
     );
   };

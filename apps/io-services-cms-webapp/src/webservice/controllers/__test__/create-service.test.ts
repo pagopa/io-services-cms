@@ -26,6 +26,7 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -100,6 +101,18 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const mockAppinsights = {
+  trackEvent: vi.fn(),
+  trackError: vi.fn(),
+} as any;
+
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+  },
+} as any;
+
 describe("createService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -112,7 +125,10 @@ describe("createService", () => {
     fsmLifecycleClient,
     fsmPublicationClient,
     subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   });
+
+  setAppContext(app, mockContext);
 
   const aNewService = {
     name: "a service",
@@ -162,6 +178,7 @@ describe("createService", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.status.value).toBe("draft");
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.id).toEqual(expect.any(String));
   });
 
@@ -175,7 +192,7 @@ describe("createService", () => {
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 
@@ -195,6 +212,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 
@@ -214,6 +232,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 
@@ -233,6 +252,7 @@ describe("createService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(spied).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import {
   FSMStore,
   ServiceLifecycle,
@@ -18,6 +19,7 @@ import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
@@ -27,26 +29,28 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorNotFound,
-  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
-  IResponseSuccessNoContent,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+
+const logPrefix = "GetServiceHandler";
 
 type Dependencies = {
   config: IConfig;
@@ -54,18 +58,15 @@ type Dependencies = {
   store: FSMStore<ServicePublication.ItemType>;
 
   apimClient: ApiManagementClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
-  | IResponseSuccessNoContent
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorNotFound
-  | IResponseErrorConflict
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type PublishServiceHandler = (
+  context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -73,28 +74,61 @@ type PublishServiceHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 export const makeGetServiceHandler =
-  ({ config, store, apimClient }: Dependencies): PublishServiceHandler =>
-  (_auth, __, attrs, serviceId) =>
+  ({
+    config,
+    store,
+    apimClient,
+    telemetryClient,
+  }: Dependencies): PublishServiceHandler =>
+  (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
         apimClient,
         serviceId,
-        _auth.subscriptionId,
-        _auth.userId
+        auth.subscriptionId,
+        auth.userId
       ),
       TE.chainW(
         flow(
           store.fetch,
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.map((res) =>
-            O.isSome(res)
-              ? ResponseSuccessJson<ServiceResponsePayload>(
-                  itemToResponse(res.value)
+          TE.chainW(
+            flow(
+              O.foldW(
+                () =>
+                  pipe(
+                    ResponseErrorNotFound(
+                      "Not found",
+                      `${serviceId} not found`
+                    ),
+                    TE.left
+                  ),
+                flow(
+                  itemToResponse,
+                  ResponseSuccessJson<ServiceResponsePayload>,
+                  TE.right
                 )
-              : ResponseErrorNotFound("Not found", `${serviceId} not found`)
+              )
+            )
           )
         )
+      ),
+      TE.map(
+        trackEventOnResponseOK(
+          telemetryClient,
+          EventNameEnum.GetServicePublication,
+          {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          }
+        )
+      ),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+          serviceId,
+        })
       ),
       TE.toUnion
     )();
@@ -103,8 +137,11 @@ export const applyRequestMiddelwares =
   (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: PublishServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -114,7 +151,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u) => ipTuple(c, u))
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
       )
     );
   };
