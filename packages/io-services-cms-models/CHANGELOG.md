@@ -1,5 +1,15 @@
 # io-services-cms-models
 
+## 1.13.0
+
+### Minor Changes
+
+- c5f4f32: Add handler to sync CMS from Legacy
+
+### Patch Changes
+
+- f9eb3db: Add Store CosmosDB Unit Tests
+
 ## 1.12.0
 
 ### Minor Changes
