@@ -194,6 +194,9 @@ locals {
 
     # List of service ids for which quality control will be bypassed
     SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
+
+    # UserId List allowed to sync services from CMS to Legacy
+    USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST = var.userid_cms_to_legacy_sync_inclusion_list
   }
 }
 

@@ -1,3 +1,4 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Queue, ServiceHistory } from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
@@ -7,10 +8,12 @@ import {
   toAuthorizedRecipients,
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import * as RE from "fp-ts/lib/ReaderEither";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { IConfig } from "../config";
+import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions = "requestSyncLegacy";
@@ -101,15 +104,28 @@ const toRequestSyncLegacyAction = (
   requestSyncLegacy: cmsToLegacy(serviceHistory),
 });
 
-export const handler: RE.ReaderEither<
-  { item: ServiceHistory },
-  Error,
-  NoAction | RequestSyncLegacyAction
-> = ({ item }) =>
-  pipe(
-    item,
-    O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
-    O.map(toRequestSyncLegacyAction),
-    O.getOrElse(() => noAction),
-    E.right
-  );
+export const handler =
+  (
+    config: IConfig,
+    apimClient: ApiManagementClient
+  ): RTE.ReaderTaskEither<
+    { item: ServiceHistory },
+    Error,
+    NoAction | RequestSyncLegacyAction
+  > =>
+  ({ item }) =>
+    pipe(
+      isUserEnabledForCmsToLegacySync(config, apimClient, item.id),
+      TE.chainW((isUserEnabled) =>
+        pipe(
+          item,
+          O.fromPredicate(
+            (itm) =>
+              isUserEnabled && itm.fsm.lastTransition !== SYNC_FROM_LEGACY
+          ),
+          O.map(toRequestSyncLegacyAction),
+          O.getOrElse(() => noAction),
+          TE.right
+        )
+      )
+    );
