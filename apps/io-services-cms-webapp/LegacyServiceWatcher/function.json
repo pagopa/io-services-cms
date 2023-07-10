@@ -10,7 +10,7 @@
       "collectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES%",
       "leaseCollectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
       "createLeaseCollectionIfNotExists": true,
-      "startFromBeginning": false
+      "startFromBeginning": true
     },
     {
       "queueName": "%REQUEST_SYNC_CMS_QUEUE%",
