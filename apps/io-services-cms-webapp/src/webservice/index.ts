@@ -6,6 +6,7 @@ import express from "express";
 import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import {
@@ -64,6 +65,7 @@ type Dependencies = {
   apimClient: ApiManagementClient;
   config: IConfig;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const createWebServer = ({
@@ -73,6 +75,7 @@ export const createWebServer = ({
   apimClient,
   config,
   subscriptionCIDRsModel,
+  telemetryClient,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -87,6 +90,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         apimClient,
         config,
+        telemetryClient,
       }),
       applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -99,6 +103,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         apimClient,
         config,
+        telemetryClient,
       }),
       applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel)
     )
@@ -111,6 +116,7 @@ export const createWebServer = ({
         config,
         store: fsmLifecycleClient.getStore(),
         apimClient,
+        telemetryClient,
       }),
       applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -123,6 +129,7 @@ export const createWebServer = ({
         fsmLifecycleClient,
         config,
         apimClient,
+        telemetryClient,
       }),
       applyEditServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -135,6 +142,7 @@ export const createWebServer = ({
         config,
         fsmLifecycleClient,
         apimClient,
+        telemetryClient,
       }),
       applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -147,6 +155,7 @@ export const createWebServer = ({
         config,
         fsmLifecycleClient,
         apimClient,
+        telemetryClient,
       }),
       applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -159,6 +168,7 @@ export const createWebServer = ({
         config,
         fsmPublicationClient,
         apimClient,
+        telemetryClient,
       }),
       applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -171,6 +181,7 @@ export const createWebServer = ({
         config,
         store: fsmPublicationClient.getStore(),
         apimClient,
+        telemetryClient,
       }),
       applyGetPublicationStatusServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -183,6 +194,7 @@ export const createWebServer = ({
         config,
         fsmPublicationClient,
         apimClient,
+        telemetryClient,
       }),
       applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -194,6 +206,7 @@ export const createWebServer = ({
       makeGetServiceKeysHandler({
         config,
         apimClient,
+        telemetryClient,
       }),
       applyGetServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
     )
@@ -205,6 +218,7 @@ export const createWebServer = ({
       makeRegenerateServiceKeysHandler({
         config,
         apimClient,
+        telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
     )

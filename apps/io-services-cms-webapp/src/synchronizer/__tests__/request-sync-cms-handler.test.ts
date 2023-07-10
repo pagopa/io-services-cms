@@ -7,6 +7,7 @@ import {
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { handleQueueItem } from "../request-sync-cms-handler";
 
 const createContext = () =>
@@ -120,7 +121,7 @@ describe("Sync CMS Handler", () => {
         ...aServiceLifecycleItem,
         fsm: {
           ...aServiceLifecycleItem.fsm,
-          lastTransition: "from Legacy",
+          lastTransition: SYNC_FROM_LEGACY,
         },
       }
     );
@@ -144,7 +145,7 @@ describe("Sync CMS Handler", () => {
         ...aServicePublicationItem,
         fsm: {
           ...aServicePublicationItem.fsm,
-          lastTransition: "from Legacy",
+          lastTransition: SYNC_FROM_LEGACY,
         },
       }
     );

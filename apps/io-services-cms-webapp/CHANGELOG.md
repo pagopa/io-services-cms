@@ -1,5 +1,33 @@
 # io-services-cms-webapp
 
+## 1.19.1
+
+### Patch Changes
+
+- 59da654: Fix Service History Feature Flag
+
+## 1.19.0
+
+### Minor Changes
+
+- c2fbce2: startFromBeginning set to false on ServiceHistory
+
+## 1.18.0
+
+### Minor Changes
+
+- 1a7e48a: Add handler to manage legacy sync requests
+- 378a047: Add Logger and TelemetryClient
+- c5f4f32: Add handler to sync CMS from Legacy
+- b4bbd7c: Add FeatureFlag for cms to legacy sync
+
+### Patch Changes
+
+- 9e59e73: refactor: move from Legacy label into a shared utility
+- Updated dependencies [f9eb3db]
+- Updated dependencies [c5f4f32]
+  - @io-services-cms/models@1.13.0
+
 ## 1.17.2
 
 ### Patch Changes

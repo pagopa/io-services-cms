@@ -2,6 +2,7 @@ import {
   ApiManagementClient,
   SubscriptionContract,
 } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -18,6 +19,7 @@ import {
   ClientIp,
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import {
   withRequestMiddlewares,
@@ -27,18 +29,15 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
-  IntegerFromString,
   IWithinRangeIntegerTag,
+  IntegerFromString,
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
-  IResponseErrorConflict,
-  IResponseErrorForbiddenNotAuthorized,
-  IResponseErrorInternal,
-  IResponseErrorTooManyRequests,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson,
@@ -59,15 +58,20 @@ import {
 } from "../../lib/clients/apim-client";
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
+
+const logPrefix = "GetServicesHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServicePagination>
-  | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorConflict
-  | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | ErrorResponseTypes;
 
 type GetServicesHandler = (
+  context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -83,6 +87,7 @@ type Dependencies = {
   apimClient: ApiManagementClient;
   // The app configuration
   config: IConfig;
+  telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export type ServiceSubscriptionPair = {
@@ -198,8 +203,9 @@ export const makeGetServicesHandler =
     fsmLifecycleClient,
     apimClient,
     config,
+    telemetryClient,
   }: Dependencies): GetServicesHandler =>
-  (_auth, __, attrs, userEmail, limit, offset) =>
+  (context, auth, __, ___, userEmail, limit, offset) =>
     pipe(
       getUserIdTask(apimClient, userEmail, config),
       TE.chainW((userId) =>
@@ -233,6 +239,20 @@ export const makeGetServicesHandler =
         )
       ),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.map(
+        trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServices, {
+          userSubscriptionId: auth.subscriptionId,
+          limit,
+          offset,
+        })
+      ),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
+          limit,
+          offset,
+        })
+      ),
       TE.toUnion
     )();
 
@@ -240,8 +260,11 @@ export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: GetServicesHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
+      // extract the Azure functions context
+      ContextMiddleware(),
       // only allow requests by users belonging to certain groups
       AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
+      // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
       AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
@@ -267,7 +290,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, c, u, __, ___, ____) =>
+        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____, _____) =>
           ipTuple(c, u)
         )
       )
