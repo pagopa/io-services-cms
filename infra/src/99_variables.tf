@@ -152,5 +152,5 @@ variable "vnet_name" {
 
 variable "userid_cms_to_legacy_sync_inclusion_list" {
   type        = string
-  description = "The name of the database where legacy data is"
+  description = "User Ids to include in the sync from CMS to legacy"
 }
