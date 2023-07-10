@@ -79,7 +79,6 @@
 | [azurerm_key_vault_secret.legacy_cosmosdb_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.serviceid_quality_check_exclusion_list](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
-| [azurerm_key_vault_secret.userid_cms_to_legacy_sync_inclusion_list](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_monitor_action_group.email](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.slack](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
@@ -134,6 +133,7 @@
 | <a name="input_reviewer_db_table"></a> [reviewer\_db\_table](#input\_reviewer\_db\_table) | n/a | `string` | `null` | no |
 | <a name="input_reviewer_db_user"></a> [reviewer\_db\_user](#input\_reviewer\_db\_user) | n/a | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
+| <a name="input_userid_cms_to_legacy_sync_inclusion_list"></a> [userid\_cms\_to\_legacy\_sync\_inclusion\_list](#input\_userid\_cms\_to\_legacy\_sync\_inclusion\_list) | The name of the database where legacy data is | `string` | n/a | yes |
 | <a name="input_vnet_common_rg"></a> [vnet\_common\_rg](#input\_vnet\_common\_rg) | Common Virtual network resource group name. | `string` | `""` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Common Virtual network resource name. | `string` | `""` | no |
 

@@ -60,3 +60,6 @@ reviewer_db_table  = "service_review"
 legacy_cosmosdb_name     = "db"
 legacy_cosmosdb_uri      = "https://io-p-cosmos-api.documents.azure.com:443/"
 legacy_jira_project_name = "IES"
+
+# Feature flags Condfiguration
+userid_cms_to_legacy_sync_inclusion_list = "01GJMF341BZQBP71Q39S1EHBH6,01H2FM7RANV37YX2B7RRDJP3HV,01GK6W9JH0W148DB7X0JVJB6SE,01H2FMHQX0D0NYFXJZ3QMXHMDM"

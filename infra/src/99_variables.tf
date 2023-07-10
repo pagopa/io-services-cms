@@ -144,3 +144,13 @@ variable "vnet_name" {
   description = "Common Virtual network resource name."
   default     = ""
 }
+
+
+###############################
+# Feature Flags Configuration #
+###############################
+
+variable "userid_cms_to_legacy_sync_inclusion_list" {
+  type        = string
+  description = "The name of the database where legacy data is"
+}
