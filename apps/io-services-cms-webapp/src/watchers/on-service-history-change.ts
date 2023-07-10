@@ -115,7 +115,7 @@ export const handler =
   > =>
   ({ item }) =>
     pipe(
-      isUserEnabledForCmsToLegacySync(config, apimClient, item.id),
+      isUserEnabledForCmsToLegacySync(config, apimClient, item.serviceId),
       TE.chainW((isUserEnabled) =>
         pipe(
           item,
