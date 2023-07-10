@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.0
+
+### Minor Changes
+
+- c2fbce2: startFromBeginning set to false on ServiceHistory
+
 ## 1.18.0
 
 ### Minor Changes
