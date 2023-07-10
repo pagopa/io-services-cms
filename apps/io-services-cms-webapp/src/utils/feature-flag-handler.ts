@@ -17,7 +17,7 @@ const isElementAllowedOnList =
     list.includes(wildcard) || list.includes(element);
 
 /**
- * Check if the owner of the service is enabled for CMS to Legacy Sync
+ *
  * @param config
  * @param apimClient
  * @param serviceId
@@ -27,7 +27,7 @@ export const isUserEnabledForCmsToLegacySync = (
   config: IConfig,
   apimClient: ApiManagementClient,
   serviceId: NonEmptyString
-) =>
+): TE.TaskEither<Error, boolean> =>
   pipe(
     getSubscription(
       apimClient,
