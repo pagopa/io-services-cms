@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.4
+
+### Patch Changes
+
+- 852ff1f: Fix Wrong Class method reference in pipe
+
 ## 1.19.3
 
 ### Patch Changes
