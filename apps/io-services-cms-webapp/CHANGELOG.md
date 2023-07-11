@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.2
+
+### Patch Changes
+
+- 8d8562b: Add Verbose log on Request Sync Legacy Handler
+
 ## 1.19.1
 
 ### Patch Changes
