@@ -5,14 +5,10 @@ timespan: 10m
 data_source:
   - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
 action_groups:
-  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/SlackPagoPA
-  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/microsoft.insights/actionGroups/EmailPagoPA
   - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/Microsoft.Insights/actiongroups/iopquarantineerror
 overrides:
   hosts:
-    - app-backend.io.italia.it
-    - api-app.io.pagopa.it
-    # TODO domini abilitati per nostre api
+    - api.io.pagopa.it
   endpoints:
     /api/v1/manage/services:
       response_time_threshold: 6
