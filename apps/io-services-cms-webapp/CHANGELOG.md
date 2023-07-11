@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.19.1
+
+### Patch Changes
+
+- 59da654: Fix Service History Feature Flag
+
+## 1.19.0
+
+### Minor Changes
+
+- c2fbce2: startFromBeginning set to false on ServiceHistory
+
 ## 1.18.0
 
 ### Minor Changes
