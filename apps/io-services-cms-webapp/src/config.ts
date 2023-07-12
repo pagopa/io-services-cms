@@ -158,6 +158,11 @@ const FeatureFlags = t.type({
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
+  // UserId List allowed to sync services from CMS to Legacy
+  USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
 });
 
 // Global app configuration

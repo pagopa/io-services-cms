@@ -16,17 +16,11 @@ const isElementAllowedOnList =
   (list: ReadonlyArray<NonEmptyString>) => (element: NonEmptyString) =>
     list.includes(wildcard) || list.includes(element);
 
-/**
- *
- * @param config
- * @param apimClient
- * @param serviceId
- * @returns
- */
-export const isUserEnabledForCmsToLegacySync = (
+const isUserEnabledToSync = (
   config: IConfig,
   apimClient: ApiManagementClient,
-  serviceId: NonEmptyString
+  serviceId: NonEmptyString,
+  inclusionList: ReadonlyArray<NonEmptyString>
 ): TE.TaskEither<Error, boolean> =>
   pipe(
     getSubscription(
@@ -45,7 +39,45 @@ export const isUserEnabledForCmsToLegacySync = (
       pipe(
         ownerId as NonEmptyString,
         parseOwnerIdFullPath,
-        isElementAllowedOnList(config.USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST)
+        isElementAllowedOnList(inclusionList)
       )
     )
+  );
+
+/**
+ *
+ * @param config
+ * @param apimClient
+ * @param serviceId
+ * @returns
+ */
+export const isUserEnabledForCmsToLegacySync = (
+  config: IConfig,
+  apimClient: ApiManagementClient,
+  serviceId: NonEmptyString
+): TE.TaskEither<Error, boolean> =>
+  isUserEnabledToSync(
+    config,
+    apimClient,
+    serviceId,
+    config.USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST
+  );
+
+/**
+ *
+ * @param config
+ * @param apimClient
+ * @param serviceId
+ * @returns
+ */
+export const isUserEnabledForLegacyToCmsSync = (
+  config: IConfig,
+  apimClient: ApiManagementClient,
+  serviceId: NonEmptyString
+): TE.TaskEither<Error, boolean> =>
+  isUserEnabledToSync(
+    config,
+    apimClient,
+    serviceId,
+    config.USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST
   );
