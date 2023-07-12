@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.19.5
+
+### Patch Changes
+
+- e38b86c: Legacy Service Watcher startFromBeginning set to false
+- 8da02ee: Add UserId inclusionList FeatureFlag on Legacy to CMS sync
+
 ## 1.19.4
 
 ### Patch Changes
