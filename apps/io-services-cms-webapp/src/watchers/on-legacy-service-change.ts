@@ -1,3 +1,4 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import {
   LegacyService,
   Queue,
@@ -13,10 +14,12 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import { IConfig } from "../config";
 import {
   JiraLegacyAPIClient,
   JiraLegacyIssueStatus,
 } from "../lib/clients/jira-legacy-client";
+import { isUserEnabledForLegacyToCmsSync } from "../utils/feature-flag-handler";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -152,22 +155,27 @@ const legacyToCms = (
 export const handler =
   (
     jiraLegacyClient: JiraLegacyAPIClient,
-    qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>
+    config: IConfig,
+    apimClient: ApiManagementClient
   ): RTE.ReaderTaskEither<
     { item: LegacyService },
     Error,
     NoAction | RequestSyncCmsAction
   > =>
-  ({ item }) => {
-    if (item.cmsTag) {
-      return pipe(
-        item,
-        onLegacyServiceChangeHandler(
-          jiraLegacyClient,
-          qualityCheckExclusionList
+  ({ item }) =>
+    pipe(
+      isUserEnabledForLegacyToCmsSync(config, apimClient, item.serviceId),
+      TE.chainW((isUserEnabled) =>
+        pipe(
+          item,
+          O.fromPredicate((itm) => isUserEnabled && itm.cmsTag === true),
+          O.map(
+            onLegacyServiceChangeHandler(
+              jiraLegacyClient,
+              config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+            )
+          ),
+          O.getOrElse(() => TE.right(noAction))
         )
-      );
-    } else {
-      return TE.right(noAction);
-    }
-  };
+      )
+    );
