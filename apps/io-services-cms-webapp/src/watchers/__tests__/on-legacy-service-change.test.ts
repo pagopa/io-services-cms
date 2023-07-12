@@ -11,6 +11,9 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { JiraLegacyAPIClient } from "../../lib/clients/jira-legacy-client";
 import { handler } from "../on-legacy-service-change";
+import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { IConfig } from "../../config";
+import { ap } from "fp-ts/lib/Reader";
 
 const mockJiraLegacyClient = {
   searchJiraIssueByServiceId: vi.fn((_) =>
@@ -99,6 +102,19 @@ const aServicePublicationItem: ServicePublication.ItemType = {
   },
 };
 
+const anUserId = "123";
+const ownerId = `/an/owner/${anUserId}`;
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        ownerId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
 describe("On Legacy Service Change Handler", () => {
   it("should map a deleted item to a requestSyncCms action containing a service lifecycle with DELETED status", async () => {
     const item = {
@@ -106,9 +122,15 @@ describe("On Legacy Service Change Handler", () => {
       serviceName: "DELETED aServiceName",
     } as unknown as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -139,9 +161,15 @@ describe("On Legacy Service Change Handler", () => {
       ...aLegacyService,
     } as unknown as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -166,9 +194,15 @@ describe("On Legacy Service Change Handler", () => {
       ...aLegacyService,
     } as unknown as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -189,9 +223,15 @@ describe("On Legacy Service Change Handler", () => {
       isVisible: false,
     } as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -217,9 +257,18 @@ describe("On Legacy Service Change Handler", () => {
       isVisible: false,
     } as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [],
+    } as unknown as IConfig;
+
     delete item["serviceMetadata"];
 
-    const result = await handler(mockJiraLegacyClient, [])({ item })();
+    const result = await handler(
+      mockJiraLegacyClient,
+      mockConfig,
+      mockApimClient
+    )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -249,11 +298,17 @@ describe("On Legacy Service Change Handler", () => {
       isVisible: false,
     } as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     delete item["serviceMetadata"];
 
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -278,9 +333,39 @@ describe("On Legacy Service Change Handler", () => {
       cmsTag: false,
     } as LegacyService;
 
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
     const result = await handler(
       mockJiraLegacyClient,
-      qualityCheckExclusionList
+      mockConfig,
+      mockApimClient
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({});
+    }
+  });
+
+  it("should map an item to a no action when user not included in inclusionList", async () => {
+    const item = {
+      ...aLegacyService,
+      cmsTag: true,
+    } as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: ["aDifferentUserId"],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      mockConfig,
+      mockApimClient
     )({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
