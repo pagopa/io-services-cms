@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.6
+
+### Patch Changes
+
+- a9a1029: Fix cmsTag handling on LegacyServiceWatcher in order to avoid sync loop
+
 ## 1.19.5
 
 ### Patch Changes
