@@ -26,12 +26,17 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     (x) => {
-      _context.log.info("before parse:", x);
+      _context.log.info(`before parse: ${JSON.stringify(x)}`);
       return x;
     },
     parseIncomingMessage,
-    E.mapLeft((_) => {
-      _context.log.error(_);
+    E.mapLeft((err) => {
+      _context.log.error(
+        `An Error has occurred while parsing incoming message, the reason was => ${JSON.stringify(
+          err.message
+        )}`,
+        err
+      );
       return new Error("Error while parsing incoming message");
     }), // TODO: map as _permanent_ error
     TE.fromEither,
@@ -44,30 +49,41 @@ export const handleQueueItem = (
               pipe(
                 { kind: "INewService" as const, ...item },
                 (x) => {
-                  _context.log.info("create param:", x);
+                  _context.log.info(`create param:", ${JSON.stringify(x)}`);
                   return x;
                 },
-                legacyServiceModel.create
+                (x) => legacyServiceModel.create(x)
               ),
             (existingService) =>
               pipe(
                 { ...existingService, ...item },
                 (x) => {
-                  _context.log.info("update param:", x);
+                  _context.log.info(`update param: ${JSON.stringify(x)}`);
                   return x;
                 },
-                legacyServiceModel.update
+                (x) => legacyServiceModel.update(x)
               )
           )
         ),
-        (x) => x,
         TE.map((_) => void 0)
       )
     ),
     TE.getOrElse((e) => {
       if (e instanceof Error) {
+        _context.log.error(
+          `An Error has occurred while persisting data, the reason was => ${e.message}`,
+          e
+        );
         throw e;
       } else {
+        _context.log.error(
+          `An ${
+            e.kind
+          } has occurred while persisting data, the reason was => ${JSON.stringify(
+            e
+          )}`,
+          e
+        );
         switch (e.kind) {
           case "COSMOS_EMPTY_RESPONSE":
           case "COSMOS_CONFLICT_RESPONSE":

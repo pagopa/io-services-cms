@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.19.4
+
+### Patch Changes
+
+- 852ff1f: Fix Wrong Class method reference in pipe
+
+## 1.19.3
+
+### Patch Changes
+
+- 318e64f: Fix Stringify
+
+## 1.19.2
+
+### Patch Changes
+
+- 8d8562b: Add Verbose log on Request Sync Legacy Handler
+
 ## 1.19.1
 
 ### Patch Changes
