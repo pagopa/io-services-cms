@@ -35,7 +35,6 @@ const aLegacyService = {
   requireSecureChannels: true,
   serviceId: "aServiceId",
   serviceName: "aServiceName",
-  cmsTag: true,
   serviceMetadata: {
     category: "aCategory",
     scope: ServiceScopeEnum.LOCAL,
@@ -330,7 +329,7 @@ describe("On Legacy Service Change Handler", () => {
   it("should map an item to a no action", async () => {
     const item = {
       ...aLegacyService,
-      cmsTag: false,
+      cmsTag: true,
     } as LegacyService;
 
     const mockConfig = {
@@ -354,7 +353,6 @@ describe("On Legacy Service Change Handler", () => {
   it("should map an item to a no action when user not included in inclusionList", async () => {
     const item = {
       ...aLegacyService,
-      cmsTag: true,
     } as LegacyService;
 
     const mockConfig = {
