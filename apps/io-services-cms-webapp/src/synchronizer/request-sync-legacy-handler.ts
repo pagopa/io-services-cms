@@ -49,16 +49,10 @@ export const handleQueueItem = (
               pipe(
                 { kind: "INewService" as const, ...item },
                 (x) => {
-                  _context.log.info(
-                    `create param:", ${JSON.stringify(
-                      x
-                    )}, legacyServiceModel: ${JSON.stringify(
-                      legacyServiceModel
-                    )}`
-                  );
+                  _context.log.info(`create param:", ${JSON.stringify(x)}`);
                   return x;
                 },
-                legacyServiceModel.create
+                (x) => legacyServiceModel.create(x)
               ),
             (existingService) =>
               pipe(
@@ -67,7 +61,7 @@ export const handleQueueItem = (
                   _context.log.info(`update param: ${JSON.stringify(x)}`);
                   return x;
                 },
-                legacyServiceModel.update
+                (x) => legacyServiceModel.update(x)
               )
           )
         ),
