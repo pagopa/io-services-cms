@@ -197,6 +197,8 @@ locals {
 
     # UserId List allowed to sync services from CMS to Legacy
     USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST = var.userid_cms_to_legacy_sync_inclusion_list
+    # UserId List allowed to sync services from Legacy to CMS
+    USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST = var.userid_legacy_to_cms_sync_inclusion_list
   }
 }
 
