@@ -181,10 +181,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler(
-    jiraLegacyClient(config),
-    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
-  ),
+  onLegacyServiceChangeHandler(jiraLegacyClient(config), config, apimClient),
   processBatchOf(LegacyService),
   setBindings((results) => ({
     requestSyncCms: pipe(
