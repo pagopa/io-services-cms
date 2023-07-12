@@ -1,0 +1,23 @@
+oa3_spec: openapi.yaml
+name: opex_openapi
+location: West Europe
+timespan: 10m
+data_source:
+  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
+action_groups:
+  - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/Microsoft.Insights/actiongroups/iopquarantineerror
+overrides:
+  hosts:
+    - api.io.pagopa.it
+  endpoints:
+    /api/v1/manage/services:
+      response_time_threshold: 6
+      availability_threshold: 0.95
+    /api/v1/manage/services/{serviceId}/review:
+      response_time_threshold: 6
+      availability_threshold: 0.95
+    /api/v1/manage/services/{serviceId}/release:
+      response_time_threshold: 6
+      availability_threshold: 0.95
+    /logout:
+      availability_threshold: 0.90
