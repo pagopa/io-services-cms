@@ -164,18 +164,25 @@ export const handler =
   > =>
   ({ item }) =>
     pipe(
-      isUserEnabledForLegacyToCmsSync(config, apimClient, item.serviceId),
-      TE.chainW((isUserEnabled) =>
+      item,
+      O.fromPredicate((itm) => itm.cmsTag !== true),
+      O.map(() =>
         pipe(
-          item,
-          O.fromPredicate((itm) => isUserEnabled && itm.cmsTag === true),
-          O.map(
-            onLegacyServiceChangeHandler(
-              jiraLegacyClient,
-              config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+          isUserEnabledForLegacyToCmsSync(config, apimClient, item.serviceId),
+          TE.chainW((isUserEnabled) =>
+            pipe(
+              item,
+              O.fromPredicate((_) => isUserEnabled),
+              O.map(
+                onLegacyServiceChangeHandler(
+                  jiraLegacyClient,
+                  config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+                )
+              ),
+              O.getOrElse(() => TE.right(noAction))
             )
-          ),
-          O.getOrElse(() => TE.right(noAction))
+          )
         )
-      )
+      ),
+      O.getOrElse(() => TE.right(noAction))
     );
