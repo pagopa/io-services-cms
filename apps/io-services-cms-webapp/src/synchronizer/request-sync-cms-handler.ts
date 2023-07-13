@@ -15,10 +15,10 @@ import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestSyncCmsItemsList> =>
+): E.Either<Error, Queue.RequestSyncCmsItems> =>
   pipe(
     queueItem,
-    Queue.RequestSyncCmsItemsList.decode,
+    Queue.RequestSyncCmsItems.decode,
     E.mapLeft(flow(readableReport, E.toError))
   );
 
