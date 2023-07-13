@@ -82,7 +82,7 @@ export const jiraLegacyClient = (
         "statuscategorychangedate",
       ],
       fieldsByKeys: false,
-      jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task labels = ${JIRA_SERVICE_TAG_PREFIX}${serviceId} ORDER BY created DESC`,
+      jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND labels = ${JIRA_SERVICE_TAG_PREFIX}${serviceId} ORDER BY created DESC`,
       startAt: 0,
       maxResults: 1,
     };

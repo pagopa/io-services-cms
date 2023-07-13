@@ -115,17 +115,21 @@ export const handler =
   > =>
   ({ item }) =>
     pipe(
-      isUserEnabledForCmsToLegacySync(config, apimClient, item.serviceId),
-      TE.chainW((isUserEnabled) =>
+      item,
+      O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
+      O.map(() =>
         pipe(
-          item,
-          O.fromPredicate(
-            (itm) =>
-              isUserEnabled && itm.fsm.lastTransition !== SYNC_FROM_LEGACY
-          ),
-          O.map(toRequestSyncLegacyAction),
-          O.getOrElse(() => noAction),
-          TE.right
+          isUserEnabledForCmsToLegacySync(config, apimClient, item.serviceId),
+          TE.chainW((isUserEnabled) =>
+            pipe(
+              item,
+              O.fromPredicate((_) => isUserEnabled),
+              O.map(toRequestSyncLegacyAction),
+              O.getOrElse(() => noAction),
+              TE.right
+            )
+          )
         )
-      )
+      ),
+      O.getOrElse(() => TE.right(noAction))
     );
