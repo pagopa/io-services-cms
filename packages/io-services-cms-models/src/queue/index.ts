@@ -50,24 +50,6 @@ export const RequestSyncCmsItem = t.union([
 export type RequestSyncCmsItems = t.TypeOf<typeof RequestSyncCmsItems>;
 export const RequestSyncCmsItems = t.readonlyArray(RequestSyncCmsItem);
 
-/* export declare function omit<O, K extends keyof O>(o: O, k: K): Omit<O, K>;
-
-export const RequestSyncLegacyItem = t.intersection([
-  t.type(
-    // eslint-disable-next-line sonarjs/no-use-of-empty-return-value
-    omit(
-      {
-        ...LegacyService.types[0].types[0].props,
-        ...LegacyService.types[0].types[1].props,
-        ...LegacyService.types[1].props,
-      },
-      "isVisible"
-    )
-  ),
-  t.partial({ isVisible: t.boolean }),
-]);
-export type RequestSyncLegacyItem = t.TypeOf<typeof RequestSyncLegacyItem>; */
-
 const omitIsVisible = <T extends Record<string, unknown>>(
   t: T
 ): Omit<T, "isVisible"> => {
