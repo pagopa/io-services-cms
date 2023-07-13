@@ -47,6 +47,7 @@ jira_organization_name_custom_field = "customfield_10381"
 
 ## Apim
 azure_apim                = "io-p-apim-api"
+azure_apim_v2             = "io-p-apim-v2-api"
 azure_apim_resource_group = "io-p-rg-internal"
 azure_apim_product_id     = "io-services-api"
 

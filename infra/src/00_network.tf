@@ -36,3 +36,11 @@ data "azurerm_subnet" "apim_snet" {
   virtual_network_name = var.vnet_name
   resource_group_name  = var.vnet_common_rg
 }
+
+data "azurerm_subnet" "apim_v2_snet" {
+  count = local.is_prod ? 1 : 0
+
+  name                 = "apimv2api"
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.vnet_common_rg
+}
