@@ -222,4 +222,26 @@ describe("Sync CMS Handler", () => {
       )()
     ).rejects.toThrowError("Bad Error occurs");
   });
+
+  it("should not execute the second item in case the first fails", async () => {
+    const context = createContext();
+
+    const mockFsmLifecycleClientError = {
+      override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    await expect(() =>
+      handleQueueItem(
+        context,
+        [
+          aRequestServiceLifecycleSync,
+          aRequestServicePublicationSync,
+        ] as unknown as Json,
+        mockFsmLifecycleClientError,
+        mockFsmPublicationClient
+      )()
+    ).rejects.toThrowError("Bad Error occurs");
+
+    expect(mockFsmPublicationClient.override).not.toBeCalled();
+  });
 });

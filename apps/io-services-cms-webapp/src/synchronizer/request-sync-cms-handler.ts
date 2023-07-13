@@ -54,35 +54,45 @@ export const handleQueueItem = (
     parseIncomingMessage,
     E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
-    TE.chainW(
-      RA.traverse(TE.ApplicativePar)((item) => {
-        switch (item.kind) {
-          case "LifecycleItemType":
-            return pipe(
-              toServiceLifecycle(item.fsm.state, item),
-              (serviceLifecycle) =>
-                fsmLifecycleClient.override(
-                  serviceLifecycle.id,
-                  serviceLifecycle
-                ),
-              TE.map((_) => void 0)
-            );
-          case "PublicationItemType":
-            return pipe(
-              toServicePublication(item.fsm.state, item),
-              (servicePublication) =>
-                fsmPublicationClient.override(
-                  servicePublication.id,
-                  servicePublication
-                ),
-              TE.map((_) => void 0)
-            );
-          default:
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const _: never = item;
-            throw new Error(`should not have executed this with ${item}`);
-        }
-      })
+    TE.chainW((items) =>
+      pipe(
+        items.filter(
+          (item): item is Queue.RequestSyncCmsItem =>
+            item.kind === "LifecycleItemType"
+        ),
+        RA.traverse(TE.ApplicativePar)((item) =>
+          pipe(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            toServiceLifecycle(item.fsm.state as any, item),
+            (serviceLifecycle) =>
+              fsmLifecycleClient.override(
+                serviceLifecycle.id,
+                serviceLifecycle
+              ),
+            TE.map((_) => void 0)
+          )
+        ),
+        TE.chainW(() =>
+          pipe(
+            items.filter(
+              (item): item is Queue.RequestSyncCmsItem =>
+                item.kind === "PublicationItemType"
+            ),
+            RA.traverse(TE.ApplicativePar)((item) =>
+              pipe(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                toServicePublication(item.fsm.state as any, item),
+                (servicePublication) =>
+                  fsmPublicationClient.override(
+                    servicePublication.id,
+                    servicePublication
+                  ),
+                TE.map((_) => void 0)
+              )
+            )
+          )
+        )
+      )
     ),
     TE.getOrElse((e) => {
       throw e;
