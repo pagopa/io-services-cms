@@ -6,6 +6,7 @@ on:
     paths:
       - infra/**
       - .identity/**
+      - .github/workflows/infra-static-analysis.yaml
 
 jobs:
   static_analysis:
