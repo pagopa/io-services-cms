@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.7
+
+### Patch Changes
+
+- e3b8afb: Fix JQL query on searchJiraIssueByServiceId for jira-legacy-client.ts
+
 ## 1.19.6
 
 ### Patch Changes
