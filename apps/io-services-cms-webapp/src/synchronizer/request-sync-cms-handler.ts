@@ -6,6 +6,7 @@ import {
 } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
@@ -14,10 +15,10 @@ import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestSyncCmsItem> =>
+): E.Either<Error, Queue.RequestSyncCmsItemsList> =>
   pipe(
     queueItem,
-    Queue.RequestSyncCmsItem.decode,
+    Queue.RequestSyncCmsItemsList.decode,
     E.mapLeft(flow(readableReport, E.toError))
   );
 
@@ -53,34 +54,36 @@ export const handleQueueItem = (
     parseIncomingMessage,
     E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
-    TE.chain((item) => {
-      switch (item.kind) {
-        case "LifecycleItemType":
-          return pipe(
-            toServiceLifecycle(item.fsm.state, item),
-            (serviceLifecycle) =>
-              fsmLifecycleClient.override(
-                serviceLifecycle.id,
-                serviceLifecycle
-              ),
-            TE.map((_) => void 0)
-          );
-        case "PublicationItemType":
-          return pipe(
-            toServicePublication(item.fsm.state, item),
-            (servicePublication) =>
-              fsmPublicationClient.override(
-                servicePublication.id,
-                servicePublication
-              ),
-            TE.map((_) => void 0)
-          );
-        default:
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _: never = item;
-          throw new Error(`should not have executed this with ${item}`);
-      }
-    }),
+    TE.chainW(
+      RA.traverse(TE.ApplicativePar)((item) => {
+        switch (item.kind) {
+          case "LifecycleItemType":
+            return pipe(
+              toServiceLifecycle(item.fsm.state, item),
+              (serviceLifecycle) =>
+                fsmLifecycleClient.override(
+                  serviceLifecycle.id,
+                  serviceLifecycle
+                ),
+              TE.map((_) => void 0)
+            );
+          case "PublicationItemType":
+            return pipe(
+              toServicePublication(item.fsm.state, item),
+              (servicePublication) =>
+                fsmPublicationClient.override(
+                  servicePublication.id,
+                  servicePublication
+                ),
+              TE.map((_) => void 0)
+            );
+          default:
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _: never = item;
+            throw new Error(`should not have executed this with ${item}`);
+        }
+      })
+    ),
     TE.getOrElse((e) => {
       throw e;
     })

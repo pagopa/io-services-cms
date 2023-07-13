@@ -47,5 +47,8 @@ export const RequestSyncCmsItem = t.union([
   ]),
 ]);
 
+export type RequestSyncCmsItemsList = t.TypeOf<typeof RequestSyncCmsItemsList>;
+export const RequestSyncCmsItemsList = t.readonlyArray(RequestSyncCmsItem);
+
 export type RequestSyncLegacyItem = t.TypeOf<typeof RequestSyncLegacyItem>;
 export const RequestSyncLegacyItem = LegacyService;
