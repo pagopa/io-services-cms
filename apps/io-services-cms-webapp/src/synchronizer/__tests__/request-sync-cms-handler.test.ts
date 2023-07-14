@@ -103,12 +103,26 @@ describe("Sync CMS Handler", () => {
     ).rejects.toThrowError("Error while parsing incoming message");
   });
 
+  it("should return an Error if queueItem is not an Array of Items", async () => {
+    const context = createContext();
+    const anInvalidQueueItem = aRequestServiceLifecycleSync as unknown as Json;
+
+    await expect(() =>
+      handleQueueItem(
+        context,
+        anInvalidQueueItem,
+        mockFsmLifecycleClient,
+        mockFsmPublicationClient
+      )()
+    ).rejects.toThrowError("Error while parsing incoming message");
+  });
+
   it("should override a Service Lifecycle Item with Legacy tag", async () => {
     const context = createContext();
 
     await handleQueueItem(
       context,
-      aRequestServiceLifecycleSync as unknown as Json,
+      [aRequestServiceLifecycleSync] as unknown as Json,
       mockFsmLifecycleClient,
       mockFsmPublicationClient
     )();
@@ -132,7 +146,7 @@ describe("Sync CMS Handler", () => {
 
     await handleQueueItem(
       context,
-      aRequestServicePublicationSync as unknown as Json,
+      [aRequestServicePublicationSync] as unknown as Json,
       mockFsmLifecycleClient,
       mockFsmPublicationClient
     )();
@@ -149,5 +163,85 @@ describe("Sync CMS Handler", () => {
         },
       }
     );
+  });
+
+  it("should override a both Service Lifecycle and Service Publication Item with Legacy tag", async () => {
+    const context = createContext();
+
+    await handleQueueItem(
+      context,
+      [
+        aRequestServiceLifecycleSync,
+        aRequestServicePublicationSync,
+      ] as unknown as Json,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient
+    )();
+
+    expect(mockFsmPublicationClient.override).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.override).toBeCalledWith(
+      aServicePublicationItem.id,
+      {
+        ...aServicePublicationItem,
+        fsm: {
+          ...aServicePublicationItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+
+    expect(mockFsmLifecycleClient.override).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.override).toBeCalledWith(
+      aServiceLifecycleItem.id,
+      {
+        ...aServiceLifecycleItem,
+        fsm: {
+          ...aServiceLifecycleItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+  });
+
+  it("should result in error when at least an error occurs processing the items", async () => {
+    const context = createContext();
+
+    const mockFsmPublicationClientError = {
+      override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+    } as unknown as ServicePublication.FsmClient;
+
+    await expect(() =>
+      handleQueueItem(
+        context,
+        [
+          aRequestServiceLifecycleSync,
+          aRequestServicePublicationSync,
+        ] as unknown as Json,
+        mockFsmLifecycleClient,
+        mockFsmPublicationClientError
+      )()
+    ).rejects.toThrowError("Bad Error occurs");
+  });
+
+  it("should not execute the second item in case the first fails", async () => {
+    const context = createContext();
+
+    const mockFsmLifecycleClientError = {
+      override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    await expect(() =>
+      handleQueueItem(
+        context,
+        [
+          aRequestServiceLifecycleSync,
+          aRequestServicePublicationSync,
+        ] as unknown as Json,
+        mockFsmLifecycleClientError,
+        mockFsmPublicationClient
+      )()
+    ).rejects.toThrowError("Bad Error occurs");
+
+    expect(mockFsmPublicationClient.override).not.toBeCalled();
   });
 });

@@ -56,7 +56,6 @@ const aLegacyService = {
   authorizedCIDRs: toAuthorizedCIDRs(["127.0.0.1" as CIDR]),
   authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
   departmentName: "aDepartmentName",
-  isVisible: true,
   maxAllowedPaymentAmount: 1000000,
   organizationFiscalCode: "12345678901",
   organizationName: "anOrganizationName",
@@ -104,8 +103,8 @@ const mockConfig = {
 describe("On Service History Change Handler", () => {
   it.each`
     scenario                             | item                                                                                         | expected
-    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${{ requestSyncLegacy: aLegacyService }}
-    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
+    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
+    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${{ requestSyncLegacy: aLegacyService }}
     ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler(mockConfig, mockApimClient)({ item })();

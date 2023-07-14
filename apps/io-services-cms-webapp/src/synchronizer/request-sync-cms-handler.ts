@@ -6,6 +6,7 @@ import {
 } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
@@ -14,10 +15,10 @@ import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestSyncCmsItem> =>
+): E.Either<Error, Queue.RequestSyncCmsItems> =>
   pipe(
     queueItem,
-    Queue.RequestSyncCmsItem.decode,
+    Queue.RequestSyncCmsItems.decode,
     E.mapLeft(flow(readableReport, E.toError))
   );
 
@@ -53,34 +54,46 @@ export const handleQueueItem = (
     parseIncomingMessage,
     E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
-    TE.chain((item) => {
-      switch (item.kind) {
-        case "LifecycleItemType":
-          return pipe(
-            toServiceLifecycle(item.fsm.state, item),
+    TE.chainW((items) =>
+      pipe(
+        items.filter(
+          (item): item is Queue.RequestSyncCmsItem =>
+            item.kind === "LifecycleItemType"
+        ),
+        RA.traverse(TE.ApplicativePar)((item) =>
+          pipe(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            toServiceLifecycle(item.fsm.state as any, item),
             (serviceLifecycle) =>
               fsmLifecycleClient.override(
                 serviceLifecycle.id,
                 serviceLifecycle
               ),
             TE.map((_) => void 0)
-          );
-        case "PublicationItemType":
-          return pipe(
-            toServicePublication(item.fsm.state, item),
-            (servicePublication) =>
-              fsmPublicationClient.override(
-                servicePublication.id,
-                servicePublication
-              ),
-            TE.map((_) => void 0)
-          );
-        default:
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _: never = item;
-          throw new Error(`should not have executed this with ${item}`);
-      }
-    }),
+          )
+        ),
+        TE.chainW(() =>
+          pipe(
+            items.filter(
+              (item): item is Queue.RequestSyncCmsItem =>
+                item.kind === "PublicationItemType"
+            ),
+            RA.traverse(TE.ApplicativePar)((item) =>
+              pipe(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                toServicePublication(item.fsm.state as any, item),
+                (servicePublication) =>
+                  fsmPublicationClient.override(
+                    servicePublication.id,
+                    servicePublication
+                  ),
+                TE.map((_) => void 0)
+              )
+            )
+          )
+        )
+      )
+    ),
     TE.getOrElse((e) => {
       throw e;
     })

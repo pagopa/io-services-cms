@@ -11,7 +11,7 @@ on:
       - 'infra/src/env/prod/config.yaml'
 
 env:
-  API_NAME: openapi
+  API_NAME: https://raw.githubusercontent.com/pagopa/io-functions-services/master/openapi/index.yaml
 
 permissions:
   id-token: write
@@ -38,7 +38,7 @@ jobs:
           fetch-depth: 0
 
       # from https://github.com/pagopa/opex-dashboard-azure-action/
-      - uses: pagopa/opex-dashboard-azure-action@v1.0.3
+      - uses: pagopa/opex-dashboard-azure-action@v1.1.2
         with:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}

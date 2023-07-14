@@ -47,5 +47,23 @@ export const RequestSyncCmsItem = t.union([
   ]),
 ]);
 
+export type RequestSyncCmsItems = t.TypeOf<typeof RequestSyncCmsItems>;
+export const RequestSyncCmsItems = t.readonlyArray(RequestSyncCmsItem);
+
+const omitIsVisible = <T extends Record<string, unknown>>(
+  t: T
+): Omit<T, "isVisible"> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isVisible, ...rest } = t;
+  return rest;
+};
+
 export type RequestSyncLegacyItem = t.TypeOf<typeof RequestSyncLegacyItem>;
-export const RequestSyncLegacyItem = LegacyService;
+export const RequestSyncLegacyItem = t.intersection([
+  t.type({
+    ...omitIsVisible(LegacyService.types[0].types[0].props),
+    ...LegacyService.types[0].types[1].props,
+    ...LegacyService.types[1].props,
+  }),
+  t.partial({ isVisible: t.boolean }),
+]);
