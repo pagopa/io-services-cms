@@ -11,7 +11,7 @@ on:
       - 'infra/src/env/prod/config.yaml'
 
 env:
-  API_NAME: openapi
+  API_NAME: https://raw.githubusercontent.com/pagopa/io-functions-services/master/openapi/index.yaml
 
 permissions:
   id-token: write
