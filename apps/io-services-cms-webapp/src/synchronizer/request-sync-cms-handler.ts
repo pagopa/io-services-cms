@@ -56,10 +56,8 @@ export const handleQueueItem = (
     TE.fromEither,
     TE.chainW((items) =>
       pipe(
-        items.filter(
-          (item): item is Queue.RequestSyncCmsItem =>
-            item.kind === "LifecycleItemType"
-        ),
+        items,
+        RA.filter((item) => item.kind === "LifecycleItemType"),
         RA.traverse(TE.ApplicativePar)((item) =>
           pipe(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,10 +72,8 @@ export const handleQueueItem = (
         ),
         TE.chainW(() =>
           pipe(
-            items.filter(
-              (item): item is Queue.RequestSyncCmsItem =>
-                item.kind === "PublicationItemType"
-            ),
+            items,
+            RA.filter((item) => item.kind === "PublicationItemType"),
             RA.traverse(TE.ApplicativePar)((item) =>
               pipe(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
