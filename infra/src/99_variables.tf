@@ -65,6 +65,12 @@ variable "azure_apim" {
   default     = null
 }
 
+variable "azure_apim_v2" {
+  type        = string
+  description = "APIM v2 resource name."
+  default     = null
+}
+
 variable "azure_apim_resource_group" {
   type        = string
   description = "APIM resource group name."
