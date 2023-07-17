@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.19.9
+
+### Patch Changes
+
+- 3b5f19d: Add DELETED suffix on serviceName while mapping, cms -> legacy, a deleted service
+- 4a87596: Code CleanUp Request Sync CMS
+
 ## 1.19.8
 
 ### Patch Changes
