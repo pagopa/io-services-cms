@@ -1,5 +1,15 @@
 # io-services-cms-webapp
 
+## 1.19.8
+
+### Patch Changes
+
+- d80a942: Fix OnRequestSyncCms, update code to process a List of items instead of a single item
+- b436659: Change the way how the isVisible field is calculated during CMS to Legacy service Mapping.
+- Updated dependencies [d80a942]
+- Updated dependencies [b436659]
+  - @io-services-cms/models@1.13.1
+
 ## 1.19.7
 
 ### Patch Changes

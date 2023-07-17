@@ -52,7 +52,11 @@ export const handleQueueItem = (
                   _context.log.info(`create param:", ${JSON.stringify(x)}`);
                   return x;
                 },
-                (x) => legacyServiceModel.create(x)
+                (x) =>
+                  legacyServiceModel.create({
+                    ...x,
+                    isVisible: x.isVisible ?? false,
+                  })
               ),
             (existingService) =>
               pipe(

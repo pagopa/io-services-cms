@@ -1,5 +1,12 @@
 # io-services-cms-models
 
+## 1.13.1
+
+### Patch Changes
+
+- d80a942: Fix OnRequestSyncCms, update code to process a List of items instead of a single item
+- b436659: Change the way how the isVisible field is calculated during CMS to Legacy service Mapping.
+
 ## 1.13.0
 
 ### Minor Changes

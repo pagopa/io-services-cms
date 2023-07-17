@@ -36,7 +36,6 @@ const cmsToLegacy = (
     ),
     departmentName: serviceHistory.data.organization
       .department_name as NonEmptyString, // it will be validated in OnRequestSyncLegacy Azure Function
-    isVisible: serviceHistory.fsm.state === "published",
     maxAllowedPaymentAmount: serviceHistory.data.max_allowed_payment_amount,
     organizationFiscalCode: serviceHistory.data.organization.fiscal_code,
     organizationName: serviceHistory.data.organization.name,
@@ -63,6 +62,7 @@ const cmsToLegacy = (
   };
   return {
     ...legacyServiceBase,
+    ...manageIsVisibleField(serviceHistory),
     serviceMetadata: {
       ...legacyServiceBase.serviceMetadata,
       ...getSpecialFields(
@@ -71,6 +71,16 @@ const cmsToLegacy = (
       ),
     },
   };
+};
+
+const manageIsVisibleField = (item: ServiceHistory) => {
+  if (item.fsm.state === "published") {
+    return { isVisible: true };
+  } else if (item.fsm.state === "unpublished") {
+    return { isVisible: false };
+  } else {
+    return {};
+  }
 };
 
 const getSpecialFields = (
