@@ -572,11 +572,11 @@ components:
               type: integer
             last_update:
               $ref: '#/components/schemas/Timestamp'
+          required:
+            - id
+            - status
+            - last_update
         - $ref: '#/components/schemas/ServiceData'
-      required:
-        - id
-        - status
-        - last_update
     ServicePublication:
       description: Service Publication model data
       allOf:
@@ -590,11 +590,11 @@ components:
               type: integer
             last_update:
               $ref: '#/components/schemas/Timestamp'
+          required:
+            - id
+            - status
+            - last_update
         - $ref: '#/components/schemas/ServiceData'
-      required:
-        - id
-        - status
-        - last_update
     ServicePayload:
       description: A payload used to create or update a service.
       allOf:

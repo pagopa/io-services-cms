@@ -11,9 +11,11 @@ export const itemToResponse = ({
   fsm: { state },
   data,
   id,
+  last_update,
 }: ServicePublication.ItemType): ServiceResponsePayload => ({
   id,
   status: toServiceStatusType(state),
+  last_update: last_update ?? new Date().getTime().toString(),
   name: data.name,
   description: data.description,
   organization: data.organization,
