@@ -36,9 +36,11 @@ export const itemToResponse = ({
   fsm,
   data,
   id,
+  last_update,
 }: ServiceLifecycle.ItemType): ServiceResponsePayload => ({
   id,
   status: toServiceStatus(fsm),
+  last_update: last_update ?? new Date().getTime().toString(),
   name: data.name,
   description: data.description,
   organization: data.organization,
