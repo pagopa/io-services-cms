@@ -99,7 +99,7 @@ const fromLegacyToCmsService = (
       category: service.serviceMetadata?.category,
       cta: service.serviceMetadata?.cta,
       custom_special_flow: service.serviceMetadata?.customSpecialFlow,
-      description: service.serviceMetadata?.description,
+      description: getDescription(service),
       email: service.serviceMetadata?.email,
       pec: service.serviceMetadata?.pec,
       phone: service.serviceMetadata?.phone,
