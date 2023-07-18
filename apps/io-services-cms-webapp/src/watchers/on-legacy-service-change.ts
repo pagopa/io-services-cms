@@ -75,7 +75,9 @@ const getLegacyToCmsStatus = (
   ) {
     return ["submitted"];
   } else if (isValidService(qualityCheckExclusionList)(service)) {
-    return service.isVisible ? ["approved", "published"] : ["approved"];
+    return service.isVisible
+      ? ["approved", "published"]
+      : ["approved", "unpublished"];
   } else {
     return ["draft"];
   }
@@ -89,7 +91,7 @@ const fromLegacyToCmsService = (
   data: {
     authorized_cidrs: Array.from(service.authorizedCIDRs.values()),
     authorized_recipients: Array.from(service.authorizedRecipients.values()),
-    description: service.serviceMetadata?.description as NonEmptyString,
+    description: getDescription(service),
     max_allowed_payment_amount: service.maxAllowedPaymentAmount,
     metadata: {
       scope: service.serviceMetadata?.scope ?? "LOCAL", // FIXME: va bene come valore di default?
@@ -99,7 +101,7 @@ const fromLegacyToCmsService = (
       category: service.serviceMetadata?.category,
       cta: service.serviceMetadata?.cta,
       custom_special_flow: service.serviceMetadata?.customSpecialFlow,
-      description: service.serviceMetadata?.description,
+      description: getDescription(service),
       email: service.serviceMetadata?.email,
       pec: service.serviceMetadata?.pec,
       phone: service.serviceMetadata?.phone,
@@ -126,6 +128,9 @@ const fromLegacyToCmsService = (
       ? "PublicationItemType"
       : "LifecycleItemType",
 });
+
+const getDescription = (service: Service) =>
+  service.serviceMetadata?.description ?? ("-" as NonEmptyString);
 
 const legacyToCms = (
   jiraLegacyClient: JiraLegacyAPIClient,

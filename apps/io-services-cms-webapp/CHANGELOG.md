@@ -1,5 +1,24 @@
 # io-services-cms-webapp
 
+## 1.19.12
+
+### Patch Changes
+
+- 329ae0a: Map legacy not visible service to unpublished CMS service
+
+## 1.19.11
+
+### Patch Changes
+
+- cb319d4: Add placeholder value for metadata.description while mapping a legacy sevice who lacks of description
+
+## 1.19.10
+
+### Patch Changes
+
+- 6454a43: Generator doesn't generate correctly required parameter inside allOf in openApi
+- 5dd4cfa: Add placeholder value when a legacy service lack of description
+
 ## 1.19.9
 
 ### Patch Changes
