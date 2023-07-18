@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.12
+
+### Patch Changes
+
+- 329ae0a: Map legacy not visible service to unpublished CMS service
+
 ## 1.19.11
 
 ### Patch Changes
