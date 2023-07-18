@@ -41,7 +41,6 @@ const cmsToLegacy = (
     organizationName: serviceHistory.data.organization.name,
     requireSecureChannels: serviceHistory.data.require_secure_channel,
     serviceId: serviceHistory.serviceId,
-    serviceName: serviceHistory.data.name,
     cmsTag: true,
     serviceMetadata: {
       scope: ServiceScopeEnum[serviceHistory.data.metadata.scope],
@@ -62,6 +61,7 @@ const cmsToLegacy = (
   };
   return {
     ...legacyServiceBase,
+    ...manageServiceName(serviceHistory),
     ...manageIsVisibleField(serviceHistory),
     serviceMetadata: {
       ...legacyServiceBase.serviceMetadata,
@@ -71,6 +71,13 @@ const cmsToLegacy = (
       ),
     },
   };
+};
+
+const manageServiceName = (item: ServiceHistory) => {
+  if (item.fsm.state === "deleted") {
+    return { serviceName: `DELETED ${item.data.name}` as NonEmptyString };
+  }
+  return { serviceName: item.data.name };
 };
 
 const manageIsVisibleField = (item: ServiceHistory) => {
