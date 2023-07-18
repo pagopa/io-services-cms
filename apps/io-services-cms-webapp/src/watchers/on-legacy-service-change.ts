@@ -89,7 +89,7 @@ const fromLegacyToCmsService = (
   data: {
     authorized_cidrs: Array.from(service.authorizedCIDRs.values()),
     authorized_recipients: Array.from(service.authorizedRecipients.values()),
-    description: service.serviceMetadata?.description as NonEmptyString,
+    description: getDescription(service),
     max_allowed_payment_amount: service.maxAllowedPaymentAmount,
     metadata: {
       scope: service.serviceMetadata?.scope ?? "LOCAL", // FIXME: va bene come valore di default?
@@ -126,6 +126,9 @@ const fromLegacyToCmsService = (
       ? "PublicationItemType"
       : "LifecycleItemType",
 });
+
+const getDescription = (service: Service) =>
+  service.serviceMetadata?.description ?? ("-" as NonEmptyString);
 
 const legacyToCms = (
   jiraLegacyClient: JiraLegacyAPIClient,

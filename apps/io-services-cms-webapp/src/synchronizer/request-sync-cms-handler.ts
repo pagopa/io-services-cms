@@ -52,7 +52,12 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
+    E.mapLeft(
+      (err) =>
+        new Error(
+          `Error while parsing incoming message, the reason was => ${err.message}`
+        )
+    ), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((items) =>
       pipe(
