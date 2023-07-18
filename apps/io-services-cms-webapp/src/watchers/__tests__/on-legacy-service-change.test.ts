@@ -263,7 +263,7 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a valid and not visible item to a requestSyncCms action containing a service lifecycle with APPROVED status", async () => {
+  it("should map a valid and not visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with UNPUBLISHED status", async () => {
     const item = {
       ...aLegacyService,
       isVisible: false,
@@ -286,6 +286,11 @@ describe("On Legacy Service Change Handler", () => {
       expect(result.right).toStrictEqual({
         requestSyncCms: [
           { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
+          {
+            ...aServicePublicationItem,
+            fsm: { state: "unpublished" },
+            kind: "PublicationItemType",
+          },
         ],
       });
     }
