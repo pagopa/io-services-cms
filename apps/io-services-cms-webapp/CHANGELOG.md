@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.11
+
+### Patch Changes
+
+- cb319d4: Add placeholder value for metadata.description while mapping a legacy sevice who lacks of description
+
 ## 1.19.10
 
 ### Patch Changes
