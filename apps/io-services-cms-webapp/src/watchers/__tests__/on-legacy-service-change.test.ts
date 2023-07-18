@@ -149,6 +149,50 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
+  it("should map a new item to a requestSyncCms action containing a service lifecycle with the description placeholder", async () => {
+    const item = {
+      authorizedCIDRs: ["127.0.0.1"],
+      authorizedRecipients: ["AAAAAA01B02C123D"],
+      departmentName: "aDepartmentName",
+      isVisible: false,
+      maxAllowedPaymentAmount: 0,
+      organizationFiscalCode: "12345678901",
+      organizationName: "anOrganizationName",
+      requireSecureChannels: false,
+      serviceId: "aServiceId",
+      serviceName: "aServiceName",
+      version: 0,
+    } as unknown as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [
+        "anotherServiceId" as NonEmptyString,
+      ],
+    } as unknown as IConfig;
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      mockConfig,
+      mockApimClient
+    )({ item })();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          requestSyncCms: expect.arrayContaining([
+            expect.objectContaining({
+              data: expect.objectContaining({ description: "-" }),
+              kind: "LifecycleItemType",
+            }),
+          ]),
+        })
+      );
+    }
+  });
+
   it("should map a valid item with pending review to a requestSyncCms action containing a service lifecycle with SUBMITTED status", async () => {
     const mockJiraLegacyClient = {
       searchJiraIssueByServiceId: vi.fn((_) =>
