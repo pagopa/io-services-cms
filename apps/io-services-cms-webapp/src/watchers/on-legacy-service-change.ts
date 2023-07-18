@@ -75,7 +75,9 @@ const getLegacyToCmsStatus = (
   ) {
     return ["submitted"];
   } else if (isValidService(qualityCheckExclusionList)(service)) {
-    return service.isVisible ? ["approved", "published"] : ["approved"];
+    return service.isVisible
+      ? ["approved", "published"]
+      : ["approved", "unpublished"];
   } else {
     return ["draft"];
   }
