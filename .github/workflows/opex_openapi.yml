@@ -8,7 +8,7 @@ on:
     paths:
       - 'openapi.yaml'
       - '.github/workflows/opex_openapi.yml'
-      - 'infra/src/env/prod/config.yaml'
+      - '.opex/openapi/**'
 
 env:
   API_NAME: openapi
