@@ -184,7 +184,10 @@ describe("On Legacy Service Change Handler", () => {
         expect.objectContaining({
           requestSyncCms: expect.arrayContaining([
             expect.objectContaining({
-              data: expect.objectContaining({ description: "-" }),
+              data: expect.objectContaining({
+                description: "-",
+                metadata: expect.objectContaining({ description: "-" }),
+              }),
               kind: "LifecycleItemType",
             }),
           ]),
