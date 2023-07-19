@@ -68,7 +68,7 @@ const getLegacyToCmsStatus = (
   issueStatus?: JiraLegacyIssueStatus
 ): Array<Queue.RequestSyncCmsItem["fsm"]["state"]> => {
   if (isDeletedService(service)) {
-    return ["deleted"];
+    return ["deleted", "unpublished"];
   } else if (
     isValidService(qualityCheckExclusionList)(service) &&
     hasOngoingReview(issueStatus)
