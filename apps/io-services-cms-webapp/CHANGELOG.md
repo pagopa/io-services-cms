@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.19.13
+
+### Patch Changes
+
+- 02a4a4b: Map Completata status.name for Jira Legacy Status name
+- 21919a7: unpublish service on delete
+- Updated dependencies [21919a7]
+  - @io-services-cms/models@1.13.2
+
 ## 1.19.12
 
 ### Patch Changes
