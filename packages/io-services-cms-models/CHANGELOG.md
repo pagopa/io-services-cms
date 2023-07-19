@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.13.2
+
+### Patch Changes
+
+- 21919a7: unpublish service on delete
+
 ## 1.13.1
 
 ### Patch Changes
