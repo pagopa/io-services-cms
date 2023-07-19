@@ -34,13 +34,13 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
-import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "DeleteServiceHandler";
 
@@ -68,7 +68,7 @@ export const makeDeleteServiceHandler =
     apimClient,
     telemetryClient,
   }: Dependencies): DeleteServiceHandler =>
-  (context, auth, __, ___, serviceId) =>
+  (context, auth, _, __, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         config,
