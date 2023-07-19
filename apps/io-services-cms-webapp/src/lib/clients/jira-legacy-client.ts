@@ -21,6 +21,7 @@ export const JiraLegacyIssueStatus = t.union([
   t.literal("REVIEW"),
   t.literal("REJECTED"),
   t.literal("DONE"),
+  t.literal("Completata"), // Status DONE will return this value as name
 ]);
 export type JiraLegacyIssueStatus = t.TypeOf<typeof JiraLegacyIssueStatus>;
 
