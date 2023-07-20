@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.19.15
+
+### Patch Changes
+
+- 8ecfaec: preparation for controlled massive sync
+- 9958603: Wrap error adding information about the processed serviceId
+
 ## 1.19.14
 
 ### Patch Changes
