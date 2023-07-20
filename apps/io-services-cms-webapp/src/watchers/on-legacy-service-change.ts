@@ -187,7 +187,7 @@ export const handler =
                   TE.mapLeft(
                     (e) =>
                       new Error(
-                        `Error while processing serviceId ${item.serviceId}, the reason was => ${e.message}`
+                        `Error while processing serviceId ${item.serviceId}, the reason was => ${e.message}, the stack was => ${e.stack}`
                       )
                   )
                 )
