@@ -115,7 +115,7 @@ const mockApimClient = {
 } as unknown as ApiManagementClient;
 
 describe("On Legacy Service Change Handler", () => {
-  it("should map a deleted item to a requestSyncCms action containing a service lifecycle with DELETED status", async () => {
+  it("should map a deleted item to a requestSyncCms action containing a service lifecycle with DELETED status and a service publication with UNPUBLISHED status", async () => {
     const item = {
       ...aLegacyService,
       serviceName: "DELETED aServiceName",
@@ -143,6 +143,11 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
+          },
+          {
+            ...aServicePublicationItem,
+            fsm: { state: "unpublished" },
+            kind: "PublicationItemType",
           },
         ],
       });

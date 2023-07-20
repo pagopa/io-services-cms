@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.14
+
+### Patch Changes
+
+- 32f56a8: unpublish service when deleting request is coming from legacy sync
+
 ## 1.19.13
 
 ### Patch Changes
