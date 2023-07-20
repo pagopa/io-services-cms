@@ -143,7 +143,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     if (E.isLeft(issue)) {
       expect(issue.left).toHaveProperty(
         "message",
-        `Unknown status code, 123, received`
+        `Unknown status code 123 received`
       );
     }
   });
