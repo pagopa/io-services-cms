@@ -429,4 +429,37 @@ describe("On Legacy Service Change Handler", () => {
       expect(result.right).toStrictEqual({});
     }
   });
+
+  it("Should propagate the original error", async () => {
+    const message =
+      'value ["Completata"] at [root.0.issues.0.fields.status.name.0] is not a valid ["NEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.1] is not a valid ["REVIEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.2] is not a valid ["REJECTED"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.3] is not a valid ["DONE"]';
+
+    const mockJiraLegacyClient = {
+      searchJiraIssueByServiceId: vi.fn((_) => TE.left(new Error(message))),
+    } as unknown as JiraLegacyAPIClient;
+
+    const item = {
+      ...aLegacyService,
+      isVisible: false,
+    } as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
+    } as unknown as IConfig;
+
+    delete item["serviceMetadata"];
+
+    const result = await handler(
+      mockJiraLegacyClient,
+      mockConfig,
+      mockApimClient
+    )({ item })();
+
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left.message).toContain(message);
+      expect(result.left.message).toContain("aServiceId");
+    }
+  });
 });
