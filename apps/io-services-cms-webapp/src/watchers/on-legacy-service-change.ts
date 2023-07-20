@@ -179,9 +179,17 @@ export const handler =
               item,
               O.fromPredicate((_) => isUserEnabled),
               O.map(
-                onLegacyServiceChangeHandler(
-                  jiraLegacyClient,
-                  config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+                flow(
+                  onLegacyServiceChangeHandler(
+                    jiraLegacyClient,
+                    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
+                  ),
+                  TE.mapLeft(
+                    (e) =>
+                      new Error(
+                        `Error while processing serviceId ${item.serviceId}, the reason was => ${e.message}`
+                      )
+                  )
                 )
               ),
               O.getOrElse(() => TE.right(noAction))
