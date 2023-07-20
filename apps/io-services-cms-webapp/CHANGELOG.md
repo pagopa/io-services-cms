@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.17
+
+### Patch Changes
+
+- 6df95c5: Feature Flag Optimization
+
 ## 1.19.16
 
 ### Patch Changes
