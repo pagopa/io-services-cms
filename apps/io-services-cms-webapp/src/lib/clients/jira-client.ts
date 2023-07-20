@@ -100,7 +100,9 @@ export const checkJiraResponse = (
   } else if (response.status >= 500) {
     return E.left(new Error("Jira API returns an error"));
   } else {
-    return E.left(new Error("Unknown status code response error"));
+    return E.left(
+      new Error(`Unknown status code, ${response.status}, received`)
+    );
   }
 };
 
