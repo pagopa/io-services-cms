@@ -17,10 +17,6 @@ resource "azurerm_monitor_metric_alert" "webapp_functions_app_health_check" {
   }
 
   action {
-    action_group_id = data.azurerm_monitor_action_group.email.id
-  }
-
-  action {
-    action_group_id = data.azurerm_monitor_action_group.slack.id
+    action_group_id = data.azurerm_monitor_action_group.error_action_group.id
   }
 }
