@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.16
+
+### Patch Changes
+
+- 2c104b8: Add status on checkJiraResponse when an unknown status is received
+
 ## 1.19.15
 
 ### Patch Changes
