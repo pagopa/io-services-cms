@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.19
+
+### Patch Changes
+
+- 388cd81: update runner image
+
 ## 1.19.18
 
 ### Patch Changes
