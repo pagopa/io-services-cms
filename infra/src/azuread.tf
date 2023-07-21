@@ -3,10 +3,6 @@ data "azuread_group" "adgroup_admin" {
   display_name = format("%s-adgroup-admin", local.project)
 }
 
-data "azuread_group" "adgroup_contributors" {
-  display_name = format("%s-adgroup-contributors", local.project)
-}
-
 data "azuread_group" "adgroup_developers" {
   display_name = format("%s-adgroup-developers", local.project)
 }
