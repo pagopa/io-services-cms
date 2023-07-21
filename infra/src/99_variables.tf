@@ -110,6 +110,11 @@ variable "legacy_cosmosdb_container_services_lease" {
   default     = "services-cms--legacy-watcher-lease"
 }
 
+variable "legacy_service_watcher_max_items_per_invocation" {
+  type        = number
+  description = "Chunck size for the change feed"
+}
+
 
 ############
 ## Monitor #
