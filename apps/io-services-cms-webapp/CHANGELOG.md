@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.23
+
+### Patch Changes
+
+- 8a550f3: Fix type legacy service watcher max items per invocation
+
 ## 1.19.22
 
 ### Patch Changes
