@@ -8,11 +8,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
 import { IConfig } from "../../config";
-import {
-  JIRA_REST_API_PATH,
-  SearchJiraIssuesPayload,
-  checkJiraResponse,
-} from "./jira-client";
+import { JIRA_REST_API_PATH, SearchJiraIssuesPayload } from "./jira-client";
 
 export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
@@ -98,8 +94,23 @@ export const jiraLegacyClient = (
           }),
         E.toError
       ),
-      TE.chainEitherK(checkJiraResponse),
-      TE.chain((response) => TE.tryCatch(() => response.json(), E.toError)),
+      TE.chain((response) =>
+        pipe(
+          TE.tryCatch(
+            () => response.json(),
+            (err) =>
+              new Error(
+                `Error parsing Jira response: ${E.toError(err).message}`
+              )
+          ),
+          TE.chain((responseBody) =>
+            pipe(
+              checkJiraResponse(response.status, responseBody),
+              TE.fromEither
+            )
+          )
+        )
+      ),
       TE.chain((responseBody) =>
         pipe(
           responseBody,
@@ -110,6 +121,47 @@ export const jiraLegacyClient = (
         )
       )
     );
+  };
+
+  const checkJiraResponse = (
+    status: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    responseBody: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): E.Either<Error, any> => {
+    if (status === 200 || status === 201) {
+      return E.right(responseBody);
+    } else if (status === 400) {
+      return E.left(
+        new Error(
+          `Invalid request, responseBody: ${JSON.stringify(responseBody)}`
+        )
+      );
+    } else if (status === 401) {
+      return E.left(
+        new Error(
+          `Jira secrets misconfiguration, responseBody: ${JSON.stringify(
+            responseBody
+          )}`
+        )
+      );
+    } else if (status >= 500) {
+      return E.left(
+        new Error(
+          `Jira API returns an error, responseBody: ${JSON.stringify(
+            responseBody
+          )}`
+        )
+      );
+    } else {
+      return E.left(
+        new Error(
+          `Unknown status code ${status} received, responseBody: ${JSON.stringify(
+            responseBody
+          )}`
+        )
+      );
+    }
   };
 
   return {

@@ -45,8 +45,15 @@ const aSearchJiraIssuesByServiceIdResponse: SearchJiraLegacyIssuesResponse = {
 };
 
 describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
-  it("should return a generic error if searchJiraIssueByServiceId returns an error", async () => {
-    const mockFetch = getMockFetchWithStatus(500);
+  it("should return an error containing the details if searchJiraIssueByServiceId returns an error on body", async () => {
+    const resultObj = {
+      errorMessages: "Error on Jira response",
+    };
+    const mockFetch = vitest.fn().mockImplementation(async () => ({
+      json: vitest.fn(() => Promise.resolve(resultObj)),
+      status: 429,
+    }));
+
     const client = jiraLegacyClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssueByServiceId(aServiceId)();
@@ -61,7 +68,34 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
     if (E.isLeft(issues)) {
       expect(issues.left).toHaveProperty(
         "message",
-        "Jira API returns an error"
+        `Unknown status code 429 received, responseBody: ${JSON.stringify(
+          resultObj
+        )}`
+      );
+    }
+  });
+
+  it("should return the deserializzation error if searchJiraIssueByServiceId body extractions end up in failure", async () => {
+    const mockFetch = vitest.fn().mockImplementation(async () => ({
+      json: vitest.fn(() => Promise.reject(new Error("Bad Error"))),
+      status: 429,
+    }));
+
+    const client = jiraLegacyClient(JIRA_CONFIG, mockFetch);
+
+    const issues = await client.searchJiraIssueByServiceId(aServiceId)();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+
+    expect(E.isLeft(issues)).toBeTruthy();
+    if (E.isLeft(issues)) {
+      expect(issues.left).toHaveProperty(
+        "message",
+        "Error parsing Jira response: Bad Error"
       );
     }
   });
