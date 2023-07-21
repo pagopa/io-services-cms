@@ -10,6 +10,7 @@ import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 type Actions =
   | "requestReview"
   | "requestPublication"
+  | "requestUnpublication"
   | "requestHistoricization";
 
 type Action<A extends Actions, B> = Record<A, B>;
@@ -22,6 +23,12 @@ type RequestPublicationAction = Action<
   Queue.RequestPublicationItem
 >;
 type OnApproveActions = Action<"requestPublication", unknown>;
+
+type RequestUnpublicationItem = Action<
+  "requestPublication",
+  Queue.RequestUnpublicationItem
+>;
+type OnDeleteActions = Action<"requestPublication", unknown>;
 
 type RequestHistoricizationAction = Action<
   "requestHistoricization",
@@ -58,8 +65,18 @@ const onApproveHandler =
         max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
       },
       autoPublish: ServiceLifecycle.getAutoPublish(item),
+      kind: "RequestPublicationItem",
     },
   });
+
+const onDeleteHandler = (
+  item: ServiceLifecycle.ItemType
+): RequestUnpublicationItem => ({
+  requestPublication: {
+    id: item.id,
+    kind: "RequestUnpublicationItem",
+  },
+});
 
 // FIXME: fix request historicization action (avoid to call onAnyChangesHandler foreach case)
 export const handler =
@@ -69,7 +86,8 @@ export const handler =
     { item: ServiceLifecycle.ItemType },
     Error,
     | RequestHistoricizationAction
-    | ((OnSubmitActions | OnApproveActions) & RequestHistoricizationAction)
+    | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &
+        RequestHistoricizationAction)
   > =>
   ({ item }) => {
     if (item.fsm.lastTransition !== SYNC_FROM_LEGACY) {
@@ -85,7 +103,13 @@ export const handler =
           return pipe(
             item,
             onApproveHandler(config),
-            (x) => x,
+            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
+            TE.right
+          );
+        case "deleted":
+          return pipe(
+            item,
+            onDeleteHandler,
             (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
             TE.right
           );
