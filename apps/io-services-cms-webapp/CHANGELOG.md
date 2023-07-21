@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.20
+
+### Patch Changes
+
+- 5505553: Log not json response received from jira
+
 ## 1.19.19
 
 ### Patch Changes
