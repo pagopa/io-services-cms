@@ -98,7 +98,7 @@ export const CosmosLegacyConfig = t.type({
   LEGACY_COSMOSDB_KEY: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE: NonEmptyString,
-  LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION: NumberFromString,
+  LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION: t.number,
 });
 
 export const AzureClientSecretCredential = t.type({
