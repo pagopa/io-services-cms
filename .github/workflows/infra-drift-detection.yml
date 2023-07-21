@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 env:
-  DIR: "infra/src"
+  DIR: 'infra/src'
   AZURE_ENVIRONMENT: prod
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Create GitHub Runner
         id: create_github_runner
         # from https://github.com/pagopa/github-self-hosted-runner-azure-create-action/commits/main
-        uses: pagopa/github-self-hosted-runner-azure-create-action@63534a04613b420ce6474ccbb52ac7884129ff6f
+        uses: pagopa/github-self-hosted-runner-azure-create-action@13d5d0ae9550efdd5770b14029d346c7ad490d01
         with:
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant_id: ${{ secrets.AZURE_TENANT_ID }}
@@ -32,11 +32,11 @@ jobs:
           container_app_environment_name: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           pat_token: ${{ secrets.BOT_TOKEN }}
-          self_hosted_runner_image_tag: v1.4.1@sha256:97aebedab1fe4ccfca0050726f37a76d18dcfa4165493ee2f823454897548ff9
+          self_hosted_runner_image_tag: v1.4.2@sha256:330b40e255e12c798f4a6e784efc3189e12316499dd399a3e3e6487c9b32f824
 
   terraform_driftdetection_job:
     name: Terraform Drift Detection
-    runs-on: [self-hosted, "${{ needs.create_runner.outputs.runner_name }}"]
+    runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
     environment: prod-ci
     needs: create_runner
     steps:
@@ -73,7 +73,7 @@ jobs:
       - name: Cleanup GitHub Runner
         id: cleanup_github_runner
         # from https://github.com/pagopa/github-self-hosted-runner-azure-cleanup-action/commits/main
-        uses: pagopa/github-self-hosted-runner-azure-cleanup-action@97731a35e6ffc79b66c4dfd2aae5e4fd04e3ebb5
+        uses: pagopa/github-self-hosted-runner-azure-cleanup-action@832e65984d94a95818c69ba7df605aa82c4a09cd
         with:
           client_id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant_id: ${{ secrets.AZURE_TENANT_ID }}
@@ -81,4 +81,3 @@ jobs:
           resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           runner_name: ${{ needs.create_runner.outputs.runner_name }}
           pat_token: ${{ secrets.BOT_TOKEN }}
-
