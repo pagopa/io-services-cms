@@ -1,5 +1,51 @@
 # io-services-cms-webapp
 
+## 1.19.19
+
+### Patch Changes
+
+- 388cd81: update runner image
+
+## 1.19.18
+
+### Patch Changes
+
+- d18748c: Updated jira-legacy-client.ts error handling
+
+## 1.19.17
+
+### Patch Changes
+
+- 6df95c5: Feature Flag Optimization
+
+## 1.19.16
+
+### Patch Changes
+
+- 2c104b8: Add status on checkJiraResponse when an unknown status is received
+
+## 1.19.15
+
+### Patch Changes
+
+- 8ecfaec: preparation for controlled massive sync
+- 9958603: Wrap error adding information about the processed serviceId
+
+## 1.19.14
+
+### Patch Changes
+
+- 32f56a8: unpublish service when deleting request is coming from legacy sync
+
+## 1.19.13
+
+### Patch Changes
+
+- 02a4a4b: Map Completata status.name for Jira Legacy Status name
+- 21919a7: unpublish service on delete
+- Updated dependencies [21919a7]
+  - @io-services-cms/models@1.13.2
+
 ## 1.19.12
 
 ### Patch Changes

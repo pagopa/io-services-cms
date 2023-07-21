@@ -2,7 +2,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import { LegacyService } from "../service-legacy";
 import { ItemType as LifecycleItemType } from "../service-lifecycle";
-import { Service } from "../service-lifecycle/definitions";
+import { Service, ServiceId } from "../service-lifecycle/definitions";
 import { ItemType as PublicationItemType } from "../service-publication";
 
 export type RequestReviewItem = t.TypeOf<typeof RequestReviewItem>;
@@ -18,7 +18,22 @@ export const RequestPublicationItem = t.intersection([
   Service,
   t.type({
     autoPublish: t.boolean, // autoPublish required
+    kind: t.literal("RequestPublicationItem"),
   }),
+]);
+
+export type RequestUnpublicationItem = t.TypeOf<
+  typeof RequestUnpublicationItem
+>;
+export const RequestUnpublicationItem = t.type({
+  id: ServiceId,
+  kind: t.literal("RequestUnpublicationItem"),
+});
+
+export type RequestPubUnpubItem = t.TypeOf<typeof RequestPubUnpubItem>;
+export const RequestPubUnpubItem = t.union([
+  RequestPublicationItem,
+  RequestUnpublicationItem,
 ]);
 
 export type RequestHistoricizationItem = t.TypeOf<

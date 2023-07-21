@@ -58,16 +58,11 @@ describe("Service Publication Handler", () => {
     const autoPublishQueueItem = {
       ...aService,
       autoPublish: true,
+      kind: "RequestPublicationItem",
     } as unknown as Json;
     const context = createContext();
 
     const mockFsmLifecycleClient = {
-      release: vi.fn(() =>
-        TE.right({
-          ...aService,
-          fsm: { state: "unpublished" },
-        })
-      ),
       publish: vi.fn(() =>
         TE.right({
           ...aService,
@@ -91,6 +86,7 @@ describe("Service Publication Handler", () => {
     const autoPublishQueueItem = {
       ...aService,
       autoPublish: false,
+      kind: "RequestPublicationItem",
     } as unknown as Json;
     const context = createContext();
 
@@ -99,12 +95,6 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "unpublished" },
-        })
-      ),
-      publish: vi.fn(() =>
-        TE.right({
-          ...aService,
-          fsm: { state: "published" },
         })
       ),
     } as unknown as ServicePublication.FsmClient;
@@ -118,5 +108,30 @@ describe("Service Publication Handler", () => {
     expect(mockFsmLifecycleClient.release).toBeCalledWith(aService.id, {
       data: aService,
     });
+  });
+
+  it("handleQueueItem should unpublish", async () => {
+    const autoPublishQueueItem = {
+      id: aService.id,
+      kind: "RequestUnpublicationItem",
+    } as unknown as Json;
+    const context = createContext();
+
+    const mockFsmLifecycleClient = {
+      unpublish: vi.fn(() =>
+        TE.right({
+          ...aService,
+          fsm: { state: "unpublished" },
+        })
+      ),
+    } as unknown as ServicePublication.FsmClient;
+
+    await handleQueueItem(
+      context,
+      autoPublishQueueItem,
+      mockFsmLifecycleClient
+    )();
+    expect(mockFsmLifecycleClient.unpublish).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.unpublish).toBeCalledWith(aService.id);
   });
 });
