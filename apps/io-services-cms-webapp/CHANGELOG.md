@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.21
+
+### Patch Changes
+
+- 28b6c98: Add Max Items per Invocations on LegacyServiceWatcher
+
 ## 1.19.20
 
 ### Patch Changes
