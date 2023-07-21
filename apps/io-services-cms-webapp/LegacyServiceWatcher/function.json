@@ -11,7 +11,7 @@
       "leaseCollectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
       "createLeaseCollectionIfNotExists": true,
       "startFromBeginning": true,
-      "maxItemsPerInvocation": "%LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION%"
+      "maxItemsPerInvocation": 10
     },
     {
       "queueName": "%REQUEST_SYNC_CMS_QUEUE%",
