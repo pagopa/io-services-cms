@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.18
+
+### Patch Changes
+
+- d18748c: Updated jira-legacy-client.ts error handling
+
 ## 1.19.17
 
 ### Patch Changes
