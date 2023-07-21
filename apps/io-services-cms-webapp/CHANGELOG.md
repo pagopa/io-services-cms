@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.24
+
+### Patch Changes
+
+- ff01bca: Add fixed value for maxItemsPerInvocation on LegacyServiceWatcher
+
 ## 1.19.23
 
 ### Patch Changes
