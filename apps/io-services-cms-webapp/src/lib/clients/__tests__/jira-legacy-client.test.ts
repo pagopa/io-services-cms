@@ -93,7 +93,10 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
     expect(E.isLeft(issues)).toBeTruthy();
     if (E.isLeft(issues)) {
-      expect(issues.left).toHaveProperty("message", "Bad Error");
+      expect(issues.left).toHaveProperty(
+        "message",
+        "Error parsing Jira response: Bad Error"
+      );
     }
   });
 

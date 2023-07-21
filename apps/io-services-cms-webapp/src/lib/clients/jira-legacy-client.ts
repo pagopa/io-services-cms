@@ -96,7 +96,13 @@ export const jiraLegacyClient = (
       ),
       TE.chain((response) =>
         pipe(
-          TE.tryCatch(() => response.json(), E.toError),
+          TE.tryCatch(
+            () => response.json(),
+            (err) =>
+              new Error(
+                `Error parsing Jira response: ${E.toError(err).message}`
+              )
+          ),
           TE.chain((responseBody) =>
             pipe(
               checkJiraResponse(response.status, responseBody),
