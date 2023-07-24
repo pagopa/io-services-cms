@@ -6,7 +6,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { isNumber } from "fp-ts/lib/number";
-import * as T from "fp-ts/task";
+import * as T from "fp-ts/Task";
 import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
 import { IConfig } from "../../config";
