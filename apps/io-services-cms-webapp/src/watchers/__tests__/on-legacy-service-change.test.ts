@@ -210,6 +210,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const item = {
       ...aLegacyService,
+      isVisible: false,
     } as unknown as LegacyService;
 
     const mockConfig = {

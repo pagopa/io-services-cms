@@ -138,7 +138,17 @@ const legacyToCms = (
   item: Service
 ) =>
   pipe(
-    jiraLegacyClient.searchJiraIssueByServiceId(item.serviceId),
+    item,
+    O.fromPredicate(
+      (item) =>
+        !isDeletedService(item) &&
+        isValidService(qualityCheckExclusionList)(item) &&
+        !item.isVisible
+    ),
+    O.fold(
+      () => TE.right(O.none), // evitiamo la chiamata a Jira quando non serve, simulando una sua risposta vuota
+      (_) => jiraLegacyClient.searchJiraIssueByServiceId(item.serviceId)
+    ),
     TE.map(
       flow(
         O.fold(
