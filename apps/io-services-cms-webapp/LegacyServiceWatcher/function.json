@@ -21,6 +21,12 @@
       "direction": "out"
     }
   ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 10,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:01:00"
+  },
   "scriptFile": "../dist/main.js",
   "entryPoint": "onLegacyServiceChangeEntryPoint"
 }
