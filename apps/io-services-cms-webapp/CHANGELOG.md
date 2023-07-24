@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.25
+
+### Patch Changes
+
+- 8193fcc: Legacy Service Watcher set sequential process mode
+
 ## 1.19.24
 
 ### Patch Changes
