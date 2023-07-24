@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.28
+
+### Patch Changes
+
+- b4feca7: Add retry capabilities to Jira Legacy Client on Throttled response
+
 ## 1.19.27
 
 ### Patch Changes
