@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.27
+
+### Patch Changes
+
+- 0aa8439: Optimization Jira REST Api call on Legacy Service Watcher
+
 ## 1.19.26
 
 ### Patch Changes
