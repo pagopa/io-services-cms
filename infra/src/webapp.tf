@@ -178,12 +178,13 @@ locals {
     REVIEWER_DB_USER     = var.reviewer_db_user
 
     # Legacy source data
-    LEGACY_COSMOSDB_CONNECTIONSTRING         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
-    LEGACY_COSMOSDB_NAME                     = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_URI                      = var.legacy_cosmosdb_uri
-    LEGACY_COSMOSDB_KEY                      = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
-    LEGACY_COSMOSDB_CONTAINER_SERVICES       = var.legacy_cosmosdb_container_services
-    LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE = var.legacy_cosmosdb_container_services_lease
+    LEGACY_COSMOSDB_CONNECTIONSTRING                = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
+    LEGACY_COSMOSDB_NAME                            = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI                             = var.legacy_cosmosdb_uri
+    LEGACY_COSMOSDB_KEY                             = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_CONTAINER_SERVICES              = var.legacy_cosmosdb_container_services
+    LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = var.legacy_cosmosdb_container_services_lease
+    LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = var.legacy_service_watcher_max_items_per_invocation
 
     # Queues
     REQUEST_REVIEW_QUEUE          = azurerm_storage_queue.request-review.name
