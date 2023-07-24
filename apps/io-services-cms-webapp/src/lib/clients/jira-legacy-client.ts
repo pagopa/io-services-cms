@@ -96,30 +96,14 @@ export const jiraLegacyClient = (
       ),
       TE.chain((response) =>
         pipe(
-          TE.tryCatch(() => response.json(), E.toError),
-          TE.fold(
-            // in case the response does not contain a valid json body, we try to parse the response as text
-            // and include the content in the error message so that will be logged
+          TE.tryCatch(
+            () => response.json(),
             (err) =>
-              pipe(
-                TE.tryCatch(() => response.text(), E.toError),
-                TE.mapLeft(
-                  () =>
-                    new Error(
-                      `Error parsing Jira response: ${E.toError(err).message}`
-                    )
-                ),
-                TE.fold(
-                  (err) => TE.left(err),
-                  (text) =>
-                    TE.left(
-                      new Error(
-                        `Received a not JSON response from JIRA, the content is: ${text}`
-                      )
-                    )
-                )
-              ),
-            (responseBody) => TE.right(responseBody)
+              new Error(
+                `Error parsing Jira response, statusCode: ${
+                  response.status
+                } error: ${E.toError(err).message}`
+              )
           ),
           TE.chain((responseBody) =>
             pipe(
