@@ -164,12 +164,10 @@ export const jiraLegacyClient = (
                 O.chain((delay) =>
                   isNumber(Number(delay)) ? O.some(delay) : O.none
                 ),
-                (x) => x,
                 O.fold(
                   () => defaultRetryAfter,
                   (retryAfter) => Number(retryAfter) * 1000
                 ),
-                (x) => x,
                 (retryAfter) =>
                   retryCount < maxRetryCount
                     ? pipe(
