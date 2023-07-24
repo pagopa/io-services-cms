@@ -182,7 +182,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 
 export const onLegacyServiceChangeEntryPoint = pipe(
   onLegacyServiceChangeHandler(jiraLegacyClient(config), config, apimClient),
-  processBatchOf(LegacyService),
+  processBatchOf(LegacyService, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(
       results,
