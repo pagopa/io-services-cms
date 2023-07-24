@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.26
+
+### Patch Changes
+
+- 2aeb4bd: Add retry on Legacy Service Watcher
+
 ## 1.19.25
 
 ### Patch Changes
