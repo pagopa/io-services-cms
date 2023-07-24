@@ -5,6 +5,8 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { isNumber } from "fp-ts/lib/number";
+import * as T from "fp-ts/task";
 import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
 import { IConfig } from "../../config";
@@ -50,9 +52,15 @@ export type SearchJiraLegacyIssuesResponse = t.TypeOf<
   typeof SearchJiraLegacyIssuesResponse
 >;
 
+export type JiraLegacyOptions = {
+  defaultRetryAfter?: number;
+  maxRetry?: number;
+};
+
 export type JiraLegacyAPIClient = {
   readonly searchJiraIssueByServiceId: (
-    serviceId: ServiceId
+    serviceId: ServiceId,
+    options?: JiraLegacyOptions
   ) => TE.TaskEither<Error, O.Option<JiraLegacyIssue>>;
 };
 
@@ -68,7 +76,16 @@ export const jiraLegacyClient = (
     "Content-Type": "application/json",
   };
 
-  const searchJiraIssueByServiceId = (serviceId: ServiceId) => {
+  const searchJiraIssueByServiceId = (
+    serviceId: ServiceId,
+    {
+      defaultRetryAfter = 5000,
+      maxRetry = 5,
+    }: {
+      defaultRetryAfter?: number;
+      maxRetry?: number;
+    } = {}
+  ) => {
     const bodyData: SearchJiraIssuesPayload = {
       fields: [
         "summary",
@@ -85,14 +102,16 @@ export const jiraLegacyClient = (
     };
 
     return pipe(
-      TE.tryCatch(
-        () =>
-          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`, {
-            body: JSON.stringify(bodyData),
-            headers: jiraHeaders,
-            method: "POST",
-          }),
-        E.toError
+      fetchApiWithRetry(
+        `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`,
+        fetchApi,
+        {
+          body: JSON.stringify(bodyData),
+          headers: jiraHeaders,
+          method: "POST",
+        },
+        defaultRetryAfter,
+        maxRetry
       ),
       TE.chain((response) =>
         pipe(
@@ -102,7 +121,9 @@ export const jiraLegacyClient = (
               new Error(
                 `Error parsing Jira response, statusCode: ${
                   response.status
-                } error: ${E.toError(err).message}`
+                }, headers: ${extractHeaders(response)}, error: ${
+                  E.toError(err).message
+                }`
               )
           ),
           TE.chain((responseBody) =>
@@ -123,6 +144,65 @@ export const jiraLegacyClient = (
         )
       )
     );
+  };
+
+  const fetchApiWithRetry = (
+    url: string,
+    fetchApi: typeof fetch,
+    options: RequestInit,
+    defaultRetryAfter: number,
+    maxRetryCount: number
+  ): TE.TaskEither<Error, Response> => {
+    const attempt = (retryCount: number): TE.TaskEither<Error, Response> =>
+      pipe(
+        TE.tryCatch(() => fetchApi(url, options), E.toError),
+        TE.chain((response) =>
+          response.status === 429
+            ? pipe(
+                response.headers.get("Retry-After"),
+                O.fromNullable,
+                O.chain((delay) =>
+                  isNumber(Number(delay)) ? O.some(delay) : O.none
+                ),
+                (x) => x,
+                O.fold(
+                  () => defaultRetryAfter,
+                  (retryAfter) => Number(retryAfter) * 1000
+                ),
+                (x) => x,
+                (retryAfter) =>
+                  retryCount < maxRetryCount
+                    ? pipe(
+                        T.delay(retryAfter)(attempt(retryCount + 1)),
+                        TE.map(TE.right),
+                        TE.flatten
+                      )
+                    : TE.left(
+                        new Error(
+                          `Cannot Contact jira after retries, statusCode: ${
+                            response.status
+                          }, headers: ${extractHeaders(response)}`
+                        )
+                      )
+              )
+            : TE.right(response)
+        )
+      );
+
+    return attempt(0);
+  };
+
+  const extractHeaders = (response: Response) => {
+    try {
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        // eslint-disable-next-line functional/immutable-data
+        headers[key] = value;
+      });
+      return JSON.stringify(headers);
+    } catch (e) {
+      return "CANNOT EXTRACT HEADERS";
+    }
   };
 
   const checkJiraResponse = (
