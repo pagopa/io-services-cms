@@ -1,5 +1,35 @@
 # io-services-cms-webapp
 
+## 1.19.25
+
+### Patch Changes
+
+- 8193fcc: Legacy Service Watcher set sequential process mode
+
+## 1.19.24
+
+### Patch Changes
+
+- ff01bca: Add fixed value for maxItemsPerInvocation on LegacyServiceWatcher
+
+## 1.19.23
+
+### Patch Changes
+
+- 8a550f3: Fix type legacy service watcher max items per invocation
+
+## 1.19.22
+
+### Patch Changes
+
+- 529b734: Fix type legacy service watcher max items per invocation
+
+## 1.19.21
+
+### Patch Changes
+
+- 28b6c98: Add Max Items per Invocations on LegacyServiceWatcher
+
 ## 1.19.20
 
 ### Patch Changes
