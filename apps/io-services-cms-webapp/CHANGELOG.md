@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.19.29
+
+### Patch Changes
+
+- 1a115bf: statuscategorychangedate optional in JiraLegacyIssue
+
 ## 1.19.28
 
 ### Patch Changes
