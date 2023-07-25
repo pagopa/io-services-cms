@@ -26,15 +26,19 @@ export type JiraLegacyIssueStatus = t.TypeOf<typeof JiraLegacyIssueStatus>;
 export const JiraLegacyIssue = t.type({
   id: NonEmptyString,
   key: NonEmptyString,
-  fields: t.type({
-    comment: t.type({
-      comments: t.readonlyArray(t.type({ body: t.string })),
+  fields: t.intersection([
+    t.type({
+      comment: t.type({
+        comments: t.readonlyArray(t.type({ body: t.string })),
+      }),
+      status: t.type({
+        name: JiraLegacyIssueStatus,
+      }),
     }),
-    status: t.type({
-      name: JiraLegacyIssueStatus,
+    t.partial({
+      statuscategorychangedate: t.string,
     }),
-    statuscategorychangedate: NonEmptyString,
-  }),
+  ]),
 });
 export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
