@@ -10,7 +10,8 @@
       "collectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES%",
       "leaseCollectionName": "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
       "createLeaseCollectionIfNotExists": true,
-      "startFromBeginning": false
+      "startFromBeginning": true,
+      "maxItemsPerInvocation": 10
     },
     {
       "queueName": "%REQUEST_SYNC_CMS_QUEUE%",
@@ -20,6 +21,12 @@
       "direction": "out"
     }
   ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 10,
+    "minimumInterval": "00:00:10",
+    "maximumInterval": "00:01:00"
+  },
   "scriptFile": "../dist/main.js",
   "entryPoint": "onLegacyServiceChangeEntryPoint"
 }

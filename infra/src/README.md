@@ -66,7 +66,6 @@
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_reviewer_usr_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azuread_group.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
-| [azuread_group.adgroup_contributors](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
 | [azuread_group.adgroup_developers](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
 | [azuread_group.adgroup_externals](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
 | [azuread_group.adgroup_security](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
@@ -129,6 +128,7 @@
 | <a name="input_legacy_cosmosdb_name"></a> [legacy\_cosmosdb\_name](#input\_legacy\_cosmosdb\_name) | The name of the database where legacy data is | `string` | n/a | yes |
 | <a name="input_legacy_cosmosdb_uri"></a> [legacy\_cosmosdb\_uri](#input\_legacy\_cosmosdb\_uri) | The uri of the database where legacy data is | `string` | n/a | yes |
 | <a name="input_legacy_jira_project_name"></a> [legacy\_jira\_project\_name](#input\_legacy\_jira\_project\_name) | n/a | `string` | `null` | no |
+| <a name="input_legacy_service_watcher_max_items_per_invocation"></a> [legacy\_service\_watcher\_max\_items\_per\_invocation](#input\_legacy\_service\_watcher\_max\_items\_per\_invocation) | Chunck size for the change feed | `number` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |
 | <a name="input_monitor_action_group_email_name"></a> [monitor\_action\_group\_email\_name](#input\_monitor\_action\_group\_email\_name) | The email to send alerts to | `string` | n/a | yes |
 | <a name="input_monitor_action_group_slack_name"></a> [monitor\_action\_group\_slack\_name](#input\_monitor\_action\_group\_slack\_name) | The slack channel to send alerts to | `string` | n/a | yes |

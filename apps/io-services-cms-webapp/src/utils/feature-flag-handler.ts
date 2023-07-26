@@ -11,6 +11,9 @@ import {
 
 const wildcard = "*" as NonEmptyString;
 
+const allAllowed = (inclusionList: ReadonlyArray<NonEmptyString>) =>
+  isElementAllowedOnList(inclusionList)(wildcard);
+
 // Return True if the element is in the list or if the list contains the wildcard
 const isElementAllowedOnList =
   (list: ReadonlyArray<NonEmptyString>) => (element: NonEmptyString) =>
@@ -21,8 +24,12 @@ const isUserEnabledToSync = (
   apimClient: ApiManagementClient,
   serviceId: NonEmptyString,
   inclusionList: ReadonlyArray<NonEmptyString>
-): TE.TaskEither<Error, boolean> =>
-  pipe(
+): TE.TaskEither<Error, boolean> => {
+  if (allAllowed(inclusionList)) {
+    return TE.right(true);
+  }
+
+  return pipe(
     getSubscription(
       apimClient,
       config.AZURE_APIM_RESOURCE_GROUP,
@@ -43,6 +50,7 @@ const isUserEnabledToSync = (
       )
     )
   );
+};
 
 /**
  *

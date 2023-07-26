@@ -1,5 +1,96 @@
 # io-services-cms-webapp
 
+## 1.19.29
+
+### Patch Changes
+
+- 1a115bf: statuscategorychangedate optional in JiraLegacyIssue
+
+## 1.19.28
+
+### Patch Changes
+
+- b4feca7: Add retry capabilities to Jira Legacy Client on Throttled response
+
+## 1.19.27
+
+### Patch Changes
+
+- 0aa8439: Optimization Jira REST Api call on Legacy Service Watcher
+
+## 1.19.26
+
+### Patch Changes
+
+- 2aeb4bd: Add retry on Legacy Service Watcher
+
+## 1.19.25
+
+### Patch Changes
+
+- 8193fcc: Legacy Service Watcher set sequential process mode
+
+## 1.19.24
+
+### Patch Changes
+
+- ff01bca: Add fixed value for maxItemsPerInvocation on LegacyServiceWatcher
+
+## 1.19.23
+
+### Patch Changes
+
+- 8a550f3: Fix type legacy service watcher max items per invocation
+
+## 1.19.22
+
+### Patch Changes
+
+- 529b734: Fix type legacy service watcher max items per invocation
+
+## 1.19.21
+
+### Patch Changes
+
+- 28b6c98: Add Max Items per Invocations on LegacyServiceWatcher
+
+## 1.19.20
+
+### Patch Changes
+
+- 5505553: Log not json response received from jira
+
+## 1.19.19
+
+### Patch Changes
+
+- 388cd81: update runner image
+
+## 1.19.18
+
+### Patch Changes
+
+- d18748c: Updated jira-legacy-client.ts error handling
+
+## 1.19.17
+
+### Patch Changes
+
+- 6df95c5: Feature Flag Optimization
+
+## 1.19.16
+
+### Patch Changes
+
+- 2c104b8: Add status on checkJiraResponse when an unknown status is received
+
+## 1.19.15
+
+### Patch Changes
+
+- 8ecfaec: preparation for controlled massive sync
+- 9958603: Wrap error adding information about the processed serviceId
+
 ## 1.19.14
 
 ### Patch Changes
