@@ -124,7 +124,6 @@ export const QueueConfig = t.type({
   REQUEST_REVIEW_QUEUE: NonEmptyString,
   REQUEST_PUBLICATION_QUEUE: NonEmptyString,
   REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
-  REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
