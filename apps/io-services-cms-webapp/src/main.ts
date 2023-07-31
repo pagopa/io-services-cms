@@ -46,6 +46,7 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
+import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
@@ -139,6 +140,15 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   jiraProxy(jiraClient(config)),
   fsmLifecycleClient
 );
+
+export const createRequestReviewLegacyEntryPoint =
+  createRequestReviewLegacyHandler(
+    fsmLifecycleClient,
+    getDao({
+      ...config,
+      REVIEWER_DB_TABLE: config.REVIEWER_LEGACY_DB_TABLE,
+    })
+  );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
