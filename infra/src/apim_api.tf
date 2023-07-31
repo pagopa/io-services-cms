@@ -48,6 +48,34 @@ resource "azurerm_api_management_api_operation_policy" "update_service_logo_poli
   xml_content = file("./api/io_services_cms/v1/updateservicelogo_policy/policy.xml")
 }
 
+# Temporary policy resource for the time needed to upgrade apim to v2
+resource "azurerm_api_management_api_operation_policy" "delete_service_policy" {
+  api_name            = "io-services-cms-api"
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
+  operation_id        = "deleteService"
+
+  xml_content = file("./api/io_services_cms/v1/temp_mock_response_500_policy/policy.xml")
+}
+
+resource "azurerm_api_management_api_operation_policy" "update_service_policy" {
+  api_name            = "io-services-cms-api"
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
+  operation_id        = "updateService"
+
+  xml_content = file("./api/io_services_cms/v1/temp_mock_response_500_policy/policy.xml")
+}
+
+resource "azurerm_api_management_api_operation_policy" "regenerate_service_key_policy" {
+  api_name            = "io-services-cms-api"
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
+  operation_id        = "regenerateServiceKey"
+
+  xml_content = file("./api/io_services_cms/v1/temp_mock_response_500_policy/policy.xml")
+}
+
 
 # Named Value fn-services-cms
 resource "azurerm_api_management_named_value" "io_fn_services_cms_key" {
