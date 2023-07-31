@@ -68,6 +68,7 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_PORT: NumberFromString,
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
+  REVIEWER_LEGACY_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(
     IntegerFromString,
@@ -124,6 +125,9 @@ export const QueueConfig = t.type({
   REQUEST_REVIEW_QUEUE: NonEmptyString,
   REQUEST_PUBLICATION_QUEUE: NonEmptyString,
   REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
+  REQUEST_SYNC_LEGACY_QUEUE: NonEmptyString,
+  REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
+  REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
