@@ -90,10 +90,6 @@ describe("Service Review Handler", () => {
       id: aServiceId,
     } as unknown as ServiceLifecycle.ItemType;
 
-    vi.mock("crypto", () => ({
-      randomUUID: vi.fn(() => "anUUID"),
-    }));
-
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
       override: vi.fn(() =>
