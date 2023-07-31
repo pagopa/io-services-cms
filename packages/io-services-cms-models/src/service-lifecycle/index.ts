@@ -473,6 +473,7 @@ const getFsmClient = (store: LifecycleStore) => ({
     apply("reject", id, args)(store),
   delete: (id: ServiceId) => apply("delete", id)(store),
   override: (...args: Parameters<typeof override>) => override(...args)(store),
+  fetch: (id: ServiceId) => store.fetch(id),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 
