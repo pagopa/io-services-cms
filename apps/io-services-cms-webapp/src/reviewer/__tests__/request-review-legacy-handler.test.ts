@@ -3,14 +3,10 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
-import { afterEach, describe, expect, it, vi, vitest } from "vitest";
-import {
-  ServiceReviewDao,
-  ServiceReviewRowDataTable,
-} from "../../utils/service-review-dao";
-import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
-import { s } from "vitest/dist/types-e3c9754d";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
+import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
 
 afterEach(() => {
   vi.resetAllMocks();
