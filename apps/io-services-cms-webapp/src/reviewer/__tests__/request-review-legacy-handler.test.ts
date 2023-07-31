@@ -1,0 +1,119 @@
+import { Context } from "@azure/functions";
+import { ServiceLifecycle } from "@io-services-cms/models";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { QueryResult } from "pg";
+import { afterEach, describe, expect, it, vi, vitest } from "vitest";
+import {
+  ServiceReviewDao,
+  ServiceReviewRowDataTable,
+} from "../../utils/service-review-dao";
+import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
+import { s } from "vitest/dist/types-e3c9754d";
+import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
+
+afterEach(() => {
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
+});
+
+const aVoidFn = () => console.log("");
+
+const aBaseQueueMessage = {
+  isNewTicket: true,
+  serviceId: "aServiceId",
+  ticketKey: "aTicketKey",
+};
+const aBaseServiceLifecycle = {
+  id: "aServiceId",
+  last_update: "aServiceLastUpdate",
+  data: {
+    name: "aServiceName",
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      address: "via tal dei tali 123",
+      email: "service@email.it",
+      pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+  },
+  fsm: {
+    state: "draft",
+  },
+} as unknown as ServiceLifecycle.ItemType;
+
+const anInsertQueryResult: QueryResult = {
+  command: "string",
+  rowCount: 1,
+  oid: 1,
+  fields: [],
+  rows: [],
+};
+
+const mainMockServiceReviewDao = {
+  insert: vi.fn((data: ServiceReviewRowDataTable) => {
+    return TE.of(anInsertQueryResult);
+  }),
+  executeOnPending: vi.fn(
+    (
+      fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
+    ) => {
+      return TE.of(aVoidFn());
+    }
+  ),
+  updateStatus: vi.fn(),
+};
+
+const createContext = () =>
+  ({
+    bindings: {},
+    executionContext: { functionName: "funcname" },
+    log: { ...console, verbose: console.log },
+  } as unknown as Context);
+
+describe("Service Review Handler", () => {
+  it("should set to submitted status the item", async () => {
+    const aServiceId = "s1";
+    const aQueueMessage = {
+      ...aBaseQueueMessage,
+      serviceId: aServiceId,
+    };
+    const aServiceLifecycle = {
+      ...aBaseServiceLifecycle,
+      id: aServiceId,
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const mockFsmLifecycleClient = {
+      fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
+      override: vi.fn(() =>
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    const handler = createRequestReviewLegacyHandler(
+      mockFsmLifecycleClient,
+      mainMockServiceReviewDao
+    );
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
+
+    expect(mockFsmLifecycleClient.override).toHaveBeenCalledWith(aServiceId, {
+      ...aServiceLifecycle,
+      fsm: {
+        ...aServiceLifecycle.fsm,
+        state: "submitted",
+        lastTransition: SYNC_FROM_LEGACY,
+      },
+    });
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalled();
+  });
+});
