@@ -1,5 +1,29 @@
 # io-services-cms-webapp
 
+## 1.19.29
+
+### Patch Changes
+
+- 1a115bf: statuscategorychangedate optional in JiraLegacyIssue
+
+## 1.19.28
+
+### Patch Changes
+
+- b4feca7: Add retry capabilities to Jira Legacy Client on Throttled response
+
+## 1.19.27
+
+### Patch Changes
+
+- 0aa8439: Optimization Jira REST Api call on Legacy Service Watcher
+
+## 1.19.26
+
+### Patch Changes
+
+- 2aeb4bd: Add retry on Legacy Service Watcher
+
 ## 1.19.25
 
 ### Patch Changes

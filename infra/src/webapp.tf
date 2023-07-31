@@ -192,6 +192,7 @@ locals {
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
+    REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
 
     # List of service ids for which quality control will be bypassed
     SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
@@ -230,7 +231,7 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "0"
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
       "AzureWebJobs.ServiceReviewChecker.Disabled"      = "0"
