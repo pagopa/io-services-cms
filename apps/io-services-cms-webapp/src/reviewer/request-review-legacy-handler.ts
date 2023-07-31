@@ -1,3 +1,16 @@
+/**
+ * This function is triggered by messages in the "request-review-legacy" queue
+ *
+ * On this queue there are messages that are written by the legacy system when an user requests a service review,
+ * we need to intercept those events in order to keep alligned io-services-cms and the legacy service.
+ *
+ * It does the following:
+ * - it fetches the service from the service lifecycle cosmosDB container
+ * - if the service is not found, it returns an error
+ * - if the service is found, it sets the state to submitted and creates a new entry in the service review legacy pg table in order to keep track of the request
+ *   and update the legacy service when the review is completed
+ */
+
 import { Context } from "@azure/functions";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
