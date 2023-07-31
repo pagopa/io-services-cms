@@ -9,6 +9,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import nodeFetch from "node-fetch-commonjs";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { JiraConfig } from "../../config";
+// import { JiraLegacyIssueStatus } from "./jira-legacy-client";
 
 export const JIRA_REST_API_PATH = "/rest/api/2/";
 
@@ -24,6 +25,9 @@ export const JiraIssueStatus = t.union([
   t.literal("REVIEW"),
   t.literal("REJECTED"),
   t.literal("APPROVED"),
+  // FIXME : delete after removing jira legacy client
+  t.literal("DONE"),
+  t.literal("Completata"),
 ]);
 export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
 
