@@ -74,8 +74,10 @@ export const handleQueueItem = (
           pipe(
             dao.insert({
               service_id: requestReviewLegacy.serviceId,
-              service_version: "TODO service version" as NonEmptyString, // TODO: how to value this field cause we dont have this info?
-              ticket_id: "TODO ticket id" as NonEmptyString, // TODO: how to value this field cause in legacy remains the same everytime?
+              service_version: new Date()
+                .getTime()
+                .toString() as NonEmptyString,
+              ticket_id: requestReviewLegacy.ticketId, // TODO: how to value this field cause in legacy remains the same everytime?
               ticket_key: requestReviewLegacy.ticketKey,
               status: "PENDING",
               extra_data: {},

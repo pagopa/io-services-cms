@@ -18,6 +18,7 @@ const aVoidFn = () => console.log("");
 const aBaseQueueMessage = {
   isNewTicket: true,
   serviceId: "aServiceId",
+  ticketId: "aTicketId",
   ticketKey: "aTicketKey",
 };
 const aBaseServiceLifecycle = {
