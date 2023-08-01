@@ -1,24 +1,12 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import {
-  LegacyService,
-  Queue,
-  ServiceLifecycle,
-} from "@io-services-cms/models";
-import {
-  Service,
-  ValidService,
-} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { LegacyService, Queue } from "@io-services-cms/models";
+import { Service } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import {
-  JiraLegacyAPIClient,
-  JiraLegacyIssueStatus,
-} from "../lib/clients/jira-legacy-client";
 import { isUserEnabledForLegacyToCmsSync } from "../utils/feature-flag-handler";
 
 const noAction = {};
@@ -30,54 +18,19 @@ type RequestSyncCmsAction = Action<
   Queue.RequestSyncCmsItem[]
 >;
 
-const onLegacyServiceChangeHandler =
-  (
-    jiraLegacyClient: JiraLegacyAPIClient,
-    qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>
-  ) =>
-  (item: Service): TE.TaskEither<Error, RequestSyncCmsAction> =>
-    pipe(
-      legacyToCms(jiraLegacyClient, qualityCheckExclusionList, item),
-      TE.map((docs) => ({ requestSyncCms: docs }))
-    );
-
-const isValidService =
-  (
-    qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>
-  ) =>
-  (service: Service) =>
-    qualityCheckExclusionList.indexOf(service.serviceId) > -1
-      ? true
-      : pipe(
-          ValidService.decode(service),
-          E.fold(
-            (_) => false,
-            (_) => true
-          )
-        );
-
-const hasOngoingReview = (issueStatus?: JiraLegacyIssueStatus) =>
-  issueStatus === "NEW" || issueStatus === "REVIEW";
+const onLegacyServiceChangeHandler = (item: Service): RequestSyncCmsAction =>
+  pipe(legacyToCms(item), (docs) => ({ requestSyncCms: docs }));
 
 const isDeletedService = (service: Service) =>
   service.serviceName.startsWith("DELETED");
 
 const getLegacyToCmsStatus = (
-  qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>,
-  service: Service,
-  issueStatus?: JiraLegacyIssueStatus
+  service: Service
 ): Array<Queue.RequestSyncCmsItem["fsm"]["state"]> => {
   if (isDeletedService(service)) {
     return ["deleted", "unpublished"];
-  } else if (
-    isValidService(qualityCheckExclusionList)(service) &&
-    hasOngoingReview(issueStatus)
-  ) {
-    return ["submitted"];
-  } else if (isValidService(qualityCheckExclusionList)(service)) {
-    return service.isVisible
-      ? ["approved", "published"]
-      : ["approved", "unpublished"];
+  } else if (service.isVisible) {
+    return ["approved", "published"];
   } else {
     return ["draft"];
   }
@@ -132,44 +85,13 @@ const fromLegacyToCmsService = (
 const getDescription = (service: Service) =>
   service.serviceMetadata?.description ?? ("-" as NonEmptyString);
 
-const legacyToCms = (
-  jiraLegacyClient: JiraLegacyAPIClient,
-  qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>,
-  item: Service
-) =>
-  pipe(
-    item,
-    O.fromPredicate(
-      (item) =>
-        !isDeletedService(item) &&
-        isValidService(qualityCheckExclusionList)(item) &&
-        !item.isVisible
-    ),
-    O.fold(
-      () => TE.right(O.none), // evitiamo la chiamata a Jira quando non serve, simulando una sua risposta vuota
-      (_) => jiraLegacyClient.searchJiraIssueByServiceId(item.serviceId)
-    ),
-    TE.map(
-      flow(
-        O.fold(
-          () => getLegacyToCmsStatus(qualityCheckExclusionList, item),
-          (issue) =>
-            getLegacyToCmsStatus(
-              qualityCheckExclusionList,
-              item,
-              issue.fields.status.name
-            )
-        )
-      )
-    ),
-    TE.map((statusList) =>
-      statusList.map((status) => fromLegacyToCmsService(item, status))
-    )
+const legacyToCms = (item: Service) =>
+  pipe(getLegacyToCmsStatus(item), (statusList) =>
+    statusList.map((status) => fromLegacyToCmsService(item, status))
   );
 
 export const handler =
   (
-    jiraLegacyClient: JiraLegacyAPIClient,
     config: IConfig,
     apimClient: ApiManagementClient
   ): RTE.ReaderTaskEither<
@@ -184,25 +106,12 @@ export const handler =
       O.map(() =>
         pipe(
           isUserEnabledForLegacyToCmsSync(config, apimClient, item.serviceId),
-          TE.chainW((isUserEnabled) =>
+          TE.map((isUserEnabled) =>
             pipe(
               item,
               O.fromPredicate((_) => isUserEnabled),
-              O.map(
-                flow(
-                  onLegacyServiceChangeHandler(
-                    jiraLegacyClient,
-                    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
-                  ),
-                  TE.mapLeft(
-                    (e) =>
-                      new Error(
-                        `Error while processing serviceId ${item.serviceId}, the reason was => ${e.message}, the stack was => ${e.stack}`
-                      )
-                  )
-                )
-              ),
-              O.getOrElse(() => TE.right(noAction))
+              O.map(onLegacyServiceChangeHandler),
+              O.getOrElse(() => noAction)
             )
           )
         )

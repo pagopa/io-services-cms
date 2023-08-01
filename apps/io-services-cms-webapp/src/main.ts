@@ -27,7 +27,6 @@ import { getDatabase } from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
-import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
@@ -181,7 +180,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler(jiraLegacyClient(config), config, apimClient),
+  onLegacyServiceChangeHandler(config, apimClient),
   processBatchOf(LegacyService, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(
