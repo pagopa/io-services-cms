@@ -24,6 +24,9 @@ export const JiraIssueStatus = t.union([
   t.literal("REVIEW"),
   t.literal("REJECTED"),
   t.literal("APPROVED"),
+  // FIXME : delete after removing jira legacy client
+  t.literal("DONE"),
+  t.literal("Completata"),
 ]);
 export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
 
