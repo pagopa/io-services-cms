@@ -78,7 +78,7 @@ export const RequestSyncLegacyItem = t.intersection([
   t.type({
     ...omitIsVisible(LegacyService.types[0].types[0].props),
     ...LegacyService.types[0].types[1].props,
-    ...LegacyService.types[1].props,
+    ...LegacyService.types[2].props,
   }),
   t.partial({ isVisible: t.boolean }),
 ]);

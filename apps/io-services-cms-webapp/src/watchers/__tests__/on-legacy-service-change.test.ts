@@ -6,10 +6,13 @@ import {
 } from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { handler } from "../on-legacy-service-change";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 
 const qualityCheckExclusionList = ["aServiceId" as NonEmptyString];
 
@@ -42,6 +45,7 @@ const aLegacyService = {
     tokenName: "aTokenName",
     tosUrl: "aTosUrl",
     webUrl: "aWebUrl",
+    version: 1,
   },
 } as unknown as LegacyService;
 
@@ -115,8 +119,17 @@ describe("On Legacy Service Change Handler", () => {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
-    const result = await handler(mockConfig, mockApimClient)({ item })();
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
 
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
+
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -149,17 +162,26 @@ describe("On Legacy Service Change Handler", () => {
       organizationFiscalCode: "12345678901",
       organizationName: "anOrganizationName",
       requireSecureChannels: false,
-      serviceId: "aServiceId",
+      serviceId: "aServiceIdScoppia",
       serviceName: "aServiceName",
-      version: 0,
+      version: 1,
     } as unknown as LegacyService;
+
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(item))),
+    } as unknown as ServiceModel;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
-    const result = await handler(mockConfig, mockApimClient)({ item })();
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
 
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -188,8 +210,17 @@ describe("On Legacy Service Change Handler", () => {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
-    const result = await handler(mockConfig, mockApimClient)({ item })();
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
 
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
+
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -202,7 +233,7 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a not visible and not deleted item to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
+  it("should map a not visible, not deleted and not previously published service to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
     const item = {
       ...aLegacyService,
       isVisible: false,
@@ -212,10 +243,19 @@ describe("On Legacy Service Change Handler", () => {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(item))),
+    } as unknown as ServiceModel;
+
     delete item["serviceMetadata"];
 
-    const result = await handler(mockConfig, mockApimClient)({ item })();
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
 
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -225,6 +265,65 @@ describe("On Legacy Service Change Handler", () => {
             expect.objectContaining({
               fsm: expect.objectContaining({ state: "draft" }),
               kind: "LifecycleItemType",
+            }),
+          ]),
+        })
+      );
+    }
+  });
+
+  it("should map a not visible, not deleted but previously published service to a lifecycle approved and pubblication unpublished", async () => {
+    const item = {
+      ...aLegacyService,
+      version: 1,
+      isVisible: false,
+    } as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+    } as unknown as IConfig;
+
+    const mockServiceModel = {
+      find: vi.fn(() =>
+        TE.right(
+          O.some({
+            ...aLegacyService,
+            version: 0,
+            isVisible: true,
+          })
+        )
+      ),
+    } as unknown as ServiceModel;
+
+    delete item["serviceMetadata"];
+
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
+
+    const previousVersionId = `${item.serviceId}-${(item.version - 1)
+      .toString()
+      .padStart(16, "0")}`;
+
+    expect(mockServiceModel.find).toHaveBeenCalledWith([
+      previousVersionId,
+      item.serviceId,
+    ]);
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          requestSyncCms: expect.arrayContaining([
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "approved" }),
+              kind: "LifecycleItemType",
+            }),
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "unpublished" }),
+              kind: "PublicationItemType",
             }),
           ]),
         })
@@ -242,8 +341,17 @@ describe("On Legacy Service Change Handler", () => {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
-    const result = await handler(mockConfig, mockApimClient)({ item })();
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
 
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
+
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {

@@ -180,7 +180,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler(config, apimClient),
+  onLegacyServiceChangeHandler(config, apimClient, legacyServiceModel),
   processBatchOf(LegacyService, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(
