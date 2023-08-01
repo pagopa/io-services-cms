@@ -1,3 +1,4 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import {
   LegacyService,
   ServiceLifecycle,
@@ -6,20 +7,9 @@ import {
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
-import { JiraLegacyAPIClient } from "../../lib/clients/jira-legacy-client";
-import { handler } from "../on-legacy-service-change";
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { IConfig } from "../../config";
-import { ap } from "fp-ts/lib/Reader";
-
-const mockJiraLegacyClient = {
-  searchJiraIssueByServiceId: vi.fn((_) =>
-    TE.right(O.of({ fields: { status: { name: "DONE" } } }))
-  ),
-} as unknown as JiraLegacyAPIClient;
+import { handler } from "../on-legacy-service-change";
 
 const qualityCheckExclusionList = ["aServiceId" as NonEmptyString];
 
@@ -123,14 +113,9 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    const result = await handler(mockConfig, mockApimClient)({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -171,16 +156,9 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [
-        "anotherServiceId" as NonEmptyString,
-      ],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    const result = await handler(mockConfig, mockApimClient)({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -201,61 +179,16 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a valid item with pending review to a requestSyncCms action containing a service lifecycle with SUBMITTED status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "NEW" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as unknown as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({
-        requestSyncCms: [
-          {
-            ...aServiceLifecycleItem,
-            fsm: {
-              state: "submitted",
-            },
-            kind: "LifecycleItemType",
-          },
-        ],
-      });
-    }
-  });
-
-  it("should map a valid and visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
+  it("should map a visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
     const item = {
       ...aLegacyService,
     } as unknown as LegacyService;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    const result = await handler(mockConfig, mockApimClient)({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -269,7 +202,7 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a valid and not visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with UNPUBLISHED status", async () => {
+  it("should map a not visible and not deleted item to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
     const item = {
       ...aLegacyService,
       isVisible: false,
@@ -277,55 +210,11 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({
-        requestSyncCms: [
-          { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
-          {
-            ...aServicePublicationItem,
-            fsm: { state: "unpublished" },
-            kind: "PublicationItemType",
-          },
-        ],
-      });
-    }
-  });
-
-  it("should map an invalid item to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [],
     } as unknown as IConfig;
 
     delete item["serviceMetadata"];
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    const result = await handler(mockConfig, mockApimClient)({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -343,47 +232,6 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map an invalid item in qualityCheckExclusionList to a requestSyncCms action containing a service lifecycle with APPROVED status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    delete item["serviceMetadata"];
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toEqual(
-        expect.objectContaining({
-          requestSyncCms: expect.arrayContaining([
-            expect.objectContaining({
-              fsm: expect.objectContaining({ state: "approved" }),
-              kind: "LifecycleItemType",
-            }),
-          ]),
-        })
-      );
-    }
-  });
-
   it("should map an item to a no action", async () => {
     const item = {
       ...aLegacyService,
@@ -392,75 +240,14 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    const result = await handler(mockConfig, mockApimClient)({ item })();
 
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({});
-    }
-  });
-
-  it("should map an item to a no action when user not included in inclusionList", async () => {
-    const item = {
-      ...aLegacyService,
-    } as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: ["aDifferentUserId"],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({});
-    }
-  });
-
-  it("Should propagate the original error", async () => {
-    const message =
-      'value ["Completata"] at [root.0.issues.0.fields.status.name.0] is not a valid ["NEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.1] is not a valid ["REVIEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.2] is not a valid ["REJECTED"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.3] is not a valid ["DONE"]';
-
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) => TE.left(new Error(message))),
-    } as unknown as JiraLegacyAPIClient;
-
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    delete item["serviceMetadata"];
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left.message).toContain(message);
-      expect(result.left.message).toContain("aServiceId");
     }
   });
 });
