@@ -47,9 +47,8 @@ export const handleQueueItem = (
       pipe(
         requestReviewLegacy.serviceId,
         fsmLifecycleClient.fetch,
-        TE.chain((service) =>
-          pipe(
-            service,
+        TE.chain(
+          flow(
             O.fold(
               () =>
                 TE.left(
