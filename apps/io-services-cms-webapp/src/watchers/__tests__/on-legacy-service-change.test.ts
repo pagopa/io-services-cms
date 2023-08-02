@@ -5,16 +5,18 @@ import {
   ServicePublication,
 } from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
-import { handler } from "../on-legacy-service-change";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-
-const qualityCheckExclusionList = ["aServiceId" as NonEmptyString];
+import {
+  buildPreviousVersionId,
+  handler,
+  serviceWasPublished,
+} from "../on-legacy-service-change";
 
 // Legacy Service: valid and visible
 const aLegacyService = {
@@ -357,5 +359,109 @@ describe("On Legacy Service Change Handler", () => {
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({});
     }
+  });
+
+  describe("buildPreviousVersionId tests", () => {
+    it("should return the previous version id", () => {
+      const previousVersionId = buildPreviousVersionId({
+        ...aLegacyService,
+        serviceId: "aServiceId" as NonEmptyString,
+        version: 20,
+      });
+      expect(O.isSome(previousVersionId)).toBeTruthy();
+      if (O.isSome(previousVersionId)) {
+        expect(previousVersionId.value).toBe("aServiceId-0000000000000019");
+      }
+    });
+
+    it("should return O.none", () => {
+      const previousVersionId = buildPreviousVersionId({
+        ...aLegacyService,
+        serviceId: "aServiceId" as NonEmptyString,
+        version: 0,
+      });
+      expect(O.isNone(previousVersionId)).toBeTruthy();
+    });
+  });
+
+  describe("serviceWasPublished tests", () => {
+    it("should return true if the service was published", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 6,
+      } as LegacyService;
+
+      const previousService = {
+        ...aLegacyService,
+        isVisible: true,
+        version: 5,
+      } as LegacyService;
+
+      const mockServiceModel = {
+        find: vi.fn(() => TE.right(O.some(previousService))),
+      } as unknown as ServiceModel;
+
+      const result = await serviceWasPublished(
+        currentService,
+        mockServiceModel
+      )();
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toBeTruthy();
+      }
+    });
+
+    it("should return false if the service was not published", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 6,
+      } as LegacyService;
+
+      const previousService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 5,
+      } as LegacyService;
+
+      const mockServiceModel = {
+        find: vi.fn(() => TE.right(O.some(previousService))),
+      } as unknown as ServiceModel;
+
+      const result = await serviceWasPublished(
+        currentService,
+        mockServiceModel
+      )();
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).not.toBeTruthy();
+      }
+    });
+
+    it("should return false without fetching from cosmos when surrentService is the first version", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 0,
+      } as LegacyService;
+
+      const mockServiceModel = {
+        find: vi.fn(() => TE.left(new Error("should not be called"))),
+      } as unknown as ServiceModel;
+
+      const result = await serviceWasPublished(
+        currentService,
+        mockServiceModel
+      )();
+
+      expect(mockServiceModel.find).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).not.toBeTruthy();
+      }
+    });
   });
 });

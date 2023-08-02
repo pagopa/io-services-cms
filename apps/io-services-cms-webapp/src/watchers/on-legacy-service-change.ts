@@ -112,7 +112,7 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
     )
   );
 
-const serviceWasPublished = (
+export const serviceWasPublished = (
   item: LegacyService,
   legacyServiceModel: ServiceModel
 ): TE.TaskEither<Error, boolean> =>
