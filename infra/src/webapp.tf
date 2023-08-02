@@ -109,12 +109,6 @@ variable "reviewer_db_table" {
   default     = null
 }
 
-variable "reviewer_legacy_db_table" {
-  type        = string
-  description = ""
-  default     = null
-}
-
 variable "legacy_jira_project_name" {
   type        = string
   description = ""
@@ -181,7 +175,6 @@ locals {
     REVIEWER_DB_PORT         = module.postgres_flexible_server_private.connection_port
     REVIEWER_DB_SCHEMA       = var.reviewer_db_schema
     REVIEWER_DB_TABLE        = var.reviewer_db_table
-    REVIEWER_LEGACY_DB_TABLE = var.reviewer_legacy_db_table
     REVIEWER_DB_USER         = var.reviewer_db_user
 
     # Legacy source data

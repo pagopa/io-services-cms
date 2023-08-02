@@ -68,7 +68,6 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_PORT: NumberFromString,
   REVIEWER_DB_SCHEMA: NonEmptyString,
   REVIEWER_DB_TABLE: NonEmptyString,
-  REVIEWER_LEGACY_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(
     IntegerFromString,
