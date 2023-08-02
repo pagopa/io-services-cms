@@ -103,10 +103,8 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
     ),
     TE.map(
       flow(
-        O.fold(
-          () => getLegacyToCmsStatus(item),
-          (wasPublished) => getLegacyToCmsStatus(item, wasPublished)
-        )
+        O.getOrElse(() => false),
+        (wasPublished) => getLegacyToCmsStatus(item, wasPublished)
       )
     ),
     TE.map((statusList) =>
