@@ -98,8 +98,8 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
     item,
     O.fromPredicate((item) => !isDeletedService(item) && !item.isVisible),
     O.fold(
-      () => TE.right(O.none), // evitiamo la chiamata a Jira quando non serve, simulando una sua risposta vuota
-      (_) => serviceWasPublished(item, legacyServiceModel)
+      () => TE.right(O.none), // evitiamo di effettuare il fetch della versione precedente quando non serve
+      (_) => pipe(serviceWasPublished(item, legacyServiceModel), TE.map(O.some))
     ),
     TE.map(
       flow(
@@ -117,12 +117,12 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
 const serviceWasPublished = (
   item: LegacyService,
   legacyServiceModel: ServiceModel
-): TE.TaskEither<Error, O.Option<boolean>> =>
+): TE.TaskEither<Error, boolean> =>
   pipe(
     item,
     buildPreviousVersionId,
     O.fold(
-      () => TE.right(O.some(false)),
+      () => TE.right(false),
       (previousId) =>
         pipe(
           legacyServiceModel.find([previousId, item.serviceId]),
@@ -138,7 +138,7 @@ const serviceWasPublished = (
                       `Previous service version was not found ${previousId}`
                     )
                   ),
-                (service) => TE.right(O.some(service.isVisible))
+                (service) => TE.right(service.isVisible)
               )
             )
           )
@@ -146,7 +146,7 @@ const serviceWasPublished = (
     )
   );
 
-const buildPreviousVersionId = (
+export const buildPreviousVersionId = (
   item: LegacyService
 ): O.Option<NonEmptyString> => {
   if (item.version === 0) {
