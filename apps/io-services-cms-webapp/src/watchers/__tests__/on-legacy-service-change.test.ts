@@ -402,9 +402,8 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(
-        currentService,
-        mockServiceModel
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
       )();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -430,9 +429,8 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(
-        currentService,
-        mockServiceModel
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
       )();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -452,9 +450,8 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.left(new Error("should not be called"))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(
-        currentService,
-        mockServiceModel
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
       )();
 
       expect(mockServiceModel.find).not.toHaveBeenCalled();

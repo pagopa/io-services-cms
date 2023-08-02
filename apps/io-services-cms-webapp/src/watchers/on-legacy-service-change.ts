@@ -98,51 +98,45 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
     item,
     O.fromPredicate((item) => !isDeletedService(item) && !item.isVisible),
     O.fold(
-      () => TE.right(O.none), // evitiamo di effettuare il fetch della versione precedente quando non serve
-      (_) => pipe(serviceWasPublished(item, legacyServiceModel), TE.map(O.some))
+      () => TE.right(false), // default false quando non serve controllare se un servizio era pubblicato
+      serviceWasPublished(legacyServiceModel)
     ),
-    TE.map(
-      flow(
-        O.getOrElse(() => false),
-        (wasPublished) => getLegacyToCmsStatus(item, wasPublished)
-      )
-    ),
+    TE.map((wasPublished) => getLegacyToCmsStatus(item, wasPublished)),
     TE.map((statusList) =>
       statusList.map((status) => fromLegacyToCmsService(item, status))
     )
   );
 
-export const serviceWasPublished = (
-  item: LegacyService,
-  legacyServiceModel: ServiceModel
-): TE.TaskEither<Error, boolean> =>
-  pipe(
-    item,
-    buildPreviousVersionId,
-    O.fold(
-      () => TE.right(false),
-      (previousId) =>
-        pipe(
-          legacyServiceModel.find([previousId, item.serviceId]),
-          TE.mapLeft(
-            (e) => new Error(`Error while retrieving previous service ${e}`)
-          ),
-          TE.chainW(
-            flow(
-              O.fold(
-                () =>
-                  TE.left(
-                    new Error(
-                      `Previous service version was not found ${previousId}`
-                    )
-                  ),
-                (service) => TE.right(service.isVisible)
+export const serviceWasPublished =
+  (legacyServiceModel: ServiceModel) =>
+  (item: LegacyService): TE.TaskEither<Error, boolean> =>
+    pipe(
+      item,
+      buildPreviousVersionId,
+      O.fold(
+        () => TE.right(false),
+        (previousId) =>
+          pipe(
+            legacyServiceModel.find([previousId, item.serviceId]),
+            TE.mapLeft(
+              (e) => new Error(`Error while retrieving previous service ${e}`)
+            ),
+            TE.chainW(
+              flow(
+                O.fold(
+                  () =>
+                    TE.left(
+                      new Error(
+                        `Previous service version was not found ${previousId}`
+                      )
+                    ),
+                  (service) => TE.right(service.isVisible)
+                )
               )
             )
           )
-        )
-    )
-  );
+      )
+    );
 
 export const buildPreviousVersionId = (
   item: LegacyService
