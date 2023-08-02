@@ -241,6 +241,7 @@ module "webapp_functions_app" {
       "AzureWebJobs.OnRequestReview.Disabled"           = "0"
       "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"       = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"     = "1"
     }
   )
 
@@ -255,6 +256,7 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestReview.Disabled",
     "AzureWebJobs.OnRequestSyncCms.Disabled",
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
+    "AzureWebJobs.OnRequestReviewLegacy.Disabled"
   ]
 
   subnet_id = module.app_snet.id
