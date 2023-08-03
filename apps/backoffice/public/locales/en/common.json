@@ -1,0 +1,30 @@
+{
+  "apikeys": {
+    "title": "API Keys",
+    "subtitle": "View and manage security keys for APIs."
+  },
+  "app": {
+    "title": "IO BackOffice"
+  },
+  "footer": {
+    "legalInfo": "<strong>PagoPA S.p.A.</strong> - Joint-stock company with sole shareholder - Share capital of 1,000,000 euros fully paid - Registered office in Rome, Piazza Colonna 370, <br /> CAP 00187 - Registration number in the Rome Company Register, Tax Code and VAT number 15376371009",
+    "preLogin": {},
+    "postLogin": {
+      "privacyPolicy": "Privacy policy",
+      "personalDataProtection": "Right to the protection of personal data",
+      "termsAndConditions": "Terms and conditions"
+    }
+  },
+  "section": {
+    "overview": "Overview",
+    "services": "Services",
+    "apikeys": "API Keys",
+    "users": "Users",
+    "groups": "Groups"
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "View and manage the services of your Institution."
+  },
+  "test": "This is a translation test"
+}
