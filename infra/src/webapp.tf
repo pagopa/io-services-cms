@@ -241,6 +241,7 @@ module "webapp_functions_app" {
       "AzureWebJobs.OnRequestReview.Disabled"            = "0"
       "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )
@@ -256,6 +257,7 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestReview.Disabled",
     "AzureWebJobs.OnRequestSyncCms.Disabled",
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
+    "AzureWebJobs.OnRequestReviewLegacy.Disabled",
     "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
   ]
 
@@ -301,6 +303,7 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.OnRequestReview.Disabled"            = "1"
       "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )

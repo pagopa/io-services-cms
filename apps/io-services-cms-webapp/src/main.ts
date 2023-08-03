@@ -18,6 +18,7 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { getConfigOrThrow } from "./config";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
@@ -47,6 +48,7 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
+import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
 import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
 
@@ -141,6 +143,15 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   jiraProxy(jiraClient(config)),
   fsmLifecycleClient
 );
+
+export const createRequestReviewLegacyEntryPoint =
+  createRequestReviewLegacyHandler(
+    fsmLifecycleClient,
+    getDao({
+      ...config,
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}-legacy` as NonEmptyString,
+    })
+  );
 
 export const serviceReviewLegacyCheckerEntryPoint =
   createReviewLegacyCheckerHandler(
