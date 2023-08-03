@@ -1,0 +1,35 @@
+{
+  "name": "io-services-cms-backoffice",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@emotion/react": "11.10.5",
+    "@emotion/styled": "11.10.5",
+    "@mui/icons-material": "5.11.0",
+    "@mui/lab": "5.0.0-alpha.119",
+    "@mui/material": "5.11.8",
+    "@mui/system": "^5.14.3",
+    "@pagopa/mui-italia": "^0.9.5",
+    "eslint": "8.46.0",
+    "eslint-config-next": "13.4.12",
+    "next": "13.4.12",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.5",
+    "@types/react": "18.2.18",
+    "@types/react-dom": "18.2.7",
+    "@vitest/coverage-v8": "^0.34.1",
+    "typescript": "5.1.6",
+    "vitest": "^0.34.1"
+  }
+}
