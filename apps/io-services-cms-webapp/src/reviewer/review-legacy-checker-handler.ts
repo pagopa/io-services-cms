@@ -88,10 +88,10 @@ export const updateReview =
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
     context: Context
   ) =>
-  (data: IssueItemPair[]): TE.TaskEither<Error, void> => {
+  (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> => {
     const logger = getLogger(context, logPrefix, "updateReview");
     return pipe(
-      data,
+      issueItemPairs,
       RA.traverse(TE.ApplicativePar)(({ issue, item }) =>
         sequenceT(TE.ApplicativeSeq)(
           makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
