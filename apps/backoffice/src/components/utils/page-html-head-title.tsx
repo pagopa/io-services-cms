@@ -7,11 +7,12 @@ export type PageHtmlHeadTitleProps = {
 
 export const PageHtmlHeadTitle = ({ section }: PageHtmlHeadTitleProps) => {
   const { t } = useTranslation();
+
+  const getTitle = () => `${t("app.title")} | ${t(`section.${section}`)}`;
+
   return (
     <Head>
-      <title>
-        {t("app.title")} | {t(`section.${section}`)}
-      </title>
+      <title>{getTitle()}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
     </Head>
   );
