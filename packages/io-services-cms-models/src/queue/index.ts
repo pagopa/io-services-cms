@@ -82,3 +82,11 @@ export const RequestSyncLegacyItem = t.intersection([
   }),
   t.partial({ isVisible: t.boolean }),
 ]);
+
+export type RequestReviewLegacyItem = t.TypeOf<typeof RequestReviewLegacyItem>;
+export const RequestReviewLegacyItem = t.type({
+  isNewTicket: t.boolean,
+  serviceId: NonEmptyString,
+  ticketId: NonEmptyString,
+  ticketKey: NonEmptyString,
+});
