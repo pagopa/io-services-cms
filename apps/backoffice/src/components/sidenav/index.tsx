@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 
@@ -28,23 +29,24 @@ export type SidenavProps = {
 };
 
 export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const menu: Array<SidenavItem> = [
     {
       href: "/",
       icon: <Dashboard fontSize="inherit" />,
-      text: "Panoramica",
+      text: "section.overview",
     },
     {
       href: "/services",
       icon: <NoteAlt fontSize="inherit" />,
-      text: "Servizi",
+      text: "section.services",
     },
     {
       href: "/apikeys",
       icon: <VpnKey fontSize="inherit" />,
-      text: "API Key",
+      text: "section.apikeys",
     },
   ];
 
@@ -71,7 +73,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
               onClick={() => handleListItemClick(index)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText primary={t(item.text)} />
             </ListItemButton>
           </NextLink>
         ))}
@@ -85,7 +87,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
             <ListItemIcon>
               <People fontSize="inherit" />
             </ListItemIcon>
-            <ListItemText primary="Utenti" />
+            <ListItemText primary={t("section.users")} />
             <ListItemIcon>
               <ExitToAppRounded color="action" />
             </ListItemIcon>
@@ -96,7 +98,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
             <ListItemIcon>
               <SupervisedUserCircle fontSize="inherit" />
             </ListItemIcon>
-            <ListItemText primary="Gruppi" />
+            <ListItemText primary={t("section.groups")} />
             <ListItemIcon>
               <ExitToAppRounded color="action" />
             </ListItemIcon>

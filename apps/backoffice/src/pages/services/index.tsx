@@ -1,15 +1,17 @@
+import { PageHtmlHeadTitle } from "@/components/utils/page-html-head-title";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Box, Button } from "@mui/material";
-import Head from "next/head";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
 import { ReactElement } from "react";
 
 export default function Services() {
+  const { t } = useTranslation();
+
   return (
     <>
-      <Head>
-        <title>IO BackOffice | Servizi</title>
-      </Head>
+      <PageHtmlHeadTitle section="services" />
       <main>
         <Box>contenuto pagina lista servizi</Box>
         <Box paddingY={3}>
@@ -37,6 +39,15 @@ export default function Services() {
       </main>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: any) {
+  return {
+    props: {
+      // pass the translation props to the page component
+      ...(await serverSideTranslations(locale)),
+    },
+  };
 }
 
 Services.getLayout = function getLayout(page: ReactElement) {

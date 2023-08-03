@@ -1,6 +1,7 @@
 import { AppProvider } from "@/providers/app";
 import "@/styles/globals.css";
 import { NextPage } from "next";
+import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
@@ -19,4 +20,4 @@ const App = ({ Component, pageProps }: AppPropsWithLayout) => {
   return <AppProvider>{pageContent}</AppProvider>;
 };
 
-export default App;
+export default appWithTranslation(App);
