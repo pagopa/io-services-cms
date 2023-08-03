@@ -4,7 +4,8 @@
       "path": "."
     },
     {
-      "path": "apps/io-services-cms-backoffice"
+      "path": "backoffice",
+      "name": "@io-services-cms/backoffice"
     },
     {
       "path": "apps/io-services-cms-webapp"

@@ -1,5 +1,5 @@
 internal: packages/**/*
-backoffice: apps/io-services-cms-backoffice/**/*
+backoffice: apps/backoffice/**/*
 webapp: apps/io-services-cms-webapp/**/*
 docs: docs/**/*
 ci: .github/workflows/**/*
