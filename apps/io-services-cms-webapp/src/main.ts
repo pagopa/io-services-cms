@@ -146,7 +146,7 @@ export const serviceReviewLegacyCheckerEntryPoint =
   createReviewLegacyCheckerHandler(
     getDao({
       ...config,
-      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}-legacy` as NonEmptyString,
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
     jiraProxy(
       jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString })
