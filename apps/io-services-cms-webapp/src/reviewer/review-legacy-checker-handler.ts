@@ -1,8 +1,8 @@
 import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -18,7 +18,9 @@ const logPrefix = "ServiceReviewLegacyChecker";
 
 export type ProcessedJiraIssue = JiraIssue & {
   fields: JiraIssue["fields"] & {
-    status: JiraIssue["fields"]["status"] & { name: "APPROVED" | "REJECTED" };
+    status: JiraIssue["fields"]["status"] & {
+      name: "APPROVED" | "REJECTED" | "DONE" | "Completata";
+    };
   };
 };
 
@@ -96,7 +98,10 @@ export const updateReview =
           pipe(
             dao.updateStatus({
               ...item,
-              status: issue.fields.status.name,
+              status:
+                issue.fields.status.name === "REJECTED"
+                  ? "REJECTED"
+                  : "APPROVED",
             }),
             TE.mapLeft((err) => {
               logger.logError(err, "Error updating legacy review status on DB");
