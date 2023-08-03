@@ -121,7 +121,7 @@ const makeServiceLifecycleApply = (
 ) =>
   pipe(
     serviceReview.service_id,
-    fsmLifecycleClient.getStore().fetch,
+    fsmLifecycleClient.fetch,
     TE.chain(
       flow(
         O.fold(

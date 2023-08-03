@@ -18,7 +18,6 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { getConfigOrThrow } from "./config";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {

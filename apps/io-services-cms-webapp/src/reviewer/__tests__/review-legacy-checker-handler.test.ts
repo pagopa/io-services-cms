@@ -224,10 +224,8 @@ describe("Service Review Legacy Checker Handler tests", () => {
         );
 
       const mockFsmLifecycleClient = {
-        getStore: vi.fn(() => ({
-          fetch: mockFetch,
-        })),
         override: vi.fn((_, service) => TE.right(service)),
+        fetch: mockFetch,
       } as unknown as ServiceLifecycle.FsmClient;
 
       const result = await updateReview(
@@ -246,8 +244,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       ] as unknown as IssueItemPair[])();
 
       expect(E.isRight(result)).toBeTruthy();
-      expect(mockFsmLifecycleClient.getStore).toBeCalledTimes(2);
-      expect(mockFsmLifecycleClient.getStore().fetch).toBeCalledTimes(2);
+      expect(mockFsmLifecycleClient.fetch).toBeCalledTimes(2);
       expect(mockFsmLifecycleClient.override).toBeCalledTimes(2);
 
       // Test1: approve
@@ -300,10 +297,8 @@ describe("Service Review Legacy Checker Handler tests", () => {
       );
 
       const mockFsmLifecycleClient = {
-        getStore: vi.fn(() => ({
-          fetch: mockFetch,
-        })),
         override: vi.fn(() => TE.left(new Error("Error overriding service"))),
+        fetch: mockFetch,
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
@@ -333,8 +328,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
         expect(result.left.message).eq("Error overriding service");
       }
 
-      expect(mockFsmLifecycleClient.getStore).toBeCalled();
-      expect(mockFsmLifecycleClient.getStore().fetch).toBeCalled();
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
       expect(mockFsmLifecycleClient.override).toBeCalled();
       expect(mockServiceReviewDao.updateStatus).toBeCalled();
       expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
@@ -357,13 +351,9 @@ describe("Service Review Legacy Checker Handler tests", () => {
     });
 
     it("Should fails when fetch return none", async () => {
-      const mockFetch = vi.fn(() => TE.right(O.none));
-
       const mockFsmLifecycleClient = {
-        getStore: vi.fn(() => ({
-          fetch: mockFetch,
-        })),
         override: vi.fn((_, service) => TE.right(service)),
+        fetch: vi.fn(() => TE.right(O.none)),
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
@@ -395,8 +385,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
         );
       }
 
-      expect(mockFsmLifecycleClient.getStore).toBeCalled();
-      expect(mockFsmLifecycleClient.getStore().fetch).toBeCalled();
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
       expect(mockFsmLifecycleClient.override).not.toBeCalled();
       expect(mockServiceReviewDao.updateStatus).toBeCalled();
       expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
