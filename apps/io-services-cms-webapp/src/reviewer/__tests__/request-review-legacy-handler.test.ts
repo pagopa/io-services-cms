@@ -7,6 +7,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
+import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { IConfig } from "../../config";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -14,6 +16,23 @@ afterEach(() => {
 });
 
 const aVoidFn = () => console.log("");
+
+const anUserId = "123";
+const ownerId = `/an/owner/${anUserId}`;
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        ownerId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
+const mockConfig = {
+  USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: [anUserId],
+} as unknown as IConfig;
 
 const aBaseQueueMessage = {
   isNewTicket: true,
@@ -96,7 +115,9 @@ describe("Request Review Legacy Handler", () => {
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
-      mainMockServiceReviewDao
+      mainMockServiceReviewDao,
+      mockConfig,
+      mockApimClient
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -114,6 +135,41 @@ describe("Request Review Legacy Handler", () => {
     expect(mainMockServiceReviewDao.insert).toHaveBeenCalled();
   });
 
+  it("should do nothing when a service is not related to an allowed user", async () => {
+    const aServiceId = "s1";
+    const aQueueMessage = {
+      ...aBaseQueueMessage,
+      serviceId: aServiceId,
+    };
+    const aServiceLifecycle = {
+      ...aBaseServiceLifecycle,
+      id: aServiceId,
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const mockFsmLifecycleClient = {
+      fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
+      override: vi.fn(() =>
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    const excusiveConfig = {
+      USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: ["anotherUserId"],
+    } as unknown as IConfig;
+
+    const handler = createRequestReviewLegacyHandler(
+      mockFsmLifecycleClient,
+      mainMockServiceReviewDao,
+      excusiveConfig,
+      mockApimClient
+    );
+    const context = createContext();
+    await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).not.toHaveBeenCalled();
+    expect(mockFsmLifecycleClient.override).not.toHaveBeenCalled();
+    expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
+  });
   it("should fail on bad queue items", async () => {
     const aServiceId = "s2";
 
@@ -135,7 +191,9 @@ describe("Request Review Legacy Handler", () => {
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
-      mainMockServiceReviewDao
+      mainMockServiceReviewDao,
+      mockConfig,
+      mockApimClient
     );
     const context = createContext();
     await expect(() =>
@@ -164,7 +222,9 @@ describe("Request Review Legacy Handler", () => {
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
-      mainMockServiceReviewDao
+      mainMockServiceReviewDao,
+      mockConfig,
+      mockApimClient
     );
     const context = createContext();
     await expect(() =>
@@ -197,7 +257,9 @@ describe("Request Review Legacy Handler", () => {
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
-      mainMockServiceReviewDao
+      mainMockServiceReviewDao,
+      mockConfig,
+      mockApimClient
     );
     const context = createContext();
     await expect(() =>
@@ -228,7 +290,9 @@ describe("Request Review Legacy Handler", () => {
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
-      mainMockServiceReviewDao
+      mainMockServiceReviewDao,
+      mockConfig,
+      mockApimClient
     );
     const context = createContext();
     await expect(() =>
