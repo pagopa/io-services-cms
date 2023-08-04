@@ -106,44 +106,40 @@ export const buildIssueItemPairs =
  */
 export const updateReview =
   (dao: ServiceReviewDao, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
-  (data: TE.TaskEither<Error, IssueItemPair[]>): TE.TaskEither<Error, void> =>
+  (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> =>
     pipe(
-      data,
-      TE.map((issuesAndItems) =>
-        issuesAndItems.map(({ issue, item }) =>
-          sequenceT(TE.ApplicativeSeq)(
-            pipe(
-              makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
-              TE.orElse((fsmError) => {
-                // eslint-disable-next-line sonarjs/no-small-switch
-                switch (fsmError.kind) {
-                  case "FsmNoTransitionMatchedError":
-                    // eslint-disable-next-line no-console
-                    console.warn(fsmError.message); // FIXME: is it correct to log via console?
-                    return TE.right(void 0);
-                  default:
-                    // eslint-disable-next-line no-console
-                    console.error(fsmError.message); // FIXME: is it correct to log via console?
-                    return pipe(fsmError, E.toError, TE.left);
-                }
-              })
-            ),
-            pipe(
-              dao.updateStatus({
-                ...item,
-                status: issue.fields.status.name,
-              }),
-              TE.mapLeft((err) => {
-                // eslint-disable-next-line no-console
-                console.error(err.message); // FIXME: is it correct to log via console?
-                return E.toError(err);
-              })
-            )
+      issueItemPairs,
+      RA.traverse(TE.ApplicativePar)(({ issue, item }) =>
+        sequenceT(TE.ApplicativeSeq)(
+          pipe(
+            makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
+            TE.orElse((fsmError) => {
+              // eslint-disable-next-line sonarjs/no-small-switch
+              switch (fsmError.kind) {
+                case "FsmNoTransitionMatchedError":
+                  // eslint-disable-next-line no-console
+                  console.warn(fsmError.message); // FIXME: is it correct to log via console?
+                  return TE.right(void 0);
+                default:
+                  // eslint-disable-next-line no-console
+                  console.error(fsmError.message); // FIXME: is it correct to log via console?
+                  return pipe(fsmError, E.toError, TE.left);
+              }
+            })
+          ),
+          pipe(
+            dao.updateStatus({
+              ...item,
+              status: issue.fields.status.name,
+            }),
+            TE.mapLeft((err) => {
+              // eslint-disable-next-line no-console
+              console.error(err.message); // FIXME: is it correct to log via console?
+              return E.toError(err);
+            })
           )
         )
       ),
-      // execute each sub-procedure in parallel
-      TE.chain(RA.sequence(TE.ApplicativePar)),
       // we don't need data as result, just return void
       TE.map((_) => void 0)
     );
@@ -159,5 +155,5 @@ export const processBatchOfReviews =
     pipe(
       items,
       buildIssueItemPairs(jiraProxy),
-      updateReview(dao, fsmLifecycleClient)
+      TE.chain(updateReview(dao, fsmLifecycleClient))
     );

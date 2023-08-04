@@ -17,6 +17,8 @@ export type ErrorResponseTypes =
   | IResponseErrorTooManyRequests
   | IResponseErrorInternal;
 
+type LogLevel = "info" | "warn" | "error";
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const getLogger = (
   context: Context,
@@ -57,6 +59,19 @@ export const getLogger = (
     context.log.error(
       `${logPrefix}|${step}|UNKNOWN_ERROR=${JSON.stringify(errs)}`
     ),
+  log: (level: LogLevel, message: string): void => {
+    switch (level) {
+      case "warn":
+        context.log.warn(`${logPrefix}|${step}|MESSAGE: ${message}`);
+        break;
+      case "error":
+        context.log.error(`${logPrefix}|${step}|MESSAGE: ${message}`);
+        break;
+      default:
+        context.log.info(`${logPrefix}|${step}|MESSAGE: ${message}`);
+        break;
+    }
+  },
 });
 
 const handleErrorResponseType = (errorResponse: ErrorResponseTypes) =>

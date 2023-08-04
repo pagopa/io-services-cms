@@ -1,0 +1,6 @@
+.main {
+  min-height: calc(100vh - 270px);
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}

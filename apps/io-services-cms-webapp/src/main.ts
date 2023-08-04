@@ -17,6 +17,7 @@ import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { getConfigOrThrow } from "./config";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
@@ -27,7 +28,6 @@ import { getDatabase } from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
-import { jiraLegacyClient } from "./lib/clients/jira-legacy-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
@@ -46,7 +46,9 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
+import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
+import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -140,6 +142,27 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   fsmLifecycleClient
 );
 
+export const createRequestReviewLegacyEntryPoint =
+  createRequestReviewLegacyHandler(
+    fsmLifecycleClient,
+    getDao({
+      ...config,
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}-legacy` as NonEmptyString,
+    })
+  );
+
+export const serviceReviewLegacyCheckerEntryPoint =
+  createReviewLegacyCheckerHandler(
+    getDao({
+      ...config,
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
+    }),
+    jiraProxy(
+      jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString })
+    ),
+    fsmLifecycleClient
+  );
+
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
   processBatchOf(ServiceLifecycle.ItemType),
@@ -181,7 +204,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler(jiraLegacyClient(config), config, apimClient),
+  onLegacyServiceChangeHandler(config, apimClient, legacyServiceModel),
   processBatchOf(LegacyService, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(

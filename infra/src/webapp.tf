@@ -231,16 +231,18 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "0"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "0"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "0"
-      "AzureWebJobs.OnRequestPublication.Disabled"      = "0"
-      "AzureWebJobs.OnRequestReview.Disabled"           = "0"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"       = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "0"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "0"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "0"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"       = "0"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"   = "0"
+      "AzureWebJobs.OnRequestPublication.Disabled"       = "0"
+      "AzureWebJobs.OnRequestReview.Disabled"            = "0"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )
 
@@ -255,6 +257,8 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestReview.Disabled",
     "AzureWebJobs.OnRequestSyncCms.Disabled",
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
+    "AzureWebJobs.OnRequestReviewLegacy.Disabled",
+    "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
   ]
 
   subnet_id = module.app_snet.id
@@ -289,16 +293,18 @@ module "webapp_functions_app_staging_slot" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
-      "AzureWebJobs.OnRequestPublication.Disabled"      = "1"
-      "AzureWebJobs.OnRequestReview.Disabled"           = "1"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"       = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "1"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "1"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "1"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"       = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"   = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"       = "1"
+      "AzureWebJobs.OnRequestReview.Disabled"            = "1"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )
 
