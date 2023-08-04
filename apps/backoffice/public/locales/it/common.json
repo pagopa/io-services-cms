@@ -1,8 +1,4 @@
 {
-  "apikeys": {
-    "title": "Chiavi API",
-    "subtitle": "Visualizza e gestisci le chiavi di sicurezza per le API."
-  },
   "app": {
     "title": "IO BackOffice"
   },
@@ -18,13 +14,9 @@
   "section": {
     "overview": "Panoramica",
     "services": "Servizi",
-    "apikeys": "Chiavi API",
+    "keys": "Chiavi API",
     "users": "Utenti",
     "groups": "Gruppi"
-  },
-  "services": {
-    "title": "Servizi",
-    "subtitle": "Visualizza e gestisci i Servizi del tuo Ente."
   },
   "test": "Questo è un test di traduzione"
 }

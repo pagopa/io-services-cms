@@ -4,7 +4,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
 
-export default function ApiKeys() {
+export default function Keys() {
   const { t } = useTranslation();
 
   return (
@@ -24,7 +24,7 @@ export async function getStaticProps({ locale }: any) {
   };
 }
 
-ApiKeys.getLayout = function getLayout(page: ReactElement) {
+Keys.getLayout = function getLayout(page: ReactElement) {
   return (
     <AppLayout>
       <PageLayout title="API Key">{page}</PageLayout>

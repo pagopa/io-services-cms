@@ -44,9 +44,9 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
       text: "section.services",
     },
     {
-      href: "/apikeys",
+      href: "/keys",
       icon: <VpnKey fontSize="inherit" />,
-      text: "section.apikeys",
+      text: "section.keys",
     },
   ];
 
