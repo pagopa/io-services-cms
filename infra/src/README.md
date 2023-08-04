@@ -145,6 +145,7 @@
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
 | <a name="input_userid_cms_to_legacy_sync_inclusion_list"></a> [userid\_cms\_to\_legacy\_sync\_inclusion\_list](#input\_userid\_cms\_to\_legacy\_sync\_inclusion\_list) | User Ids to include in the sync from CMS to legacy | `string` | n/a | yes |
 | <a name="input_userid_legacy_to_cms_sync_inclusion_list"></a> [userid\_legacy\_to\_cms\_sync\_inclusion\_list](#input\_userid\_legacy\_to\_cms\_sync\_inclusion\_list) | User Ids to include in the sync from legacy to CMS | `string` | n/a | yes |
+| <a name="input_userid_request_review_legacy_inclusion_list"></a> [userid\_request\_review\_legacy\_inclusion\_list](#input\_userid\_request\_review\_legacy\_inclusion\_list) | User Ids to include in the request review from legacy services | `string` | n/a | yes |
 | <a name="input_vnet_common_rg"></a> [vnet\_common\_rg](#input\_vnet\_common\_rg) | Common Virtual network resource group name. | `string` | `""` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Common Virtual network resource name. | `string` | `""` | no |
 

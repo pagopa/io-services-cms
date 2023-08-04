@@ -167,6 +167,11 @@ const FeatureFlags = t.type({
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
+  // UserId List allowed to sync JIRA ticket events from Legacy to CMS
+  USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
 });
 
 // Global app configuration
