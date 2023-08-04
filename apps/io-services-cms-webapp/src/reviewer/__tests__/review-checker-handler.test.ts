@@ -211,18 +211,16 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const result = await updateReview(
       mainMockServiceReviewDao,
       mockFsmLifecycleClient
-    )(
-      TE.of([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-        {
-          issue: aJiraIssue2,
-          item: anItem2,
-        },
-      ] as unknown as IssueItemPair[])
-    )();
+    )([
+      {
+        issue: aJiraIssue1,
+        item: anItem1,
+      },
+      {
+        issue: aJiraIssue2,
+        item: anItem2,
+      },
+    ] as unknown as IssueItemPair[])();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -255,7 +253,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const result = await updateReview(
       mainMockServiceReviewDao,
       mockFsmLifecycleClient
-    )(TE.of([] as unknown as IssueItemPair[]))();
+    )([] as unknown as IssueItemPair[])();
 
     expect(E.isRight(result)).toBeTruthy();
 
@@ -288,14 +286,12 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const result = await updateReview(
       mockServiceReviewDao,
       mockFsmLifecycleClient
-    )(
-      TE.of([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ] as unknown as IssueItemPair[])
-    )();
+    )([
+      {
+        issue: aJiraIssue1,
+        item: anItem1,
+      },
+    ] as unknown as IssueItemPair[])();
 
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
@@ -328,14 +324,12 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const result = await updateReview(
       mockServiceReviewDao,
       mockFsmLifecycleClient
-    )(
-      TE.of([
-        {
-          issue: aJiraIssue1,
-          item: anItem1,
-        },
-      ] as unknown as IssueItemPair[])
-    )();
+    )([
+      {
+        issue: aJiraIssue1,
+        item: anItem1,
+      },
+    ] as unknown as IssueItemPair[])();
 
     // updateReview result
     expect(E.isRight(result)).toBeTruthy();
