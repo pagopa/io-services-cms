@@ -147,8 +147,10 @@ export const createRequestReviewLegacyEntryPoint =
     fsmLifecycleClient,
     getDao({
       ...config,
-      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}-legacy` as NonEmptyString,
-    })
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
+    }),
+    config,
+    apimClient
   );
 
 export const serviceReviewLegacyCheckerEntryPoint =
