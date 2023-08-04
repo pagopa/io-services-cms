@@ -21,6 +21,9 @@ export const TopBar = ({ user }: TopBarProps) => {
       onAssistanceClick={() => {
         console.log("Clicked/Tapped on Assistance");
       }}
+      onDocumentationClick={() => {
+        console.log("Clicked/Tapped on Documentation");
+      }}
       onLogin={() => {
         console.log("User login");
       }}

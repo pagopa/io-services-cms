@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Trans, useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import {
   Footer,
@@ -18,15 +19,7 @@ const pagoPALink: RootLinkType = {
   title: pagoPACompanyLabel,
 };
 
-const companyLegalInfo = (
-  <>
-    <strong>PagoPA S.p.A.</strong> - Società per azioni con socio unico -
-    Capitale sociale di euro 1,000,000 interamente versato - Sede legale in
-    Roma, Piazza Colonna 370, <br />
-    CAP 00187 - N. di iscrizione a Registro Imprese di Roma, CF e P.IVA
-    15376371009
-  </>
-);
+const companyLegalInfo = <Trans i18nKey="footer.legalInfo" />;
 
 const languages: Languages = {
   it: {
@@ -45,24 +38,25 @@ export type AppFooterProps = {
 };
 
 export const AppFooter = ({ loggedUser, currentLanguage }: AppFooterProps) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [lang, setLang] = useState(currentLanguage);
 
   const postLoginLinks: Array<FooterLinksType> = [
     {
-      label: "privacyPolicy",
+      label: t("footer.postLogin.privacyPolicy"),
       href: "",
       ariaLabel: "Vai al link: Privacy policy",
       linkType: "internal",
     },
     {
-      label: "personalDataProtection",
+      label: t("footer.postLogin.personalDataProtection"),
       href: "",
       ariaLabel: "Vai al link: Diritto alla protezione dei dati personali",
       linkType: "internal",
     },
     {
-      label: "termsAndConditions",
+      label: t("footer.postLogin.termsAndConditions"),
       href: "",
       ariaLabel: "Vai al link: Termini e condizioni",
       linkType: "internal",
