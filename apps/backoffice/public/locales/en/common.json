@@ -1,8 +1,4 @@
 {
-  "apikeys": {
-    "title": "API Keys",
-    "subtitle": "View and manage security keys for APIs."
-  },
   "app": {
     "title": "IO BackOffice"
   },
@@ -18,13 +14,9 @@
   "section": {
     "overview": "Overview",
     "services": "Services",
-    "apikeys": "API Keys",
+    "keys": "API Keys",
     "users": "Users",
     "groups": "Groups"
-  },
-  "services": {
-    "title": "Services",
-    "subtitle": "View and manage the services of your Institution."
   },
   "test": "This is a translation test"
 }
