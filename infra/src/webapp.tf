@@ -201,6 +201,8 @@ locals {
     USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST = var.userid_cms_to_legacy_sync_inclusion_list
     # UserId List allowed to sync services from Legacy to CMS
     USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST = var.userid_legacy_to_cms_sync_inclusion_list
+    # UserId List allowed to sync JIRA ticket events from Legacy to CMS
+    USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST = var.userid_request_review_legacy_inclusion_list
   }
 }
 
