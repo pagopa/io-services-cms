@@ -48,6 +48,7 @@ import { createWebServer } from "./webservice";
 
 import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
+import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -148,6 +149,18 @@ export const createRequestReviewLegacyEntryPoint =
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}-legacy` as NonEmptyString,
     })
+  );
+
+export const serviceReviewLegacyCheckerEntryPoint =
+  createReviewLegacyCheckerHandler(
+    getDao({
+      ...config,
+      REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
+    }),
+    jiraProxy(
+      jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString })
+    ),
+    fsmLifecycleClient
   );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
