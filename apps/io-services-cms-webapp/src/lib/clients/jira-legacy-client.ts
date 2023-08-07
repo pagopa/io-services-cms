@@ -37,9 +37,9 @@ export const JiraLegacyIssue = t.type({
     }),
     t.partial({
       statuscategorychangedate: t.string,
+      labels: t.readonlyArray(NonEmptyString),
     }),
   ]),
-  labels: t.readonlyArray(NonEmptyString),
 });
 export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
@@ -226,7 +226,7 @@ const buildSearchJiraIssuesByKeyAndStatusPayload =
     fields: ["id", "labels", "status", "comment", "statuscategorychangedate"],
     fieldsByKeys: false,
     startAt,
-    jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND status IN (NEW, REVIEW, REJECTED) ORDER BY created DESC`,
+    jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND status IN (NEW, REVIEW, REJECTED) AND labels not in (TEST, DISATTIVAZIONE) AND labels = zendesk_IES ORDER BY created DESC`,
     maxResults: 100,
   });
 
