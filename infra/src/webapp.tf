@@ -159,7 +159,7 @@ locals {
     LEGACY_JIRA_PROJECT_NAME = var.legacy_jira_project_name
 
     # Apim connection
-    AZURE_APIM                           = var.azure_apim
+    AZURE_APIM                           = var.azure_apim_v2
     AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
     AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
     AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = var.azure_apim_product_id
