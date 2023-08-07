@@ -89,4 +89,5 @@ export const RequestReviewLegacyItem = t.type({
   serviceId: NonEmptyString,
   ticketId: NonEmptyString,
   ticketKey: NonEmptyString,
+  apimUserId: NonEmptyString,
 });

@@ -149,8 +149,7 @@ export const createRequestReviewLegacyEntryPoint =
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
-    config,
-    apimClient
+    config
   );
 
 export const serviceReviewLegacyCheckerEntryPoint =

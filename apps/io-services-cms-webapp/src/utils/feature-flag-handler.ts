@@ -99,12 +99,10 @@ export const isUserEnabledForLegacyToCmsSync = (
  */
 export const isUserEnabledForRequestReviewLegacy = (
   config: IConfig,
-  apimClient: ApiManagementClient,
-  serviceId: NonEmptyString
-): TE.TaskEither<Error, boolean> =>
-  isUserEnabledToSync(
-    config,
-    apimClient,
-    serviceId,
-    config.USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST
+  apimUserId: NonEmptyString
+): boolean =>
+  pipe(
+    apimUserId,
+    parseOwnerIdFullPath,
+    isElementAllowedOnList(config.USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST)
   );
