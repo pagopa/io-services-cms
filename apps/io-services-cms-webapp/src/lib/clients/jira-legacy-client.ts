@@ -39,6 +39,7 @@ export const JiraLegacyIssue = t.type({
       statuscategorychangedate: t.string,
     }),
   ]),
+  labels: t.readonlyArray(NonEmptyString),
 });
 export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
@@ -66,21 +67,79 @@ export type JiraLegacyAPIClient = {
     serviceId: ServiceId,
     options?: JiraLegacyOptions
   ) => TE.TaskEither<Error, O.Option<JiraLegacyIssue>>;
+  readonly searchJiraNewReviewRejectedIssuesPaginated: (
+    startAt: number
+  ) => TE.TaskEither<Error, SearchJiraLegacyIssuesResponse>;
 };
 
-export const jiraLegacyClient = (
-  config: IConfig,
-  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
-): JiraLegacyAPIClient => {
-  const jiraHeaders = {
-    Accept: "application/json",
-    Authorization: `Basic ${Buffer.from(
-      `${config.JIRA_USERNAME}:${config.JIRA_TOKEN}`
-    ).toString("base64")}`,
-    "Content-Type": "application/json",
-  };
+const extractHeaders = (response: Response) => {
+  try {
+    const headers: Record<string, string> = {};
+    response.headers.forEach((value, key) => {
+      // eslint-disable-next-line functional/immutable-data
+      headers[key] = value;
+    });
+    return JSON.stringify(headers);
+  } catch (e) {
+    return "CANNOT EXTRACT HEADERS";
+  }
+};
 
-  const searchJiraIssueByServiceId = (
+const jiraHeaders = (config: IConfig) => ({
+  Accept: "application/json",
+  Authorization: `Basic ${Buffer.from(
+    `${config.JIRA_USERNAME}:${config.JIRA_TOKEN}`
+  ).toString("base64")}`,
+  "Content-Type": "application/json",
+});
+
+const fetchApiWithRetry = (
+  url: string,
+  fetchApi: typeof fetch,
+  options: RequestInit,
+  defaultRetryAfter: number,
+  maxRetryCount: number
+): TE.TaskEither<Error, Response> => {
+  const attempt = (retryCount: number): TE.TaskEither<Error, Response> =>
+    pipe(
+      TE.tryCatch(() => fetchApi(url, options), E.toError),
+      TE.chain((response) =>
+        response.status === 429
+          ? pipe(
+              response.headers.get("Retry-After"),
+              O.fromNullable,
+              O.chain((delay) =>
+                isNumber(Number(delay)) ? O.some(delay) : O.none
+              ),
+              O.fold(
+                () => defaultRetryAfter,
+                (retryAfter) => Number(retryAfter) * 1000
+              ),
+              (retryAfter) =>
+                retryCount < maxRetryCount
+                  ? pipe(
+                      T.delay(retryAfter)(attempt(retryCount + 1)),
+                      TE.map(TE.right),
+                      TE.flatten
+                    )
+                  : TE.left(
+                      new Error(
+                        `Cannot Contact jira after retries, statusCode: ${
+                          response.status
+                        }, headers: ${extractHeaders(response)}`
+                      )
+                    )
+            )
+          : TE.right(response)
+      )
+    );
+
+  return attempt(0);
+};
+
+const searchJiraIssueByServiceId =
+  (config: IConfig, fetchApi: typeof fetch) =>
+  (
     serviceId: ServiceId,
     {
       defaultRetryAfter = 5000,
@@ -111,33 +170,13 @@ export const jiraLegacyClient = (
         fetchApi,
         {
           body: JSON.stringify(bodyData),
-          headers: jiraHeaders,
+          headers: jiraHeaders(config),
           method: "POST",
         },
         defaultRetryAfter,
         maxRetry
       ),
-      TE.chain((response) =>
-        pipe(
-          TE.tryCatch(
-            () => response.json(),
-            (err) =>
-              new Error(
-                `Error parsing Jira response, statusCode: ${
-                  response.status
-                }, headers: ${extractHeaders(response)}, error: ${
-                  E.toError(err).message
-                }`
-              )
-          ),
-          TE.chain((responseBody) =>
-            pipe(
-              checkJiraResponse(response.status, responseBody),
-              TE.fromEither
-            )
-          )
-        )
-      ),
+      TE.chain(jiraResponseParseAndValidate),
       TE.chain((responseBody) =>
         pipe(
           responseBody,
@@ -150,105 +189,128 @@ export const jiraLegacyClient = (
     );
   };
 
-  const fetchApiWithRetry = (
-    url: string,
-    fetchApi: typeof fetch,
-    options: RequestInit,
-    defaultRetryAfter: number,
-    maxRetryCount: number
-  ): TE.TaskEither<Error, Response> => {
-    const attempt = (retryCount: number): TE.TaskEither<Error, Response> =>
-      pipe(
-        TE.tryCatch(() => fetchApi(url, options), E.toError),
-        TE.chain((response) =>
-          response.status === 429
-            ? pipe(
-                response.headers.get("Retry-After"),
-                O.fromNullable,
-                O.chain((delay) =>
-                  isNumber(Number(delay)) ? O.some(delay) : O.none
-                ),
-                O.fold(
-                  () => defaultRetryAfter,
-                  (retryAfter) => Number(retryAfter) * 1000
-                ),
-                (retryAfter) =>
-                  retryCount < maxRetryCount
-                    ? pipe(
-                        T.delay(retryAfter)(attempt(retryCount + 1)),
-                        TE.map(TE.right),
-                        TE.flatten
-                      )
-                    : TE.left(
-                        new Error(
-                          `Cannot Contact jira after retries, statusCode: ${
-                            response.status
-                          }, headers: ${extractHeaders(response)}`
-                        )
-                      )
-              )
-            : TE.right(response)
-        )
-      );
+export const jiraLegacyClient = (
+  config: IConfig,
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
+): JiraLegacyAPIClient => ({
+  searchJiraIssueByServiceId: searchJiraIssueByServiceId(config, fetchApi),
+  searchJiraNewReviewRejectedIssuesPaginated:
+    searchJiraNewReviewRejectedIssuesPaginated(config, fetchApi),
+});
 
-    return attempt(0);
-  };
+const searchJiraNewReviewRejectedIssuesPaginated =
+  (config: IConfig, fetchApi: typeof fetch) =>
+  (startAt: number): TE.TaskEither<Error, SearchJiraLegacyIssuesResponse> =>
+    searchJiraIssues(
+      config,
+      fetchApi
+    )(buildSearchJiraIssuesByKeyAndStatusPayload(config)(startAt));
 
-  const extractHeaders = (response: Response) => {
-    try {
-      const headers: Record<string, string> = {};
-      response.headers.forEach((value, key) => {
-        // eslint-disable-next-line functional/immutable-data
-        headers[key] = value;
-      });
-      return JSON.stringify(headers);
-    } catch (e) {
-      return "CANNOT EXTRACT HEADERS";
+/**
+  * {
+    "fields": [
+        "id",
+        "labels",
+        "status",
+        "created",
+        "statuscategorychangedate"
+    ],
+      "fieldsByKeys": false,
+      "jql": "project = IES AND issuetype = Task AND status not in(NEW, REVIEW, DONE, REJECTED)",
+      "startAt": 0,
+      "maxResults": 100
     }
-  };
+  *  */
+const buildSearchJiraIssuesByKeyAndStatusPayload =
+  (config: IConfig) => (startAt: number) => ({
+    fields: ["id", "labels", "status", "comment", "statuscategorychangedate"],
+    fieldsByKeys: false,
+    startAt,
+    jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND status IN (NEW, REVIEW, REJECTED) ORDER BY created DESC`,
+    maxResults: 100,
+  });
 
-  const checkJiraResponse = (
-    status: number,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseBody: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): E.Either<Error, any> => {
-    if (status === 200 || status === 201) {
-      return E.right(responseBody);
-    } else if (status === 400) {
-      return E.left(
-        new Error(
-          `Invalid request, responseBody: ${JSON.stringify(responseBody)}`
+const searchJiraIssues =
+  (config: IConfig, fetchApi: typeof fetch) =>
+  (
+    bodyData: SearchJiraIssuesPayload
+  ): TE.TaskEither<Error, SearchJiraLegacyIssuesResponse> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`, {
+            body: JSON.stringify(bodyData),
+            headers: jiraHeaders(config),
+            method: "POST",
+          }),
+        E.toError
+      ),
+      TE.chain(jiraResponseParseAndValidate),
+      TE.chain((responseBody) =>
+        pipe(
+          responseBody,
+          SearchJiraLegacyIssuesResponse.decode,
+          TE.fromEither,
+          TE.mapLeft((errors) => E.toError(readableReport(errors)))
         )
-      );
-    } else if (status === 401) {
-      return E.left(
-        new Error(
-          `Jira secrets misconfiguration, responseBody: ${JSON.stringify(
-            responseBody
-          )}`
-        )
-      );
-    } else if (status >= 500) {
-      return E.left(
-        new Error(
-          `Jira API returns an error, responseBody: ${JSON.stringify(
-            responseBody
-          )}`
-        )
-      );
-    } else {
-      return E.left(
-        new Error(
-          `Unknown status code ${status} received, responseBody: ${JSON.stringify(
-            responseBody
-          )}`
-        )
-      );
-    }
-  };
+      )
+    );
 
-  return {
-    searchJiraIssueByServiceId,
-  };
+const jiraResponseParseAndValidate = (response: Response) =>
+  pipe(
+    TE.tryCatch(
+      () => response.json(),
+      (err) =>
+        new Error(
+          `Error parsing Jira response, statusCode: ${
+            response.status
+          }, headers: ${extractHeaders(response)}, error: ${
+            E.toError(err).message
+          }`
+        )
+    ),
+    TE.chain((responseBody) =>
+      pipe(checkJiraResponse(response.status, responseBody), TE.fromEither)
+    )
+  );
+
+const checkJiraResponse = (
+  status: number,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  responseBody: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): E.Either<Error, any> => {
+  if (status === 200 || status === 201) {
+    return E.right(responseBody);
+  } else if (status === 400) {
+    return E.left(
+      new Error(
+        `Invalid request, responseBody: ${JSON.stringify(responseBody)}`
+      )
+    );
+  } else if (status === 401) {
+    return E.left(
+      new Error(
+        `Jira secrets misconfiguration, responseBody: ${JSON.stringify(
+          responseBody
+        )}`
+      )
+    );
+  } else if (status >= 500) {
+    return E.left(
+      new Error(
+        `Jira API returns an error, responseBody: ${JSON.stringify(
+          responseBody
+        )}`
+      )
+    );
+  } else {
+    return E.left(
+      new Error(
+        `Unknown status code ${status} received, responseBody: ${JSON.stringify(
+          responseBody
+        )}`
+      )
+    );
+  }
 };
