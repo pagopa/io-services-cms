@@ -20,12 +20,11 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
+import { isUserEnabledForRequestReviewLegacy } from "../utils/feature-flag-handler";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
-import { IConfig } from "../config";
-import { isUserEnabledForRequestReviewLegacy } from "../utils/feature-flag-handler";
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -41,8 +40,7 @@ export const handleQueueItem = (
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
-  config: IConfig,
-  apimClient: ApiManagementClient
+  config: IConfig
 ) =>
   pipe(
     queueItem,
@@ -52,14 +50,10 @@ export const handleQueueItem = (
       pipe(
         isUserEnabledForRequestReviewLegacy(
           config,
-          apimClient,
-          requestReviewLegacy.serviceId
-        ),
-        TE.chainW((isUserEnabled) =>
-          isUserEnabled
-            ? processItem(fsmLifecycleClient, dao, requestReviewLegacy)
-            : TE.right(void 0)
+          requestReviewLegacy.apimUserId
         )
+          ? processItem(fsmLifecycleClient, dao, requestReviewLegacy)
+          : TE.right(void 0)
       )
     ),
     TE.getOrElse((e) => {
@@ -122,16 +116,8 @@ const setToSubmitted = (
 export const createRequestReviewLegacyHandler = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
-  config: IConfig,
-  apimClient: ApiManagementClient
+  config: IConfig
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(
-      context,
-      queueItem,
-      fsmLifecycleClient,
-      dao,
-      config,
-      apimClient
-    )()
+    handleQueueItem(context, queueItem, fsmLifecycleClient, dao, config)()
   );

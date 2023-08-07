@@ -19,16 +19,6 @@ const aVoidFn = () => console.log("");
 
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
 
 const mockConfig = {
   USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: [anUserId],
@@ -39,6 +29,7 @@ const aBaseQueueMessage = {
   serviceId: "aServiceId",
   ticketId: "aTicketId",
   ticketKey: "aTicketKey",
+  apimUserId: ownerId,
 };
 const aBaseServiceLifecycle = {
   id: "aServiceId",
@@ -116,8 +107,50 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
-      mockApimClient
+      mockConfig
+    );
+    const context = createContext();
+    await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
+
+    expect(mockFsmLifecycleClient.override).toHaveBeenCalledWith(aServiceId, {
+      ...aServiceLifecycle,
+      fsm: {
+        ...aServiceLifecycle.fsm,
+        state: "submitted",
+        lastTransition: SYNC_FROM_LEGACY,
+      },
+    });
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalled();
+  });
+
+  it("should set to submitted status the item when wildcard is present in inclusionList", async () => {
+    const aServiceId = "s1";
+    const aQueueMessage = {
+      ...aBaseQueueMessage,
+      serviceId: aServiceId,
+    };
+    const aServiceLifecycle = {
+      ...aBaseServiceLifecycle,
+      id: aServiceId,
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const mockFsmLifecycleClient = {
+      fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
+      override: vi.fn(() =>
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    const excusiveConfig = {
+      USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: ["*"],
+    } as unknown as IConfig;
+
+    const handler = createRequestReviewLegacyHandler(
+      mockFsmLifecycleClient,
+      mainMockServiceReviewDao,
+      excusiveConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -160,8 +193,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      excusiveConfig,
-      mockApimClient
+      excusiveConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -170,6 +202,7 @@ describe("Request Review Legacy Handler", () => {
     expect(mockFsmLifecycleClient.override).not.toHaveBeenCalled();
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
   });
+
   it("should fail on bad queue items", async () => {
     const aServiceId = "s2";
 
@@ -192,8 +225,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
-      mockApimClient
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
@@ -223,8 +255,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
-      mockApimClient
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
@@ -258,8 +289,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
-      mockApimClient
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
@@ -291,8 +321,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
-      mockApimClient
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
