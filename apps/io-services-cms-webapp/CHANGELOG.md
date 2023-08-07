@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.20.0
+
+### Minor Changes
+
+- 7e538e0: ADD ServiceReviewLegacyChecker Azure Function
+- c7c186d: Add Request review legacy queue trigger
+
+### Patch Changes
+
+- ffd7577: Added a feature flag to restrict Jira Legacy sync only for service belonging to selected users
+- 48a699f: add legacy ticket status to jira client
+- 84317cf: Removed Jira call and update status mapping on LegacyServiceWatcher
+- 880ba56: Check apimUserId instead of serviceId on feature flag for request review legacy
+- Updated dependencies [7e538e0]
+- Updated dependencies [c7c186d]
+- Updated dependencies [880ba56]
+  - @io-services-cms/models@1.14.0
+
 ## 1.19.29
 
 ### Patch Changes
