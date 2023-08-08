@@ -14,11 +14,11 @@ overrides:
     - api.io.pagopa.it
   endpoints:
     /api/v1/manage/services:
-      response_time_threshold: 6
-      availability_threshold: 0.95
+      response_time_threshold: 5
+      availability_threshold: 0.90
     /api/v1/manage/services/{serviceId}/review:
-      response_time_threshold: 6
-      availability_threshold: 0.95
+      response_time_threshold: 5
+      availability_threshold: 0.90
     /api/v1/manage/services/{serviceId}/release:
-      response_time_threshold: 6
-      availability_threshold: 0.95
+      response_time_threshold: 5
+      availability_threshold: 0.90

@@ -50,9 +50,3 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
           docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
-      
-      - run: ls -la ./azure-dashboard
-        if: always()
-
-      - run: cat ./azure-dashboard/01_opex.tf
-        if: always()
