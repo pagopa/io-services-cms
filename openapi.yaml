@@ -13,7 +13,7 @@ info:
     url: https://docs.pagopa.it/io-guida-tecnica/
   version: 0.11.0
 servers:
-  - url: https://url
+  - url: https://api.io.pagopa.it/api/v1/manage
 tags:
   - name: services
     description: Services API specification
