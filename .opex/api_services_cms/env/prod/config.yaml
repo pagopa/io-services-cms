@@ -6,7 +6,7 @@ evaluation_frequency: 40 # default 20
 evaluation_time_window: 40 # default 20
 event_occurrences: 3 # default 1
 resource_type: app-gateway
-data_source: '/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway'
+data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
 action_groups:
   - /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-common/providers/Microsoft.Insights/actiongroups/iopquarantineerror
 overrides:
