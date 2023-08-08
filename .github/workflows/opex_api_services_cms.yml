@@ -13,6 +13,9 @@ on:
 
 env:
   API_NAME: api_services_cms
+  AZURE_CLIENT_ID: a0185b52-1982-4cea-9107-bd4abffe90d1
+  AZURE_TENANT_ID: 7788edaf-0346-4068-9d79-c868aed15b3d
+  AZURE_SUBSCRIPTION_ID: ec285037-c673-4f58-b594-d7c480da4e8b
 
 permissions:
   id-token: write
@@ -44,8 +47,8 @@ jobs:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}
           config: .opex/${{ env.API_NAME }}/env/prod/config.yaml
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
           docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
