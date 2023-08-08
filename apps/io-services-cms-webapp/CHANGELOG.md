@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.1
+
+### Patch Changes
+
+- 3ff1976: Add statuscategorychangedate default value on JiraIssue io-ts type
+
 ## 1.20.0
 
 ### Minor Changes
