@@ -22,4 +22,5 @@ overrides:
       response_time_threshold: 6
       availability_threshold: 0.95
     /logout:
+      response_time_threshold: 6
       availability_threshold: 0.90
