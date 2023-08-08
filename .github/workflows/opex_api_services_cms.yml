@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - IOPAE-421-add-opex-dashboard
     paths:
       - 'openapi.yaml'
       - '.github/workflows/opex_api_services_cms.yml'
