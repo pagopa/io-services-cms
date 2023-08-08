@@ -7,11 +7,11 @@ on:
       - master
     paths:
       - 'openapi.yaml'
-      - '.github/workflows/opex_openapi.yml'
-      - 'infra/src/env/prod/config.yaml'
+      - '.github/workflows/opex_api_services_cms.yml'
+      - '.opex/api_services_cms/**'
 
 env:
-  API_NAME: openapi
+  API_NAME: api_services_cms
 
 permissions:
   id-token: write
@@ -25,7 +25,9 @@ jobs:
 
     strategy:
       matrix:
-        environment: [prod-cd]
+        environment: [prod]
+
+    environment: ${{ matrix.environment }}-opex
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,9 +44,15 @@ jobs:
         with:
           environment: ${{ matrix.environment }}
           api-name: ${{ env.API_NAME }}
-          config: infra/src/env/prod/config.yaml
-          client-id: ${{ secrets.CLIENT_ID }}
-          tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+          config: .opex/${{ env.API_NAME }}/env/${{ matrix.environment }}/config.yaml
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
           docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d
+      
+      - run: ls -la ./azure-dashboard
+        if: always()
+
+      - run: cat ./azure-dashboard/01_opex.tf
+        if: always()
