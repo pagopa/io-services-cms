@@ -1,24 +1,12 @@
 import { ApiManagementClient } from "@azure/arm-apimanagement";
-import {
-  LegacyService,
-  Queue,
-  ServiceLifecycle,
-} from "@io-services-cms/models";
-import {
-  Service,
-  ValidService,
-} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { LegacyService, Queue } from "@io-services-cms/models";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import {
-  JiraLegacyAPIClient,
-  JiraLegacyIssueStatus,
-} from "../lib/clients/jira-legacy-client";
 import { isUserEnabledForLegacyToCmsSync } from "../utils/feature-flag-handler";
 
 const noAction = {};
@@ -31,60 +19,33 @@ type RequestSyncCmsAction = Action<
 >;
 
 const onLegacyServiceChangeHandler =
-  (
-    jiraLegacyClient: JiraLegacyAPIClient,
-    qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>
-  ) =>
-  (item: Service): TE.TaskEither<Error, RequestSyncCmsAction> =>
+  (legacyServiceModel: ServiceModel) =>
+  (item: LegacyService): TE.TaskEither<Error, RequestSyncCmsAction> =>
     pipe(
-      legacyToCms(jiraLegacyClient, qualityCheckExclusionList, item),
+      legacyToCms(item, legacyServiceModel),
       TE.map((docs) => ({ requestSyncCms: docs }))
     );
 
-const isValidService =
-  (
-    qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>
-  ) =>
-  (service: Service) =>
-    qualityCheckExclusionList.indexOf(service.serviceId) > -1
-      ? true
-      : pipe(
-          ValidService.decode(service),
-          E.fold(
-            (_) => false,
-            (_) => true
-          )
-        );
-
-const hasOngoingReview = (issueStatus?: JiraLegacyIssueStatus) =>
-  issueStatus === "NEW" || issueStatus === "REVIEW";
-
-const isDeletedService = (service: Service) =>
+const isDeletedService = (service: LegacyService) =>
   service.serviceName.startsWith("DELETED");
 
 const getLegacyToCmsStatus = (
-  qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>,
-  service: Service,
-  issueStatus?: JiraLegacyIssueStatus
+  service: LegacyService,
+  wasPublished: boolean = false
 ): Array<Queue.RequestSyncCmsItem["fsm"]["state"]> => {
   if (isDeletedService(service)) {
     return ["deleted", "unpublished"];
-  } else if (
-    isValidService(qualityCheckExclusionList)(service) &&
-    hasOngoingReview(issueStatus)
-  ) {
-    return ["submitted"];
-  } else if (isValidService(qualityCheckExclusionList)(service)) {
-    return service.isVisible
-      ? ["approved", "published"]
-      : ["approved", "unpublished"];
+  } else if (service.isVisible) {
+    return ["approved", "published"];
+  } else if (wasPublished) {
+    return ["approved", "unpublished"];
   } else {
     return ["draft"];
   }
 };
 
 const fromLegacyToCmsService = (
-  service: Service,
+  service: LegacyService,
   status: Queue.RequestSyncCmsItem["fsm"]["state"]
 ): Queue.RequestSyncCmsItem => ({
   id: service.serviceId,
@@ -129,39 +90,75 @@ const fromLegacyToCmsService = (
       : "LifecycleItemType",
 });
 
-const getDescription = (service: Service) =>
+const getDescription = (service: LegacyService) =>
   service.serviceMetadata?.description ?? ("-" as NonEmptyString);
 
-const legacyToCms = (
-  jiraLegacyClient: JiraLegacyAPIClient,
-  qualityCheckExclusionList: ReadonlyArray<ServiceLifecycle.definitions.ServiceId>,
-  item: Service
-) =>
+const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
   pipe(
-    jiraLegacyClient.searchJiraIssueByServiceId(item.serviceId),
-    TE.map(
-      flow(
-        O.fold(
-          () => getLegacyToCmsStatus(qualityCheckExclusionList, item),
-          (issue) =>
-            getLegacyToCmsStatus(
-              qualityCheckExclusionList,
-              item,
-              issue.fields.status.name
-            )
-        )
-      )
+    item,
+    O.fromPredicate((item) => !isDeletedService(item) && !item.isVisible),
+    O.fold(
+      () => TE.right(false), // default false quando non serve controllare se un servizio era pubblicato
+      serviceWasPublished(legacyServiceModel)
     ),
+    TE.map((wasPublished) => getLegacyToCmsStatus(item, wasPublished)),
     TE.map((statusList) =>
       statusList.map((status) => fromLegacyToCmsService(item, status))
     )
   );
 
+export const serviceWasPublished =
+  (legacyServiceModel: ServiceModel) =>
+  (item: LegacyService): TE.TaskEither<Error, boolean> =>
+    pipe(
+      item,
+      buildPreviousVersionId,
+      O.fold(
+        () => TE.right(false),
+        (previousId) =>
+          pipe(
+            legacyServiceModel.find([previousId, item.serviceId]),
+            TE.mapLeft(
+              (e) => new Error(`Error while retrieving previous service ${e}`)
+            ),
+            TE.chainW(
+              flow(
+                O.fold(
+                  () =>
+                    TE.left(
+                      new Error(
+                        `Previous service version was not found ${previousId}`
+                      )
+                    ),
+                  (service) => TE.right(service.isVisible)
+                )
+              )
+            )
+          )
+      )
+    );
+
+export const buildPreviousVersionId = (
+  item: LegacyService
+): O.Option<NonEmptyString> => {
+  if (item.version === 0) {
+    return O.none;
+  }
+
+  const previousVersionId = item.version - 1;
+
+  return O.some(
+    `${item.serviceId}-${previousVersionId
+      .toString()
+      .padStart(16, "0")}` as NonEmptyString
+  );
+};
+
 export const handler =
   (
-    jiraLegacyClient: JiraLegacyAPIClient,
     config: IConfig,
-    apimClient: ApiManagementClient
+    apimClient: ApiManagementClient,
+    legacyServiceModel: ServiceModel
   ): RTE.ReaderTaskEither<
     { item: LegacyService },
     Error,
@@ -180,10 +177,7 @@ export const handler =
               O.fromPredicate((_) => isUserEnabled),
               O.map(
                 flow(
-                  onLegacyServiceChangeHandler(
-                    jiraLegacyClient,
-                    config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST
-                  ),
+                  onLegacyServiceChangeHandler(legacyServiceModel),
                   TE.mapLeft(
                     (e) =>
                       new Error(

@@ -1,5 +1,16 @@
 # io-services-cms-models
 
+## 1.14.0
+
+### Minor Changes
+
+- 7e538e0: ADD ServiceReviewLegacyChecker Azure Function
+- c7c186d: Add Request review legacy queue trigger
+
+### Patch Changes
+
+- 880ba56: Check apimUserId instead of serviceId on feature flag for request review legacy
+
 ## 1.13.2
 
 ### Patch Changes

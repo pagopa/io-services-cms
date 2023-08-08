@@ -170,3 +170,8 @@ variable "userid_legacy_to_cms_sync_inclusion_list" {
   type        = string
   description = "User Ids to include in the sync from legacy to CMS"
 }
+
+variable "userid_request_review_legacy_inclusion_list" {
+  type        = string
+  description = "User Ids to include in the request review from legacy services"
+}

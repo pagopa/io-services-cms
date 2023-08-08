@@ -1,5 +1,53 @@
 # io-services-cms-webapp
 
+## 1.20.1
+
+### Patch Changes
+
+- 3ff1976: Add statuscategorychangedate default value on JiraIssue io-ts type
+
+## 1.20.0
+
+### Minor Changes
+
+- 7e538e0: ADD ServiceReviewLegacyChecker Azure Function
+- c7c186d: Add Request review legacy queue trigger
+
+### Patch Changes
+
+- ffd7577: Added a feature flag to restrict Jira Legacy sync only for service belonging to selected users
+- 48a699f: add legacy ticket status to jira client
+- 84317cf: Removed Jira call and update status mapping on LegacyServiceWatcher
+- 880ba56: Check apimUserId instead of serviceId on feature flag for request review legacy
+- Updated dependencies [7e538e0]
+- Updated dependencies [c7c186d]
+- Updated dependencies [880ba56]
+  - @io-services-cms/models@1.14.0
+
+## 1.19.29
+
+### Patch Changes
+
+- 1a115bf: statuscategorychangedate optional in JiraLegacyIssue
+
+## 1.19.28
+
+### Patch Changes
+
+- b4feca7: Add retry capabilities to Jira Legacy Client on Throttled response
+
+## 1.19.27
+
+### Patch Changes
+
+- 0aa8439: Optimization Jira REST Api call on Legacy Service Watcher
+
+## 1.19.26
+
+### Patch Changes
+
+- 2aeb4bd: Add retry on Legacy Service Watcher
+
 ## 1.19.25
 
 ### Patch Changes

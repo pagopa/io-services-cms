@@ -89,3 +89,20 @@ export const isUserEnabledForLegacyToCmsSync = (
     serviceId,
     config.USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST
   );
+
+/**
+ *
+ * @param config
+ * @param apimClient
+ * @param serviceId
+ * @returns
+ */
+export const isUserEnabledForRequestReviewLegacy = (
+  config: IConfig,
+  apimUserId: NonEmptyString
+): boolean =>
+  pipe(
+    apimUserId,
+    parseOwnerIdFullPath,
+    isElementAllowedOnList(config.USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST)
+  );

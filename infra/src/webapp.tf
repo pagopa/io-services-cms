@@ -159,7 +159,7 @@ locals {
     LEGACY_JIRA_PROJECT_NAME = var.legacy_jira_project_name
 
     # Apim connection
-    AZURE_APIM                           = var.azure_apim
+    AZURE_APIM                           = var.azure_apim_v2
     AZURE_APIM_RESOURCE_GROUP            = var.azure_apim_resource_group
     AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
     AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = var.azure_apim_product_id
@@ -192,6 +192,7 @@ locals {
     REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
     REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
+    REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
 
     # List of service ids for which quality control will be bypassed
     SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
@@ -200,6 +201,8 @@ locals {
     USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST = var.userid_cms_to_legacy_sync_inclusion_list
     # UserId List allowed to sync services from Legacy to CMS
     USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST = var.userid_legacy_to_cms_sync_inclusion_list
+    # UserId List allowed to sync JIRA ticket events from Legacy to CMS
+    USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST = var.userid_request_review_legacy_inclusion_list
   }
 }
 
@@ -230,16 +233,18 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "0"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "0"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "0"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "0"
-      "AzureWebJobs.OnRequestPublication.Disabled"      = "0"
-      "AzureWebJobs.OnRequestReview.Disabled"           = "0"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"       = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "0"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "0"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "0"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"       = "0"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"   = "0"
+      "AzureWebJobs.OnRequestPublication.Disabled"       = "0"
+      "AzureWebJobs.OnRequestReview.Disabled"            = "0"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )
 
@@ -254,6 +259,8 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestReview.Disabled",
     "AzureWebJobs.OnRequestSyncCms.Disabled",
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
+    "AzureWebJobs.OnRequestReviewLegacy.Disabled",
+    "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
   ]
 
   subnet_id = module.app_snet.id
@@ -288,16 +295,18 @@ module "webapp_functions_app_staging_slot" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"      = "1"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"   = "1"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled" = "1"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"      = "1"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"     = "1"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"  = "1"
-      "AzureWebJobs.OnRequestPublication.Disabled"      = "1"
-      "AzureWebJobs.OnRequestReview.Disabled"           = "1"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"          = "1"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"       = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "1"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "1"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "1"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"       = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"   = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"       = "1"
+      "AzureWebJobs.OnRequestReview.Disabled"            = "1"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
     }
   )
 

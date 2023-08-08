@@ -48,7 +48,6 @@ resource "azurerm_api_management_api_operation_policy" "update_service_logo_poli
   xml_content = file("./api/io_services_cms/v1/updateservicelogo_policy/policy.xml")
 }
 
-
 # Named Value fn-services-cms
 resource "azurerm_api_management_named_value" "io_fn_services_cms_key" {
   name                = "io-fn-services-cms-key"

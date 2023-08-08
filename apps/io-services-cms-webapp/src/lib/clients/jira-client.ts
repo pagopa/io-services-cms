@@ -1,13 +1,14 @@
-import { Either, toError } from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
+import { Either, toError } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import nodeFetch from "node-fetch-commonjs";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { JiraConfig } from "../../config";
 
 export const JIRA_REST_API_PATH = "/rest/api/2/";
@@ -24,6 +25,9 @@ export const JiraIssueStatus = t.union([
   t.literal("REVIEW"),
   t.literal("REJECTED"),
   t.literal("APPROVED"),
+  // FIXME : delete after removing jira legacy client
+  t.literal("DONE"),
+  t.literal("Completata"),
 ]);
 export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
 
@@ -37,7 +41,10 @@ export const JiraIssue = t.type({
     status: t.type({
       name: JiraIssueStatus,
     }),
-    statuscategorychangedate: NonEmptyString,
+    statuscategorychangedate: withDefault(
+      NonEmptyString,
+      new Date().toISOString() as NonEmptyString
+    ),
   }),
 });
 export type JiraIssue = t.TypeOf<typeof JiraIssue>;

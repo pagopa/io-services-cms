@@ -1,27 +1,22 @@
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 import {
   LegacyService,
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
-import { JiraLegacyAPIClient } from "../../lib/clients/jira-legacy-client";
-import { handler } from "../on-legacy-service-change";
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { IConfig } from "../../config";
-import { ap } from "fp-ts/lib/Reader";
-
-const mockJiraLegacyClient = {
-  searchJiraIssueByServiceId: vi.fn((_) =>
-    TE.right(O.of({ fields: { status: { name: "DONE" } } }))
-  ),
-} as unknown as JiraLegacyAPIClient;
-
-const qualityCheckExclusionList = ["aServiceId" as NonEmptyString];
+import {
+  buildPreviousVersionId,
+  handler,
+  serviceWasPublished,
+} from "../on-legacy-service-change";
 
 // Legacy Service: valid and visible
 const aLegacyService = {
@@ -52,6 +47,7 @@ const aLegacyService = {
     tokenName: "aTokenName",
     tosUrl: "aTosUrl",
     webUrl: "aWebUrl",
+    version: 1,
   },
 } as unknown as LegacyService;
 
@@ -123,15 +119,19 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
+
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -164,24 +164,26 @@ describe("On Legacy Service Change Handler", () => {
       organizationFiscalCode: "12345678901",
       organizationName: "anOrganizationName",
       requireSecureChannels: false,
-      serviceId: "aServiceId",
+      serviceId: "aServiceIdScoppia",
       serviceName: "aServiceName",
-      version: 0,
+      version: 1,
     } as unknown as LegacyService;
+
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(item))),
+    } as unknown as ServiceModel;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [
-        "anotherServiceId" as NonEmptyString,
-      ],
     } as unknown as IConfig;
 
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -201,61 +203,26 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a valid item with pending review to a requestSyncCms action containing a service lifecycle with SUBMITTED status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "NEW" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
+  it("should map a visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
     const item = {
       ...aLegacyService,
     } as unknown as LegacyService;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({
-        requestSyncCms: [
-          {
-            ...aServiceLifecycleItem,
-            fsm: {
-              state: "submitted",
-            },
-            kind: "LifecycleItemType",
-          },
-        ],
-      });
-    }
-  });
-
-  it("should map a valid and visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
-    const item = {
-      ...aLegacyService,
-    } as unknown as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
 
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -268,7 +235,7 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map a valid and not visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with UNPUBLISHED status", async () => {
+  it("should map a not visible, not deleted and not previously published service to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
     const item = {
       ...aLegacyService,
       isVisible: false,
@@ -276,56 +243,21 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({
-        requestSyncCms: [
-          { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
-          {
-            ...aServicePublicationItem,
-            fsm: { state: "unpublished" },
-            kind: "PublicationItemType",
-          },
-        ],
-      });
-    }
-  });
-
-  it("should map an invalid item to a requestSyncCms action containing a service lifecycle with DRAFT status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as LegacyService;
-
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [],
-    } as unknown as IConfig;
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(item))),
+    } as unknown as ServiceModel;
 
     delete item["serviceMetadata"];
 
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -342,31 +274,45 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map an invalid item in qualityCheckExclusionList to a requestSyncCms action containing a service lifecycle with APPROVED status", async () => {
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) =>
-        TE.right(O.of({ fields: { status: { name: "REJECTED" } } }))
-      ),
-    } as unknown as JiraLegacyAPIClient;
-
+  it("should map a not visible, not deleted but previously published service to a lifecycle approved and pubblication unpublished", async () => {
     const item = {
       ...aLegacyService,
+      version: 1,
       isVisible: false,
     } as LegacyService;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
+
+    const mockServiceModel = {
+      find: vi.fn(() =>
+        TE.right(
+          O.some({
+            ...aLegacyService,
+            version: 0,
+            isVisible: true,
+          })
+        )
+      ),
+    } as unknown as ServiceModel;
 
     delete item["serviceMetadata"];
 
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    const previousVersionId = `${item.serviceId}-${(item.version - 1)
+      .toString()
+      .padStart(16, "0")}`;
+
+    expect(mockServiceModel.find).toHaveBeenCalledWith([
+      previousVersionId,
+      item.serviceId,
+    ]);
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -376,6 +322,10 @@ describe("On Legacy Service Change Handler", () => {
             expect.objectContaining({
               fsm: expect.objectContaining({ state: "approved" }),
               kind: "LifecycleItemType",
+            }),
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "unpublished" }),
+              kind: "PublicationItemType",
             }),
           ]),
         })
@@ -391,15 +341,19 @@ describe("On Legacy Service Change Handler", () => {
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
     } as unknown as IConfig;
 
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
+
     const result = await handler(
-      mockJiraLegacyClient,
       mockConfig,
-      mockApimClient
+      mockApimClient,
+      mockServiceModel
     )({ item })();
 
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -407,59 +361,104 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
-  it("should map an item to a no action when user not included in inclusionList", async () => {
-    const item = {
-      ...aLegacyService,
-    } as LegacyService;
+  describe("buildPreviousVersionId tests", () => {
+    it("should return the previous version id", () => {
+      const previousVersionId = buildPreviousVersionId({
+        ...aLegacyService,
+        serviceId: "aServiceId" as NonEmptyString,
+        version: 20,
+      });
+      expect(O.isSome(previousVersionId)).toBeTruthy();
+      if (O.isSome(previousVersionId)) {
+        expect(previousVersionId.value).toBe("aServiceId-0000000000000019");
+      }
+    });
 
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: ["aDifferentUserId"],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
-
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
-
-    expect(E.isRight(result)).toBeTruthy();
-
-    if (E.isRight(result)) {
-      expect(result.right).toStrictEqual({});
-    }
+    it("should return O.none", () => {
+      const previousVersionId = buildPreviousVersionId({
+        ...aLegacyService,
+        serviceId: "aServiceId" as NonEmptyString,
+        version: 0,
+      });
+      expect(O.isNone(previousVersionId)).toBeTruthy();
+    });
   });
 
-  it("Should propagate the original error", async () => {
-    const message =
-      'value ["Completata"] at [root.0.issues.0.fields.status.name.0] is not a valid ["NEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.1] is not a valid ["REVIEW"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.2] is not a valid ["REJECTED"]\nvalue ["Completata"] at [root.0.issues.0.fields.status.name.3] is not a valid ["DONE"]';
+  describe("serviceWasPublished tests", () => {
+    it("should return true if the service was published", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 6,
+      } as LegacyService;
 
-    const mockJiraLegacyClient = {
-      searchJiraIssueByServiceId: vi.fn((_) => TE.left(new Error(message))),
-    } as unknown as JiraLegacyAPIClient;
+      const previousService = {
+        ...aLegacyService,
+        isVisible: true,
+        version: 5,
+      } as LegacyService;
 
-    const item = {
-      ...aLegacyService,
-      isVisible: false,
-    } as LegacyService;
+      const mockServiceModel = {
+        find: vi.fn(() => TE.right(O.some(previousService))),
+      } as unknown as ServiceModel;
 
-    const mockConfig = {
-      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
-      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId" as NonEmptyString],
-    } as unknown as IConfig;
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
 
-    delete item["serviceMetadata"];
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toBeTruthy();
+      }
+    });
 
-    const result = await handler(
-      mockJiraLegacyClient,
-      mockConfig,
-      mockApimClient
-    )({ item })();
+    it("should return false if the service was not published", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 6,
+      } as LegacyService;
 
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left.message).toContain(message);
-      expect(result.left.message).toContain("aServiceId");
-    }
+      const previousService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 5,
+      } as LegacyService;
+
+      const mockServiceModel = {
+        find: vi.fn(() => TE.right(O.some(previousService))),
+      } as unknown as ServiceModel;
+
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).not.toBeTruthy();
+      }
+    });
+
+    it("should return false without fetching from cosmos when surrentService is the first version", async () => {
+      const currentService = {
+        ...aLegacyService,
+        isVisible: false,
+        version: 0,
+      } as LegacyService;
+
+      const mockServiceModel = {
+        find: vi.fn(() => TE.left(new Error("should not be called"))),
+      } as unknown as ServiceModel;
+
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
+
+      expect(mockServiceModel.find).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).not.toBeTruthy();
+      }
+    });
   });
 });

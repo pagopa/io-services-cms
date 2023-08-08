@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "schedule": "0 8-19 * * 1-5",
+      "name": "serviceReviewLegacyCheckerTimer",
+      "type": "timerTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "serviceReviewLegacyCheckerEntryPoint"
+}

@@ -124,6 +124,9 @@ export const QueueConfig = t.type({
   REQUEST_REVIEW_QUEUE: NonEmptyString,
   REQUEST_PUBLICATION_QUEUE: NonEmptyString,
   REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
+  REQUEST_SYNC_LEGACY_QUEUE: NonEmptyString,
+  REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
+  REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
@@ -161,6 +164,11 @@ const FeatureFlags = t.type({
   ),
   // UserId List allowed to sync services from CMS to Legacy
   USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
+  // UserId List allowed to sync JIRA ticket events from Legacy to CMS
+  USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
