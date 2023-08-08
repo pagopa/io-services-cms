@@ -22,6 +22,3 @@ overrides:
     /api/v1/manage/services/{serviceId}/release:
       response_time_threshold: 6
       availability_threshold: 0.95
-    /logout:
-      response_time_threshold: 6
-      availability_threshold: 0.90
