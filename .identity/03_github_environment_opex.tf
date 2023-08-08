@@ -2,8 +2,8 @@ resource "github_repository_environment" "github_repository_environment_opex" {
   environment = "${var.env}-opex"
   repository  = var.github.repository
   deployment_branch_policy {
-    protected_branches     = false
-    custom_branch_policies = true
+    protected_branches     = true
+    custom_branch_policies = false
   }
 }
 
