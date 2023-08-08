@@ -187,7 +187,7 @@ const startParallel = async () => {
   const timeElapsed = endTime - startTime;
 
   console.log(
-    `PAST RECOVERY PROCEDURE DONE WITH SUCCES in ${timeElapsed} milliseconds (~${(
+    `PAST RECOVERY [PARALLEL] PROCEDURE DONE WITH SUCCES in ${timeElapsed} milliseconds (~${(
       timeElapsed / 60000
     ).toFixed(
       2
