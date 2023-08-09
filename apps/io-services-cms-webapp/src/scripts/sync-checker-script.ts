@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-/* eslint-disable functional/immutable-data */
 /**
  * Script to check if the sync process is working properly.
  *
@@ -47,6 +44,7 @@ type InvalidItem = {
   processPhase: ProcessPhases;
 };
 
+/* eslint-disable no-console */
 const logger = {
   info: (message: string) =>
     console.log(
@@ -116,37 +114,48 @@ const buildInvalidItem = (
   processPhase,
 });
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const retrieveNextChunk = (queryIterator: QueryIterator<any>) => async () => {
-  const validItems: ServiceLifecycle.ItemType[] = [];
-  const invalidItems: InvalidItem[] = [];
-
   const { resources: itemsChunk, continuationToken } =
     await queryIterator.fetchNext();
 
-  for (const item of itemsChunk) {
-    const validationResult = ServiceLifecycle.ItemType.decode(item);
+  const res = itemsChunk.reduce(
+    (acc, item) => {
+      const validationResult = ServiceLifecycle.ItemType.decode(item);
 
-    if (E.isRight(validationResult)) {
-      validItems.push(validationResult.right);
-    } else {
-      logger.error(`Item ${item.id} is not valid: ${validationResult.left}`);
-      // L'elemento non è valido secondo il codec
-      invalidItems.push(
-        buildInvalidItem(
-          item.id,
-          JSON.stringify(validationResult.left),
-          "LIFECYCLE_RETRIEVE"
-        )
-      );
+      if (E.isRight(validationResult)) {
+        return {
+          ...acc,
+          validItems: [...acc.validItems, validationResult.right],
+        };
+      } else {
+        logger.error(`Item ${item.id} is not valid: ${validationResult.left}`);
+        // L'elemento non è valido secondo il codec
+        return {
+          ...acc,
+          invalidItems: [
+            ...acc.invalidItems,
+            buildInvalidItem(
+              item.id,
+              JSON.stringify(validationResult.left),
+              "LIFECYCLE_RETRIEVE"
+            ),
+          ],
+        };
+      }
+    },
+    {
+      validItems: [] as ServiceLifecycle.ItemType[],
+      invalidItems: [] as InvalidItem[],
     }
-  }
+  );
+
   logger.info(
-    `Next chunk retreived from ServiceLifecycle, validItems: ${validItems.length}, invalidItems: ${invalidItems.length}`
+    `Next chunk retreived from ServiceLifecycle, validItems: ${res.validItems.length}, invalidItems: ${res.invalidItems.length}`
   );
 
   return {
-    validItems,
-    invalidItems,
+    ...res,
     continuationToken,
   };
 };
