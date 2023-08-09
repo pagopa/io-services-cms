@@ -9,12 +9,12 @@ import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
-import { getConfigOrThrow } from "./config";
-import { getApimClient, getSubscription } from "./lib/clients/apim-client";
+import { getConfigOrThrow } from "../config";
+import { getApimClient, getSubscription } from "../lib/clients/apim-client";
 import {
   JiraLegacyIssue,
   jiraLegacyClient,
-} from "./lib/clients/jira-legacy-client";
+} from "../lib/clients/jira-legacy-client";
 
 const SERVICE_ID_PREFIX = "devportal-service-";
 
