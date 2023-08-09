@@ -26,7 +26,7 @@ type RequestSyncLegacyAction = Action<
 >;
 const noAction = {};
 
-const cmsToLegacy = (
+export const cmsToLegacy = (
   serviceHistory: ServiceHistory
 ): Queue.RequestSyncLegacyItem => {
   const legacyServiceBase = {
