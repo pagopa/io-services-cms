@@ -79,6 +79,18 @@ const RESULT_PATH = `${os.homedir()}/sync_check_result`;
 const INVALID_ITEMS_CSV_FILE_PATH = `${RESULT_PATH}/invalid_items.csv`;
 const CONTINUATION_TOKEN_FILE = `${RESULT_PATH}/continuation_token.txt`;
 
+const bindEvents = () => {
+  process.on("unhandledRejection", (reason) => {
+    logger.error(`Unhandled rejection: ${reason}`);
+    process.exit(1);
+  });
+
+  process.on("sigint", () => {
+    logger.info("SIGINT received, exiting");
+    process.exit(0);
+  });
+};
+
 const getContinuationToken = (): string | undefined => {
   if (fs.existsSync(CONTINUATION_TOKEN_FILE)) {
     const continuationToken = fs
@@ -262,6 +274,9 @@ const checkItemsOnLegacy = (
 
 const main = async () => {
   logger.info("Starting ...");
+
+  bindEvents();
+
   // Create filesystem result folder
   if (!fs.existsSync(RESULT_PATH)) {
     fs.mkdirSync(RESULT_PATH);
