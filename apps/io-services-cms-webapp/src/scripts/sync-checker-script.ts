@@ -210,7 +210,7 @@ const objectToMap = (
   return mappa;
 };
 
-const lifeCycleAndLegacyEquals = (
+const compareLifecycleAndLegacy = (
   lifecycleItem: Queue.RequestSyncLegacyItem,
   legacyItem: RetrievedService
 ): E.Either<InvalidItem, void> => {
@@ -224,6 +224,7 @@ const lifeCycleAndLegacyEquals = (
     "_attachments",
     "_ts",
     "cmsTag",
+    "maxAllowedPaymentAmount",
     "isVisible", // FIXME: nel mapping per elementi lifecycle isVisible non é calcolato
   ];
 
@@ -242,16 +243,23 @@ const lifeCycleAndLegacyEquals = (
     );
   }
 
+  // eslint-disable-next-line functional/no-let
+  let unmatchedProps = "";
+
   for (const [key, legacyValue] of legacyItemMap) {
     const lifecycleValue = lifecycleItemMap.get(key);
     if (lifecycleValue !== legacyValue) {
-      const errorMessage = `Item ${lifecycleItem.serviceId} has a different value for ${key}, lifecycle: ${lifecycleValue} legacy: ${legacyValue}`;
-      logger.error(errorMessage);
-      return E.left(
-        buildInvalidItem(lifecycleItem.serviceId, errorMessage, "COMPARE")
-      );
+      unmatchedProps = `${unmatchedProps} - [${key} lifecycle: ${lifecycleValue} legacy: ${legacyValue}]`;
     }
   }
+  if (unmatchedProps.length !== 0) {
+    const errorMessage = `Item ${lifecycleItem.serviceId} has a different value for the following properties: ${unmatchedProps}`;
+    logger.error(errorMessage);
+    return E.left(
+      buildInvalidItem(lifecycleItem.serviceId, errorMessage, "COMPARE")
+    );
+  }
+
   logger.info(
     `Item ${lifecycleItem.serviceId} mapped and legacyItem are equals`
   );
@@ -313,7 +321,7 @@ const checkItemOnLegacy = (
       pipe(
         retrieveLegacyService(lifecycleItem.id),
         TE.chain((legacyItem) =>
-          pipe(lifeCycleAndLegacyEquals(mapped, legacyItem), TE.fromEither)
+          pipe(compareLifecycleAndLegacy(mapped, legacyItem), TE.fromEither)
         )
       )
     ),
