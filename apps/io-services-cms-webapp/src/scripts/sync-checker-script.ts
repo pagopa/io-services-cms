@@ -173,31 +173,88 @@ const retrieveNextChunk = (queryIterator: QueryIterator<any>) => async () => {
 };
 
 const appendInvalidItemsToCSV = (invalidItems: InvalidItem[]) => {
+  if (!fs.existsSync(INVALID_ITEMS_CSV_FILE_PATH)) {
+    // File does not exist, init it by appending the CSV header
+    fs.appendFileSync(
+      INVALID_ITEMS_CSV_FILE_PATH,
+      "itemId;processPhase;errorDetail\n"
+    );
+  }
   invalidItems.forEach((invalidItem) => {
-    const csvLine = `${invalidItem.itemId};${invalidItem.error};${invalidItem.processPhase}`;
+    const csvLine = `${invalidItem.itemId};${invalidItem.processPhase};${invalidItem.error}`;
     fs.appendFileSync(INVALID_ITEMS_CSV_FILE_PATH, csvLine + "\n");
   });
+};
+
+const objectToMap = (
+  obj: { [key: string]: any },
+  parentName: string = "",
+  propertyToIgnore: string[] = []
+): Map<string, any> => {
+  const mappa = new Map<string, any>();
+
+  for (const key in obj) {
+    if (!propertyToIgnore.includes(key)) {
+      const mapKey = parentName ? `${parentName}.${key}` : key;
+
+      if (typeof obj[key] === "object" && obj[key] !== null) {
+        const nestedMap = objectToMap(obj[key], mapKey, propertyToIgnore);
+        for (const [nestedKey, nestedValue] of nestedMap) {
+          mappa.set(nestedKey, nestedValue);
+        }
+      } else {
+        mappa.set(mapKey, obj[key]);
+      }
+    }
+  }
+  return mappa;
 };
 
 const lifeCycleAndLegacyEquals = (
   lifecycleItem: Queue.RequestSyncLegacyItem,
   legacyItem: RetrievedService
 ): E.Either<InvalidItem, void> => {
-  const legacyItemWithoutId = { ...legacyItem };
+  const propertyToIgnore = [
+    "id",
+    "version",
+    "kind",
+    "_rid",
+    "_self",
+    "_etag",
+    "_attachments",
+    "_ts",
+    "cmsTag",
+    "isVisible", // FIXME: nel mapping per elementi lifecycle isVisible non é calcolato
+  ];
 
-  const lifecycleItemWithoutId = { ...lifecycleItem };
+  const legacyItemMap = objectToMap(legacyItem, "", propertyToIgnore);
+  const lifecycleItemMap = objectToMap(lifecycleItem, "", propertyToIgnore);
 
-  if (
-    JSON.stringify(legacyItemWithoutId) !==
-    JSON.stringify(lifecycleItemWithoutId)
-  ) {
-    const errorMessage = `Item ${lifecycleItem.serviceId} mapped is not equal to last legacy version`;
+  if (legacyItemMap.size !== lifecycleItemMap.size) {
+    const errorMessage = `Item ${
+      lifecycleItem.serviceId
+    } mapped and legacyItem does not have the same properties, lifecycleProperties: ${Array.from(
+      lifecycleItemMap.keys()
+    )}, legacyProperties: ${Array.from(legacyItemMap.keys())}`;
     logger.error(errorMessage);
     return E.left(
       buildInvalidItem(lifecycleItem.serviceId, errorMessage, "COMPARE")
     );
   }
 
+  for (const [key, legacyValue] of legacyItemMap) {
+    const lifecycleValue = lifecycleItemMap.get(key);
+    if (lifecycleValue !== legacyValue) {
+      const errorMessage = `Item ${lifecycleItem.serviceId} has a different value for ${key}, lifecycle: ${lifecycleValue} legacy: ${legacyValue}`;
+      logger.error(errorMessage);
+      return E.left(
+        buildInvalidItem(lifecycleItem.serviceId, errorMessage, "COMPARE")
+      );
+    }
+  }
+  logger.info(
+    `Item ${lifecycleItem.serviceId} mapped and legacyItem are equals`
+  );
   return E.right(void 0);
 };
 
@@ -205,7 +262,10 @@ const mapToLegacy = (
   lifecycleItem: ServiceLifecycle.ItemType
 ): E.Either<InvalidItem, Queue.RequestSyncLegacyItem> => {
   try {
-    const mapped = cmsToLegacy(lifecycleItem as unknown as ServiceHistory);
+    const mapped = cmsToLegacy({
+      ...lifecycleItem,
+      serviceId: lifecycleItem.id,
+    } as unknown as ServiceHistory);
     return E.right(mapped);
   } catch (error) {
     logger.error(
@@ -265,11 +325,12 @@ const checkItemsOnLegacy = (
 ): T.Task<InvalidItem[]> =>
   pipe(
     lifecycleItems,
-    RA.traverse(T.ApplicativePar)(checkItemOnLegacy), // Esegue checkItemOnLegacy per ogni elemento
-    T.map((results) => {
-      const errors = results.filter(E.isLeft).map((e) => e.left); // Filtra gli errori e mappa a InvalidItem
-      return errors.length > 0 ? errors : [];
-    })
+    RA.traverse(T.ApplicativePar)(checkItemOnLegacy),
+    T.map((results: ReadonlyArray<E.Either<InvalidItem, void>>) =>
+      results
+        .filter((result): result is E.Left<InvalidItem> => E.isLeft(result))
+        .map((e) => e.left)
+    )
   );
 
 const main = async () => {
