@@ -327,7 +327,7 @@ const insertMassiveMessagesWithDelay = async (
     try {
       await insertQueueMessageAsync(contents[i]);
 
-      // Logga un messaggio ogni 100 inserimenti
+      // Log progress every 100 queue messages inserted
       if ((i + 1) % 100 === 0) {
         console.log(
           `PAST RECOVERY ${
@@ -347,7 +347,6 @@ const insertMassiveMessagesWithDelay = async (
         contents[i],
         error
       );
-      // Potresti voler salvare il messaggio in un sistema di logging avanzato qui
     }
   }
 };
