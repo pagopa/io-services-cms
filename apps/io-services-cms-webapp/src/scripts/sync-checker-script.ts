@@ -6,6 +6,8 @@
  * 2. For each service, map to legacy format usign the cmsToLegacy function from onHistoryChange
  * 3. Retrieve the last version of the corrispondig service from the legacy collection
  * 4. Compare the two services and log the result
+ *
+ * Run Script command: ts-node src/scripts/sync-checker-script.ts
  */
 import fs from "fs";
 import os from "os";
