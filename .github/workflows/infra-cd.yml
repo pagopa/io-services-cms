@@ -55,7 +55,7 @@ jobs:
       - name: Setup terraform
         id: setup-version
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/terraform/terraform-install-action
-        uses: pagopa/eng-github-actions-iac-template/terraform-install-action@main
+        uses: pagopa/eng-github-actions-iac-template/terraform/terraform-install-action@main
 
       - name: Terraform pre apply
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/terraform-preapply-azure-action
