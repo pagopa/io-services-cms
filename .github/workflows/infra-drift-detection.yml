@@ -49,8 +49,8 @@ jobs:
 
       - name: Setup terraform
         id: setup-version
-        # https://github.com/pagopa/terraform-install-action/commits/main
-        uses: pagopa/terraform-install-action@1f76f593176e58c423b88d72273a612ba7ba430b
+        # https://github.com/pagopa/eng-github-actions-iac-template/tree/main/terraform/terraform-install-action
+        uses: pagopa/eng-github-actions-iac-template/terraform-install-action@main
 
       - name: Terraform drift detection
         # from https://github.com/pagopa/terraform-driftdetection-azure-action/commits/main
