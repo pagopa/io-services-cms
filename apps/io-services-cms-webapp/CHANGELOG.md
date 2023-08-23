@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.2
+
+### Patch Changes
+
+- a23d4dd: Updated Github Actions
+
 ## 1.20.1
 
 ### Patch Changes
