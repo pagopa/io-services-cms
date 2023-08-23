@@ -233,7 +233,7 @@ module "webapp_functions_app" {
   app_settings = merge(
     local.webapp_functions_app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"       = "0"
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "0"
       "AzureWebJobs.ServiceReviewChecker.Disabled"       = "0"
