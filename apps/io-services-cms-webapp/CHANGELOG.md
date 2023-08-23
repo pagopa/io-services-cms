@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.3
+
+### Patch Changes
+
+- bf51f9c: Fetch previous legacy service recursive
+
 ## 1.20.2
 
 ### Patch Changes
