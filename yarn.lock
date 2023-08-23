@@ -1102,6 +1102,7 @@ __metadata:
     "@mui/material": ^5.14.5
     "@mui/system": ^5.14.5
     "@pagopa/mui-italia": ^1.0.0
+    "@pagopa/openapi-codegen-ts": ^13.1.0
     "@types/node": 20.4.5
     "@types/react": 18.2.18
     "@types/react-dom": 18.2.7
@@ -1670,6 +1671,27 @@ __metadata:
     gen-api-models: dist/commands/gen-api-models/cli.js
     gen-api-sdk: dist/commands/gen-api-sdk/cli.js
   checksum: 29f3a038903aafdc9c831b5b1f9060b2c29b03475022d32424f1e8591326dcb1aff8c4e834139fbbc32fa520a7abb6cd0ebfad41b304236a6b26fb991ed10af3
+  languageName: node
+  linkType: hard
+
+"@pagopa/openapi-codegen-ts@npm:^13.1.0":
+  version: 13.1.0
+  resolution: "@pagopa/openapi-codegen-ts@npm:13.1.0"
+  dependencies:
+    "@pagopa/ts-commons": ^10.15.0
+    fs-extra: ^6.0.0
+    nunjucks: ^3.2.3
+    openapi-types: ^10.0.0
+    prettier: ^1.12.1
+    safe-identifier: ^0.4.2
+    swagger-parser: ^10.0.3
+    write-yaml-file: ^4.1.3
+    yargs: ^15.0.1
+  bin:
+    bundle-api-spec: dist/commands/bundle-api-spec/cli.js
+    gen-api-models: dist/commands/gen-api-models/cli.js
+    gen-api-sdk: dist/commands/gen-api-sdk/cli.js
+  checksum: 21940064ac4988833b5978fd19536876b79793aaa45cc418550c017844f1782f57b288d7d723e5e1293e703dc54c257c855c1b46f1a4183056b0102f642a3ef4
   languageName: node
   linkType: hard
 
