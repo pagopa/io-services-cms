@@ -333,6 +333,73 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
+  it("should map a not visible, not deleted but previously not consecutive published service to a lifecycle approved and pubblication unpublished", async () => {
+    const item = {
+      ...aLegacyService,
+      version: 2,
+      isVisible: false,
+    } as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+    } as unknown as IConfig;
+
+    const mockServiceModel = {
+      find: vi
+        .fn()
+        .mockImplementationOnce(() => TE.right(O.none))
+        .mockImplementationOnce(() =>
+          TE.right(
+            O.some({
+              ...aLegacyService,
+              version: 0,
+              isVisible: true,
+            })
+          )
+        ),
+    } as unknown as ServiceModel;
+
+    delete item["serviceMetadata"];
+
+    const result = await handler(
+      mockConfig,
+      mockApimClient,
+      mockServiceModel
+    )({ item })();
+
+    const versionOne = `${item.serviceId}-${(1).toString().padStart(16, "0")}`;
+    const versionZero = `${item.serviceId}-${(0).toString().padStart(16, "0")}`;
+
+    expect(mockServiceModel.find).toHaveBeenCalledTimes(2);
+    expect(mockServiceModel.find).toHaveBeenCalledWith([
+      versionOne,
+      item.serviceId,
+    ]);
+
+    expect(mockServiceModel.find).toHaveBeenCalledWith([
+      versionZero,
+      item.serviceId,
+    ]);
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toEqual(
+        expect.objectContaining({
+          requestSyncCms: expect.arrayContaining([
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "approved" }),
+              kind: "LifecycleItemType",
+            }),
+            expect.objectContaining({
+              fsm: expect.objectContaining({ state: "unpublished" }),
+              kind: "PublicationItemType",
+            }),
+          ]),
+        })
+      );
+    }
+  });
+
   it("should map an item to a no action", async () => {
     const item = {
       ...aLegacyService,
