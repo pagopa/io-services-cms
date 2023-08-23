@@ -1,0 +1,151 @@
+Institution:
+  type: object
+  description: Selfcare institution resource
+  properties:
+    address:
+      type: string
+      description: Institution's physical address
+    assistanceContacts:
+      $ref: "#/AssistanceContacts"
+      description: Institution's assistance contacts
+    companyInformations:
+      $ref: "#/CompanyInformations"
+      description: GPS, SCP, PT optional data
+    dpoData:
+      $ref: "#/DpoData"
+      description: Data Protection Officer (DPO) specific data
+    externalId:
+      type: string
+      description: Institution's unique external identifier
+    fiscalCode:
+      type: string
+      description: Institution's taxCode
+    id:
+      type: string
+      description: Institution's unique internal identifier
+    institutionType:
+      type: string
+      enum: [GSP, PA, PSP, PT, SCP]
+    mailAddress:
+      type: string
+      description: Institution's digitalAddress
+    name:
+      type: string
+      description: Institution's name
+    origin:
+      type: string
+      description: Institution data origin
+    originId:
+      type: string
+      description: Institution's details origin Id
+    pspData:
+      $ref: "#/PspData"
+      description: Payment Service Provider (PSP) specific data
+    recipientCode:
+      type: string
+      description: Billing recipient code
+    status:
+      type: string
+      description: Institution onboarding status
+    userProductRoles:
+      type: array
+      description: Logged user's roles on product
+      items:
+        type: string
+  required:
+    - address
+    - externalId
+    - fiscalCode
+    - id
+    - mailAddress
+    - name
+    - origin
+    - originId
+    - status
+    - userProductRoles
+Product:
+  type: object
+  description: Selfcare product resource
+  properties:
+    description:
+      type: string
+      description: Product's description
+    id:
+      type: string
+      description: Product's unique identifier
+    title:
+      type: string
+      description: Product's title
+    urlBO:
+      type: string
+      description: URL that redirects to the back-office section, where is possible to manage the product
+    urlPublic:
+      type: string
+      description: URL that redirects to the public information webpage of the product
+  required:
+    - description
+    - id
+    - title
+    - urlBO
+AssistanceContacts:
+  type: object
+  properties:
+    supportEmail:
+      type: string
+      description: Institution's support email contact
+    supportPhone:
+      type: string
+      description: Institution's support phone contact
+CompanyInformations:
+  type: object
+  properties:
+    businessRegisterPlace:
+      type: string
+      description: Institution's business register place
+    rea:
+      type: string
+      description: Institution's REA
+    shareCapital:
+      type: string
+      description: Institution's share capital value
+DpoData:
+  type: object
+  properties:
+    address:
+      type: string
+      description: DPO's address
+    email:
+      type: string
+      description: IDPO's email
+    pec:
+      type: string
+      description: DPO's pec
+  required:
+    - address
+    - email
+    - pec
+PspData:
+  type: object
+  properties:
+    abiCode:
+      type: string
+      description: PSP's ABI code
+    businessRegisterNumber:
+      type: string
+      description: PSP's Business Register number
+    legalRegisterName:
+      type: string
+      description: PSP's legal register name
+    legalRegisterNumber:
+      type: string
+      description: PSP's legal register number
+    vatNumberGroup:
+      type: boolean
+      description: PSP's Vat Number group
+      example: false
+  required:
+    - abiCode
+    - businessRegisterNumber
+    - legalRegisterName
+    - legalRegisterNumber
+    - vatNumberGroup
