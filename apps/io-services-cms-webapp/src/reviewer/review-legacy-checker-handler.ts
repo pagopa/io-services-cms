@@ -94,7 +94,7 @@ export const updateReview =
       issueItemPairs,
       RA.traverse(TE.ApplicativePar)(({ issue, item }) =>
         sequenceT(TE.ApplicativeSeq)(
-          makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
+          makeServiceLifecycleApply(item, issue, fsmLifecycleClient, context),
           pipe(
             dao.updateStatus({
               ...item,
@@ -117,9 +117,11 @@ export const updateReview =
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
   jiraIssue: ProcessedJiraIssue,
-  fsmLifecycleClient: ServiceLifecycle.FsmClient
-) =>
-  pipe(
+  fsmLifecycleClient: ServiceLifecycle.FsmClient,
+  context: Context
+) => {
+  const logger = getLogger(context, logPrefix, "makeServiceLifecycleApply");
+  return pipe(
     serviceReview.service_id,
     fsmLifecycleClient.fetch,
     TE.chain(
@@ -132,27 +134,47 @@ const makeServiceLifecycleApply = (
               )
             ),
           flow(
-            updateServiceLifecycleStatus(jiraIssue.fields.status.name),
-            (updateService) =>
-              fsmLifecycleClient.override(updateService.id, updateService),
-            TE.map((_) => void 0)
+            buildUpdatedServiceLifecycleItem(jiraIssue.fields.status.name),
+            O.fold(
+              () => {
+                logger.log(
+                  "warn",
+                  `Service ${serviceReview.service_id} is deleted, skipping it`
+                );
+                return TE.right(void 0);
+              },
+              (updateService) =>
+                pipe(
+                  fsmLifecycleClient.override(updateService.id, updateService),
+                  TE.map((_) => void 0)
+                )
+            )
           )
         )
       )
     )
   );
+};
 
-const updateServiceLifecycleStatus =
+const buildUpdatedServiceLifecycleItem =
   (issueStatus: JiraIssue["fields"]["status"]["name"]) =>
-  (service: ServiceLifecycle.ItemType): ServiceLifecycle.ItemType => ({
-    ...service,
-    fsm: {
-      ...service.fsm,
-      state:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        issueStatus === "REJECTED" ? ("rejected" as any) : ("approved" as any),
-    },
-  });
+  (service: ServiceLifecycle.ItemType): O.Option<ServiceLifecycle.ItemType> =>
+    pipe(
+      service,
+      O.fromPredicate((srv) => srv.fsm.state !== "deleted"),
+      O.map((srv) => ({
+        ...srv,
+        fsm: {
+          ...srv.fsm,
+          state:
+            issueStatus === "REJECTED"
+              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ("rejected" as any)
+              : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ("approved" as any),
+        },
+      }))
+    );
 
 export const createReviewLegacyCheckerHandler =
   (
