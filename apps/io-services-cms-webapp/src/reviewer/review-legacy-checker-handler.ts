@@ -134,7 +134,6 @@ const makeServiceLifecycleApply = (
               )
             ),
           flow(
-            buildUpdatedServiceLifecycleItem(jiraIssue.fields.status.name),
             O.fromPredicate((service) => service.fsm.state !== "deleted"),
             O.fold(
               () => {
@@ -144,11 +143,12 @@ const makeServiceLifecycleApply = (
                 );
                 return TE.right(void 0);
               },
-              (updateService) =>
-                pipe(
+              flow(
+                buildUpdatedServiceLifecycleItem(jiraIssue.fields.status.name),
+                (updateService) =>
                   fsmLifecycleClient.override(updateService.id, updateService),
-                  TE.map((_) => void 0)
-                )
+                TE.map((_) => void 0)
+              )
             )
           )
         )
