@@ -6,7 +6,7 @@ info:
 
     ### Some useful links:
     - [IO-SERVICES-CMS Github codebase](https://github.com/pagopa/io-services-cms)
-    - [IO-SERVICES-CMS Source API definition ](https://github.com/pagopa/io-services-cms/openapi.yaml)
+    - [IO-SERVICES-CMS Source API definition ](https://raw.githubusercontent.com/pagopa/io-services-cms/master/apps/io-services-cms-webapp/openapi.yaml)
 
   contact:
     name: PagoPA S.p.A.

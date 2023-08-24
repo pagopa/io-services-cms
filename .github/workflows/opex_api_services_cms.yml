@@ -6,7 +6,7 @@ on:
     branches:
       - master
     paths:
-      - 'openapi.yaml'
+      - 'apps/io-services-cms-webapp/openapi.yaml'
       - '.github/workflows/opex_api_services_cms.yml'
       - '.opex/api_services_cms/**'
 
