@@ -70,10 +70,8 @@ const processItem = (
     requestReviewLegacy.serviceId,
     fsmLifecycleClient.fetch,
     TE.chain(
-      flow(
-        TE.fromOption(
-          () => new Error(`Service ${requestReviewLegacy.serviceId} not found `)
-        )
+      TE.fromOption(
+        () => new Error(`Service ${requestReviewLegacy.serviceId} not found `)
       )
     ),
     // in case of deleted do nothing
