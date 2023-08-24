@@ -390,5 +390,50 @@ describe("Service Review Legacy Checker Handler tests", () => {
       expect(mockServiceReviewDao.updateStatus).toBeCalled();
       expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
     });
+
+    it("Should not override when a service is currently deleted", async () => {
+      const mockFetch = vi.fn(() =>
+        TE.right(
+          O.some({
+            ...aService,
+            fsm: { state: "deleted" },
+          })
+        )
+      );
+
+      const mockFsmLifecycleClient = {
+        override: vi.fn((_, service) => TE.right(service)),
+        fetch: mockFetch,
+      } as unknown as ServiceLifecycle.FsmClient;
+
+      const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
+        Promise.resolve({} as QueryResult)
+      );
+      const mockServiceReviewDao = {
+        insert: vi.fn(),
+        executeOnPending: vi.fn(),
+        updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+        ),
+      };
+
+      const result = await updateReview(
+        mockServiceReviewDao,
+        mockFsmLifecycleClient,
+        mockContext
+      )([
+        {
+          issue: aJiraIssue1,
+          item: anItem1,
+        },
+      ] as unknown as IssueItemPair[])();
+
+      expect(E.isRight(result)).toBeTruthy();
+
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
+      expect(mockFsmLifecycleClient.override).not.toBeCalled();
+      expect(mockServiceReviewDao.updateStatus).toBeCalled();
+      expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
+    });
   });
 });
