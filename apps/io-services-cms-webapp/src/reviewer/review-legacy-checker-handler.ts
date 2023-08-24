@@ -135,6 +135,7 @@ const makeServiceLifecycleApply = (
             ),
           flow(
             buildUpdatedServiceLifecycleItem(jiraIssue.fields.status.name),
+            O.fromPredicate((service) => service.fsm.state !== "deleted"),
             O.fold(
               () => {
                 logger.log(
@@ -158,23 +159,18 @@ const makeServiceLifecycleApply = (
 
 const buildUpdatedServiceLifecycleItem =
   (issueStatus: JiraIssue["fields"]["status"]["name"]) =>
-  (service: ServiceLifecycle.ItemType): O.Option<ServiceLifecycle.ItemType> =>
-    pipe(
-      service,
-      O.fromPredicate((srv) => srv.fsm.state !== "deleted"),
-      O.map((srv) => ({
-        ...srv,
-        fsm: {
-          ...srv.fsm,
-          state:
-            issueStatus === "REJECTED"
-              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ("rejected" as any)
-              : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ("approved" as any),
-        },
-      }))
-    );
+  (service: ServiceLifecycle.ItemType): ServiceLifecycle.ItemType => ({
+    ...service,
+    fsm: {
+      ...service.fsm,
+      state:
+        issueStatus === "REJECTED"
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ("rejected" as any)
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ("approved" as any),
+    },
+  });
 
 export const createReviewLegacyCheckerHandler =
   (
