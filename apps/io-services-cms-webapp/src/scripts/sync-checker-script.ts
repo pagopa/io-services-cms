@@ -46,6 +46,12 @@ type InvalidItem = {
   processPhase: ProcessPhases;
 };
 
+const serviceToBeSkipped = [
+  "AzureDeployc49a",
+  "01FTVK2CZSTS2CBJEQBZ96JFNT",
+  "01FM4QP98FYMGE1EW0QCW7A520",
+];
+
 /* eslint-disable no-console */
 const logger = {
   info: (message: string) =>
@@ -164,10 +170,6 @@ const retrieveNextChunk = (queryIterator: QueryIterator<any>) => async () => {
     }
   );
 
-  logger.info(
-    `Next chunk retreived from ServiceLifecycle, validItems: ${res.validItems.length}, invalidItems: ${res.invalidItems.length}`
-  );
-
   return {
     ...res,
     continuationToken,
@@ -179,11 +181,13 @@ const appendInvalidItemsToCSV = (invalidItems: InvalidItem[]) => {
     // File does not exist, init it by appending the CSV header
     fs.appendFileSync(
       INVALID_ITEMS_CSV_FILE_PATH,
-      "itemId;processPhase;errorDetail\n"
+      "itemId|processPhase|errorDetail\n"
     );
   }
   invalidItems.forEach((invalidItem) => {
-    const csvLine = `${invalidItem.itemId};${invalidItem.processPhase};${invalidItem.error}`;
+    const csvLine = `${invalidItem.itemId}|${
+      invalidItem.processPhase
+    }|${encodeURI(invalidItem.error)}`;
     fs.appendFileSync(INVALID_ITEMS_CSV_FILE_PATH, csvLine + "\n");
   });
 };
@@ -193,7 +197,7 @@ const objectToMap = (
   parentName: string = "",
   propertyToIgnore: string[] = []
 ): Map<string, any> => {
-  const mappa = new Map<string, any>();
+  const objectMap = new Map<string, any>();
 
   for (const key in obj) {
     if (!propertyToIgnore.includes(key)) {
@@ -202,20 +206,24 @@ const objectToMap = (
       if (typeof obj[key] === "object" && obj[key] !== null) {
         const nestedMap = objectToMap(obj[key], mapKey, propertyToIgnore);
         for (const [nestedKey, nestedValue] of nestedMap) {
-          mappa.set(nestedKey, nestedValue);
+          objectMap.set(nestedKey, nestedValue);
         }
-      } else {
-        mappa.set(mapKey, obj[key]);
+      } else if (obj[key] !== null && obj[key] !== undefined) {
+        objectMap.set(mapKey, obj[key]);
       }
     }
   }
-  return mappa;
+  return objectMap;
 };
 
 const compareLifecycleAndLegacy = (
   lifecycleItem: Queue.RequestSyncLegacyItem,
   legacyItem: RetrievedService
 ): E.Either<InvalidItem, void> => {
+  if (serviceToBeSkipped.includes(legacyItem.serviceId)) {
+    return E.right(void 0);
+  }
+
   const propertyToIgnore = [
     "id",
     "version",
@@ -230,15 +238,37 @@ const compareLifecycleAndLegacy = (
     "isVisible", // FIXME: nel mapping per elementi lifecycle isVisible non é calcolato
   ];
 
-  const legacyItemMap = objectToMap(legacyItem, "", propertyToIgnore);
-  const lifecycleItemMap = objectToMap(lifecycleItem, "", propertyToIgnore);
+  const legacyItemMap = objectToMap(
+    {
+      ...legacyItem,
+      serviceName: legacyItem.serviceName.replace("DELETED", "").trim(),
+      serviceMetadata: {
+        ...legacyItem.serviceMetadata,
+        description: legacyItem.serviceMetadata?.description ?? "-",
+        scope: legacyItem.serviceMetadata?.scope ?? "LOCAL",
+        category: legacyItem.serviceMetadata?.category ?? "STANDARD",
+      },
+    },
+    "",
+    propertyToIgnore
+  );
+  const lifecycleItemMap = objectToMap(
+    {
+      ...lifecycleItem,
+      serviceName: lifecycleItem.serviceName.replace("DELETED", "").trim(),
+    },
+
+    "",
+    propertyToIgnore
+  );
 
   if (legacyItemMap.size !== lifecycleItemMap.size) {
     const errorMessage = `Item ${
       lifecycleItem.serviceId
     } mapped and legacyItem does not have the same properties, lifecycleProperties: ${Array.from(
       lifecycleItemMap.keys()
-    )}, legacyProperties: ${Array.from(legacyItemMap.keys())}`;
+    )}, legacyProperties: ${Array.from(legacyItemMap.keys())}
+    LIFECYCLE: ${[...lifecycleItemMap]}, LEGACY: ${[...legacyItemMap]}`;
     logger.error(errorMessage);
     return E.left(
       buildInvalidItem(lifecycleItem.serviceId, errorMessage, "COMPARE")
@@ -262,9 +292,9 @@ const compareLifecycleAndLegacy = (
     );
   }
 
-  logger.info(
-    `Item ${lifecycleItem.serviceId} mapped and legacyItem are equals`
-  );
+  // logger.info(
+  //   `Item ${lifecycleItem.serviceId} mapped and legacyItem are equals`
+  // );
   return E.right(void 0);
 };
 
@@ -344,6 +374,13 @@ const checkItemsOnLegacy = (
   );
 
 const main = async () => {
+  // eslint-disable-next-line functional/no-let
+  let totalItemProcessed = 0;
+  // eslint-disable-next-line functional/no-let
+  let totalValidItems = 0;
+  // eslint-disable-next-line functional/no-let
+  let totalInvalidItems = 0;
+
   logger.info("Starting ...");
 
   bindEvents();
@@ -371,7 +408,20 @@ const main = async () => {
 
     // Write continuation token to file in order to resume the script
     writeContinuationToken(chunk.continuationToken);
+
+    totalItemProcessed += chunk.validItems.length;
+    totalValidItems += chunk.validItems.length;
+    totalInvalidItems += chunk.invalidItems.length;
+    totalInvalidItems += checkResult.length;
+
+    logger.info(
+      `Processed ${totalItemProcessed} items, validItems: ${totalValidItems}, invalidItems: ${totalInvalidItems}`
+    );
   }
+
+  logger.info(
+    `PROCEDURE FINISHED Processed ${totalItemProcessed} items, validItems: ${totalValidItems}, invalidItems: ${totalInvalidItems}`
+  );
 };
 
 // execute the script
