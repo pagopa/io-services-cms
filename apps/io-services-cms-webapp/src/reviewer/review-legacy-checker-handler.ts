@@ -94,7 +94,7 @@ export const updateReview =
       issueItemPairs,
       RA.traverse(TE.ApplicativePar)(({ issue, item }) =>
         sequenceT(TE.ApplicativeSeq)(
-          makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
+          makeServiceLifecycleApply(context)(item, issue, fsmLifecycleClient),
           pipe(
             dao.updateStatus({
               ...item,
@@ -114,43 +114,67 @@ export const updateReview =
     );
   };
 
-const makeServiceLifecycleApply = (
-  serviceReview: ServiceReviewRowDataTable,
-  jiraIssue: ProcessedJiraIssue,
-  fsmLifecycleClient: ServiceLifecycle.FsmClient
-) =>
-  pipe(
-    serviceReview.service_id,
-    fsmLifecycleClient.fetch,
-    TE.chain(
-      flow(
-        O.fold(
-          () =>
-            TE.left(
-              new Error(
-                `Service ${serviceReview.service_id} not found cannot ovverride after legacy review`
+const makeServiceLifecycleApply =
+  (context: Context) =>
+  (
+    serviceReview: ServiceReviewRowDataTable,
+    jiraIssue: ProcessedJiraIssue,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
+  ) => {
+    const logger = getLogger(context, logPrefix, "makeServiceLifecycleApply");
+    return pipe(
+      serviceReview.service_id,
+      fsmLifecycleClient.fetch,
+      TE.chain(
+        flow(
+          O.fold(
+            () =>
+              TE.left(
+                new Error(
+                  `Service ${serviceReview.service_id} not found cannot ovverride after legacy review`
+                )
+              ),
+            flow(
+              O.fromPredicate((service) => service.fsm.state !== "deleted"),
+              O.fold(
+                () => {
+                  logger.log(
+                    "warn",
+                    `Service ${serviceReview.service_id} is deleted, skipping it`
+                  );
+                  return TE.right(void 0);
+                },
+                flow(
+                  buildUpdatedServiceLifecycleItem(
+                    jiraIssue.fields.status.name
+                  ),
+                  (updateService) =>
+                    fsmLifecycleClient.override(
+                      updateService.id,
+                      updateService
+                    ),
+                  TE.map((_) => void 0)
+                )
               )
-            ),
-          flow(
-            updateServiceLifecycleStatus(jiraIssue.fields.status.name),
-            (updateService) =>
-              fsmLifecycleClient.override(updateService.id, updateService),
-            TE.map((_) => void 0)
+            )
           )
         )
       )
-    )
-  );
+    );
+  };
 
-const updateServiceLifecycleStatus =
+const buildUpdatedServiceLifecycleItem =
   (issueStatus: JiraIssue["fields"]["status"]["name"]) =>
   (service: ServiceLifecycle.ItemType): ServiceLifecycle.ItemType => ({
     ...service,
     fsm: {
       ...service.fsm,
       state:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        issueStatus === "REJECTED" ? ("rejected" as any) : ("approved" as any),
+        issueStatus === "REJECTED"
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ("rejected" as any)
+          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ("approved" as any),
     },
   });
 
