@@ -74,19 +74,30 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
     }
   });
 
+<<<<<<< Updated upstream
   it("should return the deserializzation error if searchJiraIssueByServiceId body extractions json end up in failure", async () => {
     const mockHeaders = new Map();
     mockHeaders.set("anHeader", "anHeaderValue");
 
+=======
+  it("should return the deserializzation error if searchJiraIssueByServiceId body extractions both json and text end up in failure", async () => {
+>>>>>>> Stashed changes
     const mockFetch = vitest.fn().mockImplementation(async () => ({
       json: vitest.fn(() =>
         Promise.reject(new Error("Bad Error on JSON deserialize"))
       ),
+<<<<<<< Updated upstream
       headers: {
         forEach: (callback) => mockHeaders.forEach(callback),
         get: (key) => mockHeaders.get(key),
       },
       status: 500,
+=======
+      text: vitest.fn(() =>
+        Promise.reject(new Error("Bad Error on Text deserialize"))
+      ),
+      status: 429,
+>>>>>>> Stashed changes
     }));
 
     const client = jiraLegacyClient(JIRA_CONFIG, mockFetch);
@@ -103,7 +114,37 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
     if (E.isLeft(issues)) {
       expect(issues.left).toHaveProperty(
         "message",
+<<<<<<< Updated upstream
         'Error parsing Jira response, statusCode: 500, headers: {"anHeader":"anHeaderValue"}, error: Bad Error on JSON deserialize'
+=======
+        "Error parsing Jira response: Bad Error on JSON deserialize"
+      );
+    }
+  });
+
+  it("should return the text response if searchJiraIssueByServiceId body is not a valid json", async () => {
+    const mockFetch = vitest.fn().mockImplementation(async () => ({
+      json: vitest.fn(() => Promise.reject(new Error("Bad Error"))),
+      text: vitest.fn(() => Promise.resolve("Not Json Response")),
+      status: 429,
+    }));
+
+    const client = jiraLegacyClient(JIRA_CONFIG, mockFetch);
+
+    const issues = await client.searchJiraIssueByServiceId(aServiceId)();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+
+    expect(E.isLeft(issues)).toBeTruthy();
+    if (E.isLeft(issues)) {
+      expect(issues.left).toHaveProperty(
+        "message",
+        "Received a not JSON response from JIRA, the content is: Not Json Response"
+>>>>>>> Stashed changes
       );
     }
   });
