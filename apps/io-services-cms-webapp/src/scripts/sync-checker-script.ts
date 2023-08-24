@@ -50,6 +50,8 @@ const serviceToBeSkipped = [
   "AzureDeployc49a",
   "01FTVK2CZSTS2CBJEQBZ96JFNT",
   "01FM4QP98FYMGE1EW0QCW7A520",
+  "5a563817fcc896087002ea46c49a",
+  "01FBRNRQQ44N48ZGC5ABNQ18V6",
 ];
 
 /* eslint-disable no-console */
