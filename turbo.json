@@ -3,7 +3,7 @@
   "pipeline": {
     "generate": {
       "inputs": [
-        "../../openapi.yaml",
+        "./openapi.yaml",
         "src/generated/**/*"
       ],
       "outputMode": "errors-only"
