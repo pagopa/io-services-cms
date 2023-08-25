@@ -10,7 +10,7 @@ ServiceLifecycle:
         version:
           type: integer
         last_update:
-          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
+          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
       required:
         - id
         - status
@@ -28,7 +28,7 @@ ServicePublication:
         version:
           type: integer
         last_update:
-          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
+          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
       required:
         - id
         - status
@@ -55,7 +55,7 @@ ServiceData:
     authorized_recipients:
       type: array
       items:
-        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode"
+        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode"
     authorized_cidrs:
       description: >-
         Allowed source IPs or CIDRs for this service.
@@ -63,7 +63,7 @@ ServiceData:
         behalf of the service.
       type: array
       items:
-        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr"
+        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr"
     max_allowed_payment_amount:
       type: integer
       format: int32
@@ -166,7 +166,7 @@ ServicePagination:
       items:
         $ref: "#/ServiceLifecycle"
     pagination:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
 Organization:
   type: object
   properties:
@@ -174,7 +174,7 @@ Organization:
       type: string
       minLength: 1
     fiscal_code:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-524-refactor-openapi-schemas/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
     department_name:
       type: string
       minLength: 1
