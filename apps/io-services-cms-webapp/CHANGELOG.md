@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.20.4
+
+### Patch Changes
+
+- 53f2b12: Skip currently deleted services on OnRequestReviewLegacy and RequestReviewLegacyChecker
+
+## 1.20.3
+
+### Patch Changes
+
+- bf51f9c: Fetch previous legacy service recursive
+
+## 1.20.2
+
+### Patch Changes
+
+- a23d4dd: Updated Github Actions
+
 ## 1.20.1
 
 ### Patch Changes

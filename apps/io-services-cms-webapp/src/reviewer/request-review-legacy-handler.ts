@@ -70,34 +70,47 @@ const processItem = (
     requestReviewLegacy.serviceId,
     fsmLifecycleClient.fetch,
     TE.chain(
+      TE.fromOption(
+        () => new Error(`Service ${requestReviewLegacy.serviceId} not found `)
+      )
+    ),
+    // in case of deleted do nothing
+    TE.map(
+      O.fromPredicate(
+        (currentService) => currentService.fsm.state !== "deleted"
+      )
+    ),
+    TE.chain(
       flow(
         O.fold(
-          () =>
-            TE.left(
-              new Error(`Service ${requestReviewLegacy.serviceId} not found `)
-            ),
+          () => TE.right(void 0),
           flow(
             // 1. set to submitted the service doing an override
             setToSubmitted,
             (submittedService) =>
-              fsmLifecycleClient.override(submittedService.id, submittedService)
+              fsmLifecycleClient.override(
+                submittedService.id,
+                submittedService
+              ),
+            // 2. create entry in service review legacy table
+            TE.chain((_) =>
+              pipe(
+                dao.insert({
+                  service_id: requestReviewLegacy.serviceId,
+                  service_version: new Date()
+                    .getTime()
+                    .toString() as NonEmptyString,
+                  ticket_id: requestReviewLegacy.ticketId,
+                  ticket_key: requestReviewLegacy.ticketKey,
+                  status: "PENDING",
+                  extra_data: {},
+                }),
+                TE.mapLeft(E.toError),
+                TE.map((_) => void 0)
+              )
+            )
           )
         )
-      )
-    ),
-    // 2. create entry in service review legacy table
-    TE.chain((_) =>
-      pipe(
-        dao.insert({
-          service_id: requestReviewLegacy.serviceId,
-          service_version: new Date().getTime().toString() as NonEmptyString,
-          ticket_id: requestReviewLegacy.ticketId,
-          ticket_key: requestReviewLegacy.ticketKey,
-          status: "PENDING",
-          extra_data: {},
-        }),
-        TE.mapLeft(E.toError),
-        TE.map((_) => void 0)
       )
     )
   );

@@ -241,10 +241,10 @@ module "webapp_functions_app" {
       "AzureWebJobs.OnRequestHistoricization.Disabled"   = "0"
       "AzureWebJobs.OnRequestPublication.Disabled"       = "0"
       "AzureWebJobs.OnRequestReview.Disabled"            = "0"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "1"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"           = "0"
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
-      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
-      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "0"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "0"
     }
   )
 

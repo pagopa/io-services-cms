@@ -203,6 +203,44 @@ describe("Request Review Legacy Handler", () => {
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
   });
 
+  it("should do nothing when a service is currently deleted", async () => {
+    const aServiceId = "s1";
+    const aQueueMessage = {
+      ...aBaseQueueMessage,
+      serviceId: aServiceId,
+    };
+    const aCurrentlyDeletedServiceLifecycle = {
+      ...aBaseServiceLifecycle,
+      id: aServiceId,
+      fsm: {
+        ...aBaseServiceLifecycle.fsm,
+        state: "deleted",
+      },
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const mockFsmLifecycleClient = {
+      fetch: vi.fn(() => TE.right(O.some(aCurrentlyDeletedServiceLifecycle))),
+      override: vi.fn(() =>
+        TE.right({
+          ...aCurrentlyDeletedServiceLifecycle,
+          fsm: { state: "submitted" },
+        })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    const handler = createRequestReviewLegacyHandler(
+      mockFsmLifecycleClient,
+      mainMockServiceReviewDao,
+      mockConfig
+    );
+    const context = createContext();
+    await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
+    expect(mockFsmLifecycleClient.override).not.toHaveBeenCalled();
+    expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
+  });
+
   it("should fail on bad queue items", async () => {
     const aServiceId = "s2";
 

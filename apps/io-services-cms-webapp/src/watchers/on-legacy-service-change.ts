@@ -125,11 +125,10 @@ export const serviceWasPublished =
               flow(
                 O.fold(
                   () =>
-                    TE.left(
-                      new Error(
-                        `Previous service version was not found ${previousId}`
-                      )
-                    ),
+                    serviceWasPublished(legacyServiceModel)({
+                      ...item,
+                      version: item.version - 1,
+                    }),
                   (service) => TE.right(service.isVisible)
                 )
               )

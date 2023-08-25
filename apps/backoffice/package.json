@@ -1,6 +1,6 @@
 {
   "name": "@io-services-cms/backoffice",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -11,21 +11,21 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@emotion/react": "11.10.5",
-    "@emotion/styled": "11.10.5",
-    "@mui/icons-material": "5.11.0",
-    "@mui/lab": "5.0.0-alpha.119",
-    "@mui/material": "5.11.8",
-    "@mui/system": "^5.14.3",
-    "@pagopa/mui-italia": "^0.9.5",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.3",
+    "@mui/lab": "^5.0.0-alpha.140",
+    "@mui/material": "^5.14.5",
+    "@mui/system": "^5.14.5",
+    "@pagopa/mui-italia": "^1.0.0",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
-    "i18next": "^23.4.1",
-    "next": "13.4.12",
+    "i18next": "^23.4.4",
+    "next": "^13.4.19",
     "next-i18next": "^14.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-i18next": "^13.0.3"
+    "react-i18next": "^13.1.2"
   },
   "devDependencies": {
     "@types/node": "20.4.5",
