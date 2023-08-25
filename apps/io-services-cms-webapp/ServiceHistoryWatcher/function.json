@@ -10,7 +10,7 @@
       "collectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
       "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%-lease",
       "createLeaseCollectionIfNotExists": true,
-      "startFromBeginning": false,
+      "startFromBeginning": true,
       "maxItemsPerInvocation": 30
     },
     {
