@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -28,6 +29,7 @@
     "react-i18next": "^13.1.2"
   },
   "devDependencies": {
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
     "@types/node": "20.4.5",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
