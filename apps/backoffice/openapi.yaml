@@ -56,20 +56,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/ResponseError"
   /auth: # /idp/selfcare/resolve-identity
-    get:
+    post:
       tags:
         - auth
       summary: Resolve selfcare identity
       description: Resolve selfcare identity
       operationId: resolveSelfCareIdentity
       security: [] # public endpoint
-      parameters:
-        - name: identity-token
-          in: header
-          required: true
-          description: It's the _**IdentityToken**_ that SelfCare issues to BackOffice to communicate _**identity, company, role**_ tuple
-          schema:
-            type: string
+      requestBody:
+        description: The _**IdentityToken**_ that SelfCare issues to BackOffice to communicate _**identity, company, role**_ tuple
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identity_token:
+                  type: string
+        required: true
       responses:
         "200":
           description: BackOffice JWT session token.
