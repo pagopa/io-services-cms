@@ -237,7 +237,7 @@ module "webapp_functions_app" {
       "AzureWebJobs.ServiceLifecycleWatcher.Disabled"    = "0"
       "AzureWebJobs.ServicePublicationWatcher.Disabled"  = "0"
       "AzureWebJobs.ServiceReviewChecker.Disabled"       = "0"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"      = "0"
       "AzureWebJobs.OnRequestHistoricization.Disabled"   = "0"
       "AzureWebJobs.OnRequestPublication.Disabled"       = "0"
       "AzureWebJobs.OnRequestReview.Disabled"            = "0"
