@@ -55,7 +55,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResponseError"
-  /auth#id: # /idp/selfcare/resolve-identity
+  /auth: # /idp/selfcare/resolve-identity
     get:
       tags:
         - auth
@@ -64,20 +64,25 @@ paths:
       operationId: resolveSelfCareIdentity
       security: [] # public endpoint
       parameters:
-        - name: id
+        - name: identity-token
           in: header
           required: true
           description: It's the _**IdentityToken**_ that SelfCare issues to BackOffice to communicate _**identity, company, role**_ tuple
           schema:
             type: string
       responses:
-        "301":
-          description: The URL of the requested resource has been changed permanently. The new URL is given in the response header.
-          headers:
-            location:
-              description: https://url/login#id_token=sessionToken _(where sessionToken is the BackOffice JWT session token)_
+        "200":
+          description: BackOffice JWT session token.
+          content:
+            application/jwt:
               schema:
                 type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal server error
   /services/migrations/ownership-claims/latest: #? valutare se mantenere la rotta as-is
     get:
       tags:
