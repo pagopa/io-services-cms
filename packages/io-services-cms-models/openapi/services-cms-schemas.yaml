@@ -10,7 +10,7 @@ ServiceLifecycle:
         version:
           type: integer
         last_update:
-          $ref: "#/Timestamp"
+          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
       required:
         - id
         - status
@@ -28,7 +28,7 @@ ServicePublication:
         version:
           type: integer
         last_update:
-          $ref: "#/Timestamp"
+          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
       required:
         - id
         - status
@@ -55,7 +55,7 @@ ServiceData:
     authorized_recipients:
       type: array
       items:
-        $ref: "#/FiscalCode"
+        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode"
     authorized_cidrs:
       description: >-
         Allowed source IPs or CIDRs for this service.
@@ -63,7 +63,7 @@ ServiceData:
         behalf of the service.
       type: array
       items:
-        $ref: "#/Cidr"
+        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr"
     max_allowed_payment_amount:
       type: integer
       format: int32
@@ -166,19 +166,7 @@ ServicePagination:
       items:
         $ref: "#/ServiceLifecycle"
     pagination:
-      $ref: "#/PaginationResultSet"
-PaginationResultSet:
-  type: object
-  properties:
-    offset:
-      type: number
-      description: result set offset
-    limit:
-      type: number
-      description: result set size
-    count:
-      type: number
-      description: total record count
+      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
 Organization:
   type: object
   properties:
@@ -186,33 +174,13 @@ Organization:
       type: string
       minLength: 1
     fiscal_code:
-      $ref: "#/OrganizationFiscalCode"
+      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
     department_name:
       type: string
       minLength: 1
   required:
     - name
     - fiscal_code
-OrganizationFiscalCode:
-  type: string
-  description: Organization's fiscal code.
-  pattern: "^[0-9]{11}$"
-  example: 012345678901
-FiscalCode:
-  type: string
-  description: User's fiscal code.
-  pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
-  example: AAAAAA00A00A000A
-Logo:
-  description: A base64 string representation of the logo PNG image.
-  type: object
-  properties:
-    logo:
-      type: string
-      format: byte
-      minLength: 1
-  required:
-    - logo
 SubscriptionKeys:
   type: object
   properties:
@@ -226,10 +194,6 @@ SubscriptionKeys:
 SubscriptionKeyType:
   type: string
   enum: [primary, secondary]
-Cidr:
-  type: string
-  description: Describes a single IP or a range of IPs.
-  pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
 Comment:
   type: object
   properties:
@@ -245,7 +209,3 @@ ReviewRequest:
       example: true
   required:
     - auto_publish
-Timestamp:
-  type: string
-  description: A date-time field in ISO-8601 format and UTC timezone.
-  example: "2023-01-22T00:00:00.000Z"

@@ -1,3 +1,39 @@
+Cidr:
+  type: string
+  description: Describes a single IP or a range of IPs.
+  pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
+FiscalCode:
+  type: string
+  description: User's fiscal code.
+  pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+  example: AAAAAA00A00A000A
+Logo:
+  description: A base64 string representation of the logo PNG image.
+  type: object
+  properties:
+    logo:
+      type: string
+      format: byte
+      minLength: 1
+  required:
+    - logo
+OrganizationFiscalCode:
+  type: string
+  description: Organization's fiscal code.
+  pattern: "^[0-9]{11}$"
+  example: 012345678901
+PaginationResultSet:
+  type: object
+  properties:
+    offset:
+      type: number
+      description: result set offset
+    limit:
+      type: number
+      description: result set size
+    count:
+      type: number
+      description: total record count
 ResponseError:
   type: object
   properties:
@@ -36,3 +72,7 @@ ResponseError:
       description: |
         An absolute URI that identifies the specific occurrence of the problem.
         It may or may not yield further information if dereferenced.
+Timestamp:
+  type: string
+  description: A date-time field in ISO-8601 format and UTC timezone.
+  example: "2023-01-22T00:00:00.000Z"
