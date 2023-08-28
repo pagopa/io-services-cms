@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.5
+
+### Patch Changes
+
+- 0db9c2e: Set startFromBeginning on ServiceHistoryWatcher
+
 ## 1.20.4
 
 ### Patch Changes
