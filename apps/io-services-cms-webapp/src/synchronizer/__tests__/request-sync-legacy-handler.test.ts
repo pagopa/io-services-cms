@@ -22,7 +22,6 @@ import {
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
