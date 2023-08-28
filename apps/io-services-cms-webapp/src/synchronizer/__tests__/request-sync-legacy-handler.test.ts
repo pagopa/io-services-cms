@@ -22,6 +22,7 @@ import {
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -223,6 +224,59 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
+      legacyServiceModelMock
+    )();
+
+    expect(res).toBeUndefined();
+    expect(legacyServiceModelMock.update).not.toBeCalled();
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findOneByServiceId).toBeCalledWith(
+      aRequestSyncLegacyItem.serviceId
+    );
+    expect(legacyServiceModelMock.create).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.create).toBeCalledWith(
+      expect.objectContaining({ cmsTag: true })
+    );
+  });
+  it("should create a new legacy service with CMS tag on, when only minimal data is set", async () => {
+    const context = createContext();
+
+    const aMinimalService = {
+      authorizedCIDRs: toAuthorizedCIDRs(["127.0.0.1" as CIDR]),
+      authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
+      departmentName: "-",
+      isVisible: true,
+      organizationFiscalCode: "12345678901",
+      organizationName: "anOrganizationName",
+      serviceId: "sid",
+      serviceName: "aServiceName",
+      cmsTag: true,
+      serviceMetadata: {
+        category: StandardServiceCategoryEnum.STANDARD,
+        scope: ServiceScopeEnum.LOCAL,
+        customSpecialFlow: undefined,
+        description: "aDescription",
+      },
+    } as unknown as Service;
+
+    const aRequestSyncMinimalLegacyItem = {
+      cmsTag: true,
+      ...aMinimalService,
+    } as unknown as Queue.RequestSyncLegacyItem;
+
+    const legacyServiceModelMock = {
+      findOneByServiceId: vi.fn(() => {
+        return TE.right(O.none);
+      }),
+      create: vi.fn(() => {
+        return TE.right(aRetrievedService);
+      }),
+      update: vi.fn(),
+    } as unknown as ServiceModel;
+
+    const res = await handleQueueItem(
+      context,
+      aRequestSyncMinimalLegacyItem as unknown as Json,
       legacyServiceModelMock
     )();
 
