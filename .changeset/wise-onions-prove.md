@@ -2,4 +2,4 @@
 "io-services-cms-webapp": patch
 ---
 
-Placeholder value for field department name before syncing a service to legacy who lack's of
+Add a placeholder value before syncing a service to legacy one that lacks the field "department name"
