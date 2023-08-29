@@ -19,7 +19,7 @@ const isElementAllowedOnList =
   (list: ReadonlyArray<NonEmptyString>) => (element: NonEmptyString) =>
     list.includes(wildcard) || list.includes(element);
 
-const isUserEnabledToSync = (
+const isUserIncludedInList = (
   config: IConfig,
   apimClient: ApiManagementClient,
   serviceId: NonEmptyString,
@@ -27,6 +27,10 @@ const isUserEnabledToSync = (
 ): TE.TaskEither<Error, boolean> => {
   if (allAllowed(inclusionList)) {
     return TE.right(true);
+  }
+
+  if (inclusionList.length === 0) {
+    return TE.right(false);
   }
 
   return pipe(
@@ -64,7 +68,7 @@ export const isUserEnabledForCmsToLegacySync = (
   apimClient: ApiManagementClient,
   serviceId: NonEmptyString
 ): TE.TaskEither<Error, boolean> =>
-  isUserEnabledToSync(
+  isUserIncludedInList(
     config,
     apimClient,
     serviceId,
@@ -83,11 +87,30 @@ export const isUserEnabledForLegacyToCmsSync = (
   apimClient: ApiManagementClient,
   serviceId: NonEmptyString
 ): TE.TaskEither<Error, boolean> =>
-  isUserEnabledToSync(
+  isUserIncludedInList(
     config,
     apimClient,
     serviceId,
     config.USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST
+  );
+
+/**
+ *
+ * @param config
+ * @param apimClient
+ * @param serviceId
+ * @returns
+ */
+export const isUserAllowedForAutomaticApproval = (
+  config: IConfig,
+  apimClient: ApiManagementClient,
+  serviceId: NonEmptyString
+): TE.TaskEither<Error, boolean> =>
+  isUserIncludedInList(
+    config,
+    apimClient,
+    serviceId,
+    config.USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST
   );
 
 /**
