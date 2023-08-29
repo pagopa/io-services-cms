@@ -13,11 +13,11 @@ import {
   SUBSCRIPTION_CIDRS_COLLECTION_NAME,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { getConfigOrThrow } from "./config";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
@@ -33,7 +33,6 @@ import { createRequestReviewHandler } from "./reviewer/request-review-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
 import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { createRequestSyncLegacyHandler } from "./synchronizer/request-sync-legacy-handler";
-import { apimProxy } from "./utils/apim-proxy";
 import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
@@ -47,8 +46,9 @@ import { handler as onServicePublicationChangeHandler } from "./watchers/on-serv
 import { createWebServer } from "./webservice";
 
 import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
-import { initTelemetryClient } from "./utils/applicationinsight";
 import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
+import { initTelemetryClient } from "./utils/applicationinsight";
+import { apimProxy } from "./utils/apim-proxy";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -115,11 +115,10 @@ export const httpEntryPoint = pipe(
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
-  apimProxy(
-    getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
-    config.AZURE_APIM_RESOURCE_GROUP,
-    config.AZURE_APIM
-  )
+  apimProxy(apimClient, config.AZURE_APIM_RESOURCE_GROUP, config.AZURE_APIM),
+  fsmLifecycleClient,
+  apimClient,
+  config
 );
 
 export const createRequestPublicationEntryPoint =

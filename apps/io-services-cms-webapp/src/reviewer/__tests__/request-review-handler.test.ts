@@ -14,6 +14,8 @@ import { createRequestReviewHandler } from "../request-review-handler";
 import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { DatabaseError, QueryResult } from "pg";
+import { IConfig } from "../../config";
+import { ApiManagementClient } from "@azure/arm-apimanagement";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -146,13 +148,38 @@ const mainMockApimProxy = {
     return TE.of(aDelegate);
   }),
 };
+const anUserId = "123";
+const anOwnerId = `/an/owner/${anUserId}`;
+const mockApimClient = {
+  subscription: {
+    get: vi.fn(() =>
+      Promise.resolve({
+        _etag: "_etag",
+        anOwnerId,
+      })
+    ),
+  },
+} as unknown as ApiManagementClient;
+
+const mockConfig = {
+  USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [],
+} as unknown as IConfig;
+
+const mockFsmLifecycleClient = {
+  approve: vi.fn((serviceId: NonEmptyString) => {
+    return TE.of(void 0);
+  }),
+} as unknown as ServiceLifecycle.FsmClient;
 
 describe("Service Review Handler", () => {
   it("should create a non existing ticket for a new service review", async () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mainMockJiraProxy,
-      mainMockApimProxy
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
@@ -169,7 +196,6 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
-    expect(result).toBe(anInsertQueryResult);
   });
 
   it("should insert pending review only on db if service already exist on Jira", async () => {
@@ -183,7 +209,10 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
@@ -195,7 +224,6 @@ describe("Service Review Handler", () => {
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
-    expect(result).toBe(anInsertQueryResult);
   });
 
   it("should have a generic error if getPendingJiraIssueByServiceId returns an Error", async () => {
@@ -209,7 +237,10 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
@@ -237,7 +268,10 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mainMockJiraProxy,
-      mockApimProxy
+      mockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
@@ -268,7 +302,10 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
@@ -299,7 +336,10 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mockServiceReviewDao,
       mainMockJiraProxy,
-      mainMockApimProxy
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
     );
 
     const context = createContext();
