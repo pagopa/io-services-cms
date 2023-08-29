@@ -172,6 +172,11 @@ const FeatureFlags = t.type({
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
+  // UserId List allowed to automatic service approval
+  USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
 });
 
 // Global app configuration
