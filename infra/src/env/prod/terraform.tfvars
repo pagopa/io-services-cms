@@ -65,6 +65,7 @@ legacy_jira_project_name = "IES"
 legacy_service_watcher_max_items_per_invocation = 10
 
 # Feature flags Configuration
-userid_cms_to_legacy_sync_inclusion_list    = "*"
-userid_legacy_to_cms_sync_inclusion_list    = "*"
-userid_request_review_legacy_inclusion_list = "*"
+userid_cms_to_legacy_sync_inclusion_list         = "*"
+userid_legacy_to_cms_sync_inclusion_list         = "*"
+userid_request_review_legacy_inclusion_list      = "*"
+userid_automatic_service_approval_inclusion_list = ""
