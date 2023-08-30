@@ -203,6 +203,8 @@ locals {
     USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST = var.userid_legacy_to_cms_sync_inclusion_list
     # UserId List allowed to sync JIRA ticket events from Legacy to CMS
     USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST = var.userid_request_review_legacy_inclusion_list
+    # UserId List allowed to automatic service approval
+    USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST = var.userid_automatic_service_approval_inclusion_list
   }
 }
 

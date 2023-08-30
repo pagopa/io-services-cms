@@ -34,8 +34,9 @@ const cmsToLegacy = (
     authorizedRecipients: toAuthorizedRecipients(
       serviceHistory.data.authorized_recipients
     ),
-    departmentName: serviceHistory.data.organization
-      .department_name as NonEmptyString, // it will be validated in OnRequestSyncLegacy Azure Function
+    departmentName:
+      serviceHistory.data.organization.department_name ??
+      ("-" as NonEmptyString),
     maxAllowedPaymentAmount: serviceHistory.data.max_allowed_payment_amount,
     organizationFiscalCode: serviceHistory.data.organization.fiscal_code,
     organizationName: serviceHistory.data.organization.name,

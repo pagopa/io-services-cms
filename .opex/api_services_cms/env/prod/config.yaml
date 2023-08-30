@@ -1,4 +1,4 @@
-oa3_spec: openapi.yaml
+oa3_spec: apps/io-services-cms-webapp/openapi.yaml
 name: opex_api_service_cms
 location: West Europe
 timespan: 10m

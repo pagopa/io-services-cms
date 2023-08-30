@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.6
+
+### Patch Changes
+
+- 8c5a81b: Add a placeholder value before syncing a service to legacy one that lacks the field "department name"
+
 ## 1.20.5
 
 ### Patch Changes
