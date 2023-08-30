@@ -155,7 +155,7 @@ const mockApimClient = {
     get: vi.fn(() =>
       Promise.resolve({
         _etag: "_etag",
-        anOwnerId,
+        ownerId: anOwnerId,
       })
     ),
   },
@@ -196,6 +196,35 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+  });
+
+  it("should approve the service in when the user is in inclusionList", async () => {
+    const mockConfig = {
+      USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [anUserId],
+    } as unknown as IConfig;
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mainMockJiraProxy,
+      mainMockApimProxy,
+      mockFsmLifecycleClient,
+      mockApimClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mainMockJiraProxy.getPendingJiraIssueByServiceId
+    ).not.toHaveBeenCalled();
+    expect(mainMockApimProxy.getDelegateFromServiceId).not.toHaveBeenCalled();
+    expect(mainMockJiraProxy.createJiraIssue).not.toHaveBeenCalled();
+    expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
+
+    expect(mockFsmLifecycleClient.approve).toBeCalledWith(aService.id, {
+      approvalDate: expect.any(String),
+    });
   });
 
   it("should insert pending review only on db if service already exist on Jira", async () => {
