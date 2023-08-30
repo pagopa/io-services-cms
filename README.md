@@ -30,6 +30,6 @@ Please refer to our [development guide](./docs/terraform-development.md) before 
 
 The table below describes the _features that can be activated/deactivated_, either globally or by restricting them to specific users, by modifying specific configuration parameters, called **_FeatureFlags_**, in the application.
 
-| Configuration Parameter                            | Value Type     | Description                                                                                        |
-| -------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------- |
-| `USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST` | `List<String>` | **Automatically approve** review requests for **services** related to Users in the inclusion list. |
+| Configuration Parameter                            | Value Type     | Description                                                                                        | Example               |
+| -------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------- | --------------------- |
+| `USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST` | `List<String>` | **Automatically approve** review requests for **services** related to Users in the inclusion list. | `user1,user2,..userN` |
