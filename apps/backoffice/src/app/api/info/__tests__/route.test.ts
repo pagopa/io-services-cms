@@ -1,13 +1,13 @@
+import axios from "axios";
 import { expect, test } from "vitest";
 import { mockApiServicesCmsUrl } from "../../../../../mocks/handlers/services-cms-handlers";
 
 test("test backend api info()", async () => {
-  const getInfo = async () => {
-    const res = await fetch(`${mockApiServicesCmsUrl}/info`);
-    return await res.json();
-  };
-  const result = await getInfo();
+  const { data, status } = await axios.get<any>(
+    `${mockApiServicesCmsUrl}/info`
+  );
 
-  expect(result).toHaveProperty("version");
-  expect(result).toHaveProperty("name");
+  expect(data).toHaveProperty("version");
+  expect(data).toHaveProperty("name");
+  expect(status).toBe(200);
 });
