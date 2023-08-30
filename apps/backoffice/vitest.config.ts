@@ -5,7 +5,10 @@ export default defineConfig({
   resolve: {
     alias: {
       react: "next/dist/compiled/react",
-      "@": path.resolve(__dirname, "./src"),
-    },
+      "@": path.resolve(__dirname, "./src")
+    }
   },
+  test: {
+    setupFiles: ["./mocks/msw-vitest.ts"]
+  }
 });
