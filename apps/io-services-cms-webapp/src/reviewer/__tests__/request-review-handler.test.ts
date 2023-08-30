@@ -196,9 +196,10 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
-  it("should approve the service in when the user is in inclusionList", async () => {
+  it("should approve the service when the user is in inclusionList", async () => {
     const mockConfig = {
       USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
@@ -253,6 +254,7 @@ describe("Service Review Handler", () => {
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
   it("should have a generic error if getPendingJiraIssueByServiceId returns an Error", async () => {
@@ -285,6 +287,7 @@ describe("Service Review Handler", () => {
     expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
   it("should have a generic error if getDelegateFromServiceId returns an ApimError", async () => {
@@ -316,6 +319,7 @@ describe("Service Review Handler", () => {
     expect(mockApimProxy.getDelegateFromServiceId).toBeCalledWith(aService.id);
     expect(mainMockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
   it("should have a generic error if createJiraIssue returns an Error", async () => {
@@ -352,6 +356,7 @@ describe("Service Review Handler", () => {
     );
     expect(mockJiraProxy.createJiraIssue).toBeCalledWith(aService, aDelegate);
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
   it("should have a generic error if insert on db returns an Error", async () => {
@@ -389,5 +394,6 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 });
