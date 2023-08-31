@@ -133,7 +133,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -160,7 +160,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)([])();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -178,7 +178,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -191,7 +191,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
       () => TE.left(new Error())
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
