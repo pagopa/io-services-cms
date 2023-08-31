@@ -75,8 +75,10 @@ export const createReviewCheckerHandler =
  * @returns
  */
 export const buildIssueItemPairs =
-  (jiraProxy: JiraProxy) => (items: ServiceReviewRowDataTable[]) =>
-    pipe(
+  (context: Context, jiraProxy: JiraProxy) =>
+  (items: ServiceReviewRowDataTable[]) => {
+    const logger = getLogger(context, logPrefix, "buildIssueItemPairs");
+    return pipe(
       // from pending items to their relative jira issues
       jiraProxy.searchJiraIssuesByKeyAndStatus(
         items.map((item) => item.ticket_key),
@@ -97,8 +99,13 @@ export const buildIssueItemPairs =
             // be sure the pending review is not undefined
             .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
         );
+      }),
+      TE.mapLeft((err) => {
+        logger.logError(err, "An error occurred while building IssueItemPairs");
+        return err;
       })
     );
+  };
 
 /**
  * For each pair, compose a sub-procedure of actions to be executed one after another
@@ -171,6 +178,6 @@ export const processBatchOfReviews =
   (items: ServiceReviewRowDataTable[]) =>
     pipe(
       items,
-      buildIssueItemPairs(jiraProxy),
+      buildIssueItemPairs(context, jiraProxy),
       TE.chain(updateReview(context, dao, fsmLifecycleClient))
     );

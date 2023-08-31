@@ -107,7 +107,7 @@ const executeOnPending =
               TE.fromEither,
               TE.chain(fn)
             );
-            await handler(); // TODO: manage error (at least write a log)
+            await handler();
           } while (length > 0);
         } finally {
           cursor.close(() => {
