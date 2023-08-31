@@ -127,7 +127,10 @@ export const updateReview =
                 fsmError.kind === "FsmNoTransitionMatchedError",
                 B.fold(
                   () => {
-                    logger.log("error", fsmError.message);
+                    logger.logError(
+                      fsmError,
+                      `An ${fsmError.kind} has occurred`
+                    );
                     return pipe(fsmError, E.toError, TE.left);
                   },
                   () => {
@@ -145,7 +148,10 @@ export const updateReview =
             }),
             TE.mapLeft((err) => {
               // eslint-disable-next-line no-console
-              console.error(err.message); // FIXME: is it correct to log via console?
+              logger.logError(
+                err,
+                "An error occurred while updating the status"
+              );
               return E.toError(err);
             })
           )
