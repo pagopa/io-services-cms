@@ -147,7 +147,6 @@ export const updateReview =
               status: issue.fields.status.name,
             }),
             TE.mapLeft((err) => {
-              // eslint-disable-next-line no-console
               logger.logError(
                 err,
                 "An error occurred while updating the status"
