@@ -157,18 +157,32 @@ const ServiceIdQualityCheckExclusionList = t.type({
 });
 
 const FeatureFlags = t.type({
-  // UserId List allowed to sync services from CMS to Legacy
+  /**
+   * UserId List allowed to sync services from CMS to Legacy
+   * @deprecated this feature flag will be removed in future releases
+   */
   USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
-  // UserId List allowed to sync services from CMS to Legacy
+  /**
+   * UserId List allowed to sync services from CMS to Legacy
+   * @deprecated this feature flag will be removed in future releases
+   */
   USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
-  // UserId List allowed to sync JIRA ticket events from Legacy to CMS
+  /**
+   * UserId List allowed to sync JIRA ticket events from Legacy to CMS
+   * @deprecated this feature flag will be removed in future releases
+   */
   USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    []
+  ),
+  // UserId List allowed to automatic service approval
+  USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
     []
   ),
