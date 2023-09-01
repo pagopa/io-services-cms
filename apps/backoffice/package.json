@@ -9,7 +9,13 @@
     "lint": "next lint",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
+    "api-definitions:clean": "rm -rf ./src/generated/api",
+    "api-definitions:generate": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders",
+    "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:generate",
+    "services-cms:clean": "rm -rf ./src/generated/services-cms",
+    "services-cms:generate": "gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
+    "services-cms:all": "yarn services-cms:clean && yarn services-cms:generate",
+    "generate": "yarn api-definitions:all & yarn services-cms:all"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
