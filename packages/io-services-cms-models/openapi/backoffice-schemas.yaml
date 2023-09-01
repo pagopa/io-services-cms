@@ -1,0 +1,7 @@
+  SelfCareIdentity:
+    type: object
+    properties:
+      identity_token:
+        type: string
+    required:
+      - identity_token
