@@ -9,10 +9,10 @@ import { ResponseError } from '@/generated/api/ResponseError';
  */
 export async function PUT(request: NextRequest) {
   const data = await request.json();
-  const boduParsed = Logo.decode(data);
+  const bodyParsed = Logo.decode(data);
 
-  if (boduParsed._tag === "Right") {
-    console.log(boduParsed.right);
+  if (bodyParsed._tag === "Right") {
+    console.log(bodyParsed.right);
   } else {
     const responseError: ResponseError = {
       title: "Bad Request",

@@ -10,10 +10,10 @@ import { ReviewRequest } from '@/generated/api/ReviewRequest';
  */
 export async function PUT(request: NextRequest) {
   const data = await request.json();
-  const boduParsed = ReviewRequest.decode(data);
+  const bodyParsed = ReviewRequest.decode(data);
 
-  if (boduParsed._tag === "Right") {
-    console.log(boduParsed.right);
+  if (bodyParsed._tag === "Right") {
+    console.log(bodyParsed.right);
   } else {
     const responseError: ResponseError = {
       title: "Bad Request",
@@ -34,10 +34,10 @@ export async function PUT(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   const data = await request.json();
-  const boduParsed = Comment.decode(data);
+  const bodyParsed = Comment.decode(data);
 
-  if (boduParsed._tag === "Right") {
-    console.log(boduParsed.right);
+  if (bodyParsed._tag === "Right") {
+    console.log(bodyParsed.right);
   } else {
     const responseError: ResponseError = {
       title: "Bad Request",

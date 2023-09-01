@@ -9,10 +9,10 @@ import { ServicePayload } from '@/generated/api/ServicePayload';
  */
 export async function POST(request: NextRequest) {
   const data = await request.json();
-  const boduParsed = ServicePayload.decode(data);
+  const bodyParsed = ServicePayload.decode(data);
 
-  if (boduParsed._tag === "Right") {
-    console.log(boduParsed.right);
+  if (bodyParsed._tag === "Right") {
+    console.log(bodyParsed.right);
   } else {
     const responseError: ResponseError = {
       title: "Bad Request",

@@ -9,10 +9,10 @@ import { SelfCareIdentity } from '@/generated/api/SelfCareIdentity';
  */
 export async function POST(request: NextRequest) {
   const data = await request.json();
-  const boduParsed = SelfCareIdentity.decode(data);
+  const bodyParsed = SelfCareIdentity.decode(data);
 
-  if (boduParsed._tag === "Right") {
-    console.log(boduParsed.right);
+  if (bodyParsed._tag === "Right") {
+    console.log(bodyParsed.right);
   } else {
     const responseError: ResponseError = {
       title: "Bad Request",
