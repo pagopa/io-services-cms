@@ -809,12 +809,7 @@ components:
     Institution:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution"
     SelfCareIdentity:
-          type: object
-          properties:
-            identity_token:
-              type: string
-          required:
-            - identity_token
+       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/SelfCareIdentity"
   securitySchemes:
     bearerAuth:
       type: http
