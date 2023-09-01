@@ -4,9 +4,11 @@ import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
 import { pipe } from "fp-ts/lib/function";
 import { JiraIssue } from "../lib/clients/jira-client";
 import { JiraProxy } from "../utils/jira-proxy";
+import { getLogger } from "../utils/logger";
 import {
   ServiceReviewDao,
   ServiceReviewRowDataTable,
@@ -22,6 +24,8 @@ export type IssueItemPair = {
   issue: ProcessedJiraIssue;
   item: ServiceReviewRowDataTable;
 };
+
+const logPrefix = "ReviewerCheckerHandler";
 
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
@@ -71,8 +75,10 @@ export const createReviewCheckerHandler =
  * @returns
  */
 export const buildIssueItemPairs =
-  (jiraProxy: JiraProxy) => (items: ServiceReviewRowDataTable[]) =>
-    pipe(
+  (context: Context, jiraProxy: JiraProxy) =>
+  (items: ServiceReviewRowDataTable[]) => {
+    const logger = getLogger(context, logPrefix, "buildIssueItemPairs");
+    return pipe(
       // from pending items to their relative jira issues
       jiraProxy.searchJiraIssuesByKeyAndStatus(
         items.map((item) => item.ticket_key),
@@ -93,8 +99,13 @@ export const buildIssueItemPairs =
             // be sure the pending review is not undefined
             .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
         );
+      }),
+      TE.mapLeft((err) => {
+        logger.logError(err, "An error occurred while building IssueItemPairs");
+        return err;
       })
     );
+  };
 
 /**
  * For each pair, compose a sub-procedure of actions to be executed one after another
@@ -105,27 +116,37 @@ export const buildIssueItemPairs =
  * @returns
  */
 export const updateReview =
-  (dao: ServiceReviewDao, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
-  (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> =>
-    pipe(
+  (
+    context: Context,
+    dao: ServiceReviewDao,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
+  ) =>
+  (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> => {
+    const logger = getLogger(context, logPrefix, "updateReview");
+    return pipe(
       issueItemPairs,
       RA.traverse(TE.ApplicativePar)(({ issue, item }) =>
         sequenceT(TE.ApplicativeSeq)(
           pipe(
             makeServiceLifecycleApply(item, issue, fsmLifecycleClient),
-            TE.orElse((fsmError) => {
-              // eslint-disable-next-line sonarjs/no-small-switch
-              switch (fsmError.kind) {
-                case "FsmNoTransitionMatchedError":
-                  // eslint-disable-next-line no-console
-                  console.warn(fsmError.message); // FIXME: is it correct to log via console?
-                  return TE.right(void 0);
-                default:
-                  // eslint-disable-next-line no-console
-                  console.error(fsmError.message); // FIXME: is it correct to log via console?
-                  return pipe(fsmError, E.toError, TE.left);
-              }
-            })
+            TE.orElse((fsmError) =>
+              pipe(
+                fsmError.kind === "FsmNoTransitionMatchedError",
+                B.fold(
+                  () => {
+                    logger.logError(
+                      fsmError,
+                      `An ${fsmError.kind} has occurred`
+                    );
+                    return pipe(fsmError, E.toError, TE.left);
+                  },
+                  () => {
+                    logger.log("warn", fsmError.message);
+                    return TE.right(void 0);
+                  }
+                )
+              )
+            )
           ),
           pipe(
             dao.updateStatus({
@@ -133,8 +154,10 @@ export const updateReview =
               status: issue.fields.status.name,
             }),
             TE.mapLeft((err) => {
-              // eslint-disable-next-line no-console
-              console.error(err.message); // FIXME: is it correct to log via console?
+              logger.logError(
+                err,
+                "An error occurred while updating the status"
+              );
               return E.toError(err);
             })
           )
@@ -143,6 +166,7 @@ export const updateReview =
       // we don't need data as result, just return void
       TE.map((_) => void 0)
     );
+  };
 
 export const processBatchOfReviews =
   (
@@ -154,6 +178,6 @@ export const processBatchOfReviews =
   (items: ServiceReviewRowDataTable[]) =>
     pipe(
       items,
-      buildIssueItemPairs(jiraProxy),
-      TE.chain(updateReview(dao, fsmLifecycleClient))
+      buildIssueItemPairs(context, jiraProxy),
+      TE.chain(updateReview(context, dao, fsmLifecycleClient))
     );

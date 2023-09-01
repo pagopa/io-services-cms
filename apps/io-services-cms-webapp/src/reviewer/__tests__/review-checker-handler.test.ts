@@ -114,6 +114,14 @@ const mainMockJiraProxy = {
   getPendingJiraIssueByServiceId: vi.fn(),
 };
 
+const mockContext = {
+  log: {
+    error: vi.fn((_) => console.error(_)),
+    info: vi.fn((_) => console.info(_)),
+    warn: vi.fn((_) => console.warn(_)),
+  },
+} as any;
+
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   it("should build TWO IssueItemPairs given 2 jira issues, an APPROVED one and a REJECTED one", async () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
@@ -125,7 +133,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -152,7 +160,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)([])();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -170,7 +178,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -183,7 +191,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
       () => TE.left(new Error())
     );
 
-    const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
 
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
@@ -209,6 +217,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
       ),
     } as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
+      mockContext,
       mainMockServiceReviewDao,
       mockFsmLifecycleClient
     )([
@@ -251,6 +260,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const mockFsmLifecycleClient =
       vi.fn() as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
+      mockContext,
       mainMockServiceReviewDao,
       mockFsmLifecycleClient
     )([] as unknown as IssueItemPair[])();
@@ -284,6 +294,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     };
 
     const result = await updateReview(
+      mockContext,
       mockServiceReviewDao,
       mockFsmLifecycleClient
     )([
@@ -322,6 +333,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     };
 
     const result = await updateReview(
+      mockContext,
       mockServiceReviewDao,
       mockFsmLifecycleClient
     )([
