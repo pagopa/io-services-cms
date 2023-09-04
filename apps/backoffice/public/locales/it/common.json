@@ -18,5 +18,11 @@
     "users": "Utenti",
     "groups": "Gruppi"
   },
-  "test": "Questo è un test di traduzione"
+  "test": "Questo è un test di traduzione",
+  "empty": {
+    "noService": "Non ci sono servizi."
+  },
+  "create": {
+    "aService": "Crea un servizio."
+  }
 }
