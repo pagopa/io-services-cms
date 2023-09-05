@@ -18,11 +18,5 @@
     "users": "Users",
     "groups": "Groups"
   },
-  "test": "This is a translation test",
-  "empty": {
-    "noService": "No services available."
-  },
-  "create": {
-    "aService": "Create a service."
-  }
+  "test": "This is a translation test"
 }
