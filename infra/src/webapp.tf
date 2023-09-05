@@ -1,121 +1,4 @@
 #
-# Variables
-#
-variable "functions_kind" {
-  type        = string
-  description = "App service plan kind"
-  default     = null
-}
-
-variable "functions_sku_tier" {
-  type        = string
-  description = "App service plan sku tier"
-  default     = null
-}
-
-variable "functions_sku_size" {
-  type        = string
-  description = "App service plan sku size"
-  default     = null
-}
-
-variable "functions_autoscale_minimum" {
-  type        = number
-  description = "The minimum number of instances for this resource."
-  default     = 1
-}
-
-variable "functions_autoscale_maximum" {
-  type        = number
-  description = "The maximum number of instances for this resource."
-  default     = 30
-}
-
-variable "functions_autoscale_default" {
-  type        = number
-  description = "The number of instances that are available for scaling if metrics are not available for evaluation."
-  default     = 1
-}
-
-variable "jira_namespace_url" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_project_name" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_username" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_contract_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_delegate_email_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_delegate_name_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_organization_cf_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_organization_name_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "reviewer_db_name" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "reviewer_db_schema" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "reviewer_db_user" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "reviewer_db_table" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "legacy_jira_project_name" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-#
 # Function app definition
 #
 
@@ -213,7 +96,7 @@ module "webapp_functions_app" {
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
-  location            = var.location
+  location            = azurerm_resource_group.rg.location
   health_check_path   = "/api/v1/info"
 
   export_keys = true
@@ -284,7 +167,7 @@ module "webapp_functions_app_staging_slot" {
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
-  location            = var.location
+  location            = azurerm_resource_group.rg.location
   health_check_path   = "/api/v1/info"
 
   function_app_id = module.webapp_functions_app.id

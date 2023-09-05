@@ -32,13 +32,17 @@ variable "tags" {
 }
 
 
-############
-# Postgres #
-############
+###########
+# Network #
+###########
 
-variable "cidr_subnet_pgres" {
-  type        = string
-  description = "Subnet address space."
+variable "subnets_cidrs" {
+  type = object({
+    api        = list(string)
+    postgres   = list(string)
+    backoffice = list(string)
+  })
+  description = "The CIDR address prefixes of the subnets"
 }
 
 
@@ -52,6 +56,23 @@ variable "cosmos_private_endpoint_enabled" {
 
 variable "cosmos_public_network_access_enabled" {
   type = bool
+}
+
+
+############
+# Postgres #
+############
+
+variable "postgres_admin_credentials_rotation_id" {
+  type        = string
+  default     = "1682602957131"
+  description = "You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
+}
+
+variable "postgres_reviewer_usr_credentials_rotation_id" {
+  type        = string
+  default     = "1682602957131"
+  description = "You can renew reviewer user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
 }
 
 
@@ -80,6 +101,125 @@ variable "azure_apim_resource_group" {
 variable "azure_apim_product_id" {
   type        = string
   description = "APIM Services Product id."
+  default     = null
+}
+
+
+##########
+# Webapp #
+##########
+
+variable "functions_kind" {
+  type        = string
+  description = "App service plan kind"
+  default     = null
+}
+
+variable "functions_sku_tier" {
+  type        = string
+  description = "App service plan sku tier"
+  default     = null
+}
+
+variable "functions_sku_size" {
+  type        = string
+  description = "App service plan sku size"
+  default     = null
+}
+
+variable "functions_autoscale_minimum" {
+  type        = number
+  description = "The minimum number of instances for this resource."
+  default     = 1
+}
+
+variable "functions_autoscale_maximum" {
+  type        = number
+  description = "The maximum number of instances for this resource."
+  default     = 30
+}
+
+variable "functions_autoscale_default" {
+  type        = number
+  description = "The number of instances that are available for scaling if metrics are not available for evaluation."
+  default     = 1
+}
+
+variable "jira_namespace_url" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_project_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_username" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_contract_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_delegate_email_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_delegate_name_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_organization_cf_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "jira_organization_name_custom_field" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_name" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_schema" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_user" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "reviewer_db_table" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "legacy_jira_project_name" {
+  type        = string
+  description = ""
   default     = null
 }
 
@@ -116,46 +256,23 @@ variable "legacy_service_watcher_max_items_per_invocation" {
 }
 
 
-############
-## Monitor #
-############
+#############
+# IO Common #
+#############
 
-variable "application_insights_name" {
-  type        = string
-  description = "The common Application Insights name"
+variable "io_common" {
+  type = object({
+    resource_group_name = string
+    # Network
+    vnet_name            = string
+    appgateway_snet_name = string
+    # Monitor
+    application_insights_name = string
+    action_group_email_name   = string
+    action_group_slack_name   = string
+  })
+  description = "Name of common resources of IO platform"
 }
-
-variable "monitor_resource_group_name" {
-  type        = string
-  description = "Monitor resource group name"
-}
-
-variable "monitor_action_group_email_name" {
-  type        = string
-  description = "The email to send alerts to"
-}
-
-variable "monitor_action_group_slack_name" {
-  type        = string
-  description = "The slack channel to send alerts to"
-}
-
-###########
-# network #
-###########
-
-variable "vnet_common_rg" {
-  type        = string
-  description = "Common Virtual network resource group name."
-  default     = ""
-}
-
-variable "vnet_name" {
-  type        = string
-  description = "Common Virtual network resource name."
-  default     = ""
-}
-
 
 ###############################
 # Feature Flags Configuration #
@@ -179,4 +296,20 @@ variable "userid_request_review_legacy_inclusion_list" {
 variable "userid_automatic_service_approval_inclusion_list" {
   type        = string
   description = "User Ids allowed to automatic service approval"
+}
+
+##############
+# backoffice #
+##############
+
+variable "backoffice_app" {
+  type = object({
+    sku_name = string
+    app_settings = list(object({
+      name                  = string
+      value                 = optional(string, "")
+      key_vault_secret_name = optional(string)
+    }))
+  })
+  description = "Configuration of the io-services-cms-backoffice service"
 }

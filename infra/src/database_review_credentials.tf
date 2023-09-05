@@ -4,11 +4,6 @@
 #########
 # ADMIN #
 #########
-variable "postgres_admin_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
 
 locals {
   postgres_admin_username = "pgadminusr"
@@ -31,11 +26,6 @@ resource "azurerm_key_vault_secret" "pgres_flex_admin_pwd" {
   expiration_date = "2025-04-28T23:59:59Z"
 }
 
-variable "postgres_reviewer_usr_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew reviewer user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
 
 ############
 # REVIEWER #

@@ -8,7 +8,7 @@ module "storage_account" {
   access_tier                   = "Hot"
   blob_versioning_enabled       = false
   resource_group_name           = azurerm_resource_group.rg.name
-  location                      = var.location
+  location                      = azurerm_resource_group.rg.location
   advanced_threat_protection    = false
   public_network_access_enabled = true
 
