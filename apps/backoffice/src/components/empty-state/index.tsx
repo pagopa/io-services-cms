@@ -3,14 +3,12 @@ import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 
-/**
- * @param emptyStateLabel
- * @param ctaLabel
- * @param ctaRoute
- */
 export type EmptyStateProps = {
+  /** Descriptive label for empty state */
   emptyStateLabel: string;
+  /** Call to action label for optional action button */
   ctaLabel: string;
+  /** The path or URL to navigate to */
   ctaRoute: string;
 };
 
