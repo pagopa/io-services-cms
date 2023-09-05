@@ -11,7 +11,7 @@ tags = {
 
 io_common = {
   resource_group_name       = "io-p-rg-common"
-  vnet_common_name          = "io-p-vnet-common"
+  vnet_name                 = "io-p-vnet-common"
   application_insights_name = "io-p-ai-common"
   action_group_email_name   = "EmailPagoPA"
   action_group_slack_name   = "SlackPagoPA"
