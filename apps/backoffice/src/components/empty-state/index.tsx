@@ -3,6 +3,11 @@ import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 
+/**
+ * @param emptyStateLabel
+ * @param ctaLabel
+ * @param ctaRoute
+ */
 export type EmptyStateProps = {
   emptyStateLabel: string;
   ctaLabel: string;
@@ -12,8 +17,8 @@ export type EmptyStateProps = {
 export const EmptyState = ({ ...props }: EmptyStateProps) => {
   const { t } = useTranslation();
   return (
-    <Box padding={"24px"} bgcolor={"#EEEEEE"}>
-      <Box padding={"24px"} bgcolor={"#FFFFFF"}>
+    <Box padding={3} bgcolor={"#EEEEEE"}>
+      <Box padding={3} bgcolor={"#FFFFFF"}>
         <Typography variant="body2" textAlign={"center"}>
           {t(props.emptyStateLabel)}{" "}
           <NextLink href={props.ctaRoute}>
