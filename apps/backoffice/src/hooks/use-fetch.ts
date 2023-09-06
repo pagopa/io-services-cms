@@ -120,26 +120,29 @@ const useFetch = <RC, T extends keyof ClientOperations>(
       const result = await clientWithBearerToken[operationId](requestParams);
 
       if (result._tag === "Right") {
+        // Get client http response
+        const response = result.right;
+
         // Check 401 Unauthorized
-        if (result.right.status === 401) {
+        if (response.status === 401) {
           push("/logout"); // todo: configure correct route path
           return;
         }
 
         /** Set a response class type based on http response status code */
         const httpResponseClassType = manageHttpResponseStatusCode(
-          result.right.status
+          response.status
         );
 
         switch (httpResponseClassType) {
           case "successful":
             // 2XX successful response status code
-            const decodedResult = responseCodec.decode(result.right.value);
-            decodedResult._tag === "Right"
-              ? setData(decodedResult.right)
+            const decodedResponseValue = responseCodec.decode(response.value);
+            decodedResponseValue._tag === "Right"
+              ? setData(decodedResponseValue.right)
               : setUseFetchError(
                   "validationError",
-                  readableReport(decodedResult.left)
+                  readableReport(decodedResponseValue.left)
                 );
             break;
           case "clientError":
@@ -147,7 +150,7 @@ const useFetch = <RC, T extends keyof ClientOperations>(
             setUseFetchError(
               "httpError",
               httpResponseClassType,
-              result.right.status
+              response.status
             );
           default:
             break;
