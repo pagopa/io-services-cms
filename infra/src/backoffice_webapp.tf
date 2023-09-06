@@ -24,10 +24,9 @@ module "backoffice_app" {
   plan_name = format("%s-%s-backoffice-plan", local.project, local.application_basename)
   sku_name  = var.backoffice_app.sku_name
 
-  docker_image     = format("ghcr.io/pagopa/%s-%s-backoffice", var.prefix, local.application_basename)
-  docker_image_tag = "latest"
+  node_version = "18"
 
-  health_check_path = "/info"
+  health_check_path = "/api/info"
 
   app_settings = local.backoffice_app_settings
 
@@ -38,13 +37,13 @@ module "backoffice_app" {
 
   allowed_subnets = [
     data.azurerm_subnet.appgateway_snet.id,
-    data.azurerm_subnet.apim_v2_snet[0].id # FIXME: is it required (apim should not call the app service, but the other way around) ??
+    data.azurerm_subnet.apim_v2_snet[0].id # FIXME: is it required? (apim should not call the app service, but app service should query APIM through its SDK [so I think they will go through his public endpoint])
   ]
 
   tags = var.tags
 }
 
-resource "azurerm_private_endpoint" "backoffice_app" { # FIXME: is it required (backoffice app service should be called only through appgateway) ?
+resource "azurerm_private_endpoint" "backoffice_app" { # FIXME: is it required? (backoffice app service should be called only through appgateway, so we have-to/can disable public network access to eliminating public exposure)
   name                = format("%s-%s-backoffice-endpoint", local.project, local.application_basename)
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
