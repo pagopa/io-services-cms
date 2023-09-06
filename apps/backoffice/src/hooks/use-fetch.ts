@@ -1,6 +1,8 @@
 import { API_BACKEND_BASE_URL } from "@/config/constants";
 import { Client, WithDefaultsT, createClient } from "@/generated/api/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -142,13 +144,13 @@ const useFetch = <RC, T extends keyof ClientOperations>(
         switch (httpResponseClassType) {
           case "successful":
             // 2XX successful response status code
-            const decodedResponseValue = responseCodec.decode(response.value);
-            decodedResponseValue._tag === "Right"
-              ? setData(decodedResponseValue.right)
-              : setUseFetchError(
-                  "validationError",
-                  readableReport(decodedResponseValue.left)
-                );
+            pipe(
+              responseCodec.decode(response.value),
+              E.fold(
+                e => setUseFetchError("validationError", readableReport(e)),
+                setData
+              )
+            );
             break;
           case "clientError":
           case "serverError":
