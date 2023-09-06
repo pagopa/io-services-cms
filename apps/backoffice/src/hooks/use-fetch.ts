@@ -5,12 +5,17 @@ import * as t from "io-ts";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+/** Custom error type for `useFetch` */
 export type UseFetchError = {
+  /** readable error type classification */
   kind: UseFetchErrorStatusType;
+  /** http response status code, defined in case of _"httpError"_ `kind` */
   status?: number;
+  /** additional error info */
   message: string;
 };
 
+/** Custom `useFetch` error classification */
 export type UseFetchErrorStatusType =
   | "httpError"
   | "validationError"
