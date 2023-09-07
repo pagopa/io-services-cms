@@ -37,29 +37,7 @@ module "backoffice_app" {
 
   allowed_subnets = [
     data.azurerm_subnet.appgateway_snet.id,
-    # data.azurerm_subnet.apim_v2_snet[0].id # FIXME: is it required? (apim should not call the app service, but app service should query APIM through its SDK [so I think they will go through his public endpoint])
   ]
 
   tags = var.tags
 }
-
-#resource "azurerm_private_endpoint" "backoffice_app" { # FIXME: is it required? (backoffice app service should be called only through appgateway, so we have-to/can disable public network access to eliminating public exposure)
-#  name                = format("%s-%s-backoffice-endpoint", local.project, local.application_basename)
-#  location            = azurerm_resource_group.rg.location
-#  resource_group_name = azurerm_resource_group.rg.name
-#  subnet_id           = data.azurerm_subnet.private_endpoints_subnet[0].id
-#
-#  private_service_connection {
-#    name                           = format("%s-%s-backoffice-endpoint", local.project, local.application_basename)
-#    private_connection_resource_id = module.backoffice_app.id
-#    is_manual_connection           = false
-#    subresource_names              = ["sites"]
-#  }
-#
-#  private_dns_zone_group {
-#    name                 = "private-dns-zone-group"
-#    private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_azurewebsites_net.id]
-#  }
-#
-#  tags = var.tags
-#}

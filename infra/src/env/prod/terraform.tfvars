@@ -27,7 +27,7 @@ io_common = {
 subnets_cidrs = {
   api        = ["10.0.135.0/26"]
   postgres   = ["10.0.135.64/26"]
-  backoffice = ["10.0.136.0/26"] # FIXME: use correct CIDR
+  backoffice = ["10.0.135.128/26"]
 }
 
 ## Functions
