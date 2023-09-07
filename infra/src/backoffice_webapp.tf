@@ -24,7 +24,7 @@ module "backoffice_app" {
   plan_name = format("%s-%s-backoffice-plan", local.project, local.application_basename)
   sku_name  = var.backoffice_app.sku_name
 
-  node_version = "18"
+  node_version = "18-lts"
 
   health_check_path = "/api/info"
 
