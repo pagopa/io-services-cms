@@ -126,7 +126,9 @@ const useFetch = <RC, T extends keyof ClientOperations>(
     try {
       const result = await clientWithBearerToken[operationId](requestParams);
 
-      if (result._tag === "Right") {
+      if (E.isLeft(result)) {
+        setUseFetchError("validationError", readableReport(result.left));
+      } else {
         // Get client http response
         const response = result.right;
 
@@ -162,8 +164,6 @@ const useFetch = <RC, T extends keyof ClientOperations>(
             break;
           // todo: manage other response class type
         }
-      } else {
-        setUseFetchError("validationError", readableReport(result.left));
       }
     } catch (err) {
       setUseFetchError("exceptionError", (err as Error).message);
