@@ -30,10 +30,10 @@ data "azurerm_private_dns_zone" "privatelink_postgres_database_azure_com" {
 }
 
 
-data "azurerm_private_dns_zone" "privatelink_azurewebsites_net" { # FIXME: is it required ?
-  name                = "privatelink.azurewebsites.net"
-  resource_group_name = var.io_common.resource_group_name
-}
+#data "azurerm_private_dns_zone" "privatelink_azurewebsites_net" { # FIXME: is it required ?
+#  name                = "privatelink.azurewebsites.net"
+#  resource_group_name = var.io_common.resource_group_name
+#}
 
 
 data "azurerm_subnet" "apim_snet" {

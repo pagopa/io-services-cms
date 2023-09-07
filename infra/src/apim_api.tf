@@ -54,6 +54,6 @@ resource "azurerm_api_management_named_value" "io_fn_services_cms_key" {
   api_management_name = data.azurerm_api_management.apim.name
   resource_group_name = data.azurerm_api_management.apim.resource_group_name
   display_name        = "io-fn-services-cms-key"
-  value               = azurerm_key_vault_secret.webapp_fn_app_key.value # FIXME: use module.webapp_functions_app.primary_key
+  value               = azurerm_key_vault_secret.webapp_fn_app_key.value # FIXME: refactor: remove, use module.webapp_functions_app.primary_key
   secret              = "true"
 }
