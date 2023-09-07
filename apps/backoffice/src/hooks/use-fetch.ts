@@ -159,8 +159,8 @@ const useFetch = <RC, T extends keyof ClientOperations>(
               httpResponseClassType,
               response.status
             );
-          default:
             break;
+          // todo: manage other response class type
         }
       } else {
         setUseFetchError("validationError", readableReport(result.left));
