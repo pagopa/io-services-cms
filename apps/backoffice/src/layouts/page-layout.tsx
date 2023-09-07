@@ -13,13 +13,14 @@ export const PageLayout = ({
   title,
   subtitle,
   isFullWidth = true,
-  children,
+  children
 }: PageLayoutProps) => {
   return (
     <Box
       padding={3}
       width={isFullWidth ? "100%" : "60%"}
       marginX={isFullWidth ? "" : "auto"}
+      bgcolor={"#F5F5F5"}
     >
       <PageHeader title={title} subtitle={subtitle} />
       <Box>{children}</Box>

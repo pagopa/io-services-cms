@@ -1,10 +1,10 @@
 import {
-  Dashboard,
+  Category,
   ExitToAppRounded,
-  NoteAlt,
   People,
   SupervisedUserCircle,
-  VpnKey,
+  ViewSidebar,
+  VpnKey
 } from "@mui/icons-material";
 import {
   Box,
@@ -35,12 +35,12 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
   const menu: Array<SidenavItem> = [
     {
       href: "/",
-      icon: <Dashboard fontSize="inherit" />,
+      icon: <ViewSidebar fontSize="inherit" />,
       text: "section.overview",
     },
     {
       href: "/services",
-      icon: <NoteAlt fontSize="inherit" />,
+      icon: <Category fontSize="inherit" />,
       text: "section.services",
     },
     {
