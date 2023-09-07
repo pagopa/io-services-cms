@@ -12,7 +12,7 @@ import {
   List,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
+  ListItemText
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
@@ -36,18 +36,18 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
     {
       href: "/",
       icon: <ViewSidebar fontSize="inherit" />,
-      text: "section.overview",
+      text: "routes.overview.title"
     },
     {
       href: "/services",
       icon: <Category fontSize="inherit" />,
-      text: "section.services",
+      text: "routes.services.title"
     },
     {
       href: "/keys",
       icon: <VpnKey fontSize="inherit" />,
-      text: "section.keys",
-    },
+      text: "routes.keys.title"
+    }
   ];
 
   const handleListItemClick = (index: number) => {
@@ -59,7 +59,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
       sx={{
         height: "100%",
         maxWidth: 360,
-        backgroundColor: "background.paper",
+        backgroundColor: "background.paper"
       }}
     >
       <List component="nav" aria-label="menu-back-office">
@@ -87,7 +87,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
             <ListItemIcon>
               <People fontSize="inherit" />
             </ListItemIcon>
-            <ListItemText primary={t("section.users")} />
+            <ListItemText primary={t("routes.users.title")} />
             <ListItemIcon>
               <ExitToAppRounded color="action" />
             </ListItemIcon>
@@ -98,7 +98,7 @@ export const Sidenav = ({ onNavItemClick }: SidenavProps) => {
             <ListItemIcon>
               <SupervisedUserCircle fontSize="inherit" />
             </ListItemIcon>
-            <ListItemText primary={t("section.groups")} />
+            <ListItemText primary={t("routes.groups.title")} />
             <ListItemIcon>
               <ExitToAppRounded color="action" />
             </ListItemIcon>

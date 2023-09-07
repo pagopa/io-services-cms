@@ -11,12 +11,35 @@
       "termsAndConditions": "Terms and conditions"
     }
   },
-  "section": {
-    "overview": "Overview",
-    "services": "Services",
-    "keys": "API Keys",
-    "users": "Users",
-    "groups": "Groups"
+  "routes": {
+    "overview": {
+      "title": "Overview",
+      "description": "Monitor all your activities from here."
+    },
+    "services": {
+      "title": "Services",
+      "description": "View and manage your institution's services."
+    },
+    "new-service": {
+      "title": "Create a new service",
+      "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app."
+    },
+    "edit-service": {
+      "title": "Edit the service",
+      "description": "Follow the steps and fill in the required fields. Once modified, you can send the service for review and then proceed to publish it on the IO app."
+    },
+    "keys": {
+      "title": "API Keys",
+      "description": "Here you can manage the API keys to be used to authenticate the institution's requests."
+    },
+    "users": {
+      "title": "Users",
+      "description": ""
+    },
+    "groups": {
+      "title": "Groups",
+      "description": ""
+    }
   },
   "test": "This is a translation test"
 }

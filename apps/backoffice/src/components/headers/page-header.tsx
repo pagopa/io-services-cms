@@ -1,48 +1,28 @@
-import { Box, Breadcrumbs, Typography } from "@mui/material";
-import { useRouter } from "next/router";
+import { Box, Typography } from "@mui/material";
+import { useTranslation } from "next-i18next";
+import { PageBreadcrumbs } from "./page-breadcrumbs";
+import { PageHtmlHeadTitle } from "./page-html-head-title";
 
 export type PageHeaderProps = {
   title: string;
-  subtitle?: string;
+  description?: string;
 };
 
-export const PageHeader = ({ title, subtitle }: PageHeaderProps) => {
-  const router = useRouter();
-  const getRoutePath = (): string[] => {
-    return router.pathname.split("/");
-  };
+export const PageHeader = ({ title, description }: PageHeaderProps) => {
+  const { t } = useTranslation();
 
   return (
-    <Box>
-      <Box>
-        <Breadcrumbs>
-          {getRoutePath().map((section, index, sections) =>
-            index > 0 && sections.length > 2 ? (
-              <Typography
-                key={index}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                color="inherit"
-                fontWeight={
-                  index > 0 && index < sections.length - 1 ? 400 : 600
-                }
-              >
-                {section}
-              </Typography>
-            ) : null
-          )}
-        </Breadcrumbs>
+    <>
+      <PageHtmlHeadTitle section={title} />
+      <PageBreadcrumbs />
+      <Box marginBottom={3} id="bo-io-page-title-descr">
+        <Typography marginBottom={2} variant="h4">
+          {t(title)}
+        </Typography>
+        {description ? (
+          <Typography variant="body1">{t(description)}</Typography>
+        ) : null}
       </Box>
-      <Box margin={"8px 0"}>
-        <Typography variant="h4">{title}</Typography>
-      </Box>
-      {subtitle ? (
-        <Box marginBottom={"24px"}>
-          <Typography variant="body1">{subtitle}</Typography>
-        </Box>
-      ) : null}
-    </Box>
+    </>
   );
 };
