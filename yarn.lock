@@ -1118,7 +1118,9 @@ __metadata:
     axios: ^1.5.0
     eslint: 8.46.0
     eslint-config-next: 13.4.12
+    fp-ts: ^2.13.1
     i18next: ^23.4.4
+    io-ts: ^2.2.20
     msw: ^1.2.5
     next: ^13.4.19
     next-i18next: ^14.0.0
