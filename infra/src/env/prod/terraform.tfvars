@@ -79,7 +79,7 @@ userid_automatic_service_approval_inclusion_list = ""
 
 # Backoffice Configurations
 backoffice_app = {
-  sku_name = "B1"
+  sku_name = "S1" # FIXME: use "P1v3" before "production launch"
   app_settings = [
     {
       name  = "NODE_ENV",
