@@ -1,24 +1,3 @@
-# Postgres Flexible Server subnet
-module "postgres_flexible_snet" {
-  source                                    = "git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v6.19.1"
-  name                                      = "${local.project}-${local.application_basename}-pgres-flexible-snet"
-  address_prefixes                          = [var.cidr_subnet_pgres]
-  resource_group_name                       = var.vnet_common_rg
-  virtual_network_name                      = var.vnet_name
-  service_endpoints                         = ["Microsoft.Storage"]
-  private_endpoint_network_policies_enabled = true
-
-  delegation = {
-    name = "delegation"
-    service_delegation = {
-      name = "Microsoft.DBforPostgreSQL/flexibleServers"
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-      ]
-    }
-  }
-}
-
 # https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server
 module "postgres_flexible_server_private" {
   source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v6.19.1"

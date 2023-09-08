@@ -1,7 +1,7 @@
 resource "azurerm_monitor_autoscale_setting" "webapp_functions_app_autoscale" {
   name                = "${module.webapp_functions_app.name}-autoscale"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
+  location            = azurerm_resource_group.rg.location
   target_resource_id  = module.webapp_functions_app.app_service_plan_id
 
   profile {
