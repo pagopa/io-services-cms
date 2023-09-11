@@ -3,6 +3,8 @@
     "title": "IO BackOffice"
   },
   "buttons": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard"
   },
   "copied": "Copied",
