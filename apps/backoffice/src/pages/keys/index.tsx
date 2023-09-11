@@ -1,16 +1,21 @@
-import { PageHtmlHeadTitle } from "@/components/utils/page-html-head-title";
+import { PageHeader } from "@/components/headers";
 import { AppLayout, PageLayout } from "@/layouts";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
+
+const pageTitleLocaleKey = "routes.keys.title";
+const pageDescriptionLocaleKey = "routes.keys.description";
 
 export default function Keys() {
   const { t } = useTranslation();
 
   return (
     <>
-      <PageHtmlHeadTitle section="apikeys" />
-      <main>contenuto pagina API Key</main>
+      <PageHeader
+        title={pageTitleLocaleKey}
+        description={pageDescriptionLocaleKey}
+      />
     </>
   );
 }
@@ -19,15 +24,15 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
+      ...(await serverSideTranslations(locale))
+    }
   };
 }
 
 Keys.getLayout = function getLayout(page: ReactElement) {
   return (
     <AppLayout>
-      <PageLayout title="API Key">{page}</PageLayout>
+      <PageLayout>{page}</PageLayout>
     </AppLayout>
   );
 };

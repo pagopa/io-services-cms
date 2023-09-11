@@ -8,7 +8,7 @@ export type PageHtmlHeadTitleProps = {
 export const PageHtmlHeadTitle = ({ section }: PageHtmlHeadTitleProps) => {
   const { t } = useTranslation();
 
-  const getTitle = () => `${t("app.title")} | ${t(`section.${section}`)}`;
+  const getTitle = () => `${t("app.title")} | ${t(section)}`;
 
   return (
     <Head>

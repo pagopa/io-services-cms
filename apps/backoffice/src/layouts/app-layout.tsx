@@ -17,23 +17,23 @@ const mockUser: JwtUser = {
   id: "12345",
   name: "Mario",
   surname: "Rossi",
-  email: "mario.rossi@email.it",
+  email: "mario.rossi@email.it"
 };
 const mockProducts: ProductSwitchItem[] = [
   {
     id: "1",
     title: "App IO",
     productUrl: "",
-    linkType: "internal",
-  },
+    linkType: "internal"
+  }
 ];
 const mockPartyList: PartySwitchItem[] = [
   {
     id: "1",
     name: "Nome Ente",
     productRole: "Amministratore",
-    logoUrl: "https://agid.digitalpa.it/media/images/stemma.png",
-  },
+    logoUrl: "https://agid.digitalpa.it/media/images/stemma.png"
+  }
 ];
 
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
@@ -45,11 +45,11 @@ export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
       <Box>
         <Header products={mockProducts} parties={mockPartyList} />
       </Box>
-      <Grid container spacing={0}>
+      <Grid container spacing={0} bgcolor={"#F5F5F5"}>
         {hideSidenav ? null : (
           <Grid item width={360}>
             <Sidenav
-              onNavItemClick={(index) =>
+              onNavItemClick={index =>
                 console.log(`Sidenav item click ${index}`)
               }
             />

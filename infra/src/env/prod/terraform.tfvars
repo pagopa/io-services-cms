@@ -9,13 +9,26 @@ tags = {
   CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
 }
 
+io_common = {
+  resource_group_name       = "io-p-rg-common"
+  vnet_name                 = "io-p-vnet-common"
+  application_insights_name = "io-p-ai-common"
+  action_group_email_name   = "EmailPagoPA"
+  action_group_slack_name   = "SlackPagoPA"
+  appgateway_snet_name      = "io-p-appgateway-snet"
+}
+
 ## Network
-vnet_common_rg = "io-p-rg-common"
-vnet_name      = "io-p-vnet-common"
 # refer to https://github.com/pagopa/io-infra/blob/main/src/core/env/prod/terraform.tfvars#L26
 #  for availble netowrk spaces
-cidr_subnet       = "10.0.135.0/26"
-cidr_subnet_pgres = "10.0.135.64/26"
+# You can retrieve the list of current defined subnets using the CLI command
+# az network vnet subnet list --subscription PROD-IO --vnet-name io-p-vnet-common --resource-group io-p-rg-common --output table
+# and thus define new CIDRs according to the unallocated address space
+subnets_cidrs = {
+  api        = ["10.0.135.0/26"]
+  postgres   = ["10.0.135.64/26"]
+  backoffice = ["10.0.135.128/26"]
+}
 
 ## Functions
 functions_kind              = "Linux"
@@ -28,12 +41,6 @@ functions_autoscale_default = 1
 cosmos_private_endpoint_enabled      = true
 cosmos_public_network_access_enabled = false
 
-
-## Monitor
-application_insights_name       = "io-p-ai-common"
-monitor_resource_group_name     = "io-p-rg-common"
-monitor_action_group_email_name = "EmailPagoPA"
-monitor_action_group_slack_name = "SlackPagoPA"
 
 ## Jira
 jira_namespace_url                  = "https://pagopa.atlassian.net"
@@ -69,3 +76,22 @@ userid_cms_to_legacy_sync_inclusion_list         = "*"
 userid_legacy_to_cms_sync_inclusion_list         = "*"
 userid_request_review_legacy_inclusion_list      = "*"
 userid_automatic_service_approval_inclusion_list = ""
+
+# Backoffice Configurations
+backoffice_app = {
+  sku_name = "S1" # FIXME: use "P1v3" before "production launch"
+  app_settings = [
+    {
+      name  = "NODE_ENV",
+      value = "production"
+    },
+    {
+      name  = "WEBSITES_PORT",
+      value = "3000"
+    },
+    {
+      name                  = "AUTH_SESSION_SECRET",
+      key_vault_secret_name = "bo-auth-session-secret"
+    }
+  ]
+}

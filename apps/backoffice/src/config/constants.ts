@@ -5,8 +5,10 @@ export const API_SERVICES_CMS_MOCKING =
   process.env.NEXT_PUBLIC_API_SERVICES_CMS_MOCKING === "true";
 
 // BackOffice backend for frontend API configuration
-export const API_BACKEND_URL = process.env
-  .NEXT_PUBLIC_API_BACKEND_URL as string;
+export const API_BACKEND_BASE_URL = process.env
+  .NEXT_PUBLIC_API_BACKEND_BASE_URL as string;
+export const API_BACKEND_BASE_PATH = process.env
+  .NEXT_PUBLIC_API_BACKEND_BASE_PATH as string;
 export const API_BACKEND_MOCKING =
   process.env.NEXT_PUBLIC_API_BACKEND_MOCKING === "true";
 

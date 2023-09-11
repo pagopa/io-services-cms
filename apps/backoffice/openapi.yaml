@@ -11,7 +11,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.1.0
+  version: 0.2.0
 servers:
   - url: http://localhost:3000/api #FIXME
 tags:
@@ -34,7 +34,6 @@ paths:
     get:
       description: Get runtime status information about the application
       operationId: info
-      security: [] # public endpoint
       responses:
         "200":
           description: The application is up and running
@@ -62,7 +61,6 @@ paths:
       summary: Resolve selfcare identity
       description: Resolve selfcare identity
       operationId: resolveSelfCareIdentity
-      security: [] # public endpoint
       requestBody:
         description: The _**IdentityToken**_ that SelfCare issues to BackOffice to communicate _**identity, company, role**_ tuple
         content:
@@ -90,6 +88,8 @@ paths:
       summary: Retrieve latest service migration status
       description: Retrieve latest service migration status, intended as a list of items containing delegate data, relative service migration status and last update date
       operationId: getServicesMigrationStatus
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Service migration status fetched successfully
@@ -112,6 +112,8 @@ paths:
       summary: Retrieve delegates with the number of services to migrate
       description: Retrieve delegates with the number of services to migrate
       operationId: getServicesMigrationDelegates
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Delegates with service to migrate fetched successfully
@@ -134,6 +136,8 @@ paths:
       summary: Migrate delegate's services
       description: Migrate delegate's services
       operationId: migrateDelegatesServices
+      security:
+        - bearerAuth: []
       parameters:
         - name: delegateId
           in: path
@@ -160,6 +164,8 @@ paths:
       summary: Get delegate's services migration status
       description: Get delegate's services migration status
       operationId: getServicesMigrationDetails
+      security:
+        - bearerAuth: []
       parameters:
         - name: delegateId
           in: path
@@ -191,6 +197,8 @@ paths:
       summary: Create a new service
       description: Create a new Service with the attributes provided in the request payload
       operationId: createService
+      security:
+        - bearerAuth: []
       requestBody:
         description: A service body payload
         content:
@@ -221,6 +229,8 @@ paths:
       summary: Retrieve all services
       description: Retrieve all services owned by the calling user
       operationId: getServices
+      security:
+        - bearerAuth: []
       parameters:
         - name: limit
           in: query
@@ -261,6 +271,8 @@ paths:
       summary: Retrieve service
       description: Retrieve a service by ID
       operationId: getService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -291,6 +303,8 @@ paths:
       summary: Update service
       description: Update an existing service by ID
       operationId: updateService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -330,6 +344,8 @@ paths:
       summary: Delete service
       description: Delete a service by ID
       operationId: deleteService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -357,6 +373,8 @@ paths:
       summary: Upload service logo
       description: Upload service logo by service ID
       operationId: updateServiceLogo
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -393,6 +411,8 @@ paths:
       summary: Retrieve service keys
       description: Retrieve service keys by service ID
       operationId: getServiceKeys
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -424,6 +444,8 @@ paths:
       summary: Regenerate service key
       description: Regenerate service key by service ID and key type
       operationId: regenerateServiceKey
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -463,6 +485,8 @@ paths:
       summary: Send service to review
       description: Send service to review by service ID
       operationId: reviewService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -498,6 +522,8 @@ paths:
       summary: Explain service review
       description: Explain service review by service ID
       operationId: explainService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -536,6 +562,8 @@ paths:
       summary: Publish service on IO
       description: Publish service by ID on __IO Platform__
       operationId: releaseService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -564,6 +592,8 @@ paths:
       summary: Retrieve last published version of service
       description: Retrieve last version of service published on __IO Platform__
       operationId: getPublishedService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -594,6 +624,8 @@ paths:
       summary: Unpublish service from IO
       description: Unpublish service by ID from __IO Platform__
       operationId: unpublishService
+      security:
+        - bearerAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -621,6 +653,8 @@ paths:
       summary: Retrieve all institutions
       description: Retrieves all the onboarded institutions related to the provided user and the product retrieved from Subscription Key
       operationId: getInstitutions
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Institutions fetched successfully
@@ -645,6 +679,8 @@ paths:
       summary: Retrieve Institution
       description: Retrieve an institution by ID
       operationId: getInstitution
+      security:
+        - bearerAuth: []
       parameters:
         - name: institutionId
           in: path
@@ -815,5 +851,3 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-  - bearerAuth: []

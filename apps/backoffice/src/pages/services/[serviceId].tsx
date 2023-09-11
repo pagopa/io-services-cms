@@ -1,4 +1,4 @@
-import { PageHtmlHeadTitle } from "@/components/utils/page-html-head-title";
+import { PageHeader } from "@/components/headers";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Box, Button } from "@mui/material";
 import { useTranslation } from "next-i18next";
@@ -14,21 +14,18 @@ export default function ServiceDetails() {
 
   return (
     <>
-      <PageHtmlHeadTitle section="services" />
-      <main>
-        <Box>contenuto pagina dettagli servizio {serviceId}</Box>
-        <Box paddingY={3}>
-          <NextLink
-            href={`/services/${serviceId}/edit-service`}
-            passHref
-            style={{ textDecoration: "none" }}
-          >
-            <Button size="medium" variant="contained">
-              Modifica il servizio
-            </Button>
-          </NextLink>
-        </Box>
-      </main>
+      <PageHeader title={serviceId} />
+      <Box paddingY={3}>
+        <NextLink
+          href={`/services/${serviceId}/edit-service`}
+          passHref
+          style={{ textDecoration: "none" }}
+        >
+          <Button size="medium" variant="contained">
+            Modifica il servizio
+          </Button>
+        </NextLink>
+      </Box>
     </>
   );
 }
@@ -36,15 +33,15 @@ export default function ServiceDetails() {
 export async function getServerSideProps({ locale }: any) {
   return {
     props: {
-      ...(await serverSideTranslations(locale)),
-    },
+      ...(await serverSideTranslations(locale))
+    }
   };
 }
 
 ServiceDetails.getLayout = function getLayout(page: ReactElement) {
   return (
     <AppLayout>
-      <PageLayout title="Dettagli Servizio">{page}</PageLayout>
+      <PageLayout>{page}</PageLayout>
     </AppLayout>
   );
 };

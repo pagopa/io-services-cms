@@ -79,7 +79,7 @@ resource "azurerm_key_vault_access_policy" "github_action_cd" {
   key_permissions         = []
 }
 
-resource "azurerm_key_vault_secret" "webapp_fn_app_key" {
+resource "azurerm_key_vault_secret" "webapp_fn_app_key" { # FIXME: remove
   name            = "webapp-fn-app-key"
   key_vault_id    = module.key_vault_domain.id
   value           = module.webapp_functions_app.primary_key
