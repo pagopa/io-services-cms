@@ -14,7 +14,8 @@ import { aMockErrorResponse } from "../data/common-data";
 
 faker.seed(1);
 
-const baseURL = API_SERVICES_CMS_URL + API_SERVICES_CMS_BASE_PATH;
+const baseURL = "http://mock-rest-endpoint/api/manage";
+// const baseURL = API_SERVICES_CMS_URL + API_SERVICES_CMS_BASE_PATH;
 
 export const handlers = [
   rest.get(`${baseURL}/info`, (_, res, ctx) => {
