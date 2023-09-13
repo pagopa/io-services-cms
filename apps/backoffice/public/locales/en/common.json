@@ -2,6 +2,12 @@
   "app": {
     "title": "IO BackOffice"
   },
+  "buttons": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "copyToClipboard": "Copy to clipboard"
+  },
+  "copied": "Copied",
   "footer": {
     "legalInfo": "<strong>PagoPA S.p.A.</strong> - Joint-stock company with sole shareholder - Share capital of 1,000,000 euros fully paid - Registered office in Rome, Piazza Colonna 370, <br /> CAP 00187 - Registration number in the Rome Company Register, Tax Code and VAT number 15376371009",
     "preLogin": {},
