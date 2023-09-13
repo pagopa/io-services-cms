@@ -1,3 +1,5 @@
+import DialogProvider from "@/components/dialog-provider";
+import SnackbarProvider from "@/components/snackbar-provider";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { theme } from "@pagopa/mui-italia"; // MUI Italia theme
 import { ReactNode } from "react";
@@ -10,7 +12,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {children}
+      <DialogProvider>
+        <SnackbarProvider>{children}</SnackbarProvider>
+      </DialogProvider>
     </ThemeProvider>
   );
 };
