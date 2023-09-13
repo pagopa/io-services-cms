@@ -1,6 +1,8 @@
 // IO Services CMS API configuration
 export const API_SERVICES_CMS_URL = process.env
   .NEXT_PUBLIC_API_SERVICES_CMS_URL as string;
+export const API_SERVICES_CMS_BASE_PATH = process.env
+  .NEXT_PUBLIC_API_SERVICES_CMS_BASE_PATH as string;
 export const API_SERVICES_CMS_MOCKING =
   process.env.NEXT_PUBLIC_API_SERVICES_CMS_MOCKING === "true";
 
