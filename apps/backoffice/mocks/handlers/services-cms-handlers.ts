@@ -14,7 +14,7 @@ import { aMockErrorResponse } from "../data/common-data";
 
 faker.seed(1);
 
-const baseURL = "http://mock-rest-endpoint/api/manage";
+const baseURL = "https://mock-rest-endpoint/api/manage";
 // const baseURL = API_SERVICES_CMS_URL + API_SERVICES_CMS_BASE_PATH;
 
 export const handlers = [
@@ -239,4 +239,4 @@ export function getGetPublishedService200Response() {
   return aMockServicePublication;
 }
 
-export const mockApiServicesCmsUrl = "http://mock-rest-endpoint/api/manage";
+export const mockApiServicesCmsUrl = "https://mock-rest-endpoint/api/manage";
