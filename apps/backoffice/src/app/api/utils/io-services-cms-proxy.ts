@@ -1,5 +1,6 @@
 import {
   API_SERVICES_CMS_BASE_PATH,
+  API_SERVICES_CMS_MOCKING,
   API_SERVICES_CMS_URL
 } from "@/config/constants";
 import { Client, createClient } from "@/generated/services-cms/client";
@@ -8,10 +9,10 @@ import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { NextRequest, NextResponse } from "next/server";
 
-// if (API_SERVICES_CMS_MOCKING) {
-//   const { setupMocks } = require("../../../../mocks");
-//   setupMocks();
-// }
+if (API_SERVICES_CMS_MOCKING) {
+  const { setupMocks } = require("../../../../mocks");
+  setupMocks();
+}
 
 const buildClient = (): Client =>
   createClient({
@@ -21,8 +22,10 @@ const buildClient = (): Client =>
   });
 
 type PathParameters = {
-  serviceId: string;
+  serviceId?: string;
   keyType?: string;
+  limit?: string;
+  offset?: string;
 };
 
 export const forwardIoServicesCmsRequest = async <T extends keyof Client>(

@@ -7,6 +7,7 @@ import { rest } from "msw";
 import {
   aMockServiceKeys,
   aMockServicePagination,
+  aMockServicePaginationLimitOffset,
   aMockServicePublication,
   getMockServiceLifecycle
 } from "../data/backend-data";
@@ -38,9 +39,18 @@ export const handlers = [
 
     return res(...resultArray[0]);
   }),
-  rest.get(`${baseURL}/services`, (_, res, ctx) => {
+  rest.get(`${baseURL}/services`, (req, res, ctx) => {
+    const offset = req.url.searchParams.get("offset");
+    const limit = req.url.searchParams.get("limit");
+    console.log(
+      `GET ${baseURL}/services intercepted, offset: ${offset}, limit: ${limit}`
+    );
+
     const resultArray = [
-      [ctx.status(200), ctx.json(getGetServices200Response())],
+      [
+        ctx.status(200),
+        ctx.json(getGetServices200Response(Number(limit), Number(offset)))
+      ],
       [ctx.status(401), ctx.json(null)],
       [ctx.status(403), ctx.json(null)],
       [ctx.status(429), ctx.json(null)],
@@ -215,8 +225,8 @@ export function getCreateService201Response() {
   return getMockServiceLifecycle();
 }
 
-export function getGetServices200Response() {
-  return aMockServicePagination;
+export function getGetServices200Response(limit?: number, offset?: number) {
+  return aMockServicePaginationLimitOffset(limit, offset);
 }
 
 export function getGetService200Response(serviceId: string) {

@@ -12,5 +12,11 @@ export async function POST(request: NextRequest) {
  * @description Retrieve all services owned by the calling user
  */
 export async function GET(request: NextRequest) {
-  return forwardIoServicesCmsRequest("getServices", request);
+  const limit = request.nextUrl.searchParams.get("limit");
+  const offset = request.nextUrl.searchParams.get("offset");
+
+  return forwardIoServicesCmsRequest("getServices", request, {
+    limit: limit ?? undefined,
+    offset: offset ?? undefined
+  });
 }
