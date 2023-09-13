@@ -13,7 +13,7 @@ import {
 } from "../lib/clients/jira-client";
 
 const formatOptionalStringValue = (value?: string) =>
-  value || `{color:#000000}*[ DATO MANCANTE ]*{color}`;
+  value || `*[ DATO MANCANTE ]*`;
 
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
