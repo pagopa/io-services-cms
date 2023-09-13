@@ -1,45 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ResponseError } from '@/generated/api/ResponseError';
-import { ServicePayload } from '@/generated/api/ServicePayload'; 
+import { forwardIoServicesCmsRequest } from "@/app/api/utils/io-services-cms-proxy";
+import { NextRequest } from "next/server";
 
 /**
  * @description Retrieve a service by ID
- * TODO:!!!!This is a placeholder!!!!
- * FIXME:!!!!Update the implementation!!!!
  */
-export async function GET(request: NextRequest) {
-  return NextResponse.json({ message: 'Hello World' });
-} 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { serviceId: string } }
+) {
+  return forwardIoServicesCmsRequest("getService", request, {
+    serviceId: params.serviceId
+  });
+}
 
 /**
  * @description Update an existing service by ID
- * TODO:!!!!This is a placeholder!!!!
- * FIXME:!!!!Update the implementation!!!!
  */
-export async function PUT(request: NextRequest) {
-  const data = await request.json();
-  const bodyParsed = ServicePayload.decode(data);
-
-  if (bodyParsed._tag === "Right") {
-    console.log(bodyParsed.right);
-  } else {
-    const responseError: ResponseError = {
-      title: "Bad Request",
-      status: 400 as any,
-      detail: "An Error Occurred while parsing the request body, request contains an invalid payload",
-    };
-
-    return NextResponse.json(responseError, { status: 400 });
-  }
-
-  return NextResponse.json({ message: 'Hello World' });
-} 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { serviceId: string } }
+) {
+  return forwardIoServicesCmsRequest("updateService", request, {
+    serviceId: params.serviceId
+  });
+}
 
 /**
  * @description Delete a service by ID
- * TODO:!!!!This is a placeholder!!!!
- * FIXME:!!!!Update the implementation!!!!
  */
-export async function DELETE(request: NextRequest) {
-  return NextResponse.json({ message: 'Hello World' });
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { serviceId: string } }
+) {
+  return forwardIoServicesCmsRequest("deleteService", request, {
+    serviceId: params.serviceId
+  });
 }
