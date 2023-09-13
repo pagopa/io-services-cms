@@ -75,7 +75,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
 });
 
 export const aMockServicePublication = {
-  ...getMockServiceLifecycle,
+  ...getMockServiceLifecycle(),
   status: faker.helpers.arrayElement(["published", "unpublished"]),
   version: faker.string.uuid()
 };
