@@ -1,12 +1,12 @@
 import { LoaderFullscreen } from "@/components/loaders";
-import { SELFCARE_URL } from "@/config/constants";
+import { getConfiguration } from "@/config";
 import { signOut } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
 
 export default function Logout() {
   useEffect(() => {
-    signOut({ callbackUrl: SELFCARE_URL });
+    signOut({ callbackUrl: getConfiguration().SELFCARE_URL });
   }, []);
 
   return <LoaderFullscreen title="app.title" content="auth.leaving" />;

@@ -1,9 +1,5 @@
 import { LoaderFullscreen } from "@/components/loaders";
-import {
-  API_BACKEND_BASE_PATH,
-  API_BACKEND_BASE_URL,
-  SELFCARE_URL
-} from "@/config/constants";
+import { getConfiguration } from "@/config";
 import axios from "axios";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -31,13 +27,15 @@ export default function Login() {
 
     if (identity_token === null) {
       // redirect to selfcare
-      router.push(SELFCARE_URL);
+      router.push(getConfiguration().SELFCARE_URL);
       return;
     }
 
     // resolve selfcare identity
     const { data, status } = await axios.post<any>(
-      `${API_BACKEND_BASE_URL}${API_BACKEND_BASE_PATH}/auth`,
+      `${getConfiguration().API_BACKEND_BASE_URL}${
+        getConfiguration().API_BACKEND_BASE_PATH
+      }/auth`,
       { identity_token }
     );
 
@@ -57,7 +55,8 @@ export default function Login() {
     if (session && router.isReady) {
       setTimeout(() => {
         // redirect to the return url or home page
-        router.push((router.query.returnUrl as string) || "/");
+        // router.push((router.query.returnUrl as string) || "/");
+        router.push("/");
       }, 2000);
     } else {
       handleIdentity();

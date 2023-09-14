@@ -15,6 +15,9 @@ export function getConfiguration() {
       .NEXT_PUBLIC_API_BACKEND_BASE_PATH as string,
     API_BACKEND_MOCKING: process.env.NEXT_PUBLIC_API_BACKEND_MOCKING === "true",
 
+    // BackOffice URLs
+    SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
+
     // NodeJS Environment mode
     IS_DEVELOPMENT: process.env.NODE_ENV === "development",
     IS_TEST: process.env.NODE_ENV === "test",
