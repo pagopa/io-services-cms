@@ -1,4 +1,4 @@
-import { API_BACKEND_BASE_URL } from "@/config/constants";
+import { getConfiguration } from "@/config";
 import { Client, WithDefaultsT, createClient } from "@/generated/api/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -67,7 +67,7 @@ const withBearer: WithDefaultsT<"bearerAuth"> = wrappedOperation => params => {
 };
 
 export const clientWithBearerToken: Client<"bearerAuth"> = createClient({
-  baseUrl: API_BACKEND_BASE_URL,
+  baseUrl: getConfiguration().API_BACKEND_BASE_URL,
   fetchApi: (fetch as any) as typeof fetch,
   withDefaults: withBearer
 });

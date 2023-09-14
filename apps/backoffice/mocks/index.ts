@@ -1,4 +1,4 @@
-import { IS_BROWSER } from "@/config/constants";
+import { getConfiguration } from "@/config";
 
 /**
  * MSW Setup
@@ -7,7 +7,7 @@ import { IS_BROWSER } from "@/config/constants";
  * or a NodeJS request interceptor _(done via a designated node-request-interceptor library)_.
  */
 export const setupMocks = () => {
-  if (IS_BROWSER) {
+  if (getConfiguration().IS_BROWSER) {
     const { mswWorker } = require("./msw-worker");
     mswWorker.start({ onUnhandledRequest: "bypass" });
   } else {

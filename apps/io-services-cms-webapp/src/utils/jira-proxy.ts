@@ -13,7 +13,7 @@ import {
 } from "../lib/clients/jira-client";
 
 const formatOptionalStringValue = (value?: string) =>
-  value || `{color:#FF991F}*[ DATO MANCANTE ]*{color}`;
+  value || `*[ DATO MANCANTE ]*`;
 
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
@@ -74,11 +74,13 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
   ) =>
-    `Effettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
+    `h1. Dati Servizio
+    \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
-    \n\nh2. *${service.data.name} (${service.data.metadata.scope})*
-    \n\n${formatOptionalStringValue(service.data.description)}
+    \n\nh2. *Nome Servizio: ${service.data.name}*
+    \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
+    \n\n*Area:* ${service.data.metadata.scope}
     \n\n----\n\nh3. _Contatti:_
     \n\n*Url di supporto:* ${formatOptionalStringValue(
       service.data.metadata.support_url
@@ -90,7 +92,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     \n\n*Privacy Url:* ${formatOptionalStringValue(
       service.data.metadata.privacy_url
     )}
-    \n\nh3. _Dati account ({account_type}):_
+    \n\nh3. _Dati account (API V2):_
     \n\n${formatOptionalStringValue(delegate.email)}
     \n\n*Limitato:* ${
       delegate.permissions.indexOf("apimessagewrite") !== -1 ? "NO" : "SI"

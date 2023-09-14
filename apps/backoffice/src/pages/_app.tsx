@@ -1,4 +1,4 @@
-import { API_BACKEND_MOCKING } from "@/config/constants";
+import { getConfiguration } from "@/config";
 import { ProtectedLayout } from "@/layouts/protected-layout";
 import { AppProvider } from "@/providers/app";
 import "@/styles/globals.css";
@@ -8,8 +8,8 @@ import { appWithTranslation } from "next-i18next";
 import { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
-if (API_BACKEND_MOCKING) {
-  const { setupMocks } = require("../../mocks");
+if (getConfiguration().API_BACKEND_MOCKING) {
+  const { setupMocks } = require('../../mocks');
   setupMocks();
 }
 
