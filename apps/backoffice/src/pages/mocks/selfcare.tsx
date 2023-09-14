@@ -20,10 +20,15 @@ export default function Selfcare() {
       alignItems="center"
     >
       <Grid item padding={5}>
-        <Typography textAlign="center" variant="h3" marginBottom={5}>
+        <Typography textAlign="center" variant="h3">
           Prodotti attivi
         </Typography>
-        <Card raised sx={{ minWidth: 275, maxWidth: 300 }}>
+        <Typography textAlign="center" variant="body1">
+          Questa è una pagina di test visibili solo in ambiente DEV.
+        </Typography>
+      </Grid>
+      <Grid item padding={5}>
+        <Card raised sx={{ width: 300 }}>
           <CardContent sx={{ textAlign: "center" }}>
             <Typography variant="h6" gutterBottom>
               App IO
