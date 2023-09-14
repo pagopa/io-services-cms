@@ -36,3 +36,5 @@ Keys.getLayout = function getLayout(page: ReactElement) {
     </AppLayout>
   );
 };
+
+Keys.requireAuth = true;

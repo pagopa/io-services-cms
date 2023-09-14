@@ -60,3 +60,5 @@ Services.getLayout = function getLayout(page: ReactElement) {
     </AppLayout>
   );
 };
+
+Services.requireAuth = true;

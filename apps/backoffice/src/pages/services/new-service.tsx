@@ -49,3 +49,5 @@ NewService.getLayout = function getLayout(page: ReactElement) {
     </AppLayout>
   );
 };
+
+NewService.requireAuth = true;

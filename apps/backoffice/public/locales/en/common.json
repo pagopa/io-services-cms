@@ -2,6 +2,10 @@
   "app": {
     "title": "IO BackOffice"
   },
+  "auth": {
+    "leaving": "Exit in progress",
+    "loading": "Access in progress"
+  },
   "buttons": {
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -17,6 +21,7 @@
       "termsAndConditions": "Terms and conditions"
     }
   },
+  "loading": "Loading",
   "routes": {
     "overview": {
       "title": "Overview",

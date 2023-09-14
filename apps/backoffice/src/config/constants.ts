@@ -12,6 +12,9 @@ export const API_BACKEND_BASE_PATH = process.env
 export const API_BACKEND_MOCKING =
   process.env.NEXT_PUBLIC_API_BACKEND_MOCKING === "true";
 
+// BackOffice URLs
+export const SELFCARE_URL = process.env.NEXT_PUBLIC_SELFCARE_URL as string;
+
 // NodeJS Environment mode
 export const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
 export const IS_TEST = process.env.NODE_ENV === "test";
