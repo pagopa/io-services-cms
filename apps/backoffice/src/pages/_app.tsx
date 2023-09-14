@@ -1,4 +1,4 @@
-import { API_BACKEND_MOCKING } from "@/config/constants";
+import { getConfiguration } from "@/config";
 import { AppProvider } from "@/providers/app";
 import "@/styles/globals.css";
 import { NextPage } from "next";
@@ -6,7 +6,7 @@ import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
-if (API_BACKEND_MOCKING) {
+if (getConfiguration().API_BACKEND_MOCKING) {
   const { setupMocks } = require('../../mocks');
   setupMocks();
 }
