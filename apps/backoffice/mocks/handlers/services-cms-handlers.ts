@@ -15,7 +15,8 @@ faker.seed(1);
 export const buildHandlers = () => {
   const configuration = getConfiguration();
   const baseURL =
-    configuration.API_BACKEND_BASE_URL + configuration.API_BACKEND_BASE_PATH;
+    configuration.API_SERVICES_CMS_URL +
+    configuration.API_SERVICES_CMS_BASE_PATH;
 
   return [
     rest.get(`${baseURL}/info`, (_, res, ctx) => {
