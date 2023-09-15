@@ -1,5 +1,12 @@
-import { forwardIoServicesCmsRequest } from "@/app/api/utils/io-services-cms-proxy";
+import {
+  buildClient,
+  forwardIoServicesCmsRequest
+} from "@/app/api/utils/io-services-cms-proxy";
+import { getConfiguration } from "@/config";
 import { NextRequest } from "next/server";
+
+const configuration = getConfiguration();
+const client = buildClient(configuration);
 
 /**
  * @description Send service to review by service ID
@@ -8,7 +15,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { serviceId: string } }
 ) {
-  return forwardIoServicesCmsRequest("reviewService", request, {
+  return forwardIoServicesCmsRequest(client)("reviewService", request, {
     serviceId: params.serviceId
   });
 }
@@ -20,7 +27,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { serviceId: string } }
 ) {
-  return forwardIoServicesCmsRequest("explainService", request, {
+  return forwardIoServicesCmsRequest(client)("explainService", request, {
     serviceId: params.serviceId
   });
 }

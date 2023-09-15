@@ -1,5 +1,12 @@
-import { forwardIoServicesCmsRequest } from "@/app/api/utils/io-services-cms-proxy";
+import {
+  forwardIoServicesCmsRequest,
+  buildClient
+} from "@/app/api/utils/io-services-cms-proxy";
+import { getConfiguration } from "@/config";
 import { NextRequest } from "next/server";
+
+const configuration = getConfiguration();
+const client = buildClient(configuration);
 
 /**
  * @description Retrieve a service by ID
@@ -8,7 +15,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { serviceId: string } }
 ) {
-  return forwardIoServicesCmsRequest("getService", request, {
+  return forwardIoServicesCmsRequest(client)("getService", request, {
     serviceId: params.serviceId
   });
 }
@@ -20,7 +27,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { serviceId: string } }
 ) {
-  return forwardIoServicesCmsRequest("updateService", request, {
+  return forwardIoServicesCmsRequest(client)("updateService", request, {
     serviceId: params.serviceId
   });
 }
@@ -32,7 +39,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { serviceId: string } }
 ) {
-  return forwardIoServicesCmsRequest("deleteService", request, {
+  return forwardIoServicesCmsRequest(client)("deleteService", request, {
     serviceId: params.serviceId
   });
 }

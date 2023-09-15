@@ -1,18 +1,19 @@
-import { getConfiguration } from "@/config";
+import { Configuration, getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/services-cms/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { NextRequest, NextResponse } from "next/server";
 
-const configuration = getConfiguration();
-
-if (configuration.API_SERVICES_CMS_MOCKING) {
+if (getConfiguration().API_SERVICES_CMS_MOCKING) {
   const { setupMocks } = require("../../../../mocks");
   setupMocks();
 }
 
-const buildClient = (): Client =>
+export type IoServicesCmsClient = Client;
+
+export const buildClient = (
+  configuration: Configuration
+): IoServicesCmsClient =>
   createClient({
     baseUrl: configuration.API_SERVICES_CMS_URL,
     fetchApi: (fetch as any) as typeof fetch,
@@ -26,11 +27,17 @@ type PathParameters = {
   offset?: string;
 };
 
-export const forwardIoServicesCmsRequest = async <T extends keyof Client>(
+/**
+ * The Backoffice needs to call io-services-cms APIs,
+ * we chose to implement intermediate APIs to do this in the B4F,
+ * the following method is responsible for forwarding requests to the corresponding io-services-cms APIs
+ */
+export const forwardIoServicesCmsRequest = (
+  client: IoServicesCmsClient
+) => async <T extends keyof IoServicesCmsClient>(
   operationId: T,
   nextRequest: NextRequest,
-  pathParams?: PathParameters,
-  requestCodec?: t.Mixed
+  pathParams?: PathParameters
 ) => {
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.text());
@@ -42,17 +49,13 @@ export const forwardIoServicesCmsRequest = async <T extends keyof Client>(
     ...pathParams,
     body: jsonBody,
     "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: replace with real value
-    "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: replace with real value
+    // "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: replace with real value
     "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: replace with real value
     "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE" // TODO: replace with real value
   } as any;
 
   // call the io-services-cms API
-  const result = await callIoServicesCms(
-    buildClient(),
-    operationId,
-    requestPayload
-  );
+  const result = await callIoServicesCms(client)(operationId, requestPayload);
 
   console.log("ioServicesCmsApiCall result: ", result);
 
@@ -67,8 +70,9 @@ export const forwardIoServicesCmsRequest = async <T extends keyof Client>(
  * @param requestParams request parameters _(as specified in openapi)_
  * @returns the response or an error
  */
-const callIoServicesCms = async <T extends keyof Client>(
-  client: Client,
+const callIoServicesCms = (client: IoServicesCmsClient) => async <
+  T extends keyof IoServicesCmsClient
+>(
   operationId: T,
   requestPayload: any
 ) => {
