@@ -36,5 +36,3 @@ Home.getLayout = function getLayout(page: ReactElement) {
     </AppLayout>
   );
 };
-
-Home.requireAuth = true;

@@ -52,5 +52,3 @@ EditService.getLayout = function getLayout(page: ReactElement) {
     </AppLayout>
   );
 };
-
-EditService.requireAuth = true;

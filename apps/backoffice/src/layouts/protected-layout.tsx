@@ -7,10 +7,7 @@ type Props = {
   children: React.ReactElement;
 };
 
-/** Manage protected routes
- *
- * Add the `requireAuth` property to the page component to protect the page from unauthenticated users
- * */
+/** Manage protected routes */
 export const ProtectedLayout = ({ children }: Props): JSX.Element => {
   const router = useRouter();
   const { status: sessionStatus } = useSession();

@@ -41,6 +41,7 @@ export default function Login() {
 
     if (status === 200 && data) {
       console.log("auth ok");
+      // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
       await signIn("access-control", {
         session_token: data,
         callbackUrl: "/"
@@ -75,3 +76,6 @@ export async function getStaticProps({ locale }: any) {
     }
   };
 }
+
+// No Auth required
+Login.publicRoute = true;

@@ -24,7 +24,7 @@ export default function Selfcare() {
           Prodotti attivi
         </Typography>
         <Typography textAlign="center" variant="body1">
-          Questa è una pagina di test visibili solo in ambiente DEV.
+          Questa è una pagina di test visibile solo in ambiente DEV.
         </Typography>
       </Grid>
       <Grid item padding={5}>
@@ -62,3 +62,6 @@ export async function getStaticProps({ locale }: any) {
     }
   };
 }
+
+// No Auth required
+Selfcare.publicRoute = true;

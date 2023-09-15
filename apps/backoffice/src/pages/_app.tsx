@@ -9,7 +9,7 @@ import { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
 if (getConfiguration().API_BACKEND_MOCKING) {
-  const { setupMocks } = require('../../mocks');
+  const { setupMocks } = require("../../mocks");
   setupMocks();
 }
 
@@ -18,13 +18,17 @@ type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement, pageProps: unknown) => ReactNode;
 };
 
-/** Used to define protected pages.
- * To define a protected page:
+/**
+ * Used to define public or protected pages.
  *
- * `Page.requireAuth = true`
+ * Pages are protected by default.
+ *
+ * To define a public page _(route)_:
+ *
+ * `Page.publicRoute = true`
  */
 type NextPageWithAuth = NextPage & {
-  requireAuth?: boolean;
+  publicRoute?: boolean;
 };
 
 type AppPropsWithAuthAndLayout = AppProps & {
@@ -37,12 +41,12 @@ const App = ({ Component, pageProps }: AppPropsWithAuthAndLayout) => {
 
   return (
     <SessionProvider session={pageProps.session}>
-      {Component.requireAuth ? (
+      {Component.publicRoute ? (
+        <AppProvider>{pageContent}</AppProvider>
+      ) : (
         <ProtectedLayout>
           <AppProvider>{pageContent}</AppProvider>
         </ProtectedLayout>
-      ) : (
-        <AppProvider>{pageContent}</AppProvider>
       )}
     </SessionProvider>
   );
