@@ -4,6 +4,7 @@ import { Sidenav } from "@/components/sidenav";
 import { Box, Grid } from "@mui/material";
 import { JwtUser, ProductSwitchItem } from "@pagopa/mui-italia";
 import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
+import { useSession } from "next-auth/react";
 import { ReactNode } from "react";
 
 import styles from "@/styles/app-layout.module.css";
@@ -27,23 +28,27 @@ const mockProducts: ProductSwitchItem[] = [
     linkType: "internal"
   }
 ];
-const mockPartyList: PartySwitchItem[] = [
-  {
-    id: "1",
-    name: "Nome Ente",
-    productRole: "Amministratore",
-    logoUrl: "https://agid.digitalpa.it/media/images/stemma.png"
-  }
-];
 
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
+  const { data } = useSession();
+  const parties: PartySwitchItem[] = [];
+
+  if (data?.user?.organization) {
+    parties.push({
+      id: "1",
+      name: data.user.organization.name,
+      productRole: data.user.organization.roles[0].role,
+      logoUrl: "https://agid.digitalpa.it/media/images/stemma.png" // TODO: get correct image
+    });
+  }
+
   return (
     <Box>
       <Box>
         <TopBar user={mockUser} />
       </Box>
       <Box>
-        <Header products={mockProducts} parties={mockPartyList} />
+        <Header products={mockProducts} parties={parties} />
       </Box>
       <Grid container spacing={0} bgcolor={"#F5F5F5"}>
         {hideSidenav ? null : (

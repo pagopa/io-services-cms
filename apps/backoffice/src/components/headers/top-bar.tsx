@@ -1,4 +1,5 @@
 import { HeaderAccount, JwtUser, RootLinkType } from "@pagopa/mui-italia";
+import { useRouter } from "next/router";
 
 const pagoPACompanyLabel = "PagoPa S.p.A.";
 
@@ -6,7 +7,7 @@ const pagoPALink: RootLinkType = {
   ariaLabel: pagoPACompanyLabel,
   href: "https://www.pagopa.it/it/",
   label: pagoPACompanyLabel,
-  title: pagoPACompanyLabel,
+  title: pagoPACompanyLabel
 };
 
 export type TopBarProps = {
@@ -14,6 +15,8 @@ export type TopBarProps = {
 };
 
 export const TopBar = ({ user }: TopBarProps) => {
+  const router = useRouter();
+
   return (
     <HeaderAccount
       rootLink={pagoPALink}
@@ -27,6 +30,7 @@ export const TopBar = ({ user }: TopBarProps) => {
       onLogin={() => {
         console.log("User login");
       }}
+      onLogout={() => router.push("/auth/logout")}
     />
   );
 };
