@@ -1,24 +1,22 @@
-import {
-  API_SERVICES_CMS_BASE_PATH,
-  API_SERVICES_CMS_MOCKING,
-  API_SERVICES_CMS_URL
-} from "@/config/constants";
+import { getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/services-cms/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { NextRequest, NextResponse } from "next/server";
 
-if (API_SERVICES_CMS_MOCKING) {
+const configuration = getConfiguration();
+
+if (configuration.API_SERVICES_CMS_MOCKING) {
   const { setupMocks } = require("../../../../mocks");
   setupMocks();
 }
 
 const buildClient = (): Client =>
   createClient({
-    baseUrl: API_SERVICES_CMS_URL,
+    baseUrl: configuration.API_SERVICES_CMS_URL,
     fetchApi: (fetch as any) as typeof fetch,
-    basePath: API_SERVICES_CMS_BASE_PATH
+    basePath: configuration.API_SERVICES_CMS_BASE_PATH
   });
 
 type PathParameters = {
