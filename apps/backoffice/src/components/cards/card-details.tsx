@@ -3,7 +3,7 @@ import { Box, Grid, Stack, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
 import NextLink from "next/link";
 import { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 import { CopyToClipboard } from "../copy-to-clipboard";
 
 export type CardDetailsRowType = {

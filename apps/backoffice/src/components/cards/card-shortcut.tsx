@@ -1,7 +1,7 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "next-i18next";
 
 export type CardShortcutProps = {
   /** If defined, render an icon on top of the card */
