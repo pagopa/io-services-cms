@@ -5,6 +5,7 @@ import { Box, Grid } from "@mui/material";
 import { JwtUser, ProductSwitchItem } from "@pagopa/mui-italia";
 import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 
 import styles from "@/styles/app-layout.module.css";
@@ -30,6 +31,7 @@ const mockProducts: ProductSwitchItem[] = [
 ];
 
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
+  const { t } = useTranslation();
   const { data } = useSession();
   const parties: PartySwitchItem[] = [];
 
@@ -37,7 +39,7 @@ export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
     parties.push({
       id: "1",
       name: data.user.organization.name,
-      productRole: data.user.organization.roles[0].role,
+      productRole: t(`roles.${data.user.organization.role}`),
       logoUrl: "https://agid.digitalpa.it/media/images/stemma.png" // TODO: get correct image
     });
   }

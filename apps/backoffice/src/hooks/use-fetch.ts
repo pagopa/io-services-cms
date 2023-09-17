@@ -4,6 +4,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -62,10 +63,14 @@ const manageHttpResponseStatusCode = (
 const withBearer: WithDefaultsT<"bearerAuth"> = wrappedOperation => params => {
   return wrappedOperation({
     ...params,
-    bearerAuth: "VALID_TOKEN" // todo: get session token
+    bearerAuth: "VALID_TOKEN" // just a placeholder, see `clientWithBearerToken` explanations below
   });
 };
 
+/**
+ * IO Services CMS generated Api Client
+ *
+ * Client with defaults bearerAuth, to avoid bearer token definition in each component call. */
 export const clientWithBearerToken: Client<"bearerAuth"> = createClient({
   baseUrl: getConfiguration().API_BACKEND_BASE_URL,
   fetchApi: (fetch as any) as typeof fetch,
@@ -104,6 +109,7 @@ const useFetch = <RC, T extends keyof ClientOperations>(
   const [error, setError] = useState<UseFetchError>();
   const [loading, setLoading] = useState(true);
   const { push } = useRouter();
+  const { data: session } = useSession();
 
   /**
    * SetStateAction\<UseFetchError>
@@ -122,9 +128,23 @@ const useFetch = <RC, T extends keyof ClientOperations>(
       status
     });
 
+  /**
+   * IO Services CMS generated Api Client
+   *
+   * Client without defaults: we need to create it inside `useFetch()`
+   * because a React Hook should not be called at the top level.
+   * React Hooks must be called in a React function component or a custom React Hook function. */
+  const client: Client = createClient({
+    baseUrl: getConfiguration().API_BACKEND_BASE_URL,
+    fetchApi: (fetch as any) as typeof fetch
+  });
+
   const fetchData = async (requestParams: any) => {
     try {
-      const result = await clientWithBearerToken[operationId](requestParams);
+      const result = await client[operationId]({
+        ...requestParams,
+        bearerAuth: session?.user?.accessToken
+      });
 
       if (E.isLeft(result)) {
         setUseFetchError("validationError", readableReport(result.left));
@@ -134,7 +154,7 @@ const useFetch = <RC, T extends keyof ClientOperations>(
 
         // Check 401 Unauthorized
         if (response.status === 401) {
-          push("/logout"); // todo: configure correct route path
+          push("/auth/logout");
           return;
         }
 

@@ -16,13 +16,12 @@ declare module "next-auth/jwt" {
 
 interface BackOfficeUser extends DefaultUser {
   organization: BackOfficeUserOrganization;
+  accessToken: string;
+  permissions: string[];
 }
 
 interface BackOfficeUserOrganization {
   id: string;
   name: string;
-  roles: {
-    partyRole: string;
-    role: string;
-  }[];
+  role: string;
 }
