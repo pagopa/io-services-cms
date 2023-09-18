@@ -35,12 +35,12 @@ export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
   const { data } = useSession();
   const parties: PartySwitchItem[] = [];
 
-  if (data?.user?.organization) {
+  if (data?.user?.institution) {
     parties.push({
-      id: "1",
-      name: data.user.organization.name,
-      productRole: t(`roles.${data.user.organization.role}`),
-      logoUrl: "https://agid.digitalpa.it/media/images/stemma.png" // TODO: get correct image
+      id: data.user.institution.id,
+      name: data.user.institution.name,
+      productRole: t(`roles.${data.user.institution.role}`),
+      logoUrl: data.user.institution.logo_url
     });
   }
 

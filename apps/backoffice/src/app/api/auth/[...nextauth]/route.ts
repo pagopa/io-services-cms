@@ -60,7 +60,9 @@ const authOptions: NextAuthOptions = {
           id: sessionTokenPayload.right.jti,
           name: `${sessionTokenPayload.right.given_name} ${sessionTokenPayload.right.family_name}`,
           email: sessionTokenPayload.right.email,
-          organization: sessionTokenPayload.right.organization,
+          institution: sessionTokenPayload.right.institution,
+          authorizedInstitutions:
+            sessionTokenPayload.right.authorized_institutions,
           permissions: sessionTokenPayload.right.parameters.user_groups,
           accessToken: session_token
         };
@@ -88,7 +90,8 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
-        token.organization = user.organization;
+        token.institution = user.institution;
+        token.authorizedInstitutions = user.authorizedInstitutions;
         token.permissions = user.permissions;
         token.accessToken = user.accessToken;
       }
@@ -97,7 +100,8 @@ const authOptions: NextAuthOptions = {
     session({ session, token }) {
       /* update the session.user based on the token object */
       if (token && session.user) {
-        session.user.organization = token.organization;
+        session.user.institution = token.institution;
+        session.user.authorizedInstitutions = token.authorizedInstitutions;
         session.user.permissions = token.permissions;
         session.user.accessToken = token.accessToken;
       }
