@@ -5,6 +5,7 @@ import {
   IoServicesCmsClient,
   forwardIoServicesCmsRequest
 } from "../io-services-cms-proxy";
+import { ValidationError } from "io-ts";
 
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
@@ -122,5 +123,60 @@ describe("forwardIoServicesCmsRequest tests", () => {
 
     expect(result.status).toBe(204);
     expect(result.body).toBe(null);
+  });
+
+  it("ValidationErrors occurs on request", async () => {
+    const validationError: ValidationError[] = [
+      {
+        value: "test",
+        context: [
+          {
+            key: "test",
+            type: "string",
+            actual: "test",
+            message: "test"
+          }
+        ],
+        message: "test"
+      } as any
+    ];
+
+    // Mock io-services-cms client
+    const mockIoServicesCmsClient = ({
+      reviewService: vi.fn(() => Promise.resolve(E.left(validationError)))
+    } as any) as IoServicesCmsClient;
+
+    const aBodyPayload = {
+      name: "test"
+    };
+
+    // Mock NextRequest
+    const request = ({
+      bodyUsed: true,
+      json: () => Promise.resolve(aBodyPayload)
+    } as any) as NextRequest;
+
+    const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
+      "reviewService",
+      request,
+      {
+        serviceId: "test"
+      }
+    );
+
+    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalled();
+    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: check with real tocken value
+        "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: check with real tocken value
+        "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: check with real tocken value
+        "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: check with real tocken value
+        body: aBodyPayload,
+        serviceId: "test"
+      })
+    );
+
+    expect(result.status).toBe(400);
+    expect(result.body).not.toBe(null);
   });
 });
