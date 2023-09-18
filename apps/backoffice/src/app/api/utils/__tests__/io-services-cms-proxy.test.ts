@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import * as E from "fp-ts/Either";
+import { NextRequest } from "next/server";
+import { describe, expect, it, vi } from "vitest";
 import {
   IoServicesCmsClient,
   forwardIoServicesCmsRequest
 } from "../io-services-cms-proxy";
-import * as E from "fp-ts/Either";
-import { NextRequest } from "next/server";
 
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
@@ -122,7 +122,5 @@ describe("forwardIoServicesCmsRequest tests", () => {
 
     expect(result.status).toBe(204);
     expect(result.body).toBe(null);
-
-    console.log("result: ", result);
   });
 });
