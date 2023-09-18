@@ -25,8 +25,8 @@ const decodeJwtPayload = <T>(token: string, codec: t.Type<T>) => {
 };
 
 /** Utility to check if a string is null, undefined or empty */
-const isNullUndefinedOrEmpty = (value: string) =>
-  value === null || value === undefined || value === "";
+const isNullUndefinedOrEmpty = (value: string | null | undefined) =>
+  !value || value.trim().length === 0;
 
 const authOptions: NextAuthOptions = {
   providers: [
