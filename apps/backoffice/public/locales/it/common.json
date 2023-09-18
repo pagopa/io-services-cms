@@ -22,6 +22,10 @@
     }
   },
   "loading": "Caricamento in corso",
+  "roles": {
+    "admin": "Amministratore",
+    "operator": "Operatore"
+  },
   "routes": {
     "overview": {
       "title": "Panoramica",
