@@ -22,6 +22,10 @@
     }
   },
   "loading": "Loading",
+  "roles": {
+    "admin": "Administrator",
+    "operator": "Operator"
+  },
   "routes": {
     "overview": {
       "title": "Overview",
