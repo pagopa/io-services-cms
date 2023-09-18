@@ -2,6 +2,10 @@
   "app": {
     "title": "IO BackOffice"
   },
+  "auth": {
+    "leaving": "Uscita in corso",
+    "loading": "Accesso in corso"
+  },
   "buttons": {
     "cancel": "Annulla",
     "confirm": "Conferma",
@@ -17,6 +21,7 @@
       "termsAndConditions": "Termini e Condizioni"
     }
   },
+  "loading": "Caricamento in corso",
   "routes": {
     "overview": {
       "title": "Panoramica",

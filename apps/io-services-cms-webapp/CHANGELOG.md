@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.20.7
+
+### Patch Changes
+
+- 9707eb9: update jira issue description
+- e5914bc: Add Automatic Service Approval Capability in RequestReviewHandler
+- 1a0cc5b: Logging unification and improvements
+
 ## 1.20.6
 
 ### Patch Changes
