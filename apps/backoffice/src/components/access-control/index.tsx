@@ -27,10 +27,10 @@ export const AccessControl = ({
   const isArraySubset = (subset: string[], superset: string[]) =>
     subset.every(item => superset.includes(item));
 
-  const canBeShown = () =>
+  const hasRequiredPermissions = () =>
     isArraySubset(requiredPermissions, session?.user?.permissions as string[]);
 
-  const [show] = useState(canBeShown());
+  const [show] = useState(hasRequiredPermissions());
 
   if (show) return <>{children}</>;
   if (renderNoAccess) return <>{renderNoAccess}</>;
