@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     setupFiles: ["./mocks/msw-vitest.ts"],
-    include: ["./src/**/__tests__/*.ts"]
+    include: ["./src/**/__tests__/*.ts"],
+    exclude: ["./src/components/__tests__/setup.ts"]
   }
 });

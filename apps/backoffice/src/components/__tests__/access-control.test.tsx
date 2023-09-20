@@ -36,28 +36,28 @@ describe("[AccessControl] Component", () => {
     requiredPermissions = ["permission1"];
     render(getAccessControlComponent());
 
-    expect(document.getElementById("ac-test")).not.toBeNull();
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
   });
 
   it("should render wrapped children if requiredPermissions match all session user.permissions", () => {
     requiredPermissions = ["permission1", "permission2"];
     render(getAccessControlComponent());
 
-    expect(document.getElementById("ac-test")).not.toBeNull();
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
   });
 
   it("should render wrapped children if requiredPermissions is empty", () => {
     requiredPermissions = [];
     render(getAccessControlComponent());
 
-    expect(document.getElementById("ac-test")).not.toBeNull();
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
   });
 
   it("should NOT render wrapped children if requiredPermissions don't match session.user permissions", () => {
     requiredPermissions = ["anunmatchedpermission"];
     render(getAccessControlComponent());
 
-    expect(document.getElementById("ac-test")).toBeNull();
+    expect(document.getElementById("ac-test")).not.toBeInTheDocument();
   });
 
   it("should render defined 'renderNoAccess' element insted of null if requiredPermissions don't match session.user permissions", () => {
@@ -65,7 +65,7 @@ describe("[AccessControl] Component", () => {
     renderNoAccess = <div id="alternative-content">Test</div>;
     render(getAccessControlComponent());
 
-    expect(document.getElementById("ac-test")).toBeNull();
-    expect(document.getElementById("alternative-content")).not.toBeNull();
+    expect(document.getElementById("ac-test")).not.toBeInTheDocument();
+    expect(document.getElementById("alternative-content")).toBeVisible();
   });
 });

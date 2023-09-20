@@ -1,3 +1,22 @@
+export type Configuration = {
+  // IO Services CMS API configuration
+  API_SERVICES_CMS_URL: string;
+  API_SERVICES_CMS_BASE_PATH: string;
+  API_SERVICES_CMS_MOCKING: boolean;
+
+  // BackOffice backend for frontend API configuration
+  API_BACKEND_BASE_URL: string;
+  API_BACKEND_BASE_PATH: string;
+  API_BACKEND_MOCKING: boolean;
+
+  // NodeJS Environment mode
+  IS_DEVELOPMENT: boolean;
+  IS_TEST: boolean;
+
+  // window guards (useful to configure MSW to work in the browser or in Node environment)
+  IS_BROWSER: boolean;
+  IS_SERVER: boolean;
+};
 export function getConfiguration() {
   return {
     // IO Services CMS API configuration
