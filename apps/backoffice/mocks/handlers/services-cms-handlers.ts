@@ -3,6 +3,7 @@ import { rest } from "msw";
 import {
   aMockServiceKeys,
   aMockServicePagination,
+  aMockServicePaginationLimitOffset,
   aMockServicePublication,
   getMockServiceLifecycle
 } from "../data/backend-data";
@@ -14,7 +15,8 @@ faker.seed(1);
 export const buildHandlers = () => {
   const configuration = getConfiguration();
   const baseURL =
-    configuration.API_BACKEND_BASE_URL + configuration.API_BACKEND_BASE_PATH;
+    configuration.API_SERVICES_CMS_URL +
+    configuration.API_SERVICES_CMS_BASE_PATH;
 
   return [
     rest.get(`${baseURL}/info`, (_, res, ctx) => {
@@ -215,8 +217,8 @@ export function getCreateService201Response() {
   return getMockServiceLifecycle();
 }
 
-export function getGetServices200Response() {
-  return aMockServicePagination;
+export function getGetServices200Response(limit?: number, offset?: number) {
+  return aMockServicePaginationLimitOffset(limit, offset);
 }
 
 export function getGetService200Response(serviceId: string) {

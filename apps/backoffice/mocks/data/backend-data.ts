@@ -85,7 +85,12 @@ export const aMockServiceKeys = {
   secondary_key: faker.string.alphanumeric(32)
 };
 
-const getMockServicePagination = () => {
+const getMockServicePagination = (limit?: number, offset?: number) => {
+  const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
+  const purifiedOffset =
+    (offset && offset > 0 && offset < 99) ??
+    faker.number.int({ min: 0, max: 99 });
+
   const total = [
     ...Array.from(
       Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
@@ -95,14 +100,18 @@ const getMockServicePagination = () => {
   return {
     value: total.map(_ => getMockServiceLifecycle()),
     pagination: {
-      offset: faker.number.int({ min: 0, max: 99 }),
-      limit: faker.helpers.arrayElement([10, 20, 50, 100]),
+      offset: purifiedOffset,
+      limit: purifiedLimit,
       count: total.length
     }
   };
 };
 
 export const aMockServicePagination = getMockServicePagination();
+export const aMockServicePaginationLimitOffset = (
+  limit?: number,
+  offset?: number
+) => getMockServicePagination(limit, offset);
 
 // **********************************************************************
 // Services import into SelfCare
