@@ -7,36 +7,63 @@ let ctaLabel = "ctaLabel";
 let ctaRoute = "/ctaRoute";
 
 const getEmptyStateComponent = () => (
-  <div id="es-test">
-    <EmptyState
-      emptyStateLabel={emptyStateLabel}
-      ctaLabel={ctaLabel}
-      ctaRoute={ctaRoute}
-    ></EmptyState>
-  </div>
+  <EmptyState
+    emptyStateLabel={emptyStateLabel}
+    ctaLabel={ctaLabel}
+    ctaRoute={ctaRoute}
+  ></EmptyState>
 );
 
 // needed to clean document (react dom)
 afterEach(cleanup);
 
-describe("[Empty State] Component", () => {
-  it("Should render the button to redirect inside the empty state if ctaLabel is set", () => {
+describe("[EmptyState] Component", () => {
+  it("Should render the empty state component", () => {
     render(getEmptyStateComponent());
     const aButton = screen.getByRole("button", {
       name: ctaLabel
     });
+
     expect(aButton).toBeVisible();
+    expect(document.getElementById("empty-state")).toBeInTheDocument();
+    expect(document.getElementById("empty-state-label")).toHaveTextContent(
+      emptyStateLabel
+    );
+    expect(document.getElementById("empty-state-cta")).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: ctaLabel })).toHaveAttribute(
+      "href",
+      ctaRoute
+    );
   });
 
-  it("Should NOT render a button if the button label is empty but should render the component label", () => {
+  it("Should render the button with empty label if ctaLabel is an empty string", () => {
     ctaLabel = "";
     ctaRoute = "";
     render(getEmptyStateComponent());
-    expect(document.getElementById("es-test")).not.toContainHTML(
-      '<ButtonNaked color="primary" size="medium" sx={{ verticalAlign: "unset" }}>{t(props.ctaLabel)}</ButtonNaked>'
+
+    expect(document.getElementById("empty-state")).toBeInTheDocument();
+    expect(document.getElementById("empty-state-label")).toHaveTextContent(
+      emptyStateLabel
     );
-    expect(document.getElementById("es-test")).toContainHTML(
-      '<p class="MuiTypography-root MuiTypography-body2 css-1ypfif-MuiTypography-root">emptyStateLabel</p>'
+    expect(document.getElementById("empty-state-cta")).toBeInTheDocument();
+    expect(document.getElementById("empty-state-cta")).toHaveTextContent(
+      ctaLabel
+    );
+
+    expect(screen.getByRole("link", { name: ctaLabel })).toHaveAttribute(
+      "href",
+      ctaRoute
+    );
+  });
+
+  it("Should render the component with empty text if component label is empty string", () => {
+    emptyStateLabel = "";
+    render(getEmptyStateComponent());
+
+    expect(document.getElementById("empty-state")).toBeInTheDocument();
+    expect(document.getElementById("empty-state-label")).toHaveTextContent(
+      emptyStateLabel
     );
   });
 });
