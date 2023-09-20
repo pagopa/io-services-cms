@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * @description Regenerate Manage key by service ID and key type
+ * @description Retrieve Manage keys
+ * TODO:!!!!This is a placeholder!!!!
+ * FIXME:!!!!Update the implementation!!!!
+ *
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { keyType: string } }
-) {
+export async function GET(request: NextRequest) {
   return NextResponse.json({ message: "Not Implemented" });
 }
