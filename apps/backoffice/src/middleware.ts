@@ -1,17 +1,10 @@
-import { NextRequestWithAuth, withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
-import { setUserDetails } from "./lib/auth";
+import { withAuth } from "next-auth/middleware";
+import { addUserDetails } from "./lib/auth";
 
 export default withAuth(
   // `withAuth` augments your `Request` with the user's token.
-  function middleware(req: NextRequestWithAuth) {
-    const requestHeaders = setUserDetails(req);
-    return NextResponse.next({
-      request: {
-        // New request headers
-        headers: requestHeaders
-      }
-    });
+  function middleware(req) {
+    return addUserDetails(req);
   },
   {
     callbacks: {
