@@ -307,6 +307,31 @@ export const buildHandlers = () => {
       ];
 
       return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/keys/manage`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getGetServiceKeys200Response())],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(404), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.put(`${baseURL}/keys/manage/:keyType`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
+        [ctx.status(400), ctx.json(null)],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(404), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
     })
   ];
 };
