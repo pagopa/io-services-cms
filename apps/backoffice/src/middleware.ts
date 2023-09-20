@@ -5,7 +5,6 @@ import { setUserDetails } from "./lib/auth";
 export default withAuth(
   // `withAuth` augments your `Request` with the user's token.
   function middleware(req: NextRequestWithAuth) {
-    console.log("req.nextauth.token", req.nextauth.token);
     const requestHeaders = setUserDetails(req);
     return NextResponse.next({
       request: {
@@ -21,4 +20,6 @@ export default withAuth(
   }
 );
 
-export const config = { matcher: ["/api/info", "/api/services/:path*"] };
+export const config = {
+  matcher: ["/api/((?!info).*)"]
+};

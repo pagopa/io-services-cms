@@ -1,4 +1,3 @@
-import { getUserDetails } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
 
@@ -7,8 +6,6 @@ import packageJson from "../../../../package.json";
  * @returns project _name_ and _version_
  */
 export async function GET(req: NextRequest) {
-  const userDetails = getUserDetails(req); //TODO: remove
-  console.log("userDetails", userDetails); //TODO: remove
   const info = {
     name: packageJson.name,
     version: packageJson.version

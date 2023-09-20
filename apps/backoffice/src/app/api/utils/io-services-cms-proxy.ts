@@ -40,6 +40,7 @@ export const forwardIoServicesCmsRequest = (
   nextRequest: NextRequest,
   pathParams?: PathParameters
 ) => {
+  console.log("forwardIoServicesCmsRequest");
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
 
