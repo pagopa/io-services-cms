@@ -29,6 +29,8 @@ tags:
     description: Services migration API specification
   - name: institutions
     description: Institutions API specification
+  - name: manage-keys
+    description: Manage Keys API specification
 paths:
   /info:
     get:
