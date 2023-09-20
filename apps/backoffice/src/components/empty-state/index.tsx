@@ -14,22 +14,30 @@ export type EmptyStateProps = {
 
 export const EmptyState = ({ ...props }: EmptyStateProps) => {
   const { t } = useTranslation();
-  return (
-    <Box padding={3} bgcolor={"#EEEEEE"}>
-      <Box padding={3} bgcolor={"#FFFFFF"}>
-        <Typography variant="body2" textAlign={"center"}>
-          {t(props.emptyStateLabel)}{" "}
-          <NextLink href={props.ctaRoute}>
-            <ButtonNaked
-              color="primary"
-              size="medium"
-              sx={{ verticalAlign: "unset" }}
-            >
-              {t(props.ctaLabel)}
-            </ButtonNaked>
-          </NextLink>
-        </Typography>
+  if (props.ctaLabel !== "") {
+    return (
+      <Box padding={3} bgcolor={"#EEEEEE"}>
+        <Box padding={3} bgcolor={"#FFFFFF"}>
+          <Typography variant="body2" textAlign={"center"}>
+            {t(props.emptyStateLabel)}{" "}
+            <NextLink href={props.ctaRoute}>
+              <ButtonNaked
+                color="primary"
+                size="medium"
+                sx={{ verticalAlign: "unset" }}
+              >
+                {t(props.ctaLabel)}
+              </ButtonNaked>
+            </NextLink>
+          </Typography>
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  } else {
+    return (
+      <Typography variant="body2" textAlign={"center"}>
+        {props.emptyStateLabel}
+      </Typography>
+    );
+  }
 };
