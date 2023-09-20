@@ -1,10 +1,10 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { SessionTokenPayload } from "../types";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { IdentityTokenPayload } from "../types";
 
 /**
  * Given a jwt token, returns its payload decoded as T
@@ -34,37 +34,51 @@ const authOptions: NextAuthOptions = {
       id: "access-control",
       credentials: {},
       authorize(credentials) {
-        const { session_token } = credentials as {
-          session_token: string;
+        const { identity_token: identity_token } = credentials as {
+          identity_token: string;
         };
 
         // first quick token check
-        if (isNullUndefinedOrEmpty(session_token)) {
+        if (isNullUndefinedOrEmpty(identity_token)) {
           throw new Error("null undefined or empty session token");
         }
 
-        // decode session token payload
-        const sessionTokenPayload = decodeJwtPayload(
-          session_token,
-          SessionTokenPayload
+        // verify identity token
+
+        // decode identity token payload
+        const identityTokenPayload = decodeJwtPayload(
+          identity_token,
+          IdentityTokenPayload
         );
 
-        if (E.isLeft(sessionTokenPayload)) {
+        if (E.isLeft(identityTokenPayload)) {
           throw new Error(
-            "invalid session token: " + readableReport(sessionTokenPayload.left)
+            "invalid identity token: " +
+              readableReport(identityTokenPayload.left)
           );
         }
 
+        console.log("identityTokenPayload:", identityTokenPayload.right);
+
         // set next-auth User
         const user = {
-          id: sessionTokenPayload.right.jti,
-          name: `${sessionTokenPayload.right.given_name} ${sessionTokenPayload.right.family_name}`,
-          email: sessionTokenPayload.right.email,
-          institution: sessionTokenPayload.right.institution,
-          authorizedInstitutions:
-            sessionTokenPayload.right.authorized_institutions,
-          permissions: sessionTokenPayload.right.parameters.user_groups,
-          accessToken: session_token
+          id: identityTokenPayload.right.uid,
+          name: `${identityTokenPayload.right.name} ${identityTokenPayload.right.family_name}`,
+          email: identityTokenPayload.right.email,
+          institution: {
+            id: identityTokenPayload.right.organization.id,
+            name: identityTokenPayload.right.organization.name,
+            role: identityTokenPayload.right.organization.roles[0]?.role,
+            logo_url: "url"
+          },
+          authorizedInstitutions: [
+            {
+              id: "id_2",
+              name: "name_2",
+              role: "operator"
+            }
+          ],
+          permissions: ["write"]
         };
         return user;
       }
@@ -90,25 +104,27 @@ const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
+        token.id = user.id;
         token.institution = user.institution;
         token.authorizedInstitutions = user.authorizedInstitutions;
         token.permissions = user.permissions;
-        token.accessToken = user.accessToken;
+        // token.accessToken = user.accessToken;
       }
       return token;
     },
     session({ session, token }) {
       /* update the session.user based on the token object */
       if (token && session.user) {
+        session.user.id = token.id;
         session.user.institution = token.institution;
         session.user.authorizedInstitutions = token.authorizedInstitutions;
         session.user.permissions = token.permissions;
-        session.user.accessToken = token.accessToken;
+        // session.user.accessToken = token.accessToken;
       }
       return session;
     }
-  },
-  secret: process.env.NEXTAUTH_SECRET
+  }
+  // secret: process.env.NEXTAUTH_SECRET
 };
 
 const handler = NextAuth(authOptions);

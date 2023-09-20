@@ -143,7 +143,7 @@ const useFetch = <RC, T extends keyof ClientOperations>(
     try {
       const result = await client[operationId]({
         ...requestParams,
-        bearerAuth: session?.user?.accessToken
+        bearerAuth: "session?.user?.accessToken" //TODO: update OpenAPI and remove this header (next-auth will automatically set tje JWT session as cookie header for each request)
       });
 
       if (E.isLeft(result)) {
