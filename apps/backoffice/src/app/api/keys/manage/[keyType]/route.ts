@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * @description Regenerate Manage key by service ID and key type
+ * @description Regenerate Manage key by key type
  */
 export async function PUT(
   request: NextRequest,
