@@ -1,9 +1,10 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
+import { isNullUndefinedOrEmpty } from "@/utils/string-util";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { SessionTokenPayload } from "../types";
 
 /**
@@ -23,10 +24,6 @@ const decodeJwtPayload = <T>(token: string, codec: t.Type<T>) => {
 
   return pipe(codec.decode(JSON.parse(jsonPayload)));
 };
-
-/** Utility to check if a string is null, undefined or empty */
-const isNullUndefinedOrEmpty = (value: string | null | undefined) =>
-  !value || value.trim().length === 0;
 
 const authOptions: NextAuthOptions = {
   providers: [
