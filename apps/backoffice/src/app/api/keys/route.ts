@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * @description Retrieve Manage keys
@@ -7,5 +7,5 @@ import { NextRequest } from "next/server";
  *
  */
 export async function GET(request: NextRequest) {
-  throw new Error("Not implemented");
+  return NextResponse.json({ message: "Not Implemented" });
 }
