@@ -16,7 +16,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => true //TODO: manage user role here (e.g.: token?.role === "admin")
+      authorized: ({ token, req }) => !!token //TODO: manage user role here (e.g.: token?.role === "admin")
     }
   }
 );

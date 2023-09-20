@@ -1,5 +1,6 @@
 import { Configuration, getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/services-cms/client";
+import { getUserDetails } from "@/lib/auth";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
@@ -42,17 +43,17 @@ export const forwardIoServicesCmsRequest = (
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
 
-  // TODO: extract JWT token
+  // get authenticated user details
+  const userDetails = getUserDetails(nextRequest);
 
   // create the request payload
   const requestPayload = {
     ...pathParams,
     body: jsonBody,
-    "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: replace with real value
-    // "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: replace with real value
-    "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: replace with real value
-    "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: replace with real value
-    "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE" // TODO: replace with real value
+    "x-user-email": userDetails?.email, // TODO: replace with real value
+    "x-user-id": userDetails?.id, // TODO: replace with real value
+    "x-subscription-id": userDetails?.id, // TODO: replace with real value
+    "x-user-groups": userDetails?.permissions.toString() // TODO: replace with real value
   } as any;
 
   // call the io-services-cms API

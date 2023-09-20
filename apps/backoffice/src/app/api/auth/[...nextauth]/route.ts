@@ -58,8 +58,6 @@ const authOptions: NextAuthOptions = {
           );
         }
 
-        console.log("identityTokenPayload:", identityTokenPayload.right);
-
         // set next-auth User
         const user = {
           id: identityTokenPayload.right.uid,
@@ -108,7 +106,6 @@ const authOptions: NextAuthOptions = {
         token.institution = user.institution;
         token.authorizedInstitutions = user.authorizedInstitutions;
         token.permissions = user.permissions;
-        // token.accessToken = user.accessToken;
       }
       return token;
     },
@@ -119,12 +116,10 @@ const authOptions: NextAuthOptions = {
         session.user.institution = token.institution;
         session.user.authorizedInstitutions = token.authorizedInstitutions;
         session.user.permissions = token.permissions;
-        // session.user.accessToken = token.accessToken;
       }
       return session;
     }
   }
-  // secret: process.env.NEXTAUTH_SECRET
 };
 
 const handler = NextAuth(authOptions);
