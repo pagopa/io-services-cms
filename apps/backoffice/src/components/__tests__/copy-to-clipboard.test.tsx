@@ -10,7 +10,7 @@ const getCopyToClipboardComponent = () => (
 // needed to clean document (react dom)
 afterEach(cleanup);
 
-describe("[AccessControl] Component", () => {
+describe("[CopyToClipboard] Component", () => {
   it("should copy to clipboard", () => {
     const { getByRole } = render(getCopyToClipboardComponent());
 
