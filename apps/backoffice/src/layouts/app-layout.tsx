@@ -2,8 +2,8 @@ import { AppFooter } from "@/components/footer";
 import { Header, TopBar } from "@/components/headers";
 import { Sidenav } from "@/components/sidenav";
 import { Box, Grid } from "@mui/material";
-import { JwtUser } from "@pagopa/mui-italia";
-import { ReactNode } from "react";
+import { useSession } from "next-auth/react";
+import { ReactNode, useState } from "react";
 
 import styles from "@/styles/app-layout.module.css";
 
@@ -12,30 +12,22 @@ type AppLayoutProps = {
   children: ReactNode;
 };
 
-const mockUser: JwtUser = {
-  id: "12345",
-  name: "Mario",
-  surname: "Rossi",
-  email: "mario.rossi@email.it"
-};
-
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
+  const { data: session } = useSession();
+  const [sidenavWidth, setSidenavWidth] = useState(320);
+
   return (
     <Box>
       <Box>
-        <TopBar user={mockUser} />
+        <TopBar user={session?.user ? { id: session.user.id } : undefined} />
       </Box>
       <Box>
         <Header />
       </Box>
       <Grid container spacing={0} bgcolor={"#F5F5F5"}>
         {hideSidenav ? null : (
-          <Grid item width={360}>
-            <Sidenav
-              onNavItemClick={index =>
-                console.log(`Sidenav item click ${index}`)
-              }
-            />
+          <Grid item width={sidenavWidth}>
+            <Sidenav onWidthChange={setSidenavWidth} />
           </Grid>
         )}
         <Grid item className={styles.main}>
