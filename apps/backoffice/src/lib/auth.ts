@@ -1,29 +1,20 @@
 import { User } from "next-auth";
-import { NextRequestWithAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { JWT } from "next-auth/jwt";
 
 const USER_DETAILS_HEADER_NAME = "user-details";
 
 /**
- * Augment the request with logged user details by setting request headers for API Routes (see https://nextjs.org/docs/app/building-your-application/routing/middleware#nextresponse)
- * @param req the `Request` augmented with the user's token.
- * @returns the `Request` augmented with logged user details
+ * Augment the request headers with logged user details
+ * @param token the session token
+ * @param requestHeaders the original request header
+ * @returns the request headers augmented with user details
  */
-export function addUserDetails(
-  req: NextRequestWithAuth
-): NextResponse<unknown> {
-  const requestHeaders = new Headers(req.headers);
-  if (req.nextauth.token) {
-    const { iat, exp, jti, ...userDetails } = req.nextauth.token;
-    requestHeaders.set(USER_DETAILS_HEADER_NAME, JSON.stringify(userDetails));
-  }
+export function addUserDetails(token: JWT, requestHeaders: Headers): Headers {
+  const augmentedHeaders = new Headers(requestHeaders);
+  const { iat, exp, jti, ...userDetails } = token;
+  augmentedHeaders.set(USER_DETAILS_HEADER_NAME, JSON.stringify(userDetails));
   // augments your `Request` with the user's token.
-  return NextResponse.next({
-    request: {
-      // New request headers
-      headers: requestHeaders
-    }
-  });
+  return augmentedHeaders;
 }
 
 /**
