@@ -1,5 +1,5 @@
 {
-  "name": "@io-services-cms/backoffice",
+  "name": "io-services-cms-backoffice",
   "version": "0.3.0",
   "private": true,
   "scripts": {
