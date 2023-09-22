@@ -768,6 +768,64 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /keys/manage/cidrs:
+    get:
+      tags:
+        - manage-keys
+      summary: Retrieve manage key authorized CIDRs
+      description: Retrieve manage key authorized CIDRs
+      operationId: getManageKeysAuthorizedCidrs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Manage key authorized CIDRs fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageKeyCIDRs'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - manage-keys
+      summary: Update manage key authorized CIDRs
+      description: Update manage key authorized CIDRs
+      operationId: updateManageKeysAuthorizedCidrs
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: An Authorized CIDRs body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageKeyCIDRs'
+        required: true
+      responses:
+        '200':
+          description: Manage key Authorized CIDRs successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageKeyCIDRs'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
 components:
   schemas:
     ServiceLifecycle:
@@ -812,6 +870,8 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+    ManageKeyCIDRs:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/ManageKeyCIDRs'
     MigrationItemList:
       type: object
       properties:
