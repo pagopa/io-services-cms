@@ -1,4 +1,4 @@
-# @io-services-cms/backoffice
+# io-services-cms-backoffice
 
 ## 0.3.0
 
