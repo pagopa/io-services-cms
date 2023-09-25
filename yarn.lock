@@ -7310,6 +7310,7 @@ __metadata:
   resolution: "io-services-cms@workspace:."
   dependencies:
     "@changesets/cli": ^2.25.2
+    "@pagopa/openapi-codegen-ts": ^13.0.0
     turbo: ^1.6.3
   languageName: unknown
   linkType: soft

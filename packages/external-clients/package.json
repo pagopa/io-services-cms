@@ -21,7 +21,8 @@
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
-    "lint:fix": "eslint --fix \"src/**\""
+    "lint:fix": "eslint --fix \"src/**\"",
+    "generate": "rm -rf ./src/generated & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated --response-decoders"
   },
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",

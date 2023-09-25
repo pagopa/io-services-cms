@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: External Clients Definitions
+paths:
+components:
+  schemas:
+      SubscriptionKeyType:
+            $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType"

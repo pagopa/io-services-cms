@@ -22,6 +22,10 @@ import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import {
+  SubscriptionKeyType,
+  SubscriptionKeyTypeEnum,
+} from "../generated/SubscriptionKeyType";
+import {
   FilterCompositionEnum,
   FilterFieldEnum,
   FilterSupportedFunctionsEnum,
@@ -30,8 +34,6 @@ import {
 import {
   AzureClientSecretCredential,
   MANAGE_APIKEY_PREFIX,
-  SubscriptionKeyType,
-  SubscriptionKeyTypeEnum,
 } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
@@ -401,3 +403,6 @@ export const subscriptionsExceptManageOneApimFilter = () =>
     }),
     O.getOrElse(() => "")
   );
+
+export * as definitions from "./definitions";
+export * as apim_filters from "./apim-filters";

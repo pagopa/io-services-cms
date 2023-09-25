@@ -1,5 +1,4 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as t from "io-ts";
 
 export const AzureClientSecretCredential = t.type({
@@ -10,21 +9,6 @@ export const AzureClientSecretCredential = t.type({
 export type AzureClientSecretCredential = t.TypeOf<
   typeof AzureClientSecretCredential
 >;
-
-// TODO: this is a generated definitions from the openapi generator
-// we needs to find a way to import it from the generated code
-
-export enum SubscriptionKeyTypeEnum {
-  "primary" = "primary",
-
-  "secondary" = "secondary",
-}
-
-export type SubscriptionKeyType = t.TypeOf<typeof SubscriptionKeyType>;
-export const SubscriptionKeyType = enumType<SubscriptionKeyTypeEnum>(
-  SubscriptionKeyTypeEnum,
-  "SubscriptionKeyType"
-);
 
 /**
  * Utilities to handle subscriptions api keys
