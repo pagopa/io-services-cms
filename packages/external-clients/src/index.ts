@@ -1,1 +1,1 @@
-export * as ApimClient from "./apim-client";
+export * as ApimUtils from "./apim-client";
