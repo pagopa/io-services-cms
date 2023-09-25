@@ -124,6 +124,9 @@ export type ApimService = {
     serviceId: string,
     keyType: SubscriptionKeyType
   ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  readonly getDelegateFromServiceId: (
+    serviceId: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, Delegate>;
 };
 
 export const getApimService = (
@@ -168,6 +171,8 @@ export const getApimService = (
       serviceId,
       keyType
     ),
+  getDelegateFromServiceId: (serviceId) =>
+    getDelegateFromServiceId(apimClient, apimResourceGroup, apim, serviceId),
 });
 
 const getUser = (
@@ -474,6 +479,38 @@ const regenerateSubscriptionKey = (
     chainApimMappedError
   );
 
+const getDelegateFromServiceId = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apim: string,
+  serviceId: NonEmptyString
+): TE.TaskEither<ApimRestError, Delegate> =>
+  pipe(
+    getSubscription(apimClient, apimResourceGroup, apim, serviceId),
+    TE.map((subscription) =>
+      parseOwnerIdFullPath(subscription.ownerId as NonEmptyString)
+    ),
+    TE.chain((ownerId) =>
+      getUser(apimClient, apimResourceGroup, apim, ownerId)
+    ),
+    TE.chainW((user) =>
+      pipe(
+        getUserGroups(
+          apimClient,
+          apimResourceGroup,
+          apim,
+          user.name as NonEmptyString
+        ),
+        TE.map((userGroups) => ({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          permissions: userGroups.map((group) => group.name),
+        }))
+      )
+    )
+  );
+
 /**
  * User Subscription list filtered by name not startswith 'MANAGE-'
  *
@@ -504,6 +541,14 @@ export const parseOwnerIdFullPath = (
     (f) => f.split("/"),
     (a) => a[a.length - 1] as NonEmptyString
   );
+
+// TODO: remove when jira-proxy.ts is moved in this package
+type Delegate = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  permissions: Array<string | undefined>;
+};
 
 export * as apim_filters from "./apim-filters";
 export * as definitions from "./definitions";
