@@ -59,43 +59,16 @@ export const serviceOwnerCheckManageTask = (
 ): TaskEither<ErrorResponses, NonEmptyString> =>
   pipe(
     ownerSubscriptionId,
-    (x) => {
-      // eslint-disable-next-line no-console
-      console.log("serviceOwnerCheckManageTask before predicate: ", x);
-      // eslint-disable-next-line no-console
-      console.log(
-        "serviceOwnerCheckManageTask before predicate:, apimService ",
-        apimService
-      );
-      return x;
-    },
     TE.fromPredicate(isManageKey, () => ResponseErrorForbiddenNotAuthorized),
-    TE.map((x) => {
-      // eslint-disable-next-line no-console
-      console.log("AFTER isManageKey predicate: ", x);
-      return x;
-    }),
     TE.chainW(() =>
       pipe(
         serviceId,
-        (x) => {
-          // eslint-disable-next-line no-console
-          console.log("BEFORE apimService.getSubscription: ", x);
-          return x;
-        },
         apimService.getSubscription,
-        TE.map((x) => {
-          // eslint-disable-next-line no-console
-          console.log("AFTER apimService.getSubscription: ", x);
-          return x;
-        }),
-        TE.mapLeft((err) => {
-          // eslint-disable-next-line no-console
-          console.log("ERROR apimService.getSubscription: ", err);
-          return ResponseErrorInternal(
+        TE.mapLeft(() =>
+          ResponseErrorInternal(
             `An error has occurred while retrieving service '${serviceId}'`
-          );
-        })
+          )
+        )
       )
     ),
     TE.chainW((serviceSubscription) =>

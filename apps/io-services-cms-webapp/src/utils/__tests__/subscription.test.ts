@@ -26,10 +26,6 @@ describe("subscription", () => {
     vi.restoreAllMocks();
   });
   it("should return serviceId in case of valid subscription and userId for the requested service", async () => {
-    console.log("mockApimService", mockApimService);
-    console.log("aServiceId", mockApimService);
-    console.log("aManageSubscriptionId", mockApimService);
-    console.log("anUserId", mockApimService);
 
     const result = await serviceOwnerCheckManageTask(
       mockApimService,

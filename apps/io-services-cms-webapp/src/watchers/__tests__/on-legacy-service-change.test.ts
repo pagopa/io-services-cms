@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyService,
   ServiceLifecycle,
@@ -17,7 +17,6 @@ import {
   handler,
   serviceWasPublished,
 } from "../on-legacy-service-change";
-import { ApimUtils } from "@io-services-cms/external-clients";
 
 // Legacy Service: valid and visible
 const aLegacyService = {
