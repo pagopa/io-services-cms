@@ -6,6 +6,7 @@ import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import {
   aMockJwtSessionToken,
+  aMockManageKeysCIDRs,
   aMockServiceKeys,
   aMockServicePagination,
   aMockServicePublication,
@@ -332,6 +333,31 @@ export const buildHandlers = () => {
       ];
 
       return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/keys/manage/cidrs`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getManageKeysCIDRs200Response())],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(404), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.put(`${baseURL}/keys/manage/cidrs`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getManageKeysCIDRs200Response())],
+        [ctx.status(400), ctx.json(null)],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(404), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
     })
   ];
 };
@@ -398,6 +424,10 @@ export function getGetServiceKeys200Response() {
 
 export function getRegenerateServiceKey200Response() {
   return aMockServiceKeys;
+}
+
+export function getManageKeysCIDRs200Response() {
+  return aMockManageKeysCIDRs;
 }
 
 export function getGetPublishedService200Response() {

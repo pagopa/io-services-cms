@@ -5,3 +5,19 @@
         type: string
     required:
       - identity_token
+  ManageKeyCIDRs:
+    type: object
+    description: Service basic data
+    properties:
+      cidrs:
+        description: >-
+          List of Allowed source IPs or CIDRs associated to the Manage key.
+          When empty, every IP address it's authorized for this Manage Keys.
+        type: array
+        items:
+          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr"
+    required:
+      - cidrs
+      - description
+      - organization
+      - metadata

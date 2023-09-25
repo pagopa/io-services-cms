@@ -10,8 +10,10 @@ permissions:
 
 env:
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
+  AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
   RESOURCE_GROUP: io-p-services-cms-rg
-  HEALTHCHECK_PATH: 'api/v1/info'
+  WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
+  BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
 
 jobs:
   create_runner:
@@ -44,6 +46,13 @@ jobs:
         id: download_artifact
         run: 'curl --output artifact.zip --location ${{ github.event.release.assets[0].browser_download_url }}'
 
+      - name: Identify workload
+        id: workload
+        shell: bash
+        run: |
+          # Parse the release artifact name to retrieve app name
+          echo name=$(echo "${{ contains(github.event.release.assets[0].name, 'webapp') && env.AZURE_WEBAPP_NAME || env.AZURE_BACKOFFICE_NAME }}") >> "$GITHUB_OUTPUT"
+
       - name: Login
         id: login
         # from https://github.com/Azure/login/commits/master
@@ -53,25 +62,53 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      #################
+      # Webapp Deploy #
+      #################
+
       - name: Deploy to staging
+        if: contains(github.event.release.assets[0].name, 'webapp')
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          resource-group-name: ${{ env.RESOURCE_GROUP }}
           package: artifact.zip
           slot-name: staging
 
-      # healthcheck
       - name: 'Healthcheck'
+        if: contains(github.event.release.assets[0].name, 'webapp')
         id: healthcheck
         run: |
           # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.HEALTHCHECK_PATH }}'
+          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
-      # swap staging to production
       - name: 'Swap staging to production'
+        if: contains(github.event.release.assets[0].name, 'webapp')
         id: swap_to_production
         run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
+
+      #####################
+      # Backoffice Deploy #
+      #####################
+
+      - name: Deploy to staging
+        if: contains(github.event.release.assets[0].name, 'backoffice')
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_BACKOFFICE_NAME }}
+          package: artifact.zip
+          slot-name: staging
+
+      - name: 'Healthcheck'
+        if: contains(github.event.release.assets[0].name, 'backoffice')
+        id: healthcheck
+        run: |
+          # fails if response status is not 2xx
+          curl -f 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
+
+      - name: 'Swap staging to production'
+        if: contains(github.event.release.assets[0].name, 'backoffice')
+        id: swap_to_production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
 
   cleanup_runner:
     name: Cleanup Runner
