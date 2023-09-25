@@ -1,3 +1,4 @@
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyService,
   ServiceHistory,
@@ -26,7 +27,6 @@ import {
 } from "./lib/azure/adapters";
 import { getDatabase } from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
-import { getApimClient } from "./lib/clients/apim-client";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
@@ -48,7 +48,6 @@ import { createWebServer } from "./webservice";
 import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
-import { apimProxy } from "./utils/apim-proxy";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -57,7 +56,17 @@ const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 const config = getConfigOrThrow();
 
 // client to interact with Api Management
-const apimClient = getApimClient(config, config.AZURE_SUBSCRIPTION_ID);
+const apimCliento = ApimUtils.getApimClient(
+  config,
+  config.AZURE_SUBSCRIPTION_ID
+);
+
+// Apim Service, used to operates on Apim resources
+const apimService = ApimUtils.getApimService(
+  apimCliento,
+  config.AZURE_APIM_RESOURCE_GROUP,
+  config.AZURE_APIM
+);
 
 // client to interact with cms db
 const cosmos = getDatabase(config);
@@ -101,7 +110,7 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 export const httpEntryPoint = pipe(
   {
     basePath: BASE_PATH,
-    apimClient,
+    apimService,
     config,
     fsmLifecycleClient,
     fsmPublicationClient,
@@ -115,9 +124,8 @@ export const httpEntryPoint = pipe(
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getDao(config),
   jiraProxy(jiraClient(config)),
-  apimProxy(apimClient, config.AZURE_APIM_RESOURCE_GROUP, config.AZURE_APIM),
+  apimService,
   fsmLifecycleClient,
-  apimClient,
   config
 );
 
@@ -204,7 +212,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
-  onLegacyServiceChangeHandler(config, apimClient, legacyServiceModel),
+  onLegacyServiceChangeHandler(config, apimService, legacyServiceModel),
   processBatchOf(LegacyService, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(
@@ -218,7 +226,7 @@ export const onLegacyServiceChangeEntryPoint = pipe(
 );
 
 export const onServiceHistoryChangeEntryPoint = pipe(
-  onServiceHistoryHandler(config, apimClient),
+  onServiceHistoryHandler(config, apimService),
   processBatchOf(ServiceHistory),
   setBindings((results) => ({
     requestSyncLegacy: pipe(

@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { LegacyService, Queue } from "@io-services-cms/models";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -156,7 +156,7 @@ export const buildPreviousVersionId = (
 export const handler =
   (
     config: IConfig,
-    apimClient: ApiManagementClient,
+    apimService: ApimUtils.ApimService,
     legacyServiceModel: ServiceModel
   ): RTE.ReaderTaskEither<
     { item: LegacyService },
@@ -169,7 +169,7 @@ export const handler =
       O.fromPredicate((itm) => itm.cmsTag !== true),
       O.map(() =>
         pipe(
-          isUserEnabledForLegacyToCmsSync(config, apimClient, item.serviceId),
+          isUserEnabledForLegacyToCmsSync(config, apimService, item.serviceId),
           TE.chainW((isUserEnabled) =>
             pipe(
               item,

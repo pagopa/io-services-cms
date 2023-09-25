@@ -3,7 +3,7 @@ import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/
 import bodyParser from "body-parser";
 import express from "express";
 
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
@@ -62,7 +62,7 @@ type Dependencies = {
   basePath: string;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   config: IConfig;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
   telemetryClient: ReturnType<typeof initAppInsights>;
@@ -72,7 +72,7 @@ export const createWebServer = ({
   basePath,
   fsmLifecycleClient,
   fsmPublicationClient,
-  apimClient,
+  apimService,
   config,
   subscriptionCIDRsModel,
   telemetryClient,
@@ -88,7 +88,7 @@ export const createWebServer = ({
     pipe(
       makeCreateServiceHandler({
         fsmLifecycleClient,
-        apimClient,
+        apimService,
         config,
         telemetryClient,
       }),
@@ -101,7 +101,7 @@ export const createWebServer = ({
     pipe(
       makeGetServicesHandler({
         fsmLifecycleClient,
-        apimClient,
+        apimService,
         config,
         telemetryClient,
       }),
@@ -113,9 +113,8 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        config,
         store: fsmLifecycleClient.getStore(),
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel)
@@ -128,7 +127,7 @@ export const createWebServer = ({
       makeEditServiceHandler({
         fsmLifecycleClient,
         config,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyEditServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -139,9 +138,8 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
-        config,
         fsmLifecycleClient,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -152,9 +150,8 @@ export const createWebServer = ({
     "/services/:serviceId/review",
     pipe(
       makeReviewServiceHandler({
-        config,
         fsmLifecycleClient,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -165,9 +162,8 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makePublishServiceHandler({
-        config,
         fsmPublicationClient,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -178,9 +174,8 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        config,
         store: fsmPublicationClient.getStore(),
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyGetPublicationStatusServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -191,9 +186,8 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
-        config,
         fsmPublicationClient,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel)
@@ -204,8 +198,7 @@ export const createWebServer = ({
     "/services/:serviceId/keys",
     pipe(
       makeGetServiceKeysHandler({
-        config,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyGetServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
@@ -216,8 +209,7 @@ export const createWebServer = ({
     "/services/:serviceId/keys/:keyType",
     pipe(
       makeRegenerateServiceKeysHandler({
-        config,
-        apimClient,
+        apimService,
         telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(subscriptionCIDRsModel)

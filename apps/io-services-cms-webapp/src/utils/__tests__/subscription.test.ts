@@ -1,6 +1,7 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { serviceOwnerCheckManageTask } from "../subscription";
@@ -11,24 +12,27 @@ const aManageSubscriptionId = "MANAGE-123" as NonEmptyString;
 const anUserId = "123" as NonEmptyString;
 const aServiceId = "1234567890" as NonEmptyString;
 
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId: anUserId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId: anUserId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
+
 describe("subscription", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
   it("should return serviceId in case of valid subscription and userId for the requested service", async () => {
+    console.log("mockApimService", mockApimService);
+    console.log("aServiceId", mockApimService);
+    console.log("aManageSubscriptionId", mockApimService);
+    console.log("anUserId", mockApimService);
+
     const result = await serviceOwnerCheckManageTask(
-      mockConfig,
-      mockApimClient,
+      mockApimService,
       aServiceId,
       aManageSubscriptionId,
       anUserId
@@ -46,8 +50,7 @@ describe("subscription", () => {
     const aDifferentUserId = "456" as NonEmptyString;
 
     const result = await serviceOwnerCheckManageTask(
-      mockConfig,
-      mockApimClient,
+      mockApimService,
       aServiceId,
       aDifferentManageSubscriptionId,
       aDifferentUserId
@@ -61,13 +64,12 @@ describe("subscription", () => {
     const aDifferentUserId = "456" as NonEmptyString;
 
     const result = await serviceOwnerCheckManageTask(
-      mockConfig,
-      mockApimClient,
+      mockApimService,
       aServiceId,
       aNotManageSubscriptionId,
       aDifferentUserId
     )();
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(E.isLeft(result)).toBeTruthy();
   });
 });
