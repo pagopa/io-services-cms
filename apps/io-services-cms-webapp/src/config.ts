@@ -5,7 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import { AzureClientSecretCredential } from "@io-services-cms/external-clients/apim-client/definitions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
@@ -192,7 +192,7 @@ export const IConfig = t.intersection([
   ]),
   t.intersection([
     CosmosConfig,
-    AzureClientSecretCredential,
+    ApimUtils.definitions.AzureClientSecretCredential,
     ApimConfig,
     QueueConfig,
     ServiceIdQualityCheckExclusionList,
