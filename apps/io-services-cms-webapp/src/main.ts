@@ -56,14 +56,14 @@ const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 const config = getConfigOrThrow();
 
 // client to interact with Api Management
-const apimCliento = ApimUtils.getApimClient(
+const apimClient = ApimUtils.getApimClient(
   config,
   config.AZURE_SUBSCRIPTION_ID
 );
 
 // Apim Service, used to operates on Apim resources
 const apimService = ApimUtils.getApimService(
-  apimCliento,
+  apimClient,
   config.AZURE_APIM_RESOURCE_GROUP,
   config.AZURE_APIM
 );
