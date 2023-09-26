@@ -16,8 +16,11 @@ export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
 export const JiraLegacyIssueStatus = t.union([
   t.literal("NEW"),
+  t.literal("New"),
   t.literal("REVIEW"),
+  t.literal("Review"),
   t.literal("REJECTED"),
+  t.literal("Rejected"),
   t.literal("DONE"),
   t.literal("Completata"), // Status DONE will return this value as name
 ]);

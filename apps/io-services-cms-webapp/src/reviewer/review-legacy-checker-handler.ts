@@ -19,7 +19,7 @@ const logPrefix = "ServiceReviewLegacyChecker";
 export type ProcessedJiraIssue = JiraIssue & {
   fields: JiraIssue["fields"] & {
     status: JiraIssue["fields"]["status"] & {
-      name: "APPROVED" | "REJECTED" | "DONE" | "Completata";
+      name: "APPROVED" | "REJECTED" | "Rejected" | "DONE" | "Completata";
     };
   };
 };
@@ -99,7 +99,7 @@ export const updateReview =
             dao.updateStatus({
               ...item,
               status:
-                issue.fields.status.name === "REJECTED"
+                issue.fields.status.name.toUpperCase() === "REJECTED"
                   ? "REJECTED"
                   : "APPROVED",
             }),

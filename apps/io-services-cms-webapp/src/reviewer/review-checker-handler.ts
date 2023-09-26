@@ -16,7 +16,9 @@ import {
 
 export type ProcessedJiraIssue = JiraIssue & {
   fields: JiraIssue["fields"] & {
-    status: JiraIssue["fields"]["status"] & { name: "APPROVED" | "REJECTED" };
+    status: JiraIssue["fields"]["status"] & {
+      name: "APPROVED" | "REJECTED" | "Approved" | "Rejected";
+    };
   };
 };
 
@@ -34,6 +36,7 @@ const makeServiceLifecycleApply = (
 ) => {
   switch (jiraIssue.fields.status.name) {
     case "REJECTED":
+    case "Rejected":
       return pipe(
         {
           reason: jiraIssue.fields.comment.comments
@@ -44,6 +47,7 @@ const makeServiceLifecycleApply = (
         TE.map((_) => void 0)
       );
     case "APPROVED":
+    case "Approved":
       return pipe(
         {
           approvalDate: jiraIssue.fields.statuscategorychangedate,
@@ -151,7 +155,10 @@ export const updateReview =
           pipe(
             dao.updateStatus({
               ...item,
-              status: issue.fields.status.name,
+              status:
+                issue.fields.status.name.toUpperCase() === "APPROVED"
+                  ? "APPROVED"
+                  : "REJECTED",
             }),
             TE.mapLeft((err) => {
               logger.logError(
