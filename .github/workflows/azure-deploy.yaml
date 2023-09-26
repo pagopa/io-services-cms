@@ -100,14 +100,14 @@ jobs:
 
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'backoffice')
-        id: healthcheck
+        id: healthcheck_backoffice
         run: |
           # fails if response status is not 2xx
           curl -f 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'backoffice')
-        id: swap_to_production
+        id: swap_to_production_backoffice
         run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
 
   cleanup_runner:

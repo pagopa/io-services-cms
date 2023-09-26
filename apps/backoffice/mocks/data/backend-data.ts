@@ -82,15 +82,15 @@ export const aMockServicePublication = {
   version: faker.string.uuid()
 };
 
-export const aMockServiceKeys = {
+export const getMockServiceKeys = () => ({
   primary_key: faker.string.alphanumeric(32),
   secondary_key: faker.string.alphanumeric(32)
-};
+});
 
 export const aMockManageKeysCIDRs: ManageKeyCIDRs = {
   cidrs: [
     ...Array.from(
-      Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
+      Array(faker.number.int({ min: 1, max: 5 })).keys()
     )
   ].map(
     _ =>

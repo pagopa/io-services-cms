@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.9
+
+### Patch Changes
+
+- 9dfd38e: Fix Azure Deploy action
+
 ## 1.20.8
 
 ### Patch Changes
