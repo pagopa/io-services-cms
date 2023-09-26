@@ -16,16 +16,8 @@ import {
 
 const logPrefix = "ServiceReviewLegacyChecker";
 
-export type ProcessedJiraIssue = JiraIssue & {
-  fields: JiraIssue["fields"] & {
-    status: JiraIssue["fields"]["status"] & {
-      name: "APPROVED" | "REJECTED" | "Rejected" | "DONE" | "Completata";
-    };
-  };
-};
-
 export type IssueItemPair = {
-  issue: ProcessedJiraIssue;
+  issue: JiraIssue;
   item: ServiceReviewRowDataTable;
 };
 
@@ -98,10 +90,7 @@ export const updateReview =
           pipe(
             dao.updateStatus({
               ...item,
-              status:
-                issue.fields.status.name.toUpperCase() === "REJECTED"
-                  ? "REJECTED"
-                  : "APPROVED",
+              status: decodeLegacyJiraIssueStatus(issue),
             }),
             TE.mapLeft((err) => {
               logger.logError(err, "Error updating legacy review status on DB");
@@ -118,7 +107,7 @@ const makeServiceLifecycleApply =
   (context: Context) =>
   (
     serviceReview: ServiceReviewRowDataTable,
-    jiraIssue: ProcessedJiraIssue,
+    jiraIssue: JiraIssue,
     fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) => {
     const logger = getLogger(context, logPrefix, "makeServiceLifecycleApply");
@@ -177,6 +166,15 @@ const buildUpdatedServiceLifecycleItem =
             ("approved" as any),
     },
   });
+
+const decodeLegacyJiraIssueStatus = (
+  issue: JiraIssue
+): "APPROVED" | "REJECTED" => {
+  if (issue.fields.status.name.toUpperCase() === "REJECTED") {
+    return "REJECTED";
+  }
+  return "APPROVED";
+};
 
 export const createReviewLegacyCheckerHandler =
   (

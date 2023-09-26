@@ -7,7 +7,6 @@ import {
   CreateJiraIssueResponse,
   JiraAPIClient,
   JiraIssue,
-  JiraIssueStatus,
   SearchJiraIssuesPayload,
   SearchJiraIssuesResponse,
 } from "../lib/clients/jira-client";
@@ -18,6 +17,15 @@ const formatOptionalStringValue = (value?: string) =>
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
 
+// DONE and Completata will be removed whe legacy jira will be removed
+export type JiraIssueStatusFilter =
+  | "NEW"
+  | "REVIEW"
+  | "REJECTED"
+  | "APPROVED"
+  | "DONE"
+  | "Completata";
+
 export type JiraProxy = {
   readonly createJiraIssue: (
     service: ServiceLifecycle.definitions.Service,
@@ -25,7 +33,7 @@ export type JiraProxy = {
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKeyAndStatus: (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
   ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
   readonly getJiraIssueByServiceId: (
     serviceId: NonEmptyString
@@ -122,7 +130,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
 
   const buildSearchJiraIssuesByKeyAndStatusPayload = (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
   ) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
@@ -136,7 +144,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
 
   const searchJiraIssuesByKeyAndStatus = (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
+    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
   ): TE.TaskEither<Error, SearchJiraIssuesResponse> =>
     jiraClient.searchJiraIssues(
       buildSearchJiraIssuesByKeyAndStatusPayload(

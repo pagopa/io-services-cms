@@ -19,22 +19,6 @@ export const CreateJiraIssueResponse = t.type({
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
-export const JiraIssueStatus = t.union([
-  // TODO: maybe get these literal values from config?
-  t.literal("NEW"),
-  t.literal("REVIEW"),
-  t.literal("REJECTED"),
-  t.literal("APPROVED"),
-  t.literal("New"),
-  t.literal("Review"),
-  t.literal("Rejected"),
-  t.literal("Approved"),
-  // FIXME : delete after removing jira legacy client
-  t.literal("DONE"),
-  t.literal("Completata"),
-]);
-export type JiraIssueStatus = t.TypeOf<typeof JiraIssueStatus>;
-
 export const JiraIssue = t.type({
   id: NonEmptyString,
   key: NonEmptyString,
@@ -43,7 +27,7 @@ export const JiraIssue = t.type({
       comments: t.readonlyArray(t.type({ body: t.string })),
     }),
     status: t.type({
-      name: JiraIssueStatus,
+      name: t.string,
     }),
     statuscategorychangedate: withDefault(
       NonEmptyString,

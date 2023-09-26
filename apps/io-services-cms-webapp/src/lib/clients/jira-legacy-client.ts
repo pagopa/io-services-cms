@@ -14,18 +14,6 @@ import { JIRA_REST_API_PATH, SearchJiraIssuesPayload } from "./jira-client";
 
 export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
-export const JiraLegacyIssueStatus = t.union([
-  t.literal("NEW"),
-  t.literal("New"),
-  t.literal("REVIEW"),
-  t.literal("Review"),
-  t.literal("REJECTED"),
-  t.literal("Rejected"),
-  t.literal("DONE"),
-  t.literal("Completata"), // Status DONE will return this value as name
-]);
-export type JiraLegacyIssueStatus = t.TypeOf<typeof JiraLegacyIssueStatus>;
-
 export const JiraLegacyIssue = t.type({
   id: NonEmptyString,
   key: NonEmptyString,
@@ -35,7 +23,7 @@ export const JiraLegacyIssue = t.type({
         comments: t.readonlyArray(t.type({ body: t.string })),
       }),
       status: t.type({
-        name: JiraLegacyIssueStatus,
+        name: t.string,
       }),
     }),
     t.partial({

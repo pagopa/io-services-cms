@@ -14,16 +14,8 @@ import {
   ServiceReviewRowDataTable,
 } from "../utils/service-review-dao";
 
-export type ProcessedJiraIssue = JiraIssue & {
-  fields: JiraIssue["fields"] & {
-    status: JiraIssue["fields"]["status"] & {
-      name: "APPROVED" | "REJECTED" | "Approved" | "Rejected";
-    };
-  };
-};
-
 export type IssueItemPair = {
-  issue: ProcessedJiraIssue;
+  issue: JiraIssue;
   item: ServiceReviewRowDataTable;
 };
 
@@ -31,12 +23,12 @@ const logPrefix = "ReviewerCheckerHandler";
 
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
-  jiraIssue: ProcessedJiraIssue,
+  jiraIssue: JiraIssue,
   fsmLifecycleClient: ServiceLifecycle.FsmClient
 ) => {
-  switch (jiraIssue.fields.status.name) {
+  const jiraIssueStatus = decodeJiraIssueStatus(jiraIssue);
+  switch (jiraIssueStatus) {
     case "REJECTED":
-    case "Rejected":
       return pipe(
         {
           reason: jiraIssue.fields.comment.comments
@@ -47,7 +39,6 @@ const makeServiceLifecycleApply = (
         TE.map((_) => void 0)
       );
     case "APPROVED":
-    case "Approved":
       return pipe(
         {
           approvalDate: jiraIssue.fields.statuscategorychangedate,
@@ -56,8 +47,6 @@ const makeServiceLifecycleApply = (
         TE.map((_) => void 0)
       );
     default:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _: never = jiraIssue.fields.status.name;
       throw new Error("It should not happen");
   }
 };
@@ -155,10 +144,7 @@ export const updateReview =
           pipe(
             dao.updateStatus({
               ...item,
-              status:
-                issue.fields.status.name.toUpperCase() === "APPROVED"
-                  ? "APPROVED"
-                  : "REJECTED",
+              status: decodeJiraIssueStatus(issue),
             }),
             TE.mapLeft((err) => {
               logger.logError(
@@ -174,6 +160,13 @@ export const updateReview =
       TE.map((_) => void 0)
     );
   };
+
+const decodeJiraIssueStatus = (issue: JiraIssue): "APPROVED" | "REJECTED" => {
+  if (issue.fields.status.name.toUpperCase() === "APPROVED") {
+    return "APPROVED";
+  }
+  return "REJECTED";
+};
 
 export const processBatchOfReviews =
   (
