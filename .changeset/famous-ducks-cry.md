@@ -2,4 +2,4 @@
 "io-services-cms-webapp": patch
 ---
 
-Handle changed jira issue status names
+Handle Jira Issue status name case change
