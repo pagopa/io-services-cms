@@ -1,10 +1,10 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import {
-  aMockServiceKeys,
   aMockServicePagination,
   aMockServicePaginationLimitOffset,
   aMockServicePublication,
+  getMockServiceKeys,
   getMockServiceLifecycle
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
@@ -230,11 +230,11 @@ export function getUpdateService200Response(serviceId: string) {
 }
 
 export function getGetServiceKeys200Response() {
-  return aMockServiceKeys;
+  return getMockServiceKeys();
 }
 
 export function getRegenerateServiceKey200Response() {
-  return aMockServiceKeys;
+  return getMockServiceKeys();
 }
 
 export function getGetPublishedService200Response() {
