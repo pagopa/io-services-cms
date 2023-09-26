@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.20.8
+
+### Patch Changes
+
+- e47f151: Handle Jira Issue status name case change
+
 ## 1.20.7
 
 ### Patch Changes
