@@ -1,5 +1,5 @@
 ---
-"@io-services-cms/backoffice": minor
+"io-services-cms-backoffice": minor
 ---
 
 Add Institution selection

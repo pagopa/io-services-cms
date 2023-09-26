@@ -1,5 +1,5 @@
 ---
-"@io-services-cms/backoffice": patch
+"io-services-cms-backoffice": patch
 ---
 
 Update next-auth with session token data
