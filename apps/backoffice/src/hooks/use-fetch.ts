@@ -92,22 +92,15 @@ type ExtractRequestParams<T extends keyof ClientOperations> = Parameters<
  * @param operationId openapi operationId
  * @param requestParams request parameters _(as specified in openapi)_
  * @param responseCodec io-ts expected response codec
- * @param redirectOnError if true, in case of fetch error, perform an auto redirect to an error page
- * @param notifyOnError if true, in case of fetch error, show a notification
  * @returns `data` fetch result of _responseCodec_ type
  * @returns `error` in case of request error, decode failure or exceptions
  * @returns `loading` as boolean value for request pending state
  */
-const useFetch = <RC, T extends keyof ClientOperations>(
-  operationId: T,
-  requestParams: ExtractRequestParams<T>,
-  responseCodec: t.Type<RC>
-  // redirectOnError: boolean = false, // todo: will be implemented soon
-  // notifyOnError: boolean = false // todo: will be implemented soon
-) => {
+const useFetch = <RC>() => {
   const [data, setData] = useState<RC>();
   const [error, setError] = useState<UseFetchError>();
   const [loading, setLoading] = useState(true);
+
   const { push } = useRouter();
   const { data: session } = useSession();
 
@@ -139,10 +132,14 @@ const useFetch = <RC, T extends keyof ClientOperations>(
     fetchApi: (fetch as any) as typeof fetch
   });
 
-  const fetchData = async (requestParams: any) => {
+  const fetchData = async <T extends keyof ClientOperations>(
+    operationId: T,
+    requestParams: ExtractRequestParams<T>,
+    responseCodec: t.Type<RC>
+  ) => {
     try {
       const result = await client[operationId]({
-        ...requestParams,
+        ...(requestParams as any),
         bearerAuth: session?.user?.accessToken
       });
 
@@ -192,12 +189,7 @@ const useFetch = <RC, T extends keyof ClientOperations>(
     }
   };
 
-  useEffect(() => {
-    fetchData(requestParams);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return { data, error, loading };
+  return { data, error, loading, fetchData };
 };
 
 export default useFetch;
