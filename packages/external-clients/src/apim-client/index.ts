@@ -25,7 +25,8 @@ import * as t from "io-ts";
 import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
-} from "../generated/SubscriptionKeyType";
+} from "../generated/api/SubscriptionKeyType";
+
 import {
   FilterCompositionEnum,
   FilterFieldEnum,
