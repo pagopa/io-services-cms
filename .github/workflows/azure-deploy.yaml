@@ -76,14 +76,14 @@ jobs:
 
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'webapp')
-        id: healthcheck_webapp
+        id: healthcheck
         run: |
           # fails if response status is not 2xx
           curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'webapp')
-        id: swap_to_production_webapp
+        id: swap_to_production
         run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
 
       #####################
