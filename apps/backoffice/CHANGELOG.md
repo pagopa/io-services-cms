@@ -1,5 +1,20 @@
 # io-services-cms-backoffice
 
+## 0.4.0
+
+### Minor Changes
+
+- 22205bf: Setup B4F and Forward io-services-cms request
+- f0e546d: Add Institution selection
+- 710a6de: Add AccessControl component and setup unit tests frontend
+- b6f7c28: test CD
+
+### Patch Changes
+
+- 593df7a: ADD GET, PUT /keys/manage/cidrs B4F API api route placeholders, and mocks msw
+- 221de41: Update next-auth with session token data
+- 52db875: ADD /keys/manage and /keys/manage/{keyType} API route handler placeholders
+
 ## 0.3.0
 
 ### Minor Changes
