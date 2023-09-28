@@ -51,7 +51,6 @@
 | [azurerm_key_vault_secret.bo_auth_session_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_admin_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.webapp_fn_app_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_monitor_autoscale_setting.webapp_functions_app_autoscale](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_autoscale_setting) | resource |
 | [azurerm_monitor_metric_alert.webapp_functions_app_health_check](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/monitor_metric_alert) | resource |
 | [azurerm_postgresql_flexible_server_database.reviewer_database](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/postgresql_flexible_server_database) | resource |
