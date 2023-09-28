@@ -1,15 +1,16 @@
 locals {
   backoffice_app_settings = merge({
-    AZURE_SUBSCRIPTION_ID = data.azurerm_subscription.current.subscription_id
+    NODE_ENV = "production"
     # Apim connection
-    AZURE_APIM                     = data.azurerm_api_management.apim_v2.name
-    AZURE_APIM_RESOURCE_GROUP      = data.azurerm_api_management.apim_v2.resource_group_name
-    AZURE_APIM_PRODUCT_NAME        = data.azurerm_api_management_product.apim_product_services.product_id
+    AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
+    AZURE_APIM                = data.azurerm_api_management.apim_v2.name
+    AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
+    AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_product_services.product_id
+    # Logs
     APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
-    },
-    {
-      for s in var.backoffice_app.app_settings :
-      s.name => s.key_vault_secret_name != null ? "@Microsoft.KeyVault(VaultName=${module.key_vault_domain.name};SecretName=${s.key_vault_secret_name})" : s.value
+    # NextAuthJS
+    NEXTAUTH_URL    = data.azurerm_api_management_product.apim_product_services.product_id
+    NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
   })
 }
 

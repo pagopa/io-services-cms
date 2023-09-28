@@ -86,3 +86,20 @@ resource "azurerm_key_vault_secret" "webapp_fn_app_key" { # FIXME: remove
   content_type    = "string"
   expiration_date = "2025-06-26T23:59:59Z"
 }
+
+resource "random_password" "bo_auth_session_secret" {
+  for_each    = toset([var.bo_auth_session_secret_rotation_id])
+  length      = 16
+  min_lower   = 3
+  min_numeric = 3
+  min_special = 3
+  min_upper   = 3
+}
+
+resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
+  name            = "pgres-flex-admin-pwd"
+  key_vault_id    = module.key_vault_domain.id
+  value           = random_password.bo_auth_session_secret[var.bo_auth_session_secret_rotation_id].result
+  content_type    = "string"
+  expiration_date = timeadd(formatdate("YYYY-MM-DD'T'HH:mm:ssZ", timestamp()), "43800h") # expires 5 yers after creation
+}

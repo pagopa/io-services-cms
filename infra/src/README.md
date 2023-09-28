@@ -48,6 +48,7 @@
 | [azurerm_key_vault_access_policy.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.github_action_cd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.github_action_ci](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_secret.bo_auth_session_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_admin_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.webapp_fn_app_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_secret) | resource |
@@ -67,6 +68,7 @@
 | [azurerm_storage_queue.request-sync-cms-poison](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
 | [azurerm_storage_queue.request-sync-legacy](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
 | [azurerm_storage_queue.request-sync-legacy-poison](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/storage_queue) | resource |
+| [random_password.bo_auth_session_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_reviewer_usr_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [azuread_group.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
@@ -108,7 +110,8 @@
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
-| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name = string<br>    app_settings = list(object({<br>      name                  = string<br>      value                 = optional(string, "")<br>      key_vault_secret_name = optional(string)<br>    }))<br>  })</pre> | n/a | yes |
+| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name = string<br>  })</pre> | n/a | yes |
+| <a name="input_bo_auth_session_secret_rotation_id"></a> [bo\_auth\_session\_secret\_rotation\_id](#input\_bo\_auth\_session\_secret\_rotation\_id) | You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1695908210722"` | no |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
