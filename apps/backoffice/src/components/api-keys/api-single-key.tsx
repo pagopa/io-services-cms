@@ -1,5 +1,4 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/services-cms/SubscriptionKeyType";
-import { obscure } from "@/utils/string-util";
 import { Block, Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -11,7 +10,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
-import { CopyToClipboard } from "../copy-to-clipboard";
+import { ApiKeyValue } from ".";
 
 export type ApiSingleKeyProps = {
   keyType: SubscriptionKeyTypeEnum;
@@ -50,14 +49,7 @@ export const ApiSingleKey = ({
             </IconButton>
           </Typography>
         </Box>
-        <Box paddingY={1} paddingX={1.5} bgcolor="background.default">
-          <Stack direction="row" alignItems={"center"} spacing={0.5}>
-            <Typography variant="monospaced" noWrap>
-              {keyValue ? (isVisible ? keyValue : obscure(keyValue)) : null}
-            </Typography>
-            {keyValue ? <CopyToClipboard text={keyValue} /> : null}
-          </Stack>
-        </Box>
+        <ApiKeyValue keyValue={keyValue} isVisible={isVisible} />
       </Grid>
       <Grid
         item
