@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "yarn generate && next build",
+    "build:package": "zip -r -q ${npm_package_name}-${npm_package_version}.zip .next node_modules package.json public next-i18next.config.js next.config.js .env*",
+    "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint",
     "test": "yarn test:b4f & yarn test:fe",
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
