@@ -89,7 +89,7 @@ resource "random_password" "bo_auth_session_secret" {
 }
 
 resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
-  name            = "pgres-flex-admin-pwd"
+  name            = "bo-auth-session-secret"
   key_vault_id    = module.key_vault_domain.id
   value           = random_password.bo_auth_session_secret[var.bo_auth_session_secret_rotation_id].result
   content_type    = "string"
