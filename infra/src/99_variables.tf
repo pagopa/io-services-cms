@@ -305,11 +305,12 @@ variable "userid_automatic_service_approval_inclusion_list" {
 variable "backoffice_app" {
   type = object({
     sku_name = string
-    app_settings = list(object({
-      name                  = string
-      value                 = optional(string, "")
-      key_vault_secret_name = optional(string)
-    }))
   })
   description = "Configuration of the io-services-cms-backoffice service"
+}
+
+variable "bo_auth_session_secret_rotation_id" {
+  type        = string
+  default     = "1695908210722"
+  description = "You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp)"
 }
