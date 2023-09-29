@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.5.1
+
+### Patch Changes
+
+- 94eec1c: Moving Apim Client in the new External-Clients package
+
 ## 0.5.0
 
 ### Minor Changes

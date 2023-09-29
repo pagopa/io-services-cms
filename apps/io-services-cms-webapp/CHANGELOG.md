@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.21.0
+
+### Minor Changes
+
+- 94eec1c: Moving Apim Client in the new External-Clients package
+
+### Patch Changes
+
+- 1572c54: Update openapi-codegen-ts to version ^13.1.0 in io-services-cms-webapp
+- Updated dependencies [94eec1c]
+  - @io-services-cms/external-clients@1.0.0
+
 ## 1.20.9
 
 ### Patch Changes
