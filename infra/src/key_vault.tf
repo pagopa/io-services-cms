@@ -93,5 +93,5 @@ resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
   key_vault_id    = module.key_vault_domain.id
   value           = random_password.bo_auth_session_secret[var.bo_auth_session_secret_rotation_id].result
   content_type    = "string"
-  expiration_date = timeadd(formatdate("YYYY-MM-DD'T'HH:mm:ssZ", timestamp()), "43800h") # expires 5 yers after creation
+  expiration_date = "2028-09-27T07:41:36Z"
 }

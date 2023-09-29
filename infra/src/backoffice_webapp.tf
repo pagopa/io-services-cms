@@ -1,4 +1,6 @@
 locals {
+  backoffice_node_version      = "18-lts"
+  backoffice_health_check_path = "/api/info"
   backoffice_app_settings = merge({
     NODE_ENV = "production"
     # Apim connection
@@ -25,9 +27,37 @@ module "backoffice_app" {
   plan_name = format("%s-%s-backoffice-plan", local.project, local.application_basename)
   sku_name  = var.backoffice_app.sku_name
 
-  node_version = "18-lts"
+  node_version = local.backoffice_node_version
 
-  health_check_path = "/api/info"
+  health_check_path = local.backoffice_health_check_path
+
+  app_settings = local.backoffice_app_settings
+
+  always_on        = true
+  vnet_integration = true
+
+  subnet_id = module.backoffice_app_snet.id
+
+  allowed_subnets = [
+    data.azurerm_subnet.appgateway_snet.id,
+  ]
+
+  tags = var.tags
+}
+
+module "backoffice_app_staging" {
+  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//app_service_slot?ref=v6.20.2"
+
+  name                = "staging"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  app_service_id   = module.backoffice_app.id
+  app_service_name = module.backoffice_app.name
+
+  node_version = local.backoffice_node_version
+
+  health_check_path = local.backoffice_health_check_path
 
   app_settings = local.backoffice_app_settings
 
