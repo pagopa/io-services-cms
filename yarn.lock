@@ -1416,6 +1416,7 @@ __metadata:
     "@azure/identity": ^3.1.4
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/openapi-codegen-ts": ^13.1.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^0.34.1
@@ -7322,7 +7323,6 @@ __metadata:
   resolution: "io-services-cms@workspace:."
   dependencies:
     "@changesets/cli": ^2.25.2
-    "@pagopa/openapi-codegen-ts": ^13.0.0
     turbo: ^1.6.3
   languageName: unknown
   linkType: soft
