@@ -9,7 +9,7 @@ locals {
     # Logs
     APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
     # NextAuthJS
-    NEXTAUTH_URL    = data.azurerm_api_management_product.apim_product_services.product_id
+    NEXTAUTH_URL    = "https://selfcare.io.pagopa.it/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
   })
 }
