@@ -48,7 +48,7 @@ export default function TokenExchange() {
 
 export async function getStaticProps({ locale }: any) {
   // ! return a not found error in prod environemnt
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
   return {
