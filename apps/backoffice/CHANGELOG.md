@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 0.5.0
+
+### Minor Changes
+
+- f6ce3bc: Add manage key card on Overview, update API Key Page
+- 86761c0: BackOffice API Key section
+
+### Patch Changes
+
+- 5a38795: use APP_ENV instead of NODE_ENV to show/hide some test pages
+
 ## 0.4.0
 
 ### Minor Changes
