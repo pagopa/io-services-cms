@@ -72,7 +72,7 @@ export const ApiKeys = (props: ApiKeysProps) => {
       </Box>
       {props.showAuthorizedCidrs ? (
         <AuthorizedCidrs
-          cidrs={props.cidrs ?? []}
+          cidrs={props.cidrs}
           onSaveClick={props.onUpdateCidrs}
         ></AuthorizedCidrs>
       ) : null}

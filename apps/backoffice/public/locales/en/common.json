@@ -77,7 +77,8 @@
       "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
       "manage": {
         "title": "API Key Manage",
-        "description": "Use this key for programmatic operations of creating a new service or updating an existing one."
+        "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
+        "shortcut": "Manage API keys"
       }
     },
     "users": {

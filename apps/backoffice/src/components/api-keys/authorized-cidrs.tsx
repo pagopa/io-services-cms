@@ -5,10 +5,11 @@ import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { TextFieldArrayController } from "../forms/controllers";
+import { LoaderSkeleton } from "../loaders";
 
 export type AuthorizedCidrsProps = {
   /** List of IPs in CIDR format */
-  cidrs: string[];
+  cidrs?: string[];
   /** Event triggered when user click on **Save** button */
   onSaveClick?: (cidrs: string[]) => void;
 };
@@ -29,7 +30,7 @@ export const AuthorizedCidrs = ({
 
   const handleSave = () => {
     if (onSaveClick) {
-      onSaveClick(getValues().cidrs);
+      onSaveClick(getValues().cidrs ?? []);
       reset({ cidrs: getValues().cidrs });
     }
   };
@@ -54,30 +55,32 @@ export const AuthorizedCidrs = ({
       <Typography variant="body2" marginTop={1} marginBottom={3}>
         {t("authorizedCidrs.description")}
       </Typography>
-      <FormProvider {...formMethods}>
-        <Box marginTop={3} component="form" autoComplete="off">
-          <TextFieldArrayController
-            name="cidrs"
-            addButtonLabel={t("authorizedCidrs.add")}
-            addDefaultValue=""
-            size="small"
-            variant="filled"
-            inputProps={{
-              style: {
-                textAlign: "center"
-              }
-            }}
-            sx={{ maxWidth: "185px" }}
-            editable
-            readOnly
-            addSaveButton={formState.isDirty && formState.isValid}
-            onSaveClick={handleSave}
-            addCancelButton={formState.isDirty}
-            onCancelClick={handleCancel}
-            showGenericErrorMessage
-          />
-        </Box>
-      </FormProvider>
+      <LoaderSkeleton loading={cidrs === undefined} style={{ width: "50%" }}>
+        <FormProvider {...formMethods}>
+          <Box marginTop={3} component="form" autoComplete="off">
+            <TextFieldArrayController
+              name="cidrs"
+              addButtonLabel={t("authorizedCidrs.add")}
+              addDefaultValue=""
+              size="small"
+              variant="filled"
+              inputProps={{
+                style: {
+                  textAlign: "center"
+                }
+              }}
+              sx={{ maxWidth: "185px" }}
+              editable
+              readOnly
+              addSaveButton={formState.isDirty && formState.isValid}
+              onSaveClick={handleSave}
+              addCancelButton={formState.isDirty}
+              onCancelClick={handleCancel}
+              showGenericErrorMessage
+            />
+          </Box>
+        </FormProvider>
+      </LoaderSkeleton>
     </Box>
   );
 };
