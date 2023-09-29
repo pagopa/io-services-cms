@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Container } from "@azure/cosmos";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceLifecycle,
   ServicePublication,
@@ -23,16 +23,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
 
-vi.mock("../../lib/clients/apim-client", async () => {
-  const anApimResource = { id: "any-id", name: "any-name" };
-
-  return {
-    getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-    getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
-    upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
-  };
-});
-
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
@@ -46,17 +36,19 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
+const anApimResource = { id: "any-id", name: "any-name" };
 
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId,
+    })
+  ),
+  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {} as unknown as IConfig;
 
@@ -134,7 +126,7 @@ describe("publishService", () => {
 
   const app = createWebServer({
     basePath: "api",
-    apimClient: mockApimClient,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
@@ -231,7 +223,7 @@ describe("publishService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
 
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 });

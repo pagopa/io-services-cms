@@ -26,6 +26,7 @@
       ],
       "outputs": [],
       "dependsOn": [
+        "generate",
         "^build"
       ]
     },
@@ -36,6 +37,7 @@
       ],
       "outputs": [],
       "dependsOn": [
+        "generate",
         "^build"
       ]
     },
@@ -47,6 +49,7 @@
       "outputs": [],
       "outputMode": "errors-only",
       "dependsOn": [
+        "generate",
         "^build"
       ]
     },

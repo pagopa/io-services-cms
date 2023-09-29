@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Container } from "@azure/cosmos";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   RetrievedSubscriptionCIDRs,
@@ -73,16 +73,13 @@ const aServiceList = [
   aServiceLifecycle3,
 ];
 
-// Apim client mock *******************************
-vi.mock("../../../lib/clients/apim-client", async () => {
-  return {
-    getUserByEmail: vi.fn((_) => TE.right(O.some(anApimUserResource))),
-    getUserSubscriptions: vi.fn((_) => TE.right(aSubscriptionCollection)),
-    parseOwnerIdFullPath: vi.fn((_) => "a-user-id"),
-  };
-});
+// Apim service mock *******************************
+const mockApimService = {
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimUserResource))),
+  getUserSubscriptions: vi.fn((_) => TE.right(aSubscriptionCollection)),
+  parseOwnerIdFullPath: vi.fn((_) => "a-user-id"),
+} as unknown as ApimUtils.ApimService;
 
-const mockApimClient = {} as unknown as ApiManagementClient;
 const mockConfig = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 100,
@@ -155,7 +152,7 @@ const mockContext = {
 describe("getServices", () => {
   const app = createWebServer({
     basePath: "api",
-    apimClient: mockApimClient,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient: mockFsmLifecycleClient,
     fsmPublicationClient: mockFsmPublicationClient,

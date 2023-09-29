@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -11,7 +11,6 @@ import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { CreateJiraIssueResponse } from "../lib/clients/jira-client";
-import { ApimProxy } from "../utils/apim-proxy";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
@@ -26,13 +25,13 @@ const parseIncomingMessage = (
   );
 
 const createJiraTicket =
-  (apimProxy: ApimProxy, jiraProxy: JiraProxy) =>
+  (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
   (
     service: Queue.RequestReviewItem
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     pipe(
       service.id,
-      apimProxy.getDelegateFromServiceId,
+      apimService.getDelegateFromServiceId,
       TE.mapLeft(E.toError),
       TE.chain((delegate) =>
         pipe(
@@ -68,7 +67,11 @@ const approveService =
     );
 
 const sendServiceToReview =
-  (dao: ServiceReviewDao, jiraProxy: JiraProxy, apimProxy: ApimProxy) =>
+  (
+    dao: ServiceReviewDao,
+    jiraProxy: JiraProxy,
+    apimService: ApimUtils.ApimService
+  ) =>
   (service: Queue.RequestReviewItem): TE.TaskEither<Error, void> =>
     pipe(
       service.id,
@@ -76,7 +79,7 @@ const sendServiceToReview =
       TE.chain(
         flow(
           O.fold(
-            () => createJiraTicket(apimProxy, jiraProxy)(service),
+            () => createJiraTicket(apimService, jiraProxy)(service),
             TE.right
           )
         )
@@ -88,9 +91,8 @@ const sendServiceToReview =
 export const createRequestReviewHandler = (
   dao: ServiceReviewDao,
   jiraProxy: JiraProxy,
-  apimProxy: ApimProxy,
+  apimService: ApimUtils.ApimService,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
-  apimClient: ApiManagementClient,
   config: IConfig
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((_context, queueItem) =>
@@ -100,10 +102,10 @@ export const createRequestReviewHandler = (
       TE.fromEither,
       TE.chain((service) =>
         pipe(
-          isUserAllowedForAutomaticApproval(config, apimClient, service.id),
+          isUserAllowedForAutomaticApproval(config, apimService, service.id),
           TE.chain(
             B.fold(
-              () => sendServiceToReview(dao, jiraProxy, apimProxy)(service),
+              () => sendServiceToReview(dao, jiraProxy, apimService)(service),
               () => approveService(fsmLifecycleClient)(service)
             )
           )

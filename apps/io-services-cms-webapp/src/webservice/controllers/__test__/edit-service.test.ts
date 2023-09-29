@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Container } from "@azure/cosmos";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceLifecycle,
   ServicePublication,
@@ -16,6 +16,7 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
@@ -35,16 +36,14 @@ const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
 
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId: anUserId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {} as unknown as IConfig;
 
@@ -101,7 +100,7 @@ describe("editService", () => {
 
   const app = createWebServer({
     basePath: "api",
-    apimClient: mockApimClient,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
@@ -248,7 +247,7 @@ describe("editService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
 
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 

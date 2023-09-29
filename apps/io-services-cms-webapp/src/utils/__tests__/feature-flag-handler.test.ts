@@ -1,23 +1,23 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { describe, expect, it, vi } from "vitest";
-import { isUserEnabledForCmsToLegacySync } from "../feature-flag-handler";
-import { IConfig } from "../../config";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
+import { isUserEnabledForCmsToLegacySync } from "../feature-flag-handler";
 
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
 const aServiceId = "aServiceId" as NonEmptyString;
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
 
 describe("FeatureFlagHandlerTest", () => {
   it.each`
@@ -34,7 +34,7 @@ describe("FeatureFlagHandlerTest", () => {
 
       const result = await isUserEnabledForCmsToLegacySync(
         mockConfig,
-        mockApimClient,
+        mockApimService,
         aServiceId
       )();
 
@@ -49,20 +49,17 @@ describe("FeatureFlagHandlerTest", () => {
       USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: [anUserId],
     } as unknown as IConfig;
 
-    const errorMockApimClient = {
-      subscription: {
-        get: vi.fn(() =>
-          Promise.reject({
-            _etag: "_etag",
-            status: 500,
-          })
-        ),
-      },
-    } as unknown as ApiManagementClient;
+    const errorMockApimService = {
+      getSubscription: vi.fn(() =>
+        TE.left({
+          statusCode: 500,
+        })
+      ),
+    } as unknown as ApimUtils.ApimService;
 
     const result = await isUserEnabledForCmsToLegacySync(
       mockConfig,
-      errorMockApimClient,
+      errorMockApimService,
       aServiceId
     )();
 

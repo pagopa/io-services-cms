@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
@@ -15,12 +15,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { IConfig } from "../config";
-import {
-  getSubscription,
-  parseOwnerIdFullPath,
-} from "../lib/clients/apim-client";
-import { MANAGE_APIKEY_PREFIX } from "./api-keys";
 
 type ErrorResponses =
   | IResponseErrorNotFound
@@ -29,7 +23,7 @@ type ErrorResponses =
   | IResponseErrorTooManyRequests;
 
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
-  ownerSubscriptionId.startsWith(MANAGE_APIKEY_PREFIX);
+  ownerSubscriptionId.startsWith(ApimUtils.definitions.MANAGE_APIKEY_PREFIX);
 
 const extractOwnerId = (
   fullPath?: string
@@ -39,7 +33,7 @@ const extractOwnerId = (
     O.fromNullable,
     O.foldW(
       () => E.left(ResponseErrorNotFound("Not found", "ownerId not found")),
-      (f) => E.right(pipe(f as NonEmptyString, parseOwnerIdFullPath))
+      (f) => E.right(pipe(f as NonEmptyString, ApimUtils.parseOwnerIdFullPath))
     )
   );
 
@@ -58,8 +52,7 @@ const extractOwnerId = (
  * @returns
  */
 export const serviceOwnerCheckManageTask = (
-  config: IConfig,
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString,
   ownerSubscriptionId: NonEmptyString,
   userId: NonEmptyString
@@ -69,12 +62,8 @@ export const serviceOwnerCheckManageTask = (
     TE.fromPredicate(isManageKey, () => ResponseErrorForbiddenNotAuthorized),
     TE.chainW(() =>
       pipe(
-        getSubscription(
-          apimClient,
-          config.AZURE_APIM_RESOURCE_GROUP,
-          config.AZURE_APIM,
-          serviceId
-        ),
+        serviceId,
+        apimService.getSubscription,
         TE.mapLeft(() =>
           ResponseErrorInternal(
             `An error has occurred while retrieving service '${serviceId}'`
