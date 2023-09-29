@@ -1,16 +1,18 @@
 import { ArrowForward } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
+import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { ReactNode } from "react";
-import { useTranslation } from "next-i18next";
+import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
+import { LoaderSkeleton } from "../loaders";
 
 export type CardDetailsRowType = {
   /** row label, shown on left */
   label: string;
   /** row value, shown on right */
-  value: string;
+  value?: string;
   /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis.
    * _(This is the default behaviour)_ */
   noWrap?: boolean;
@@ -20,7 +22,7 @@ export type CardDetailsRowType = {
   kind?: CardDetailsRowValueType;
 };
 
-export type CardDetailsRowValueType = "link" | "markdown";
+export type CardDetailsRowValueType = "apikey" | "link" | "markdown";
 
 export type CardDetailsProps = {
   /** Card title */
@@ -28,7 +30,7 @@ export type CardDetailsProps = {
   /** Array of label/value rows displayed as a list */
   rows: CardDetailsRowType[];
   /** If defined, render a custom card body content */
-  body?: ReactNode;
+  customContent?: ReactNode;
   /** Call to action link placed in card footer */
   cta?: {
     label: string;
@@ -40,22 +42,59 @@ export type CardDetailsProps = {
 /**
  * Card used to show detailed general-purpose information.
  */
-export const CardDetails = ({ title, rows, body, cta }: CardDetailsProps) => {
+export const CardDetails = ({
+  title,
+  rows,
+  customContent,
+  cta
+}: CardDetailsProps) => {
   const { t } = useTranslation();
 
-  const renderValue = (value: string, kind?: CardDetailsRowValueType) => {
-    switch (kind) {
+  const renderValue = (value: string | undefined, children: ReactNode) => (
+    <LoaderSkeleton loading={value === undefined} style={{ width: "100%" }}>
+      {children}
+    </LoaderSkeleton>
+  );
+
+  /** render row value based on `kind` first and other additional settings _(noWrap)_ */
+  const renderRowKind = (row: CardDetailsRowType) => {
+    switch (row.kind) {
+      case "apikey":
+        return <ApiKeyValue isVisible={false} keyValue={row.value} />;
       case "link":
-        return (
-          <NextLink href={value} target="_blank" rel="noreferrer">
-            {value}
+        return renderValue(
+          row.value,
+          <NextLink href={row.value ?? "/"} target="_blank" rel="noreferrer">
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              noWrap={row.noWrap ?? true}
+              color={"primary"}
+            >
+              {row.value ?? "-"}
+            </Typography>
           </NextLink>
         );
       case "markdown":
         // todo: to be implemented
-        return <span>{value}</span>;
+        return <span>{row.value}</span>;
       default:
-        return value;
+        return renderValue(
+          row.value,
+          <>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              noWrap={row.noWrap ?? true}
+              color={"text"}
+            >
+              {row.value}
+            </Typography>
+            {row.copyableValue ? (
+              <CopyToClipboard text={row.value ?? ""} />
+            ) : null}
+          </>
+        );
     }
   };
 
@@ -67,9 +106,9 @@ export const CardDetails = ({ title, rows, body, cta }: CardDetailsProps) => {
       borderRadius={0.5}
     >
       <Typography id="card-title" variant="overline">
-        {title}
+        {t(title)}
       </Typography>
-      {body ?? null}
+      {customContent ?? null}
       <Box marginTop={rows.length > 0 ? 4 : 0} id="body-rows">
         {rows.map((row, index) => (
           <Grid
@@ -78,6 +117,7 @@ export const CardDetails = ({ title, rows, body, cta }: CardDetailsProps) => {
             spacing={0}
             columnSpacing={2}
             marginTop={2}
+            alignItems="center"
           >
             <Grid item xs={4}>
               <Typography variant="body2" noWrap>
@@ -85,18 +125,8 @@ export const CardDetails = ({ title, rows, body, cta }: CardDetailsProps) => {
               </Typography>
             </Grid>
             <Grid item xs={8}>
-              <Stack direction="row" alignItems={"center"} spacing={0.5}>
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  noWrap={row.noWrap ?? true}
-                  color={row.kind === "link" ? "primary" : "text"}
-                >
-                  {renderValue(row.value, row.kind)}
-                </Typography>
-                {row.copyableValue ? (
-                  <CopyToClipboard text={row.value} />
-                ) : null}
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                {renderRowKind(row)}
               </Stack>
             </Grid>
           </Grid>

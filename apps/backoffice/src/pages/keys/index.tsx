@@ -15,21 +15,15 @@ const pageDescriptionLocaleKey = "routes.keys.description";
 
 export default function Keys() {
   const { t } = useTranslation();
-
-  const { data: manageKey, fetchData: fetchManageKey } = useFetch<
-    SubscriptionKeys
-  >();
-
-  const { data: authCidrs, fetchData: fetchAuthCidrs } = useFetch<
-    ManageKeyCIDRs
-  >();
+  const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
+  const { data: acData, fetchData: acFetchData } = useFetch<ManageKeyCIDRs>();
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
-    fetchManageKey("regenerateManageKey", { keyType }, SubscriptionKeys);
+    mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys);
   };
 
   const handleUpdateCidrs = (cidrs: string[]) => {
-    fetchAuthCidrs(
+    acFetchData(
       "updateManageKeysAuthorizedCidrs",
       { body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) } },
       ManageKeyCIDRs
@@ -37,8 +31,8 @@ export default function Keys() {
   };
 
   useEffect(() => {
-    fetchManageKey("getManageKeys", {}, SubscriptionKeys);
-    fetchAuthCidrs("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs);
+    mkFetchData("getManageKeys", {}, SubscriptionKeys);
+    acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -51,10 +45,10 @@ export default function Keys() {
       <ApiKeys
         title={t("routes.keys.manage.title")}
         description={t("routes.keys.manage.description")}
-        keys={manageKey}
+        keys={mkData}
         onRotateKey={handleRotateKey}
         showAuthorizedCidrs
-        cidrs={authCidrs ? ((authCidrs.cidrs as unknown) as string[]) : []}
+        cidrs={(acData?.cidrs as unknown) as string[]}
         onUpdateCidrs={handleUpdateCidrs}
       />
     </>
