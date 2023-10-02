@@ -2,6 +2,7 @@ import { getConfiguration } from "@/config";
 import { ProtectedLayout } from "@/layouts/protected-layout";
 import { AppProvider } from "@/providers/app";
 import "@/styles/globals.css";
+import { RequiredAuthorizations } from "@/types/auth";
 import { NextPage } from "next";
 import { SessionProvider } from "next-auth/react";
 import { appWithTranslation } from "next-i18next";
@@ -19,17 +20,19 @@ type NextPageWithLayout = NextPage & {
 };
 
 /**
- * Used to define public or protected pages.
+ * Used to define public/protected pages, and more granular authorizations with `RequiredAuthorizations`.
+ * - Pages are protected by default.
  *
- * Pages are protected by default.
+ * To define 'requiredAuthorizations' for a page _(route)_:
+ * - `Page.requiredRole = "rolename"` -> to specify a required access role
+ * - `Page.requiredPermissions = ["p1", "p2", ...]` -> to specify one or more access permissions
  *
- * To define a public page _(route)_:
- *
- * `Page.publicRoute = true`
+ * To define a public page _(route)_: `Page.publicRoute = true`
+ * - `publicRoute` overwrite `requiredRole` and `requiredPermissions`.
  */
 type NextPageWithAuth = NextPage & {
   publicRoute?: boolean;
-};
+} & RequiredAuthorizations;
 
 type AppPropsWithAuthAndLayout = AppProps & {
   Component: NextPageWithAuth & NextPageWithLayout;
@@ -44,7 +47,10 @@ const App = ({ Component, pageProps }: AppPropsWithAuthAndLayout) => {
       {Component.publicRoute ? (
         <AppProvider>{pageContent}</AppProvider>
       ) : (
-        <ProtectedLayout>
+        <ProtectedLayout
+          requiredPermissions={Component.requiredPermissions}
+          requiredRole={Component.requiredRole}
+        >
           <AppProvider>{pageContent}</AppProvider>
         </ProtectedLayout>
       )}
