@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -33,7 +33,6 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
@@ -45,9 +44,8 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 const logPrefix = "DeleteServiceHandler";
 
 type Dependencies = {
-  config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -63,16 +61,14 @@ type DeleteServiceHandler = (
 
 export const makeDeleteServiceHandler =
   ({
-    config,
     fsmLifecycleClient: fsmLifecycleClient,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): DeleteServiceHandler =>
   (context, auth, _, __, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

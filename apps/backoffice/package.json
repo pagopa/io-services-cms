@@ -1,11 +1,12 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "0.3.0",
+  "version": "0.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "yarn generate && next build",
+    "build:package": "zip -r -q ${npm_package_name}-${npm_package_version}.zip .next node_modules package.json public next-i18next.config.js next.config.js .env*",
+    "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint",
     "test": "yarn test:b4f & yarn test:fe",
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@hookform/resolvers": "^3.3.1",
     "@mui/icons-material": "^5.14.3",
     "@mui/lab": "^5.0.0-alpha.142",
     "@mui/material": "^5.14.5",
@@ -38,6 +40,7 @@
     "next-i18next": "^14.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.46.2",
     "react-i18next": "^13.1.2"
   },
   "devDependencies": {

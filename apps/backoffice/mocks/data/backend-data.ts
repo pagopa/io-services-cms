@@ -1,5 +1,7 @@
 import { faker } from "@faker-js/faker/locale/it";
 import packageJson from "../../package.json";
+import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
+import { Cidr } from "@/generated/api/Cidr";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -80,9 +82,23 @@ export const aMockServicePublication = {
   version: faker.string.uuid()
 };
 
-export const aMockServiceKeys = {
+export const getMockServiceKeys = () => ({
   primary_key: faker.string.alphanumeric(32),
   secondary_key: faker.string.alphanumeric(32)
+});
+
+export const aMockManageKeysCIDRs: ManageKeyCIDRs = {
+  cidrs: [
+    ...Array.from(
+      Array(faker.number.int({ min: 1, max: 5 })).keys()
+    )
+  ].map(
+    _ =>
+      `${faker.internet.ipv4()}/${faker.helpers.rangeToNumber({
+        min: 0,
+        max: 32
+      })}` as Cidr
+  )
 };
 
 const getMockServicePagination = (limit?: number, offset?: number) => {

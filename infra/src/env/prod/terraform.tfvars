@@ -80,18 +80,4 @@ userid_automatic_service_approval_inclusion_list = ""
 # Backoffice Configurations
 backoffice_app = {
   sku_name = "S1" # FIXME: use "P1v3" before "production launch"
-  app_settings = [
-    {
-      name  = "NODE_ENV",
-      value = "production"
-    },
-    {
-      name  = "WEBSITES_PORT",
-      value = "3000"
-    },
-    {
-      name                  = "AUTH_SESSION_SECRET",
-      key_vault_secret_name = "bo-auth-session-secret"
-    }
-  ]
 }

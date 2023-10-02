@@ -5,6 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
@@ -101,15 +102,6 @@ export const CosmosLegacyConfig = t.type({
   LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION: NumberFromString,
 });
 
-export const AzureClientSecretCredential = t.type({
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-});
-export type AzureClientSecretCredential = t.TypeOf<
-  typeof AzureClientSecretCredential
->;
-
 // Apim configuration
 export const ApimConfig = t.type({
   AZURE_APIM: NonEmptyString,
@@ -200,7 +192,7 @@ export const IConfig = t.intersection([
   ]),
   t.intersection([
     CosmosConfig,
-    AzureClientSecretCredential,
+    ApimUtils.definitions.AzureClientSecretCredential,
     ApimConfig,
     QueueConfig,
     ServiceIdQualityCheckExclusionList,

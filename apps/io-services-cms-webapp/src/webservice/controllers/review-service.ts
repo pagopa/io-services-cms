@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -34,7 +34,6 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
@@ -43,9 +42,8 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 const logPrefix = "ReviewServiceHandler";
 
 type Dependencies = {
-  config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -62,16 +60,14 @@ type ReviewServiceHandler = (
 
 export const makeReviewServiceHandler =
   ({
-    config,
     fsmLifecycleClient: fsmLifecycleClient,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): ReviewServiceHandler =>
   (context, auth, __, ___, serviceId, body) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

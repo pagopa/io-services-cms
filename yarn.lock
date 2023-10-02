@@ -1363,6 +1363,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@hookform/resolvers@npm:3.3.1"
+  peerDependencies:
+    react-hook-form: ^7.0.0
+  checksum: 1ddc250a8d6769fb11b03110b586677b03463276dda1cdfd0225ab94f46d422868f74b01bef85f785010cc3d836f0669d6b6c0ed752cae532d2badf3537b1e72
+  languageName: node
+  linkType: hard
+
 "@humanwhocodes/config-array@npm:^0.11.10":
   version: 0.11.10
   resolution: "@humanwhocodes/config-array@npm:0.11.10"
@@ -1398,6 +1407,30 @@ __metadata:
   checksum: a824a1ec31591231e4bad5787641f59e9633827d0a2eaae131a288d33c9ef0290bd16fda8da6f7c0fcb014147865d12118df10db57f27f41e20da92369fcb3f1
   languageName: node
   linkType: hard
+
+"@io-services-cms/external-clients@workspace:^, @io-services-cms/external-clients@workspace:packages/external-clients":
+  version: 0.0.0-use.local
+  resolution: "@io-services-cms/external-clients@workspace:packages/external-clients"
+  dependencies:
+    "@azure/arm-apimanagement": 8.1.2
+    "@azure/identity": ^3.1.4
+    "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/openapi-codegen-ts": ^13.1.0
+    "@pagopa/ts-commons": ^11.0.0
+    "@rushstack/eslint-patch": ^1.2.0
+    "@vitest/coverage-v8": ^0.34.1
+    eslint: ^8.38.0
+    fp-ts: ^2.13.1
+    io-ts: ^2.2.20
+    io-ts-types: ^0.5.19
+    monocle-ts: ^2.3.13
+    newtype-ts: ^0.3.5
+    prettier: ^2.8.7
+    typescript: ^5.0.4
+    vitest: ^0.34.1
+  languageName: unknown
+  linkType: soft
 
 "@io-services-cms/models@workspace:^, @io-services-cms/models@workspace:packages/io-services-cms-models":
   version: 0.0.0-use.local
@@ -2101,27 +2134,6 @@ __metadata:
     react: ^18.2.0
     react-dom: ^18.2.0
   checksum: 7327fc59fb81c867763c7c030da6089e289dae8bb32ee3387c8b3f34c856d66c788afd77a5ef3ccae7c8a4d50302cd7a8f0657ca992ede4134c9075931ffeb85
-  languageName: node
-  linkType: hard
-
-"@pagopa/openapi-codegen-ts@npm:^13.0.0":
-  version: 13.0.0
-  resolution: "@pagopa/openapi-codegen-ts@npm:13.0.0"
-  dependencies:
-    "@pagopa/ts-commons": ^10.15.0
-    fs-extra: ^6.0.0
-    nunjucks: ^3.2.3
-    openapi-types: ^10.0.0
-    prettier: ^1.12.1
-    safe-identifier: ^0.4.2
-    swagger-parser: ^10.0.3
-    write-yaml-file: ^4.1.3
-    yargs: ^15.0.1
-  bin:
-    bundle-api-spec: dist/commands/bundle-api-spec/cli.js
-    gen-api-models: dist/commands/gen-api-models/cli.js
-    gen-api-sdk: dist/commands/gen-api-sdk/cli.js
-  checksum: 29f3a038903aafdc9c831b5b1f9060b2c29b03475022d32424f1e8591326dcb1aff8c4e834139fbbc32fa520a7abb6cd0ebfad41b304236a6b26fb991ed10af3
   languageName: node
   linkType: hard
 
@@ -6487,9 +6499,9 @@ __metadata:
   linkType: hard
 
 "get-func-name@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "get-func-name@npm:2.0.0"
-  checksum: 8d82e69f3e7fab9e27c547945dfe5cc0c57fc0adf08ce135dddb01081d75684a03e7a0487466f478872b341d52ac763ae49e660d01ab83741f74932085f693c3
+  version: 2.0.2
+  resolution: "get-func-name@npm:2.0.2"
+  checksum: 3f62f4c23647de9d46e6f76d2b3eafe58933a9b3830c60669e4180d6c601ce1b4aa310ba8366143f55e52b139f992087a9f0647274e8745621fa2af7e0acf13b
   languageName: node
   linkType: hard
 
@@ -7208,6 +7220,7 @@ __metadata:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@faker-js/faker": ^8.0.2
+    "@hookform/resolvers": ^3.3.1
     "@mui/icons-material": ^5.14.3
     "@mui/lab": ^5.0.0-alpha.142
     "@mui/material": ^5.14.5
@@ -7234,6 +7247,7 @@ __metadata:
     next-i18next: ^14.0.0
     react: 18.2.0
     react-dom: 18.2.0
+    react-hook-form: ^7.46.2
     react-i18next: ^13.1.2
     typescript: 5.1.6
     vitest: ^0.34.1
@@ -7248,11 +7262,12 @@ __metadata:
     "@azure/cosmos": ^3.17.3
     "@azure/functions": ^3.5.1
     "@azure/identity": ^3.1.4
+    "@io-services-cms/external-clients": "workspace:^"
     "@io-services-cms/models": "workspace:^"
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/express-azure-functions": ^4.0.1
     "@pagopa/io-functions-commons": ^28.2.0
-    "@pagopa/openapi-codegen-ts": ^13.0.0
+    "@pagopa/openapi-codegen-ts": ^13.1.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
     "@types/express": ^4.17.17
@@ -10410,6 +10425,15 @@ __metadata:
   peerDependencies:
     react: ^18.2.0
   checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.46.2":
+  version: 7.46.2
+  resolution: "react-hook-form@npm:7.46.2"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18
+  checksum: 5ad2b478337fed3ab1a7bee79844d89a85485626fb1afd4acba54e28adb8f6663d37efefa9000b6ddb33f7de23b765bfac9a1d12e10c63e71463317a307134cf
   languageName: node
   linkType: hard
 

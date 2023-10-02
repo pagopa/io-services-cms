@@ -3,6 +3,7 @@ import {
   GroupContract,
   ProductContract,
   SubscriptionContract,
+  SubscriptionListSecretsResponse,
   UserContract,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
@@ -20,12 +21,22 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { AzureClientSecretCredential } from "../../config";
+
 import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
-} from "../../generated/api/SubscriptionKeyType";
-import { subscriptionsExceptManageOneApimFilter } from "../../utils/api-keys";
+} from "../generated/api/SubscriptionKeyType";
+
+import {
+  FilterCompositionEnum,
+  FilterFieldEnum,
+  FilterSupportedFunctionsEnum,
+  buildApimFilter,
+} from "./apim-filters";
+import {
+  AzureClientSecretCredential,
+  MANAGE_APIKEY_PREFIX,
+} from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -43,7 +54,7 @@ export const mapApimRestError =
           `Internal Error while retrieving ${resource} detail`
         );
 
-export const chainApimMappedError = <T>(
+const chainApimMappedError = <T>(
   te: TE.TaskEither<unknown, T>
 ): TE.TaskEither<ApimRestError, T> =>
   pipe(
@@ -81,38 +92,132 @@ export function getApimClient(
   );
 }
 
-export function getUser(
+export type ApimService = {
+  readonly getUser: (
+    userId: string
+  ) => TE.TaskEither<ApimRestError, UserGetResponse>;
+  readonly getUserByEmail: (
+    userEmail: EmailString
+  ) => TE.TaskEither<ApimRestError, O.Option<UserContract>>;
+  readonly getUserGroups: (
+    userId: string
+  ) => TE.TaskEither<ApimRestError, ReadonlyArray<GroupContract>>;
+  readonly getSubscription: (
+    serviceId: string
+  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  readonly listSecrets: (
+    serviceId: string
+  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  readonly upsertSubscription: (
+    productId: string,
+    ownerId: string,
+    subscriptionId: string
+  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  readonly getProductByName: (
+    productName: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, O.Option<ProductContract>>;
+  readonly getUserSubscriptions: (
+    userId: string,
+    offset?: number,
+    limit?: number
+  ) => TE.TaskEither<ApimRestError, ReadonlyArray<SubscriptionContract>>;
+  readonly regenerateSubscriptionKey: (
+    serviceId: string,
+    keyType: SubscriptionKeyType
+  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  readonly getDelegateFromServiceId: (
+    serviceId: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, Delegate>;
+};
+
+export const getApimService = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string
+): ApimService => ({
+  getUser: (userId) =>
+    getUser(apimClient, apimResourceGroup, apimServiceName, userId),
+  getUserByEmail: (userEmail) =>
+    getUserByEmail(apimClient, apimResourceGroup, apimServiceName, userEmail),
+  getUserGroups: (userId) =>
+    getUserGroups(apimClient, apimResourceGroup, apimServiceName, userId),
+  getSubscription: (serviceId) =>
+    getSubscription(apimClient, apimResourceGroup, apimServiceName, serviceId),
+  listSecrets: (serviceId) =>
+    listSecrets(apimClient, apimResourceGroup, apimServiceName, serviceId),
+  upsertSubscription: (productId, ownerId, subscriptionId) =>
+    upsertSubscription(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      productId,
+      ownerId,
+      subscriptionId
+    ),
+  getProductByName: (productName) =>
+    getProductByName(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      productName
+    ),
+  getUserSubscriptions: (userId, offset, limit) =>
+    getUserSubscriptions(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      userId,
+      offset,
+      limit
+    ),
+  regenerateSubscriptionKey: (serviceId, keyType) =>
+    regenerateSubscriptionKey(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      serviceId,
+      keyType
+    ),
+  getDelegateFromServiceId: (serviceId) =>
+    getDelegateFromServiceId(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      serviceId
+    ),
+});
+
+const getUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
   userId: string
-): TE.TaskEither<ApimRestError, UserGetResponse> {
-  return pipe(
+): TE.TaskEither<ApimRestError, UserGetResponse> =>
+  pipe(
     TE.tryCatch(
-      () => apimClient.user.get(apimResourceGroup, apim, userId),
+      () => apimClient.user.get(apimResourceGroup, apimServiceName, userId),
       identity
     ),
     chainApimMappedError
   );
-}
 
 /**
  * Retrieve the APIM user by its email
  *
  * @param apimClient
  * @param apimResourceGroup
- * @param apim
+ * @param apimServiceName
  * @param userEmail
  * @returns
  */
-export function getUserByEmail(
+const getUserByEmail = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   userEmail: EmailString
-): TE.TaskEither<ApimRestError, O.Option<UserContract>> {
-  return pipe(
-    apimClient.user.listByService(apimResourceGroup, apim, {
+): TE.TaskEither<ApimRestError, O.Option<UserContract>> =>
+  pipe(
+    apimClient.user.listByService(apimResourceGroup, apimServiceName, {
       filter: `email eq '${userEmail}'`,
     }),
     // the first element does the job
@@ -125,19 +230,27 @@ export function getUserByEmail(
       }, identity),
     chainApimMappedError
   );
-}
 
-export function getUserGroups(
+/**
+ * Retrieve the APIM user groups by its userId
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param userId
+ * @returns
+ */
+const getUserGroups = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   userId: string
-): TE.TaskEither<ApimRestError, ReadonlyArray<GroupContract>> {
-  return pipe(
+): TE.TaskEither<ApimRestError, ReadonlyArray<GroupContract>> =>
+  pipe(
     TE.tryCatch(async () => {
       const groupListResponse = apimClient.userGroup.list(
         apimResourceGroup,
-        apim,
+        apimServiceName,
         userId
       );
       // eslint-disable-next-line functional/immutable-data
@@ -151,32 +264,58 @@ export function getUserGroups(
     }, E.toError),
     chainApimMappedError
   );
-}
 
-export const getSubscription = (
+/**
+ * Retrieve the APIM subscription by its Id
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param serviceId
+ * @returns
+ */
+const getSubscription = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
-  serviceId: string
-) =>
-  pipe(
-    TE.tryCatch(
-      () => apimClient.subscription.get(apimResourceGroup, apim, serviceId),
-      identity
-    ),
-    chainApimMappedError
-  );
-
-export const listSecrets = (
-  apimClient: ApiManagementClient,
-  apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   serviceId: string
 ) =>
   pipe(
     TE.tryCatch(
       () =>
-        apimClient.subscription.listSecrets(apimResourceGroup, apim, serviceId),
+        apimClient.subscription.get(
+          apimResourceGroup,
+          apimServiceName,
+          serviceId
+        ),
+      identity
+    ),
+    chainApimMappedError
+  );
+
+/**
+ * Retrieve the APIM secrets for a subscription
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param serviceId
+ * @returns
+ */
+const listSecrets = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  serviceId: string
+) =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.listSecrets(
+          apimResourceGroup,
+          apimServiceName,
+          serviceId
+        ),
       identity
     ),
     chainApimMappedError
@@ -187,16 +326,16 @@ export const listSecrets = (
  *
  * @param apimClient
  * @param apimResourceGroup
- * @param apim
+ * @param apimServiceName
  * @param productId
  * @param ownerId
  * @param subscriptionId
  * @returns
  */
-export const upsertSubscription = (
+const upsertSubscription = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   productId: string,
   ownerId: string,
   subscriptionId: string
@@ -206,7 +345,7 @@ export const upsertSubscription = (
       () =>
         apimClient.subscription.createOrUpdate(
           apimResourceGroup,
-          apim,
+          apimServiceName,
           subscriptionId,
           {
             displayName: subscriptionId,
@@ -225,18 +364,18 @@ export const upsertSubscription = (
  *
  * @param apimClient
  * @param apimResourceGroup
- * @param apim
+ * @param apimServiceName
  * @param productName
  * @returns
  */
-export function getProductByName(
+const getProductByName = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   productName: NonEmptyString
-): TE.TaskEither<ApimRestError, O.Option<ProductContract>> {
-  return pipe(
-    apimClient.product.listByService(apimResourceGroup, apim, {
+): TE.TaskEither<ApimRestError, O.Option<ProductContract>> =>
+  pipe(
+    apimClient.product.listByService(apimResourceGroup, apimServiceName, {
       filter: `name eq '${productName}'`,
     }),
     // the first element does the job
@@ -249,7 +388,6 @@ export function getProductByName(
       }, identity),
     chainApimMappedError
   );
-}
 
 /**
  * Lists the collection of subscriptions for the specified `userId`
@@ -262,19 +400,19 @@ export function getProductByName(
  * @param limit Number of records to return
  * @returns
  */
-export function getUserSubscriptions(
+const getUserSubscriptions = (
   apimClient: ApiManagementClient,
   resourceGroupName: string,
-  serviceName: string,
+  apimServiceName: string,
   userId: string,
   offset?: number,
   limit?: number
-): TE.TaskEither<ApimRestError, ReadonlyArray<SubscriptionContract>> {
-  return pipe(
+): TE.TaskEither<ApimRestError, ReadonlyArray<SubscriptionContract>> =>
+  pipe(
     TE.tryCatch(async () => {
       const subscriptionListResponse = apimClient.userSubscription.list(
         resourceGroupName,
-        serviceName,
+        apimServiceName,
         userId,
         {
           filter: subscriptionsExceptManageOneApimFilter(),
@@ -308,38 +446,37 @@ export function getUserSubscriptions(
     }, E.toError),
     chainApimMappedError
   );
-}
 
 /**
  * Regenerates primary or secondary key of an existing subscription
  *
  * @param apimClient
  * @param apimResourceGroup
- * @param apim
+ * @param apimServiceName
  * @param serviceId
  * @param keyType
  * @returns updated subscription
  */
-export function regenerateSubscriptionKey(
+const regenerateSubscriptionKey = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
-  apim: string,
+  apimServiceName: string,
   serviceId: string,
   keyType: SubscriptionKeyType
-) {
-  return pipe(
+): TE.TaskEither<ApimRestError, SubscriptionListSecretsResponse> =>
+  pipe(
     TE.tryCatch(() => {
       switch (keyType) {
         case SubscriptionKeyTypeEnum.primary:
           return apimClient.subscription.regeneratePrimaryKey(
             apimResourceGroup,
-            apim,
+            apimServiceName,
             serviceId
           );
         case SubscriptionKeyTypeEnum.secondary:
           return apimClient.subscription.regenerateSecondaryKey(
             apimResourceGroup,
-            apim,
+            apimServiceName,
             serviceId
           );
         default:
@@ -351,10 +488,11 @@ export function regenerateSubscriptionKey(
     TE.chain(() =>
       // retrieve updated subscription
       TE.tryCatch(
+        // eslint-disable-next-line sonarjs/no-identical-functions
         () =>
           apimClient.subscription.listSecrets(
             apimResourceGroup,
-            apim,
+            apimServiceName,
             serviceId
           ),
         E.toError
@@ -362,7 +500,55 @@ export function regenerateSubscriptionKey(
     ),
     chainApimMappedError
   );
-}
+
+const getDelegateFromServiceId = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  serviceId: NonEmptyString
+): TE.TaskEither<ApimRestError, Delegate> =>
+  pipe(
+    getSubscription(apimClient, apimResourceGroup, apimServiceName, serviceId),
+    TE.map((subscription) =>
+      parseOwnerIdFullPath(subscription.ownerId as NonEmptyString)
+    ),
+    TE.chain((ownerId) =>
+      getUser(apimClient, apimResourceGroup, apimServiceName, ownerId)
+    ),
+    TE.chainW((user) =>
+      pipe(
+        getUserGroups(
+          apimClient,
+          apimResourceGroup,
+          apimServiceName,
+          user.name as NonEmptyString
+        ),
+        TE.map((userGroups) => ({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          permissions: userGroups.map((group) => group.name),
+        }))
+      )
+    )
+  );
+
+/**
+ * User Subscription list filtered by name not startswith 'MANAGE-'
+ *
+ * @returns API Management `$filter` property
+ */
+export const subscriptionsExceptManageOneApimFilter = () =>
+  pipe(
+    buildApimFilter({
+      composeFilter: FilterCompositionEnum.none,
+      field: FilterFieldEnum.name,
+      filterType: FilterSupportedFunctionsEnum.startswith,
+      inverse: true,
+      value: MANAGE_APIKEY_PREFIX,
+    }),
+    O.getOrElse(() => "")
+  );
 
 /*
  ** The right full path for ownerID is in this kind of format:
@@ -377,3 +563,14 @@ export const parseOwnerIdFullPath = (
     (f) => f.split("/"),
     (a) => a[a.length - 1] as NonEmptyString
   );
+
+// TODO: remove when jira-proxy.ts is moved in this package
+type Delegate = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  permissions: Array<string | undefined>;
+};
+
+export * as apim_filters from "./apim-filters";
+export * as definitions from "./definitions";

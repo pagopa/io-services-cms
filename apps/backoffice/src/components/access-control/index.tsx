@@ -1,36 +1,31 @@
+import { RequiredAuthorizations } from "@/types/auth";
+import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { useSession } from "next-auth/react";
 import { ReactNode, useState } from "react";
 
-type usefulPermissions =
-  | "apiadmin"
-  | "apilimitedmessagewrite"
-  | "apiservicewrite";
-
 export type AccessControlProps = {
-  /** permissions to match for render wrapped `children` */
-  requiredPermissions: Array<usefulPermissions> | Array<string>;
   /** Optional element to show in case of unmatched permissions.
    * If not specified, nothing will be shown in place of the wrapped `children` */
   renderNoAccess?: ReactNode;
   /** Wrapped component that need access control based on user permissions */
   children: ReactNode;
-};
+} & RequiredAuthorizations;
 
-/** Wrapper for content rendering based on user permissions match */
+/** Wrapper for content rendering based on user permissions/role match */
 export const AccessControl = ({
   requiredPermissions,
+  requiredRole,
   renderNoAccess,
   children
 }: AccessControlProps) => {
   const { data: session } = useSession();
 
-  const isArraySubset = (subset: string[], superset: string[]) =>
-    subset.every(item => superset.includes(item));
-
-  const hasRequiredPermissions = () =>
-    isArraySubset(requiredPermissions, session?.user?.permissions as string[]);
-
-  const [show] = useState(hasRequiredPermissions());
+  const [show] = useState(
+    hasRequiredAuthorizations(session, {
+      requiredPermissions,
+      requiredRole
+    })
+  );
 
   if (show) return <>{children}</>;
   if (renderNoAccess) return <>{renderNoAccess}</>;
