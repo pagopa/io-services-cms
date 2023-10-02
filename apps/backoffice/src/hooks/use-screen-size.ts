@@ -1,4 +1,4 @@
-import { useTheme } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 
 /** React Custom Hook to have updated screen dimensions as width and height _(in pixels)_ */
