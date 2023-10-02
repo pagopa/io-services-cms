@@ -1,13 +1,7 @@
 import useScreenSize from "@/hooks/use-screen-size";
-import {
-  Category,
-  ExitToAppRounded,
-  MenuOpen,
-  People,
-  SupervisedUserCircle,
-  ViewSidebar,
-  VpnKey
-} from "@mui/icons-material";
+import { RequiredAuthorizations } from "@/types/auth";
+import { hasRequiredAuthorizations } from "@/utils/auth-util";
+import { ExitToAppRounded, MenuOpen } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -19,6 +13,7 @@ import {
   Tooltip,
   useTheme
 } from "@mui/material";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -30,50 +25,19 @@ export type SidenavItem = {
   text: string;
   linkType: "internal" | "external";
   hasBottomDivider?: boolean;
-};
+} & RequiredAuthorizations;
 
 export type SidenavProps = {
+  /** Sidenav menu items */
+  items: SidenavItem[];
   /** Sidenav menu width change event */
   onWidthChange: (width: number) => void;
 };
 
-const menu: Array<SidenavItem> = [
-  {
-    href: "/",
-    icon: <ViewSidebar fontSize="inherit" />,
-    text: "routes.overview.title",
-    linkType: "internal"
-  },
-  {
-    href: "/services",
-    icon: <Category fontSize="inherit" />,
-    text: "routes.services.title",
-    linkType: "internal"
-  },
-  {
-    href: "/keys",
-    icon: <VpnKey fontSize="inherit" />,
-    text: "routes.keys.title",
-    linkType: "internal",
-    hasBottomDivider: true
-  },
-  {
-    href: "",
-    icon: <People fontSize="inherit" />,
-    text: "routes.users.title",
-    linkType: "external"
-  },
-  {
-    href: "",
-    icon: <SupervisedUserCircle fontSize="inherit" />,
-    text: "routes.groups.title",
-    linkType: "external"
-  }
-];
-
-export const Sidenav = ({ onWidthChange }: SidenavProps) => {
+export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { data: session } = useSession();
 
   const theme = useTheme();
   const screenSize = useScreenSize();
@@ -164,41 +128,48 @@ export const Sidenav = ({ onWidthChange }: SidenavProps) => {
     >
       <Box id="menu-items">
         <List component="nav" aria-label="menu-back-office">
-          {menu.map((item, index) => (
-            <Fragment key={index}>
-              <NextLink href={item.href} passHref>
-                {renderTooltipOnCollapse(
-                  t(item.text),
-                  <ListItemButton
-                    selected={
-                      router.pathname === item.href ||
-                      (item.href.length > 1 &&
-                        router.pathname.startsWith(item.href))
-                    }
-                  >
-                    <ListItemIcon
-                      sx={
-                        settings.collapse
-                          ? { marginLeft: 2, marginRight: 4 }
-                          : {}
+          {items
+            .filter(({ requiredPermissions, requiredRole }) =>
+              hasRequiredAuthorizations(session, {
+                requiredRole,
+                requiredPermissions
+              })
+            )
+            .map((item, index) => (
+              <Fragment key={index}>
+                <NextLink href={item.href} passHref>
+                  {renderTooltipOnCollapse(
+                    t(item.text),
+                    <ListItemButton
+                      selected={
+                        router.pathname === item.href ||
+                        (item.href.length > 1 &&
+                          router.pathname.startsWith(item.href))
                       }
                     >
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={settings.collapse ? "" : t(item.text)}
-                    />
-                    {item.linkType === "external" && !settings.collapse ? (
-                      <ListItemIcon>
-                        <ExitToAppRounded color="action" />
+                      <ListItemIcon
+                        sx={
+                          settings.collapse
+                            ? { marginLeft: 2, marginRight: 4 }
+                            : {}
+                        }
+                      >
+                        {item.icon}
                       </ListItemIcon>
-                    ) : null}
-                  </ListItemButton>
-                )}
-              </NextLink>
-              {item.hasBottomDivider ? <Divider /> : null}
-            </Fragment>
-          ))}
+                      <ListItemText
+                        primary={settings.collapse ? "" : t(item.text)}
+                      />
+                      {item.linkType === "external" && !settings.collapse ? (
+                        <ListItemIcon>
+                          <ExitToAppRounded color="action" />
+                        </ListItemIcon>
+                      ) : null}
+                    </ListItemButton>
+                  )}
+                </NextLink>
+                {item.hasBottomDivider ? <Divider /> : null}
+              </Fragment>
+            ))}
         </List>
       </Box>
 
