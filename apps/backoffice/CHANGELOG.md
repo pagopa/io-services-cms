@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 0.6.0
+
+### Minor Changes
+
+- 0e9a4ef: Frontend authorization level on Components, Sidenav, Page Routes
+
+### Patch Changes
+
+- a0fc08a: Update NextJs v.13.5 and other minor packages updates
+
 ## 0.5.1
 
 ### Patch Changes
