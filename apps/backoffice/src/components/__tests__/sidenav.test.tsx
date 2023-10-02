@@ -125,6 +125,6 @@ describe("[Sidenav] Component", () => {
     const elements = container.getElementsByClassName("Mui-selected");
 
     expect(elements.length).toBe(1);
-    expect(elements[0]).toHaveProperty("aria-label", mockMenuItems[1].text);
+    expect(elements[0]).toHaveAttribute("aria-label", mockMenuItems[1].text);
   });
 });
