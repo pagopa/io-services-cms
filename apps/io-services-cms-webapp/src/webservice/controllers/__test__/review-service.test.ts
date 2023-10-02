@@ -1,39 +1,29 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { Container } from "@azure/cosmos";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceLifecycle,
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
-import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
-import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { IConfig } from "../../../config";
-import { createWebServer } from "../../index";
-import { ReviewRequest } from "../../../generated/api/ReviewRequest";
-import { Container } from "@azure/cosmos";
 import {
   RetrievedSubscriptionCIDRs,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-
-vi.mock("../../lib/clients/apim-client", async () => {
-  const anApimResource = { id: "any-id", name: "any-name" };
-
-  return {
-    getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-    getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
-    upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
-  };
-});
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import request from "supertest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../../config";
+import { ReviewRequest } from "../../../generated/api/ReviewRequest";
+import { createWebServer } from "../../index";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -48,17 +38,20 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
+const anApimResource = { id: "any-id", name: "any-name" };
 
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId,
+    })
+  ),
+  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
+  regenerateSubscriptionKey: vi.fn((_) => TE.right(anApimResource)),
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {} as unknown as IConfig;
 
@@ -136,7 +129,7 @@ describe("ReviewService", () => {
 
   const app = createWebServer({
     basePath: "api",
-    apimClient: mockApimClient,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
@@ -287,7 +280,7 @@ describe("ReviewService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
 
-    expect(mockApimClient.subscription.get).not.toHaveBeenCalled();
+    expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(403);
   });
 });

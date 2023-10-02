@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -33,21 +33,19 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
-import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "UnpublishServiceHandler";
 
 type Dependencies = {
-  config: IConfig;
   fsmPublicationClient: ServicePublication.FsmClient;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -63,16 +61,14 @@ type UnPublishServiceHandler = (
 
 export const makeUnpublishServiceHandler =
   ({
-    config,
     fsmPublicationClient,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): UnPublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

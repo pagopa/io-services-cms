@@ -12,6 +12,8 @@ export const PageLayout = ({
 }: PageLayoutProps) => {
   return (
     <Box
+      display="flex"
+      flexDirection="column"
       padding={3}
       width={isFullWidth ? "100%" : "60%"}
       marginX={isFullWidth ? "" : "auto"}

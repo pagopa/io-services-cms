@@ -13,6 +13,10 @@
     {
       "path": "packages/io-services-cms-models",
       "name": "@io-services-cms/models"
+    },
+    {
+      "path": "packages/external-clients",
+      "name": "@io-services-cms/external-clients"
     }
   ],
   "settings": {

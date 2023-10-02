@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -25,6 +25,7 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -35,17 +36,15 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
-import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceLifecycleHandler";
 
@@ -62,25 +61,22 @@ type GetServiceLifecycleHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  config: IConfig;
   // A store od ServiceLifecycle objects
   store: FSMStore<ServiceLifecycle.ItemType>;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeGetServiceLifecycleHandler =
   ({
-    config,
     store,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): GetServiceLifecycleHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

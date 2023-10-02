@@ -77,7 +77,8 @@
       "description": "Qui puoi gestire le chiavi API da utilizzare per autenticare le richieste dell’ente.",
       "manage": {
         "title": "Chiave API Manage",
-        "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente."
+        "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente.",
+        "shortcut": "Gestisci chiavi API"
       }
     },
     "users": {

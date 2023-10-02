@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Container } from "@azure/cosmos";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceLifecycle,
   ServicePublication,
@@ -10,23 +10,18 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IPatternStringTag,
+  NonEmptyString,
+} from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import {
-  getProductByName,
-  getUserByEmail,
-  upsertSubscription,
-} from "../../../lib/clients/apim-client";
 import { createWebServer } from "../../index";
-import {
-  IPatternStringTag,
-  NonEmptyString,
-} from "@pagopa/ts-commons/lib/strings";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
 vi.mock("../../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -52,16 +47,18 @@ const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
 
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+const anApimResource = { id: "any-id", name: "any-name" };
+const mockApimService = {
+  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId: anUserId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
   SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
@@ -120,7 +117,7 @@ describe("createService", () => {
 
   const app = createWebServer({
     basePath: "api",
-    apimClient: mockApimClient,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
@@ -197,7 +194,10 @@ describe("createService", () => {
   });
 
   it("should fail when cannot find apim user", async () => {
-    vi.mocked(getUserByEmail).mockImplementation(() =>
+
+
+    
+    vi.mocked(mockApimService.getUserByEmail).mockImplementation(() =>
       TE.left({ statusCode: 500 })
     );
 
@@ -217,7 +217,7 @@ describe("createService", () => {
   });
 
   it("should fail when cannot find apim product", async () => {
-    vi.mocked(getProductByName).mockImplementation(() =>
+    vi.mocked(mockApimService.getProductByName).mockImplementation(() =>
       TE.left({ statusCode: 500 })
     );
 
@@ -237,7 +237,7 @@ describe("createService", () => {
   });
 
   it("should fail when cannot create subscription", async () => {
-    vi.mocked(upsertSubscription).mockImplementation(() =>
+    vi.mocked(mockApimService.upsertSubscription).mockImplementation(() =>
       TE.left({ statusCode: 500 })
     );
 

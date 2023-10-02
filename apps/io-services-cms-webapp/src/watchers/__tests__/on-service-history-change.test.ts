@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { LegacyService, ServiceHistory } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
@@ -8,6 +8,7 @@ import {
   toAuthorizedRecipients,
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
@@ -85,16 +86,15 @@ const aLegacyService = {
 
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
   USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: [anUserId],
@@ -108,7 +108,7 @@ describe("On Service History Change Handler", () => {
     ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}` } }}
     ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler(mockConfig, mockApimClient)({ item })();
+    const res = await handler(mockConfig, mockApimService)({ item })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual(expected);

@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -33,13 +33,8 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
 import { SubscriptionKeyType } from "../../generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
-import {
-  mapApimRestError,
-  regenerateSubscriptionKey,
-} from "../../lib/clients/apim-client";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
@@ -59,36 +54,27 @@ type RegenerateServiceKeysHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  config: IConfig;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeRegenerateServiceKeysHandler =
   ({
-    config,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): RegenerateServiceKeysHandler =>
   (context, auth, __, ___, serviceId, keyType) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId
       ),
       TE.chainW(() =>
         pipe(
-          regenerateSubscriptionKey(
-            apimClient,
-            config.AZURE_APIM_RESOURCE_GROUP,
-            config.AZURE_APIM,
-            serviceId,
-            keyType
-          ),
-          TE.mapLeft(mapApimRestError(serviceId)),
+          apimService.regenerateSubscriptionKey(serviceId, keyType),
+          TE.mapLeft(ApimUtils.mapApimRestError(serviceId)),
           TE.map((updatedSubscription) =>
             ResponseSuccessJson<SubscriptionKeys>({
               primary_key: updatedSubscription.primaryKey as string,

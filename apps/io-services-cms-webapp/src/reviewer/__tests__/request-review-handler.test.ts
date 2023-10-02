@@ -1,8 +1,12 @@
-import { afterEach, describe, expect, it, vi, vitest } from "vitest";
+import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
-import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
+import * as TE from "fp-ts/lib/TaskEither";
+import { DatabaseError, QueryResult } from "pg";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
 import {
   CreateJiraIssueResponse,
   JiraIssue,
@@ -10,12 +14,8 @@ import {
   SearchJiraIssuesResponse,
 } from "../../lib/clients/jira-client";
 import { Delegate } from "../../utils/jira-proxy";
+import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
-import { Context } from "@azure/functions";
-import { ServiceLifecycle } from "@io-services-cms/models";
-import { DatabaseError, QueryResult } from "pg";
-import { IConfig } from "../../config";
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -143,23 +143,19 @@ const mainMockJiraProxy = {
   }),
 };
 
-const mainMockApimProxy = {
+const anUserId = "123";
+const anOwnerId = `/an/owner/${anUserId}`;
+const mainMockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId: anOwnerId,
+    })
+  ),
   getDelegateFromServiceId: vi.fn((sid: NonEmptyString) => {
     return TE.of(aDelegate);
   }),
-};
-const anUserId = "123";
-const anOwnerId = `/an/owner/${anUserId}`;
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId: anOwnerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+} as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
   USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [],
@@ -176,9 +172,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mainMockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -188,7 +183,7 @@ describe("Service Review Handler", () => {
     expect(mainMockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mainMockApimProxy.getDelegateFromServiceId).toBeCalledWith(
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
@@ -207,9 +202,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mainMockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -219,7 +213,7 @@ describe("Service Review Handler", () => {
     expect(
       mainMockJiraProxy.getPendingJiraIssueByServiceId
     ).not.toHaveBeenCalled();
-    expect(mainMockApimProxy.getDelegateFromServiceId).not.toHaveBeenCalled();
+    expect(mainMockApimService.getDelegateFromServiceId).not.toHaveBeenCalled();
     expect(mainMockJiraProxy.createJiraIssue).not.toHaveBeenCalled();
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
 
@@ -239,9 +233,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -251,13 +244,15 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
+    expect(mainMockApimService.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
   it("should have a generic error if getPendingJiraIssueByServiceId returns an Error", async () => {
+    
+    
     const mockJiraProxy = {
       ...mainMockJiraProxy,
       getPendingJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
@@ -268,9 +263,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -284,7 +278,7 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mainMockApimProxy.getDelegateFromServiceId).not.toBeCalled();
+    expect(mainMockApimService.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
@@ -292,6 +286,7 @@ describe("Service Review Handler", () => {
 
   it("should have a generic error if getDelegateFromServiceId returns an ApimError", async () => {
     const mockApimProxy = {
+      ...mainMockApimService,
       getDelegateFromServiceId: vi.fn((sid: NonEmptyString) => {
         return TE.left({ statusCode: 400 });
       }),
@@ -302,7 +297,6 @@ describe("Service Review Handler", () => {
       mainMockJiraProxy,
       mockApimProxy,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -335,9 +329,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mainMockServiceReviewDao,
       mockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -351,7 +344,7 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mainMockApimProxy.getDelegateFromServiceId).toBeCalledWith(
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
     expect(mockJiraProxy.createJiraIssue).toBeCalledWith(aService, aDelegate);
@@ -370,9 +363,8 @@ describe("Service Review Handler", () => {
     const handler = createRequestReviewHandler(
       mockServiceReviewDao,
       mainMockJiraProxy,
-      mainMockApimProxy,
+      mainMockApimService,
       mockFsmLifecycleClient,
-      mockApimClient,
       mockConfig
     );
 
@@ -386,7 +378,7 @@ describe("Service Review Handler", () => {
     expect(mainMockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mainMockApimProxy.getDelegateFromServiceId).toBeCalledWith(
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(

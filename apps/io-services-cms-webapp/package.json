@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-webapp",
-  "version": "1.20.9",
+  "version": "1.21.0",
   "packageManager": "yarn@3.3.0",
   "files": [
     "**/function.json",
@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^3.0.0",
-    "@pagopa/openapi-codegen-ts": "^13.0.0",
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
     "@rushstack/eslint-patch": "^1.2.0",
     "@types/express": "^4.17.17",
     "@types/pg": "^8.6.6",
@@ -43,6 +43,7 @@
     "@azure/cosmos": "^3.17.3",
     "@azure/functions": "^3.5.1",
     "@azure/identity": "^3.1.4",
+    "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^28.2.0",

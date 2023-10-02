@@ -9,12 +9,14 @@ vi.mock("next-auth/react");
 const mockUseSession = useSession as Mock;
 
 let requiredPermissions = [""];
+let requiredRole: any;
 let renderNoAccess: any;
 
 /** a test `AccessControl` component */
 const getAccessControlComponent = () => (
   <AccessControl
     requiredPermissions={requiredPermissions}
+    requiredRole={requiredRole}
     renderNoAccess={renderNoAccess}
   >
     <div id="ac-test">test</div>
@@ -24,7 +26,12 @@ const getAccessControlComponent = () => (
 beforeAll(() => {
   mockUseSession.mockReturnValue({
     status: "authenticated",
-    data: { user: { permissions: ["permission1", "permission2"] } }
+    data: {
+      user: {
+        permissions: ["permission1", "permission2"],
+        institution: { role: "aRole" }
+      }
+    }
   });
 });
 
@@ -53,8 +60,30 @@ describe("[AccessControl] Component", () => {
     expect(document.getElementById("ac-test")).toBeInTheDocument();
   });
 
+  it("should render wrapped children if requiredRole match session role", () => {
+    requiredRole = "aRole";
+    render(getAccessControlComponent());
+
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
+  });
+
+  it("should render wrapped children if requiredPermissions and requiredRole are both matched in session", () => {
+    requiredPermissions = ["permission1"];
+    requiredRole = "aRole";
+    render(getAccessControlComponent());
+
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
+  });
+
   it("should NOT render wrapped children if requiredPermissions don't match session.user permissions", () => {
     requiredPermissions = ["anunmatchedpermission"];
+    render(getAccessControlComponent());
+
+    expect(document.getElementById("ac-test")).not.toBeInTheDocument();
+  });
+
+  it("should NOT render wrapped children if requiredRole don't match session role", () => {
+    requiredRole = ["anunmatchedrole"];
     render(getAccessControlComponent());
 
     expect(document.getElementById("ac-test")).not.toBeInTheDocument();

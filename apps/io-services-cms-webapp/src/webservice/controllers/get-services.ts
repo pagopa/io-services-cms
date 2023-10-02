@@ -1,8 +1,6 @@
-import {
-  ApiManagementClient,
-  SubscriptionContract,
-} from "@azure/arm-apimanagement";
+import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -51,18 +49,13 @@ import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePagination } from "../../generated/api/ServicePagination";
-import {
-  getUserByEmail,
-  getUserSubscriptions,
-  parseOwnerIdFullPath,
-} from "../../lib/clients/apim-client";
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
-import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 
 const logPrefix = "GetServicesHandler";
 
@@ -84,7 +77,7 @@ type Dependencies = {
   // An instance of ServiceLifecycle client
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   // The app configuration
   config: IConfig;
   telemetryClient: ReturnType<typeof initAppInsights>;
@@ -103,22 +96,16 @@ const pickId = (obj: unknown): E.Either<Error, NonEmptyString> =>
     E.bimap(
       (err) =>
         new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-      ({ id }) => parseOwnerIdFullPath(id)
+      ({ id }) => ApimUtils.parseOwnerIdFullPath(id)
     )
   );
 
 const getUserIdTask = (
-  apimClient: ApiManagementClient,
-  userEmail: EmailString,
-  config: IConfig
+  apimService: ApimUtils.ApimService,
+  userEmail: EmailString
 ) =>
   pipe(
-    getUserByEmail(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM,
-      userEmail
-    ),
+    apimService.getUserByEmail(userEmail),
     TE.mapLeft(
       (err) =>
         new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
@@ -201,19 +188,16 @@ export const buildServiceSubscriptionPairs = (
 export const makeGetServicesHandler =
   ({
     fsmLifecycleClient,
-    apimClient,
+    apimService,
     config,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
   (context, auth, __, ___, userEmail, limit, offset) =>
     pipe(
-      getUserIdTask(apimClient, userEmail, config),
+      getUserIdTask(apimService, userEmail),
       TE.chainW((userId) =>
         pipe(
-          getUserSubscriptions(
-            apimClient,
-            config.AZURE_APIM_RESOURCE_GROUP,
-            config.AZURE_APIM,
+          apimService.getUserSubscriptions(
             userId,
             getOffset(offset),
             getLimit(limit, config.PAGINATION_DEFAULT_LIMIT)
