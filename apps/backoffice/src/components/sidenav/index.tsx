@@ -2,17 +2,15 @@ import useScreenSize from "@/hooks/use-screen-size";
 import { RequiredAuthorizations } from "@/types/auth";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { ExitToAppRounded, MenuOpen } from "@mui/icons-material";
-import {
-  Box,
-  Divider,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-  useTheme
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Tooltip from "@mui/material/Tooltip";
+import { useTheme } from "@mui/material/styles";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
