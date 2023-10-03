@@ -1,6 +1,6 @@
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
-import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -37,7 +37,7 @@ const authOptions: NextAuthOptions = {
         } = credentials as SelfCareIdentity;
 
         // first quick token check
-        if (isNullUndefinedOrEmpty(identity_token)) {
+        if (!NonEmptyString.is(identity_token)) {
           throw new Error("null undefined or empty identity token");
         }
 
