@@ -173,7 +173,7 @@ const useFetch = <RC>() => {
         buildNotification();
         break;
       case "errors":
-        error !== undefined ? buildNotification() : null;
+        if (error !== undefined) buildNotification();
         break;
     }
   };
@@ -246,7 +246,7 @@ const useFetch = <RC>() => {
   };
 
   useEffect(() => {
-    options ? manageNotification() : null;
+    if (options) manageNotification();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data]);
 
