@@ -1,3 +1,4 @@
+import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -31,9 +32,9 @@ const authOptions: NextAuthOptions = {
       id: "access-control",
       credentials: {},
       authorize(credentials) {
-        const { identity_token: identity_token } = credentials as {
-          identity_token: string;
-        };
+        const {
+          identity_token: identity_token
+        } = credentials as SelfCareIdentity;
 
         // first quick token check
         if (isNullUndefinedOrEmpty(identity_token)) {
@@ -125,7 +126,8 @@ const authOptions: NextAuthOptions = {
       }
       return session;
     }
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET
 };
 
 const handler = NextAuth(authOptions);
