@@ -6,10 +6,18 @@
     "leaving": "Exit in progress",
     "loading": "Access in progress"
   },
+  "authorizedCidrs": {
+    "add": "Add IP address",
+    "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys.",
+    "title": "Authorized IP address"
+  },
   "buttons": {
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "copyToClipboard": "Copy to clipboard"
+    "copyToClipboard": "Copy to clipboard",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save"
   },
   "copied": "Copied",
   "footer": {
@@ -19,6 +27,27 @@
       "privacyPolicy": "Privacy policy",
       "personalDataProtection": "Right to the protection of personal data",
       "termsAndConditions": "Terms and conditions"
+    }
+  },
+  "forms": {
+    "errors": {
+      "invalidField": "Invalid field"
+    }
+  },
+  "keys": {
+    "block": "Block",
+    "primary": {
+      "title": "Primary API Key"
+    },
+    "rotate": {
+      "button": "Rotate",
+      "modal": {
+        "title": "Rotate API Key",
+        "description": "By rotating this API Key, you deactivate the existing one and generate a new one, with the same attributes."
+      }
+    },
+    "secondary": {
+      "title": "Secondary API Key"
     }
   },
   "loading": "Loading",
@@ -45,7 +74,12 @@
     },
     "keys": {
       "title": "API Keys",
-      "description": "Here you can manage the API keys to be used to authenticate the institution's requests."
+      "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
+      "manage": {
+        "title": "API Key Manage",
+        "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
+        "shortcut": "Manage API keys"
+      }
     },
     "users": {
       "title": "Users",

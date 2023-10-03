@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   FSMStore,
   ServiceLifecycle,
@@ -40,7 +40,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   EventNameEnum,
@@ -53,11 +52,10 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 const logPrefix = "GetServiceHandler";
 
 type Dependencies = {
-  config: IConfig;
   // A store of ServicePublication objects
   store: FSMStore<ServicePublication.ItemType>;
 
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -75,16 +73,14 @@ type PublishServiceHandler = (
 
 export const makeGetServiceHandler =
   ({
-    config,
     store,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

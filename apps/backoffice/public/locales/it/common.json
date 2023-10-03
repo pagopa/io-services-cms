@@ -6,10 +6,18 @@
     "leaving": "Uscita in corso",
     "loading": "Accesso in corso"
   },
+  "authorizedCidrs": {
+    "add": "Aggiungi indirizzo IP",
+    "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le chiavi API.",
+    "title": "Indirizzi IP autorizzati"
+  },
   "buttons": {
     "cancel": "Annulla",
     "confirm": "Conferma",
-    "copyToClipboard": "Copy to clipboard"
+    "copyToClipboard": "Copy to clipboard",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "save": "Salva"
   },
   "copied": "Copiato",
   "footer": {
@@ -19,6 +27,27 @@
       "privacyPolicy": "Privacy policy",
       "personalDataProtection": "Diritto alla protezione dei dati personali",
       "termsAndConditions": "Termini e Condizioni"
+    }
+  },
+  "forms": {
+    "errors": {
+      "invalidField": "Campo invalido"
+    }
+  },
+  "keys": {
+    "block": "Blocca",
+    "primary": {
+      "title": "API Key primaria"
+    },
+    "rotate": {
+      "button": "Ruota",
+      "modal": {
+        "title": "Ruota API Key",
+        "description": "Ruotando questa API Key, disattivi quella esistente e ne generi una nuova, con gli stessi attributi."
+      }
+    },
+    "secondary": {
+      "title": "API Key secondaria"
     }
   },
   "loading": "Caricamento in corso",
@@ -45,7 +74,12 @@
     },
     "keys": {
       "title": "Chiavi API",
-      "description": "Qui puoi gestire le chiavi API da utilizzare per autenticare le richieste dell’ente."
+      "description": "Qui puoi gestire le chiavi API da utilizzare per autenticare le richieste dell’ente.",
+      "manage": {
+        "title": "Chiave API Manage",
+        "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente.",
+        "shortcut": "Gestisci chiavi API"
+      }
     },
     "users": {
       "title": "Utenti",

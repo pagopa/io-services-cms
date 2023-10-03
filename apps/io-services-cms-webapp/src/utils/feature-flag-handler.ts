@@ -1,13 +1,9 @@
 // Handle Feature Flags
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import {
-  getSubscription,
-  parseOwnerIdFullPath,
-} from "../lib/clients/apim-client";
 
 const wildcard = "*" as NonEmptyString;
 
@@ -20,8 +16,7 @@ const isElementAllowedOnList =
     list.includes(wildcard) || list.includes(element);
 
 const isServiceOwnerIncludedInList = (
-  config: IConfig,
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString,
   inclusionList: ReadonlyArray<NonEmptyString>
 ): TE.TaskEither<Error, boolean> => {
@@ -34,12 +29,7 @@ const isServiceOwnerIncludedInList = (
   }
 
   return pipe(
-    getSubscription(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM,
-      serviceId
-    ),
+    apimService.getSubscription(serviceId),
     TE.mapLeft(
       (_) =>
         new Error(
@@ -49,7 +39,7 @@ const isServiceOwnerIncludedInList = (
     TE.map(({ ownerId }) =>
       pipe(
         ownerId as NonEmptyString,
-        parseOwnerIdFullPath,
+        ApimUtils.parseOwnerIdFullPath,
         isElementAllowedOnList(inclusionList)
       )
     )
@@ -59,18 +49,17 @@ const isServiceOwnerIncludedInList = (
 /**
  *
  * @param config
- * @param apimClient
+ * @param apimService
  * @param serviceId
  * @returns
  */
 export const isUserEnabledForCmsToLegacySync = (
   config: IConfig,
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString
 ): TE.TaskEither<Error, boolean> =>
   isServiceOwnerIncludedInList(
-    config,
-    apimClient,
+    apimService,
     serviceId,
     config.USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST
   );
@@ -78,18 +67,17 @@ export const isUserEnabledForCmsToLegacySync = (
 /**
  *
  * @param config
- * @param apimClient
+ * @param apimService
  * @param serviceId
  * @returns
  */
 export const isUserEnabledForLegacyToCmsSync = (
   config: IConfig,
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString
 ): TE.TaskEither<Error, boolean> =>
   isServiceOwnerIncludedInList(
-    config,
-    apimClient,
+    apimService,
     serviceId,
     config.USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST
   );
@@ -97,18 +85,17 @@ export const isUserEnabledForLegacyToCmsSync = (
 /**
  *
  * @param config
- * @param apimClient
+ * @param apimService
  * @param serviceId
  * @returns
  */
 export const isUserAllowedForAutomaticApproval = (
   config: IConfig,
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString
 ): TE.TaskEither<Error, boolean> =>
   isServiceOwnerIncludedInList(
-    config,
-    apimClient,
+    apimService,
     serviceId,
     config.USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST
   );
@@ -116,7 +103,6 @@ export const isUserAllowedForAutomaticApproval = (
 /**
  *
  * @param config
- * @param apimClient
  * @param serviceId
  * @returns
  */
@@ -126,6 +112,6 @@ export const isUserEnabledForRequestReviewLegacy = (
 ): boolean =>
   pipe(
     apimUserId,
-    parseOwnerIdFullPath,
+    ApimUtils.parseOwnerIdFullPath,
     isElementAllowedOnList(config.USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST)
   );

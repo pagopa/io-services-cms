@@ -4,11 +4,10 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
-import { ApiManagementClient } from "@azure/arm-apimanagement";
-import { IConfig } from "../../config";
 
 afterEach(() => {
   vi.resetAllMocks();

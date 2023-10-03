@@ -4,15 +4,19 @@
       "path": "."
     },
     {
-      "path": "backoffice",
-      "name": "@io-services-cms/backoffice"
+      "path": "apps/backoffice",
+      "name": "io-services-cms-backoffice"
     },
     {
-      "path": "apps/io-services-cms-webapp"
+      "path": "apps/io-services-cms-webapp",
     },
     {
       "path": "packages/io-services-cms-models",
       "name": "@io-services-cms/models"
+    },
+    {
+      "path": "packages/external-clients",
+      "name": "@io-services-cms/external-clients"
     }
   ],
   "settings": {

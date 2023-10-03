@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { Queue, ServiceHistory } from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
@@ -125,7 +125,7 @@ const toRequestSyncLegacyAction = (
 export const handler =
   (
     config: IConfig,
-    apimClient: ApiManagementClient
+    apimService: ApimUtils.ApimService
   ): RTE.ReaderTaskEither<
     { item: ServiceHistory },
     Error,
@@ -137,7 +137,7 @@ export const handler =
       O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
       O.map(() =>
         pipe(
-          isUserEnabledForCmsToLegacySync(config, apimClient, item.serviceId),
+          isUserEnabledForCmsToLegacySync(config, apimService, item.serviceId),
           TE.chainW((isUserEnabled) =>
             pipe(
               item,

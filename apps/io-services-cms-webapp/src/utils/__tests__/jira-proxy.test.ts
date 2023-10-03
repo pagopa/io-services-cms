@@ -1,17 +1,16 @@
-import { describe, expect, it, vitest } from "vitest";
-import * as config from "../../config";
-import { Delegate, jiraProxy } from "../jira-proxy";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import { describe, expect, it, vitest } from "vitest";
+import * as config from "../../config";
 import {
   JiraAPIClient,
   JiraIssue,
-  JiraIssueStatus,
   SearchJiraIssuesResponse,
   jiraClient,
 } from "../../lib/clients/jira-client";
+import { Delegate, JiraIssueStatusFilter, jiraProxy } from "../jira-proxy";
 
 const JIRA_CONFIG = {
   JIRA_NAMESPACE_URL: "anUrl",
@@ -137,10 +136,7 @@ describe("Service Review Proxy", () => {
       "anIssueKey-1" as NonEmptyString,
       "anIssueKey-2" as NonEmptyString,
     ];
-    const searchStatuses: JiraIssueStatus[] = [
-      "APPROVED",
-      "REJECTED",
-    ];
+    const searchStatuses: JiraIssueStatusFilter[] = ["APPROVED", "REJECTED"];
     const serviceReviews = await proxy.searchJiraIssuesByKeyAndStatus(
       searchKeys,
       searchStatuses
@@ -237,5 +233,4 @@ describe("Service Review Proxy", () => {
       expect(serviceReview.left.message).toBe("Jira API returns an error");
     }
   });
-
 });

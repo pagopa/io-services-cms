@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -33,15 +33,13 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
-import { listSecrets, mapApimRestError } from "../../lib/clients/apim-client";
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceKeysHandler";
 
@@ -58,35 +56,24 @@ type GetServiceKeysHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  config: IConfig;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
 export const makeGetServiceKeysHandler =
-  ({
-    config,
-    apimClient,
-    telemetryClient,
-  }: Dependencies): GetServiceKeysHandler =>
+  ({ apimService, telemetryClient }: Dependencies): GetServiceKeysHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId
       ),
       TE.chainW(() =>
         pipe(
-          listSecrets(
-            apimClient,
-            config.AZURE_APIM_RESOURCE_GROUP,
-            config.AZURE_APIM,
-            serviceId
-          ),
-          TE.mapLeft(mapApimRestError(serviceId)),
+          apimService.listSecrets(serviceId),
+          TE.mapLeft(ApimUtils.mapApimRestError(serviceId)),
           TE.map((subscription) =>
             ResponseSuccessJson<SubscriptionKeys>({
               primary_key: subscription.primaryKey as string,

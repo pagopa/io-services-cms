@@ -17,8 +17,8 @@
     "apps/*"
   ],
   "devDependencies": {
-    "@changesets/cli": "^2.25.2",
-    "turbo": "^1.6.3"
+    "@changesets/cli": "^2.26.2",
+    "turbo": "^1.10.14"
   },
   "packageManager": "yarn@3.3.0"
 }

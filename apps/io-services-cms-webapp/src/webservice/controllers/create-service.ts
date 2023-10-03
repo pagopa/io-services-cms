@@ -1,8 +1,6 @@
-import {
-  ApiManagementClient,
-  SubscriptionContract,
-} from "@azure/arm-apimanagement";
+import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -45,21 +43,16 @@ import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
-import {
-  getProductByName,
-  getUserByEmail,
-  upsertSubscription,
-} from "../../lib/clients/apim-client";
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import {
-  EventNameEnum,
-  trackEventOnResponseOK,
-} from "../../utils/applicationinsight";
 
 const logPrefix = "CreateServiceHandler";
 
@@ -80,7 +73,7 @@ type Dependencies = {
   // An instance of ServiceLifecycle client
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   config: IConfig;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
@@ -99,18 +92,13 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
   );
 
 const createSubscriptionTask = (
-  apimClient: ApiManagementClient,
+  apimService: ApimUtils.ApimService,
   userEmail: EmailString,
   subscriptionId: NonEmptyString,
   config: IConfig
 ): TE.TaskEither<Error, SubscriptionContract> => {
   const getUserId = pipe(
-    getUserByEmail(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM,
-      userEmail
-    ),
+    apimService.getUserByEmail(userEmail),
     TE.mapLeft(
       (err) =>
         new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
@@ -120,12 +108,7 @@ const createSubscriptionTask = (
   );
 
   const getProductId = pipe(
-    getProductByName(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM,
-      config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME
-    ),
+    apimService.getProductByName(config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME),
     TE.mapLeft(
       (err) =>
         new Error(
@@ -144,14 +127,7 @@ const createSubscriptionTask = (
     productId: NonEmptyString;
   }) =>
     pipe(
-      upsertSubscription(
-        apimClient,
-        config.AZURE_APIM_RESOURCE_GROUP,
-        config.AZURE_APIM,
-        productId,
-        userId,
-        subscriptionId
-      ),
+      apimService.upsertSubscription(productId, userId, subscriptionId),
       TE.mapLeft(
         (err) =>
           new Error(
@@ -172,7 +148,7 @@ const createSubscriptionTask = (
 export const makeCreateServiceHandler =
   ({
     fsmLifecycleClient,
-    apimClient,
+    apimService,
     config,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
@@ -181,7 +157,7 @@ export const makeCreateServiceHandler =
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimClient, userEmail, serviceId, config),
+      createSubscriptionTask(apimService, userEmail, serviceId, config),
       TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 

@@ -1,4 +1,36 @@
-# @io-services-cms/backoffice
+# io-services-cms-backoffice
+
+## 0.5.1
+
+### Patch Changes
+
+- 94eec1c: Moving Apim Client in the new External-Clients package
+
+## 0.5.0
+
+### Minor Changes
+
+- f6ce3bc: Add manage key card on Overview, update API Key Page
+- 86761c0: BackOffice API Key section
+
+### Patch Changes
+
+- 5a38795: use APP_ENV instead of NODE_ENV to show/hide some test pages
+
+## 0.4.0
+
+### Minor Changes
+
+- 22205bf: Setup B4F and Forward io-services-cms request
+- f0e546d: Add Institution selection
+- 710a6de: Add AccessControl component and setup unit tests frontend
+- b6f7c28: test CD
+
+### Patch Changes
+
+- 593df7a: ADD GET, PUT /keys/manage/cidrs B4F API api route placeholders, and mocks msw
+- 221de41: Update next-auth with session token data
+- 52db875: ADD /keys/manage and /keys/manage/{keyType} API route handler placeholders
 
 ## 0.3.0
 

@@ -1,5 +1,5 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
@@ -37,6 +37,10 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import {
+  EventNameEnum,
+  trackEventOnResponseOK,
+} from "../../utils/applicationinsight";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import {
   itemToResponse,
@@ -44,17 +48,13 @@ import {
 } from "../../utils/converters/service-lifecycle-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
-import {
-  EventNameEnum,
-  trackEventOnResponseOK,
-} from "../../utils/applicationinsight";
 
 const logPrefix = "EditServiceHandler";
 
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   config: IConfig;
-  apimClient: ApiManagementClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -75,14 +75,13 @@ export const makeEditServiceHandler =
   ({
     fsmLifecycleClient,
     config,
-    apimClient,
+    apimService,
     telemetryClient,
   }: Dependencies): EditServiceHandler =>
   (context, auth, __, ___, serviceId, servicePayload) =>
     pipe(
       serviceOwnerCheckManageTask(
-        config,
-        apimClient,
+        apimService,
         serviceId,
         auth.subscriptionId,
         auth.userId

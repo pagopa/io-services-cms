@@ -1,12 +1,16 @@
 import { AppFooter } from "@/components/footer";
 import { Header, TopBar } from "@/components/headers";
-import { Sidenav } from "@/components/sidenav";
+import { Sidenav, SidenavItem } from "@/components/sidenav";
+import {
+  Category,
+  People,
+  SupervisedUserCircle,
+  ViewSidebar,
+  VpnKey
+} from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
-import { JwtUser, ProductSwitchItem } from "@pagopa/mui-italia";
-import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "next-i18next";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import styles from "@/styles/app-layout.module.css";
 
@@ -15,51 +19,58 @@ type AppLayoutProps = {
   children: ReactNode;
 };
 
-const mockUser: JwtUser = {
-  id: "12345",
-  name: "Mario",
-  surname: "Rossi",
-  email: "mario.rossi@email.it"
-};
-const mockProducts: ProductSwitchItem[] = [
+/** List of sidenav menu items _(displayed on left side column)_ */
+const menu: Array<SidenavItem> = [
   {
-    id: "1",
-    title: "App IO",
-    productUrl: "",
+    href: "/",
+    icon: <ViewSidebar fontSize="inherit" />,
+    text: "routes.overview.title",
     linkType: "internal"
+  },
+  {
+    href: "/services",
+    icon: <Category fontSize="inherit" />,
+    text: "routes.services.title",
+    linkType: "internal"
+  },
+  {
+    href: "/keys",
+    icon: <VpnKey fontSize="inherit" />,
+    text: "routes.keys.title",
+    linkType: "internal",
+    hasBottomDivider: true,
+    requiredPermissions: ["apiservicewrite"]
+  },
+  {
+    href: "",
+    icon: <People fontSize="inherit" />,
+    text: "routes.users.title",
+    linkType: "external"
+  },
+  {
+    href: "",
+    icon: <SupervisedUserCircle fontSize="inherit" />,
+    text: "routes.groups.title",
+    linkType: "external"
   }
 ];
 
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
-  const { t } = useTranslation();
-  const { data } = useSession();
-  const parties: PartySwitchItem[] = [];
-
-  if (data?.user?.institution) {
-    parties.push({
-      id: data.user.institution.id,
-      name: data.user.institution.name,
-      productRole: t(`roles.${data.user.institution.role}`),
-      logoUrl: data.user.institution.logo_url
-    });
-  }
+  const { data: session } = useSession();
+  const [sidenavWidth, setSidenavWidth] = useState(320);
 
   return (
     <Box>
       <Box>
-        <TopBar user={mockUser} />
+        <TopBar user={session?.user ? { id: session.user.id } : undefined} />
       </Box>
       <Box>
-        <Header products={mockProducts} parties={parties} />
+        <Header />
       </Box>
       <Grid container spacing={0} bgcolor={"#F5F5F5"}>
         {hideSidenav ? null : (
-          <Grid item width={360}>
-            <Sidenav
-              onNavItemClick={index =>
-                console.log(`Sidenav item click ${index}`)
-              }
-            />
+          <Grid item width={sidenavWidth}>
+            <Sidenav items={menu} onWidthChange={setSidenavWidth} />
           </Grid>
         )}
         <Grid item className={styles.main}>

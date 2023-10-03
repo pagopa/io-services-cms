@@ -1,4 +1,4 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyService,
   ServiceLifecycle,
@@ -99,16 +99,15 @@ const aServicePublicationItem: ServicePublication.ItemType = {
 
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
-const mockApimClient = {
-  subscription: {
-    get: vi.fn(() =>
-      Promise.resolve({
-        _etag: "_etag",
-        ownerId,
-      })
-    ),
-  },
-} as unknown as ApiManagementClient;
+
+const mockApimService = {
+  getSubscription: vi.fn(() =>
+    TE.right({
+      _etag: "_etag",
+      ownerId,
+    })
+  ),
+} as unknown as ApimUtils.ApimService;
 
 describe("On Legacy Service Change Handler", () => {
   it("should map a deleted item to a requestSyncCms action containing a service lifecycle with DELETED status and a service publication with UNPUBLISHED status", async () => {
@@ -127,7 +126,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -179,7 +178,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -218,7 +217,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -253,7 +252,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -301,7 +300,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -363,7 +362,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
@@ -416,7 +415,7 @@ describe("On Legacy Service Change Handler", () => {
 
     const result = await handler(
       mockConfig,
-      mockApimClient,
+      mockApimService,
       mockServiceModel
     )({ item })();
 
