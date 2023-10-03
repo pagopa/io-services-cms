@@ -3,7 +3,9 @@ import {
   forwardIoServicesCmsRequest
 } from "@/app/api/utils/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
+import { withJWTAuthHandler } from "@/lib/handler-wrappers";
 import { NextRequest } from "next/server";
+import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 const configuration = getConfiguration();
 const client = buildClient(configuration);
@@ -11,35 +13,56 @@ const client = buildClient(configuration);
 /**
  * @description Publish service by ID on __IO Platform__
  */
-export async function POST(
+const publishService = (
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("releaseService", request, {
-    serviceId: params.serviceId
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "releaseService",
+    request,
+    backofficeUser,
+    params
+  );
 
 /**
  * @description Retrieve last version of service published on __IO Platform__
  */
-export async function GET(
+const getServicePublicationDetails = (
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("getPublishedService", request, {
-    serviceId: params.serviceId
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "getPublishedService",
+    request,
+    backofficeUser,
+    params
+  );
 
 /**
  * @description Unpublish service by ID from __IO Platform__
  */
-export async function DELETE(
+const unpublishService = (
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("unpublishService", request, {
-    serviceId: params.serviceId
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "unpublishService",
+    request,
+    backofficeUser,
+    params
+  );
+
+export const {
+  POST = withJWTAuthHandler(publishService),
+  GET = withJWTAuthHandler(getServicePublicationDetails),
+  DELETE = withJWTAuthHandler(unpublishService)
+} = {};

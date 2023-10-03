@@ -18,6 +18,14 @@ interface BackOfficeUser extends DefaultUser {
   institution: BackOfficeUserInstitution;
   authorizedInstitutions: BackOfficeUserInstitution[];
   permissions: string[];
+  parameters: BackOfficeUserParameters;
+}
+
+interface BackOfficeUserParameters {
+  userId: string;
+  userEmail: string;
+  userGroups: string[];
+  subscriptionId: string;
 }
 
 interface BackOfficeUserInstitution {

@@ -3,7 +3,9 @@ import {
   forwardIoServicesCmsRequest
 } from "@/app/api/utils/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
+import { withJWTAuthHandler } from "@/lib/handler-wrappers";
 import { NextRequest } from "next/server";
+import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 const configuration = getConfiguration();
 const client = buildClient(configuration);
@@ -11,11 +13,18 @@ const client = buildClient(configuration);
 /**
  * @description Upload service logo by service ID
  */
-export async function PUT(
+const uploadServiceLogo = (
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("updateServiceLogo", request, {
-    serviceId: params.serviceId
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "updateServiceLogo",
+    request,
+    backofficeUser,
+    params
+  );
+
+export const { PUT = withJWTAuthHandler(uploadServiceLogo) } = {};

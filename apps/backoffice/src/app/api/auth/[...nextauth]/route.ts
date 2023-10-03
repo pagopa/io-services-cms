@@ -37,10 +37,10 @@ const authOptions: NextAuthOptions = {
 
         // first quick token check
         if (isNullUndefinedOrEmpty(identity_token)) {
-          throw new Error("null undefined or empty session token");
+          throw new Error("null undefined or empty identity token");
         }
 
-        // verify identity token
+        // TODO: verify identity token
 
         // decode identity token payload
         const identityTokenPayload = decodeJwtPayload(
@@ -55,7 +55,7 @@ const authOptions: NextAuthOptions = {
           );
         }
 
-        // set next-auth User
+        // TODO: set next-auth User
         const user = {
           id: identityTokenPayload.right.uid,
           name: `${identityTokenPayload.right.name} ${identityTokenPayload.right.family_name}`,
@@ -73,7 +73,13 @@ const authOptions: NextAuthOptions = {
               role: "operator"
             }
           ],
-          permissions: ["write"]
+          permissions: ["write"],
+          parameters: {
+            userId: "TODO: apim user id here",
+            userEmail: "TODO: apim email here",
+            userGroups: ["TODO: user groups here"],
+            subscriptionId: "TODO: apim manage subscription id here"
+          }
         };
         return user;
       }
@@ -96,6 +102,7 @@ const authOptions: NextAuthOptions = {
         // return '/unauthorized'
       }
     },
+    // TODO: Build token here
     async jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
@@ -103,6 +110,7 @@ const authOptions: NextAuthOptions = {
         token.institution = user.institution;
         token.authorizedInstitutions = user.authorizedInstitutions;
         token.permissions = user.permissions;
+        token.parameters = user.parameters;
       }
       return token;
     },
@@ -113,6 +121,7 @@ const authOptions: NextAuthOptions = {
         session.user.institution = token.institution;
         session.user.authorizedInstitutions = token.authorizedInstitutions;
         session.user.permissions = token.permissions;
+        session.user.parameters = token.parameters;
       }
       return session;
     }

@@ -3,26 +3,43 @@ import {
   forwardIoServicesCmsRequest
 } from "@/app/api/utils/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
+import { withJWTAuthHandler } from "@/lib/handler-wrappers";
 import { NextRequest } from "next/server";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 const configuration = getConfiguration();
 const client = buildClient(configuration);
 /**
  * @description Create a new Service with the attributes provided in the request payload
  */
-export async function POST(request: NextRequest) {
-  return forwardIoServicesCmsRequest(client)("createService", request);
-}
+const createService = (
+  request: NextRequest,
+  { backofficeUser }: { backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)("createService", request, backofficeUser);
 
 /**
  * @description Retrieve all services owned by the calling user
  */
-export async function GET(request: NextRequest) {
+const getServices = (
+  request: NextRequest,
+  { backofficeUser }: { backofficeUser: BackOfficeUser }
+) => {
   const limit = request.nextUrl.searchParams.get("limit");
   const offset = request.nextUrl.searchParams.get("offset");
 
-  return forwardIoServicesCmsRequest(client)("getServices", request, {
-    limit: limit ?? undefined,
-    offset: offset ?? undefined
-  });
-}
+  return forwardIoServicesCmsRequest(client)(
+    "getServices",
+    request,
+    backofficeUser,
+    {
+      limit: limit ?? undefined,
+      offset: offset ?? undefined
+    }
+  );
+};
+
+export const {
+  GET = withJWTAuthHandler(getServices),
+  POST = withJWTAuthHandler(createService)
+} = {};

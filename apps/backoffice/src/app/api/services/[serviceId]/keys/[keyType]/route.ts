@@ -3,7 +3,9 @@ import {
   forwardIoServicesCmsRequest
 } from "@/app/api/utils/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
+import { withJWTAuthHandler } from "@/lib/handler-wrappers";
 import { NextRequest } from "next/server";
+import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 const configuration = getConfiguration();
 const client = buildClient(configuration);
@@ -11,12 +13,21 @@ const client = buildClient(configuration);
 /**
  * @description Regenerate service key by service ID and key type
  */
-export async function PUT(
+const regenerateServiceKeys = (
   request: NextRequest,
-  { params }: { params: { serviceId: string; keyType: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("regenerateServiceKey", request, {
-    serviceId: params.serviceId,
-    keyType: params.keyType // will be validated by io-ts later
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: {
+    params: { serviceId: string; keyType: string };
+    backofficeUser: BackOfficeUser;
+  }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "regenerateServiceKey",
+    request,
+    backofficeUser,
+    params
+  );
+
+export const { PUT = withJWTAuthHandler(regenerateServiceKeys) } = {};

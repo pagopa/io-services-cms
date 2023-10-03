@@ -1,14 +1,14 @@
 import { Configuration, getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/services-cms/client";
-import { getUserDetails } from "@/lib/auth";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
-// if (getConfiguration().API_SERVICES_CMS_MOCKING) {
-//   const { setupMocks } = require("../../../../mocks");
-//   setupMocks();
-// }
+if (getConfiguration().API_SERVICES_CMS_MOCKING) {
+  const { setupMocks } = require("../../../../mocks");
+  setupMocks();
+}
 
 export type IoServicesCmsClient = Client;
 
@@ -38,32 +38,26 @@ export const forwardIoServicesCmsRequest = (
 ) => async <T extends keyof IoServicesCmsClient>(
   operationId: T,
   nextRequest: NextRequest,
+  backofficeUser: BackOfficeUser,
   pathParams?: PathParameters
 ) => {
   console.log("forwardIoServicesCmsRequest");
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
 
-  // get authenticated user details
-  const userDetails = getUserDetails(nextRequest);
-
+  const headerParameters = backofficeUser.parameters;
   // create the request payload
   const requestPayload = {
     ...pathParams,
     body: jsonBody,
-    "x-user-email": userDetails?.email, // TODO: replace with real value
-    "x-user-id": userDetails?.id, // TODO: replace with real value
-    "x-subscription-id": userDetails?.id, // TODO: replace with real value
-    "x-user-groups": userDetails?.permissions.toString() // TODO: replace with real value
+    "x-user-email": headerParameters.userEmail,
+    "x-user-id": headerParameters.userId,
+    "x-subscription-id": headerParameters.subscriptionId,
+    "x-user-groups": headerParameters.userGroups.toString()
   } as any;
 
-  // call the io-services-cms API
-  const result = await callIoServicesCms(client)(operationId, requestPayload);
-
-  console.log("ioServicesCmsApiCall result: ", result);
-
-  // return the response
-  return result;
+  // call the io-services-cms API and return the response
+  return await callIoServicesCms(client)(operationId, requestPayload);
 };
 
 /**

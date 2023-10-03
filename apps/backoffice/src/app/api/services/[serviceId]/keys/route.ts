@@ -3,7 +3,9 @@ import {
   forwardIoServicesCmsRequest
 } from "@/app/api/utils/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
+import { withJWTAuthHandler } from "@/lib/handler-wrappers";
 import { NextRequest } from "next/server";
+import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 const configuration = getConfiguration();
 const client = buildClient(configuration);
@@ -11,11 +13,18 @@ const client = buildClient(configuration);
 /**
  * @description Retrieve service keys by service ID
  */
-export async function GET(
+const retrieveServiceKeys = (
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
-) {
-  return forwardIoServicesCmsRequest(client)("getServiceKeys", request, {
-    serviceId: params.serviceId
-  });
-}
+  {
+    params,
+    backofficeUser
+  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+) =>
+  forwardIoServicesCmsRequest(client)(
+    "getServiceKeys",
+    request,
+    backofficeUser,
+    params
+  );
+
+export const { GET = withJWTAuthHandler(retrieveServiceKeys) } = {};
