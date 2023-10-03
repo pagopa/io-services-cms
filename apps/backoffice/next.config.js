@@ -5,6 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@pagopa/mui-italia"],
   i18n,
+  output: "standalone"
 };
 
 module.exports = nextConfig;
