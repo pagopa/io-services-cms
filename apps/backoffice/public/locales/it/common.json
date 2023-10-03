@@ -1,4 +1,10 @@
 {
+  "400": "Bad Request",
+  "401": "Unauthorized",
+  "403": "Forbidden",
+  "404": "Not Found",
+  "429": "Too Many Requests",
+  "500": "Internal Server Error",
   "app": {
     "title": "IO BackOffice"
   },
@@ -51,6 +57,12 @@
     }
   },
   "loading": "Caricamento in corso",
+  "notifications": {
+    "exceptionError": "Eccezione applicativa",
+    "httpError": "Errore Http",
+    "success": "Operazione completata con successo",
+    "validationError": "Errore di validazione dati"
+  },
   "roles": {
     "admin": "Amministratore",
     "operator": "Operatore"
