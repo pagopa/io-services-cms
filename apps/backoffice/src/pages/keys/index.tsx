@@ -19,20 +19,25 @@ export default function Keys() {
   const { data: acData, fetchData: acFetchData } = useFetch<ManageKeyCIDRs>();
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
-    mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys);
+    mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
+      notify: "all"
+    });
   };
 
   const handleUpdateCidrs = (cidrs: string[]) => {
     acFetchData(
       "updateManageKeysAuthorizedCidrs",
       { body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) } },
-      ManageKeyCIDRs
+      ManageKeyCIDRs,
+      { notify: "all" }
     );
   };
 
   useEffect(() => {
-    mkFetchData("getManageKeys", {}, SubscriptionKeys);
-    acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs);
+    mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
+    acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
+      notify: "errors"
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -39,6 +39,7 @@ module "backoffice_app" {
   subnet_id = module.backoffice_app_snet.id
 
   allowed_subnets = [
+    module.backoffice_app_snet.id,
     data.azurerm_subnet.appgateway_snet.id,
   ]
 
@@ -67,7 +68,8 @@ module "backoffice_app_staging" {
   subnet_id = module.backoffice_app_snet.id
 
   allowed_subnets = [
-    data.azurerm_subnet.appgateway_snet.id,
+    module.backoffice_app_snet.id,
+    local.is_prod ? data.azurerm_subnet.github_runner_subnet[0].id : null
   ]
 
   tags = var.tags
