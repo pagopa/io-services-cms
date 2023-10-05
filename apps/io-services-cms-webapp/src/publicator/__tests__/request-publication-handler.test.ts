@@ -46,11 +46,11 @@ describe("Service Publication Handler", () => {
   it("handleQueueItem should return an Error if queueItem is invalid", async () => {
     const context = createContext();
 
-    const mockFsmLifecycleClient =
+    const mockFsmPublicationClient =
       {} as unknown as ServicePublication.FsmClient;
 
     await expect(() =>
-      handleQueueItem(context, anInvalidQueueItem, mockFsmLifecycleClient)()
+      handleQueueItem(context, anInvalidQueueItem, mockFsmPublicationClient)()
     ).rejects.toThrowError("Error while parsing incoming message");
   });
 
@@ -62,7 +62,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       publish: vi.fn(() =>
         TE.right({
           ...aService,
@@ -74,10 +74,10 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.publish).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.publish).toBeCalledWith(aService.id, {
+    expect(mockFsmPublicationClient.publish).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.publish).toBeCalledWith(aService.id, {
       data: aService,
     });
   });
@@ -90,7 +90,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       release: vi.fn(() =>
         TE.right({
           ...aService,
@@ -102,10 +102,10 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.release).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.release).toBeCalledWith(aService.id, {
+    expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.release).toBeCalledWith(aService.id, {
       data: aService,
     });
   });
@@ -117,7 +117,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       unpublish: vi.fn(() =>
         TE.right({
           ...aService,
@@ -129,9 +129,9 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.unpublish).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.unpublish).toBeCalledWith(aService.id);
+    expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.unpublish).toBeCalledWith(aService.id);
   });
 });
