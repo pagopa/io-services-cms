@@ -45,15 +45,14 @@ export const forwardIoServicesCmsRequest = (
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
 
-  const headerParameters = backofficeUser.parameters;
   // create the request payload
   const requestPayload = {
     ...pathParams,
     body: jsonBody,
-    "x-user-email": headerParameters.userEmail,
-    "x-user-id": headerParameters.userId,
-    "x-subscription-id": headerParameters.subscriptionId,
-    "x-user-groups": headerParameters.userGroups.toString()
+    "x-user-email": backofficeUser.parameters.userEmail,
+    "x-user-id": backofficeUser.parameters.userId,
+    "x-subscription-id": backofficeUser.parameters.subscriptionId,
+    "x-user-groups": backofficeUser.permissions.toString()
   } as any;
 
   // call the io-services-cms API and return the response

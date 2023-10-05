@@ -24,7 +24,6 @@ interface BackOfficeUser extends DefaultUser {
 interface BackOfficeUserParameters {
   userId: string;
   userEmail: string;
-  userGroups: string[];
   subscriptionId: string;
 }
 
