@@ -6,7 +6,10 @@
       "outputs": ["dist/**"],
       "dependsOn": ["^build", "generate"]
     },
-    "generate": {},
+    "generate": {
+      "inputs": ["./openapi.yaml", "src/generated/**/*"],
+      "outputMode": "errors-only"
+    },
     "typecheck": {
       "inputs": ["src/**/*.ts"],
       "outputs": [],
