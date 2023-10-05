@@ -38,14 +38,6 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Cache turbo build setup
-        uses: actions/cache@v3
-        with:
-          path: node_modules/.cache/turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
       - name: 'Build'
         run: yarn run build
 
