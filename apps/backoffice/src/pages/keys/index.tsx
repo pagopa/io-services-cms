@@ -1,4 +1,4 @@
-import { ApiKeys } from "@/components/api-keys";
+import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
 import { PageHeader } from "@/components/headers";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
@@ -6,6 +6,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, useEffect } from "react";
@@ -47,15 +48,23 @@ export default function Keys() {
         title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
       />
-      <ApiKeys
-        title={t("routes.keys.manage.title")}
-        description={t("routes.keys.manage.description")}
-        keys={mkData}
-        onRotateKey={handleRotateKey}
-        showAuthorizedCidrs
-        cidrs={(acData?.cidrs as unknown) as string[]}
-        onUpdateCidrs={handleUpdateCidrs}
-      />
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <ApiKeys
+            title={t("routes.keys.manage.title")}
+            description={t("routes.keys.manage.description")}
+            keys={mkData}
+            onRotateKey={handleRotateKey}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <AuthorizedCidrs
+            cidrs={(acData?.cidrs as unknown) as string[]}
+            editable={true}
+            onSaveClick={handleUpdateCidrs}
+          />
+        </Grid>
+      </Grid>
     </>
   );
 }

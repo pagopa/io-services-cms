@@ -1,6 +1,5 @@
 import { ArrowForward } from "@mui/icons-material";
-import { Box, Grid, Stack, Typography } from "@mui/material";
-import { ButtonNaked } from "@pagopa/mui-italia";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { ReactNode } from "react";
@@ -12,7 +11,7 @@ export type CardDetailsRowType = {
   /** row label, shown on left */
   label: string;
   /** row value, shown on right */
-  value?: string;
+  value?: string | ReactNode;
   /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis.
    * _(This is the default behaviour)_ */
   noWrap?: boolean;
@@ -22,7 +21,24 @@ export type CardDetailsRowType = {
   kind?: CardDetailsRowValueType;
 };
 
-export type CardDetailsRowValueType = "apikey" | "link" | "markdown";
+export type CardDetailsRowValueType =
+  | "apikey"
+  | "datetime"
+  | "link"
+  | "markdown";
+
+export type CardDetailsCtaType = {
+  /** call to action end icon */
+  icon?: ReactNode;
+  /** call to action label */
+  label: string;
+  /** call to action href */
+  href?: string;
+  /** href target */
+  target?: "_blank" | "_self";
+  /** call to action function performed on button click */
+  fn?: Function;
+};
 
 export type CardDetailsProps = {
   /** Card title */
@@ -32,11 +48,7 @@ export type CardDetailsProps = {
   /** If defined, render a custom card body content */
   customContent?: ReactNode;
   /** Call to action link placed in card footer */
-  cta?: {
-    label: string;
-    href: string;
-    target?: "_blank" | "_self";
-  };
+  cta?: CardDetailsCtaType;
 };
 
 /**
@@ -50,29 +62,46 @@ export const CardDetails = ({
 }: CardDetailsProps) => {
   const { t } = useTranslation();
 
-  const renderValue = (value: string | undefined, children: ReactNode) => (
+  const renderValue = (
+    value: string | ReactNode | undefined,
+    children: ReactNode
+  ) => (
     <LoaderSkeleton loading={value === undefined} style={{ width: "100%" }}>
       {children}
     </LoaderSkeleton>
+  );
+
+  const renderTextValue = (row: CardDetailsRowType) => (
+    <Typography
+      variant="body2"
+      fontWeight={600}
+      noWrap={row.noWrap ?? true}
+      color={row.kind === "link" ? "primary" : "text"}
+    >
+      {row.value
+        ? row.kind === "datetime"
+          ? new Date(row.value as string).toLocaleString()
+          : row.value
+        : "-"}
+    </Typography>
   );
 
   /** render row value based on `kind` first and other additional settings _(noWrap)_ */
   const renderRowKind = (row: CardDetailsRowType) => {
     switch (row.kind) {
       case "apikey":
-        return <ApiKeyValue isVisible={false} keyValue={row.value} />;
+        return <ApiKeyValue isVisible={false} keyValue={row.value as string} />;
+      case "datetime":
+        return renderValue(row.value, renderTextValue(row));
       case "link":
         return renderValue(
           row.value,
-          <NextLink href={row.value ?? "/"} target="_blank" rel="noreferrer">
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              noWrap={row.noWrap ?? true}
-              color={"primary"}
-            >
-              {row.value ?? "-"}
-            </Typography>
+          <NextLink
+            href={(row.value as string) ?? "/"}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {renderTextValue(row)}
           </NextLink>
         );
       case "markdown":
@@ -82,20 +111,46 @@ export const CardDetails = ({
         return renderValue(
           row.value,
           <>
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              noWrap={row.noWrap ?? true}
-              color={"text"}
-            >
-              {row.value}
-            </Typography>
+            {renderTextValue(row)}
             {row.copyableValue ? (
-              <CopyToClipboard text={row.value ?? ""} />
+              <CopyToClipboard text={(row.value as string) ?? ""} />
             ) : null}
           </>
         );
     }
+  };
+
+  const renderCallToActionButton = (cta: CardDetailsCtaType) => (
+    <Button
+      variant="text"
+      color="primary"
+      endIcon={cta.icon ?? <ArrowForward />}
+      size="small"
+      sx={{ fontWeight: 700 }}
+      onClick={() => (cta.fn ? cta.fn() : null)}
+    >
+      {t(cta.label)}
+    </Button>
+  );
+
+  /** render cta on card footer */
+  const renderCallToAction = () => {
+    if (cta)
+      return (
+        <Box id="card-cta" marginTop={4}>
+          {cta.href ? (
+            <NextLink
+              href={cta.href}
+              target={cta.target ?? "_self"}
+              rel="noreferrer"
+            >
+              {renderCallToActionButton(cta)}
+            </NextLink>
+          ) : (
+            renderCallToActionButton(cta)
+          )}
+        </Box>
+      );
   };
 
   return (
@@ -132,24 +187,7 @@ export const CardDetails = ({
           </Grid>
         ))}
       </Box>
-      {cta ? (
-        <Box id="card-cta" marginTop={4}>
-          <NextLink
-            href={cta.href}
-            target={cta.target ?? "_self"}
-            rel="noreferrer"
-          >
-            <ButtonNaked
-              color="primary"
-              endIcon={<ArrowForward />}
-              size="small"
-              sx={{ fontWeight: 700 }}
-            >
-              {t(cta.label)}
-            </ButtonNaked>
-          </NextLink>
-        </Box>
-      ) : null}
+      {renderCallToAction()}
     </Box>
   );
 };
