@@ -1,11 +1,25 @@
 import * as E from "fp-ts/Either";
+import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
+import { BackOfficeUser } from "../../../../../types/next-auth";
 import {
   IoServicesCmsClient,
   forwardIoServicesCmsRequest
 } from "../io-services-cms-proxy";
-import { ValidationError } from "io-ts";
+
+const anUserEmail = "anEmail@email.it";
+const anUserId = "anUserId";
+const aSubscriptionId = "aSubscriptionId";
+const aUserPermissions = ["permission1", "permission2"];
+const jwtMock = ({
+  permissions: aUserPermissions,
+  parameters: {
+    userEmail: anUserEmail,
+    userId: anUserId,
+    subscriptionId: aSubscriptionId
+  }
+} as unknown) as BackOfficeUser;
 
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
@@ -23,16 +37,17 @@ describe("forwardIoServicesCmsRequest tests", () => {
 
     const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
       "getServices",
-      request
+      request,
+      jwtMock
     );
 
     expect(mockIoServicesCmsClient.getServices).toHaveBeenCalled();
     expect(mockIoServicesCmsClient.getServices).toHaveBeenCalledWith(
       expect.objectContaining({
-        "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: check with real tocken value
-        "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: check with real tocken value
-        "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: check with real tocken value
-        "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE" // TODO: check with real tocken value
+        "x-user-email": anUserEmail,
+        "x-user-id": anUserId,
+        "x-subscription-id": aSubscriptionId,
+        "x-user-groups": aUserPermissions.join(",")
       })
     );
 
@@ -62,6 +77,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
     const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
       "createService",
       request,
+      jwtMock,
       {
         serviceId: "test"
       }
@@ -70,10 +86,10 @@ describe("forwardIoServicesCmsRequest tests", () => {
     expect(mockIoServicesCmsClient.createService).toHaveBeenCalled();
     expect(mockIoServicesCmsClient.createService).toHaveBeenCalledWith(
       expect.objectContaining({
-        "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: check with real tocken value
-        "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: check with real tocken value
-        "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: check with real tocken value
-        "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: check with real tocken value
+        "x-user-email": anUserEmail,
+        "x-user-id": anUserId,
+        "x-subscription-id": aSubscriptionId,
+        "x-user-groups": aUserPermissions.join(","),
         body: aBodyPayload,
         serviceId: "test"
       })
@@ -104,6 +120,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
     const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
       "reviewService",
       request,
+      jwtMock,
       {
         serviceId: "test"
       }
@@ -112,10 +129,10 @@ describe("forwardIoServicesCmsRequest tests", () => {
     expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalled();
     expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalledWith(
       expect.objectContaining({
-        "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: check with real tocken value
-        "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: check with real tocken value
-        "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: check with real tocken value
-        "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: check with real tocken value
+        "x-user-email": anUserEmail,
+        "x-user-id": anUserId,
+        "x-subscription-id": aSubscriptionId,
+        "x-user-groups": aUserPermissions.join(","),
         body: aBodyPayload,
         serviceId: "test"
       })
@@ -159,6 +176,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
     const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
       "reviewService",
       request,
+      jwtMock,
       {
         serviceId: "test"
       }
@@ -167,10 +185,10 @@ describe("forwardIoServicesCmsRequest tests", () => {
     expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalled();
     expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalledWith(
       expect.objectContaining({
-        "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: check with real tocken value
-        "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: check with real tocken value
-        "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: check with real tocken value
-        "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: check with real tocken value
+        "x-user-email": anUserEmail,
+        "x-user-id": anUserId,
+        "x-subscription-id": aSubscriptionId,
+        "x-user-groups": aUserPermissions.join(","),
         body: aBodyPayload,
         serviceId: "test"
       })

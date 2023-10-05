@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
+import { aMockedIdentiyToken } from "../../../mocks/data/selfcare-data";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
@@ -37,7 +38,10 @@ export default function Selfcare() {
               Gestisci il prodotto per questo ente.
             </Typography>
             <Box marginTop={3}>
-              <NextLink href="/auth/login#token=sample_test_token" passHref>
+              <NextLink
+                href={`/auth/login#token=${aMockedIdentiyToken}`}
+                passHref
+              >
                 <Button variant="outlined" endIcon={<ArrowForward />}>
                   Accedi al BackOffice IO
                 </Button>
