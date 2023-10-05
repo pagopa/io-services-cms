@@ -1,67 +1,34 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "generate": {
-      "inputs": [
-        "./openapi.yaml",
-        "src/generated/**/*"
-      ],
-      "outputMode": "errors-only"
-    },
     "build": {
-      "inputs": [
-        "src/**/*.ts"
-      ],
-      "outputs": [
-        "dist/**"
-      ],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "inputs": ["src/**/*.ts"],
+      "outputs": ["dist/**"],
+      "dependsOn": ["^build", "generate"]
     },
+    "generate": {},
     "typecheck": {
-      "inputs": [
-        "src/**/*.ts"
-      ],
+      "inputs": ["src/**/*.ts"],
       "outputs": [],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "format": {},
     "lint": {
-      "inputs": [
-        "src/**/*.ts"
-      ],
+      "inputs": ["src/**/*.ts"],
       "outputs": [],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "test": {
-      "inputs": [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
-      ],
+      "inputs": ["src/**/*.spec.ts", "src/**/*.test.ts"],
       "outputs": [],
       "outputMode": "errors-only",
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "test:integrations": {
-      "inputs": [
-        "__integrations__/**/*"
-      ],
+      "inputs": ["__integrations__/**/*"],
       "outputs": [],
       "outputMode": "errors-only",
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
   }
 }
