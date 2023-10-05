@@ -15,6 +15,7 @@ export default function TokenExchange() {
 
   useEffect(() => {
     // just a simple check on token exchange required query params
+    // TODO: can be used !NonEmptyString.is(institutionId) && !NonEmptyString.is(productId)??
     if (
       !(
         isNullUndefinedOrEmpty(institutionId as string) &&

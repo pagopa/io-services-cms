@@ -1,6 +1,6 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../types/next-auth";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 export const withJWTAuthHandler = (
   handler: (
