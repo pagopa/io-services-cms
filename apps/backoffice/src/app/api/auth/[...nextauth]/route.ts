@@ -74,7 +74,7 @@ const authOptions: NextAuthOptions = {
               role: "operator"
             }
           ],
-          permissions: ["write"],
+          permissions: ["apiservicewrite"],
           parameters: {
             userId: "TODO: apim user id here",
             userEmail: "TODO: apim email here",
