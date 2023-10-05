@@ -1,6 +1,10 @@
 /* eslint-disable no-console */
 import { Context } from "@azure/functions";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import {
+  ServiceLifecycle,
+  ServicePublication,
+  FsmItemNotFoundError,
+} from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Json } from "io-ts-types";
 import { describe, expect, it, vi, afterEach } from "vitest";
@@ -133,5 +137,38 @@ describe("Service Publication Handler", () => {
     )();
     expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
     expect(mockFsmPublicationClient.unpublish).toBeCalledWith(aService.id);
+  });
+
+  it("handleQueueItem should idontknow", async () => {
+    const QueueItem = {
+      id: aService.id,
+      kind: "RequestUnpublicationItem",
+    } as unknown as Json;
+    const context = createContext();
+
+    class FSMError extends Error {
+      public kind = "FsmItemNotFoundError";
+    }
+    const mockFsmPublicationClient = {
+      unpublish: vi.fn(() => TE.right(new FSMError())),
+    } as unknown as ServicePublication.FsmClient;
+
+    // class FSMError extends Error {
+    //   public kind = "FsmItemNotFoundError";
+    //   constructor() {
+    //     super(`aMessage`);
+    //   }
+    // }
+    // const mockFsmPublicationClient = {
+    //   unpublish: vi.fn(() => TE.left(new FSMError())),
+    // } as unknown as ServicePublication.FsmClient;
+
+    const result = await handleQueueItem(
+      context,
+      QueueItem,
+      mockFsmPublicationClient
+    )();
+    expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
+    expect(result).toBeInstanceOf(Error);
   });
 });

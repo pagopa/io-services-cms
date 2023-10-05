@@ -47,20 +47,16 @@ export const handleQueueItem = (
           )
         : fsmPublicationClient.unpublish(service.id)
     ),
-    TE.fold(
-      (e) => {
-        if (e instanceof FsmItemNotFoundError) {
-          context.log.info(
-            `Operation Completed no more action needed => ${e.message}`,
-            e
-          );
-          return T.of(void 0);
-        } else {
-          throw e;
-        }
-      },
-      (_) => T.of(void 0)
-    )
+    TE.getOrElseW((e) => {
+      if (e instanceof FsmItemNotFoundError) {
+        context.log.info(
+          `Operation Completed no more action needed => ${e.message}`
+        );
+        return T.of(void 0);
+      } else {
+        throw e;
+      }
+    })
   );
 
 export const createRequestPublicationHandler = (
