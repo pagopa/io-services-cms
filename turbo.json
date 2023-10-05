@@ -10,7 +10,7 @@
     "typecheck": {
       "inputs": ["src/**/*.ts"],
       "outputs": [],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "generate"]
     },
     "format": {},
     "lint": {
@@ -22,7 +22,7 @@
       "inputs": ["src/**/*.spec.ts", "src/**/*.test.ts"],
       "outputs": [],
       "outputMode": "errors-only",
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "generate"]
     },
     "test:integrations": {
       "inputs": ["__integrations__/**/*"],

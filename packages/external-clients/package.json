@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "generate": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
+    "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
   },
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",
