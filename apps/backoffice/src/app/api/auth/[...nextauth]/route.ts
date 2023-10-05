@@ -78,7 +78,6 @@ const authOptions: NextAuthOptions = {
           parameters: {
             userId: "TODO: apim user id here",
             userEmail: "TODO: apim email here",
-            userGroups: ["TODO: user groups here"],
             subscriptionId: "TODO: apim manage subscription id here"
           }
         };
