@@ -139,7 +139,7 @@ describe("Service Publication Handler", () => {
     expect(mockFsmPublicationClient.unpublish).toBeCalledWith(aService.id);
   });
 
-  it("handleQueueItem should idontknow", async () => {
+  it("handleQueueItem should be void 0 if unpublish return an FsmItemNotFoundError", async () => {
     const QueueItem = {
       id: aService.id,
       kind: "RequestUnpublicationItem",
@@ -153,22 +153,12 @@ describe("Service Publication Handler", () => {
       unpublish: vi.fn(() => TE.right(new FSMError())),
     } as unknown as ServicePublication.FsmClient;
 
-    // class FSMError extends Error {
-    //   public kind = "FsmItemNotFoundError";
-    //   constructor() {
-    //     super(`aMessage`);
-    //   }
-    // }
-    // const mockFsmPublicationClient = {
-    //   unpublish: vi.fn(() => TE.left(new FSMError())),
-    // } as unknown as ServicePublication.FsmClient;
-
     const result = await handleQueueItem(
       context,
       QueueItem,
       mockFsmPublicationClient
     )();
     expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
-    expect(result).toBeInstanceOf(Error);
+    expect(result).toBe(void 0);
   });
 });
