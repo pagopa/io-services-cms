@@ -10,5 +10,6 @@ export async function GET() {
     name: packageJson.name,
     version: packageJson.version
   };
+
   return NextResponse.json({ info });
 }
