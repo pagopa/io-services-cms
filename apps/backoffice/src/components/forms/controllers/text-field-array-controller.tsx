@@ -177,15 +177,17 @@ export function TextFieldArrayController({
       })}
       <Box marginTop={3}>
         <Stack direction="row" spacing={2} justifyContent="flex-start">
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={() => {
-              append(addDefaultValue);
-            }}
-          >
-            {t(addButtonLabel)}
-          </Button>
+          {editable ? (
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={() => {
+                append(addDefaultValue);
+              }}
+            >
+              {t(addButtonLabel)}
+            </Button>
+          ) : null}
           {addCancelButton ? (
             <Button variant="outlined" onClick={onCancelClick}>
               {t("buttons.cancel")}
