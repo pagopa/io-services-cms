@@ -52,7 +52,7 @@ export const forwardIoServicesCmsRequest = (
     "x-user-email": backofficeUser.parameters.userEmail,
     "x-user-id": backofficeUser.parameters.userId,
     "x-subscription-id": backofficeUser.parameters.subscriptionId,
-    "x-user-groups": backofficeUser.permissions.toString()
+    "x-user-groups": backofficeUser.permissions.join(",")
   } as any;
 
   // call the io-services-cms API and return the response
