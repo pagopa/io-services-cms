@@ -9,9 +9,9 @@ import { getConfiguration } from "@/config";
 export const setupMocks = () => {
   if (getConfiguration().IS_BROWSER) {
     const { mswWorker } = require("./msw-worker");
-    mswWorker.start({ onUnhandledRequest: "bypass" });
+    mswWorker.start({ onUnhandledRequest: "warn" });
   } else {
     const { mswServer } = require("./msw-server");
-    mswServer.listen({ onUnhandledRequest: "bypass" });
+    mswServer.listen({ onUnhandledRequest: "warn" });
   }
 };

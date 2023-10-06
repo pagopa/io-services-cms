@@ -1,17 +1,16 @@
 import { getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
-// import { ApimUtils } from "@io-services-cms/external-clients";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { IdentityTokenPayload } from "../types";
-import { createRemoteJWKSet, jwtVerify } from "jose";
-// import { ApimService } from "@io-services-cms/external-clients/apim-client";
 
 if (getConfiguration().SELFCARE_API_MOCKING) {
   const { setupMocks } = require("../../../../../mocks");
@@ -177,8 +176,7 @@ const authOptions: NextAuthOptions = {
       }
       return session;
     }
-  },
-  secret: process.env.NEXTAUTH_SECRET
+  }
 };
 
 const handler = NextAuth(authOptions);
