@@ -7627,6 +7627,7 @@ __metadata:
     "@emotion/styled": ^11.11.0
     "@faker-js/faker": ^8.0.2
     "@hookform/resolvers": ^3.3.1
+    "@io-services-cms/external-clients": "workspace:^"
     "@mui/icons-material": ^5.14.3
     "@mui/lab": ^5.0.0-alpha.142
     "@mui/material": ^5.14.5
