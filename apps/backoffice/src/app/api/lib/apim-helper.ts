@@ -6,7 +6,7 @@ export const buildApimService = (
 ) => {
   // client to interact with Api Management
   const apimClient = ApimUtils.getApimClient(
-    configuration.azureClientSecretCredential,
+    configuration,
     configuration.AZURE_SUBSCRIPTION_ID
   );
 
