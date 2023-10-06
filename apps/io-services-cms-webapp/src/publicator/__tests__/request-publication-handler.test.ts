@@ -146,11 +146,10 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    class FSMError extends Error {
-      public kind = "FsmItemNotFoundError";
-    }
+    const notFound = new FsmItemNotFoundError("aErrorMessage");
+
     const mockFsmPublicationClient = {
-      unpublish: vi.fn(() => TE.right(new FSMError())),
+      unpublish: vi.fn(() => TE.left(notFound)),
     } as unknown as ServicePublication.FsmClient;
 
     const result = await handleQueueItem(
