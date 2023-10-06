@@ -1,7 +1,7 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
 import { CardDetails } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
-import { ServiceDetailsMenu, ServiceStatus } from "@/components/services";
+import { ServiceContextMenu, ServiceStatus } from "@/components/services";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
@@ -10,6 +10,7 @@ import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ReadMore } from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
+import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -25,6 +26,7 @@ export default function ServiceDetails() {
     ServicePublication
   >();
   const { data: skData, fetchData: skFetchData } = useFetch<SubscriptionKeys>();
+  const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
     skFetchData(
@@ -36,6 +38,33 @@ export default function ServiceDetails() {
       }
     );
   };
+
+  const handlePublish = () =>
+    noContentFetchData("releaseService", { serviceId }, tt.unknown, {
+      notify: "all"
+    });
+
+  const handleUnpublish = () =>
+    noContentFetchData("unpublishService", { serviceId }, tt.unknown, {
+      notify: "all"
+    });
+
+  const handleDelete = () => {
+    noContentFetchData("deleteService", { serviceId }, tt.unknown, {
+      notify: "all"
+    });
+    router.push("/services");
+  };
+
+  const handleSubmitReview = (auto_publish: boolean) =>
+    noContentFetchData(
+      "reviewService",
+      { body: { auto_publish }, serviceId },
+      tt.unknown,
+      {
+        notify: "all"
+      }
+    );
 
   useEffect(() => {
     slFetchData("getService", { serviceId }, ServiceLifecycle, {
@@ -92,12 +121,23 @@ export default function ServiceDetails() {
 
   return (
     <>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={9} md={8} lg={8} xl={8}>
+      <Grid container spacing={2} alignItems="center" marginBottom={2}>
+        <Grid item xs={12} sm={12} md={7} lg={7} xl={7}>
           <PageHeader title={slData?.name} />
         </Grid>
-        <Grid item xs={12} sm={3} md={4} lg={4} xl={4}>
-          <ServiceDetailsMenu serviceId={serviceId} />
+        <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
+          <ServiceContextMenu
+            lifecycleStatus={slData?.status}
+            publicationStatus={spData?.status}
+            onPublishClick={handlePublish}
+            onUnpublishClick={handleUnpublish}
+            onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
+            onHistoryClick={() => console.log("onHistoryClick")}
+            onEditClick={() =>
+              router.push(`/services/${serviceId}/edit-service`)
+            }
+            onDeleteClick={handleDelete}
+          />
         </Grid>
       </Grid>
       <Grid container spacing={2}>

@@ -115,12 +115,48 @@
     }
   },
   "service": {
+    "actions": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "history": "View service history",
+      "publish": "Publish on IO App",
+      "submitReview": "Send to revision",
+      "unpublish": "Hide on IO App"
+    },
+    "delete": {
+      "modal": {
+        "title": "Delete service",
+        "description": "By deleting this service, it will no longer be visible in the IO app and will no longer be usable in this reserved area. This action is irreversible.",
+        "button": "Delete"
+      }
+    },
+    "publish": {
+      "modal": {
+        "title": "Publish service on IO App",
+        "description": "By publishing this service, you make it visible in the IO app to all citizens.",
+        "button": "Publish"
+      }
+    },
     "status": {
       "approved": "Active",
       "deleted": "Deleted",
       "draft": "Draft",
       "rejected": "Requested changes",
       "submitted": "In review"
+    },
+    "submitReview": {
+      "modal": {
+        "title": "Send to revision",
+        "description": "By confirming this action, the PagoPa team will take charge of the review of the service. You will not be able to take further action on this service until you receive the outcome of the review.",
+        "button": "Send"
+      }
+    },
+    "unpublish": {
+      "modal": {
+        "title": "Hide service on IO App",
+        "description": "By hiding this service, it will no longer be visible in the IO app to all citizens.",
+        "button": "Nascondi"
+      }
     },
     "visibility": {
       "published": "Visible in IO App",
