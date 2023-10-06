@@ -1,31 +1,128 @@
+import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
+import { CardDetails } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
+import { ServiceDetailsMenu, ServiceStatus } from "@/components/services";
+import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
+import { ServicePublication } from "@/generated/api/ServicePublication";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { Box, Button } from "@mui/material";
+import { ReadMore } from "@mui/icons-material";
+import { Box, Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 
 export default function ServiceDetails() {
   const { t } = useTranslation();
   const router = useRouter();
   const serviceId = router.query.serviceId as string;
 
+  const { data: slData, fetchData: slFetchData } = useFetch<ServiceLifecycle>();
+  const { data: spData, fetchData: spFetchData } = useFetch<
+    ServicePublication
+  >();
+  const { data: skData, fetchData: skFetchData } = useFetch<SubscriptionKeys>();
+
+  const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
+    skFetchData(
+      "regenerateServiceKey",
+      { keyType, serviceId },
+      SubscriptionKeys,
+      {
+        notify: "all"
+      }
+    );
+  };
+
+  useEffect(() => {
+    slFetchData("getService", { serviceId }, ServiceLifecycle, {
+      notify: "errors"
+    });
+    spFetchData("getPublishedService", { serviceId }, ServicePublication, {
+      notify: "errors"
+    });
+    skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
+      notify: "errors"
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const renderInformation = () => (
+    <CardDetails
+      title="routes.service.information"
+      cta={{
+        icon: <ReadMore style={{ fontSize: "24px" }} />,
+        label: "routes.service.viewDetails",
+        fn: () => console.log("click") // TODO
+      }}
+      rows={[
+        {
+          label: "routes.service.status",
+          value: <ServiceStatus status={slData?.status} />
+        },
+        {
+          label: "routes.service.visibility",
+          value: spData?.status
+            ? t(`service.visibility.${spData?.status}`)
+            : undefined
+        },
+        {
+          label: "routes.service.serviceId",
+          value: slData?.id
+        },
+        {
+          label: "routes.service.lastUpdate",
+          value: slData?.last_update,
+          kind: "datetime"
+        }
+      ]}
+    />
+  );
+
+  const renderServiceLogo = () => (
+    <CardDetails
+      title="Service Logo"
+      rows={[]}
+      customContent={<Box>Placeholder todo</Box>}
+    />
+  );
+
   return (
     <>
-      <PageHeader title={serviceId} />
-      <Box paddingY={3}>
-        <NextLink
-          href={`/services/${serviceId}/edit-service`}
-          passHref
-          style={{ textDecoration: "none" }}
-        >
-          <Button size="medium" variant="contained">
-            Modifica il servizio
-          </Button>
-        </NextLink>
-      </Box>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} sm={9} md={8} lg={8} xl={8}>
+          <PageHeader title={slData?.name} />
+        </Grid>
+        <Grid item xs={12} sm={3} md={4} lg={4} xl={4}>
+          <ServiceDetailsMenu serviceId={serviceId} />
+        </Grid>
+      </Grid>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={8} md={8} lg={6} xl={6}>
+          {renderInformation()}
+        </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={3} xl={3}>
+          {renderServiceLogo()}
+        </Grid>
+        <Grid item xs={12}>
+          <ApiKeys
+            title={t("routes.service.keys.title")}
+            description={t("routes.service.keys.description")}
+            keys={skData}
+            onRotateKey={handleRotateKey}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <AuthorizedCidrs
+            cidrs={(slData?.authorized_cidrs as unknown) as string[]}
+            editable={false}
+            onSaveClick={e => console.log(e)}
+          />
+        </Grid>
+      </Grid>
     </>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * next-auth` module augmentation _(used to augment `user` and `session.user` interface)_
  */
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+import { DefaultUser } from "next-auth";
 
 declare module "next-auth" {
   interface User extends BackOfficeUser {}
@@ -17,8 +17,14 @@ declare module "next-auth/jwt" {
 interface BackOfficeUser extends DefaultUser {
   institution: BackOfficeUserInstitution;
   authorizedInstitutions: BackOfficeUserInstitution[];
-  accessToken: string;
   permissions: string[];
+  parameters: BackOfficeUserParameters;
+}
+
+interface BackOfficeUserParameters {
+  userId: string;
+  userEmail: string;
+  subscriptionId: string;
 }
 
 interface BackOfficeUserInstitution {
