@@ -116,6 +116,7 @@ const useFetch = <RC>() => {
 
   // used to show notifications
   const { enqueueSnackbar } = useSnackbar();
+  const [fetchTaskCounter, setFetchTaskCounter] = useState(0);
 
   /**
    * SetStateAction\<UseFetchError>
@@ -242,13 +243,14 @@ const useFetch = <RC>() => {
       setUseFetchError("exceptionError", (err as Error).message);
     } finally {
       setLoading(false);
+      setFetchTaskCounter(() => fetchTaskCounter + 1);
     }
   };
 
   useEffect(() => {
     if (options) manageNotification();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, data]);
+  }, [fetchTaskCounter]);
 
   return { data, error, loading, fetchData };
 };

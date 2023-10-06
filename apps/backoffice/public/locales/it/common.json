@@ -115,12 +115,48 @@
     }
   },
   "service": {
+    "actions": {
+      "delete": "Elimina",
+      "edit": "Modifica",
+      "history": "Vedi storia del servizio",
+      "publish": "Pubblica in App IO",
+      "submitReview": "Invia in revisione",
+      "unpublish": "Nascondi dall'App IO"
+    },
+    "delete": {
+      "modal": {
+        "title": "Elimina servizio",
+        "description": "Eliminando questo servizio, non sarà più visibile in app IO e non sarà più utilizzabile in quest'area riservata. Questa azione è irreversibile.",
+        "button": "Elimina"
+      }
+    },
+    "publish": {
+      "modal": {
+        "title": "Pubblica servizio in App IO",
+        "description": "Pubblicando questo servizio, lo rendi visibile in app IO a tutti i cittadini.",
+        "button": "Pubblica"
+      }
+    },
     "status": {
       "approved": "Attivo",
       "deleted": "Cancellato",
       "draft": "In bozza",
       "rejected": "Modifiche richieste",
       "submitted": "In revisione"
+    },
+    "submitReview": {
+      "modal": {
+        "title": "Invia in revisione",
+        "description": "Confermando questa azione, il team PagoPa prenderà in carico la revisione del servizio. Non potrai effettuare ulteriori azioni su questo servizio fino a quando non riceverai l'esito della revisione.",
+        "button": "Invia"
+      }
+    },
+    "unpublish": {
+      "modal": {
+        "title": "Nascondi servizio dall'App IO",
+        "description": "Nascondendo questo servizio, non sarà più visibile in app IO a tutti i cittadini.",
+        "button": "Nascondi"
+      }
     },
     "visibility": {
       "published": "Visibile in App IO",
