@@ -1,6 +1,10 @@
 /* eslint-disable no-console */
 import { Context } from "@azure/functions";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import {
+  ServiceLifecycle,
+  ServicePublication,
+  FsmItemNotFoundError,
+} from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { Json } from "io-ts-types";
 import { describe, expect, it, vi, afterEach } from "vitest";
@@ -46,11 +50,11 @@ describe("Service Publication Handler", () => {
   it("handleQueueItem should return an Error if queueItem is invalid", async () => {
     const context = createContext();
 
-    const mockFsmLifecycleClient =
+    const mockFsmPublicationClient =
       {} as unknown as ServicePublication.FsmClient;
 
     await expect(() =>
-      handleQueueItem(context, anInvalidQueueItem, mockFsmLifecycleClient)()
+      handleQueueItem(context, anInvalidQueueItem, mockFsmPublicationClient)()
     ).rejects.toThrowError("Error while parsing incoming message");
   });
 
@@ -62,7 +66,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       publish: vi.fn(() =>
         TE.right({
           ...aService,
@@ -74,10 +78,10 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.publish).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.publish).toBeCalledWith(aService.id, {
+    expect(mockFsmPublicationClient.publish).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.publish).toBeCalledWith(aService.id, {
       data: aService,
     });
   });
@@ -90,7 +94,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       release: vi.fn(() =>
         TE.right({
           ...aService,
@@ -102,10 +106,10 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.release).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.release).toBeCalledWith(aService.id, {
+    expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.release).toBeCalledWith(aService.id, {
       data: aService,
     });
   });
@@ -117,7 +121,7 @@ describe("Service Publication Handler", () => {
     } as unknown as Json;
     const context = createContext();
 
-    const mockFsmLifecycleClient = {
+    const mockFsmPublicationClient = {
       unpublish: vi.fn(() =>
         TE.right({
           ...aService,
@@ -129,9 +133,31 @@ describe("Service Publication Handler", () => {
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmLifecycleClient
+      mockFsmPublicationClient
     )();
-    expect(mockFsmLifecycleClient.unpublish).toBeCalledTimes(1);
-    expect(mockFsmLifecycleClient.unpublish).toBeCalledWith(aService.id);
+    expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.unpublish).toBeCalledWith(aService.id);
+  });
+
+  it("handleQueueItem should be void 0 if unpublish return an FsmItemNotFoundError", async () => {
+    const QueueItem = {
+      id: aService.id,
+      kind: "RequestUnpublicationItem",
+    } as unknown as Json;
+    const context = createContext();
+
+    const notFound = new FsmItemNotFoundError("aErrorMessage");
+
+    const mockFsmPublicationClient = {
+      unpublish: vi.fn(() => TE.left(notFound)),
+    } as unknown as ServicePublication.FsmClient;
+
+    const result = await handleQueueItem(
+      context,
+      QueueItem,
+      mockFsmPublicationClient
+    )();
+    expect(mockFsmPublicationClient.unpublish).toBeCalledTimes(1);
+    expect(result).toBe(void 0);
   });
 });
