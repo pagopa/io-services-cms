@@ -1,3 +1,5 @@
+import { AzureClientSecretCredential } from "@io-services-cms/external-clients/apim-client/definitions";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 export type Configuration = {
   // IO Services CMS API configuration
   API_SERVICES_CMS_URL: string;
@@ -48,6 +50,38 @@ export function getConfiguration() {
 
     // window guards (useful to configure MSW to work in the browser or in Node environment)
     IS_BROWSER: typeof window !== "undefined",
-    IS_SERVER: typeof window === "undefined"
+    IS_SERVER: typeof window === "undefined",
+
+    // Apim configuration
+    AZURE_APIM: process.env.AZURE_APIM as NonEmptyString,
+    AZURE_APIM_RESOURCE_GROUP: process.env
+      .AZURE_APIM_RESOURCE_GROUP as NonEmptyString,
+    AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as NonEmptyString,
+    AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: process.env
+      .AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME as NonEmptyString,
+
+    // Apim Secrets  configuration
+    azureClientSecretCredential: {
+      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString,
+      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString,
+      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString
+    }
   };
 }
+
+const getApimConfiguration = () => {
+  return {
+    azureClientSecretCredential: {
+      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString,
+      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString,
+      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
+        .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString
+    },
+    AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string
+  };
+};

@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BackOfficeUser } from "../../../../../types/next-auth";
+import { ApimUtils } from "@io-services-cms/external-clients";
+import { getConfiguration } from "@/config";
+import { retrieveManageKeys } from "../../lib/keys-manage";
+import { withJWTAuthHandler } from "../../lib/handler-wrappers";
+import { pipe } from "fp-ts/lib/function";
+import { buildApimService } from "../../lib/apim-helper";
 
 /**
  * @description Retrieve Manage keys
- * TODO:!!!!This is a placeholder!!!!
- * FIXME:!!!!Update the implementation!!!!
  *
  */
-export async function GET(request: NextRequest) {
-  // TODO: retrieve from token the subscriptionId (id of the user's manage Subscription)
-  const subscriptionId = "00000000-0000-0000-0000-000000000000";
+const handler = (
+  request: NextRequest,
+  { backofficeUser }: { backofficeUser: BackOfficeUser }
+) => {
+  const config = getConfiguration();
 
-  return NextResponse.json({ message: "Not Implemented" });
-}
+  // Apim Service, used to operates on Apim resources
+  const apimService = buildApimService(config);
+
+  return retrieveManageKeys(apimService)(backofficeUser)();
+};
+
+export const { GET = withJWTAuthHandler(handler) } = {};

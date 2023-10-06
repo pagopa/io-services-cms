@@ -6,11 +6,13 @@ import { NextResponse } from "next/server";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
-//TODO: token details are needed in order to retrieve such keys
-export const getManageKeys = (apimService: ApimUtils.ApimService) =>
+export const retrieveManageKeys = (apimService: ApimUtils.ApimService) => (
+  backOfficeUser: BackOfficeUser
+) =>
   pipe(
-    "subscritionId", //TODO: retrieve from token the subscriptionId (id of the user's manage Subscription)
+    backOfficeUser.parameters.subscriptionId,
     apimService.listSecrets,
     TE.mapLeft(error =>
       NextResponse.json(
@@ -22,5 +24,11 @@ export const getManageKeys = (apimService: ApimUtils.ApimService) =>
         { status: error.statusCode }
       )
     ),
-    TE.map(response => NextResponse.json(response))
+    TE.map(response =>
+      NextResponse.json({
+        primaryKey: response.primaryKey,
+        secondaryKey: response.secondaryKey
+      })
+    ),
+    TE.toUnion
   );
