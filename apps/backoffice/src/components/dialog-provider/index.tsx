@@ -65,7 +65,7 @@ const DialogProvider: React.FC<{
 
   return (
     <>
-      <Dialog open={open} onClose={handleCancel}>
+      <Dialog open={open} onClose={handleCancel} disableScrollLock>
         <DialogTitle>{options.title}</DialogTitle>
         <DialogContent sx={{ minWidth: "600px" }}>
           {options.message && (

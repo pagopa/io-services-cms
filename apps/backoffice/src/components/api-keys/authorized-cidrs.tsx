@@ -10,6 +10,8 @@ import { LoaderSkeleton } from "../loaders";
 export type AuthorizedCidrsProps = {
   /** List of IPs in CIDR format */
   cidrs?: string[];
+  /** Indentify if fields are editable */
+  editable?: boolean;
   /** Event triggered when user click on **Save** button */
   onSaveClick?: (cidrs: string[]) => void;
 };
@@ -17,6 +19,7 @@ export type AuthorizedCidrsProps = {
 /** Show and Edit an IP List in CIDR format */
 export const AuthorizedCidrs = ({
   cidrs,
+  editable,
   onSaveClick
 }: AuthorizedCidrsProps) => {
   const { t } = useTranslation();
@@ -70,7 +73,7 @@ export const AuthorizedCidrs = ({
                 }
               }}
               sx={{ maxWidth: "185px" }}
-              editable
+              editable={editable}
               readOnly
               addSaveButton={formState.isDirty && formState.isValid}
               onSaveClick={handleSave}
