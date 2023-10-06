@@ -71,17 +71,3 @@ export function getConfiguration() {
     }
   };
 }
-
-const getApimConfiguration = () => {
-  return {
-    azureClientSecretCredential: {
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
-        .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString,
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
-        .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString,
-      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
-        .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString
-    },
-    AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string
-  };
-};
