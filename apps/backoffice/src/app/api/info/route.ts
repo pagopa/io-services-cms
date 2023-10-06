@@ -8,7 +8,7 @@ import packageJson from "../../../../package.json";
 export async function GET() {
   const info = {
     name: packageJson.name,
-    version: packageJson.version,
+    version: packageJson.version
   };
   return NextResponse.json({ info });
 }

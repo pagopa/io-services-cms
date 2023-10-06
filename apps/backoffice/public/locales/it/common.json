@@ -15,7 +15,7 @@
   "authorizedCidrs": {
     "add": "Aggiungi indirizzo IP",
     "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le chiavi API.",
-    "title": "Indirizzi IP autorizzati"
+    "title": "Indirizzi IP"
   },
   "buttons": {
     "cancel": "Annulla",
@@ -76,6 +76,18 @@
       "title": "Servizi",
       "description": "Visualizza e gestisci i servizi del tuo ente."
     },
+    "service": {
+      "information": "Informazioni",
+      "keys": {
+        "title": "API Key",
+        "description": "Utilizza questa chiave per operazioni programmatiche di tipo USE del servizio."
+      },
+      "lastUpdate": "Ultima modifica",
+      "serviceId": "ID Servizio",
+      "status": "Stato",
+      "viewDetails": "Vedi dettaglio",
+      "visibility": "Visibilità"
+    },
     "new-service": {
       "title": "Crea un nuovo servizio",
       "description": "Segui i passaggi e compila i campi richiesti. Una volta creato, potrai inviare il servizio in revisione e procedere poi alla pubblicazione su app IO."
@@ -100,6 +112,19 @@
     "groups": {
       "title": "Gruppi",
       "description": ""
+    }
+  },
+  "service": {
+    "status": {
+      "approved": "Attivo",
+      "deleted": "Cancellato",
+      "draft": "In bozza",
+      "rejected": "Modifiche richieste",
+      "submitted": "In revisione"
+    },
+    "visibility": {
+      "published": "Visibile in App IO",
+      "unpublished": "Non visibile in App IO"
     }
   },
   "test": "Questo è un test di traduzione"

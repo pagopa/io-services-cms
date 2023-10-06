@@ -3,11 +3,12 @@ import { Client, createClient } from "@/generated/services-cms/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
-// if (getConfiguration().API_SERVICES_CMS_MOCKING) {
-//   const { setupMocks } = require("../../../../mocks");
-//   setupMocks();
-// }
+if (getConfiguration().API_SERVICES_CMS_MOCKING) {
+  const { setupMocks } = require("../../../../mocks");
+  setupMocks();
+}
 
 export type IoServicesCmsClient = Client;
 
@@ -37,31 +38,25 @@ export const forwardIoServicesCmsRequest = (
 ) => async <T extends keyof IoServicesCmsClient>(
   operationId: T,
   nextRequest: NextRequest,
+  backofficeUser: BackOfficeUser,
   pathParams?: PathParameters
 ) => {
+  console.log("forwardIoServicesCmsRequest");
   // extract jsonBody
   const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
-
-  // TODO: extract JWT token
 
   // create the request payload
   const requestPayload = {
     ...pathParams,
     body: jsonBody,
-    "x-user-email": "SET_RETRIEVED_USER_EMAIL_HERE", // TODO: replace with real value
-    // "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE", // TODO: replace with real value
-    "x-user-id": "SET_RETRIEVED_USER_ID_HERE", // TODO: replace with real value
-    "x-subscription-id": "SET_RETRIEVED_SUBSCRIPTION_ID_HERE", // TODO: replace with real value
-    "x-user-groups": "SET_RETRIEVED_USER_GROUPS_HERE" // TODO: replace with real value
+    "x-user-email": backofficeUser.parameters.userEmail,
+    "x-user-id": backofficeUser.parameters.userId,
+    "x-subscription-id": backofficeUser.parameters.subscriptionId,
+    "x-user-groups": backofficeUser.permissions.join(",")
   } as any;
 
-  // call the io-services-cms API
-  const result = await callIoServicesCms(client)(operationId, requestPayload);
-
-  console.log("ioServicesCmsApiCall result: ", result);
-
-  // return the response
-  return result;
+  // call the io-services-cms API and return the response
+  return await callIoServicesCms(client)(operationId, requestPayload);
 };
 
 /**
