@@ -2,7 +2,9 @@
  * Module for the management of the manage key, contains the business logic for the /keys/manage apis
  */
 
+import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -39,23 +41,24 @@ export const regenerateManageKeys = (apimService: ApimUtils.ApimService) => (
   keyType: string
 ) =>
   pipe(
-    validateKeyType(keyType),
+    keyType,
+    SubscriptionKeyType.decode,
     E.mapLeft(error =>
       NextResponse.json(
         {
           title: "InvalidKeyType",
           status: 400,
-          detail: error
+          detail: readableReport(error)
         },
         { status: 400 }
       )
     ),
     TE.fromEither,
-    TE.chainW(_ =>
+    TE.chainW(decodedKeyType =>
       pipe(
         apimService.regenerateSubscriptionKey(
           backOfficeUser.parameters.subscriptionId,
-          "primary" as any
+          decodedKeyType
         ),
         TE.mapLeft(error =>
           NextResponse.json(
@@ -87,3 +90,7 @@ const validateKeyType = (keyType: string) =>
       _ => `Invalid key type: ${_}`
     )
   );
+
+const test = (keyType: string) => {
+  SubscriptionKeyType.decode(keyType);
+};
