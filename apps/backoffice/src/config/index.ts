@@ -15,9 +15,12 @@ export type Configuration = {
   BACK_OFFICE_ID: string;
   BACK_OFFICE_TITLE: string;
 
-  // URLs
+  // Selfcare
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
+  SELFCARE_BASE_URL: string;
+  SELFCARE_JWKS_PATH: string;
+  SELFCARE_API_MOCKING: boolean;
 
   // NodeJS Environment mode
   IS_DEVELOPMENT: boolean;
@@ -35,12 +38,16 @@ export type Configuration = {
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   AZURE_APIM_RESOURCE_GROUP: string;
   AZURE_APIM: string;
+  API_APIM_MOCKING: boolean;
+
+  BACKOFFICE_DOMAIN: string;
+
   // Legacy CosmosDB configuration
   LEGACY_COSMOSDB_URI: string;
   LEGACY_COSMOSDB_NAME: string;
   LEGACY_COSMOSDB_KEY: string;
 };
-export function getConfiguration() {
+export function getConfiguration(): Configuration {
   return {
     // IO Services CMS API configuration
     API_SERVICES_CMS_URL: process.env.API_SERVICES_CMS_URL as string,
@@ -90,7 +97,7 @@ export function getConfiguration() {
 
     API_APIM_MOCKING: process.env.API_APIM_MOCKING === "true",
 
-    BACKOFFICE_DOMAIN: process.env.BACKOFFICE_DOMAIN,
+    BACKOFFICE_DOMAIN: process.env.BACKOFFICE_DOMAIN as string,
 
     // Legacy CosmosDB configuration
     LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,

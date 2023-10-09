@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 export type SessionTokenInstitution = t.TypeOf<typeof SessionTokenInstitution>;
 export const SessionTokenInstitution = t.intersection([
@@ -101,4 +102,11 @@ export const IdentityTokenPayload = t.type({
   desired_exp: t.number,
   /** (Selfcare Institution) Custom Claim */
   organization: IdentityTokenOrganization
+});
+
+export type ApimUser = t.TypeOf<typeof ApimUser>;
+export const ApimUser = t.type({
+  id: NonEmptyString,
+  email: EmailString,
+  groups: t.readonlyArray(t.type({ displayName: NonEmptyString }))
 });
