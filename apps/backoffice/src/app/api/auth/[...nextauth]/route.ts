@@ -30,24 +30,24 @@ const authOptions: NextAuthOptions = {
           identity_token: identity_token
         } = credentials as SelfCareIdentity;
 
-        // first quick token check
-        if (!NonEmptyString.is(identity_token)) {
-          throw new Error("null undefined or empty identity token");
-        }
-
         const config = getConfiguration();
-
-        const jwksUrl = `${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`;
-        const JWKS = createRemoteJWKSet(new URL(jwksUrl));
 
         // validate and decode identity token
         const identityTokenPayload = await pipe(
           TE.tryCatch(
             () =>
-              jwtVerify(identity_token, JWKS, {
-                issuer: config.SELFCARE_BASE_URL,
-                audience: config.BACKOFFICE_DOMAIN
-              }),
+              jwtVerify(
+                identity_token,
+                createRemoteJWKSet(
+                  new URL(
+                    `${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`
+                  )
+                ),
+                {
+                  issuer: config.SELFCARE_BASE_URL,
+                  audience: config.BACKOFFICE_DOMAIN
+                }
+              ),
             E.toError
           ),
           TE.chain(({ payload }) =>
@@ -59,7 +59,7 @@ const authOptions: NextAuthOptions = {
             )
           ),
           TE.getOrElse(e => {
-            console.error(e);
+            console.error(e); //TODO: use "proper" log
             throw e;
           })
         )();
