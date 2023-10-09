@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 0.7.0
+
+### Minor Changes
+
+- fe992fd: Add ServiceContextMenu on service details page
+- 7c52fee: Add Service Details Page
+- e476e0a: Add notifications on fetchData result
+
+### Patch Changes
+
+- 773b243: ADD next-auth authentication API routes
+- 3515b33: ADD GET /keys/manage API Implementation
+
 ## 0.6.0
 
 ### Minor Changes
