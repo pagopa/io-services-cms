@@ -78,6 +78,5 @@ export const regenerateManageKeys = (apimService: ApimUtils.ApimService) => (
         secondaryKey: response.secondaryKey
       })
     ),
-    TE.toUnion,
-    x => x
+    TE.toUnion
   );
