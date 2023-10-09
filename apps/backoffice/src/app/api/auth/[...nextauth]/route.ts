@@ -12,7 +12,10 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { IdentityTokenPayload } from "../types";
 
-if (getConfiguration().SELFCARE_API_MOCKING) {
+if (
+  getConfiguration().SELFCARE_API_MOCKING ||
+  getConfiguration().API_APIM_MOCKING
+) {
   const { setupMocks } = require("../../../../../mocks");
   setupMocks();
 }
@@ -35,7 +38,6 @@ const authOptions: NextAuthOptions = {
         const config = getConfiguration();
 
         const jwksUrl = `${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`;
-        console.log(jwksUrl);
         const JWKS = createRemoteJWKSet(new URL(jwksUrl));
 
         // validate and decode identity token
@@ -62,50 +64,41 @@ const authOptions: NextAuthOptions = {
           })
         )();
 
-        // const apimClient = ApimUtils.getApimClient(
-        //   config,
-        //   config.AZURE_SUBSCRIPTION_ID
-        // );
-
-        // // Apim Service, used to operates on Apim resources
-        // const apimService = ApimUtils.getApimService(
-        //   apimClient,
-        //   config.AZURE_APIM_RESOURCE_GROUP,
-        //   config.AZURE_APIM
-        // );
-
-        // const apimUser = await pipe(
-        //   `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
-        //   apimService.getUserByEmail,
-        //   TE.mapLeft(
-        //     err =>
-        //       new Error(
-        //         `Failed to fetch user by its email, code: ${err.statusCode}`
-        //       )
-        //   ),
-        //   TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-        //   TE.chain(
-        //     flow(
-        //       t.type({
-        //         id: NonEmptyString,
-        //         email: EmailString,
-        //         groups: t.array(t.type({ displayName: NonEmptyString }))
-        //       }).decode,
-        //       E.mapLeft(flow(readableReport, E.toError)),
-        //       TE.fromEither
-        //     )
-        //   ),
-        //   TE.getOrElse(e => {
-        //     console.error(e);
-        //     throw e;
-        //   })
-        // )();
-
-        const apimUser = {
-          id: "userId",
-          email: "userEmail",
-          groups: [{ displayName: "displayName" }]
-        };
+        const apimUser = await pipe(
+          ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
+          apimClient =>
+            ApimUtils.getApimService(
+              apimClient,
+              config.AZURE_APIM_RESOURCE_GROUP,
+              config.AZURE_APIM
+            ),
+          apimService =>
+            apimService.getUserByEmail(
+              `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString
+            ),
+          TE.mapLeft(
+            err =>
+              new Error(
+                `Failed to fetch user by its email, code: ${err.statusCode}`
+              )
+          ),
+          TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
+          TE.chain(
+            flow(
+              t.type({
+                id: NonEmptyString,
+                email: EmailString,
+                groups: t.readonlyArray(t.type({ displayName: NonEmptyString }))
+              }).decode,
+              E.mapLeft(flow(readableReport, E.toError)),
+              TE.fromEither
+            )
+          ),
+          TE.getOrElse(e => {
+            console.error(e);
+            throw e;
+          })
+        )();
 
         // TODO: set next-auth User
         const user = {

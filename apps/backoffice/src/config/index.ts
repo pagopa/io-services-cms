@@ -81,9 +81,9 @@ export function getConfiguration() {
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
       .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
+      .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString, //FIXME: fix cast
     AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
+      .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString, //FIXME: fix cast
 
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
     AZURE_APIM: process.env.AZURE_APIM as string, //FIXME: fix cast
