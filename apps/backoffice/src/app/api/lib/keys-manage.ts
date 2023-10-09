@@ -81,16 +81,3 @@ export const regenerateManageKeys = (apimService: ApimUtils.ApimService) => (
     TE.toUnion,
     x => x
   );
-
-const validateKeyType = (keyType: string) =>
-  pipe(
-    keyType,
-    E.fromPredicate(
-      _ => _ === "primary" || _ === "secondary",
-      _ => `Invalid key type: ${_}`
-    )
-  );
-
-const test = (keyType: string) => {
-  SubscriptionKeyType.decode(keyType);
-};
