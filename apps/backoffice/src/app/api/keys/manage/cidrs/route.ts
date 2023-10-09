@@ -16,9 +16,7 @@ const subscriptionCIDRsModel = buildSubscriptionCIDRsModel(config);
 const getAuthorizedManageKeyCIDRs = (
   request: NextRequest,
   { backofficeUser }: { backofficeUser: BackOfficeUser }
-) => {
-  return retrieveManageKeyCIDRs(subscriptionCIDRsModel)(backofficeUser)();
-};
+) => retrieveManageKeyCIDRs(subscriptionCIDRsModel)(backofficeUser)();
 
 /**
  * @description Update manage key authorized CIDRs
