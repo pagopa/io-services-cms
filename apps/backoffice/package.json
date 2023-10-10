@@ -22,6 +22,7 @@
     "generate": "yarn api-definitions:all & yarn services-cms:all"
   },
   "dependencies": {
+    "@azure/cosmos": "^3.17.3",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@hookform/resolvers": "^3.3.1",
@@ -30,6 +31,7 @@
     "@mui/lab": "^5.0.0-alpha.142",
     "@mui/material": "^5.14.5",
     "@mui/system": "^5.14.5",
+    "@pagopa/io-functions-commons": "^28.2.0",
     "@pagopa/mui-italia": "^1.0.1",
     "axios": "^1.5.0",
     "eslint": "8.50.0",

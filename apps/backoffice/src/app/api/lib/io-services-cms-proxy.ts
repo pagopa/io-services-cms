@@ -1,4 +1,8 @@
 import { Configuration, getConfiguration } from "@/config";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_NO_CONTENT
+} from "@/config/constants";
 import { Client, createClient } from "@/generated/services-cms/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -78,10 +82,10 @@ const callIoServicesCms = (client: IoServicesCmsClient) => async <
     return NextResponse.json(
       {
         title: "validationError",
-        status: 400 as any,
+        status: HTTP_STATUS_BAD_REQUEST as any,
         detail: readableReport(result.left)
       },
-      { status: 400 }
+      { status: HTTP_STATUS_BAD_REQUEST }
     );
   }
 
@@ -89,7 +93,7 @@ const callIoServicesCms = (client: IoServicesCmsClient) => async <
   // NextResponse.json() does not support 204 status code https://github.com/vercel/next.js/discussions/51475
   if (status === 204) {
     return new Response(null, {
-      status: 204
+      status: HTTP_STATUS_NO_CONTENT
     });
   }
 
