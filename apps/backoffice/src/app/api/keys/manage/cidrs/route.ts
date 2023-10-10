@@ -7,17 +7,12 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 /**
  * @description Retrieve manage key authorized CIDRs
  */
-const getAuthorizedManageKeyCIDRs = async (
+const getAuthorizedManageKeyCIDRs = (
   request: NextRequest,
   { backofficeUser }: { backofficeUser: BackOfficeUser }
 ) => {
   const subscriptionCIDRsModel = getSubscriptionCIDRsModelInstance();
-  const result = await retrieveManageKeyCIDRs(subscriptionCIDRsModel)(
-    backofficeUser
-  )();
-  return NextResponse.json(result.body, {
-    status: result.httpStatus
-  });
+  return retrieveManageKeyCIDRs(subscriptionCIDRsModel)(backofficeUser)();
 };
 
 /**

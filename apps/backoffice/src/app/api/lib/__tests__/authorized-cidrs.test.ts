@@ -35,11 +35,14 @@ describe("Authorized CIDRs Subscription Manage", () => {
         jwtMock
       )();
 
+      //extract jsonBody from NextResponse
+      const jsonResponse = await new Response(result.body).json();
+
       expect(
         mockSubscriptionCIDRsModel.findLastVersionByModelId
       ).toHaveBeenCalledWith([aSubscriptionId]);
-      expect(result.httpStatus).toBe(200);
-      expect(result.body).toStrictEqual({ cidrs: ["127.0.0.1"] });
+      expect(result.status).toBe(200);
+      expect(jsonResponse).toStrictEqual({ cidrs: ["127.0.0.1"] });
     });
 
     it("should return 404 when authorized cidrs are not found", async () => {
@@ -51,13 +54,16 @@ describe("Authorized CIDRs Subscription Manage", () => {
         jwtMock
       )();
 
+      //extract jsonBody from NextResponse
+      const jsonResponse = await new Response(result.body).json();
+      console.log("jsonResponse", jsonResponse);
       expect(
         mockSubscriptionCIDRsModel.findLastVersionByModelId
       ).toHaveBeenCalledWith([aSubscriptionId]);
-      expect(result.httpStatus).toBe(404);
-      expect(result.body).not.toBe(null);
-      expect(result.body.title).toBe("ManageKeyCIDRsNotFound");
-      expect(result.body.status).toBe(404);
+      expect(result.status).toBe(404);
+      expect(jsonResponse).not.toBe(null);
+      expect(jsonResponse.title).toBe("ManageKeyCIDRsNotFound");
+      expect(jsonResponse.status).toBe(404);
     });
 
     it("should return 500 when an error is returned from cosmos", async () => {
@@ -80,13 +86,16 @@ describe("Authorized CIDRs Subscription Manage", () => {
         jwtMock
       )();
 
+      //extract jsonBody from NextResponse
+      const jsonResponse = await new Response(result.body).json();
+
       expect(
         mockSubscriptionCIDRsModel.findLastVersionByModelId
       ).toHaveBeenCalledWith([aSubscriptionId]);
-      expect(result.httpStatus).toBe(500);
-      expect(result.body).not.toBe(null);
-      expect(result.body.title).toBe("ManageKeyCIDRsError");
-      expect(result.body.status).toBe(500);
+      expect(result.status).toBe(500);
+      expect(jsonResponse).not.toBe(null);
+      expect(jsonResponse.title).toBe("ManageKeyCIDRsError");
+      expect(jsonResponse.status).toBe(500);
     });
   });
 });
