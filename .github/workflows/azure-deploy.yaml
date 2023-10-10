@@ -98,6 +98,9 @@ jobs:
           package: artifact.zip
           slot-name: staging
 
+      - name: Delay
+        run: sleep 30
+
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'backoffice')
         id: healthcheck_backoffice
