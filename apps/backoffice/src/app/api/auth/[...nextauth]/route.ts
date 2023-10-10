@@ -122,7 +122,8 @@ const retrieveApimUser = (config: Configuration) => (
       ),
     apimService =>
       apimService.getUserByEmail(
-        `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString
+        `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+        true
       ),
     TE.mapLeft(
       err =>
@@ -161,7 +162,9 @@ const toUser = (config: Configuration) => ({
       role: "operator"
     }
   ],
-  permissions: apimUser.groups.map(group => group.displayName),
+  permissions: apimUser.groups
+    .filter(group => group.type === "custom")
+    .map(group => group.name),
   parameters: {
     userId: apimUser.id,
     userEmail: apimUser.email,

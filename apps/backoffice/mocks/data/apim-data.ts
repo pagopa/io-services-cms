@@ -1,8 +1,6 @@
-import { getConfiguration } from "@/config";
+import { Configuration, getConfiguration } from "@/config";
 
-export const getOpenIdConfig = (
-  configuration: ReturnType<typeof getConfiguration>
-) => ({
+export const getOpenIdConfig = (configuration: Configuration) => ({
   token_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
   token_endpoint_auth_methods_supported: [
     "client_secret_post",
@@ -65,11 +63,10 @@ export const anOauth2TokenResponse = {
   scope: "create"
 };
 
-export const aListByServiceResponse = {
+export const getListByServiceResponse = (configuration: Configuration) => ({
   value: [
     {
-      id:
-        "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ApiManagement/service/apimService1/users/1",
+      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/1`,
       type: "Microsoft.ApiManagement/service/users",
       name: "1",
       email: "admin@live.com",
@@ -85,16 +82,21 @@ export const aListByServiceResponse = {
       ],
       groups: [
         {
-          displayName: "ApiServiceRead"
+          type: "custom",
+          name: "ApiServiceRead"
         },
         {
-          displayName: "ApiServiceWrite"
+          type: "custom",
+          name: "ApiServiceWrite"
+        },
+        {
+          type: "system",
+          name: "Developer"
         }
       ]
     },
     {
-      id:
-        "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ApiManagement/service/apimService1/users/56eaec62baf08b06e46d27fd",
+      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/56eaec62baf08b06e46d27fd`,
       type: "Microsoft.ApiManagement/service/users",
       name: "56eaec62baf08b06e46d27fd",
       properties: {
@@ -112,8 +114,7 @@ export const aListByServiceResponse = {
       }
     },
     {
-      id:
-        "/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ApiManagement/service/apimService1/users/5931a75ae4bbd512a88c680b",
+      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/5931a75ae4bbd512a88c680b`,
       type: "Microsoft.ApiManagement/service/users",
       name: "5931a75ae4bbd512a88c680b",
       properties: {
@@ -133,11 +134,9 @@ export const aListByServiceResponse = {
   ],
   count: 3,
   nextLink: ""
-};
+});
 
-export const getDiscoveryInstanceResponse = (
-  configuration: ReturnType<typeof getConfiguration>
-) => ({
+export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({
   tenant_discovery_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
   "api-version": "1.1",
   metadata: [

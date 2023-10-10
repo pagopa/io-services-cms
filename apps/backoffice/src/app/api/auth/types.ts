@@ -108,5 +108,14 @@ export type ApimUser = t.TypeOf<typeof ApimUser>;
 export const ApimUser = t.type({
   id: NonEmptyString,
   email: EmailString,
-  groups: t.readonlyArray(t.type({ displayName: NonEmptyString }))
+  groups: t.readonlyArray(
+    t.type({
+      type: t.union([
+        t.literal("custom"),
+        t.literal("system"),
+        t.literal("external")
+      ]),
+      name: NonEmptyString
+    })
+  )
 });

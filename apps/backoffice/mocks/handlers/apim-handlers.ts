@@ -5,7 +5,7 @@
 import { getConfiguration } from "@/config";
 import { rest } from "msw";
 import {
-  aListByServiceResponse,
+  getListByServiceResponse,
   anOauth2TokenResponse,
   getDiscoveryInstanceResponse,
   getOpenIdConfig
@@ -45,7 +45,7 @@ export const buildHandlers = () => {
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
       (_, res, ctx) => {
         const resultArray = [
-          [ctx.status(200), ctx.json(aListByServiceResponse)],
+          [ctx.status(200), ctx.json(getListByServiceResponse(configuration))],
           [ctx.status(500), ctx.json(getWellKnown500Response())]
         ];
 
