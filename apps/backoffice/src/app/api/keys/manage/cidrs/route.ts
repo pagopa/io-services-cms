@@ -1,14 +1,8 @@
-import {
-  buildSubscriptionCIDRsModel,
-  retrieveManageKeyCIDRs
-} from "@/app/api/lib/authorized-cidrs";
+import { retrieveManageKeyCIDRs } from "@/app/api/lib/authorized-cidrs";
 import { withJWTAuthHandler } from "@/app/api/lib/handler-wrappers";
-import { getConfiguration } from "@/config";
+import { getSubscriptionCIDRsModelInstance } from "@/app/api/lib/subscription-cidrs-singleton";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
-
-const config = getConfiguration();
-const subscriptionCIDRsModel = buildSubscriptionCIDRsModel(config);
 
 /**
  * @description Retrieve manage key authorized CIDRs
@@ -16,7 +10,10 @@ const subscriptionCIDRsModel = buildSubscriptionCIDRsModel(config);
 const getAuthorizedManageKeyCIDRs = (
   request: NextRequest,
   { backofficeUser }: { backofficeUser: BackOfficeUser }
-) => retrieveManageKeyCIDRs(subscriptionCIDRsModel)(backofficeUser)();
+) => {
+  const subscriptionCIDRsModel = getSubscriptionCIDRsModelInstance();
+  return retrieveManageKeyCIDRs(subscriptionCIDRsModel)(backofficeUser)();
+};
 
 /**
  * @description Update manage key authorized CIDRs
