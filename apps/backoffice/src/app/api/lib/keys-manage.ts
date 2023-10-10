@@ -2,6 +2,7 @@
  * Module for the management of the manage key, contains the business logic for the /keys/manage apis
  */
 
+import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -47,10 +48,10 @@ export const regenerateManageKeys = (apimService: ApimUtils.ApimService) => (
       NextResponse.json(
         {
           title: "InvalidKeyType",
-          status: 400,
+          status: HTTP_STATUS_BAD_REQUEST,
           detail: readableReport(error)
         },
-        { status: 400 }
+        { status: HTTP_STATUS_BAD_REQUEST }
       )
     ),
     TE.fromEither,

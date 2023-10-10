@@ -1,4 +1,3 @@
-import { AzureClientSecretCredential } from "@io-services-cms/external-clients/apim-client/definitions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 export type Configuration = {
   // IO Services CMS API configuration
@@ -36,6 +35,10 @@ export type Configuration = {
   AZURE_APIM_RESOURCE_GROUP: string;
   AZURE_APIM: string;
 
+  // Legacy CosmosDB configuration
+  LEGACY_COSMOSDB_URI: string;
+  LEGACY_COSMOSDB_NAME: string;
+  LEGACY_COSMOSDB_KEY: string;
 };
 export function getConfiguration() {
   return {
@@ -81,6 +84,11 @@ export function getConfiguration() {
       .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
 
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
-    AZURE_APIM: process.env.AZURE_APIM as string //FIXME: fix cast
+    AZURE_APIM: process.env.AZURE_APIM as string, //FIXME: fix cast
+
+    // Legacy CosmosDB configuration
+    LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,
+    LEGACY_COSMOSDB_NAME: process.env.LEGACY_COSMOSDB_NAME as string,
+    LEGACY_COSMOSDB_KEY: process.env.LEGACY_COSMOSDB_KEY as string
   };
 }
