@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 0.7.1
+
+### Patch Changes
+
+- 1f01f90: ADD PUT /keys/manage API Implementation
+- 7e9f4a0: ADD GET /keys/manage/cidrs API Implementation
+
 ## 0.7.0
 
 ### Minor Changes
