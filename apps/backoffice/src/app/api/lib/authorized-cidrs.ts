@@ -63,7 +63,7 @@ export const updateManageKeyCIDRs = (
             status: HTTP_STATUS_BAD_REQUEST,
             detail: "Bad request"
           },
-          { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
+          { status: HTTP_STATUS_BAD_REQUEST }
         )
     ),
     TE.chainW(
@@ -76,7 +76,7 @@ export const updateManageKeyCIDRs = (
               status: HTTP_STATUS_BAD_REQUEST,
               detail: readableReport(error)
             },
-            { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
+            { status: HTTP_STATUS_BAD_REQUEST }
           )
         ),
         TE.fromEither
@@ -92,7 +92,7 @@ export const updateManageKeyCIDRs = (
         }),
         TE.map(response =>
           NextResponse.json({
-            cidrs: response.cidrs
+            cidrs: Array.from(response.cidrs),
           })
         ),
         TE.mapLeft(error =>
