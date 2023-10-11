@@ -13,9 +13,13 @@
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
     "test:fe": "vitest run --config ./vitest.config.react.ts",
     "coverage": "vitest run --coverage",
+    "api-definitions:clean": "rm -rf ./src/generated/api",
     "api-definitions:generate": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
+    "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:generate",
+    "services-cms:clean": "rm -rf ./src/generated/services-cms",
     "services-cms:generate": "gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
-    "generate": "yarn api-definitions:generate & yarn services-cms:generate"
+    "services-cms:all": "yarn services-cms:clean && yarn services-cms:generate",
+    "generate": "yarn api-definitions:all & yarn services-cms:all"
   },
   "dependencies": {
     "@azure/cosmos": "^3.17.3",
