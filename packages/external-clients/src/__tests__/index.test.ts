@@ -1,5 +1,5 @@
 import { test } from "vitest";
 
 test("it works!", ({ expect }) => {
-  expect(4).equal(4);
+  expect(1).equal(1);
 });
