@@ -103,8 +103,7 @@ jobs:
         id: healthcheck_backoffice
         run: |
           # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
-          resp_status="$(curl --silent --head https://selfcare.io.pagopa.it/api/info | awk '/^HTTP/{print $2}')"
+          resp_status="$(curl --silent --head https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }} | awk '/^HTTP/{print $2}')"
           if [[ $resp_status != 200 ]] 
           then
             sleep 30
