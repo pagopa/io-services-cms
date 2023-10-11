@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-ADD next-auth authentication API routes
+ADD PUT /keys/manage API Implementation

@@ -1,6 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
-import { EmptyState } from "../empty-state";
+import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
+import { EmptyState } from "../empty-state";
 
 let emptyStateLabel = "emptyStateLabel";
 let ctaLabel = "ctaLabel";

@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.1
+
+### Patch Changes
+
+- d5500a0: bugfix delete never approved service
+
 ## 1.21.0
 
 ### Minor Changes

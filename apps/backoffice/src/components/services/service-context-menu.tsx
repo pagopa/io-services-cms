@@ -1,0 +1,253 @@
+import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import {
+  ServicePublicationStatusType,
+  ServicePublicationStatusTypeEnum
+} from "@/generated/api/ServicePublicationStatusType";
+import {
+  CheckCircleOutline,
+  Delete,
+  Edit,
+  HighlightOff,
+  History,
+  MoreVert
+} from "@mui/icons-material";
+import {
+  Button,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import { useTranslation } from "next-i18next";
+import { useState } from "react";
+import { useDialog } from "../dialog-provider";
+
+export enum ServiceContextMenuActions {
+  publish = "publish",
+  unpublish = "unpublish",
+  submitReview = "submitReview",
+  history = "history",
+  edit = "edit",
+  delete = "delete"
+}
+
+export type ServiceContextMenuProps = {
+  lifecycleStatus?: ServiceLifecycleStatus;
+  publicationStatus?: ServicePublicationStatusType;
+  onPublishClick: () => void;
+  onUnpublishClick: () => void;
+  onSubmitReviewClick: () => void;
+  onHistoryClick: () => void;
+  onEditClick: () => void;
+  onDeleteClick: () => void;
+};
+
+/** Service context menu */
+export const ServiceContextMenu = ({
+  lifecycleStatus,
+  publicationStatus,
+  onPublishClick,
+  onUnpublishClick,
+  onSubmitReviewClick,
+  onHistoryClick,
+  onEditClick,
+  onDeleteClick
+}: ServiceContextMenuProps) => {
+  const { t } = useTranslation();
+  const showDialog = useDialog();
+
+  const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+  const isEditMenuOpen = Boolean(editMenuAnchorEl);
+
+  /** handle edit menu opening */
+  const handleEditMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setEditMenuAnchorEl(event.currentTarget);
+  };
+  /** handle edit menu closing */
+  const handleEditMenuClose = () => {
+    setEditMenuAnchorEl(null);
+  };
+
+  /** handle actions click: open confirmation modal and on confirm click, raise event */
+  const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
+    handleEditMenuClose();
+    const raiseClickEvent = await showDialog({
+      title: t(`service.${action}.modal.title`),
+      message: t(`service.${action}.modal.description`),
+      confirmButtonLabel: t(`service.${action}.modal.button`)
+    });
+    if (raiseClickEvent) {
+      switch (action) {
+        case ServiceContextMenuActions.delete:
+          onDeleteClick();
+          break;
+        case ServiceContextMenuActions.edit:
+          onEditClick();
+          break;
+        case ServiceContextMenuActions.history:
+          onHistoryClick();
+          break;
+        case ServiceContextMenuActions.publish:
+          onPublishClick();
+          break;
+        case ServiceContextMenuActions.submitReview:
+          onSubmitReviewClick();
+          break;
+        case ServiceContextMenuActions.unpublish:
+          onUnpublishClick();
+          break;
+        default:
+          console.warn("unhandled action " + action);
+          break;
+      }
+    }
+  };
+
+  /** handle edit action menu click */
+  const handleEditClick = () => {
+    handleEditMenuClose();
+    onEditClick();
+  };
+
+  /** Define when the service is publishable _(publish action can be performed)_ */
+  const isPublishable = () =>
+    publicationStatus === undefined ||
+    publicationStatus === ServicePublicationStatusTypeEnum.unpublished;
+
+  /** Define when the service is editable _(edit/cancel actions can be performed)_ */
+  const isEditable = () =>
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.approved ||
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.draft ||
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.rejected;
+
+  /** Show publish/unpublish action button */
+  const renderPublicationAction = () => {
+    if (lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.approved)
+      return (
+        <Button
+          size="medium"
+          variant="outlined"
+          sx={{ bgcolor: "background.paper" }}
+          startIcon={
+            isPublishable() ? <CheckCircleOutline /> : <HighlightOff />
+          }
+          onClick={_ =>
+            isPublishable()
+              ? handleConfirmationModal(ServiceContextMenuActions.publish)
+              : handleConfirmationModal(ServiceContextMenuActions.unpublish)
+          }
+        >
+          <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
+            {isPublishable()
+              ? t("service.actions.publish")
+              : t("service.actions.unpublish")}
+          </Typography>
+        </Button>
+      );
+  };
+
+  /** Show Send to review action button */
+  const renderSubmitReviewAction = () => {
+    if (
+      lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.draft ||
+      lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.rejected
+    ) {
+      return (
+        <Button
+          size="medium"
+          variant="contained"
+          onClick={_ =>
+            handleConfirmationModal(ServiceContextMenuActions.submitReview)
+          }
+          disabled={
+            lifecycleStatus.value !== ServiceLifecycleStatusTypeEnum.draft
+          }
+        >
+          {t("service.actions.submitReview")}
+        </Button>
+      );
+    }
+  };
+
+  /** Show History action button */
+  const renderHistoryAction = () => (
+    <Tooltip title={t("service.actions.history")} placement="top" arrow>
+      <Button
+        size="medium"
+        variant="text"
+        sx={{ bgcolor: "background.paper", padding: 0 }}
+        onClick={onHistoryClick}
+      >
+        <History />
+      </Button>
+    </Tooltip>
+  );
+
+  /** Show Edit Menu _(edit/delete actions)_ */
+  const renderEditActions = () => {
+    if (isEditable()) {
+      return (
+        <>
+          <Button
+            id="edit-menu-button"
+            aria-label="edit-menu-button"
+            aria-controls={isEditMenuOpen ? "edit-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={isEditMenuOpen ? "true" : undefined}
+            onClick={handleEditMenuClick}
+            size="medium"
+            variant="text"
+            sx={{ bgcolor: "background.paper", padding: 0 }}
+          >
+            <MoreVert />
+          </Button>
+          <Menu
+            id="edit-menu"
+            anchorEl={editMenuAnchorEl}
+            open={isEditMenuOpen}
+            onClose={handleEditMenuClose}
+            MenuListProps={{
+              "aria-labelledby": "edit-menu-button"
+            }}
+            disableScrollLock
+          >
+            <MenuItem onClick={handleEditClick}>
+              <ListItemIcon>
+                <Edit fontSize="inherit" />
+              </ListItemIcon>
+              <Typography variant="inherit" marginLeft={1}>
+                {t("service.actions.edit")}
+              </Typography>
+            </MenuItem>
+            <MenuItem
+              onClick={_ =>
+                handleConfirmationModal(ServiceContextMenuActions.delete)
+              }
+            >
+              <ListItemIcon>
+                <Delete fontSize="inherit" color="error" />
+              </ListItemIcon>
+              <Typography variant="inherit" color="error" marginLeft={1}>
+                {t("service.actions.delete")}
+              </Typography>
+            </MenuItem>
+          </Menu>
+        </>
+      );
+    }
+  };
+
+  return (
+    <Stack direction="row-reverse" spacing={2}>
+      {renderEditActions()}
+      {renderHistoryAction()}
+      {renderSubmitReviewAction()}
+      {renderPublicationAction()}
+    </Stack>
+  );
+};
