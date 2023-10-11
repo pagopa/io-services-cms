@@ -220,9 +220,6 @@ export const createWebServer = ({
   const app = express();
   secureExpressApp(app);
 
-  // eslint-disable-next-line no-console
-  console.log("remove this log after testing");
-
   // mount router to respond on base path
   app.use(`/${basePath}`, router);
 
