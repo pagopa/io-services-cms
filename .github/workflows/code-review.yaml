@@ -17,7 +17,7 @@ on:
       - packages/**
       - package.json
   workflow_dispatch: {}
-  
+
 jobs:
   code_review:
     timeout-minutes: 10 # temp fix
@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -46,8 +46,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: "Generate API models"
+      - name: 'Generate API models'
         run: yarn workspaces foreach run generate
 
-      - name: "Code review"
+      - name: 'Code review'
         run: yarn run code-review
