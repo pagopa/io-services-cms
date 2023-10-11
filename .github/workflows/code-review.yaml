@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: "Generate API models"
-        run: yarn workspaces foreach run generate:api-models
+        run: yarn workspaces foreach run generate
 
       - name: "Code review"
         run: yarn run code-review
