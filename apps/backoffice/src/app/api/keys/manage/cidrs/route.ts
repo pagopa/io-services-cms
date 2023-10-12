@@ -1,7 +1,10 @@
-import { retrieveManageKeyCIDRs } from "@/app/api/lib/authorized-cidrs";
+import {
+  retrieveManageKeyCIDRs,
+  updateManageKeyCIDRs
+} from "@/app/api/lib/authorized-cidrs";
 import { withJWTAuthHandler } from "@/app/api/lib/handler-wrappers";
 import { getSubscriptionCIDRsModelInstance } from "@/app/api/lib/subscription-cidrs-singleton";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
@@ -18,11 +21,18 @@ const getAuthorizedManageKeyCIDRs = (
 /**
  * @description Update manage key authorized CIDRs
  */
-export async function PUT(
+const updateAuthorizedManageKeyCIDRs = (
   request: NextRequest,
   { backofficeUser }: { backofficeUser: BackOfficeUser }
-) {
-  return NextResponse.json({ message: "Not Implemented" });
-}
+) => {
+  const subscriptionCIDRsModel = getSubscriptionCIDRsModelInstance();
+  return updateManageKeyCIDRs(subscriptionCIDRsModel)(
+    backofficeUser,
+    request
+  )();
+};
 
-export const { GET = withJWTAuthHandler(getAuthorizedManageKeyCIDRs) } = {};
+export const {
+  GET = withJWTAuthHandler(getAuthorizedManageKeyCIDRs),
+  PUT = withJWTAuthHandler(updateAuthorizedManageKeyCIDRs)
+} = {};
