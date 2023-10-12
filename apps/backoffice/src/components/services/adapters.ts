@@ -1,7 +1,39 @@
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import { ServiceMetadata } from "@/generated/api/ServiceMetadata";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
+
+const adaptServiceCommonData = (
+  service: ServiceLifecycle | ServicePublication
+) => ({
+  lastUpdate: service.last_update,
+  name: service.name,
+  description: service.description,
+  requireSecureChannel: service.require_secure_channel ?? false,
+  authorizedRecipients: service.authorized_recipients
+    ? ((service.authorized_recipients as unknown) as string[])
+    : [],
+  maxAllowedPaymentAmount: service.max_allowed_payment_amount ?? 0
+});
+
+const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
+  webUrl: metadata.web_url,
+  appIos: metadata.app_ios,
+  appAndroid: metadata.app_android,
+  tosUrl: metadata.tos_url,
+  privacyUrl: metadata.privacy_url,
+  address: metadata.address,
+  phone: metadata.phone,
+  email: metadata.email,
+  pec: metadata.pec,
+  cta: metadata.cta,
+  tokenName: metadata.token_name,
+  supportUrl: metadata.support_url,
+  category: metadata.category,
+  customSpecialFlow: metadata.custom_special_flow,
+  scope: metadata.scope
+});
 
 export const fromServiceLifecycleToService = (
   service?: ServiceLifecycle,
@@ -12,31 +44,8 @@ export const fromServiceLifecycleToService = (
       id: service.id,
       status: service.status,
       visibility,
-      lastUpdate: service.last_update,
-      name: service.name,
-      description: service.description,
-      requireSecureChannel: service.require_secure_channel ?? false,
-      authorizedRecipients: service.authorized_recipients
-        ? ((service.authorized_recipients as unknown) as string[])
-        : [],
-      maxAllowedPaymentAmount: service.max_allowed_payment_amount ?? 0,
-      metadata: {
-        webUrl: service.metadata.web_url,
-        appIos: service.metadata.app_ios,
-        appAndroid: service.metadata.app_android,
-        tosUrl: service.metadata.tos_url,
-        privacyUrl: service.metadata.privacy_url,
-        address: service.metadata.address,
-        phone: service.metadata.phone,
-        email: service.metadata.email,
-        pec: service.metadata.pec,
-        cta: service.metadata.cta,
-        tokenName: service.metadata.token_name,
-        supportUrl: service.metadata.support_url,
-        category: service.metadata.category,
-        customSpecialFlow: service.metadata.custom_special_flow,
-        scope: service.metadata.scope
-      }
+      ...adaptServiceCommonData(service),
+      metadata: adaptServiceMetadata(service.metadata)
     };
   }
 };
@@ -49,31 +58,8 @@ export const fromServicePublicationToService = (
       id: service.id,
       status: { value: ServiceLifecycleStatusTypeEnum.approved },
       visibility: service?.status,
-      lastUpdate: service.last_update,
-      name: service.name,
-      description: service.description,
-      requireSecureChannel: service.require_secure_channel ?? false,
-      authorizedRecipients: service.authorized_recipients
-        ? ((service.authorized_recipients as unknown) as string[])
-        : [],
-      maxAllowedPaymentAmount: service.max_allowed_payment_amount ?? 0,
-      metadata: {
-        webUrl: service.metadata.web_url,
-        appIos: service.metadata.app_ios,
-        appAndroid: service.metadata.app_android,
-        tosUrl: service.metadata.tos_url,
-        privacyUrl: service.metadata.privacy_url,
-        address: service.metadata.address,
-        phone: service.metadata.phone,
-        email: service.metadata.email,
-        pec: service.metadata.pec,
-        cta: service.metadata.cta,
-        tokenName: service.metadata.token_name,
-        supportUrl: service.metadata.support_url,
-        category: service.metadata.category,
-        customSpecialFlow: service.metadata.custom_special_flow,
-        scope: service.metadata.scope
-      }
+      ...adaptServiceCommonData(service),
+      metadata: adaptServiceMetadata(service.metadata)
     };
   }
 };
