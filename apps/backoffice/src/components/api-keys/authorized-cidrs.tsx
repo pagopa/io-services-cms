@@ -1,9 +1,9 @@
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { ioTsResolver } from "@hookform/resolvers/io-ts";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import * as z from "zod";
 import { TextFieldArrayController } from "../forms/controllers";
 import { LoaderSkeleton } from "../loaders";
 
@@ -16,6 +16,15 @@ export type AuthorizedCidrsProps = {
   onSaveClick?: (cidrs: string[]) => void;
 };
 
+// Zod schema validation type for ipV4/cidr
+const ipv4CidrSchema = z
+  .string()
+  .regex(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(\/\d{1,2})?$/);
+const arrayOfIPv4CidrSchema = z.array(ipv4CidrSchema);
+const schema = z.object({
+  cidrs: arrayOfIPv4CidrSchema
+});
+
 /** Show and Edit an IP List in CIDR format */
 export const AuthorizedCidrs = ({
   cidrs,
@@ -26,7 +35,7 @@ export const AuthorizedCidrs = ({
 
   const formMethods = useForm({
     defaultValues: { cidrs },
-    resolver: ioTsResolver(ManageKeyCIDRs),
+    resolver: zodResolver(schema),
     mode: "onChange"
   });
   const { getValues, formState, reset } = formMethods;

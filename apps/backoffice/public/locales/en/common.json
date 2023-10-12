@@ -77,16 +77,29 @@
       "description": "View and manage your institution's services."
     },
     "service": {
+      "address": "Address",
+      "appAndroid": "Android app",
+      "appIos": "iOS app",
+      "description": "Description",
+      "email": "Email",
       "information": "Information",
+      "linksContacts": "Links & Contacts",
       "keys": {
         "title": "API Key",
         "description": "Use this key for programmatic USE operations of the service."
       },
       "lastUpdate": "Last update",
+      "name": "Name",
+      "pec": "Pec",
+      "phone": "Phone",
+      "privacyUrl": "Privacy",
       "serviceId": "Service ID",
       "status": "Status",
+      "supportUrl": "Support url",
+      "tosUrl": "Terms & conditions",
       "viewDetails": "View details",
-      "visibility": "Visibility"
+      "visibility": "Visibility on IO",
+      "webUrl": "Web url"
     },
     "new-service": {
       "title": "Create a new service",
@@ -123,21 +136,54 @@
       "submitReview": "Send to revision",
       "unpublish": "Hide on IO App"
     },
+    "alerts": {
+      "lifecycle": {
+        "message": "This service is a <strong>{{status}}</strong> version of an already active IO service.",
+        "viewVersion": "View active service."
+      },
+      "publication": {
+        "message": "This active service has a <strong>{{status}}</strong> version.",
+        "viewVersion": "View {{rawStatus}} service."
+      },
+      "rejected": {
+        "message": "This service requires modifications before it can be published in the IO app.",
+        "reason": {
+          "label": "Read the reasons for refusal here.",
+          "title": "Reasons for refusal"
+        }
+      },
+      "submitted": "This service is <strong>under review</strong>. While waiting for the response from our PagoPA team, the service cannot be modified."
+    },
+    "details": "Service Details",
     "delete": {
       "modal": {
-        "title": "Delete service",
+        "title": "Do you want to delete this service permanently?",
         "description": "By deleting this service, it will no longer be visible in the IO app and will no longer be usable in this reserved area. This action is irreversible.",
         "button": "Delete"
       }
     },
     "publish": {
       "modal": {
-        "title": "Publish service on IO App",
-        "description": "By publishing this service, you make it visible in the IO app to all citizens.",
+        "title": "Do you want to publish this service in the IO app?",
+        "description": "Citizens will see it in the “Services” section of the app, under the name of your institution. You can hide it at any time.",
         "button": "Publish"
       }
     },
     "status": {
+      "raw": {
+        "approved": "Approved",
+        "deleted": "Deleted",
+        "draft": "Draft",
+        "rejected": "Rejected",
+        "submitted": "In review"
+      },
+      "version": {
+        "approved": "Approved",
+        "deleted": "Deleted",
+        "draft": "Draft",
+        "rejected": "Rejected",
+        "submitted": "In review"
+      },
       "approved": "Active",
       "deleted": "Deleted",
       "draft": "Draft",
@@ -146,21 +192,21 @@
     },
     "submitReview": {
       "modal": {
-        "title": "Send to revision",
-        "description": "By confirming this action, the PagoPa team will take charge of the review of the service. You will not be able to take further action on this service until you receive the outcome of the review.",
-        "button": "Send"
+        "title": "Do you want to send this service for review?",
+        "description": "The service will be reviewed by the IO team. You will receive a communication with the outcome, positive or negative, on the email of the institution and the user who sent the service for review.",
+        "button": "Send for review"
       }
     },
     "unpublish": {
       "modal": {
-        "title": "Hide service on IO App",
-        "description": "By hiding this service, it will no longer be visible in the IO app to all citizens.",
+        "title": "Do you want to hide this service from the IO app?",
+        "description": "Citizens will no longer see it in the “Services” section of the app, under the name of your institution. You can publish it again at any time.",
         "button": "Nascondi"
       }
     },
     "visibility": {
-      "published": "Visible in IO App",
-      "unpublished": "Not visible in IO App"
+      "published": "Published",
+      "unpublished": "Hidden"
     }
   },
   "test": "This is a translation test"

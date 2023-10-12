@@ -21,6 +21,13 @@ export const PageBreadcrumbs = () => {
     return routeLocale;
   };
 
+  const removeQueryParamsIfExists = (route: string) => {
+    const queryParamsStartIndex = route.indexOf("?");
+    return queryParamsStartIndex >= 0
+      ? route.substring(0, queryParamsStartIndex)
+      : route;
+  };
+
   /** Manage page breadcrumbs component visibility: `true` only if current route has a nesting level greater than 1. */
   const isVisible = () => routeSectionsCount > 1;
 
@@ -46,7 +53,7 @@ export const PageBreadcrumbs = () => {
         {getRouteSections().map((crumb, index) =>
           isChildRoute(index) ? (
             <Typography key={index} color={"text.disabled"}>
-              {getRouteLocale(crumb)}
+              {removeQueryParamsIfExists(getRouteLocale(crumb))}
             </Typography>
           ) : (
             <NextLink key={index} href={getRouteSectionPath(crumb)}>
