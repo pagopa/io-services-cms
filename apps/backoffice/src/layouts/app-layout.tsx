@@ -39,7 +39,7 @@ const menu: Array<SidenavItem> = [
     text: "routes.keys.title",
     linkType: "internal",
     hasBottomDivider: true,
-    requiredPermissions: ["apiservicewrite"]
+    requiredPermissions: ["ApiServiceWrite"]
   },
   {
     href: "",

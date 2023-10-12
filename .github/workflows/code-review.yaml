@@ -20,8 +20,8 @@ on:
 
 jobs:
   code_review:
-    timeout-minutes: 10
-    runs-on: ubuntu-22.04
+    timeout-minutes: 10 # temp fix
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
@@ -29,25 +29,25 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Cache turbo build setup
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 #v3.3.1
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c #v3.6.0
         with:
           node-version-file: '.node-version'
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
-      - name: 'Build'
-        run: yarn run build
+      - name: Cache turbo build setup
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 #v3.3.1
+        with:
+          path: node_modules/.cache/turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: 'Generate API models'
+        run: yarn workspaces foreach run generate
 
       - name: 'Code review'
         run: yarn run code-review

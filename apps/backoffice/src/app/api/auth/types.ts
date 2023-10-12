@@ -1,4 +1,5 @@
 import * as t from "io-ts";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 export type SessionTokenInstitution = t.TypeOf<typeof SessionTokenInstitution>;
 export const SessionTokenInstitution = t.intersection([
@@ -60,13 +61,17 @@ export const IdentityTokenOrganizationRole = t.type({
 export type IdentityTokenOrganization = t.TypeOf<
   typeof IdentityTokenOrganization
 >;
-export const IdentityTokenOrganization = t.type({
-  id: t.string,
-  fiscal_code: t.string,
-  name: t.string,
-  roles: t.array(IdentityTokenOrganizationRole),
-  groups: t.array(t.string)
-});
+export const IdentityTokenOrganization = t.intersection([
+  t.type({
+    id: t.string,
+    fiscal_code: t.string,
+    name: t.string,
+    roles: t.array(IdentityTokenOrganizationRole)
+  }),
+  t.partial({
+    groups: t.array(t.string)
+  })
+]);
 
 /** BackOffice JWT Identity Token payload (io-ts type) */
 export type IdentityTokenPayload = t.TypeOf<typeof IdentityTokenPayload>;
@@ -97,4 +102,20 @@ export const IdentityTokenPayload = t.type({
   desired_exp: t.number,
   /** (Selfcare Institution) Custom Claim */
   organization: IdentityTokenOrganization
+});
+
+export type ApimUser = t.TypeOf<typeof ApimUser>;
+export const ApimUser = t.type({
+  id: NonEmptyString,
+  email: EmailString,
+  groups: t.readonlyArray(
+    t.type({
+      type: t.union([
+        t.literal("custom"),
+        t.literal("system"),
+        t.literal("external")
+      ]),
+      name: NonEmptyString
+    })
+  )
 });

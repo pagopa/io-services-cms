@@ -1,30 +1,23 @@
+import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
+import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { IdentityTokenPayload } from "../types";
+import { ApimUser, IdentityTokenPayload } from "../types";
 
-/**
- * Given a jwt token, returns its payload decoded as T
- * @param token a jwt token
- * @returns
- */
-const decodeJwtPayload = <T>(token: string, codec: t.Type<T>) => {
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const jsonPayload = decodeURIComponent(
-    atob(base64)
-      .split("")
-      .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join("")
-  );
-
-  return pipe(codec.decode(JSON.parse(jsonPayload)));
-};
+if (
+  getConfiguration().SELFCARE_API_MOCKING ||
+  getConfiguration().API_APIM_MOCKING
+) {
+  const { setupMocks } = require("../../../../../mocks");
+  setupMocks();
+}
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -36,52 +29,21 @@ const authOptions: NextAuthOptions = {
           identity_token: identity_token
         } = credentials as SelfCareIdentity;
 
-        // first quick token check
-        if (!NonEmptyString.is(identity_token)) {
-          throw new Error("null undefined or empty identity token");
-        }
+        const config = getConfiguration();
 
-        // TODO: verify identity token
-
-        // decode identity token payload
-        const identityTokenPayload = decodeJwtPayload(
+        return pipe(
           identity_token,
-          IdentityTokenPayload
-        );
-
-        if (E.isLeft(identityTokenPayload)) {
-          throw new Error(
-            "invalid identity token: " +
-              readableReport(identityTokenPayload.left)
-          );
-        }
-
-        // TODO: set next-auth User
-        const user = {
-          id: identityTokenPayload.right.uid,
-          name: `${identityTokenPayload.right.name} ${identityTokenPayload.right.family_name}`,
-          email: identityTokenPayload.right.email,
-          institution: {
-            id: identityTokenPayload.right.organization.id,
-            name: identityTokenPayload.right.organization.name,
-            role: identityTokenPayload.right.organization.roles[0]?.role,
-            logo_url: "url"
-          },
-          authorizedInstitutions: [
-            {
-              id: "id_2",
-              name: "name_2",
-              role: "operator"
-            }
-          ],
-          permissions: ["apiservicewrite"],
-          parameters: {
-            userId: "TODO: apim user id here",
-            userEmail: "TODO: apim email here",
-            subscriptionId: "TODO: apim manage subscription id here"
-          }
-        };
-        return user;
+          verifyToken(config),
+          TE.bindTo("identityTokenPayload"),
+          TE.bind("apimUser", ({ identityTokenPayload }) =>
+            retrieveApimUser(config)(identityTokenPayload)
+          ),
+          TE.map(toUser(config)),
+          TE.getOrElse(e => {
+            console.error(e); //TODO: use "proper" log
+            throw e;
+          })
+        )();
       }
     })
   ],
@@ -90,20 +52,7 @@ const authOptions: NextAuthOptions = {
     signOut: "/auth/logout"
   },
   callbacks: {
-    // TODO This is a sample boilerplate
-    async signIn({ user, account, profile, email, credentials }) {
-      const isAllowedToSignIn = true;
-      if (isAllowedToSignIn) {
-        return true;
-      } else {
-        // Return false to display a default error message
-        return false;
-        // Or you can return a URL to redirect to:
-        // return '/unauthorized'
-      }
-    },
-    // TODO: Build token here
-    async jwt({ token, user }) {
+    jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
         token.id = user.id;
@@ -125,10 +74,100 @@ const authOptions: NextAuthOptions = {
       }
       return session;
     }
-  },
-  secret: process.env.NEXTAUTH_SECRET
+  }
 };
 
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+
+const verifyToken = (config: Configuration) => (
+  identity_token: string
+): TE.TaskEither<Error, IdentityTokenPayload> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        jwtVerify(
+          identity_token,
+          createRemoteJWKSet(
+            new URL(`${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`)
+          ),
+          {
+            issuer: config.SELFCARE_BASE_URL,
+            audience: config.BACKOFFICE_DOMAIN
+          }
+        ),
+      E.toError
+    ),
+    TE.chain(({ payload }) =>
+      pipe(
+        payload,
+        IdentityTokenPayload.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither
+      )
+    )
+  );
+
+const retrieveApimUser = (config: Configuration) => (
+  identityTokenPayload: IdentityTokenPayload
+): TE.TaskEither<Error, ApimUser> =>
+  pipe(
+    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
+    apimClient =>
+      ApimUtils.getApimService(
+        apimClient,
+        config.AZURE_APIM_RESOURCE_GROUP,
+        config.AZURE_APIM
+      ),
+    apimService =>
+      apimService.getUserByEmail(
+        `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+        true
+      ),
+    TE.mapLeft(
+      err =>
+        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
+    ),
+    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
+    TE.chain(
+      flow(
+        ApimUser.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither
+      )
+    )
+  );
+
+const toUser = (config: Configuration) => ({
+  identityTokenPayload,
+  apimUser
+}: {
+  identityTokenPayload: IdentityTokenPayload;
+  apimUser: ApimUser;
+}) => ({
+  id: identityTokenPayload.uid,
+  name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
+  email: identityTokenPayload.email,
+  institution: {
+    id: identityTokenPayload.organization.id,
+    name: identityTokenPayload.organization.name,
+    role: identityTokenPayload.organization.roles[0]?.role,
+    logo_url: "url"
+  },
+  authorizedInstitutions: [
+    {
+      id: "id_2",
+      name: "name_2",
+      role: "operator"
+    }
+  ],
+  permissions: apimUser.groups
+    .filter(group => group.type === "custom")
+    .map(group => group.name),
+  parameters: {
+    userId: apimUser.id,
+    userEmail: apimUser.email,
+    subscriptionId: config.AZURE_SUBSCRIPTION_ID
+  }
+});

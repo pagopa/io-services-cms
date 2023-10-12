@@ -108,7 +108,7 @@ describe("ApimService Test", () => {
   });
 
   describe("getUserByEmail", () => {
-    it("should return a user", async () => {
+    it("should return a user without groups", async () => {
       // mock ApimClient
       const mockApimClient = {
         user: {
@@ -151,6 +151,67 @@ describe("ApimService Test", () => {
             _etag: "_etag",
             userId: anUserId,
             email: anUserEmail,
+          });
+        }
+      }
+    });
+
+    it("should return a user with groups", async () => {
+      // mock ApimClient
+      const mockApimClient = {
+        user: {
+          listByService: vi.fn(() => [
+            Promise.resolve({
+              _etag: "_etag",
+              userId: anUserId,
+              email: anUserEmail,
+              groups: [
+                {
+                  type: "system",
+                  name: "Developer",
+                },
+              ],
+            }),
+          ]),
+        },
+      } as unknown as ApiManagementClient;
+
+      // create ApimService
+      const apimService = getApimService(
+        mockApimClient,
+        anApimResourceGroup,
+        anApimServiceName
+      );
+
+      // call getUser
+      const result = await apimService.getUserByEmail(anUserEmail, true)();
+
+      // expect result
+      expect(mockApimClient.user.listByService).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        {
+          filter: `email eq '${anUserEmail}'`,
+          expandGroups: true,
+        }
+      );
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        const optionRes = result.right;
+        expect(O.isSome(optionRes)).toBeTruthy();
+
+        if (O.isSome(optionRes)) {
+          expect(optionRes.value).toEqual({
+            _etag: "_etag",
+            userId: anUserId,
+            email: anUserEmail,
+            groups: [
+              {
+                type: "system",
+                name: "Developer",
+              },
+            ],
           });
         }
       }
