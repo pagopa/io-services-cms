@@ -3,11 +3,11 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../../types/next-auth";
 import {
   retrieveManageKeyCIDRs,
   updateManageKeyCIDRs
-} from "../../lib/authorized-cidrs";
+} from "../authorized-cidrs";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";

@@ -1,12 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-import {
-  regenerateManageKeys,
-  retrieveManageKeys
-} from "../../lib/keys-manage";
-import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionKeyType";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { BackOfficeUser } from "../../../../../types/next-auth";
 import * as TE from "fp-ts/lib/TaskEither";
+import { describe, expect, it, vi } from "vitest";
+import { BackOfficeUser } from "../../../../types/next-auth";
+import { SubscriptionKeyTypeEnum } from "../../../generated/api/SubscriptionKeyType";
+import { regenerateManageKeys, retrieveManageKeys } from "../keys-manage";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { vi, describe, it, expect } from "vitest";
-import { BackOfficeUser } from "../../../../../types/next-auth";
 import { withJWTAuthHandler } from "../handler-wrappers";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";

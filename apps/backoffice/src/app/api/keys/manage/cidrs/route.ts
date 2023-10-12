@@ -1,9 +1,9 @@
 import {
   retrieveManageKeyCIDRs,
   updateManageKeyCIDRs
-} from "@/app/api/lib/authorized-cidrs";
-import { withJWTAuthHandler } from "@/app/api/lib/handler-wrappers";
-import { getSubscriptionCIDRsModelInstance } from "@/app/api/lib/subscription-cidrs-singleton";
+} from "@/lib/be/authorized-cidrs";
+import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { getSubscriptionCIDRsModelInstance } from "@/lib/be/subscription-cidrs-singleton";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 

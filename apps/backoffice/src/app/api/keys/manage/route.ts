@@ -1,9 +1,9 @@
 import { getConfiguration } from "@/config";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
-import { buildApimService } from "../../lib/apim-helper";
-import { withJWTAuthHandler } from "../../lib/handler-wrappers";
-import { retrieveManageKeys } from "../../lib/keys-manage";
+import { buildApimService } from "@/lib/be/apim-helper";
+import { retrieveManageKeys } from "@/lib/be/keys-manage";
+import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
 
 /**
  * @description Retrieve Manage keys
