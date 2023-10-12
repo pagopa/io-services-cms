@@ -113,7 +113,7 @@ jobs:
           done
           if [[ $resp_status !== 200 ]] 
           then
-            echo Not Healty HTTP status $resp_status after $retryCount retries
+            echo "Not Healty (response status $resp_status) after $retryCount retries"
             exit 1
           fi
 
