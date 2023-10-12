@@ -40,7 +40,7 @@ import {
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
-export const ApimRestError = t.interface({
+export const ApimRestError = t.type({
   statusCode: t.number,
 });
 export type ApimRestError = t.TypeOf<typeof ApimRestError>;
@@ -97,7 +97,8 @@ export type ApimService = {
     userId: string
   ) => TE.TaskEither<ApimRestError, UserGetResponse>;
   readonly getUserByEmail: (
-    userEmail: EmailString
+    userEmail: EmailString,
+    fetchGroups?: boolean
   ) => TE.TaskEither<ApimRestError, O.Option<UserContract>>;
   readonly getUserGroups: (
     userId: string
@@ -137,8 +138,14 @@ export const getApimService = (
 ): ApimService => ({
   getUser: (userId) =>
     getUser(apimClient, apimResourceGroup, apimServiceName, userId),
-  getUserByEmail: (userEmail) =>
-    getUserByEmail(apimClient, apimResourceGroup, apimServiceName, userEmail),
+  getUserByEmail: (userEmail, fetchGroups) =>
+    getUserByEmail(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      userEmail,
+      fetchGroups
+    ),
   getUserGroups: (userId) =>
     getUserGroups(apimClient, apimResourceGroup, apimServiceName, userId),
   getSubscription: (serviceId) =>
@@ -214,11 +221,13 @@ const getUserByEmail = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
-  userEmail: EmailString
+  userEmail: EmailString,
+  fetchGroups?: boolean
 ): TE.TaskEither<ApimRestError, O.Option<UserContract>> =>
   pipe(
     apimClient.user.listByService(apimResourceGroup, apimServiceName, {
       filter: `email eq '${userEmail}'`,
+      expandGroups: fetchGroups,
     }),
     // the first element does the job
     (userListResponse) =>

@@ -1,4 +1,5 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
 export type Configuration = {
   // IO Services CMS API configuration
   API_SERVICES_CMS_URL: string;
@@ -14,9 +15,12 @@ export type Configuration = {
   BACK_OFFICE_ID: string;
   BACK_OFFICE_TITLE: string;
 
-  // URLs
+  // Selfcare
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
+  SELFCARE_BASE_URL: string;
+  SELFCARE_JWKS_PATH: string;
+  SELFCARE_API_MOCKING: boolean;
 
   // NodeJS Environment mode
   IS_DEVELOPMENT: boolean;
@@ -34,13 +38,16 @@ export type Configuration = {
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   AZURE_APIM_RESOURCE_GROUP: string;
   AZURE_APIM: string;
+  API_APIM_MOCKING: boolean;
+
+  BACKOFFICE_DOMAIN: string;
 
   // Legacy CosmosDB configuration
   LEGACY_COSMOSDB_URI: string;
   LEGACY_COSMOSDB_NAME: string;
   LEGACY_COSMOSDB_KEY: string;
 };
-export function getConfiguration() {
+export function getConfiguration(): Configuration {
   return {
     // IO Services CMS API configuration
     API_SERVICES_CMS_URL: process.env.API_SERVICES_CMS_URL as string,
@@ -63,6 +70,9 @@ export function getConfiguration() {
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
+    SELFCARE_BASE_URL: process.env.SELFCARE_BASE_URL as string,
+    SELFCARE_JWKS_PATH: "/.well-known/jwks.json",
+    SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
 
     // NodeJS Environment mode
     IS_DEVELOPMENT: process.env.NODE_ENV === "development",
@@ -73,18 +83,21 @@ export function getConfiguration() {
     IS_BROWSER: typeof window !== "undefined",
     IS_SERVER: typeof window === "undefined",
 
-    //Apim Configuration
     AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string, //FIXME: fix cast
 
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
       .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
+      .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString, //FIXME: fix cast
     AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
+      .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString, //FIXME: fix cast
 
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
     AZURE_APIM: process.env.AZURE_APIM as string, //FIXME: fix cast
+
+    API_APIM_MOCKING: process.env.API_APIM_MOCKING === "true",
+
+    BACKOFFICE_DOMAIN: process.env.BACKOFFICE_DOMAIN as string,
 
     // Legacy CosmosDB configuration
     LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,

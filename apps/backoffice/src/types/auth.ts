@@ -10,9 +10,9 @@ export enum SelfcareRoles {
 
 /** List of some useful Azure Apim user groups */
 export type UsefulPermissions =
-  | "apiadmin"
-  | "apilimitedmessagewrite"
-  | "apiservicewrite";
+  | "ApiAdmin"
+  | "ApiLimitedMessageWrite"
+  | "ApiServiceWrite";
 
 export type UserRole = SelfcareRoles | string;
 

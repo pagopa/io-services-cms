@@ -86,4 +86,4 @@ Keys.getLayout = function getLayout(page: ReactElement) {
   );
 };
 
-Keys.requiredPermissions = ["apiservicewrite"];
+Keys.requiredPermissions = ["ApiServiceWrite"];

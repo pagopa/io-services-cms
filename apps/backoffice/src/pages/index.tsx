@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     if (
       hasRequiredAuthorizations(session, {
-        requiredPermissions: ["apiservicewrite"]
+        requiredPermissions: ["ApiServiceWrite"]
       })
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
@@ -38,7 +38,7 @@ export default function Home() {
       />
       <Grid container spacing={2}>
         <Grid item xs={12} sm={8} md={8} lg={6} xl={6}>
-          <AccessControl requiredPermissions={["apiservicewrite"]}>
+          <AccessControl requiredPermissions={["ApiServiceWrite"]}>
             <CardDetails
               title="routes.keys.manage.title"
               cta={{ label: "routes.keys.manage.shortcut", href: "/keys" }}
