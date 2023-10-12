@@ -2,11 +2,11 @@ import * as E from "fp-ts/Either";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../../types/next-auth";
 import {
   IoServicesCmsClient,
   forwardIoServicesCmsRequest
 } from "../io-services-cms-proxy";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";

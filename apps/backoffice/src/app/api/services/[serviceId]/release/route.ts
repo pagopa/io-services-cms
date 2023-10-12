@@ -1,9 +1,9 @@
 import {
   buildClient,
   forwardIoServicesCmsRequest
-} from "@/app/api/lib/io-services-cms-proxy";
+} from "@/lib/be/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
-import { withJWTAuthHandler } from "@/app/api/lib/handler-wrappers";
+import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 

@@ -10,7 +10,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser } from "../../../types/next-auth";
 
 export const retrieveManageKeys = (apimService: ApimUtils.ApimService) => (
   backOfficeUser: BackOfficeUser
