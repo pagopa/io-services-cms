@@ -35,6 +35,8 @@ export enum ServiceContextMenuActions {
 }
 
 export type ServiceContextMenuProps = {
+  /** If `true` shows ServicePublication actions only */
+  releaseMode: boolean;
   lifecycleStatus?: ServiceLifecycleStatus;
   publicationStatus?: ServicePublicationStatusType;
   onPublishClick: () => void;
@@ -47,6 +49,7 @@ export type ServiceContextMenuProps = {
 
 /** Service context menu */
 export const ServiceContextMenu = ({
+  releaseMode,
   lifecycleStatus,
   publicationStatus,
   onPublishClick,
@@ -123,11 +126,22 @@ export const ServiceContextMenu = ({
   const isEditable = () =>
     lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.approved ||
     lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.draft ||
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.rejected ||
+    releaseMode;
+
+  /** Define when the service has Send to review action button */
+  const hasSubmitReviewAction = () =>
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.draft ||
     lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.rejected;
+
+  /** Define when the service has publis/unpubulish action button */
+  const hasPublicationAction = () =>
+    lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.approved ||
+    releaseMode;
 
   /** Show publish/unpublish action button */
   const renderPublicationAction = () => {
-    if (lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.approved)
+    if (hasPublicationAction())
       return (
         <Button
           size="medium"
@@ -153,10 +167,7 @@ export const ServiceContextMenu = ({
 
   /** Show Send to review action button */
   const renderSubmitReviewAction = () => {
-    if (
-      lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.draft ||
-      lifecycleStatus?.value === ServiceLifecycleStatusTypeEnum.rejected
-    ) {
+    if (hasSubmitReviewAction()) {
       return (
         <Button
           size="medium"
@@ -165,7 +176,7 @@ export const ServiceContextMenu = ({
             handleConfirmationModal(ServiceContextMenuActions.submitReview)
           }
           disabled={
-            lifecycleStatus.value !== ServiceLifecycleStatusTypeEnum.draft
+            lifecycleStatus?.value !== ServiceLifecycleStatusTypeEnum.draft
           }
         >
           {t("service.actions.submitReview")}
@@ -216,7 +227,7 @@ export const ServiceContextMenu = ({
             }}
             disableScrollLock
           >
-            <MenuItem onClick={handleEditClick}>
+            <MenuItem onClick={handleEditClick} disabled={releaseMode}>
               <ListItemIcon>
                 <Edit fontSize="inherit" />
               </ListItemIcon>
@@ -246,7 +257,7 @@ export const ServiceContextMenu = ({
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
       {renderHistoryAction()}
-      {renderSubmitReviewAction()}
+      {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>
   );
