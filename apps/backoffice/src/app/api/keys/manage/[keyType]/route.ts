@@ -1,5 +1,5 @@
 import { buildApimService } from "@/lib/be/apim-helper";
-import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { regenerateManageKeys } from "@/lib/be/keys-manage";
 import { getConfiguration } from "@/config";
 import { NextRequest } from "next/server";

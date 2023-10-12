@@ -3,7 +3,7 @@ import {
   forwardIoServicesCmsRequest
 } from "@/lib/be/io-services-cms-proxy";
 import { getConfiguration } from "@/config";
-import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 

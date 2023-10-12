@@ -3,7 +3,7 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR
 } from "@/config/constants";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import {
   retrieveAuthorizedCIDRs,
   updateAuthorizedCIDRs

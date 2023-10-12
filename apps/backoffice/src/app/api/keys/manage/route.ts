@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
 import { buildApimService } from "@/lib/be/apim-helper";
 import { retrieveManageKeys } from "@/lib/be/keys-manage";
-import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
 
 /**
  * @description Retrieve Manage keys
