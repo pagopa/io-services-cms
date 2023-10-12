@@ -15,7 +15,7 @@
   "authorizedCidrs": {
     "add": "Add IP address",
     "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys.",
-    "title": "Authorized IP address"
+    "title": "IP address"
   },
   "buttons": {
     "cancel": "Cancel",
@@ -76,6 +76,18 @@
       "title": "Services",
       "description": "View and manage your institution's services."
     },
+    "service": {
+      "information": "Information",
+      "keys": {
+        "title": "API Key",
+        "description": "Use this key for programmatic USE operations of the service."
+      },
+      "lastUpdate": "Last update",
+      "serviceId": "Service ID",
+      "status": "Status",
+      "viewDetails": "View details",
+      "visibility": "Visibility"
+    },
     "new-service": {
       "title": "Create a new service",
       "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app."
@@ -100,6 +112,55 @@
     "groups": {
       "title": "Groups",
       "description": ""
+    }
+  },
+  "service": {
+    "actions": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "history": "View service history",
+      "publish": "Publish on IO App",
+      "submitReview": "Send to revision",
+      "unpublish": "Hide on IO App"
+    },
+    "delete": {
+      "modal": {
+        "title": "Delete service",
+        "description": "By deleting this service, it will no longer be visible in the IO app and will no longer be usable in this reserved area. This action is irreversible.",
+        "button": "Delete"
+      }
+    },
+    "publish": {
+      "modal": {
+        "title": "Publish service on IO App",
+        "description": "By publishing this service, you make it visible in the IO app to all citizens.",
+        "button": "Publish"
+      }
+    },
+    "status": {
+      "approved": "Active",
+      "deleted": "Deleted",
+      "draft": "Draft",
+      "rejected": "Requested changes",
+      "submitted": "In review"
+    },
+    "submitReview": {
+      "modal": {
+        "title": "Send to revision",
+        "description": "By confirming this action, the PagoPa team will take charge of the review of the service. You will not be able to take further action on this service until you receive the outcome of the review.",
+        "button": "Send"
+      }
+    },
+    "unpublish": {
+      "modal": {
+        "title": "Hide service on IO App",
+        "description": "By hiding this service, it will no longer be visible in the IO app to all citizens.",
+        "button": "Nascondi"
+      }
+    },
+    "visibility": {
+      "published": "Visible in IO App",
+      "unpublished": "Not visible in IO App"
     }
   },
   "test": "This is a translation test"

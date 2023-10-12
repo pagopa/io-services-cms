@@ -84,7 +84,6 @@ export const buildHandlers = () => {
       return res(...resultArray[0]);
     }),
     rest.delete(`${baseURL}/services/:serviceId`, (_, res, ctx) => {
-      console.log("DELETE /services/:serviceId intercepted");
       const resultArray = [
         [ctx.status(204)],
         [ctx.status(401), ctx.json(null)],
@@ -122,7 +121,6 @@ export const buildHandlers = () => {
       return res(...resultArray[0]);
     }),
     rest.put(`${baseURL}/services/:serviceId/keys/:keyType`, (_, res, ctx) => {
-      console.log("PUT /services/:serviceId/keys/:keyType intercepted");
       const resultArray = [
         [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
         [ctx.status(400), ctx.json(null)],

@@ -20,23 +20,23 @@ on:
 
 jobs:
   code_review:
-    timeout-minutes: 10
-    runs-on: ubuntu-22.04
+    timeout-minutes: 10 # temp fix
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out code
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.node-version'
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --immutable
 
       - name: Cache turbo build setup
         uses: actions/cache@v3
@@ -46,8 +46,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: 'Build'
-        run: yarn run build
+      - name: 'Generate API models'
+        run: yarn workspaces foreach run generate
 
       - name: 'Code review'
         run: yarn run code-review

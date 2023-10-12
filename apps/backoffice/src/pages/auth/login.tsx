@@ -1,6 +1,5 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
-import axios from "axios";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -20,8 +19,7 @@ export default function Login() {
   /**
    * Handle identity
    * 1. Get id token from url and check it
-   * 2. Resolve Selfcare identity
-   * 3. Signin with received jwt session token */
+   * 2. Signin with received Selfcare identity token */
   const handleIdentity = async () => {
     const identity_token = getToken();
 
@@ -31,25 +29,12 @@ export default function Login() {
       return;
     }
 
-    // resolve selfcare identity
-    const { data, status } = await axios.post<any>(
-      `${getConfiguration().API_BACKEND_BASE_URL}${
-        getConfiguration().API_BACKEND_BASE_PATH
-      }/auth`,
-      { identity_token }
-    );
-
-    if (status === 200 && data) {
-      console.log("auth ok");
-      // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
-      await signIn("access-control", {
-        session_token: data,
-        callbackUrl: "/"
-        //redirect: false
-      });
-    } else {
-      console.warn("auth ko", status, data); // TODO: placeholder log, will be removed
-    }
+    // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
+    await signIn("access-control", {
+      identity_token,
+      callbackUrl: "/"
+      //redirect: false
+    });
   };
 
   useEffect(() => {
