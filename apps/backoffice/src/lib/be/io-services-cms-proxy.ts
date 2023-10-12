@@ -7,10 +7,10 @@ import { Client, createClient } from "@/generated/services-cms/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser } from "../../../types/next-auth";
 
 if (getConfiguration().API_SERVICES_CMS_MOCKING) {
-  const { setupMocks } = require("../../../../mocks");
+  const { setupMocks } = require("../../../mocks");
   setupMocks();
 }
 

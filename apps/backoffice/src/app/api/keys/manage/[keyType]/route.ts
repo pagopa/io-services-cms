@@ -1,6 +1,6 @@
-import { buildApimService } from "@/app/api/lib/apim-helper";
-import { withJWTAuthHandler } from "@/app/api/lib/handler-wrappers";
-import { regenerateManageKeys } from "@/app/api/lib/keys-manage";
+import { buildApimService } from "@/lib/be/apim-helper";
+import { withJWTAuthHandler } from "@/lib/be/handler-wrappers";
+import { regenerateManageKeys } from "@/lib/be/keys-manage";
 import { getConfiguration } from "@/config";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";

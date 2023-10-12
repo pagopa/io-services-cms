@@ -11,7 +11,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser } from "../../../types/next-auth";
 
 export const retrieveManageKeyCIDRs = (
   subscriptionCIDRsModel: SubscriptionCIDRsModel
@@ -92,7 +92,7 @@ export const updateManageKeyCIDRs = (
         }),
         TE.map(response =>
           NextResponse.json({
-            cidrs: Array.from(response.cidrs),
+            cidrs: Array.from(response.cidrs)
           })
         ),
         TE.mapLeft(error =>
