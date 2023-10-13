@@ -14,6 +14,8 @@ export type Configuration = {
   // BackOffice settings
   BACK_OFFICE_ID: string;
   BACK_OFFICE_TITLE: string;
+  CDN_URL: string;
+  SERVICES_LOGO_PATH: string;
 
   // Selfcare
   SELFCARE_URL: string;
@@ -65,8 +67,10 @@ export function getConfiguration(): Configuration {
     // BackOffice settings
     BACK_OFFICE_ID: process.env.NEXT_PUBLIC_BACK_OFFICE_ID as string,
     BACK_OFFICE_TITLE: process.env.NEXT_PUBLIC_BACK_OFFICE_TITLE as string,
+    CDN_URL: process.env.NEXT_PUBLIC_CDN_URL as string,
+    SERVICES_LOGO_PATH: process.env.NEXT_PUBLIC_SERVICES_LOGO_PATH as string,
 
-    // URLs
+    // Selfcare
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,

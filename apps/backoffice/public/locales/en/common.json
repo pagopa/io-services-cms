@@ -162,6 +162,13 @@
         "button": "Delete"
       }
     },
+    "logo": {
+      "disclaimerText": "Insert <strong>only</strong> your institution logo.<br />You will be responsible for inserting images other than the one indicated.",
+      "dropzoneText": "Upload service logo",
+      "loadingText": "Loading",
+      "rejectedText": "Unsupported format",
+      "sizeFormatText": "Maximum dimension: 300x300px.<br/>Format: .png."
+    },
     "publish": {
       "modal": {
         "title": "Do you want to publish this service in the IO app?",
