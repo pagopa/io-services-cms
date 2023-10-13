@@ -111,7 +111,7 @@ jobs:
             echo resp_status="$(curl --silent --head https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }} | awk '/^HTTP/{print $2}')"
             retryCounter=$(( $retryCounter + 1 ))
           done
-          if [[ $resp_status !== 200 ]] 
+          if [[ $resp_status != 200 ]] 
           then
             echo "Not Healty (response status $resp_status) after $retryCount retries"
             exit 1
