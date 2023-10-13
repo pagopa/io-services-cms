@@ -5,8 +5,8 @@ import {
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import {
-  retrieveAuthorizedCIDRs,
-  updateAuthorizedCIDRs
+  retrieveManageSubscriptionAuthorizedCIDRs,
+  upsertManageSubscriptionAuthorizedCIDRs
 } from "@/lib/be/keys/business";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -22,7 +22,7 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      const authorizedCIDRsResponse = await retrieveAuthorizedCIDRs(
+      const authorizedCIDRsResponse = await retrieveManageSubscriptionAuthorizedCIDRs(
         backofficeUser.parameters.subscriptionId
       );
 
@@ -31,7 +31,8 @@ export const GET = withJWTAuthHandler(
       });
     } catch (error) {
       console.log(
-        `An Error has occurred while retrieving Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: ${error}`
+        `An Error has occurred while retrieving Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+        error
       );
       return NextResponse.json(
         {
@@ -68,7 +69,7 @@ export const PUT = withJWTAuthHandler(
         );
       }
 
-      const authorizedCIDRsResponse = await updateAuthorizedCIDRs(
+      const authorizedCIDRsResponse = await upsertManageSubscriptionAuthorizedCIDRs(
         backofficeUser.parameters.subscriptionId,
         decodedBody.right.cidrs
       );
@@ -76,10 +77,10 @@ export const PUT = withJWTAuthHandler(
       return NextResponse.json({
         cidrs: authorizedCIDRsResponse
       });
-
     } catch (error) {
       console.log(
-        `An Error has occurred while retrieving Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: ${error}`
+        `An Error has occurred while upserting Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by:`,
+        error
       );
       return NextResponse.json(
         {

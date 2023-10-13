@@ -4,8 +4,8 @@ import { Cidr } from "../../../generated/api/Cidr";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import {
-  retrieveAuthorizedCIDRs,
-  updateAuthorizedCIDRs
+  retrieveManageSubscriptionAuthorizedCIDRs,
+  upsertManageSubscriptionAuthorizedCIDRs
 } from "../keys/business";
 
 const mocks: { cidrs: Set<Cidr>; aSubscriptionId: string } = vi.hoisted(() => ({
@@ -49,7 +49,9 @@ describe("Authorized CIDRs Subscription Manage", () => {
         findLastVersionByModelId
       });
 
-      const result = await retrieveAuthorizedCIDRs(mocks.aSubscriptionId);
+      const result = await retrieveManageSubscriptionAuthorizedCIDRs(
+        mocks.aSubscriptionId
+      );
 
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
         mocks.aSubscriptionId
@@ -64,7 +66,9 @@ describe("Authorized CIDRs Subscription Manage", () => {
         findLastVersionByModelId
       });
 
-      const result = await retrieveAuthorizedCIDRs(mocks.aSubscriptionId);
+      const result = await retrieveManageSubscriptionAuthorizedCIDRs(
+        mocks.aSubscriptionId
+      );
 
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
         mocks.aSubscriptionId
@@ -92,7 +96,7 @@ describe("Authorized CIDRs Subscription Manage", () => {
       });
 
       expect(
-        retrieveAuthorizedCIDRs(mocks.aSubscriptionId)
+        retrieveManageSubscriptionAuthorizedCIDRs(mocks.aSubscriptionId)
       ).rejects.toThrowError();
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
         mocks.aSubscriptionId
@@ -112,7 +116,7 @@ describe("Authorized CIDRs Subscription Manage", () => {
         upsert
       });
 
-      const result = await updateAuthorizedCIDRs(
+      const result = await upsertManageSubscriptionAuthorizedCIDRs(
         mocks.aSubscriptionId,
         Array.from(mocks.cidrs)
       );
@@ -144,7 +148,10 @@ describe("Authorized CIDRs Subscription Manage", () => {
       });
 
       expect(
-        updateAuthorizedCIDRs(mocks.aSubscriptionId, Array.from(mocks.cidrs))
+        upsertManageSubscriptionAuthorizedCIDRs(
+          mocks.aSubscriptionId,
+          Array.from(mocks.cidrs)
+        )
       ).rejects.toThrowError();
       expect(upsert).toHaveBeenCalledWith({
         cidrs: mocks.cidrs,

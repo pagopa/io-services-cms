@@ -4,8 +4,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
 export async function getSubscriptionAuthorizedCIDRs(subscriptionId: string) {
-  const subscriptionCIDRsModel = getSubscriptionCIDRsModel();
-  const result = await subscriptionCIDRsModel.findLastVersionByModelId([
+  const result = await getSubscriptionCIDRsModel().findLastVersionByModelId([
     subscriptionId as NonEmptyString
   ])();
 
@@ -20,8 +19,7 @@ export async function upsertSubscriptionAuthorizedCIDRs(
   subscriptionId: string,
   cidrs: ReadonlyArray<Cidr>
 ) {
-  const subscriptionCIDRsModel = getSubscriptionCIDRsModel();
-  const result = await subscriptionCIDRsModel.upsert({
+  const result = await getSubscriptionCIDRsModel().upsert({
     cidrs: new Set(cidrs),
     kind: "INewSubscriptionCIDRs",
     subscriptionId: subscriptionId as NonEmptyString
