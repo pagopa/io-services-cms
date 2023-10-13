@@ -1,11 +1,8 @@
-import { getConfiguration } from "@/config";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR
 } from "@/config/constants";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
-import { buildApimService } from "@/lib/be/apim-helper";
-import { regenerateManageKeys } from "@/lib/be/keys-manage";
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -16,7 +13,7 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 /**
  * @description Regenerate Manage key by key type
  */
-const PUT = withJWTAuthHandler(
+export const PUT = withJWTAuthHandler(
   async (
     request: NextRequest,
     {
@@ -44,6 +41,10 @@ const PUT = withJWTAuthHandler(
       );
       return NextResponse.json(manageKeysResponse);
     } catch (error) {
+      console.log(
+        `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+        error
+      );
       return NextResponse.json(
         {
           title: "ApimError",

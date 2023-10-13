@@ -27,12 +27,10 @@ const getApimConfig = cache(() => {
 
 const getApimClient = cache(() => {
   const apimConfig = getApimConfig();
-
-  console.log("Apim Config", apimConfig);
   return ApimUtils.getApimClient(apimConfig, apimConfig.AZURE_SUBSCRIPTION_ID);
 });
 
-export const getApimService = () => {
+export const getApimService = cache(() => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
   const apimClient = getApimClient();
@@ -41,4 +39,4 @@ export const getApimService = () => {
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM
   );
-};
+});
