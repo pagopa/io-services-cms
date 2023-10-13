@@ -12,7 +12,7 @@ export type ServiceLogoProps = {
   serviceId: string;
 };
 
-/** Render service basic information card and service details drawer */
+/** Render a card with the service logo and the possibility of uploading/modifying it */
 export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
   const { t } = useTranslation();
   const configuration = getConfiguration();
