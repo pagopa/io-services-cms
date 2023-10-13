@@ -1,16 +1,7 @@
 import { Cidr } from "@/generated/api/Cidr";
-import { getLegacyCosmosContainerClient } from "@/lib/be/legacy-cosmos";
-import {
-  SUBSCRIPTION_CIDRS_COLLECTION_NAME,
-  SubscriptionCIDRsModel
-} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { getSubscriptionCIDRsModel } from "@/lib/be/legacy-cosmos";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-
-const getSubscriptionCIDRsModel = () =>
-  new SubscriptionCIDRsModel(
-    getLegacyCosmosContainerClient(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
-  );
 
 export async function getSubscriptionAuthorizedCIDRs(subscriptionId: string) {
   const subscriptionCIDRsModel = getSubscriptionCIDRsModel();

@@ -1,4 +1,8 @@
 import { CosmosClient } from "@azure/cosmos";
+import {
+  SUBSCRIPTION_CIDRS_COLLECTION_NAME,
+  SubscriptionCIDRsModel
+} from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -36,6 +40,11 @@ export const getLegacyCosmosContainerClient = (cosmosContainerName: string) => {
     .database(LEGACY_COSMOSDB_NAME)
     .container(cosmosContainerName);
 };
+
+export const getSubscriptionCIDRsModel = () =>
+  new SubscriptionCIDRsModel(
+    getLegacyCosmosContainerClient(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
+  );
 
 export async function getLegacyCosmosHealth() {
   try {
