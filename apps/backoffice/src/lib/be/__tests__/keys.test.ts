@@ -1,16 +1,27 @@
 import { describe, expect, it, vi } from "vitest";
 import { Cidr } from "../../../generated/api/Cidr";
+import { SubscriptionKeys } from "../../../generated/api/SubscriptionKeys";
 
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import {
+  regenerateManageSubscritionApiKey,
+  retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs
 } from "../keys/business";
+import { SubscriptionKeyTypeEnum } from "../../../generated/api/SubscriptionKeyType";
 
-const mocks: { cidrs: Set<Cidr>; aSubscriptionId: string } = vi.hoisted(() => ({
+const mocks: {
+  cidrs: Set<Cidr>;
+  aSubscriptionId: string;
+  aPrimaryKey: string;
+  aSecondaryKey: string;
+} = vi.hoisted(() => ({
   cidrs: new Set(["127.0.0.1/8", "127.0.0.2/8"]) as Set<Cidr>,
-  aSubscriptionId: "aSubscriptionId"
+  aSubscriptionId: "aSubscriptionId",
+  aPrimaryKey: "primary",
+  aSecondaryKey: "secondary"
 }));
 
 const { getSubscriptionCIDRsModel } = vi.hoisted(() => ({
@@ -30,13 +41,134 @@ const { getSubscriptionCIDRsModel } = vi.hoisted(() => ({
   })
 }));
 
+const { getApimService } = vi.hoisted(() => ({
+  getApimService: vi.fn().mockReturnValue({
+    listSecrets: vi.fn(() =>
+      TE.right({
+        primaryKey: mocks.aPrimaryKey,
+        secondaryKey: mocks.aSecondaryKey
+      })
+    ),
+    regenerateSubscriptionKey: vi.fn(() =>
+      TE.right({
+        primaryKey: mocks.aPrimaryKey,
+        secondaryKey: mocks.aSecondaryKey
+      })
+    )
+  })
+}));
+
 vi.mock("@/lib/be/legacy-cosmos", () => ({
   getSubscriptionCIDRsModel
 }));
 
+vi.mock("@/lib/be/apim-service", () => ({
+  getApimService
+}));
+
+describe("Manage Keys", () => {
+  describe("Retrieve", () => {
+    it("should return the keys found", async () => {
+      const listSecrets = vi.fn(() =>
+        TE.right({
+          primaryKey: mocks.aPrimaryKey,
+          secondaryKey: mocks.aSecondaryKey
+        })
+      );
+      getApimService.mockReturnValueOnce({
+        listSecrets
+      });
+
+      const result = await retrieveManageSubscriptionApiKeys(
+        mocks.aSubscriptionId
+      );
+
+      expect(listSecrets).toHaveBeenCalledWith(mocks.aSubscriptionId);
+      expect(result).toStrictEqual({
+        primary_key: mocks.aPrimaryKey,
+        secondary_key: mocks.aSecondaryKey
+      });
+    });
+
+    it("should fail when apim respond with an error", async () => {
+      const listSecrets = vi.fn(() =>
+        TE.left({
+          error: {
+            code: "Error",
+            message: "An error has occurred on APIM"
+          },
+          statusCode: 500
+        })
+      );
+      getApimService.mockReturnValueOnce({
+        listSecrets
+      });
+
+      expect(
+        retrieveManageSubscriptionApiKeys(mocks.aSubscriptionId)
+      ).rejects.toThrowError();
+      expect(listSecrets).toHaveBeenCalledWith(mocks.aSubscriptionId);
+    });
+  });
+
+  describe("Regenerate", () => {
+    it("should return the regenerated manage key", async () => {
+      const regenerateSubscriptionKey = vi.fn(() =>
+        TE.right({
+          primaryKey: mocks.aPrimaryKey,
+          secondaryKey: mocks.aSecondaryKey
+        })
+      );
+      getApimService.mockReturnValueOnce({
+        regenerateSubscriptionKey
+      });
+
+      const result = await regenerateManageSubscritionApiKey(
+        mocks.aSubscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+
+      expect(regenerateSubscriptionKey).toHaveBeenCalledWith(
+        mocks.aSubscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+      expect(result).toStrictEqual({
+        primary_key: mocks.aPrimaryKey,
+        secondary_key: mocks.aSecondaryKey
+      });
+    });
+
+    it("should return an error when apim fails regenerating", async () => {
+      const regenerateSubscriptionKey = vi.fn(() =>
+        TE.left({
+          error: {
+            code: "Error",
+            message: "An error has occurred on APIM"
+          },
+          statusCode: 500
+        })
+      );
+      getApimService.mockReturnValueOnce({
+        regenerateSubscriptionKey
+      });
+
+      expect(
+        regenerateManageSubscritionApiKey(
+          mocks.aSubscriptionId,
+          SubscriptionKeyTypeEnum.primary
+        )
+      ).rejects.toThrowError();
+      expect(regenerateSubscriptionKey).toHaveBeenCalledWith(
+        mocks.aSubscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+    });
+  });
+});
+
 describe("Authorized CIDRs Subscription Manage", () => {
   describe("Retrieve", () => {
-    it("should return 200 when authorized cidrs are found", async () => {
+    it("should return the authorized cidrs found", async () => {
       const findLastVersionByModelId = vi.fn(() =>
         TE.right(
           O.some({
@@ -59,7 +191,7 @@ describe("Authorized CIDRs Subscription Manage", () => {
       expect(result).toStrictEqual(Array.from(mocks.cidrs));
     });
 
-    it("should return 200 when authorized cidrs are not found", async () => {
+    it("should return an empty authorized cidrs list when not found are not found", async () => {
       const findLastVersionByModelId = vi.fn(() => TE.right(O.none));
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({

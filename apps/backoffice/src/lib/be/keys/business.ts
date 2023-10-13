@@ -13,8 +13,8 @@ export async function retrieveManageSubscriptionApiKeys(
 ) {
   const subscriptionApiKeys = await listSubscriptionSecrets(subscriptionId);
   return {
-    primaryKey: subscriptionApiKeys.primaryKey,
-    secondaryKey: subscriptionApiKeys.secondaryKey
+    primary_key: subscriptionApiKeys.primaryKey,
+    secondary_key: subscriptionApiKeys.secondaryKey
   };
 }
 
@@ -28,8 +28,8 @@ export async function regenerateManageSubscritionApiKey(
   );
 
   return {
-    primaryKey: subscriptionApiKeys.primaryKey,
-    secondaryKey: subscriptionApiKeys.secondaryKey
+    primary_key: subscriptionApiKeys.primaryKey,
+    secondary_key: subscriptionApiKeys.secondaryKey
   };
 }
 
