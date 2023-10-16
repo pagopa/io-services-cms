@@ -108,7 +108,7 @@ const useFetch = <RC>() => {
   const { t } = useTranslation();
   const [data, setData] = useState<RC>();
   const [error, setError] = useState<UseFetchError>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<UseFetchOptions>();
 
   const { push } = useRouter();
@@ -195,6 +195,7 @@ const useFetch = <RC>() => {
   ) => {
     setOptions(options);
     setData(undefined); // reset data
+    setLoading(true); // set loading state
     try {
       const result = await client[operationId]({
         ...(requestParams as any),
@@ -243,7 +244,7 @@ const useFetch = <RC>() => {
     } catch (err) {
       setUseFetchError("exceptionError", (err as Error).message);
     } finally {
-      setLoading(false);
+      setLoading(false); // reset loading state
       setFetchTaskCounter(() => fetchTaskCounter + 1);
     }
   };

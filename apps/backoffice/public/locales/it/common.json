@@ -162,6 +162,13 @@
         "button": "Elimina"
       }
     },
+    "logo": {
+      "disclaimerText": "Inserisci <strong>solo</strong> il logo del tuo ente.<br />Sarai responsabile dell’inserimento di immagini diverse da quella indicata.",
+      "dropzoneText": "Carica logo del servizio",
+      "loadingText": "Caricamento in corso",
+      "rejectedText": "Formato non supportato",
+      "sizeFormatText": "Dimensione massima: 300x300px.<br/>Formato: .png."
+    },
     "publish": {
       "modal": {
         "title": "Vuoi pubblicare questo servizio nell’app IO?",

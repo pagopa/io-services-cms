@@ -3,7 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { ReactNode } from "react";
-import { CardRowType, CardRows } from ".";
+import { CardBaseContainer, CardRowType, CardRows } from ".";
 
 export type CardDetailsCtaType = {
   /** call to action end icon */
@@ -74,12 +74,7 @@ export const CardDetails = ({
   };
 
   return (
-    <Box
-      bgcolor="background.paper"
-      id="card-details"
-      padding={3}
-      borderRadius={0.5}
-    >
+    <CardBaseContainer>
       <Typography id="card-title" variant="overline">
         {t(title)}
       </Typography>
@@ -88,6 +83,6 @@ export const CardDetails = ({
         <CardRows rows={rows} />
       </Box>
       {renderCallToAction()}
-    </Box>
+    </CardBaseContainer>
   );
 };
