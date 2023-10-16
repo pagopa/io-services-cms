@@ -7,6 +7,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 import { ApimUser, IdentityTokenPayload } from "../types";
 
@@ -95,7 +96,7 @@ const toUser = (config: Configuration) => ({
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
-}) => ({
+}): User => ({
   id: identityTokenPayload.uid,
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
   email: identityTokenPayload.email,
