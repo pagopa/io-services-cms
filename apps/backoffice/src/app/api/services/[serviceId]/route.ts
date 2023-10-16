@@ -1,68 +1,56 @@
-import {
-  buildClient,
-  forwardIoServicesCmsRequest
-} from "@/lib/be/io-services-cms-proxy";
-import { getConfiguration } from "@/config";
+import { forwardIoServicesCmsRequest } from "@/lib/be/cms/proxy";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
 
-const configuration = getConfiguration();
-const client = buildClient(configuration);
-
 /**
  * @description Retrieve a service by ID
  */
-const getService = (
-  request: NextRequest,
-  {
-    params,
-    backofficeUser
-  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-) =>
-  forwardIoServicesCmsRequest(client)(
-    "getService",
-    request,
-    backofficeUser,
-    params
-  );
+export const GET = withJWTAuthHandler(
+  (
+    request: NextRequest,
+    {
+      params,
+      backofficeUser
+    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+  ) =>
+    forwardIoServicesCmsRequest("getService", request, backofficeUser, params)
+);
 
 /**
  * @description Update an existing service by ID
  */
-const updateService = (
-  request: NextRequest,
-  {
-    params,
-    backofficeUser
-  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-) =>
-  forwardIoServicesCmsRequest(client)(
-    "updateService",
-    request,
-    backofficeUser,
-    params
-  );
+export const PUT = withJWTAuthHandler(
+  (
+    request: NextRequest,
+    {
+      params,
+      backofficeUser
+    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+  ) =>
+    forwardIoServicesCmsRequest(
+      "updateService",
+      request,
+      backofficeUser,
+      params
+    )
+);
 
 /**
  * @description Delete a service by ID
  */
-const deleteService = (
-  request: NextRequest,
-  {
-    params,
-    backofficeUser
-  }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-) =>
-  forwardIoServicesCmsRequest(client)(
-    "deleteService",
-    request,
-    backofficeUser,
-    params
-  );
-
-export const {
-  GET = withJWTAuthHandler(getService),
-  PUT = withJWTAuthHandler(updateService),
-  DELETE = withJWTAuthHandler(deleteService)
-} = {};
+export const DELETE = withJWTAuthHandler(
+  (
+    request: NextRequest,
+    {
+      params,
+      backofficeUser
+    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+  ) =>
+    forwardIoServicesCmsRequest(
+      "deleteService",
+      request,
+      backofficeUser,
+      params
+    )
+);
