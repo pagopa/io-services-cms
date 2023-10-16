@@ -91,9 +91,8 @@ describe("Retrieve Manage Keys API", () => {
   });
 
   it("should return 500", async () => {
-    retrieveManageSubscriptionApiKeys.mockReturnValueOnce(
-      Promise.reject({ message: "an error" })
-    );
+    retrieveManageSubscriptionApiKeys.mockRejectedValueOnce("an error");
+
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
