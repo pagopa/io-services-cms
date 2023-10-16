@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import { Cidr } from "../../../../../../generated/api/Cidr";
-import { GET } from "../route";
+import { GET, PUT } from "../route";
 
 const mocks: {
   authrizedCIDRs: Cidr[];
@@ -24,14 +24,21 @@ const { getToken } = vi.hoisted(() => ({
   getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock))
 }));
 
-const { retrieveManageSubscriptionAuthorizedCIDRs } = vi.hoisted(() => ({
+const {
+  retrieveManageSubscriptionAuthorizedCIDRs,
+  upsertManageSubscriptionAuthorizedCIDRs
+} = vi.hoisted(() => ({
   retrieveManageSubscriptionAuthorizedCIDRs: vi
+    .fn()
+    .mockReturnValue(Promise.resolve(mocks.authrizedCIDRs)),
+  upsertManageSubscriptionAuthorizedCIDRs: vi
     .fn()
     .mockReturnValue(Promise.resolve(mocks.authrizedCIDRs))
 }));
 
 vi.mock("@/lib/be/keys/business", () => ({
-  retrieveManageSubscriptionAuthorizedCIDRs
+  retrieveManageSubscriptionAuthorizedCIDRs,
+  upsertManageSubscriptionAuthorizedCIDRs
 }));
 
 vi.mock("next-auth/jwt", async () => {
@@ -42,40 +49,84 @@ vi.mock("next-auth/jwt", async () => {
   };
 });
 
-describe("Retrieve Authorized CIDRs", () => {
-  it("should return 200", async () => {
-    retrieveManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
-      Promise.resolve(mocks.authrizedCIDRs)
-    );
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+describe("Authorized CIDRs API", () => {
+  describe("Retrieve", () => {
+    it("should return 200", async () => {
+      retrieveManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+        Promise.resolve(mocks.authrizedCIDRs)
+      );
+      getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
-    // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+      // Mock NextRequest
+      const request = ({
+        bodyUsed: false
+      } as any) as NextRequest;
 
-    const result = await GET(request, {});
+      const result = await GET(request, {});
 
-    //extract jsonBody from NextResponse
-    const jsonResponse = await new Response(result.body).json();
+      //extract jsonBody from NextResponse
+      const jsonResponse = await new Response(result.body).json();
 
-    expect(result.status).toBe(200);
-    expect(jsonResponse.cidrs).toEqual(mocks.authrizedCIDRs);
+      expect(result.status).toBe(200);
+      expect(jsonResponse.cidrs).toEqual(mocks.authrizedCIDRs);
+    });
+
+    it("should return 500", async () => {
+      retrieveManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+        Promise.reject({ message: "an error" })
+      );
+      getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+
+      // Mock NextRequest
+      const request = ({
+        bodyUsed: false
+      } as any) as NextRequest;
+
+      const result = await GET(request, {});
+
+      expect(result.status).toBe(500);
+    });
   });
 
-  it("should return 500", async () => {
-    retrieveManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
-      Promise.reject({ message: "an error" })
-    );
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+  describe("Update", () => {
+    it("should return 200", async () => {
+      upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+        Promise.resolve(mocks.authrizedCIDRs)
+      );
+      getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
-    // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+      // Mock NextRequest
+      const request = ({
+        bodyUsed: false,
+        json: () => Promise.resolve({ cidrs: mocks.authrizedCIDRs })
+      } as any) as NextRequest;
 
-    const result = await GET(request, {});
+      const result = await PUT(request, {});
 
-    expect(result.status).toBe(500);
+      //extract jsonBody from NextResponse
+      const jsonResponse = await new Response(result.body).json();
+
+      expect(result.status).toBe(200);
+      expect(jsonResponse.cidrs).toEqual(mocks.authrizedCIDRs);
+    });
+
+    it("should return 400", async () => {
+      upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+        Promise.resolve(mocks.authrizedCIDRs)
+      );
+      getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+
+      // Mock NextRequest
+      const request = ({
+        bodyUsed: false,
+        json: () => Promise.resolve({ aNotValidProp: "aNotValidProp" })
+      } as any) as NextRequest;
+
+      const result = await PUT(request, {});
+
+      expect(result.status).toBe(400);
+    });
+
+    // TODO: inserire quello del 500
   });
 });
