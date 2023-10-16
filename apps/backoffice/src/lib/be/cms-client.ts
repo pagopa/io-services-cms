@@ -25,19 +25,17 @@ const getIoServicesCmsClientConfig = cache(() => {
   return result.right;
 });
 
-export const getIoServicesCmsClient = cache(
-  (): IoServicesCmsClient => {
-    const configuration = getIoServicesCmsClientConfig();
+export const getIoServicesCmsClient = cache(() => {
+  const configuration = getIoServicesCmsClientConfig();
 
-    if (configuration.API_SERVICES_CMS_MOCKING) {
-      const { setupMocks } = require("../../../mocks");
-      setupMocks();
-    }
-
-    return createClient({
-      baseUrl: configuration.API_SERVICES_CMS_URL,
-      fetchApi: (fetch as any) as typeof fetch,
-      basePath: configuration.API_SERVICES_CMS_BASE_PATH
-    });
+  if (configuration.API_SERVICES_CMS_MOCKING) {
+    const { setupMocks } = require("../../../mocks");
+    setupMocks();
   }
-);
+
+  return createClient({
+    baseUrl: configuration.API_SERVICES_CMS_URL,
+    fetchApi: (fetch as any) as typeof fetch,
+    basePath: configuration.API_SERVICES_CMS_BASE_PATH
+  });
+});

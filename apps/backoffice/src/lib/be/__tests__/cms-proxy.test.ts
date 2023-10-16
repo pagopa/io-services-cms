@@ -26,9 +26,9 @@ const { getIoServicesCmsClient } = vi.hoisted(() => ({
   })
 }));
 
-vi.mock("@lib/be/cms-client", async () => {
-  getIoServicesCmsClient;
-});
+vi.mock("@lib/be/cms-client", () => ({
+  getIoServicesCmsClient
+}));
 
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
