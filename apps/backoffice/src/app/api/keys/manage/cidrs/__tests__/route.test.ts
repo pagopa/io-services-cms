@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
@@ -48,6 +48,11 @@ vi.mock("next-auth/jwt", async () => {
     getToken
   };
 });
+
+afterEach(() => {
+    vi.resetAllMocks();
+    vi.restoreAllMocks();
+  });
 
 describe("Authorized CIDRs API", () => {
   describe("Retrieve", () => {
@@ -127,6 +132,21 @@ describe("Authorized CIDRs API", () => {
       expect(result.status).toBe(400);
     });
 
-    // TODO: inserire quello del 500
+    it("should return 400", async () => {
+        upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+            Promise.resolve(mocks.authrizedCIDRs)
+          );
+        getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+  
+        // Mock NextRequest
+        const request = ({
+          bodyUsed: false,
+          json: () => Promise.reject(new Error("error"))
+        } as any) as NextRequest;
+  
+        const result = await PUT(request, {});
+  
+        expect(result.status).toBe(500);
+      });
   });
 });
