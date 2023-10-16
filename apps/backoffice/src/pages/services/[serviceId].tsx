@@ -1,10 +1,10 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
-import { CardDetails } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
 import {
   ServiceAlerts,
   ServiceContextMenu,
   ServiceInfo,
+  ServiceLogo,
   fromServiceLifecycleToService,
   fromServicePublicationToService
 } from "@/components/services";
@@ -15,7 +15,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Service } from "@/types/service";
-import { Box, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -122,14 +122,6 @@ export default function ServiceDetails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);
 
-  const renderServiceLogo = () => (
-    <CardDetails
-      title="Service Logo"
-      rows={[]}
-      customContent={<Box>Placeholder todo</Box>}
-    />
-  );
-
   return (
     <>
       <Grid container spacing={2} alignItems="center" marginBottom={2}>
@@ -164,7 +156,7 @@ export default function ServiceDetails() {
           <ServiceInfo data={currentService} />
         </Grid>
         <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
-          {renderServiceLogo()}
+          <ServiceLogo serviceId={serviceId} />
         </Grid>
         <Grid item xs={12}>
           <ApiKeys
