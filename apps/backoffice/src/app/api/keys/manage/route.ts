@@ -2,7 +2,7 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND
 } from "@/config/constants";
-import { ApiKeyNotFoundError } from "@/lib/be/keys/apim";
+import { ApiKeyNotFoundError } from "@/lib/be/errors";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";

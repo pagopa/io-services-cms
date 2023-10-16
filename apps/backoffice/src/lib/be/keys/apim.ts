@@ -1,14 +1,7 @@
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import * as E from "fp-ts/lib/Either";
 import { getApimService } from "../apim-service";
-
-export class ApiKeyNotFoundError extends Error {
-  constructor(message: string) {
-    super("the API key already exists");
-    this.name = "ApiKeyAlreadyExistsError";
-    this.message = message;
-  }
-}
+import { ApiKeyNotFoundError } from "../errors";
 
 export async function listSubscriptionSecrets(subscriptionId: string) {
   const result = await getApimService().listSecrets(subscriptionId)();
