@@ -297,7 +297,7 @@ describe("Authorize", () => {
     );
   });
 
-  it("should fail when retrieved Apim user is valid", async () => {
+  it("should return a valid backoffice User", async () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
