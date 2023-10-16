@@ -1,12 +1,10 @@
-import { Client, createClient } from "@/generated/services-cms/client";
+import { createClient } from "@/generated/services-cms/client";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { cache } from "react";
-
-export type IoServicesCmsClient = Client;
 
 const Config = t.type({
   API_SERVICES_CMS_URL: NonEmptyString,

@@ -3,7 +3,7 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { forwardIoServicesCmsRequest } from "../cms/proxy";
+import { forwardIoServicesCmsRequest } from "../cms/business";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -18,15 +18,35 @@ const jwtMock = ({
   }
 } as unknown) as BackOfficeUser;
 
+const mocks: {
+  statusOK: number;
+  statusNoContent: number;
+  aSamplePayload: { test: string };
+} = vi.hoisted(() => ({
+  statusOK: 200,
+  statusNoContent: 204,
+  aSamplePayload: { test: "test" }
+}));
+
 const { getIoServicesCmsClient } = vi.hoisted(() => ({
   getIoServicesCmsClient: vi.fn().mockReturnValue({
-    getServices: vi.fn(() => E.of({ status: 200, value: { test: "test" } })),
-    createService: vi.fn(() => E.of({ status: 200, value: { test: "test" } })),
-    reviewService: vi.fn(() => E.of({ status: 204, value: undefined }))
+    getServices: vi.fn(() =>
+      Promise.resolve(
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
+      )
+    ),
+    createService: vi.fn(() =>
+      Promise.resolve(
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
+      )
+    ),
+    reviewService: vi.fn(() =>
+      Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
+    )
   })
 }));
 
-vi.mock("@lib/be/cms-client", () => ({
+vi.mock("../cms-client", () => ({
   getIoServicesCmsClient
 }));
 
@@ -34,7 +54,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
     // Mock io-services-cms client
     const getServices = vi.fn(() =>
-      E.of({ status: 200, value: { test: "test" } })
+      Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
     );
     getIoServicesCmsClient.mockReturnValueOnce({
       getServices

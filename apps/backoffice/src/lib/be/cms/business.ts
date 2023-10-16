@@ -3,14 +3,11 @@ import {
   HTTP_STATUS_NO_CONTENT
 } from "@/config/constants";
 
-import {
-  IoServicesCmsClient,
-  getIoServicesCmsClient
-} from "@/lib/be/cms-client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { IoServicesCmsClient, callIoServicesCms } from "./client";
 
 type PathParameters = {
   serviceId?: string;
@@ -46,21 +43,7 @@ export const forwardIoServicesCmsRequest = async <
   } as any;
 
   // call the io-services-cms API and return the response
-  return await callIoServicesCms(operationId, requestPayload);
-};
-
-/**
- * method to call io-services-cms API
- * @param clientId the client to use
- * @param operationId openapi operationId
- * @param requestParams request parameters _(as specified in openapi)_
- * @returns the response or an error
- */
-const callIoServicesCms = async <T extends keyof IoServicesCmsClient>(
-  operationId: T,
-  requestPayload: any
-) => {
-  const result = await getIoServicesCmsClient()[operationId](requestPayload);
+  const result = await callIoServicesCms(operationId, requestPayload);
 
   if (E.isLeft(result)) {
     return NextResponse.json(
