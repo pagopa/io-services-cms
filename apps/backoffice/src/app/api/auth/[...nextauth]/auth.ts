@@ -47,10 +47,7 @@ const verifyToken = (config: Configuration) => (
             audience: config.BACKOFFICE_DOMAIN
           }
         ),
-      e => {
-        console.log("ERROR");
-        return E.toError(e);
-      }
+      E.toError
     ),
     TE.chain(({ payload }) =>
       pipe(
