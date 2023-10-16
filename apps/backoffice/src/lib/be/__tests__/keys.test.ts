@@ -1,16 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { Cidr } from "../../../generated/api/Cidr";
-import { SubscriptionKeys } from "../../../generated/api/SubscriptionKeys";
 
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { SubscriptionKeyTypeEnum } from "../../../generated/api/SubscriptionKeyType";
 import {
   regenerateManageSubscritionApiKey,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs
 } from "../keys/business";
-import { SubscriptionKeyTypeEnum } from "../../../generated/api/SubscriptionKeyType";
 
 const mocks: {
   cidrs: Set<Cidr>;
