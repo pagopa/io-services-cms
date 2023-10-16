@@ -1,5 +1,4 @@
 import { getConfiguration } from "@/config";
-import * as jose from "jose";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authorize } from "./auth";
@@ -17,7 +16,7 @@ const authOptions: NextAuthOptions = {
     CredentialsProvider({
       id: "access-control",
       credentials: {},
-      authorize: authorize(getConfiguration(), jose)
+      authorize: authorize(getConfiguration())
     })
   ],
   pages: {

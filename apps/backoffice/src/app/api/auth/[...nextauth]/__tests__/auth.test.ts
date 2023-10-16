@@ -4,7 +4,6 @@ import axios from "axios";
 import http, { IncomingMessage } from "http";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as jose from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Configuration } from "../../../../../config";
 import { authorize } from "../auth";
@@ -114,6 +113,19 @@ vi.mock("@io-services-cms/external-clients", () => ({
   ApimUtils: { getApimClient, getApimService }
 }));
 
+const { jwtVerify } = vi.hoisted(() => ({
+  jwtVerify: vi.fn()
+}));
+
+vi.mock("jose", async importOriginal => {
+  const mod = await importOriginal();
+
+  return {
+    ...(mod as any),
+    jwtVerify
+  };
+});
+
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -121,9 +133,10 @@ afterEach(() => {
 describe("Authorize", () => {
   it("should fail when credentials is not valid", async () => {
     await expect(() =>
-      authorize(mockConfig, jose)({ invalidParam: "identity_token" }, {})
+      authorize(mockConfig)({ invalidParam: "identity_token" }, {})
     ).rejects.toThrowError(/is not a valid/);
 
+    expect(jwtVerify).not.toHaveBeenCalled();
     expect(getApimClient).not.toHaveBeenCalled();
     expect(getApimService).not.toHaveBeenCalled();
   });
@@ -180,10 +193,13 @@ describe("Authorize", () => {
   // });
 
   it("should fail when token is not a JWT", async () => {
+    jwtVerify.mockRejectedValueOnce("Invalid Compact JWS");
+
     await expect(() =>
-      authorize(mockConfig, jose)({ identity_token: "identity_token" }, {})
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
     ).rejects.toThrowError("Invalid Compact JWS");
 
+    expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).not.toHaveBeenCalled();
     expect(getApimService).not.toHaveBeenCalled();
   });
@@ -203,18 +219,12 @@ describe("Authorize", () => {
 
   it("should fail when JWT payload is not a valid IdentityToken", async () => {
     const { uid, ...anInvalidJwtPayload } = aValidJwtPayload;
-    const mockJose = ({
-      createRemoteJWKSet: jose.createRemoteJWKSet,
-      jwtVerify: vi.fn(() =>
-        Promise.resolve(({
-          payload: anInvalidJwtPayload,
-          protectedHeader: {}
-        } as unknown) as jose.JWTVerifyResult)
-      )
-    } as unknown) as typeof jose;
+    jwtVerify.mockResolvedValueOnce({
+      payload: anInvalidJwtPayload
+    });
 
     await expect(() =>
-      authorize(mockConfig, mockJose)(
+      authorize(mockConfig)(
         {
           identity_token: "identity_token"
         },
@@ -224,26 +234,22 @@ describe("Authorize", () => {
       "value [undefined] at [root.uid] is not a valid [string]"
     );
 
+    expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).not.toHaveBeenCalled();
     expect(getApimService).not.toHaveBeenCalled();
   });
 
   it("should fail when Apim user is not found", async () => {
-    const mockJose = ({
-      createRemoteJWKSet: jose.createRemoteJWKSet,
-      jwtVerify: vi.fn(() =>
-        Promise.resolve(({
-          payload: aValidJwtPayload,
-          protectedHeader: {}
-        } as unknown) as jose.JWTVerifyResult)
-      )
-    } as unknown) as typeof jose;
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
 
     await expect(() =>
-      authorize(mockConfig, mockJose)({ identity_token: "identity_token" }, {})
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
     ).rejects.toThrowError("Cannot find user");
 
+    expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
@@ -263,21 +269,16 @@ describe("Authorize", () => {
   });
 
   it("should fail when retrieved Apim user is not valid", async () => {
-    const mockJose = ({
-      createRemoteJWKSet: jose.createRemoteJWKSet,
-      jwtVerify: vi.fn(() =>
-        Promise.resolve(({
-          payload: aValidJwtPayload,
-          protectedHeader: {}
-        } as unknown) as jose.JWTVerifyResult)
-      )
-    } as unknown) as typeof jose;
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
     getUserByEmail.mockReturnValueOnce(TE.right(O.some({})));
 
     await expect(() =>
-      authorize(mockConfig, mockJose)({ identity_token: "identity_token" }, {})
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
     ).rejects.toThrowError(/is not a valid/);
 
+    expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
@@ -297,15 +298,9 @@ describe("Authorize", () => {
   });
 
   it("should fail when retrieved Apim user is valid", async () => {
-    const mockJose = ({
-      createRemoteJWKSet: jose.createRemoteJWKSet,
-      jwtVerify: vi.fn(() =>
-        Promise.resolve(({
-          payload: aValidJwtPayload,
-          protectedHeader: {}
-        } as unknown) as jose.JWTVerifyResult)
-      )
-    } as unknown) as typeof jose;
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
     const aValidApimUser = {
       id: faker.string.uuid(),
       email: `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
@@ -318,7 +313,7 @@ describe("Authorize", () => {
     };
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
 
-    const user = await authorize(mockConfig, mockJose)(
+    const user = await authorize(mockConfig)(
       { identity_token: "identity_token" },
       {}
     );
@@ -345,6 +340,7 @@ describe("Authorize", () => {
         subscriptionId: mockConfig.AZURE_SUBSCRIPTION_ID
       }
     });
+    expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,

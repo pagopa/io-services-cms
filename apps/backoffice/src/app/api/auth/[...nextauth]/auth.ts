@@ -6,13 +6,12 @@ import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as j from "jose";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 import { ApimUser, IdentityTokenPayload } from "../types";
 
 export const authorize = (
-  config: Configuration,
-  jose: typeof j
+  config: Configuration
 ): CredentialsConfig["authorize"] => credentials =>
   pipe(
     credentials,
@@ -20,7 +19,7 @@ export const authorize = (
     E.mapLeft(flow(readableReport, E.toError)),
     E.map(selfCareIdentity => selfCareIdentity.identity_token),
     TE.fromEither,
-    TE.chain(verifyToken(config, jose)),
+    TE.chain(verifyToken(config)),
     TE.bindTo("identityTokenPayload"),
     TE.bind("apimUser", ({ identityTokenPayload }) =>
       retrieveApimUser(config)(identityTokenPayload)
@@ -32,15 +31,15 @@ export const authorize = (
     })
   )();
 
-const verifyToken = (config: Configuration, jose: typeof j) => (
+const verifyToken = (config: Configuration) => (
   identity_token: string
 ): TE.TaskEither<Error, IdentityTokenPayload> =>
   pipe(
     TE.tryCatch(
       () =>
-        jose.jwtVerify(
+        jwtVerify(
           identity_token,
-          jose.createRemoteJWKSet(
+          createRemoteJWKSet(
             new URL(`${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`)
           ),
           {
@@ -48,7 +47,10 @@ const verifyToken = (config: Configuration, jose: typeof j) => (
             audience: config.BACKOFFICE_DOMAIN
           }
         ),
-      E.toError
+      e => {
+        console.log("ERROR");
+        return E.toError(e);
+      }
     ),
     TE.chain(({ payload }) =>
       pipe(
