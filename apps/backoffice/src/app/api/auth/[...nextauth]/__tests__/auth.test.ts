@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker/locale/it";
-import { ApimUtils } from "@io-services-cms/external-clients";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -44,19 +43,13 @@ const mockConfig = ({
 } as unknown) as Configuration;
 
 const mockApimClient = {};
-const mockApimUtils = ({
-  getApimClient: vi.fn(() => mockApimClient),
-  getApimService: vi.fn(() => ({
-    getUserByEmail: vi.fn(() => TE.right(O.none))
-  }))
-} as unknown) as typeof ApimUtils;
 
 const { getUserByEmail } = vi.hoisted(() => ({
   getUserByEmail: vi.fn()
 }));
 
 const { getApimClient, getApimService } = vi.hoisted(() => ({
-  getApimClient: vi.fn().mockReturnValue({}),
+  getApimClient: vi.fn().mockReturnValue(mockApimClient),
   getApimService: vi.fn().mockReturnValue({
     getUserByEmail
   })
