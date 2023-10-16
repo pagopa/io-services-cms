@@ -6,14 +6,13 @@ export const withJWTAuthHandler = (
   handler: (
     nextRequest: NextRequest,
     context: { params: any; backofficeUser: BackOfficeUser }
-  ) => Promise<NextResponse> | Promise<Response>,
-  tokenValidator = getToken
+  ) => Promise<NextResponse> | Promise<Response>
 ) => async (nextRequest: NextRequest, { params }: { params: {} }) => {
   // Metodo di next-auth usato anche all'interno del middleware withAuth
   // Restituisce:
   // - Nel caso di valido e non scaduto token JWT, il payload tipizzato contenuto nello stesso
   // - Nel caso di token scaduto o non valido, null
-  const authenticationDetails = await tokenValidator({ req: nextRequest });
+  const authenticationDetails = await getToken({ req: nextRequest });
 
   if (!authenticationDetails) {
     return NextResponse.json(
