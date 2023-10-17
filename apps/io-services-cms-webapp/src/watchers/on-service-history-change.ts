@@ -16,7 +16,7 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 // import * as E from "fp-ts/lib/Either";
-import { pipe, flow } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -121,48 +121,43 @@ const getSpecialFields = (
   }
 };
 
-const canBeSyncronized =
+const shouldBeSyncronized =
   (fsmPublicationClient: ServicePublication.FsmClient) =>
-  (serviceHistory: ServiceHistory): RequestSyncLegacyAction | NoAction => {
-    if (
-      serviceHistory.fsm.lastTransition === "apply edit on approved" ||
-      serviceHistory.fsm.lastTransition === "apply submit on draft"
-    ) {
-      return toNotRequestSync();
-    } else if (
-      isServiceInPublication(serviceHistory, fsmPublicationClient) &&
-      serviceHistory.fsm.lastTransition === "apply reject on submitted"
-    ) {
-      return toNotRequestSync();
-    } else {
-      return toRequestSyncLegacyAction(serviceHistory);
-    }
-  };
-
-// const pipeCanBeSyncronized =
-//   (fsmPublicationClient: ServicePublication.FsmClient) =>
-//   (serviceHistory: ServiceHistory): RequestSyncLegacyAction | NoAction => pipe(
-//     serviceHistory,
-//     E.fromPredicate()
-//   )
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const isServiceInPublication = (
-  serviceHistory: ServiceHistory,
-  fsmPublicationClient: ServicePublication.FsmClient
-): TE.TaskEither<Error, boolean> =>
-  pipe(
-    serviceHistory.serviceId,
-    fsmPublicationClient.getStore().fetch,
-    TE.map(
-      flow(
-        () => true,
-        (_) => false
+  (serviceHistory: ServiceHistory) =>
+    pipe(
+      serviceHistory,
+      O.fromPredicate((itm) =>
+        ["published", "unpublished"].includes(itm.fsm.state)
+      ),
+      O.fold(
+        () =>
+          pipe(
+            serviceHistory,
+            isServiceInPublication(fsmPublicationClient),
+            TE.chainW((isInPublication) => TE.right(!isInPublication))
+          ),
+        (_) => TE.right(true)
       )
-    )
-  );
+    );
 
-const toNotRequestSync = (): NoAction => ({});
+/**
+ * This method checks if the service can be syncronized to the legacy application
+ * if the given service is from the service-publication fsm, it can be syncronized
+ * if the given service is from the service-lifecycle fsm, it can be syncronized only if it is not in the service-publication fsm
+ *  */
+const isServiceInPublication =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (serviceHistory: ServiceHistory): TE.TaskEither<Error, boolean> =>
+    pipe(
+      serviceHistory.serviceId,
+      fsmPublicationClient.getStore().fetch,
+      TE.map(
+        flow(
+          () => true,
+          (_) => false
+        )
+      )
+    );
 
 const toRequestSyncLegacyAction = (
   serviceHistory: ServiceHistory
@@ -190,10 +185,16 @@ export const handler =
           TE.chainW((isUserEnabled) =>
             pipe(
               item,
-              O.fromPredicate((_) => isUserEnabled),
-              O.map(canBeSyncronized(fsmPublicationClient)),
-              O.getOrElse(() => noAction),
-              TE.right
+              shouldBeSyncronized(fsmPublicationClient),
+              TE.chainW((shouldBeSync) =>
+                pipe(
+                  item,
+                  O.fromPredicate((_) => isUserEnabled && shouldBeSync),
+                  O.map(toRequestSyncLegacyAction),
+                  O.getOrElse(() => noAction),
+                  TE.right
+                )
+              )
             )
           )
         )
