@@ -42,7 +42,7 @@ const mockConfig = ({
   AZURE_APIM: faker.string.alpha()
 } as unknown) as Configuration;
 
-const mockApimClient = {};
+const mockApimClient = vi.hoisted(() => ({}));
 
 const { getUserByEmail } = vi.hoisted(() => ({
   getUserByEmail: vi.fn()
