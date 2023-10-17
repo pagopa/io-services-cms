@@ -180,6 +180,12 @@ const FeatureFlags = t.type({
   ),
 });
 
+export const LogoConfiguration = t.type({
+  LOGOS_URL: NonEmptyString,
+  ASSET_STORAGE_CONNECTION: NonEmptyString,
+});
+export type LogoConfiguration = t.TypeOf<typeof LogoConfiguration>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -204,6 +210,7 @@ export const IConfig = t.intersection([
     ApplicationInsightConfig,
     FeatureFlags,
   ]),
+  LogoConfiguration,
 ]);
 
 export const envConfig = {
