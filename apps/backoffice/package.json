@@ -9,7 +9,7 @@
     "build:package": "yarn build:pre-package && (cd .next/standalone/apps/backoffice && zip -r -q ../../../../${npm_package_name}-${npm_package_version}.zip . -x package.json)",
     "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint",
-    "test": "yarn test:b4f & yarn test:fe",
+    "test": "yarn test:b4f && yarn test:fe",
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
     "test:fe": "vitest run --config ./vitest.config.react.ts",
     "coverage": "vitest run --coverage",
@@ -47,7 +47,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.47.0",
-    "react-i18next": "^13.2.2"
+    "react-i18next": "^13.2.2",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
@@ -62,6 +63,7 @@
     "jsdom": "^22.1.0",
     "msw": "^1.2.5",
     "typescript": "5.1.6",
+    "url-loader": "^4.1.1",
     "vite": "^4.4.9",
     "vitest": "^0.34.1"
   },

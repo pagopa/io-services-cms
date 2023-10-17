@@ -108,7 +108,7 @@ const useFetch = <RC>() => {
   const { t } = useTranslation();
   const [data, setData] = useState<RC>();
   const [error, setError] = useState<UseFetchError>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<UseFetchOptions>();
 
   const { push } = useRouter();
@@ -194,10 +194,12 @@ const useFetch = <RC>() => {
     options?: UseFetchOptions
   ) => {
     setOptions(options);
+    setData(undefined); // reset data
+    setLoading(true); // set loading state
     try {
       const result = await client[operationId]({
         ...(requestParams as any),
-        bearerAuth: "session?.user?.accessToken" //TODO: update OpenAPI and remove this header (next-auth will automatically set tje JWT session as cookie header for each request)
+        bearerAuth: "session?.user?.accessToken" //TODO: update OpenAPI and remove this header (next-auth will automatically set the JWT session as cookie header for each request)
       });
 
       if (E.isLeft(result)) {
@@ -242,7 +244,7 @@ const useFetch = <RC>() => {
     } catch (err) {
       setUseFetchError("exceptionError", (err as Error).message);
     } finally {
-      setLoading(false);
+      setLoading(false); // reset loading state
       setFetchTaskCounter(() => fetchTaskCounter + 1);
     }
   };

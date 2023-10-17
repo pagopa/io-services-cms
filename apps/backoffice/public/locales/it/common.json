@@ -77,16 +77,29 @@
       "description": "Visualizza e gestisci i servizi del tuo ente."
     },
     "service": {
+      "address": "Indirizzo",
+      "appAndroid": "App Android",
+      "appIos": "App iOS",
+      "description": "Descrizione",
+      "email": "Email",
       "information": "Informazioni",
+      "linksContacts": "Link e Contatti",
       "keys": {
         "title": "API Key",
         "description": "Utilizza questa chiave per operazioni programmatiche di tipo USE del servizio."
       },
       "lastUpdate": "Ultima modifica",
+      "name": "Nome",
+      "pec": "Pec",
+      "phone": "Telefono",
+      "privacyUrl": "Privacy",
       "serviceId": "ID Servizio",
       "status": "Stato",
+      "supportUrl": "Url di supporto",
+      "tosUrl": "Termini e condizioni",
       "viewDetails": "Vedi dettaglio",
-      "visibility": "Visibilità"
+      "visibility": "Visibilità in IO",
+      "webUrl": "Web url"
     },
     "new-service": {
       "title": "Crea un nuovo servizio",
@@ -123,21 +136,61 @@
       "submitReview": "Invia in revisione",
       "unpublish": "Nascondi dall'App IO"
     },
+    "alerts": {
+      "lifecycle": {
+        "message": "Questo servizio è una <strong>versione {{status}}</strong> di un servizio già attivo di IO.",
+        "viewVersion": "Visualizza il servizio attivo."
+      },
+      "publication": {
+        "message": "Questo servizio attivo ha una <strong>versione {{status}}</strong>.",
+        "viewVersion": "Visualizza il servizio {{rawStatus}}."
+      },
+      "rejected": {
+        "message": "Questo servizio richiede delle modifiche prima di poter essere pubblicato in app IO.",
+        "reason": {
+          "label": "Leggi qui i motivi del rifiuto.",
+          "title": "Motivi del rifiuto"
+        }
+      },
+      "submitted": "Questo servizio è <strong>in revisione</strong>. In attesa della risposta del nostro team PagoPA, il servizio non può essere modificato."
+    },
+    "details": "Dettagli del Servizio",
     "delete": {
       "modal": {
-        "title": "Elimina servizio",
+        "title": "Vuoi eliminare questo servizio definitivamente?",
         "description": "Eliminando questo servizio, non sarà più visibile in app IO e non sarà più utilizzabile in quest'area riservata. Questa azione è irreversibile.",
         "button": "Elimina"
       }
     },
+    "logo": {
+      "disclaimerText": "Inserisci <strong>solo</strong> il logo del tuo ente.<br />Sarai responsabile dell’inserimento di immagini diverse da quella indicata.",
+      "dropzoneText": "Carica logo del servizio",
+      "loadingText": "Caricamento in corso",
+      "rejectedText": "Formato non supportato",
+      "sizeFormatText": "Dimensione massima: 300x300px.<br/>Formato: .png."
+    },
     "publish": {
       "modal": {
-        "title": "Pubblica servizio in App IO",
-        "description": "Pubblicando questo servizio, lo rendi visibile in app IO a tutti i cittadini.",
+        "title": "Vuoi pubblicare questo servizio nell’app IO?",
+        "description": "I cittadini lo vedranno nella sezione “Servizi” dell’app, sotto al nome del tuo ente. Potrai nasconderlo in qualsiasi momento.",
         "button": "Pubblica"
       }
     },
     "status": {
+      "raw": {
+        "approved": "Approvato",
+        "deleted": "Cancellato",
+        "draft": "In bozza",
+        "rejected": "Rigettato",
+        "submitted": "In revisione"
+      },
+      "version": {
+        "approved": "Approvata",
+        "deleted": "Cancellata",
+        "draft": "In bozza",
+        "rejected": "Rigettata",
+        "submitted": "In revisione"
+      },
       "approved": "Attivo",
       "deleted": "Cancellato",
       "draft": "In bozza",
@@ -146,21 +199,21 @@
     },
     "submitReview": {
       "modal": {
-        "title": "Invia in revisione",
-        "description": "Confermando questa azione, il team PagoPa prenderà in carico la revisione del servizio. Non potrai effettuare ulteriori azioni su questo servizio fino a quando non riceverai l'esito della revisione.",
-        "button": "Invia"
+        "title": "Vuoi inviare questo servizio in revisione?",
+        "description": "Il servizio verrà revisionato dal team di IO. Riceverai una comunicazione con l’esito, positivo o negativo, sulla mail dell’ente e dell’utente che ha inviato in revisione il servizio.",
+        "button": "Invia in revisione"
       }
     },
     "unpublish": {
       "modal": {
-        "title": "Nascondi servizio dall'App IO",
-        "description": "Nascondendo questo servizio, non sarà più visibile in app IO a tutti i cittadini.",
+        "title": "Vuoi nascondere questo servizio dall’app IO?",
+        "description": "I cittadini non lo vedranno più nella sezione “Servizi” dell’app, sotto al nome del tuo ente. Potrai pubblicarlo di nuovo in qualsiasi momento.",
         "button": "Nascondi"
       }
     },
     "visibility": {
-      "published": "Visibile in App IO",
-      "unpublished": "Non visibile in App IO"
+      "published": "Pubblicato",
+      "unpublished": "Nascosto"
     }
   },
   "test": "Questo è un test di traduzione"

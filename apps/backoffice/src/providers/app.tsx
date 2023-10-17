@@ -1,4 +1,5 @@
 import DialogProvider from "@/components/dialog-provider";
+import { DrawerProvider } from "@/components/drawer-provider";
 import { Notification } from "@/components/notification";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
@@ -21,14 +22,16 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <DialogProvider>
-        <SnackbarProvider
-          Components={{
-            custom: Notification
-          }}
-          maxSnack={5}
-        >
-          {children}
-        </SnackbarProvider>
+        <DrawerProvider>
+          <SnackbarProvider
+            Components={{
+              custom: Notification
+            }}
+            maxSnack={5}
+          >
+            {children}
+          </SnackbarProvider>
+        </DrawerProvider>
       </DialogProvider>
     </ThemeProvider>
   );
