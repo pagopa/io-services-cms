@@ -15,7 +15,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-// import * as E from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";

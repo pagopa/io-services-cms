@@ -107,12 +107,16 @@ const mockConfig = {
 
 describe("On Service History Change Handler", () => {
   it.each`
-    scenario                                                    | item                                                                                         | publication                       | expected
-    ${"request sync legacy visible"}                            | ${{ ...aServiceHistory }}                                                                    | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
-    ${"request sync legacy not visible"}                        | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: aLegacyService }}
-    ${"deleted"}                                                | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}` } }}
-    ${"no action"}                                              | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${TE.of(O.none)}                  | ${{}}
-    ${"no action when is Lifecycle Item and published service"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${TE.of(O.some(aServiceHistory))} | ${{}}
+    scenario                                                                          | item                                                                                         | publication                       | expected
+    ${"request sync legacy visible"}                                                  | ${{ ...aServiceHistory }}                                                                    | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
+    ${"request sync legacy not visible"}                                              | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: aLegacyService }}
+    ${"deleted"}                                                                      | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}` } }}
+    ${"no action"}                                                                    | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${TE.of(O.none)}                  | ${{}}
+    ${"no action when is Lifecycle Item and published service"}                       | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${TE.of(O.some(aServiceHistory))} | ${{}}
+    ${"sync when is Publication Item "}                                               | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                     | ${TE.of(O.some(aServiceHistory))} | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
+    ${"no action for a rejected service if already approved version in publication "} | ${{ ...aServiceHistory, fsm: { state: "rejected" } }}                                        | ${TE.of(O.some(aServiceHistory))} | ${{}}
+    ${"sync first time approved service "}                                            | ${{ ...aServiceHistory, fsm: { state: "approved" } }}                                        | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService } }}
+    ${"sync rejected service that is not in publication "}                            | ${{ ...aServiceHistory, fsm: { state: "rejected" } }}                                        | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService } }}
   `(
     "should map an item to a $scenario action",
     async ({ item, publication, expected }) => {
