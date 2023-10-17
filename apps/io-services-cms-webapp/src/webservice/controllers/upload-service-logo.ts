@@ -111,9 +111,9 @@ export const makeUploadServiceLogoHandler =
         auth.subscriptionId,
         auth.userId
       ),
-      // TODO: serve controllare che il servizio esista?
-      // in teoria sotto controllo che quel serviceId appartenga all'utente
-      // di conseguenza potrebbe essere inutile questa operazione
+      // TODO: serve controllare che il servizio esista in FSM Lifecycle?
+      // in teoria sopra controllo che quel serviceId appartenga all'utente
+      // di conseguenza so giá se il servizio esiste o meno
       TE.chainW(
         flow(
           fsmLifecycleClient.getStore().fetch,
