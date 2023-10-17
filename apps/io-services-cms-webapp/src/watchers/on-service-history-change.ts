@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { Queue, ServiceHistory } from "@io-services-cms/models";
+import {
+  Queue,
+  ServiceHistory,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
@@ -11,7 +15,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+// import * as E from "fp-ts/lib/Either";
+import { pipe, flow } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -116,6 +121,49 @@ const getSpecialFields = (
   }
 };
 
+const canBeSyncronized =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (serviceHistory: ServiceHistory): RequestSyncLegacyAction | NoAction => {
+    if (
+      serviceHistory.fsm.lastTransition === "apply edit on approved" ||
+      serviceHistory.fsm.lastTransition === "apply submit on draft"
+    ) {
+      return toNotRequestSync();
+    } else if (
+      isServiceInPublication(serviceHistory, fsmPublicationClient) &&
+      serviceHistory.fsm.lastTransition === "apply reject on submitted"
+    ) {
+      return toNotRequestSync();
+    } else {
+      return toRequestSyncLegacyAction(serviceHistory);
+    }
+  };
+
+// const pipeCanBeSyncronized =
+//   (fsmPublicationClient: ServicePublication.FsmClient) =>
+//   (serviceHistory: ServiceHistory): RequestSyncLegacyAction | NoAction => pipe(
+//     serviceHistory,
+//     E.fromPredicate()
+//   )
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const isServiceInPublication = (
+  serviceHistory: ServiceHistory,
+  fsmPublicationClient: ServicePublication.FsmClient
+): TE.TaskEither<Error, boolean> =>
+  pipe(
+    serviceHistory.serviceId,
+    fsmPublicationClient.getStore().fetch,
+    TE.map(
+      flow(
+        () => true,
+        (_) => false
+      )
+    )
+  );
+
+const toNotRequestSync = (): NoAction => ({});
+
 const toRequestSyncLegacyAction = (
   serviceHistory: ServiceHistory
 ): RequestSyncLegacyAction => ({
@@ -125,7 +173,8 @@ const toRequestSyncLegacyAction = (
 export const handler =
   (
     config: IConfig,
-    apimService: ApimUtils.ApimService
+    apimService: ApimUtils.ApimService,
+    fsmPublicationClient: ServicePublication.FsmClient
   ): RTE.ReaderTaskEither<
     { item: ServiceHistory },
     Error,
@@ -142,7 +191,7 @@ export const handler =
             pipe(
               item,
               O.fromPredicate((_) => isUserEnabled),
-              O.map(toRequestSyncLegacyAction),
+              O.map(canBeSyncronized(fsmPublicationClient)),
               O.getOrElse(() => noAction),
               TE.right
             )

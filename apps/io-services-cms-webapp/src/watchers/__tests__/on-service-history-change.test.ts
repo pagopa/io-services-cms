@@ -11,7 +11,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
-import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
+import { SYNC_FROM_LEGACY, EDIT_ON_APPROVE } from "../../utils/synchronizer";
 import { handler } from "../on-service-history-change";
 
 const aServiceHistory = {
@@ -107,6 +107,7 @@ describe("On Service History Change Handler", () => {
     ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${{ requestSyncLegacy: aLegacyService }}
     ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}` } }}
     ${"no action"}                       | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${{}}
+    ${"no action for edit on approve"}   | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: EDIT_ON_APPROVE } }}  | ${{}}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler(mockConfig, mockApimService)({ item })();
     expect(E.isRight(res)).toBeTruthy();
