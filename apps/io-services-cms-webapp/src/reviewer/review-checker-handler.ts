@@ -162,7 +162,9 @@ export const updateReview =
   };
 
 const decodeJiraIssueStatus = (issue: JiraIssue): "APPROVED" | "REJECTED" => {
-  if (issue.fields.status.name.toUpperCase() === "APPROVED") {
+  if (
+    ["APPROVATO", "APPROVED"].includes(issue.fields.status.name.toUpperCase())
+  ) {
     return "APPROVED";
   }
   return "REJECTED";

@@ -170,7 +170,9 @@ const buildUpdatedServiceLifecycleItem =
 const decodeLegacyJiraIssueStatus = (
   issue: JiraIssue
 ): "APPROVED" | "REJECTED" => {
-  if (issue.fields.status.name.toUpperCase() === "REJECTED") {
+  if (
+    ["REJECTED", "RIFIUTATO"].includes(issue.fields.status.name.toUpperCase())
+  ) {
     return "REJECTED";
   }
   return "APPROVED";
