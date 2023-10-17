@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
@@ -46,18 +46,8 @@ vi.mock("next-auth/jwt", async () => {
   };
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-  vi.restoreAllMocks();
-});
-
 describe("Retrieve Manage Keys API", () => {
   it("should return 200", async () => {
-    retrieveManageSubscriptionApiKeys.mockReturnValueOnce(
-      Promise.resolve(mocks.apiKeys)
-    );
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
-
     // Mock NextRequest
     const request = ({
       bodyUsed: false
@@ -76,7 +66,6 @@ describe("Retrieve Manage Keys API", () => {
     retrieveManageSubscriptionApiKeys.mockReturnValueOnce(
       Promise.reject(new ApiKeyNotFoundError("api key not found"))
     );
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
     const request = ({
@@ -90,8 +79,6 @@ describe("Retrieve Manage Keys API", () => {
 
   it("should return 500", async () => {
     retrieveManageSubscriptionApiKeys.mockRejectedValueOnce("an error");
-
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
     const request = ({
