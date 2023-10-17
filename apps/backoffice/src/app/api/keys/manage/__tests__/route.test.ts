@@ -68,8 +68,6 @@ describe("Retrieve Manage Keys API", () => {
     //extract jsonBody from NextResponse
     const jsonResponse = await new Response(result.body).json();
 
-    console.log("jsonResponse", jsonResponse);
-
     expect(result.status).toBe(200);
     expect(jsonResponse).toStrictEqual(mocks.apiKeys);
   });
