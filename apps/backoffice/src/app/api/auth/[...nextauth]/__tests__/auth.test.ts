@@ -42,14 +42,18 @@ const mockConfig = ({
   AZURE_APIM: faker.string.alpha()
 } as unknown) as Configuration;
 
-const mockApimClient = {};
+const mocks: {
+  mockApimClient: {};
+} = vi.hoisted(() => ({
+  mockApimClient: {}
+}));
 
 const { getUserByEmail } = vi.hoisted(() => ({
   getUserByEmail: vi.fn()
 }));
 
 const { getApimClient, getApimService } = vi.hoisted(() => ({
-  getApimClient: vi.fn().mockReturnValue(mockApimClient),
+  getApimClient: vi.fn().mockReturnValue(mocks.mockApimClient),
   getApimService: vi.fn().mockReturnValue({
     getUserByEmail
   })
@@ -139,7 +143,7 @@ describe("Authorize", () => {
     );
     expect(getApimService).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
+      mocks.mockApimClient,
       mockConfig.AZURE_APIM_RESOURCE_GROUP,
       mockConfig.AZURE_APIM
     );
@@ -168,7 +172,7 @@ describe("Authorize", () => {
     );
     expect(getApimService).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
+      mocks.mockApimClient,
       mockConfig.AZURE_APIM_RESOURCE_GROUP,
       mockConfig.AZURE_APIM
     );
@@ -230,7 +234,7 @@ describe("Authorize", () => {
     );
     expect(getApimService).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
+      mocks.mockApimClient,
       mockConfig.AZURE_APIM_RESOURCE_GROUP,
       mockConfig.AZURE_APIM
     );
