@@ -121,6 +121,11 @@ const getSpecialFields = (
   }
 };
 
+/**
+ * This method checks if the service can be syncronized to the legacy application
+ * if the given service is from the service-publication fsm, it can be syncronized
+ * if the given service is from the service-lifecycle fsm, it can be syncronized only if it is not in the service-publication fsm
+ *  */
 const shouldBeSyncronized =
   (fsmPublicationClient: ServicePublication.FsmClient) =>
   (serviceHistory: ServiceHistory) =>
@@ -140,11 +145,6 @@ const shouldBeSyncronized =
       )
     );
 
-/**
- * This method checks if the service can be syncronized to the legacy application
- * if the given service is from the service-publication fsm, it can be syncronized
- * if the given service is from the service-lifecycle fsm, it can be syncronized only if it is not in the service-publication fsm
- *  */
 const isServiceInPublication =
   (fsmPublicationClient: ServicePublication.FsmClient) =>
   (serviceHistory: ServiceHistory): TE.TaskEither<Error, boolean> =>
@@ -153,8 +153,10 @@ const isServiceInPublication =
       fsmPublicationClient.getStore().fetch,
       TE.map(
         flow(
-          () => true,
-          (_) => false
+          O.fold(
+            () => false,
+            (_) => true
+          )
         )
       )
     );
