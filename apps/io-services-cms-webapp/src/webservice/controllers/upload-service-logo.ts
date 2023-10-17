@@ -29,11 +29,11 @@ import {
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseErrorValidation,
-  IResponseSuccessRedirectToResource,
+  IResponseSuccessNoContent,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseErrorValidation,
-  ResponseSuccessRedirectToResource,
+  ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
@@ -42,7 +42,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as UPNG from "upng-js";
-import { IConfig } from "../../config";
 import { Logo as LogoPayload } from "../../generated/api/Logo";
 import {
   EventNameEnum,
@@ -53,9 +52,7 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "UploadServiceLogoHandler";
 
-type HandlerResponseTypes =
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  IResponseSuccessRedirectToResource<{}, {}> | ErrorResponseTypes;
+type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
 
 type IUploadServiceLogoHandler = (
   context: Context,
@@ -73,7 +70,6 @@ type Dependencies = {
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
   blobService: BlobService;
-  config: IConfig;
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
@@ -102,7 +98,6 @@ export const makeUploadServiceLogoHandler =
     fsmLifecycleClient,
     apimService,
     blobService,
-    config,
     telemetryClient,
   }: Dependencies): IUploadServiceLogoHandler =>
   (context, auth, _, __, serviceId, logoPayload) => {
@@ -116,6 +111,9 @@ export const makeUploadServiceLogoHandler =
         auth.subscriptionId,
         auth.userId
       ),
+      // TODO: serve controllare che il servizio esista?
+      // in teoria sotto controllo che quel serviceId appartenga all'utente
+      // di conseguenza potrebbe essere inutile questa operazione
       TE.chainW(
         flow(
           fsmLifecycleClient.getStore().fetch,
@@ -162,7 +160,6 @@ export const makeUploadServiceLogoHandler =
                 `${lowerCaseServiceId}.png`,
                 bufferImage
               ),
-
               TE.mapLeft((err) =>
                 ResponseErrorInternal(
                   `Error trying to connect to storage ${err.message}`
@@ -176,14 +173,7 @@ export const makeUploadServiceLogoHandler =
                         "Error trying to upload image logo on storage"
                       )
                     ),
-                  () =>
-                    TE.of(
-                      ResponseSuccessRedirectToResource(
-                        {},
-                        `${config.LOGOS_URL}/services/${lowerCaseServiceId}.png`,
-                        {}
-                      )
-                    )
+                  (_) => TE.of(ResponseSuccessNoContent())
                 )
               )
             )
@@ -196,7 +186,6 @@ export const makeUploadServiceLogoHandler =
           serviceId,
         })
       ),
-      (x) => x,
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,
