@@ -72,9 +72,6 @@ describe("Regenerate Manage Keys API", () => {
   });
 
   it("should return 400", async () => {
-    regenerateManageSubscritionApiKey.mockReturnValueOnce(
-      Promise.resolve(mocks.apiKeys)
-    );
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
@@ -82,10 +79,7 @@ describe("Regenerate Manage Keys API", () => {
       bodyUsed: false
     } as any) as NextRequest;
 
-    const result = await PUT(request, { params: { keyType: "aBadKeyType" } });
-
-    //extract jsonBody from NextResponse
-    const jsonResponse = await new Response(result.body).json();
+    const result = await PUT(request, { params: { keyType: "invalid" } });
 
     expect(result.status).toBe(400);
   });
