@@ -122,7 +122,7 @@ const getSpecialFields = (
 
 /**
  * This method checks if the service can be syncronized to the legacy application
- * if the given service is from the service-publication fsm, it can be syncronized
+ * if the given service is from the service-publication fsm or is service-lifecycle fsm and is approved, it can be syncronized
  * if the given service is from the service-lifecycle fsm, it can be syncronized only if it is not in the service-publication fsm
  *  */
 const shouldBeSyncronized =
@@ -131,7 +131,7 @@ const shouldBeSyncronized =
     pipe(
       serviceHistory,
       O.fromPredicate((itm) =>
-        ["published", "unpublished"].includes(itm.fsm.state)
+        ["published", "unpublished", "approved"].includes(itm.fsm.state)
       ),
       O.fold(
         () =>

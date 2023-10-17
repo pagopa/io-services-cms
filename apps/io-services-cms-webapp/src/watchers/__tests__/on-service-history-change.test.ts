@@ -117,6 +117,7 @@ describe("On Service History Change Handler", () => {
     ${"no action for a rejected service if already approved version in publication "} | ${{ ...aServiceHistory, fsm: { state: "rejected" } }}                                        | ${TE.of(O.some(aServiceHistory))} | ${{}}
     ${"sync first time approved service "}                                            | ${{ ...aServiceHistory, fsm: { state: "approved" } }}                                        | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService } }}
     ${"sync rejected service that is not in publication "}                            | ${{ ...aServiceHistory, fsm: { state: "rejected" } }}                                        | ${TE.of(O.none)}                  | ${{ requestSyncLegacy: { ...aLegacyService } }}
+    ${"sync service if approved "}                                                    | ${{ ...aServiceHistory, fsm: { state: "approved" } }}                                        | ${TE.of(O.some(aServiceHistory))} | ${{ requestSyncLegacy: { ...aLegacyService } }}
   `(
     "should map an item to a $scenario action",
     async ({ item, publication, expected }) => {
