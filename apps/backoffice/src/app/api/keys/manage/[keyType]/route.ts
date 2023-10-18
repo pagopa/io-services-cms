@@ -47,7 +47,7 @@ export const PUT = withJWTAuthHandler(
       );
       return NextResponse.json(
         {
-          title: "ApimError",
+          title: "ManageKeyRegenerateError",
           status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
           detail:
             error instanceof Error ? error.message : "Something went wrong"

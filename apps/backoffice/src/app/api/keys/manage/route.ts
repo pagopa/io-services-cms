@@ -40,7 +40,7 @@ export const GET = withJWTAuthHandler(
       }
       return NextResponse.json(
         {
-          title: "ApimError",
+          title: "ManageKeyRetrieveError",
           status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
           detail:
             error instanceof Error ? error.message : "Something went wrong"
