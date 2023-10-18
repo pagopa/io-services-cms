@@ -14,7 +14,7 @@ const Config = t.type({
   AZURE_APIM: NonEmptyString
 });
 
-const getApimConfig = () => {
+const getApimConfig = cache(() => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -23,17 +23,15 @@ const getApimConfig = () => {
     );
   }
   return result.right;
-};
-
-const getApimClient = () => {
-  const apimConfig = getApimConfig();
-  return ApimUtils.getApimClient(apimConfig, apimConfig.AZURE_SUBSCRIPTION_ID);
-};
+});
 
 export const getApimService = cache(() => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
-  const apimClient = getApimClient();
+  const apimClient = ApimUtils.getApimClient(
+    apimConfig,
+    apimConfig.AZURE_SUBSCRIPTION_ID
+  );
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
