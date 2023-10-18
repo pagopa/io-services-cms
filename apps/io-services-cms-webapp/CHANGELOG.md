@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.2
+
+### Patch Changes
+
+- 9227198: Handle new jira issue status names
+
 ## 1.21.1
 
 ### Patch Changes
