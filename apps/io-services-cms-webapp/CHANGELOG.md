@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.21.3
+
+### Patch Changes
+
+- 5a35773: Upgrade github action runner image version
+
+## 1.21.2
+
+### Patch Changes
+
+- 9227198: Handle new jira issue status names
+
 ## 1.21.1
 
 ### Patch Changes

@@ -16,6 +16,11 @@ import {
 
 const logPrefix = "ServiceReviewLegacyChecker";
 
+const JiraLegacyIssueStatusIdMap: Record<string, string> = {
+  10279: "APPROVED",
+  10280: "REJECTED",
+};
+
 export type IssueItemPair = {
   issue: JiraIssue;
   item: ServiceReviewRowDataTable;
@@ -170,10 +175,28 @@ const buildUpdatedServiceLifecycleItem =
 const decodeLegacyJiraIssueStatus = (
   issue: JiraIssue
 ): "APPROVED" | "REJECTED" => {
-  if (issue.fields.status.name.toUpperCase() === "REJECTED") {
+  // Trying Decoding using the status id
+  const decondedStatus =
+    JiraLegacyIssueStatusIdMap[issue.fields.status.id ?? ""];
+
+  if (decondedStatus) {
+    return decondedStatus === "APPROVED" ? "APPROVED" : "REJECTED";
+  }
+
+  // Trying Decoding using the status id
+  if (
+    ["COMPLETATA", "APPROVATO", "APPROVED"].includes(
+      issue.fields.status.name.toUpperCase()
+    )
+  ) {
+    return "APPROVED";
+  } else if (
+    ["RIFIUTATO", "REJECTED"].includes(issue.fields.status.name.toUpperCase())
+  ) {
     return "REJECTED";
   }
-  return "APPROVED";
+
+  throw new Error("Unable to decode Jira Legacy Issue Status");
 };
 
 export const createReviewLegacyCheckerHandler =
