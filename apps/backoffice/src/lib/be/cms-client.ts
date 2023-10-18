@@ -12,7 +12,7 @@ const Config = t.type({
   API_SERVICES_CMS_MOCKING: BooleanFromString
 });
 
-const getIoServicesCmsClientConfig = cache(() => {
+const getIoServicesCmsClientConfig = () => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -21,7 +21,7 @@ const getIoServicesCmsClientConfig = cache(() => {
     });
   }
   return result.right;
-});
+};
 
 export const getIoServicesCmsClient = cache(() => {
   const configuration = getIoServicesCmsClientConfig();
