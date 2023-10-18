@@ -37,7 +37,6 @@ jobs:
           container_app_environment_name: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           pat_token: ${{ secrets.BOT_TOKEN }}
-          self_hosted_runner_image_tag: 'v1.6.1@sha256:3ed806535a5a50104f2a74d0e1da860a8953049ec6eca26af71f5920de4838dd'
 
   terraform_preapply_job:
     name: Terraform Pre Apply
