@@ -32,6 +32,7 @@ jobs:
           container_app_environment_name: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
           resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           pat_token: ${{ secrets.BOT_TOKEN }}
+          self_hosted_runner_image_tag: 'v1.6.0@sha256:5cc5d933d94950495498eae71965495048d3327dd0f2bdd1bb0dabf73503c13e'
 
   terraform_driftdetection_job:
     name: Terraform Drift Detection
