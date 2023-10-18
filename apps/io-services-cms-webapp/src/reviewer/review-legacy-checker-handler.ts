@@ -17,8 +17,8 @@ import {
 const logPrefix = "ServiceReviewLegacyChecker";
 
 const JiraLegacyIssueStatusIdMap: Record<string, string> = {
-  10985: "APPROVED",
-  10986: "REJECTED",
+  10279: "APPROVED",
+  10280: "REJECTED",
 };
 
 export type IssueItemPair = {
