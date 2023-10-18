@@ -43,6 +43,16 @@ const aService2 = {
   id: "s2",
 } as unknown as ServiceLifecycle.definitions.Service;
 
+const aService3 = {
+  ...aService,
+  id: "s3",
+} as unknown as ServiceLifecycle.definitions.Service;
+
+const aService4 = {
+  ...aService,
+  id: "s4",
+} as unknown as ServiceLifecycle.definitions.Service;
+
 const anItem1: ServiceReviewRowDataTable = {
   service_id: "s1" as NonEmptyString,
   service_version: "v1" as NonEmptyString,
@@ -59,7 +69,28 @@ const anItem2: ServiceReviewRowDataTable = {
   status: "PENDING",
 };
 
-const anItemList: ServiceReviewRowDataTable[] = [anItem1, anItem2];
+const anItem3: ServiceReviewRowDataTable = {
+  service_id: "s3" as NonEmptyString,
+  service_version: "v2" as NonEmptyString,
+  ticket_id: "tid3" as NonEmptyString,
+  ticket_key: "tk3" as NonEmptyString,
+  status: "PENDING",
+};
+
+const anItem4: ServiceReviewRowDataTable = {
+  service_id: "s4" as NonEmptyString,
+  service_version: "v2" as NonEmptyString,
+  ticket_id: "tid4" as NonEmptyString,
+  ticket_key: "tk4" as NonEmptyString,
+  status: "PENDING",
+};
+
+const anItemList: ServiceReviewRowDataTable[] = [
+  anItem1,
+  anItem2,
+  anItem3,
+  anItem4,
+];
 
 const aJiraIssue1: JiraIssue = {
   id: anItem1.ticket_id,
@@ -88,6 +119,42 @@ const aJiraIssue2: JiraIssue = {
       name: "REJECTED",
     },
     statuscategorychangedate: "2023-05-12T15:24:09.173+0200" as NonEmptyString,
+  },
+};
+
+const aJiraIssue3: JiraIssue = {
+  id: anItem3.ticket_id,
+  key: anItem3.ticket_key,
+  fields: {
+    comment: {
+      comments: [
+        { body: "comment 3" },
+        { body: "a *formatted* comment … {{some code}} ." },
+      ],
+    },
+    status: {
+      name: "Approvata",
+      id: "10985",
+    },
+    statuscategorychangedate: "2023-05-12T15:10:05.173+0200" as NonEmptyString,
+  },
+};
+
+const aJiraIssue4: JiraIssue = {
+  id: anItem4.ticket_id,
+  key: anItem4.ticket_key,
+  fields: {
+    comment: {
+      comments: [
+        { body: "comment 4" },
+        { body: "a *formatted* comment … {{some code}} ." },
+      ],
+    },
+    status: {
+      name: "aBadStatusName",
+      id: "10986",
+    },
+    statuscategorychangedate: "2023-05-12T15:10:05.173+0200" as NonEmptyString,
   },
 };
 
@@ -123,17 +190,20 @@ const mockContext = {
 } as any;
 
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
-  it("should build TWO IssueItemPairs given 2 jira issues, an APPROVED one and a REJECTED one", async () => {
+  it("should build THREE IssueItemPairs given 3 jira issues, an APPROVED one, a REJECTED one and an Approvata one", async () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
       () =>
         TE.of({
           startAt: 0,
-          total: 2,
-          issues: [aJiraIssue1, aJiraIssue2],
+          total: 3,
+          issues: [aJiraIssue1, aJiraIssue2, aJiraIssue3],
         })
     );
 
-    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(
+      mockContext,
+      mainMockJiraProxy
+    )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -145,6 +215,10 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         {
           issue: aJiraIssue2,
           item: anItem2,
+        },
+        {
+          issue: aJiraIssue3,
+          item: anItem3,
         },
       ]);
     }
@@ -160,7 +234,10 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)([])();
+    const result = await buildIssueItemPairs(
+      mockContext,
+      mainMockJiraProxy
+    )([])();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -178,7 +255,10 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
         })
     );
 
-    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(
+      mockContext,
+      mainMockJiraProxy
+    )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
@@ -191,7 +271,10 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
       () => TE.left(new Error())
     );
 
-    const result = await buildIssueItemPairs(mockContext, mainMockJiraProxy)(anItemList)();
+    const result = await buildIssueItemPairs(
+      mockContext,
+      mainMockJiraProxy
+    )(anItemList)();
 
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
@@ -253,6 +336,61 @@ describe("[Service Review Checker Handler] updateReview", () => {
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
       ...anItem2,
       status: aJiraIssue2.fields.status.name,
+    });
+  });
+
+  it("should update TWO PENDING service review given TWO IssueItemPairs, one with Approvata jira status and one with a bad status name but REJECTED Id jira status", async () => {
+    const mockFsmLifecycleClient = {
+      approve: vi.fn(() =>
+        TE.right({
+          ...aService,
+          fsm: { state: "approved" },
+        })
+      ),
+      reject: vi.fn(() =>
+        TE.right({
+          ...aService2,
+          fsm: { state: "rejected" },
+        })
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+    const result = await updateReview(
+      mockContext,
+      mainMockServiceReviewDao,
+      mockFsmLifecycleClient
+    )([
+      {
+        issue: aJiraIssue3,
+        item: anItem3,
+      },
+      {
+        issue: aJiraIssue4,
+        item: anItem4,
+      },
+    ] as unknown as IssueItemPair[])();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    expect(mockFsmLifecycleClient.approve).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.approve).toBeCalledWith(aService3.id, {
+      approvalDate: aJiraIssue3.fields.statuscategorychangedate,
+    });
+
+    expect(mockFsmLifecycleClient.reject).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.reject).toBeCalledWith(aService4.id, {
+      reason: aJiraIssue4.fields.comment.comments
+        .map((value) => value.body)
+        .join("|"),
+    });
+
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
+      ...anItem3,
+      status: "APPROVED",
+    });
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
+      ...anItem4,
+      status: "REJECTED",
     });
   });
 
