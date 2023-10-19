@@ -92,7 +92,7 @@ locals {
     # External storage account configurations
 
     # External storage account for assets
-    ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_storage_account.cdn_assets_storage_account.primary_connection_string
+    ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_key_vault_secret.asset_storage_connectionstring_secret.value
   }
 }
 
