@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,7 @@
     "build:package": "yarn build:pre-package && (cd .next/standalone/apps/backoffice && zip -r -q ../../../../${npm_package_name}-${npm_package_version}.zip . -x package.json)",
     "start": "./node_modules/next/dist/bin/next start",
     "lint": "next lint",
-    "test": "yarn test:b4f & yarn test:fe",
+    "test": "yarn test:b4f && yarn test:fe",
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
     "test:fe": "vitest run --config ./vitest.config.react.ts",
     "coverage": "vitest run --coverage",

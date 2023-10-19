@@ -26,9 +26,14 @@ export const JiraIssue = t.type({
     comment: t.type({
       comments: t.readonlyArray(t.type({ body: t.string })),
     }),
-    status: t.type({
-      name: t.string,
-    }),
+    status: t.intersection([
+      t.type({
+        name: t.string,
+      }),
+      t.partial({
+        id: t.string,
+      }),
+    ]),
     statuscategorychangedate: withDefault(
       NonEmptyString,
       new Date().toISOString() as NonEmptyString
