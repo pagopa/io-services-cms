@@ -21,6 +21,11 @@ export type IssueItemPair = {
 
 const logPrefix = "ReviewerCheckerHandler";
 
+const JiraIssueStatusIdMap: Record<string, string> = {
+  10985: "APPROVED",
+  10986: "REJECTED",
+};
+
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
   jiraIssue: JiraIssue,
@@ -162,10 +167,25 @@ export const updateReview =
   };
 
 const decodeJiraIssueStatus = (issue: JiraIssue): "APPROVED" | "REJECTED" => {
-  if (issue.fields.status.name.toUpperCase() === "APPROVED") {
-    return "APPROVED";
+  // Trying Decoding using the status id
+  const decondedStatus = JiraIssueStatusIdMap[issue.fields.status.id ?? ""];
+
+  if (decondedStatus) {
+    return decondedStatus === "APPROVED" ? "APPROVED" : "REJECTED";
   }
-  return "REJECTED";
+
+  // Trying Decoding using the status id
+  if (
+    ["APPROVATO", "APPROVED"].includes(issue.fields.status.name.toUpperCase())
+  ) {
+    return "APPROVED";
+  } else if (
+    ["RIFIUTATO", "REJECTED"].includes(issue.fields.status.name.toUpperCase())
+  ) {
+    return "REJECTED";
+  }
+
+  throw new Error("Unable to decode Jira Issue Status");
 };
 
 export const processBatchOfReviews =
