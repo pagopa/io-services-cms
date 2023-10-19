@@ -1,4 +1,5 @@
-import { Configuration, getConfiguration } from "@/config";
+import { Configuration } from "@/config";
+import { faker } from "@faker-js/faker";
 
 export const getOpenIdConfig = (configuration: Configuration) => ({
   token_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
@@ -63,77 +64,72 @@ export const anOauth2TokenResponse = {
   scope: "create"
 };
 
-export const getListByServiceResponse = (configuration: Configuration) => ({
-  value: [
+export const aListSecretsResponse = {
+  primaryKey: faker.string.alphanumeric(32),
+  secondaryKey: faker.string.alphanumeric(32)
+};
+
+export const anEmptyListByServiceResponse = {
+  value: [],
+  count: 0,
+  nextLink: ""
+};
+
+export const getListByServiceResponse = (
+  params: Parameters<typeof getUser>[0]
+) => {
+  const users = [getUser(params)];
+  return {
+    value: users,
+    count: users.length,
+    nextLink: ""
+  };
+};
+
+export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
+  getUser(params);
+
+const getUser = ({
+  AZURE_SUBSCRIPTION_ID,
+  AZURE_APIM_RESOURCE_GROUP,
+  AZURE_APIM,
+  userId = faker.string.uuid(),
+  userEmail = `org.${userId}@selfcare.io.pagopa.com`
+}: {
+  AZURE_SUBSCRIPTION_ID: string;
+  AZURE_APIM_RESOURCE_GROUP: string;
+  AZURE_APIM: string;
+  userId?: string;
+  userEmail?: string;
+}) => ({
+  id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/users/${userId}`,
+  type: "Microsoft.ApiManagement/service/users",
+  name: userId,
+  email: userEmail,
+  firstName: faker.person.firstName(),
+  lastName: faker.person.lastName(),
+  state: "active",
+  registrationDate: "2015-09-22T01:57:39.677Z",
+  identities: [
     {
-      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/1`,
-      type: "Microsoft.ApiManagement/service/users",
-      name: "1",
-      email: "admin@live.com",
-      firstName: "Administrator",
-      lastName: "",
-      state: "active",
-      registrationDate: "2015-09-22T01:57:39.677Z",
-      identities: [
-        {
-          provider: "Azure",
-          id: "admin@live.com"
-        }
-      ],
-      groups: [
-        {
-          type: "custom",
-          name: "ApiServiceRead"
-        },
-        {
-          type: "custom",
-          name: "ApiServiceWrite"
-        },
-        {
-          type: "system",
-          name: "Developer"
-        }
-      ]
-    },
-    {
-      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/56eaec62baf08b06e46d27fd`,
-      type: "Microsoft.ApiManagement/service/users",
-      name: "56eaec62baf08b06e46d27fd",
-      properties: {
-        firstName: "foo",
-        lastName: "bar",
-        email: "foo.bar.83@gmail.com",
-        state: "active",
-        registrationDate: "2016-03-17T17:41:56.327Z",
-        identities: [
-          {
-            provider: "Basic",
-            id: "foo.bar.83@gmail.com"
-          }
-        ]
-      }
-    },
-    {
-      id: `/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/5931a75ae4bbd512a88c680b`,
-      type: "Microsoft.ApiManagement/service/users",
-      name: "5931a75ae4bbd512a88c680b",
-      properties: {
-        firstName: "foo",
-        lastName: "bar",
-        email: "foobar@outlook.com",
-        state: "active",
-        registrationDate: "2017-06-02T17:58:50.357Z",
-        identities: [
-          {
-            provider: "Microsoft",
-            id: "*************"
-          }
-        ]
-      }
+      provider: "Azure",
+      id: "admin@live.com"
     }
   ],
-  count: 3,
-  nextLink: ""
+  groups: [
+    {
+      type: "custom",
+      name: "ApiServiceRead"
+    },
+    {
+      type: "custom",
+      name: "ApiServiceWrite"
+    },
+    {
+      type: "system",
+      name: "Developer"
+    }
+  ]
 });
 
 export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({

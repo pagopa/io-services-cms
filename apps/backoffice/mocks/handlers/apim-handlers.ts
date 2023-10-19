@@ -5,10 +5,13 @@
 import { getConfiguration } from "@/config";
 import { rest } from "msw";
 import {
-  getListByServiceResponse,
+  aListSecretsResponse,
+  anEmptyListByServiceResponse,
   anOauth2TokenResponse,
   getDiscoveryInstanceResponse,
-  getOpenIdConfig
+  getListByServiceResponse,
+  getOpenIdConfig,
+  getUserResponse
 } from "../data/apim-data";
 import { aMockErrorResponse } from "../data/common-data";
 
@@ -42,10 +45,53 @@ export const buildHandlers = () => {
       }
     ),
     rest.get(
-      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
-      (_, res, ctx) => {
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/:userId`,
+      (req, res, ctx) => {
         const resultArray = [
-          [ctx.status(200), ctx.json(getListByServiceResponse(configuration))],
+          [
+            ctx.status(200),
+            ctx.json(
+              getUserResponse({
+                ...configuration,
+                userId: req.params.userId as string
+              })
+            )
+          ],
+          [ctx.status(500), ctx.json(getWellKnown500Response())]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.get(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
+      (req, res, ctx) => {
+        const filterSearchParam = req.url.searchParams.get("$filter");
+        let isKnownUser = false;
+        let userEmail;
+        if (filterSearchParam) {
+          const matchedGroups = /email\seq\s'(?<email>.*)'/.exec(
+            filterSearchParam
+          )?.groups;
+          if (matchedGroups) {
+            userEmail = matchedGroups["email"];
+            isKnownUser =
+              userEmail ===
+              "org.74daefda-7e72-46e2-815a-b26d3bf98988@selfcare.io.pagopa.com";
+          }
+        }
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(
+              isKnownUser
+                ? getListByServiceResponse({
+                    ...configuration,
+                    userEmail
+                  })
+                : anEmptyListByServiceResponse
+            )
+          ],
           [ctx.status(500), ctx.json(getWellKnown500Response())]
         ];
 
@@ -57,6 +103,53 @@ export const buildHandlers = () => {
       (_, res, ctx) => {
         const resultArray = [
           [ctx.status(200), ctx.json(anOauth2TokenResponse)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(403), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.post(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/listSecrets`,
+      (_, res, ctx) => {
+        const resultArray = [
+          [ctx.status(200), ctx.json(aListSecretsResponse)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(403), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.put(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/:userId`,
+      (req, res, ctx) => {
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(
+              getUserResponse({
+                ...configuration,
+                userId: req.params.userId as string
+              })
+            )
+          ],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(403), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.put(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/groups/:groupId/users/:userId`,
+      (req, res, ctx) => {
+        const resultArray = [
+          [ctx.status(200), ctx.json({})],
           [ctx.status(401), ctx.json(null)],
           [ctx.status(403), ctx.json(null)],
           [ctx.status(500), ctx.json(null)]

@@ -4,11 +4,13 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
+import { ulid } from "ulid";
 import { ApimUser, IdentityTokenPayload } from "../types";
 
 export const authorize = (
@@ -66,21 +68,78 @@ const retrieveApimUser = (config: Configuration) => (
   pipe(
     ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
     apimClient =>
-      ApimUtils.getApimService(
-        apimClient,
-        config.AZURE_APIM_RESOURCE_GROUP,
-        config.AZURE_APIM
+      pipe(
+        ApimUtils.getApimService(
+          apimClient,
+          config.AZURE_APIM_RESOURCE_GROUP,
+          config.AZURE_APIM
+        ),
+        apimService =>
+          apimService.getUserByEmail(
+            `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+            true
+          ),
+        TE.mapLeft(
+          err =>
+            new Error(
+              `Failed to fetch user by its email, code: ${err.statusCode}`
+            )
+        ),
+        TE.chain(
+          flow(
+            O.fold(
+              () =>
+                pipe(
+                  TE.tryCatch(
+                    () =>
+                      apimClient.user.createOrUpdate(
+                        config.AZURE_APIM_RESOURCE_GROUP,
+                        config.AZURE_APIM,
+                        ulid(),
+                        {
+                          email: `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+                          firstName: identityTokenPayload.organization.name,
+                          lastName: identityTokenPayload.organization.id,
+                          note: identityTokenPayload.organization.fiscal_code,
+                          appType: "backofficeIO"
+                        }
+                      ),
+                    E.toError
+                  ),
+                  TE.chain(apimUser =>
+                    pipe(
+                      TE.tryCatch(
+                        async () =>
+                          await config.APIM_USER_GROUPS.split(",").forEach(
+                            async groupId =>
+                              await apimClient.groupUser.create(
+                                config.AZURE_APIM_RESOURCE_GROUP,
+                                config.AZURE_APIM,
+                                groupId,
+                                apimUser.name as string
+                              )
+                          ),
+                        E.toError
+                      ),
+                      TE.chain(_ =>
+                        TE.tryCatch(
+                          () =>
+                            apimClient.user.get(
+                              config.AZURE_APIM_RESOURCE_GROUP,
+                              config.AZURE_APIM,
+                              apimUser.name as string
+                            ),
+                          E.toError
+                        )
+                      )
+                    )
+                  )
+                ),
+              TE.right
+            )
+          )
+        )
       ),
-    apimService =>
-      apimService.getUserByEmail(
-        `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
-        true
-      ),
-    TE.mapLeft(
-      err =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
-    ),
-    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
     TE.chain(
       flow(
         ApimUser.decode,
@@ -117,7 +176,7 @@ const toUser = (config: Configuration) => ({
     .filter(group => group.type === "custom")
     .map(group => group.name),
   parameters: {
-    userId: apimUser.id,
+    userId: apimUser.name,
     userEmail: apimUser.email,
     subscriptionId: config.AZURE_SUBSCRIPTION_ID
   }
