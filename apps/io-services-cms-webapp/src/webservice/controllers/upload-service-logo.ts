@@ -28,7 +28,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
-  IResponseErrorValidation,
   IResponseSuccessNoContent,
   ResponseErrorInternal,
   ResponseErrorValidation,
@@ -90,6 +89,43 @@ const upsertBlobFromImageBuffer = (
     TE.map(O.fromNullable)
   );
 
+const validateImage = (bufferImage: Buffer) =>
+  pipe(
+    E.tryCatch(
+      () => UPNG.decode(bufferImage),
+      () => imageValidationErrorResponse()
+    ),
+    E.chain(
+      E.fromPredicate(
+        (img: UPNG.Image) => img.width > 0 && img.height > 0,
+        () => imageValidationErrorResponse()
+      )
+    )
+  );
+
+const uploadImage =
+  (blobService: BlobService) =>
+  (lowerCaseServiceId: string, bufferImage: Buffer) =>
+    pipe(
+      upsertBlobFromImageBuffer(
+        blobService,
+        "services",
+        `${lowerCaseServiceId}.png`,
+        bufferImage
+      ),
+      TE.mapLeft((err) =>
+        ResponseErrorInternal(
+          `Error trying to connect to storage ${err.message}`
+        )
+      ),
+      TE.chain(
+        TE.fromOption(() =>
+          ResponseErrorInternal("Error trying to upload image logo on storage")
+        )
+      ),
+      TE.map(() => ResponseSuccessNoContent())
+    );
+
 export const makeUploadServiceLogoHandler =
   ({
     apimService,
@@ -109,46 +145,11 @@ export const makeUploadServiceLogoHandler =
       ),
       TE.chainW((_) =>
         pipe(
-          O.tryCatch(() => UPNG.decode(bufferImage)),
-          O.fold(
-            () =>
-              E.left<IResponseErrorValidation, UPNG.Image>(
-                imageValidationErrorResponse()
-              ),
-            (img) => E.right<IResponseErrorValidation, UPNG.Image>(img)
-          ),
+          bufferImage,
+          validateImage,
           TE.fromEither,
-          TE.chain(
-            TE.fromPredicate(
-              (img: UPNG.Image) => img.width > 0 && img.height > 0,
-              () => imageValidationErrorResponse()
-            )
-          ),
           TE.chainW(() =>
-            pipe(
-              upsertBlobFromImageBuffer(
-                blobService,
-                "services",
-                `${lowerCaseServiceId}.png`,
-                bufferImage
-              ),
-              TE.mapLeft((err) =>
-                ResponseErrorInternal(
-                  `Error trying to connect to storage ${err.message}`
-                )
-              ),
-              TE.chain(
-                O.fold(
-                  () =>
-                    TE.left(
-                      ResponseErrorInternal(
-                        "Error trying to upload image logo on storage"
-                      )
-                    ),
-                  (_) => TE.of(ResponseSuccessNoContent())
-                )
-              )
-            )
+            uploadImage(blobService)(lowerCaseServiceId, bufferImage)
           )
         )
       ),
