@@ -17,8 +17,6 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import { readFileSync } from "fs";
-import path from "path";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
@@ -99,13 +97,8 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
-//Load Test Logo Image
-const aValidLogoBase64 = readFileSync(
-  path.resolve(__dirname, "./fixture/test_img.png")
-).toString("base64");
-
 const aValidLogoPayload = {
-  logo: aValidLogoBase64,
+  logo: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
 };
 
 const anInvalidLogoPayload = {
