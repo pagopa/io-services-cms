@@ -80,11 +80,6 @@ variable "postgres_reviewer_usr_credentials_rotation_id" {
 # APIM #
 ########
 
-variable "azure_apim" {
-  type        = string
-  description = "APIM resource name."
-  default     = null
-}
 
 variable "azure_apim_v2" {
   type        = string
