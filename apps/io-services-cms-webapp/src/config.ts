@@ -180,11 +180,11 @@ const FeatureFlags = t.type({
   ),
 });
 
-export const AssetBlobStorageConfiguration = t.type({
-  ASSET_STORAGE_CONNECTION: NonEmptyString,
+export const ExternalStorageAccountConfiguration = t.type({
+  ASSET_STORAGE_CONNECTIONSTRING: NonEmptyString,
 });
-export type AssetBlobStorageConfiguration = t.TypeOf<
-  typeof AssetBlobStorageConfiguration
+export type ExternalStorageAccountConfiguration = t.TypeOf<
+  typeof ExternalStorageAccountConfiguration
 >;
 
 // Global app configuration
@@ -211,7 +211,7 @@ export const IConfig = t.intersection([
     ApplicationInsightConfig,
     FeatureFlags,
   ]),
-  AssetBlobStorageConfiguration,
+  ExternalStorageAccountConfiguration,
 ]);
 
 export const envConfig = {

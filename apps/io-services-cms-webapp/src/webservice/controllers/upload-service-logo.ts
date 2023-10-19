@@ -31,7 +31,6 @@ import {
   IResponseErrorValidation,
   IResponseSuccessNoContent,
   ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseErrorValidation,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
@@ -40,7 +39,7 @@ import { BlobService } from "azure-storage";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as UPNG from "upng-js";
 import { Logo as LogoPayload } from "../../generated/api/Logo";
 import {
@@ -64,8 +63,6 @@ type IUploadServiceLogoHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  // An instance of ServiceLifecycle client
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
@@ -95,7 +92,6 @@ const upsertBlobFromImageBuffer = (
 
 export const makeUploadServiceLogoHandler =
   ({
-    fsmLifecycleClient,
     apimService,
     blobService,
     telemetryClient,
@@ -110,30 +106,6 @@ export const makeUploadServiceLogoHandler =
         serviceId,
         auth.subscriptionId,
         auth.userId
-      ),
-      // TODO: serve controllare che il servizio esista in FSM Lifecycle?
-      // in teoria sopra controllo che quel serviceId appartenga all'utente
-      // di conseguenza so giá se il servizio esiste o meno
-      TE.chainW(
-        flow(
-          fsmLifecycleClient.getStore().fetch,
-          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.chainW(
-            flow(
-              O.fold(
-                () =>
-                  pipe(
-                    ResponseErrorNotFound(
-                      "Not found",
-                      `${serviceId} not found`
-                    ),
-                    TE.left
-                  ),
-                (service) => TE.right(service)
-              )
-            )
-          )
-        )
       ),
       TE.chainW((_) =>
         pipe(

@@ -1,5 +1,6 @@
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import { BlobService } from "azure-storage";
 import bodyParser from "body-parser";
 import express from "express";
 
@@ -54,6 +55,10 @@ import {
   applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
   makeUnpublishServiceHandler,
 } from "./controllers/unpublish-service";
+import {
+  applyRequestMiddelwares as applyUploadServiceLogoRequestMiddelwares,
+  makeUploadServiceLogoHandler,
+} from "./controllers/upload-service-logo";
 
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
@@ -66,6 +71,7 @@ type Dependencies = {
   config: IConfig;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
   telemetryClient: ReturnType<typeof initAppInsights>;
+  blobService: BlobService;
 };
 
 export const createWebServer = ({
@@ -76,6 +82,7 @@ export const createWebServer = ({
   config,
   subscriptionCIDRsModel,
   telemetryClient,
+  blobService,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -213,6 +220,18 @@ export const createWebServer = ({
         telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
+    )
+  );
+
+  router.put(
+    "/services/:serviceId/logo",
+    pipe(
+      makeUploadServiceLogoHandler({
+        apimService,
+        blobService,
+        telemetryClient,
+      }),
+      applyUploadServiceLogoRequestMiddelwares(subscriptionCIDRsModel)
     )
   );
 
