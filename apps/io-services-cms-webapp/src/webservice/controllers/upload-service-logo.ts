@@ -154,10 +154,14 @@ export const makeUploadServiceLogoHandler =
         )
       ),
       TE.map(
-        trackEventOnResponseOK(telemetryClient, EventNameEnum.EditService, {
-          userSubscriptionId: auth.subscriptionId,
-          serviceId,
-        })
+        trackEventOnResponseOK(
+          telemetryClient,
+          EventNameEnum.UploadServiceLogo,
+          {
+            userSubscriptionId: auth.subscriptionId,
+            serviceId,
+          }
+        )
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
