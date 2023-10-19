@@ -88,6 +88,11 @@ locals {
     USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST = var.userid_request_review_legacy_inclusion_list
     # UserId List allowed to automatic service approval
     USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST = var.userid_automatic_service_approval_inclusion_list
+
+    # External storage account configurations
+
+    # External storage account for assets
+    ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_key_vault_secret.asset_storage_connectionstring_secret.value
   }
 }
 
