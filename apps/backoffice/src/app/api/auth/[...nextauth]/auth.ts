@@ -76,7 +76,9 @@ const retrieveApimUser = (config: Configuration) => (
         ),
         apimService =>
           apimService.getUserByEmail(
-            `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+            formatApimAccountEmailForSelfcareOrganization(
+              identityTokenPayload.organization
+            ),
             true
           ),
         TE.mapLeft(
@@ -97,7 +99,9 @@ const retrieveApimUser = (config: Configuration) => (
                         config.AZURE_APIM,
                         ulid(),
                         {
-                          email: `org.${identityTokenPayload.organization.id}@selfcare.io.pagopa.it` as EmailString,
+                          email: formatApimAccountEmailForSelfcareOrganization(
+                            identityTokenPayload.organization
+                          ),
                           firstName: identityTokenPayload.organization.name,
                           lastName: identityTokenPayload.organization.id,
                           note: identityTokenPayload.organization.fiscal_code,
@@ -107,31 +111,39 @@ const retrieveApimUser = (config: Configuration) => (
                     E.toError
                   ),
                   TE.chain(apimUser =>
-                    pipe(
-                      TE.tryCatch(
-                        async () =>
-                          await config.APIM_USER_GROUPS.split(",").forEach(
-                            async groupId =>
-                              await apimClient.groupUser.create(
+                    TE.tryCatch(
+                      () =>
+                        Promise.all(
+                          config.APIM_USER_GROUPS.split(",").reduce<
+                            ReturnType<
+                              typeof apimClient["groupUser"]["create"]
+                            >[]
+                          >(
+                            (promises, groupId) => [
+                              ...promises,
+                              apimClient.groupUser.create(
                                 config.AZURE_APIM_RESOURCE_GROUP,
                                 config.AZURE_APIM,
                                 groupId,
                                 apimUser.name as string
                               )
-                          ),
-                        E.toError
-                      ),
-                      TE.chain(_ =>
-                        TE.tryCatch(
-                          () =>
-                            apimClient.user.get(
-                              config.AZURE_APIM_RESOURCE_GROUP,
-                              config.AZURE_APIM,
-                              apimUser.name as string
-                            ),
-                          E.toError
-                        )
-                      )
+                            ],
+                            []
+                          )
+                        ),
+                      E.toError
+                    )
+                  ),
+                  TE.map(apimUsers => apimUsers[apimUsers.length - 1]),
+                  TE.chain(apimUser =>
+                    TE.tryCatch(
+                      () =>
+                        apimClient.user.get(
+                          config.AZURE_APIM_RESOURCE_GROUP,
+                          config.AZURE_APIM,
+                          apimUser.name as string
+                        ),
+                      E.toError
                     )
                   )
                 ),
@@ -147,6 +159,16 @@ const retrieveApimUser = (config: Configuration) => (
         TE.fromEither
       )
     )
+  );
+
+const formatApimAccountEmailForSelfcareOrganization = (
+  organization: IdentityTokenPayload["organization"]
+): EmailString =>
+  pipe(
+    EmailString.decode(`org.${organization.id}@selfcare.io.pagopa.it`),
+    E.getOrElseW(() => {
+      throw new Error(`Cannot format APIM account email for the organization`);
+    })
   );
 
 const toUser = (config: Configuration) => ({
