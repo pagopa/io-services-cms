@@ -19,7 +19,6 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_api_services_cms"></a> [api\_services\_cms](#module\_api\_services\_cms) | git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v6.20.0 |
 | <a name="module_api_services_cms_v2"></a> [api\_services\_cms\_v2](#module\_api\_services\_cms\_v2) | git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v6.20.0 |
 | <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet | v6.19.1 |
 | <a name="module_backoffice_app"></a> [backoffice\_app](#module\_backoffice\_app) | git::https://github.com/pagopa/terraform-azurerm-v3.git//app_service | v6.20.2 |
@@ -38,11 +37,8 @@
 
 | Name | Type |
 |------|------|
-| [azurerm_api_management_api_operation_policy.create_service_policy](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
 | [azurerm_api_management_api_operation_policy.create_service_policy_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
-| [azurerm_api_management_api_operation_policy.update_service_logo_policy](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
 | [azurerm_api_management_api_operation_policy.update_service_logo_policy_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
-| [azurerm_api_management_named_value.io_fn_services_cms_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_named_value) | resource |
 | [azurerm_api_management_named_value.io_fn_services_cms_key_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_named_value) | resource |
 | [azurerm_cosmosdb_sql_database.db_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/cosmosdb_sql_database) | resource |
 | [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
@@ -78,9 +74,7 @@
 | [azuread_group.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/group) | data source |
 | [azuread_service_principal.github_action_iac_cd](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/service_principal) | data source |
 | [azuread_service_principal.github_action_iac_ci](https://registry.terraform.io/providers/hashicorp/azuread/2.33.0/docs/data-sources/service_principal) | data source |
-| [azurerm_api_management.apim](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/api_management) | data source |
 | [azurerm_api_management.apim_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/api_management) | data source |
-| [azurerm_api_management_product.apim_product_services](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/api_management_product) | data source |
 | [azurerm_api_management_product.apim_v2_product_services](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/api_management_product) | data source |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/client_config) | data source |
@@ -96,7 +90,6 @@
 | [azurerm_monitor_action_group.slack](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_private_dns_zone.privatelink_documents_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_private_dns_zone.privatelink_postgres_database_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/private_dns_zone) | data source |
-| [azurerm_subnet.apim_snet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.apim_v2_snet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.appgateway_snet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.github_runner_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
@@ -107,7 +100,6 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_azure_apim"></a> [azure\_apim](#input\_azure\_apim) | APIM resource name. | `string` | `null` | no |
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
