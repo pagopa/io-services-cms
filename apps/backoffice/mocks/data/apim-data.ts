@@ -94,13 +94,15 @@ const getUser = ({
   AZURE_APIM_RESOURCE_GROUP,
   AZURE_APIM,
   userId = faker.string.uuid(),
-  userEmail = `org.${userId}@selfcare.io.pagopa.com`
+  userEmail = `org.${userId}@selfcare.io.pagopa.com`,
+  groups = ["Developer", "ApiServiceWrite"]
 }: {
   AZURE_SUBSCRIPTION_ID: string;
   AZURE_APIM_RESOURCE_GROUP: string;
   AZURE_APIM: string;
   userId?: string;
   userEmail?: string;
+  groups?: string[];
 }) => ({
   id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/users/${userId}`,
   type: "Microsoft.ApiManagement/service/users",
@@ -116,20 +118,10 @@ const getUser = ({
       id: "admin@live.com"
     }
   ],
-  groups: [
-    {
-      type: "custom",
-      name: "ApiServiceRead"
-    },
-    {
-      type: "custom",
-      name: "ApiServiceWrite"
-    },
-    {
-      type: "system",
-      name: "Developer"
-    }
-  ]
+  groups: groups.map(groupName => ({
+    type: "custom",
+    name: groupName
+  }))
 });
 
 export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({

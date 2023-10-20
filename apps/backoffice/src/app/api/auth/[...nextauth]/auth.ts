@@ -190,7 +190,7 @@ const toUser = (config: Configuration) => ({
   authorizedInstitutions: [
     {
       id: "id_2",
-      name: "name_2",
+      name: "Comune di Roma",
       role: "operator"
     }
   ],
