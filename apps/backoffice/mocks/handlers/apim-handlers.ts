@@ -45,26 +45,6 @@ export const buildHandlers = () => {
       }
     ),
     rest.get(
-      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/:userId`,
-      (req, res, ctx) => {
-        const resultArray = [
-          [
-            ctx.status(200),
-            ctx.json(
-              getUserResponse({
-                ...configuration,
-                userId: req.params.userId as string,
-                groups: ["ApiServiceWrite"]
-              })
-            )
-          ],
-          [ctx.status(500), ctx.json(getWellKnown500Response())]
-        ];
-
-        return res(...resultArray[0]);
-      }
-    ),
-    rest.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
       (req, res, ctx) => {
         const filterSearchParam = req.url.searchParams.get("$filter");
@@ -90,7 +70,11 @@ export const buildHandlers = () => {
                     ...configuration,
                     userEmail
                   })
-                : anEmptyListByServiceResponse
+                : getListByServiceResponse({
+                    ...configuration,
+                    userEmail,
+                    groups: ["ApiServiceRead"]
+                  })
             )
           ],
           [ctx.status(500), ctx.json(getWellKnown500Response())]

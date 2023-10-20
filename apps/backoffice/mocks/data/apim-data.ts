@@ -86,9 +86,6 @@ export const getListByServiceResponse = (
   };
 };
 
-export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
-  getUser(params);
-
 const getUser = ({
   AZURE_SUBSCRIPTION_ID,
   AZURE_APIM_RESOURCE_GROUP,
