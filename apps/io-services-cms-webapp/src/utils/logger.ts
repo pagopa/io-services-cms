@@ -7,6 +7,7 @@ import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
   IResponseErrorTooManyRequests,
+  IResponseErrorValidation,
 } from "@pagopa/ts-commons/lib/responses";
 import { Errors } from "io-ts";
 
@@ -15,7 +16,8 @@ export type ErrorResponseTypes =
   | IResponseErrorNotFound
   | IResponseErrorConflict
   | IResponseErrorTooManyRequests
-  | IResponseErrorInternal;
+  | IResponseErrorInternal
+  | IResponseErrorValidation;
 
 type LogLevel = "info" | "warn" | "error";
 

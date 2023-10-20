@@ -97,7 +97,15 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
-describe("editService", () => {
+const aValidLogoPayload = {
+  logo: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+};
+
+const anInvalidLogoPayload = {
+  logo: "invalidBase64=",
+};
+
+describe("uploadServiceLogo", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -110,129 +118,48 @@ describe("editService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
 
-  const aServicePayload = {
-    name: "string",
-    description: "string",
-    organization: {
-      name: "string",
-      fiscal_code: "12345678901",
-      department_name: "string",
-    },
-    require_secure_channel: true,
-    authorized_recipients: ["AAAAAA00A00A000A"],
-    max_allowed_payment_amount: 0,
-    metadata: {
-      web_url: "string",
-      app_ios: "string",
-      app_android: "string",
-      tos_url: "string",
-      privacy_url: "string",
-      address: "via casa mia 245",
-      phone: "string",
-      email: "string",
-      pec: "string",
-      cta: "string",
-      token_name: "string",
-      support_url: "string",
-      scope: "NATIONAL",
-    },
-  };
-
-  const aService = {
-    id: "aServiceId",
-    data: {
-      name: "aServiceName",
-      description: "aServiceDescription",
-      authorized_recipients: [],
-      max_allowed_payment_amount: 123,
-      metadata: {
-        address: "via tal dei tali 123",
-        email: "service@email.it",
-        pec: "service@pec.it",
-        scope: "LOCAL",
-      },
-      organization: {
-        name: "anOrganizationName",
-        fiscal_code: "12345678901",
-      },
-      require_secure_channel: false,
-    },
-  } as unknown as ServiceLifecycle.ItemType;
-
-  it("should fail when cannot find requested service", async () => {
+  it("should return a validation error response if the request payload is invalid", async () => {
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s1/logo")
+      .send(anInvalidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.detail).toBe(
+      "The base64 representation of the logo is invalid"
+    );
+    expect(response.body.status).toBe(400);
+    expect(response.body.title).toBe("Image not valid");
   });
 
-  it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-    await serviceLifecycleStore.save("s1", {
-      ...aService,
-      fsm: { state: "deleted" },
-    })();
-
+  it("should return a success response if the request payload is valid", async () => {
     const response = await request(app)
-      .put("/api/services/s1")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(409);
+    expect(response.statusCode).toBe(204);
   });
 
-  it("should not allow the operation without right group", async () => {
-    const response = await request(app)
-      .put("/api/services/s1")
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
-
-    expect(response.statusCode).toBe(403);
-  });
-
-  it("should edit a service", async () => {
-    await serviceLifecycleStore.save("s4", {
-      ...aService,
-      fsm: { state: "rejected" },
-    })();
-
-    const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body.status.value).toBe("draft");
-    expect(response.body.metadata.address).toBe("via casa mia 245");
-    expect(mockContext.log.error).not.toHaveBeenCalled();
-  });
   it("should not allow the operation without right userId", async () => {
     const aDifferentManageSubscriptionId = "MANAGE-456";
     const aDifferentUserId = "456";
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", aDifferentUserId)
@@ -245,8 +172,8 @@ describe("editService", () => {
     const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
@@ -257,11 +184,6 @@ describe("editService", () => {
   });
 
   it("should edit a service if cidrs array contains 0.0.0.0/0", async () => {
-    await serviceLifecycleStore.save("s4", {
-      ...aService,
-      fsm: { state: "rejected" },
-    })();
-
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["0.0.0.0/0"] as unknown as ReadonlySet<
@@ -277,24 +199,18 @@ describe("editService", () => {
     );
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
     expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.body.status.value).toBe("draft");
   });
 
   it("should edit a service if cidrs array contains only the IP address of the host", async () => {
-    await serviceLifecycleStore.save("s4", {
-      ...aService,
-      fsm: { state: "rejected" },
-    })();
-
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["127.0.0.1/32"] as unknown as ReadonlySet<
@@ -310,24 +226,18 @@ describe("editService", () => {
     );
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
     expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.body.status.value).toBe("draft");
   });
 
   it("should not edit a service if cidrs array doesn't contains the IP address of the host", async () => {
-    await serviceLifecycleStore.save("s4", {
-      ...aService,
-      fsm: { state: "rejected" },
-    })();
-
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["127.1.1.2/32"] as unknown as ReadonlySet<
@@ -343,8 +253,8 @@ describe("editService", () => {
     );
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
@@ -354,11 +264,6 @@ describe("editService", () => {
   });
 
   it("should edit a service if cidrs array contains the IP address of the host", async () => {
-    await serviceLifecycleStore.save("s4", {
-      ...aService,
-      fsm: { state: "rejected" },
-    })();
-
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: [
@@ -378,15 +283,31 @@ describe("editService", () => {
     );
 
     const response = await request(app)
-      .put("/api/services/s4")
-      .send(aServicePayload)
+      .put("/api/services/s4/logo")
+      .send(aValidLogoPayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
     expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.body.status.value).toBe("draft");
+  });
+
+  it("should return an internal error response if blob write fails", async () => {
+    mockBlobService.createBlockBlobFromText.mockImplementationOnce(
+      (_, __, ___, cb) => cb(new Error("any"), null)
+    );
+
+    const response = await request(app)
+      .put("/api/services/s1/logo")
+      .send(aValidLogoPayload)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(500);
   });
 });

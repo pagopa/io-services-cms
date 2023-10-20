@@ -95,3 +95,8 @@ resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
   content_type    = "string"
   expiration_date = "2028-09-27T07:41:36Z"
 }
+
+data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
+  name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
+  key_vault_id = module.key_vault_domain.id
+}
