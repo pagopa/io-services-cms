@@ -30,14 +30,6 @@ data "azurerm_private_dns_zone" "privatelink_postgres_database_azure_com" {
 }
 
 
-data "azurerm_subnet" "apim_snet" {
-  count = local.is_prod ? 1 : 0
-
-  name                 = "apimapi"
-  virtual_network_name = var.io_common.vnet_name
-  resource_group_name  = var.io_common.resource_group_name
-}
-
 data "azurerm_subnet" "apim_v2_snet" {
   count = local.is_prod ? 1 : 0
 

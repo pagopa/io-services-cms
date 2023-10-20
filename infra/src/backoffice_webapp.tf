@@ -7,7 +7,7 @@ locals {
     AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
     AZURE_APIM                = data.azurerm_api_management.apim_v2.name
     AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
-    AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_product_services.product_id
+    AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_v2_product_services.product_id
     # Logs
     APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
     # NextAuthJS

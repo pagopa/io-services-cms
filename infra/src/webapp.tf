@@ -152,7 +152,6 @@ module "webapp_functions_app" {
 
   allowed_subnets = [
     module.app_snet.id,
-    data.azurerm_subnet.apim_snet[0].id,
     data.azurerm_subnet.apim_v2_snet[0].id
   ]
 
