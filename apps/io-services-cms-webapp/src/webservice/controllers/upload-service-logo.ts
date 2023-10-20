@@ -36,11 +36,11 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { BlobService } from "azure-storage";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as UPNG from "upng-js";
 import { Logo as LogoPayload } from "../../generated/api/Logo";
+import { upsertBlobFromImageBuffer } from "../../lib/azure/blob-storage";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
@@ -74,19 +74,6 @@ const imageValidationErrorResponse = () =>
   ResponseErrorValidation(
     "Image not valid",
     "The base64 representation of the logo is invalid"
-  );
-
-const upsertBlobFromImageBuffer = (
-  blobService: BlobService,
-  containerName: string,
-  blobName: string,
-  content: Buffer
-): TE.TaskEither<Error, O.Option<BlobService.BlobResult>> =>
-  pipe(
-    TE.taskify<Error, BlobService.BlobResult>((cb) =>
-      blobService.createBlockBlobFromText(containerName, blobName, content, cb)
-    )(),
-    TE.map(O.fromNullable)
   );
 
 const validateImage = (bufferImage: Buffer) =>
