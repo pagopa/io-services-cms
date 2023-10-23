@@ -1,10 +1,14 @@
-import { createClient } from "@/generated/selfcare/client";
+import { createClient } from "@/lib/be/selfcare/client";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
+import { Institution } from "./selfcare/Institution";
+import { InstitutionResources } from "./selfcare/InstitutionResource";
 
 const Config = t.type({
   SELFCARE_BASE_URL: NonEmptyString,
@@ -41,21 +45,44 @@ export const getSelfcareService = cache(() => {
   const configuration = getSelfcareConfig();
   const selfcareClient = getSelfcareClient();
 
-  const getUserAuthorizedInstitutions = async (userIdForAuth: string) => {
-    const result = await selfcareClient.getInstitutionsUsingGET({
-      apiKeyHeader: configuration.SELFCARE_API_KEY,
-      userIdForAuth
-    });
-    return result;
-  };
+  const getUserAuthorizedInstitutions = (
+    userIdForAuth: string
+  ): TE.TaskEither<Error, InstitutionResources> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          selfcareClient.getInstitutionsUsingGET({
+            apiKeyHeader: configuration.SELFCARE_API_KEY,
+            userIdForAuth
+          }),
+        E.toError
+      ),
+      TE.chain(
+        flow(
+          E.chainW(InstitutionResources.decode),
+          E.mapLeft(e => new Error(readableReport(e))),
+          TE.fromEither
+        )
+      )
+    );
 
-  const getInstitutionById = async (id: string) => {
-    const result = await selfcareClient.getInstitution({
-      apiKeyHeader: configuration.SELFCARE_API_KEY,
-      id
-    });
-    return result;
-  };
+  const getInstitutionById = async (id: string): Promise<Institution> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          selfcareClient.getInstitution({
+            apiKeyHeader: configuration.SELFCARE_API_KEY,
+            id
+          }),
+        E.toError
+      ),
+      TE.chain(
+        flow(
+          E.mapLeft(e => new Error(readableReport(e))),
+          TE.fromEither
+        )
+      )
+    );
 
   return {
     getUserAuthorizedInstitutions,
