@@ -18,12 +18,16 @@
     "title": "IP address"
   },
   "buttons": {
+    "back": "Back",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
+    "createDraft": "Create draft",
     "delete": "Delete",
     "edit": "Edit",
-    "save": "Save"
+    "next": "Next",
+    "save": "Save",
+    "showMore": "Show more"
   },
   "copied": "Copied",
   "footer": {
@@ -36,8 +40,138 @@
     }
   },
   "forms": {
+    "cancel": {
+      "title": "Are you sure you want to cancel the procedure?",
+      "description": "The action is irreversible."
+    },
     "errors": {
-      "invalidField": "Invalid field"
+      "field": {
+        "assistanceChannels": "Assistance channels must have unique types",
+        "email": "Invalid e-mail",
+        "phone": "Invalid phone number",
+        "invalid": "Invalid field",
+        "required": "Required field",
+        "max": "You can enter a maximum of {{max}} characters",
+        "url": "Invalid Url",
+        "privacyCritical": "Mandatory field for a sensitive service"
+      }
+    },
+    "testUrl": "Try URL",
+    "service": {
+      "assistanceChannels": {
+        "label": "Assistance channels",
+        "add": "Add assistance channel",
+        "remove": "",
+        "email": "E-mail",
+        "pec": "PEC",
+        "phone": "Phone number",
+        "supportUrl": "Web address",
+        "channelType": "Channel type",
+        "placeholder": "Set the channel",
+        "notice": "It is mandatory to indicate at least one assistance channel"
+      },
+      "otherChannels": "Other channels",
+      "attributes": "Attributes",
+      "authorizedCidrs": "Authorized IP address",
+      "description": {
+        "helperText": "Read how to use the <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">markdown syntax</a> correctly.",
+        "label": "Description",
+        "placeholder": ""
+      },
+      "extraConfig": {
+        "label": "Add configuration",
+        "remove": "Remove configuration",
+        "description": "These features allow you to enrich the service with many additional parameters. Some of these require the signing of an ad hoc contract.",
+        "arriving": "Arriving",
+        "cta": {
+          "label": "Button with external link",
+          "description": "Add a button that takes you to a web page with more information about the service."
+        },
+        "fims": {
+          "label": "FIMS Protocol",
+          "description": "Single sign-on link between the service and an institution channel."
+        },
+        "idpay": {
+          "label": "IDPay initiative",
+          "description": "Add a new IDPay initiative."
+        }
+      },
+      "legalInfo": "Legal information",
+      "name": {
+        "helperText": "Read how to write <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/nome-del-servizio\" target=\"_blank\">service name</a> correctly.",
+        "label": "Service name",
+        "placeholder": ""
+      },
+      "requireSecureChannel": {
+        "helperText": "Services and messages that include sensitive data must comply with the requirements of paragraph 7.3 of the IO Guidelines. <a style=\"color: #0073E6;\" href=\"https://trasparenza.agid.gov.it/moduli/downloadFile.php?file=oggetto_allegati/213121604430O__OLG+Punto+accesso+telematico+servizi+PA_3.11.2021.pdf\" target=\"_blank\">Find more</a>",
+        "label": "Sensitive service",
+        "placeholder": ""
+      },
+      "metadata": {
+        "address": {
+          "helperText": "",
+          "label": "Insitution address",
+          "placeholder": ""
+        },
+        "cta": {
+          "text": {
+            "helperText": "",
+            "label": "Button label",
+            "placeholder": ""
+          },
+          "url": {
+            "helperText": "",
+            "label": "External URL",
+            "placeholder": ""
+          }
+        },
+        "privacyUrl": {
+          "helperText": "",
+          "label": "Privacy policy URL",
+          "placeholder": ""
+        },
+        "tosUrl": {
+          "helperText": "",
+          "label": "Terms & conditions URL",
+          "placeholder": ""
+        },
+        "webUrl": {
+          "helperText": "",
+          "label": "Sito web",
+          "placeholder": ""
+        },
+        "appAndroid": {
+          "helperText": "",
+          "label": "Android App URL",
+          "placeholder": ""
+        },
+        "appIos": {
+          "helperText": "",
+          "label": "iOS App URL",
+          "placeholder": ""
+        },
+        "scope": {
+          "local": "Local",
+          "national": "National",
+          "helperText": "You can change the areas of expertise at any time in yours <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">Reserved area</a>.",
+          "label": "Area of ​​competence",
+          "placeholder": ""
+        }
+      },
+      "steps": {
+        "step1": {
+          "label": "Service description",
+          "description": "If you have difficulty filling out the description, follow the IO services operating manual where you will find recommendations and advice on how to best fill out the service form."
+        },
+        "step2": {
+          "label": "Information & contacts",
+          "description": "To provide the service in IO it is necessary to associate it with a series of information and assistance channels."
+        },
+        "step3": {
+          "label": "Extra configuration",
+          "description": "These features allow you to enrich the service with many additional parameters. Be careful, some of these require the signing of an ad hoc contract."
+        }
+      }
     }
   },
   "keys": {

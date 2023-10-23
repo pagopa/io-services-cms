@@ -18,12 +18,16 @@
     "title": "Indirizzi IP"
   },
   "buttons": {
+    "back": "Indietro",
     "cancel": "Annulla",
     "confirm": "Conferma",
     "copyToClipboard": "Copy to clipboard",
+    "createDraft": "Crea bozza",
     "delete": "Elimina",
     "edit": "Modifica",
-    "save": "Salva"
+    "next": "Continua",
+    "save": "Salva",
+    "showMore": "Scopri di più"
   },
   "copied": "Copiato",
   "footer": {
@@ -36,8 +40,138 @@
     }
   },
   "forms": {
+    "cancel": {
+      "title": "Sei sicuro di voler annullare la procedura?",
+      "description": "L'azione è irreversibile."
+    },
     "errors": {
-      "invalidField": "Campo invalido"
+      "field": {
+        "assistanceChannels": "I canali si assistenza devono avere tipi univoci.",
+        "email": "E-mail non valida",
+        "phone": "Numero di telefono non valido",
+        "invalid": "Campo invalido",
+        "required": "Campo obbligatorio",
+        "max": "Puoi inserire massimo {{max}} caratteri",
+        "url": "Formato Url non valido",
+        "privacyCritical": "Campo obbligatorio per un servizio sensibile"
+      }
+    },
+    "testUrl": "Prova URL",
+    "service": {
+      "assistanceChannels": {
+        "label": "Canali di assistenza",
+        "add": "Aggiungi canale",
+        "remove": "",
+        "email": "E-mail",
+        "pec": "PEC",
+        "phone": "Numero di telefono",
+        "supportUrl": "Indirizzo web",
+        "channelType": "Tipo di canale",
+        "placeholder": "Indica il canale",
+        "notice": "È obbligatorio indicare almeno un canale di assistenza"
+      },
+      "otherChannels": "Altri canali",
+      "attributes": "Attributi",
+      "authorizedCidrs": "Indirizzi IP autorizzati",
+      "description": {
+        "helperText": "Leggi come usare correttamente il <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">linguaggio markdown</a>",
+        "label": "Descrizione",
+        "placeholder": ""
+      },
+      "extraConfig": {
+        "label": "Aggiungi configurazione",
+        "remove": "Rimuovi configurazione",
+        "description": "Queste funzionalità ti permettono di arricchire il servizio con tanti parametri aggiuntivi. Alcuni di questi richiedono la firma di un contratto ad hoc.",
+        "arriving": "In arrivo",
+        "cta": {
+          "label": "Pulsante con link esterno",
+          "description": "Aggiungi un pulsante che rimanda ad una pagina web con più informazioni sul servizio."
+        },
+        "fims": {
+          "label": "Protocollo FIMS",
+          "description": "Link in single sign-on tra il servizio e un canale dell’ente."
+        },
+        "idpay": {
+          "label": "Iniziativa IDPay",
+          "description": "Aggiungi una nuova iniziativa IDPay."
+        }
+      },
+      "legalInfo": "Informazioni legali",
+      "name": {
+        "helperText": "Leggi come scrivere correttamente il <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/nome-del-servizio\" target=\"_blank\">nome di un servizio</a>",
+        "label": "Nome del servizio",
+        "placeholder": ""
+      },
+      "requireSecureChannel": {
+        "helperText": "I servizi e i messaggi che includono dati sensibili devono rispettare le prescrizioni del paragrafo 7.3 delle Linee Guida di IO. <a style=\"color: #0073E6;\" href=\"https://trasparenza.agid.gov.it/moduli/downloadFile.php?file=oggetto_allegati/213121604430O__OLG+Punto+accesso+telematico+servizi+PA_3.11.2021.pdf\" target=\"_blank\">Scopri di più</a>",
+        "label": "Servizio sensibile",
+        "placeholder": ""
+      },
+      "metadata": {
+        "address": {
+          "helperText": "",
+          "label": "Indirizzo dell'ente",
+          "placeholder": ""
+        },
+        "cta": {
+          "text": {
+            "helperText": "",
+            "label": "Etichetta del pulsante",
+            "placeholder": ""
+          },
+          "url": {
+            "helperText": "",
+            "label": "URL esterna",
+            "placeholder": ""
+          }
+        },
+        "privacyUrl": {
+          "helperText": "",
+          "label": "URL Privacy policy",
+          "placeholder": ""
+        },
+        "tosUrl": {
+          "helperText": "",
+          "label": "URL Termini e condizioni",
+          "placeholder": ""
+        },
+        "webUrl": {
+          "helperText": "",
+          "label": "Sito web",
+          "placeholder": ""
+        },
+        "appAndroid": {
+          "helperText": "",
+          "label": "URL App Android",
+          "placeholder": ""
+        },
+        "appIos": {
+          "helperText": "",
+          "label": "URL App iOS",
+          "placeholder": ""
+        },
+        "scope": {
+          "local": "Locale",
+          "national": "Nazionale",
+          "helperText": "Puoi modificare in qualsiasi momento le aree di competenza nella tua <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">Area riservata</a>.",
+          "label": "Area di competenza",
+          "placeholder": ""
+        }
+      },
+      "steps": {
+        "step1": {
+          "label": "Descrizione del servizio",
+          "description": "Se hai difficoltà nel compilare la descrizione, segui il Manuale operativo dei servizi in IO dove troverai raccomandazioni e consigli per compilare al meglio la scheda servizio."
+        },
+        "step2": {
+          "label": "Informazioni e contatti",
+          "description": "Per erogare il servizio in IO è necessario associarlo ad una serie di canali informativi e di assistenza."
+        },
+        "step3": {
+          "label": "Configurazioni extra",
+          "description": "Queste funzionalità ti permettono di arricchire il servizio con tanti parametri aggiuntivi. Attenzione, alcuni di questi richiedono la firma di un contratto ad hoc."
+        }
+      }
     }
   },
   "keys": {

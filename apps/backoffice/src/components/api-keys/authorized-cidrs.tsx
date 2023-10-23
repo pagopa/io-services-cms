@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 import { TextFieldArrayController } from "../forms/controllers";
 import { LoaderSkeleton } from "../loaders";
+import { arrayOfIPv4CidrSchema } from "../forms/schemas";
 
 export type AuthorizedCidrsProps = {
   /** List of IPs in CIDR format */
@@ -17,10 +18,6 @@ export type AuthorizedCidrsProps = {
 };
 
 // Zod schema validation type for ipV4/cidr
-const ipv4CidrSchema = z
-  .string()
-  .regex(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(\/\d{1,2})?$/);
-const arrayOfIPv4CidrSchema = z.array(ipv4CidrSchema);
 const schema = z.object({
   cidrs: arrayOfIPv4CidrSchema
 });

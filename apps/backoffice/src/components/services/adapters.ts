@@ -11,6 +11,9 @@ const adaptServiceCommonData = (
   name: service.name,
   description: service.description,
   requireSecureChannel: service.require_secure_channel ?? false,
+  authorizedCidrs: service.authorized_cidrs
+    ? ((service.authorized_recipients as unknown) as string[])
+    : [],
   authorizedRecipients: service.authorized_recipients
     ? ((service.authorized_recipients as unknown) as string[])
     : [],
