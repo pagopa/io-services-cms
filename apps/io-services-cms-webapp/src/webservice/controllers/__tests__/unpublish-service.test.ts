@@ -120,6 +120,10 @@ const mockContext = {
   },
 } as any;
 
+const mockBlobService = {
+  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
+} as any;
+
 describe("UnPublishService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -133,6 +137,7 @@ describe("UnPublishService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
+    blobService: mockBlobService
   });
 
   setAppContext(app, mockContext);

@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 0.8.0
+
+### Minor Changes
+
+- d0de153: Service details page with alerts, information card and updated context menu
+- 3dc2447: Added ServiceLogo component in service details page
+
+### Patch Changes
+
+- 90e009d: Fix auth unit test
+- d5c9493: ADD PUT /keys/manage/cidrs API Implementation
+- d2a82d4: NextAuth refactoring: use libs following "Module Pattern"
+
 ## 0.7.1
 
 ### Patch Changes

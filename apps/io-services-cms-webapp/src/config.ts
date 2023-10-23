@@ -180,6 +180,13 @@ const FeatureFlags = t.type({
   ),
 });
 
+export const ExternalStorageAccountConfiguration = t.type({
+  ASSET_STORAGE_CONNECTIONSTRING: NonEmptyString,
+});
+export type ExternalStorageAccountConfiguration = t.TypeOf<
+  typeof ExternalStorageAccountConfiguration
+>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -204,6 +211,7 @@ export const IConfig = t.intersection([
     ApplicationInsightConfig,
     FeatureFlags,
   ]),
+  ExternalStorageAccountConfiguration,
 ]);
 
 export const envConfig = {

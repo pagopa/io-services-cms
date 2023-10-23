@@ -94,6 +94,10 @@ const mockContext = {
   },
 } as any;
 
+const mockBlobService = {
+  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
+} as any;
+
 describe("getServiceLifecycle", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -106,6 +110,7 @@ describe("getServiceLifecycle", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
+    blobService: mockBlobService
   });
 
   setAppContext(app, mockContext);
