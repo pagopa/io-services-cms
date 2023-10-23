@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 0.9.0
+
+### Minor Changes
+
+- 3e818b2: Create the apim user (if it does not exist) with predefined groups (permissions) when exchanging tokens
+- 41f8f96: Add service create/update process form
+
+### Patch Changes
+
+- 82da76a: Use Module Pattern on BackOffice B4F as Structurale Design Pattern
+
 ## 0.8.0
 
 ### Minor Changes
