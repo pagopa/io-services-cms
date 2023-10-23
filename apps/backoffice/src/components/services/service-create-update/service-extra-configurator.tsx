@@ -29,10 +29,8 @@ import { useFormContext } from "react-hook-form";
 
 export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 
-export type ServiceExtraConfiguratorProps = {};
-
 /** Configure extra parameters/configuration for a service _(i.e.: cta, fims protocol, idpay, ...)_ */
-export const ServiceExtraConfigurator = ({}: ServiceExtraConfiguratorProps) => {
+export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { openDrawer, closeDrawer } = useDrawer();
   const { resetField, formState, getValues } = useFormContext();

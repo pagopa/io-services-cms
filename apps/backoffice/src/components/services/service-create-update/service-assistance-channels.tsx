@@ -9,10 +9,8 @@ import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-export type ServiceAssistanceChannelsProps = {};
-
 /** Configure up to 4 assistance channels for an IO Service */
-export const ServiceAssistanceChannels = ({}: ServiceAssistanceChannelsProps) => {
+export const ServiceAssistanceChannels = () => {
   const { t } = useTranslation();
   const {
     control,
