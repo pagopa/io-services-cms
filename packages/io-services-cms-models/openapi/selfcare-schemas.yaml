@@ -26,7 +26,7 @@ Institution:
     zipCode:
       type: string
       example: '20100'
-    fiscalCode:
+    taxCode:
       type: string
       description: institution tax code
     origin:
@@ -86,16 +86,6 @@ Institution:
     rootParent:
       $ref: '#/RootParentResource'
   additionalProperties: false
-  required:
-    - address
-    - externalId
-    - fiscalCode
-    - id
-    - mailAddress
-    - description
-    - origin
-    - originId
-    - institutionType
 Attribute:
   type: object
   properties:
@@ -128,12 +118,6 @@ PaymentServiceProvider:
       type: boolean
       description: true when vat number identify a group
   additionalProperties: false
-  required:
-    - abiCode
-    - businessRegisterNumber
-    - legalRegisterName
-    - legalRegisterNumber
-    - vatNumberGroup
 DataProtectionOfficer:
   type: object
   properties:
@@ -147,10 +131,6 @@ DataProtectionOfficer:
       type: string
       description: Data protection officer digital address
   additionalProperties: false
-  required:
-    - address
-    - email
-    - pec
 GeographicTaxonomy:
   required:
     - code
