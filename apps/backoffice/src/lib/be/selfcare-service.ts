@@ -12,6 +12,7 @@ import { InstitutionResources } from "./selfcare/InstitutionResource";
 
 const Config = t.type({
   SELFCARE_BASE_URL: NonEmptyString,
+  SELFCARE_BASE_PATH: NonEmptyString,
   SELFCARE_API_KEY: NonEmptyString,
   SELFCARE_API_MOCKING: BooleanFromString
 });
@@ -37,7 +38,8 @@ const getSelfcareClient = () => {
 
   return createClient({
     baseUrl: configuration.SELFCARE_BASE_URL,
-    fetchApi: (fetch as any) as typeof fetch
+    fetchApi: (fetch as any) as typeof fetch,
+    basePath: configuration.SELFCARE_BASE_PATH
   });
 };
 
@@ -60,13 +62,13 @@ export const getSelfcareService = cache(() => {
       TE.chain(
         flow(
           E.chainW(InstitutionResources.decode),
-          E.mapLeft(e => new Error(readableReport(e))),
+          E.mapLeft(flow(readableReport, E.toError)),
           TE.fromEither
         )
       )
     );
 
-  const getInstitutionById = async (id: string): Promise<Institution> =>
+  const getInstitutionById = (id: string): TE.TaskEither<Error, Institution> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -76,12 +78,7 @@ export const getSelfcareService = cache(() => {
           }),
         E.toError
       ),
-      TE.chain(
-        flow(
-          E.mapLeft(e => new Error(readableReport(e))),
-          TE.fromEither
-        )
-      )
+      TE.chain(flow(E.mapLeft(flow(readableReport, E.toError)), TE.fromEither))
     );
 
   return {
