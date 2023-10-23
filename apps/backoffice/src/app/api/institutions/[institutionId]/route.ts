@@ -1,4 +1,8 @@
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@/config/constants";
+import {
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND
+} from "@/config/constants";
+import { InstitutionNotFoundError } from "@/lib/be/errors";
 import { getInstitutionById } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -24,6 +28,18 @@ export const GET = withJWTAuthHandler(
         `An Error has occurred while searching institutionId: ${params.institutionId}, caused by: `,
         error
       );
+
+      if (error instanceof InstitutionNotFoundError) {
+        return NextResponse.json(
+          {
+            title: "InstitutionNotFoundError",
+            status: HTTP_STATUS_NOT_FOUND as any,
+            detail: error.message
+          },
+          { status: HTTP_STATUS_NOT_FOUND }
+        );
+      }
+
       return NextResponse.json(
         {
           title: "InstitutionRetrieveError",
