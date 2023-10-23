@@ -1,4 +1,4 @@
-import { Configuration } from "@/config";
+import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -13,6 +13,14 @@ import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 import { ulid } from "ulid";
 import { ApimUser, IdentityTokenPayload } from "../types";
+
+if (
+  getConfiguration().SELFCARE_API_MOCKING ||
+  getConfiguration().API_APIM_MOCKING
+) {
+  const { setupMocks } = require("../../../../../mocks");
+  setupMocks();
+}
 
 export const authorize = (
   config: Configuration
