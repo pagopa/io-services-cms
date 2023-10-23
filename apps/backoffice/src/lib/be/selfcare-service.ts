@@ -17,6 +17,16 @@ const Config = t.type({
   SELFCARE_API_MOCKING: BooleanFromString
 });
 
+type InstitutionResourcesResponse = {
+  value: InstitutionResources;
+  status: number;
+};
+
+type InstitutionResponse = {
+  value: Institution;
+  status: number;
+};
+
 const getSelfcareConfig = () => {
   const result = Config.decode(process.env);
 
@@ -49,7 +59,7 @@ export const getSelfcareService = cache(() => {
 
   const getUserAuthorizedInstitutions = (
     userIdForAuth: string
-  ): TE.TaskEither<Error, InstitutionResources> =>
+  ): TE.TaskEither<Error, InstitutionResourcesResponse> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -61,14 +71,25 @@ export const getSelfcareService = cache(() => {
       ),
       TE.chain(
         flow(
-          E.chainW(InstitutionResources.decode),
+          E.chainW(responseContent =>
+            pipe(
+              responseContent.value,
+              InstitutionResources.decode,
+              E.map(value => ({
+                value,
+                status: responseContent.status
+              }))
+            )
+          ),
           E.mapLeft(flow(readableReport, E.toError)),
           TE.fromEither
         )
       )
     );
 
-  const getInstitutionById = (id: string): TE.TaskEither<Error, Institution> =>
+  const getInstitutionById = (
+    id: string
+  ): TE.TaskEither<Error, InstitutionResponse> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -78,7 +99,16 @@ export const getSelfcareService = cache(() => {
           }),
         E.toError
       ),
-      TE.chain(flow(E.mapLeft(flow(readableReport, E.toError)), TE.fromEither))
+      TE.chain(
+        flow(
+          E.map(responseContent => ({
+            value: responseContent.value,
+            status: responseContent.status
+          })),
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
     );
 
   return {
