@@ -2,11 +2,8 @@ import * as E from "fp-ts/Either";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../../types/next-auth";
-import {
-  IoServicesCmsClient,
-  forwardIoServicesCmsRequest
-} from "../io-services-cms-proxy";
+import { BackOfficeUser } from "../../../../types/next-auth";
+import { forwardIoServicesCmsRequest } from "../cms/business";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -21,28 +18,61 @@ const jwtMock = ({
   }
 } as unknown) as BackOfficeUser;
 
+const mocks: {
+  statusOK: number;
+  statusNoContent: number;
+  aSamplePayload: { test: string };
+} = vi.hoisted(() => ({
+  statusOK: 200,
+  statusNoContent: 204,
+  aSamplePayload: { test: "test" }
+}));
+
+const { getIoServicesCmsClient } = vi.hoisted(() => ({
+  getIoServicesCmsClient: vi.fn().mockReturnValue({
+    getServices: vi.fn(() =>
+      Promise.resolve(
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
+      )
+    ),
+    createService: vi.fn(() =>
+      Promise.resolve(
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
+      )
+    ),
+    reviewService: vi.fn(() =>
+      Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
+    )
+  })
+}));
+
+vi.mock("../cms-client", () => ({
+  getIoServicesCmsClient
+}));
+
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
     // Mock io-services-cms client
-    const mockIoServicesCmsClient = ({
-      getServices: vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
-      )
-    } as any) as IoServicesCmsClient;
+    const getServices = vi.fn(() =>
+      Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+    );
+    getIoServicesCmsClient.mockReturnValueOnce({
+      getServices
+    });
 
     // Mock NextRequest
     const request = ({
       bodyUsed: false
     } as any) as NextRequest;
 
-    const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
+    const result = await forwardIoServicesCmsRequest(
       "getServices",
       request,
       jwtMock
     );
 
-    expect(mockIoServicesCmsClient.getServices).toHaveBeenCalled();
-    expect(mockIoServicesCmsClient.getServices).toHaveBeenCalledWith(
+    expect(getServices).toHaveBeenCalled();
+    expect(getServices).toHaveBeenCalledWith(
       expect.objectContaining({
         "x-user-email": anUserEmail,
         "x-user-id": anUserId,
@@ -57,11 +87,12 @@ describe("forwardIoServicesCmsRequest tests", () => {
 
   it("request with body request and with response body", async () => {
     // Mock io-services-cms client
-    const mockIoServicesCmsClient = ({
-      createService: vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
-      )
-    } as any) as IoServicesCmsClient;
+    const createService = vi.fn(() =>
+      Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+    );
+    getIoServicesCmsClient.mockReturnValueOnce({
+      createService
+    });
 
     const aBodyPayload = {
       name: "test",
@@ -74,7 +105,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
       json: () => Promise.resolve(aBodyPayload)
     } as any) as NextRequest;
 
-    const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
+    const result = await forwardIoServicesCmsRequest(
       "createService",
       request,
       jwtMock,
@@ -83,8 +114,8 @@ describe("forwardIoServicesCmsRequest tests", () => {
       }
     );
 
-    expect(mockIoServicesCmsClient.createService).toHaveBeenCalled();
-    expect(mockIoServicesCmsClient.createService).toHaveBeenCalledWith(
+    expect(createService).toHaveBeenCalled();
+    expect(createService).toHaveBeenCalledWith(
       expect.objectContaining({
         "x-user-email": anUserEmail,
         "x-user-id": anUserId,
@@ -101,11 +132,12 @@ describe("forwardIoServicesCmsRequest tests", () => {
 
   it("request without body response", async () => {
     // Mock io-services-cms client
-    const mockIoServicesCmsClient = ({
-      reviewService: vi.fn(() =>
-        Promise.resolve(E.of({ status: 204, value: undefined }))
-      )
-    } as any) as IoServicesCmsClient;
+    const reviewService = vi.fn(() =>
+      Promise.resolve(E.of({ status: 204, value: undefined }))
+    );
+    getIoServicesCmsClient.mockReturnValueOnce({
+      reviewService
+    });
 
     const aBodyPayload = {
       name: "test"
@@ -117,7 +149,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
       json: () => Promise.resolve(aBodyPayload)
     } as any) as NextRequest;
 
-    const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
+    const result = await forwardIoServicesCmsRequest(
       "reviewService",
       request,
       jwtMock,
@@ -126,8 +158,8 @@ describe("forwardIoServicesCmsRequest tests", () => {
       }
     );
 
-    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalled();
-    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalledWith(
+    expect(reviewService).toHaveBeenCalled();
+    expect(reviewService).toHaveBeenCalledWith(
       expect.objectContaining({
         "x-user-email": anUserEmail,
         "x-user-id": anUserId,
@@ -159,9 +191,10 @@ describe("forwardIoServicesCmsRequest tests", () => {
     ];
 
     // Mock io-services-cms client
-    const mockIoServicesCmsClient = ({
-      reviewService: vi.fn(() => Promise.resolve(E.left(validationError)))
-    } as any) as IoServicesCmsClient;
+    const reviewService = vi.fn(() => Promise.resolve(E.left(validationError)));
+    getIoServicesCmsClient.mockReturnValueOnce({
+      reviewService
+    });
 
     const aBodyPayload = {
       name: "test"
@@ -173,7 +206,7 @@ describe("forwardIoServicesCmsRequest tests", () => {
       json: () => Promise.resolve(aBodyPayload)
     } as any) as NextRequest;
 
-    const result = await forwardIoServicesCmsRequest(mockIoServicesCmsClient)(
+    const result = await forwardIoServicesCmsRequest(
       "reviewService",
       request,
       jwtMock,
@@ -182,8 +215,8 @@ describe("forwardIoServicesCmsRequest tests", () => {
       }
     );
 
-    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalled();
-    expect(mockIoServicesCmsClient.reviewService).toHaveBeenCalledWith(
+    expect(reviewService).toHaveBeenCalled();
+    expect(reviewService).toHaveBeenCalledWith(
       expect.objectContaining({
         "x-user-email": anUserEmail,
         "x-user-id": anUserId,
