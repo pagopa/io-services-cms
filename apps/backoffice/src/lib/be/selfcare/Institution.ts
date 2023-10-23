@@ -30,10 +30,7 @@ export enum InstitutionTypeEnum {
 }
 
 // required attributes
-const InstitutionR = t.interface({});
-
-// optional attributes
-const InstitutionO = t.partial({
+const InstitutionR = t.interface({
   id: t.string,
 
   externalId: t.string,
@@ -50,23 +47,31 @@ const InstitutionO = t.partial({
 
   taxCode: t.string,
 
-  origin: t.string,
-
-  institutionType: enumType<InstitutionTypeEnum>(
-    InstitutionTypeEnum,
-    "institutionType"
-  ),
-
   attributes: Attributes,
 
-  paymentServiceProvider: PaymentServiceProvider,
-
-  dataProtectionOfficer: DataProtectionOfficer,
+  origin: t.string,
 
   geographicTaxonomies: t.readonlyArray(
     GeographicTaxonomy,
     "array of GeographicTaxonomy"
   ),
+
+
+});
+
+// optional attributes
+const InstitutionO = t.partial({
+  
+  institutionType: enumType<InstitutionTypeEnum>(
+    InstitutionTypeEnum,
+    "institutionType"
+  ),
+
+  
+
+  paymentServiceProvider: PaymentServiceProvider,
+
+  dataProtectionOfficer: DataProtectionOfficer,
 
   rea: t.string,
 
