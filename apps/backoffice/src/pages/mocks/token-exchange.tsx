@@ -3,7 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { aMockedIdentiyToken } from "../../../mocks/data/selfcare-data";
+import { aMockedChangeInstitutionIdentiyToken } from "../../../mocks/data/selfcare-data";
 
 /**
  * Selfcare change institution page.
@@ -24,7 +24,7 @@ export default function TokenExchange() {
       )
     ) {
       console.log("token-exchange");
-      router.push(`/auth/login#token=${aMockedIdentiyToken}`);
+      router.push(`/auth/login#token=${aMockedChangeInstitutionIdentiyToken}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [institutionId, productId]);

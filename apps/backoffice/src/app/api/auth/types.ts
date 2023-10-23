@@ -106,7 +106,7 @@ export const IdentityTokenPayload = t.type({
 
 export type ApimUser = t.TypeOf<typeof ApimUser>;
 export const ApimUser = t.type({
-  id: NonEmptyString,
+  name: NonEmptyString,
   email: EmailString,
   groups: t.readonlyArray(
     t.type({

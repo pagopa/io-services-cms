@@ -1,14 +1,13 @@
+import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import {
-  aMockServicePagination,
   aMockServicePaginationLimitOffset,
   aMockServicePublication,
   getMockServiceKeys,
   getMockServiceLifecycle
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
-import { getConfiguration } from "@/config";
 
 faker.seed(1);
 
