@@ -1,68 +1,159 @@
 Institution:
   type: object
-  description: Selfcare institution resource
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: 97c0f418-bcb3-48d4-825a-fe8b29ae68e5
+    externalId:
+      type: string
+      description: external institution id
+      example: c_f205
+    originId:
+      type: string
+      description: origin institution id (e.g iPA code)
+      example: c_f205
+    description:
+      type: string
+      example: AGENCY X
+    mailAddress:
+      type: string
+      format: email
+      example: email@pec.mail.org
+    address:
+      type: string
+      example: via del campo
+    zipCode:
+      type: string
+      example: '20100'
+    taxCode:
+      type: string
+      description: institution tax code
+    origin:
+      type: string
+      description: The origin form which the institution has been retrieved
+      example: IPA
+    institutionType:
+      enum:
+        - GSP
+        - PA
+        - PG
+        - PSP
+        - PT
+        - SCP
+        - SA
+      type: string
+    attributes:
+      $ref: '#/Attributes'
+    paymentServiceProvider:
+      $ref: '#/PaymentServiceProvider'
+    dataProtectionOfficer:
+      $ref: '#/DataProtectionOfficer'
+    geographicTaxonomies:
+      type: array
+      items:
+        $ref: '#/GeographicTaxonomy'
+    rea:
+      type: string
+      description: The institution REA
+    shareCapital:
+      type: string
+      description: The institution share capital value
+      example: '10000'
+    businessRegisterPlace:
+      type: string
+      description: The business register place
+      example: Rome
+    supportEmail:
+      type: string
+      description: The support email contact
+    supportPhone:
+      type: string
+      description: The support phone contact
+    imported:
+      type: boolean
+      description: True if institution is stored from batch api
+    logo:
+      type: string
+      description: URL to institution logo
+      format: url
+    subunitCode:
+      type: string
+    subunitType:
+      type: string
+    aooParentCode:
+      type: string
+    rootParent:
+      $ref: '#/RootParentResource'
+  additionalProperties: false
+Attribute:
+  type: object
+  properties:
+    origin:
+      type: string
+    code:
+      type: string
+    description:
+      type: string
+Attributes:
+  type: array
+  items:
+    $ref: '#/Attribute'
+PaymentServiceProvider:
+  type: object
+  properties:
+    abiCode:
+      type: string
+      description: ABI Code
+    businessRegisterNumber:
+      type: string
+      description: ID Registration Number on Business Register
+    legalRegisterName:
+      type: string
+      description: Chairman name on Business Register
+    legalRegisterNumber:
+      type: string
+      description: Chairman ID on Business Register
+    vatNumberGroup:
+      type: boolean
+      description: true when vat number identify a group
+  additionalProperties: false
+DataProtectionOfficer:
+  type: object
   properties:
     address:
       type: string
-      description: Institution's physical address
-    assistanceContacts:
-      $ref: "#/AssistanceContacts"
-      description: Institution's assistance contacts
-    companyInformations:
-      $ref: "#/CompanyInformations"
-      description: GPS, SCP, PT optional data
-    dpoData:
-      $ref: "#/DpoData"
-      description: Data Protection Officer (DPO) specific data
-    externalId:
+      description: Data protection officer address
+    email:
       type: string
-      description: Institution's unique external identifier
-    fiscalCode:
+      description: Data protection officer email
+    pec:
       type: string
-      description: Institution's taxCode
+      description: Data protection officer digital address
+  additionalProperties: false
+GeographicTaxonomy:
+  required:
+    - code
+    - desc
+  type: object
+  properties:
+    code:
+      type: string
+      description: Code of the geographic taxonomy
+    desc:
+      type: string
+      description: Description of the geographic taxonomy code
+  additionalProperties: false
+RootParentResource:
+  title: RootParentResource
+  type: object
+  properties:
+    description:
+      type: string
+      description: swagger.external_api.institutions.model.parentDescription
     id:
       type: string
-      description: Institution's unique internal identifier
-    institutionType:
-      type: string
-      enum: [GSP, PA, PSP, PT, SCP]
-    mailAddress:
-      type: string
-      description: Institution's digitalAddress
-    name:
-      type: string
-      description: Institution's name
-    origin:
-      type: string
-      description: Institution data origin
-    originId:
-      type: string
-      description: Institution's details origin Id
-    pspData:
-      $ref: "#/PspData"
-      description: Payment Service Provider (PSP) specific data
-    recipientCode:
-      type: string
-      description: Billing recipient code
-    status:
-      type: string
-      description: Institution onboarding status
-    userProductRoles:
-      type: array
-      description: Logged user's roles on product
-      items:
-        type: string
-  required:
-    - address
-    - externalId
-    - fiscalCode
-    - id
-    - mailAddress
-    - name
-    - origin
-    - originId
-    - status
-    - userProductRoles
+      description: Institution's unique internal Id
 Product:
   type: object
   description: Selfcare product resource
@@ -87,65 +178,3 @@ Product:
     - id
     - title
     - urlBO
-AssistanceContacts:
-  type: object
-  properties:
-    supportEmail:
-      type: string
-      description: Institution's support email contact
-    supportPhone:
-      type: string
-      description: Institution's support phone contact
-CompanyInformations:
-  type: object
-  properties:
-    businessRegisterPlace:
-      type: string
-      description: Institution's business register place
-    rea:
-      type: string
-      description: Institution's REA
-    shareCapital:
-      type: string
-      description: Institution's share capital value
-DpoData:
-  type: object
-  properties:
-    address:
-      type: string
-      description: DPO's address
-    email:
-      type: string
-      description: IDPO's email
-    pec:
-      type: string
-      description: DPO's pec
-  required:
-    - address
-    - email
-    - pec
-PspData:
-  type: object
-  properties:
-    abiCode:
-      type: string
-      description: PSP's ABI code
-    businessRegisterNumber:
-      type: string
-      description: PSP's Business Register number
-    legalRegisterName:
-      type: string
-      description: PSP's legal register name
-    legalRegisterNumber:
-      type: string
-      description: PSP's legal register number
-    vatNumberGroup:
-      type: boolean
-      description: PSP's Vat Number group
-      example: false
-  required:
-    - abiCode
-    - businessRegisterNumber
-    - legalRegisterName
-    - legalRegisterNumber
-    - vatNumberGroup
