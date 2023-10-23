@@ -1,0 +1,573 @@
+openapi: 3.0.1
+info:
+  title: External API service
+  description: This service is the proxy for external services
+  version: v2
+servers:
+  - url: https://api.selfcare.pagopa.it/external/v2
+paths:
+  /institutions:
+    get:
+      tags:
+        - institutions
+      summary: getInstitutions
+      description: The service retrieves all the onboarded institutions related to the provided user and the product retrieved from Subscription Key
+      operationId: getInstitutionsUsingGET
+      parameters:
+        - name: userIdForAuth
+          in: query
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InstitutionResource'
+              example:
+                - address: string
+                  aooParentCode: string
+                  assistanceContacts:
+                    supportEmail: string
+                    supportPhone: string
+                  companyInformations:
+                    businessRegisterPlace: string
+                    rea: string
+                    shareCapital: string
+                  description: string
+                  digitalAddress: string
+                  dpoData:
+                    address: string
+                    email: email@example.com
+                    pec: email@example.com
+                  externalId: string
+                  id: string
+                  institutionType: GSP
+                  origin: string
+                  originId: string
+                  rootParent:
+                    description: string
+                    id: string
+                  pspData:
+                    abiCode: string
+                    businessRegisterNumber: string
+                    legalRegisterName: string
+                    legalRegisterNumber: string
+                    vatNumberGroup: false
+                  recipientCode: string
+                  status: string
+                  subunitCode: string
+                  subunitType: string
+                  taxCode: string
+                  userProductRoles:
+                    - string
+                  zipCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{id}':
+    get:
+      tags:
+        - institutions
+      summary: getInstitutionById
+      description: getInstitutionById
+      operationId: getInstitution
+      parameters:
+        - name: id
+          in: path
+          description: Format - uuid. The internal identifier of the institution
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institution'
+              example:
+                id: 97c0f418-bcb3-48d4-825a-fe8b29ae68e5
+                externalId: c_f205
+                originId: c_f205
+                description: AGENCY X
+                digitalAddress: email@pec.mail.org
+                address: via del campo
+                zipCode: '20100'
+                taxCode: string
+                origin: IPA
+                institutionType: GSP
+                attributes:
+                  - origin: string
+                    code: string
+                    description: string
+                paymentServiceProvider:
+                  abiCode: string
+                  businessRegisterNumber: string
+                  legalRegisterName: string
+                  legalRegisterNumber: string
+                  vatNumberGroup: true
+                dataProtectionOfficer:
+                  address: string
+                  email: string
+                  pec: string
+                geographicTaxonomies:
+                  - code: string
+                    desc: string
+                rea: string
+                shareCapital: '10000'
+                businessRegisterPlace: Rome
+                supportEmail: string
+                supportPhone: string
+                imported: true
+                logo: string
+                subunitCode: string
+                subunitType: string
+                aooParentCode: string
+                rootParent:
+                  description: string
+                  id: string
+        '400':
+          description: Invalid id supplied
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+components:
+  schemas:
+    Attribute:
+      type: object
+      properties:
+        origin:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+    Attributes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Attribute'
+    CompanyInformationsResource:
+      title: CompanyInformationsResource
+      type: object
+      properties:
+        businessRegisterPlace:
+          type: string
+          description: Institution's business register place
+        rea:
+          type: string
+          description: Institution's REA
+        shareCapital:
+          type: string
+          description: Institution's share capital value
+    AssistanceContactsResource:
+      title: AssistanceContactsResource
+      type: object
+      properties:
+        supportEmail:
+          type: string
+          description: Institution's support email contact
+        supportPhone:
+          type: string
+          description: Institution's support phone contact
+    DpoDataResource:
+      title: DpoDataResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: DPO's address
+        email:
+          type: string
+          description: DPO's email
+          format: email
+          example: email@example.com
+        pec:
+          type: string
+          description: DPO's PEC
+          format: email
+          example: email@example.com
+    InstitutionResource:
+      title: InstitutionResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: Institution's physical address
+        aooParentCode:
+          type: string
+          description: AOO unit parent institution Code
+        assistanceContacts:
+          $ref: '#/components/schemas/AssistanceContactsResource'
+        companyInformations:
+          $ref: '#/components/schemas/CompanyInformationsResource'
+        description:
+          type: string
+          description: Institution's legal name
+        digitalAddress:
+          type: string
+          description: Institution's digitalAddress
+        dpoData:
+          $ref: '#/components/schemas/DpoDataResource'
+        externalId:
+          type: string
+          description: Institution's unique external identifier
+        id:
+          type: string
+          description: Institution's unique internal Id
+          format: uuid
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SCP
+            - SA
+          type: string
+          description: Institution's type
+        origin:
+          type: string
+          description: Institution data origin
+        originId:
+          type: string
+          description: Institution's details origin Id
+        rootParent:
+          $ref: '#/components/schemas/RootParentResource'
+        pspData:
+          $ref: '#/components/schemas/PspDataResource'
+        recipientCode:
+          type: string
+          description: Billing recipient code
+        status:
+          type: string
+          description: Institution onboarding status
+        subunitCode:
+          type: string
+          description: Institutions AOO/UO unit Code
+        subunitType:
+          type: string
+          description: Institutions AOO/UO unit type
+        taxCode:
+          type: string
+          description: Institution's taxCode
+        userProductRoles:
+          type: array
+          items:
+            type: string
+          description: Logged user's roles on product
+        zipCode:
+          type: string
+          description: Institution's zipCode
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 97c0f418-bcb3-48d4-825a-fe8b29ae68e5
+        externalId:
+          type: string
+          description: external institution id
+          example: c_f205
+        originId:
+          type: string
+          description: origin institution id (e.g iPA code)
+          example: c_f205
+        description:
+          type: string
+          example: AGENCY X
+        digitalAddress:
+          type: string
+          format: email
+          example: email@pec.mail.org
+        address:
+          type: string
+          example: via del campo
+        zipCode:
+          type: string
+          example: '20100'
+        taxCode:
+          type: string
+          description: institution tax code
+        origin:
+          type: string
+          description: The origin form which the institution has been retrieved
+          example: IPA
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SCP
+            - SA
+          type: string
+        attributes:
+          $ref: '#/components/schemas/Attributes'
+        paymentServiceProvider:
+          $ref: '#/components/schemas/PaymentServiceProvider'
+        dataProtectionOfficer:
+          $ref: '#/components/schemas/DataProtectionOfficer'
+        geographicTaxonomies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeographicTaxonomy'
+        rea:
+          type: string
+          description: The institution REA
+        shareCapital:
+          type: string
+          description: The institution share capital value
+          example: '10000'
+        businessRegisterPlace:
+          type: string
+          description: The business register place
+          example: Rome
+        supportEmail:
+          type: string
+          description: The support email contact
+        supportPhone:
+          type: string
+          description: The support phone contact
+        imported:
+          type: boolean
+          description: True if institution is stored from batch api
+        logo:
+          type: string
+          description: URL to institution logo
+          format: url
+        subunitCode:
+          type: string
+        subunitType:
+          type: string
+        aooParentCode:
+          type: string
+        rootParent:
+          $ref: '#/components/schemas/RootParentResource'
+      additionalProperties: false
+    Problem:
+      title: Problem
+      required:
+        - status
+        - title
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Human-readable description of this specific problem.
+        instance:
+          type: string
+          description: A URI that describes where the problem occurred.
+        invalidParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidParam'
+          description: A list of invalid parameters details.
+        status:
+          type: integer
+          description: The HTTP status code.
+          format: int32
+          example: 500
+        title:
+          type: string
+          description: Short human-readable summary of the problem.
+        type:
+          type: string
+          description: A URL to a page with more details regarding the problem.
+      description: A "problem detail" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)
+    RootParentResource:
+      title: RootParentResource
+      type: object
+      properties:
+        description:
+          type: string
+          description: swagger.external_api.institutions.model.parentDescription
+        id:
+          type: string
+          description: Institution's unique internal Id
+    PspDataResource:
+      title: PspDataResource
+      type: object
+      properties:
+        abiCode:
+          type: string
+          description: PSP's ABI code
+        businessRegisterNumber:
+          type: string
+          description: PSP's Business Register number
+        legalRegisterName:
+          type: string
+          description: PSP's legal register name
+        legalRegisterNumber:
+          type: string
+          description: PSP's legal register number
+        vatNumberGroup:
+          type: boolean
+          description: PSP's Vat Number group
+          example: false
+    PaymentServiceProvider:
+      type: object
+      properties:
+        abiCode:
+          type: string
+          description: ABI Code
+        businessRegisterNumber:
+          type: string
+          description: ID Registration Number on Business Register
+        legalRegisterName:
+          type: string
+          description: Chairman name on Business Register
+        legalRegisterNumber:
+          type: string
+          description: Chairman ID on Business Register
+        vatNumberGroup:
+          type: boolean
+          description: true when vat number identify a group
+      additionalProperties: false
+    DataProtectionOfficer:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Data protection officer address
+        email:
+          type: string
+          description: Data protection officer email
+        pec:
+          type: string
+          description: Data protection officer digital address
+      additionalProperties: false
+    GeographicTaxonomy:
+      required:
+        - code
+        - desc
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code of the geographic taxonomy
+        desc:
+          type: string
+          description: Description of the geographic taxonomy code
+      additionalProperties: false
+    InvalidParam:
+      title: InvalidParam
+      required:
+        - name
+        - reason
+      type: object
+      properties:
+        name:
+          type: string
+          description: Invalid parameter name.
+        reason:
+          type: string
+          description: Invalid parameter reason.
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: subscription-key
+      in: query
+security:
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
+tags:
+  - name: institutions
+    description: Institution Controller
+  - name: product
+    description: Product Controller
