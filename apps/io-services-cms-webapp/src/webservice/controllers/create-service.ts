@@ -78,7 +78,7 @@ type Dependencies = {
   telemetryClient: ReturnType<typeof initAppInsights>;
 };
 
-// TODO: refactor: move to common package (also used by backoffice)
+// TODO: refactor: move to common package (also used by backoffice, see auth.ts)
 // utility to extract a non-empty id from an object
 const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
   pipe(
@@ -108,7 +108,7 @@ const createSubscriptionTask = (
     TE.chain(pickId)
   );
 
-  // TODO: refactor: move to common package (also used by backoffice)
+  // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
   const getProductId = pipe(
     apimService.getProductByName(config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME),
     TE.mapLeft(

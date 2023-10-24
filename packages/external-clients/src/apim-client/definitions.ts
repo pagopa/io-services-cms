@@ -18,5 +18,3 @@ export enum ApiKeyTypeEnum {
 }
 
 export const MANAGE_APIKEY_PREFIX = "MANAGE-";
-
-export { SubscriptionContract } from "@azure/arm-apimanagement";
