@@ -50,4 +50,5 @@ export enum EventNameEnum {
   PublishService = "publish",
   RegenerateServiceKeys = "keys.regenerate",
   UnpublishService = "unpublish",
+  UploadServiceLogo = "logo.put",
 }

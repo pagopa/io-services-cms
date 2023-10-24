@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { buildHandlers as apimHandlers } from "./apim-handlers";
 import { buildHandlers as backendHandlers } from "./backend-handlers";
 import { buildHandlers as cdnHandlers } from "./cdn-handlers";
@@ -5,10 +6,20 @@ import { buildHandlers as selfcareHandlers } from "./selfcare-handlers";
 import { buildHandlers as servicesCmsHandlers } from "./services-cms-handlers";
 
 /** List of handlers managed by MSW */
-export const getHandlers = () => [
-  ...backendHandlers(),
-  ...servicesCmsHandlers(),
-  ...selfcareHandlers(),
-  ...apimHandlers(),
-  ...cdnHandlers()
-];
+export const getHandlers = () => {
+  const config = getConfiguration();
+  const handlers = cdnHandlers();
+  if (config.API_BACKEND_MOCKING) {
+    handlers.push(...backendHandlers());
+  }
+  if (config.API_SERVICES_CMS_MOCKING) {
+    handlers.push(...servicesCmsHandlers());
+  }
+  if (config.SELFCARE_API_MOCKING) {
+    handlers.push(...selfcareHandlers());
+  }
+  if (config.API_APIM_MOCKING) {
+    handlers.push(...apimHandlers());
+  }
+  return handlers;
+};

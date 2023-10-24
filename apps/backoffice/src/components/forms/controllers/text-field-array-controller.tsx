@@ -2,7 +2,6 @@ import { Add, Delete, Edit, ErrorOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Grid,
   InputAdornment,
   Stack,
   TextField,
@@ -91,7 +90,7 @@ export function TextFieldArrayController({
 
   /** shows generic or detailed error message based on `showGenericErrorMessage` prop */
   const showErrorMessage = (message: any) =>
-    showGenericErrorMessage ? t("forms.errors.invalidField") : message;
+    showGenericErrorMessage ? t("forms.errors.field.invalid") : message;
 
   useEffect(() => {
     setRenderedFields(initializeFieldsStatus());

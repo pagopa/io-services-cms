@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.4
+
+### Patch Changes
+
+- ed50a11: ADD Upload service logo API
+
 ## 1.21.3
 
 ### Patch Changes

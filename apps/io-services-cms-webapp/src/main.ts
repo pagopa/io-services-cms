@@ -15,6 +15,7 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { createBlobService } from "azure-storage";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
@@ -106,6 +107,8 @@ const legacyServicesContainer = cosmosdbClient
 
 const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 
+const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
+
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
@@ -116,6 +119,7 @@ export const httpEntryPoint = pipe(
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient,
+    blobService,
   },
   createWebServer,
   expressToAzureFunction
