@@ -40,6 +40,7 @@ export type Configuration = {
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   AZURE_APIM_RESOURCE_GROUP: string;
   AZURE_APIM: string;
+  APIM_USER_GROUPS: string;
   API_APIM_MOCKING: boolean;
 
   BACKOFFICE_DOMAIN: string;
@@ -98,7 +99,7 @@ export function getConfiguration(): Configuration {
 
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
     AZURE_APIM: process.env.AZURE_APIM as string, //FIXME: fix cast
-
+    APIM_USER_GROUPS: process.env.APIM_USER_GROUPS as string, //FIXME: fix cast
     API_APIM_MOCKING: process.env.API_APIM_MOCKING === "true",
 
     BACKOFFICE_DOMAIN: process.env.BACKOFFICE_DOMAIN as string,

@@ -8,8 +8,6 @@ import { rest } from "msw";
 import { aMockErrorResponse } from "../data/common-data";
 import { aWellKnown } from "../data/selfcare-data";
 
-const MAX_ARRAY_LENGTH = 20;
-
 faker.seed(1);
 
 export const buildHandlers = () => {
