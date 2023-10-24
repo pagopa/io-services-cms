@@ -1,7 +1,4 @@
-import {
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_NOT_FOUND
-} from "@/config/constants";
+import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
 import {
   InstitutionNotFoundError,
   handleInternalErrorResponse

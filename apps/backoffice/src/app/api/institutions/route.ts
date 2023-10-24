@@ -1,9 +1,8 @@
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@/config/constants";
+import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { retireveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { handleInternalErrorResponse } from "@/lib/be/errors";
 
 /**
  * @description Retrieves all the onboarded institutions related
