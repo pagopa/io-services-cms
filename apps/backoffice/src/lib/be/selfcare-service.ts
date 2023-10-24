@@ -4,6 +4,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
@@ -17,17 +18,7 @@ const Config = t.type({
   SELFCARE_API_MOCKING: BooleanFromString
 });
 
-type InstitutionResourcesResponse = {
-  value: InstitutionResources;
-  status: number;
-};
-
-type InstitutionResponse = {
-  value: Institution;
-  status: number;
-};
-
-const getSelfcareConfig = () => {
+const getSelfcareConfig = cache(() => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -36,7 +27,7 @@ const getSelfcareConfig = () => {
     });
   }
   return result.right;
-};
+});
 
 const getSelfcareClient = () => {
   const configuration = getSelfcareConfig();
@@ -57,59 +48,17 @@ export const getSelfcareService = cache(() => {
   const configuration = getSelfcareConfig();
   const selfcareClient = getSelfcareClient();
 
-  const getUserAuthorizedInstitutions = (
-    userIdForAuth: string
-  ): TE.TaskEither<Error, InstitutionResourcesResponse> =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          selfcareClient.getInstitutionsUsingGET({
-            apiKeyHeader: configuration.SELFCARE_API_KEY,
-            userIdForAuth
-          }),
-        E.toError
-      ),
-      TE.chain(
-        flow(
-          E.chainW(responseContent =>
-            pipe(
-              responseContent.value,
-              InstitutionResources.decode,
-              E.map(value => ({
-                value,
-                status: responseContent.status
-              }))
-            )
-          ),
-          E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
-    );
+  const getUserAuthorizedInstitutions = (userIdForAuth: string) =>
+    selfcareClient.getInstitutionsUsingGET({
+      apiKeyHeader: configuration.SELFCARE_API_KEY,
+      userIdForAuth
+    });
 
-  const getInstitutionById = (
-    id: string
-  ): TE.TaskEither<Error, InstitutionResponse> =>
-    pipe(
-      TE.tryCatch(
-        () =>
-          selfcareClient.getInstitution({
-            apiKeyHeader: configuration.SELFCARE_API_KEY,
-            id
-          }),
-        E.toError
-      ),
-      TE.chain(
-        flow(
-          E.map(responseContent => ({
-            value: responseContent.value,
-            status: responseContent.status
-          })),
-          E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
-    );
+  const getInstitutionById = (id: string) =>
+    selfcareClient.getInstitution({
+      apiKeyHeader: configuration.SELFCARE_API_KEY,
+      id
+    });
 
   return {
     getUserAuthorizedInstitutions,

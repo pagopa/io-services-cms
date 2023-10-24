@@ -2,8 +2,11 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND
 } from "@/config/constants";
-import { InstitutionNotFoundError } from "@/lib/be/errors";
-import { getInstitutionById } from "@/lib/be/institutions/business";
+import {
+  InstitutionNotFoundError,
+  handleInternalErrorResponse
+} from "@/lib/be/errors";
+import { retieveInstitution } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
@@ -21,7 +24,7 @@ export const GET = withJWTAuthHandler(
   ) => {
     try {
       // TODO: check if the user is authorized to access the request institution
-      const institutionResponse = getInstitutionById(params.institutionId);
+      const institutionResponse = retieveInstitution(params.institutionId);
       return NextResponse.json(institutionResponse);
     } catch (error) {
       console.error(
@@ -40,14 +43,7 @@ export const GET = withJWTAuthHandler(
         );
       }
 
-      return NextResponse.json(
-        {
-          title: "InstitutionRetrieveError",
-          status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
-          detail: "Something went wrong"
-        },
-        { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
-      );
+      return handleInternalErrorResponse("InstitutionRetrieveError", error);
     }
   }
 );

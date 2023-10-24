@@ -2,62 +2,60 @@ import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
 import { getSelfcareService } from "@/lib/be/selfcare-service";
 
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
-import { Institution as SelfcareInstitution } from "@/lib/be/selfcare/Institution";
-import { InstitutionResources } from "@/lib/be/selfcare/InstitutionResource";
-import * as E from "fp-ts/lib/Either";
+import {
+  InstitutionResource,
+  InstitutionResources
+} from "@/lib/be/selfcare/InstitutionResource";
 import { InstitutionNotFoundError } from "../errors";
+import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
+import { pipe } from "fp-ts/lib/function";
 
-export const getUserAuthorizedInstitutions = async (
+export const retireveUserAuthorizedInstitutions = async (
   selfCareUserId: string
 ): Promise<InstitutionResources> => {
-  const callResult = await getSelfcareService().getUserAuthorizedInstitutions(
-    selfCareUserId
-  )();
-
-  if (E.isLeft(callResult)) {
-    throw callResult.left;
-  }
-
-  return callResult.right.value;
+  const apiResult = await getUserAuthorizedInstitutions(selfCareUserId);
+  return apiResult.map(toInstitution);
 };
-export const getInstitutionById = async (
+export const retieveInstitution = async (
   institutionId: string
-): Promise<SelfcareInstitution> => {
-  const callResult = await getSelfcareService().getInstitutionById(
-    institutionId
-  )();
-
-  if (E.isLeft(callResult)) {
-    throw callResult.left;
-  }
-
-  const { value, status } = callResult.right;
-  if (status === HTTP_STATUS_NOT_FOUND) {
-    throw new InstitutionNotFoundError(
-      `Institution having id '${institutionId} does not exists`
-    );
-  }
-
-  return value;
+): Promise<BackofficeInstitution> => {
+  return getInstitutionById(institutionId);
 };
 
-const selfcareToBackofficeInstitution = (
-  selfcareInstitution: SelfcareInstitution
+const toInstitution = (
+  institutionResource: InstitutionResource
 ): BackofficeInstitution => ({
-  address: selfcareInstitution.address,
-  externalId: selfcareInstitution.externalId,
-  fiscalCode: selfcareInstitution.taxCode,
-  id: selfcareInstitution.id,
-  mailAddress: selfcareInstitution.supportEmail,
-  name: selfcareInstitution.description,
-  origin: selfcareInstitution.origin,
-  originId: selfcareInstitution.originId,
-  status: selfcareInstitution.status,
-  userProductRoles: selfcareInstitution.userProductRoles,
-  assistanceContacts: selfcareInstitution.assistanceContacts,
-  companyInformations: selfcareInstitution.companyInformations,
-  dpoData: selfcareInstitution.dpoData,
-  institutionType: selfcareInstitution.institutionType,
-  pspData: selfcareInstitution.pspData,
-  recipientCode: selfcareInstitution.recipientCode
+  id: institutionResource.id,
+  externalId: institutionResource.externalId,
+  originId: institutionResource.originId,
+  description: institutionResource.description,
+  mailAddress: pipe(
+    institutionResource.digitalAddress,
+    EmailString.decode,
+    O.fromEither,
+    O.toUndefined
+  ),
+  address: institutionResource.address,
+  zipCode: institutionResource.zipCode,
+  taxCode: institutionResource.taxCode,
+  origin: institutionResource.origin,
+  institutionType: institutionResource.institutionType,
+  //attributes: institutionResource.attributes,
+  paymentServiceProvider: institutionResource.pspData,
+  dataProtectionOfficer: institutionResource.dpoData,
+  //geographicTaxonomies: institutionResource.geographicTaxonomies,
+  rea: institutionResource.companyInformations?.rea,
+  shareCapital: institutionResource.companyInformations?.shareCapital,
+  businessRegisterPlace:
+    institutionResource.companyInformations?.businessRegisterPlace,
+  supportEmail: institutionResource.assistanceContacts?.supportEmail,
+  supportPhone: institutionResource.assistanceContacts?.supportPhone,
+  //imported: institutionResource.imported,
+  //logo: institutionResource.logo,
+  subunitCode: institutionResource.subunitCode,
+  subunitType: institutionResource.subunitType,
+  aooParentCode: institutionResource.aooParentCode,
+  rootParent: institutionResource.rootParent
 });
