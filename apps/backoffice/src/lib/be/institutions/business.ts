@@ -1,16 +1,12 @@
-import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
-import { getSelfcareService } from "@/lib/be/selfcare-service";
-
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import {
   InstitutionResource,
   InstitutionResources
-} from "@/lib/be/selfcare/InstitutionResource";
-import { InstitutionNotFoundError } from "../errors";
-import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
+} from "@/types/selfcare/InstitutionResource";
 import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
+import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
 
 export const retireveUserAuthorizedInstitutions = async (
   selfCareUserId: string
@@ -21,7 +17,7 @@ export const retireveUserAuthorizedInstitutions = async (
 export const retieveInstitution = async (
   institutionId: string
 ): Promise<BackofficeInstitution> => {
-  return getInstitutionById(institutionId);
+  return await getInstitutionById(institutionId);
 };
 
 const toInstitution = (

@@ -24,7 +24,9 @@ export const GET = withJWTAuthHandler(
   ) => {
     try {
       // TODO: check if the user is authorized to access the request institution
-      const institutionResponse = retieveInstitution(params.institutionId);
+      const institutionResponse = await retieveInstitution(
+        params.institutionId
+      );
       return NextResponse.json(institutionResponse);
     } catch (error) {
       console.error(

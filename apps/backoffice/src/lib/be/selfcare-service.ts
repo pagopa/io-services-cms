@@ -1,15 +1,16 @@
-import { createClient } from "@/lib/be/selfcare/client";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import axios, { AxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as O from "fp-ts/lib/Option";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
-import { Institution } from "./selfcare/Institution";
-import { InstitutionResources } from "./selfcare/InstitutionResource";
+import { Institution } from "../../types/selfcare/Institution";
+import { InstitutionResources } from "../../types/selfcare/InstitutionResource";
+
+const institutionsApi = "/institutions";
 
 const Config = t.type({
   SELFCARE_BASE_URL: NonEmptyString,
@@ -29,36 +30,81 @@ const getSelfcareConfig = cache(() => {
   return result.right;
 });
 
-const getSelfcareClient = () => {
+export const getSelfcareClient = cache(() => {
   const configuration = getSelfcareConfig();
+  const endpoint = `${configuration.SELFCARE_BASE_URL}/${configuration.SELFCARE_BASE_PATH}`;
 
   if (configuration.SELFCARE_API_MOCKING) {
     const { setupMocks } = require("../../../mocks");
     setupMocks();
   }
 
-  return createClient({
-    baseUrl: configuration.SELFCARE_BASE_URL,
-    fetchApi: (fetch as any) as typeof fetch,
-    basePath: configuration.SELFCARE_BASE_PATH
-  });
-};
+  const getUserAuthorizedInstitutions = (
+    userIdForAuth: string
+  ): TE.TaskEither<Error, InstitutionResources> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axios.get(`${endpoint}${institutionsApi}`, {
+            params: {
+              userIdForAuth
+            },
+            headers: {
+              "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY
+            }
+          }),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(e.message);
+        } else {
+          return new Error(
+            `Error calling selfcare getUserAuthorizedInstitutions API: ${e}`
+          );
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          InstitutionResources.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
 
-export const getSelfcareService = cache(() => {
-  const configuration = getSelfcareConfig();
-  const selfcareClient = getSelfcareClient();
-
-  const getUserAuthorizedInstitutions = (userIdForAuth: string) =>
-    selfcareClient.getInstitutionsUsingGET({
-      apiKeyHeader: configuration.SELFCARE_API_KEY,
-      userIdForAuth
-    });
-
-  const getInstitutionById = (id: string) =>
-    selfcareClient.getInstitution({
-      apiKeyHeader: configuration.SELFCARE_API_KEY,
-      id
-    });
+  const getInstitutionById = (
+    id: string
+  ): TE.TaskEither<Error | AxiosError, Institution> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axios.get(`${endpoint}${institutionsApi}/${id}`, {
+            headers: {
+              "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY
+            }
+          }),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return e;
+        } else {
+          return new Error(
+            `Error calling selfcare getInstitutionById API: ${e}`
+          );
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          Institution.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
 
   return {
     getUserAuthorizedInstitutions,
