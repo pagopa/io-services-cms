@@ -3,7 +3,7 @@ import {
   InstitutionNotFoundError,
   handleInternalErrorResponse
 } from "@/lib/be/errors";
-import { retieveInstitution } from "@/lib/be/institutions/business";
+import { retrieveInstitution } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
@@ -20,8 +20,7 @@ export const GET = withJWTAuthHandler(
     }: { params: { institutionId: string }; backofficeUser: BackOfficeUser }
   ) => {
     try {
-      // TODO: check if the user is authorized to access the request institution
-      const institutionResponse = await retieveInstitution(
+      const institutionResponse = await retrieveInstitution(
         params.institutionId
       );
       return NextResponse.json(institutionResponse);

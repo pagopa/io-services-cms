@@ -1,5 +1,5 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { retireveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
+import { retrieveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
@@ -14,7 +14,7 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      const institutionResponse = await retireveUserAuthorizedInstitutions(
+      const institutionResponse = await retrieveUserAuthorizedInstitutions(
         backofficeUser.id
       );
       return NextResponse.json(institutionResponse);

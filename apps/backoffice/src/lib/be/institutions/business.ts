@@ -8,13 +8,13 @@ import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
 
-export const retireveUserAuthorizedInstitutions = async (
+export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string
 ): Promise<InstitutionResources> => {
   const apiResult = await getUserAuthorizedInstitutions(selfCareUserId);
   return apiResult.map(toInstitution);
 };
-export const retieveInstitution = async (
+export const retrieveInstitution = async (
   institutionId: string
 ): Promise<BackofficeInstitution> => {
   return await getInstitutionById(institutionId);
