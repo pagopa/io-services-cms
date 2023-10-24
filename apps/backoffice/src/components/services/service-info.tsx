@@ -55,23 +55,23 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   const rowsLinksContacts: CardRowType[] = [
     {
       label: "routes.service.privacyUrl",
-      value: data?.metadata.privacyUrl,
+      value: data?.metadata.privacy_url,
       kind: "link"
     },
     {
       label: "routes.service.tosUrl",
-      value: data?.metadata.tosUrl,
+      value: data?.metadata.tos_url,
       kind: "link"
     },
     { label: "routes.service.phone", value: data?.metadata.phone },
     {
       label: "routes.service.supportUrl",
-      value: data?.metadata.supportUrl,
+      value: data?.metadata.support_url,
       kind: "link"
     },
     {
       label: "routes.service.webUrl",
-      value: data?.metadata.webUrl,
+      value: data?.metadata.web_url,
       kind: "link"
     },
     { label: "routes.service.address", value: data?.metadata.address },
@@ -79,12 +79,12 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
     { label: "routes.service.pec", value: data?.metadata.pec },
     {
       label: "routes.service.appIos",
-      value: data?.metadata.appIos,
+      value: data?.metadata.app_ios,
       kind: "link"
     },
     {
       label: "routes.service.appAndroid",
-      value: data?.metadata.appAndroid,
+      value: data?.metadata.app_android,
       kind: "link"
     }
   ];
