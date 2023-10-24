@@ -208,7 +208,8 @@
     },
     "services": {
       "title": "Services",
-      "description": "View and manage your institution's services."
+      "description": "View and manage your institution's services.",
+      "empty": "There are no services for this institution yet."
     },
     "service": {
       "address": "Address",
@@ -263,6 +264,7 @@
   },
   "service": {
     "actions": {
+      "create": "Create a service",
       "delete": "Delete",
       "edit": "Edit",
       "history": "View service history",
