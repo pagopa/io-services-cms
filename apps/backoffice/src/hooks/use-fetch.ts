@@ -1,3 +1,4 @@
+import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
 import { Client, WithDefaultsT, createClient } from "@/generated/api/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -152,19 +153,16 @@ const useFetch = <RC>() => {
       : error?.message ?? "";
 
   const buildNotification = () => {
-    enqueueSnackbar({
-      variant: "custom",
-      anchorOrigin: {
-        vertical: "top",
-        horizontal: "right"
-      },
-      severity: error === undefined ? "success" : "error",
-      title:
-        error === undefined
-          ? t("notifications.success")
-          : t(`notifications.${error?.kind as string}`),
-      message: buildNotificationMessage()
-    } as any);
+    enqueueSnackbar(
+      buildSnackbarItem({
+        severity: error === undefined ? "success" : "error",
+        title:
+          error === undefined
+            ? t("notifications.success")
+            : t(`notifications.${error?.kind as string}`),
+        message: buildNotificationMessage()
+      })
+    );
   };
 
   /** Shows a snackbar alert based on `notifications` param value */
