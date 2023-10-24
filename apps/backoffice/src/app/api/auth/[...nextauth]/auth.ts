@@ -1,18 +1,19 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
-import { ApimUtils } from "@io-services-cms/external-clients";
+import { ApimUtils, definitions } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 import { ulid } from "ulid";
-import { ApimUser, IdentityTokenPayload } from "../types";
+import { ApimUser, IdentityTokenPayload, Subscription } from "../types";
 
 if (
   getConfiguration().SELFCARE_API_MOCKING ||
@@ -35,6 +36,9 @@ export const authorize = (
     TE.bindTo("identityTokenPayload"),
     TE.bind("apimUser", ({ identityTokenPayload }) =>
       retrieveOrCreateApimUser(config)(identityTokenPayload)
+    ),
+    TE.bind("subscriptionManage", ({ apimUser }) =>
+      retrieveOrCreateUserSubscriptionManage(config)(apimUser)
     ),
     TE.map(toUser(config)),
     TE.getOrElse(e => {
@@ -185,12 +189,132 @@ const createApimUser = (
     TE.map(_ => void 0)
   );
 
+const retrieveOrCreateUserSubscriptionManage = (config: Configuration) => (
+  apimUser: ApimUser
+): TE.TaskEither<Error, Subscription> =>
+  pipe(
+    apimUser,
+    E.fromPredicate(
+      apimUser =>
+        apimUser.groups.some(group => group.name === "ApiServiceWrite"), // TODO: is this a useful check? What about users (not the new ones) without this permission?!
+      () => new Error("Forbidden not authorized") // TODO: if possible, raise a specific error in order to manage it and return a 403 error status code
+    ),
+    TE.fromEither,
+    TE.chain(getUserSubscriptionManage(config)),
+    TE.chain(
+      flow(
+        O.fold(() => pipe(apimUser, createSubscriptionManage(config)), TE.right)
+      )
+    ),
+    TE.chain(subscriptionManage =>
+      pipe(
+        subscriptionManage.name,
+        Subscription.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither
+      )
+    )
+  );
+
+const getUserSubscriptionManage = (config: Configuration) => (
+  apimUser: ApimUser
+): TE.TaskEither<Error, O.Option<definitions.SubscriptionContract>> =>
+  pipe(
+    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
+    apimClient =>
+      ApimUtils.getApimService(
+        apimClient,
+        config.AZURE_APIM_RESOURCE_GROUP,
+        config.AZURE_APIM
+      ),
+    apimService =>
+      apimService.getSubscription(
+        definitions.MANAGE_APIKEY_PREFIX + apimUser.name
+      ),
+    TE.foldW(
+      flow(
+        err =>
+          err.statusCode === 404
+            ? E.right(O.none)
+            : E.left(
+                new Error(
+                  `Failed to fetch user subscription manage, code: ${err.statusCode}`
+                )
+              ),
+        TE.fromEither
+      ),
+      flow(O.some, TE.right)
+    )
+  );
+
+const createSubscriptionManage = (config: Configuration) => (
+  apimUser: ApimUser
+): TE.TaskEither<Error, definitions.SubscriptionContract> =>
+  pipe(
+    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
+    apimClient =>
+      ApimUtils.getApimService(
+        apimClient,
+        config.AZURE_APIM_RESOURCE_GROUP,
+        config.AZURE_APIM
+      ),
+    apimService =>
+      pipe(
+        getProductId(config, apimService),
+        TE.chain(productId =>
+          pipe(
+            apimService.upsertSubscription(
+              productId,
+              apimUser.name,
+              definitions.MANAGE_APIKEY_PREFIX + apimUser.name
+            ),
+            TE.mapLeft(
+              err =>
+                new Error(
+                  `Failed to create subscription manage, code: ${err.statusCode}`
+                )
+            )
+          )
+        )
+      )
+  );
+
+const getProductId = (
+  config: Configuration,
+  apimService: ReturnType<typeof ApimUtils["getApimService"]>
+) =>
+  pipe(
+    apimService.getProductByName(config.AZURE_APIM_PRODUCT_NAME),
+    TE.mapLeft(
+      err =>
+        new Error(
+          `Failed to fetch product by its name, code: ${err.statusCode}`
+        )
+    ),
+    TE.chain(TE.fromOption(() => new Error(`Cannot find product`))),
+    TE.chain(pickId)
+  );
+
+// utility to extract a non-empty id from an object
+const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
+  pipe(
+    obj,
+    t.type({ id: NonEmptyString }).decode,
+    TE.fromEither,
+    TE.mapLeft(
+      err => new Error(`Cannot decode object to get id, ${readableReport(err)}`)
+    ),
+    TE.map(_ => _.id)
+  );
+
 const toUser = (config: Configuration) => ({
   identityTokenPayload,
-  apimUser
+  apimUser,
+  subscriptionManage
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
+  subscriptionManage: Subscription;
 }): User => ({
   id: identityTokenPayload.uid,
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
@@ -215,6 +339,6 @@ const toUser = (config: Configuration) => ({
   parameters: {
     userId: apimUser.name,
     userEmail: apimUser.email,
-    subscriptionId: config.AZURE_SUBSCRIPTION_ID // TODO: manage subscription id
+    subscriptionId: subscriptionManage.name
   }
 });

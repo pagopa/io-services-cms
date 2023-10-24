@@ -119,3 +119,8 @@ export const ApimUser = t.type({
     })
   )
 });
+
+export type Subscription = t.TypeOf<typeof Subscription>;
+export const Subscription = t.type({
+  name: NonEmptyString
+});
