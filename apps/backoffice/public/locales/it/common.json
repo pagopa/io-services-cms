@@ -208,7 +208,8 @@
     },
     "services": {
       "title": "Servizi",
-      "description": "Visualizza e gestisci i servizi del tuo ente."
+      "description": "Visualizza e gestisci i servizi del tuo ente.",
+      "empty": "Non ci sono ancora servizi per questo ente."
     },
     "service": {
       "address": "Indirizzo",
@@ -263,6 +264,7 @@
   },
   "service": {
     "actions": {
+      "create": "Crea un servizio",
       "delete": "Elimina",
       "edit": "Modifica",
       "history": "Vedi storia del servizio",
