@@ -1,9 +1,18 @@
 import { PageHeader } from "@/components/headers";
+import { buildSnackbarItem } from "@/components/notification";
+import { fromServiceCreateUpdatePayloadToApiServicePayload } from "@/components/services";
 import { ServiceCreateUpdate } from "@/components/services/service-create-update";
+import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
+import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ServicePayload } from "@/types/service";
+import { ServiceCreateUpdatePayload } from "@/types/service";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as E from "fp-ts/lib/Either";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useRouter } from "next/router";
+import { useSnackbar } from "notistack";
 import { ReactElement } from "react";
 
 const pageTitleLocaleKey = "routes.new-service.title";
@@ -11,10 +20,36 @@ const pageDescriptionLocaleKey = "routes.new-service.description";
 
 export default function NewService() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { enqueueSnackbar } = useSnackbar();
+  const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
-  const handleConfirm = (service: ServicePayload) => {
-    console.log("service", service);
-    // TODO conversion from FE ServicePayload to API ServicePayload
+  const handleConfirm = (service: ServiceCreateUpdatePayload) => {
+    const maybeServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
+      service,
+      session?.user
+    );
+    if (E.isRight(maybeServicePayload)) {
+      serviceFetchData(
+        "createService",
+        {
+          body: maybeServicePayload.right
+        },
+        ServiceLifecycle,
+        { notify: "all" }
+      );
+    } else {
+      enqueueSnackbar(
+        buildSnackbarItem({
+          severity: "error",
+          title: t("notifications.validationError"),
+          message: readableReport(maybeServicePayload.left)
+        })
+      );
+    }
+    // redirect to services list in both cases
+    router.push("/services");
   };
 
   return (

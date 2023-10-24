@@ -32,7 +32,7 @@ const getSingleAssistanceChannelSchema = (
       value: z.string().regex(regexPhone, t("forms.errors.field.phone"))
     }),
     z.object({
-      type: z.literal("supportUrl"),
+      type: z.literal("support_url"),
       value: z.string().url(t("forms.errors.field.url"))
     })
   ]);
@@ -60,10 +60,10 @@ const getAssistanceChannelsSchema = (t: TFunction<"translation", undefined>) =>
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z
     .object({
-      requireSecureChannel: z.boolean(),
+      require_secure_channel: z.boolean(),
       metadata: z.object({
-        privacyUrl: z.string().url(t("forms.errors.field.url")),
-        tosUrl: z.union([
+        privacy_url: z.string().url(t("forms.errors.field.url")),
+        tos_url: z.union([
           z.literal(""),
           z
             .string()
@@ -71,21 +71,21 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
             .url(t("forms.errors.field.url"))
         ]),
         assistanceChannels: getAssistanceChannelsSchema(t),
-        webUrl: z.union([
+        web_url: z.union([
           z.literal(""),
           z
             .string()
             .trim()
             .url(t("forms.errors.field.url"))
         ]),
-        appAndroid: z.union([
+        app_android: z.union([
           z.literal(""),
           z
             .string()
             .trim()
             .url(t("forms.errors.field.url"))
         ]),
-        appIos: z.union([
+        app_ios: z.union([
           z.literal(""),
           z
             .string()
@@ -96,11 +96,12 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     })
     .refine(
       schema =>
-        schema.requireSecureChannel === false ||
-        (schema.requireSecureChannel === true && schema.metadata.tosUrl !== ""),
+        schema.require_secure_channel === false ||
+        (schema.require_secure_channel === true &&
+          schema.metadata.tos_url !== ""),
       {
         message: t("forms.errors.field.privacyCritical"),
-        path: ["metadata.tosUrl"]
+        path: ["metadata.tos_url"]
       }
     );
 
@@ -108,7 +109,7 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
 export const ServiceBuilderStep2 = () => {
   const { t } = useTranslation();
   const { watch } = useFormContext();
-  const requiredTosUrl = watch("requireSecureChannel");
+  const requiredTosUrl = watch("require_secure_channel");
 
   return (
     <>
@@ -119,19 +120,19 @@ export const ServiceBuilderStep2 = () => {
       >
         <UrlFieldController
           required
-          name="metadata.privacyUrl"
+          name="metadata.privacy_url"
           label={t("forms.service.metadata.privacyUrl.label")}
           placeholder={t("forms.service.metadata.privacyUrl.placeholder")}
         />
         <SwitchController
-          name="requireSecureChannel"
+          name="require_secure_channel"
           label={t("forms.service.requireSecureChannel.label")}
           helperText={t("forms.service.requireSecureChannel.helperText")}
         />
         {requiredTosUrl ? (
           <UrlFieldController
             required={requiredTosUrl}
-            name="metadata.tosUrl"
+            name="metadata.tos_url"
             label={t("forms.service.metadata.tosUrl.label")}
             placeholder={t("forms.service.metadata.tosUrl.placeholder")}
           />
@@ -150,17 +151,17 @@ export const ServiceBuilderStep2 = () => {
         icon={<MobileScreenShareIcon />}
       >
         <UrlFieldController
-          name="metadata.webUrl"
+          name="metadata.web_url"
           label={t("forms.service.metadata.webUrl.label")}
           placeholder={t("forms.service.metadata.webUrl.placeholder")}
         />
         <UrlFieldController
-          name="metadata.appAndroid"
+          name="metadata.app_android"
           label={t("forms.service.metadata.appAndroid.label")}
           placeholder={t("forms.service.metadata.appAndroid.placeholder")}
         />
         <UrlFieldController
-          name="metadata.appIos"
+          name="metadata.app_ios"
           label={t("forms.service.metadata.appIos.label")}
           placeholder={t("forms.service.metadata.appIos.placeholder")}
         />
