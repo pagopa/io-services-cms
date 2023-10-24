@@ -2701,6 +2701,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.14.200":
+  version: 4.14.200
+  resolution: "@types/lodash@npm:4.14.200"
+  checksum: 6471f8bb5da692a6ecf03a8da4935bfbc341e67ee9bcb4f5730bfacff0c367232548f0a01e8ac5ea18c6fe78fb085d502494e33ccb47a7ee87cbdee03b47d00d
+  languageName: node
+  linkType: hard
+
 "@types/mime@npm:*":
   version: 3.0.1
   resolution: "@types/mime@npm:3.0.1"
@@ -7724,6 +7731,7 @@ __metadata:
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@testing-library/jest-dom": ^6.1.3
     "@testing-library/react": ^14.0.0
+    "@types/lodash": ^4.14.200
     "@types/node": 20.4.5
     "@types/react": 18.2.18
     "@types/react-dom": 18.2.7
@@ -7737,6 +7745,7 @@ __metadata:
     io-ts: ^2.2.20
     jose: ^4.15.2
     jsdom: ^22.1.0
+    lodash: ^4.17.21
     msw: ^1.2.5
     next: ^13.5.3
     next-auth: ^4.23.2

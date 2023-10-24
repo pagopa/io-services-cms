@@ -403,7 +403,7 @@ export function getGetServicesMigrationDetails200Response() {
 }
 
 export function getCreateService201Response() {
-  return getMockServiceLifecycle;
+  return getMockServiceLifecycle();
 }
 
 export function getGetServices200Response() {
