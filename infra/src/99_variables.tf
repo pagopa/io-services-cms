@@ -299,7 +299,8 @@ variable "userid_automatic_service_approval_inclusion_list" {
 
 variable "backoffice_app" {
   type = object({
-    sku_name = string
+    sku_name           = string
+    selfcare_base_path = string
   })
   description = "Configuration of the io-services-cms-backoffice service"
 }
