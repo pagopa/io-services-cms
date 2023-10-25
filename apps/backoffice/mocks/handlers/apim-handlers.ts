@@ -6,7 +6,6 @@ import { getConfiguration } from "@/config";
 import { rest } from "msw";
 import {
   aListSecretsResponse,
-  anEmptyListByServiceResponse,
   anOauth2TokenResponse,
   getDiscoveryInstanceResponse,
   getListByServiceResponse,
