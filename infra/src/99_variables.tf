@@ -301,6 +301,7 @@ variable "backoffice_app" {
   type = object({
     sku_name           = string
     selfcare_base_path = string
+    apim_user_groups   = string
   })
   description = "Configuration of the io-services-cms-backoffice service"
 }

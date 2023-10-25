@@ -3,11 +3,16 @@ locals {
   backoffice_health_check_path = "/api/info"
   backoffice_app_settings = merge({
     NODE_ENV = "production"
+    # Azure
+    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
+    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
+    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
     # Apim connection
     AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
     AZURE_APIM                = data.azurerm_api_management.apim_v2.name
     AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
     AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_v2_product_services.product_id
+    APIM_USER_GROUPS          = var.backoffice_app.apim_user_groups
     # Logs
     APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
     # NextAuthJS
@@ -16,6 +21,11 @@ locals {
 
     SELFCARE_API_KEY   = data.azurerm_key_vault_secret.selfcare_api_key.value
     SELFCARE_BASE_PATH = var.backoffice_app.selfcare_base_path
+
+    # Legacy source data
+    LEGACY_COSMOSDB_CONNECTIONSTRING = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
+    LEGACY_COSMOSDB_NAME             = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI              = var.legacy_cosmosdb_uri
   })
 }
 

@@ -81,4 +81,5 @@ userid_automatic_service_approval_inclusion_list = ""
 backoffice_app = {
   sku_name           = "S1" # FIXME: use "P1v3" before "production launch"
   selfcare_base_path = "external/v2"
+  apim_user_groups   = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
 }
