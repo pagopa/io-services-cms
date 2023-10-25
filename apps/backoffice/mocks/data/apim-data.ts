@@ -85,7 +85,7 @@ export const getListByServiceResponse = (
     nextLink: ""
   };
 };
-const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
+export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
   getUser(params);
 
 const getUser = ({
