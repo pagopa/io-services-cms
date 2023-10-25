@@ -21,50 +21,79 @@ export const aWellKnown = {
   ]
 };
 
-export const getMockInstitution = () => ({
-  address: faker.location.streetAddress(true),
-  assistanceContacts: {
-    supportEmail: faker.internet.email(),
-    supportPhone: faker.phone.number()
-  },
-  companyInformations: {
-    businessRegisterPlace: faker.lorem.slug(1),
-    rea: faker.lorem.slug(1),
-    shareCapital: faker.lorem.slug(1)
-  },
-  dpoData: {
-    address: faker.location.streetAddress(true),
-    email: faker.internet.email(),
-    pec: faker.internet.email()
-  },
+export const getMockInstitution = (institutionId?: string) => ({
+  id: institutionId ?? faker.string.uuid(),
   externalId: faker.string.numeric(11),
-  fiscalCode: faker.string.numeric(11),
-  id: faker.string.uuid(),
-  institutionType: faker.helpers.arrayElement([
-    "GSP",
-    "PA",
-    "PSP",
-    "PT",
-    "SCP"
-  ]),
-  mailAddress: faker.internet.email(),
-  name: faker.company.name(),
-  origin: "SELC",
   originId: faker.string
     .alphanumeric({ length: { min: 5, max: 10 } })
     .toUpperCase(),
-  pspData: {
+  description: faker.company.name(),
+  digitalAddress: faker.internet.email(),
+  address: faker.location.streetAddress(true),
+  zipCode: faker.location.zipCode(),
+  taxCode: faker.string.numeric(11),
+  attributes: [
+    {
+      origin: faker.lorem.slug(1),
+      code: faker.lorem.slug(1),
+      description: faker.lorem.slug(1)
+    }
+  ],
+  origin: "SELC",
+  geographicTaxonomies: [
+    {
+      code: faker.lorem.slug(1),
+      desc: faker.lorem.slug(1)
+    }
+  ],
+  institutionType: faker.helpers.arrayElement([
+    "GSP",
+    "PA",
+    "PG",
+    "PSP",
+    "PT",
+    "SCP",
+    "SA"
+  ]),
+  name: faker.company.name(),
+  paymentServiceProvider: {
     abiCode: faker.string.numeric(5),
     businessRegisterNumber: faker.string.numeric(10),
     legalRegisterName: faker.company.name(),
     legalRegisterNumber: faker.string.numeric(8),
     vatNumberGroup: faker.datatype.boolean()
   },
-  recipientCode: faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
-  status: "ACTIVE",
-  userProductRoles: [
-    ...Array.from(
-      Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
-    )
-  ].map(_ => faker.lorem.slug(1))
+  dataProtectionOfficer: {
+    address: faker.location.streetAddress(true),
+    email: faker.internet.email(),
+    pec: faker.internet.email()
+  },
+  rea: faker.lorem.slug(1),
+  shareCapital: faker.lorem.slug(1),
+  businessRegisterPlace: faker.lorem.slug(1),
+  supportEmail: faker.internet.email(),
+  supportPhone: faker.phone.number(),
+  imported: faker.datatype.boolean(),
+  logo: faker.image.url(),
+  subunitCode: faker.string.numeric(5),
+  subunitType: faker.lorem.slug(1),
+  aooParentCode: faker.string.numeric(5),
+  rootParent: {
+    id: faker.string.uuid(),
+    description: faker.company.name()
+  }
+});
+
+export const getSelfCareProblemResponse = (status: number) => ({
+  status,
+  title: faker.lorem.slug(5),
+  detail: faker.lorem.slug(5),
+  instance: faker.lorem.slug(1),
+  type: faker.lorem.slug(1),
+  invalidParams: [
+    {
+      name: faker.lorem.slug(1),
+      reason: faker.lorem.slug(1)
+    }
+  ]
 });

@@ -79,5 +79,6 @@ userid_automatic_service_approval_inclusion_list = ""
 
 # Backoffice Configurations
 backoffice_app = {
-  sku_name = "S1" # FIXME: use "P1v3" before "production launch"
+  sku_name           = "S1" # FIXME: use "P1v3" before "production launch"
+  selfcare_base_path = "external/v2"
 }
