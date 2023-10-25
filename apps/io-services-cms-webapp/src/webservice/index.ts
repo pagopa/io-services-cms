@@ -235,6 +235,18 @@ export const createWebServer = ({
     )
   );
 
+  router.put(
+    "/services/:serviceId/logotest",
+    pipe(
+      makeUploadServiceLogoHandler({
+        apimService,
+        blobService,
+        telemetryClient,
+      }),
+      applyUploadServiceLogoRequestMiddelwares(subscriptionCIDRsModel)
+    )
+  );
+
   // configure app
   const app = express();
   secureExpressApp(app);
