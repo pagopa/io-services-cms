@@ -8,7 +8,7 @@
     "lint": "turbo run lint --no-daemon --",
     "build": "turbo run build --no-daemon",
     "generate": "turbo run generate --no-daemon",
-    "code-review": "turbo run typecheck lint test",
+    "code-review": "turbo run generate build typecheck lint test",
     "version": "changeset version",
     "release": "changeset tag"
   },
