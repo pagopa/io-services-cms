@@ -1,15 +1,20 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import {
-    SelectController,
-    TextFieldController
+  SelectController,
+  TextFieldController
 } from "@/components/forms/controllers";
 import { ScopeEnum } from "@/generated/api/ServiceMetadata";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { Button, Grid } from "@mui/material";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TFunction } from "i18next";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import * as z from "zod";
+import { ServicePreview } from "..";
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z.object({
@@ -20,7 +25,7 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     description: z
       .string()
       .min(1, { message: t("forms.errors.field.required") })
-      .max(300, { message: t("forms.errors.field.max", { max: 300 }) }),
+      .max(1000, { message: t("forms.errors.field.max", { max: 1000 }) }),
     metadata: z.object({
       scope: z.string(),
       address: z
@@ -33,6 +38,21 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
 /** First step of Service create/update process */
 export const ServiceBuilderStep1 = () => {
   const { t } = useTranslation();
+  const { data: session } = useSession();
+
+  const { watch } = useFormContext();
+  const watchedName = watch("name");
+  const watchedDescription = watch("description");
+
+  const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  useEffect(() => {
+    NonEmptyString.is(watchedName) && NonEmptyString.is(watchedDescription)
+      ? setIsPreviewEnabled(true)
+      : setIsPreviewEnabled(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedName, watchedDescription]);
 
   return (
     <>
@@ -55,7 +75,7 @@ export const ServiceBuilderStep1 = () => {
           }
         />
         <Grid container spacing={2} justifyContent="center" alignItems="center">
-          <Grid item xs={9}>
+          <Grid item xs>
             <TextFieldController
               required
               name="description"
@@ -69,17 +89,17 @@ export const ServiceBuilderStep1 = () => {
                 />
               }
               multiline
-              rows={4}
+              rows={7}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs="auto">
             <Button
               size="small"
               variant="text"
-              disabled={false}
-              onClick={() => console.log("todo preview")}
+              disabled={!isPreviewEnabled}
+              onClick={() => setIsPreviewOpen(true)}
             >
-              {t("Vedi anteprima")}
+              {t("service.preview.button")}
             </Button>
           </Grid>
         </Grid>
@@ -162,6 +182,13 @@ export const ServiceBuilderStep1 = () => {
           disabled
         />
       </FormStepSectionWrapper>
+      <ServicePreview
+        isOpen={isPreviewOpen}
+        name={watchedName}
+        institutionName={session?.user?.institution.name}
+        description={watchedDescription}
+        onChange={setIsPreviewOpen}
+      />
     </>
   );
 };

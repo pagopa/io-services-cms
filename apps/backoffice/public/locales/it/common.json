@@ -20,6 +20,7 @@
   "buttons": {
     "back": "Indietro",
     "cancel": "Annulla",
+    "close": "Chiudi",
     "confirm": "Conferma",
     "copyToClipboard": "Copy to clipboard",
     "createDraft": "Crea bozza",
@@ -350,6 +351,11 @@
     "visibility": {
       "published": "Pubblicato",
       "unpublished": "Nascosto"
+    },
+    "preview": {
+      "title": "Anteprima",
+      "button": "Vedi anteprima",
+      "info": "Ecco come si visualizzerà la descrizione del servizio in app IO."
     }
   },
   "test": "Questo è un test di traduzione"
