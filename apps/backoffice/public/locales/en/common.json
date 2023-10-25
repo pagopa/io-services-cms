@@ -20,6 +20,7 @@
   "buttons": {
     "back": "Back",
     "cancel": "Cancel",
+    "close": "Close",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
     "createDraft": "Create draft",
@@ -350,6 +351,11 @@
     "visibility": {
       "published": "Published",
       "unpublished": "Hidden"
+    },
+    "preview": {
+      "title": "Preview",
+      "button": "See preview",
+      "info": "This is how the service description will be displayed in the IO app."
     }
   },
   "test": "This is a translation test"
