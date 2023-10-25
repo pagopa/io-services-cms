@@ -6,7 +6,6 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-//import { cache } from "react";
 import { Institution } from "../../types/selfcare/Institution";
 import { InstitutionResources } from "../../types/selfcare/InstitutionResource";
 import { cache } from "react";
