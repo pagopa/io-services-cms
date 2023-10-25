@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.5
+
+### Patch Changes
+
+- 808f038: ADD test logo api
+
 ## 1.21.4
 
 ### Patch Changes
