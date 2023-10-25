@@ -85,6 +85,8 @@ export const getListByServiceResponse = (
     nextLink: ""
   };
 };
+export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
+  getUser(params);
 
 const getUser = ({
   AZURE_SUBSCRIPTION_ID,
