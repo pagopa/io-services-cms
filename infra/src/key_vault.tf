@@ -100,3 +100,8 @@ data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
   name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
   key_vault_id = module.key_vault_domain.id
 }
+
+data "azurerm_key_vault_secret" "selfcare_api_key" {
+  name         = "SELFCARE-API-KEY"
+  key_vault_id = module.key_vault_domain.id
+}

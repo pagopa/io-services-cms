@@ -6,7 +6,11 @@ import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import { aMockErrorResponse } from "../data/common-data";
-import { aWellKnown } from "../data/selfcare-data";
+import {
+  aWellKnown,
+  getMockInstitution,
+  getSelfCareProblemResponse
+} from "../data/selfcare-data";
 
 faker.seed(1);
 
@@ -22,7 +26,34 @@ export const buildHandlers = () => {
       ];
 
       return res(...resultArray[0]);
-    })
+    }),
+    rest.get(
+      `${baseURL}/${configuration.SELFCARE_BASE_PATH}/institutions`,
+      (_, res, ctx) => {
+        const resultArray = [
+          [ctx.status(200), ctx.json([getMockInstitution()])],
+          [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
+          [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+        ];
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.get(
+      `${baseURL}/${configuration.SELFCARE_BASE_PATH}/institutions/:institutionId`,
+      (req, res, ctx) => {
+        const { institutionId } = req.params;
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(getMockInstitution(institutionId as string))
+          ],
+          [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
+          [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+        ];
+
+        return res(...resultArray[1]);
+      }
+    )
   ];
 };
 

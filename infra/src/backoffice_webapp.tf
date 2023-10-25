@@ -13,6 +13,9 @@ locals {
     # NextAuthJS
     NEXTAUTH_URL    = "https://selfcare.io.pagopa.it/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
+
+    SELFCARE_API_KEY   = data.azurerm_key_vault_secret.selfcare_api_key.value
+    SELFCARE_BASE_PATH = var.backoffice_app.selfcare_base_path
   })
 }
 
