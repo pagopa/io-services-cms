@@ -11,11 +11,7 @@ export default async function healthcheck(
 
   const failures = results
     .filter((c): c is PromiseRejectedResult => c.status === "rejected")
-    .map(({ reason }) =>
-      reason instanceof HealthChecksError
-        ? reason
-        : new HealthChecksError("unknown", new Error("unknown error"))
-    );
+    .map(({ reason }) => decodeReason(reason));
   if (failures.length > 0) {
     // log all HealthChecksError
     failures.forEach(f =>
@@ -34,4 +30,16 @@ export default async function healthcheck(
     };
   }
   return { status: "ok" };
+}
+
+function decodeReason(reason: unknown): HealthChecksError {
+  if (reason instanceof HealthChecksError) {
+    return reason;
+  }
+
+  if (reason instanceof Error) {
+    return new HealthChecksError("unknown", reason);
+  }
+
+  return new HealthChecksError("unknown", new Error("unknown error"));
 }
