@@ -1,7 +1,7 @@
+import { Cidr } from "@/generated/api/Cidr";
+import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { faker } from "@faker-js/faker/locale/it";
 import packageJson from "../../package.json";
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { Cidr } from "@/generated/api/Cidr";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -46,9 +46,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     { min: 0, max: 5 }
   ),
   authorized_cidrs: [
-    ...Array.from(
-      Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
-    )
+    ...Array.from(Array(faker.number.int({ min: 1, max: 5 })).keys())
   ].map(
     _ =>
       `${faker.internet.ipv4()}/${faker.helpers.rangeToNumber({
@@ -67,7 +65,11 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     phone: faker.phone.number(),
     email: faker.internet.email(),
     pec: faker.internet.email(),
-    cta: faker.lorem.slug(1),
+    cta: `"---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
+      2
+    )}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+      2
+    )}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n---"`,
     token_name: faker.lorem.slug(1),
     support_url: faker.internet.url(),
     category: faker.helpers.arrayElement(["SPECIAL", "STANDARD"]),
@@ -78,7 +80,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
 
 export const aMockServicePublication = {
   ...getMockServiceLifecycle(),
-  status: faker.helpers.arrayElement(["published", "unpublished"]),
+  status: faker.helpers.arrayElement(["published", "unpublished"])
   //version: faker.string.uuid()
 };
 
@@ -89,9 +91,7 @@ export const getMockServiceKeys = () => ({
 
 export const aMockManageKeysCIDRs: ManageKeyCIDRs = {
   cidrs: [
-    ...Array.from(
-      Array(faker.number.int({ min: 1, max: 5 })).keys()
-    )
+    ...Array.from(Array(faker.number.int({ min: 1, max: 5 })).keys())
   ].map(
     _ =>
       `${faker.internet.ipv4()}/${faker.helpers.rangeToNumber({

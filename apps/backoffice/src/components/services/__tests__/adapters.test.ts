@@ -1,9 +1,12 @@
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { describe, expect, it } from "vitest";
-import { ServiceCreateUpdatePayload } from "../../../types/service";
-import { fromServiceCreateUpdatePayloadToApiServicePayload } from "../adapters";
 import { ServicePayload as ApiServicePayload } from "../../../generated/api/ServicePayload";
+import { ServiceCreateUpdatePayload } from "../../../types/service";
+import {
+  fromApiServicePayloadToServiceCreateUpdatePayload,
+  fromServiceCreateUpdatePayloadToApiServicePayload
+} from "../adapters";
 
 const mockedSessionUser = {
   institution: { name: "anInstitutionName" }
@@ -38,7 +41,7 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
 const aCtaResult =
   '"---\nit:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\nen:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\n---"';
 
-const aServicePayloadResult = ({
+const anApiServicePayloadResult = ({
   name: aValidServiceCreateUpdatePayload.name,
   description: aValidServiceCreateUpdatePayload.description,
   metadata: {
@@ -75,7 +78,7 @@ describe("[Services] Adapters", () => {
 
     if (E.isRight(result)) {
       const servicePayload = {
-        ...aServicePayloadResult,
+        ...anApiServicePayloadResult,
         organization: {
           name: mockedSessionUser.institution.name,
           fiscal_code: "00000000000"
@@ -97,5 +100,21 @@ describe("[Services] Adapters", () => {
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isLeft(result));
+  });
+
+  it("should return a valid frontend service payload if a valid Api ServicePayload is provided", () => {
+    const result = fromApiServicePayloadToServiceCreateUpdatePayload(
+      anApiServicePayloadResult
+    );
+    const aServiceCreateUpdatePayload = {
+      ...aValidServiceCreateUpdatePayload,
+      metadata: {
+        ...aValidServiceCreateUpdatePayload.metadata,
+        category: "",
+        custom_special_flow: "",
+        token_name: ""
+      }
+    };
+    expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
 });

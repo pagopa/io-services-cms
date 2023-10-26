@@ -31,8 +31,17 @@ export type UseFetchErrorStatusType =
 export type UseFetchOptions = {
   /** FetchData notifications: \
    * `all` shows all fetchData results, `errors` shows only fetchData error results */
-  notify: "all" | "errors";
+  notify: UseFetchOptionsResultType;
+  /** Redirection at fetchData completition */
+  redirect?: {
+    /** `all` redirect to `href` all fetchData results,\
+     * `errors` redirect to `href` only fetchData error results */
+    on: UseFetchOptionsResultType;
+    /** Navigate to the provided href. Pushes a new history entry. */
+    href: string;
+  };
 };
+export type UseFetchOptionsResultType = "all" | "errors";
 
 /**
  * The status codes defined by RFC 9110
@@ -165,14 +174,31 @@ const useFetch = <RC>() => {
     );
   };
 
+  const manageOptions = () => {
+    manageNotifications();
+    if (options?.redirect) manageRedirections();
+  };
+
   /** Shows a snackbar alert based on `notifications` param value */
-  const manageNotification = () => {
+  const manageNotifications = () => {
     switch (options?.notify) {
       case "all":
         buildNotification();
         break;
       case "errors":
         if (error !== undefined) buildNotification();
+        break;
+    }
+  };
+
+  /** Shows a snackbar alert based on `notifications` param value */
+  const manageRedirections = () => {
+    switch (options?.redirect?.on) {
+      case "all":
+        push(options.redirect.href);
+        break;
+      case "errors":
+        if (error !== undefined) push(options.redirect.href);
         break;
     }
   };
@@ -248,7 +274,7 @@ const useFetch = <RC>() => {
   };
 
   useEffect(() => {
-    if (options) manageNotification();
+    if (options) manageOptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchTaskCounter]);
 
