@@ -33,15 +33,12 @@ export class HealthChecksError extends Error {
     if (innerError instanceof Error) {
       message = innerError.message;
     }
-    
+
     super(message);
     this.name = "HealthChecksError";
     this.message = message;
     this.innerError = innerError;
     this.externalServiceName = externalServiceName;
-  }
-  logError() {
-    console.error(`[HEALTH CHECK ERROR ${this.externalServiceName}] ${this.message} =>`, this.innerError);
   }
 }
 
