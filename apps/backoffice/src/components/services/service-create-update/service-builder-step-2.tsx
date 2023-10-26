@@ -13,7 +13,9 @@ import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 import { ServiceAssistanceChannels } from "./service-assistance-channels";
 
-const regexPhone: RegExp = /^(?:(?:\+|00)39?)?[ ]?(?:\d{2})?[ ]?(?:3[\d]|[89]\d{1})[ ]?\/?[ ]?\d{6,8}$/;
+const regexPhone = new RegExp(
+  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/
+);
 
 const getSingleAssistanceChannelSchema = (
   t: TFunction<"translation", undefined>

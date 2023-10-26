@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   DefaultValues,
   FieldValues,
@@ -53,11 +53,10 @@ export function CreateUpdateProcess<T extends FieldValues>({
 
   const [currentStepIndex, setCurrentStep] = useState(0);
   const [sended, setSended] = useState(false);
-  const [currentItemToCreateUpdate] = useState(itemToCreateUpdate);
 
   const methods = useForm({
     //shouldUnregister: true,
-    defaultValues: currentItemToCreateUpdate,
+    defaultValues: itemToCreateUpdate,
     resolver: zodResolver(steps[currentStepIndex].validationSchema),
     mode: "onChange"
   });
@@ -95,6 +94,11 @@ export function CreateUpdateProcess<T extends FieldValues>({
       trigger();
     }
   };
+
+  useEffect(() => {
+    methods.reset(itemToCreateUpdate); // update form values when change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemToCreateUpdate]);
 
   const renderStepDescription = () => {
     if (steps[currentStepIndex].description)

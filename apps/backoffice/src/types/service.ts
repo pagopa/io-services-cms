@@ -37,6 +37,12 @@ export type ServiceMetadata = {
 
 export type AssistanceChannelType = "email" | "pec" | "phone" | "support_url";
 export type AssistanceChannel = { type: AssistanceChannelType; value: string };
+export type AssistanceChannelsMetadata = {
+  email?: string;
+  pec?: string;
+  phone?: string;
+  support_url?: string;
+};
 
 export type ServiceCreateUpdatePayloadMetadata = {
   web_url: string;

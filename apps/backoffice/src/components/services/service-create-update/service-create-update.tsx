@@ -62,7 +62,7 @@ export type ServiceCreateUpdateProps = {
  * Here are defined process steps (`BuilderStep[]`), service default data, and process mode. */
 export const ServiceCreateUpdate = ({
   mode,
-  service: serviceData,
+  service,
   onConfirm
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
@@ -106,7 +106,7 @@ export const ServiceCreateUpdate = ({
 
   return (
     <CreateUpdateProcess
-      itemToCreateUpdate={serviceData ? serviceData : serviceDefaultData}
+      itemToCreateUpdate={service ?? serviceDefaultData}
       mode={mode}
       steps={serviceBuilderSteps}
       onCancel={() => handleCancel()}

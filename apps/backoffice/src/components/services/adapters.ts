@@ -6,9 +6,12 @@ import { ServicePublication } from "@/generated/api/ServicePublication";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
 import {
   AssistanceChannel,
+  AssistanceChannelType,
+  AssistanceChannelsMetadata,
   Service,
   ServiceCreateUpdatePayload
 } from "@/types/service";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
 import { User } from "next-auth";
@@ -94,6 +97,49 @@ export const fromServiceCreateUpdatePayloadToApiServicePayload = (
     ApiServicePayload.decode
   );
 
+/**
+ * Convert `@/generated/api/ServicePayload` to _'frontend'_ service payload
+ * @param apiService service _(as result api getService fetch)_
+ * @param sessionUser `next-auth` session user
+ * @returns `ServiceCreateUpdatePayload`
+ */
+export const fromApiServicePayloadToServiceCreateUpdatePayload = (
+  apiService: ApiServicePayload
+): ServiceCreateUpdatePayload => ({
+  name: apiService.name,
+  description: apiService.description,
+  organization: {
+    // TODO same check as `inferOrganizationFromUser`
+    name: "",
+    fiscal_code: "",
+    department_name: ""
+  },
+  require_secure_channel: apiService.require_secure_channel ?? false,
+  authorized_cidrs: apiService.authorized_cidrs
+    ? Array.from(apiService.authorized_cidrs.values())
+    : [],
+  authorized_recipients: apiService.authorized_recipients
+    ? Array.from(apiService.authorized_recipients.values())
+    : [],
+  max_allowed_payment_amount: apiService.max_allowed_payment_amount ?? 0,
+  metadata: {
+    web_url: apiService.metadata.web_url ?? "",
+    app_ios: apiService.metadata.app_ios ?? "",
+    app_android: apiService.metadata.app_android ?? "",
+    tos_url: apiService.metadata.tos_url ?? "",
+    privacy_url: apiService.metadata.privacy_url ?? "",
+    address: apiService.metadata.address ?? "",
+    assistanceChannels: convertAssistanceChannelsObjToArray(
+      apiService.metadata
+    ),
+    cta: buildCtaObj(apiService.metadata.cta),
+    token_name: apiService.metadata.token_name ?? "",
+    category: apiService.metadata.category ?? "",
+    custom_special_flow: apiService.metadata.custom_special_flow ?? "",
+    scope: apiService.metadata.scope
+  }
+});
+
 const buildBaseServicePayload = (
   s: ServiceCreateUpdatePayload,
   u?: User
@@ -119,6 +165,29 @@ const convertAssistanceChannelsArrayToObj = (arr: AssistanceChannel[]) => {
   return result;
 };
 
+const convertAssistanceChannelsObjToArray = (
+  obj: AssistanceChannelsMetadata
+) => {
+  const channels: AssistanceChannel[] = [];
+  const allowedTypes: AssistanceChannelType[] = [
+    "email",
+    "pec",
+    "phone",
+    "support_url"
+  ];
+
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const type = key as AssistanceChannelType;
+      if (allowedTypes.includes(type)) {
+        const value = obj[key as keyof AssistanceChannelsMetadata];
+        channels.push({ type, value: value ?? "" });
+      }
+    }
+  }
+  return channels;
+};
+
 const inferOrganizationFromUser = (sessionUser?: User) => ({
   name: sessionUser?.institution.name,
   fiscal_code: "00000000000", // TODO Check how to get this
@@ -128,6 +197,42 @@ const inferOrganizationFromUser = (sessionUser?: User) => ({
 const buildCtaString = (ctaObj: { text: string; url: string }) => {
   if (ctaObj.text !== "" && ctaObj.url !== "") {
     return `"---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"iohandledlink://${ctaObj.url}\"\nen:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"iohandledlink://${ctaObj.url}\"\n---"`;
+  }
+  return "";
+};
+
+const buildCtaObj = (ctaString?: string) => {
+  if (NonEmptyString.is(ctaString)) {
+    return {
+      text: getCtaTextFromCtaString(ctaString),
+      url: getCtaUrlFromCtaString(ctaString)
+    };
+  }
+  return { text: "", url: "" };
+};
+
+const getCtaTextFromCtaString = (value: string) => {
+  // Splits the string into lines
+  const lines = value.split("\n");
+  // Find the line containing 'text: "<text>"'
+  const textLine = lines.find(line => line.includes("text:"));
+  // Extract the text between the quotes
+  const match = /\"(.+?)\"/.exec(textLine ?? "");
+  if (match) {
+    return match[1];
+  }
+  return "";
+};
+
+const getCtaUrlFromCtaString = (value: string) => {
+  // Splits the string into lines
+  const lines = value.split("\n");
+  // Find the line containing 'text: "<text>"'
+  const actionLine = lines.find(line => line.includes("action:"));
+  // Extract the text between the quotes
+  const match = /iohandledlink:\/\/(.+?)\"/.exec(actionLine ?? "");
+  if (match) {
+    return match[1];
   }
   return "";
 };
