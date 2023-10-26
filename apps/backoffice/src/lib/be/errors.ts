@@ -25,6 +25,23 @@ export class ManagedInternalError extends Error {
   }
 }
 
+export class HealthChecksError extends Error {
+  innerError: unknown;
+  externalServiceName: string;
+  constructor(externalServiceName: string, innerError: unknown) {
+    let message = "Undefined Error during health check";
+    if (innerError instanceof Error) {
+      message = innerError.message;
+    }
+
+    super(message);
+    this.name = "HealthChecksError";
+    this.message = message;
+    this.innerError = innerError;
+    this.externalServiceName = externalServiceName;
+  }
+}
+
 export const handleInternalErrorResponse = (
   title: string,
   error: unknown
