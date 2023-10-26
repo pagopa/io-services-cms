@@ -10,7 +10,7 @@ const Config = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-  AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
+  AZURE_APIM_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM: NonEmptyString
@@ -43,15 +43,15 @@ export const getApimService = cache(() => {
 
 export const getApimHealth = async () => {
   try {
-    const { AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME } = getApimConfig();
+    const { AZURE_APIM_PRODUCT_NAME } = getApimConfig();
     const apimService = getApimService();
-    const res = await apimService.getProductByName(
-      AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME
-    )();
-    if (!res) {
-      throw new Error();
+    const res = await apimService.getProductByName(AZURE_APIM_PRODUCT_NAME)();
+    if (E.isLeft(res)) {
+      throw new Error(
+        `error getting apim product, ${JSON.stringify(res.left)}`
+      );
     }
   } catch (e) {
-    throw new HealthChecksError("APIM", e);
+    throw new HealthChecksError("apim", e);
   }
 };
