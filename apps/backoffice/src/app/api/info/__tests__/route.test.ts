@@ -9,6 +9,14 @@ const { getLegacyCosmosHealth } = vi.hoisted(() => ({
   getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve())
 }));
 
+const { getSelfcareHealth } = vi.hoisted(() => ({
+  getSelfcareHealth: vi.fn().mockReturnValue(Promise.resolve())
+}));
+
+const { getIoServicesCmsHealth } = vi.hoisted(() => ({
+  getIoServicesCmsHealth: vi.fn().mockReturnValue(Promise.resolve())
+}));
+
 const { getApimHealth } = vi.hoisted(() => ({
   getApimHealth: vi.fn().mockReturnValue({
     getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve())
@@ -17,6 +25,14 @@ const { getApimHealth } = vi.hoisted(() => ({
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
   getLegacyCosmosHealth
+}));
+
+vi.mock("@/lib/be/selfcare-client", () => ({
+  getSelfcareHealth
+}));
+
+vi.mock("@/lib/be/cms-client", () => ({
+  getIoServicesCmsHealth
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({

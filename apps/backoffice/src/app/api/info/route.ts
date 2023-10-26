@@ -7,6 +7,8 @@ import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
 import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
+import { getSelfcareHealth } from "@/lib/be/selfcare-client";
+import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 
 /**
  * `api/info` route handler
@@ -15,7 +17,12 @@ import packageJson from "../../../../package.json";
 export async function GET() {
   // get info from package.json
 
-  const health = await healthcheck([getLegacyCosmosHealth(), getApimHealth()]);
+  const health = await healthcheck([
+    getLegacyCosmosHealth(),
+    getApimHealth(),
+    getSelfcareHealth(),
+    getIoServicesCmsHealth()
+  ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
 
