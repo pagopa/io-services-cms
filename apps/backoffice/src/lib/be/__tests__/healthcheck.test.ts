@@ -15,7 +15,7 @@ describe("healthcheck", () => {
     expect(health.status).toBe("fail");
     if (health.status === "fail") {
       expect(health.failures).toEqual([
-        { service: "service1", errorMesage: "failure error message" }
+        { service: "service1", errorMessage: "failure error message" }
       ]);
     }
   });
@@ -34,7 +34,7 @@ describe("healthcheck", () => {
     expect.assertions(1);
     if (health.status === "fail") {
       expect(health.failures).toEqual([
-        { service: "unknown", errorMesage: "unknown error" }
+        { service: "unknown", errorMessage: "unknown error" }
       ]);
     }
   });

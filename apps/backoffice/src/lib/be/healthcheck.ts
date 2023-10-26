@@ -2,7 +2,7 @@ import { HealthChecksError } from "./errors";
 
 type HealthStatus =
   | { status: "ok" }
-  | { status: "fail"; failures: { service: string; errorMesage: string }[] };
+  | { status: "fail"; failures: { service: string; errorMessage: string }[] };
 
 export default async function healthcheck(
   checks: Array<Promise<unknown>>
@@ -29,7 +29,7 @@ export default async function healthcheck(
       status: "fail",
       failures: failures.map(f => ({
         service: f.externalServiceName,
-        errorMesage: f.message
+        errorMessage: f.message
       }))
     };
   }

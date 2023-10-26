@@ -849,7 +849,7 @@ components:
         service:
           type: string
           description: the service in error
-        errorMesage:
+        errorMessage:
           type: string
           description: the component failure message
     ServiceLifecycle:
