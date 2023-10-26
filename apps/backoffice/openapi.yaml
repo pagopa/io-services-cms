@@ -42,20 +42,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  version:
-                    type: string
-                    description: the application version
-                  name:
-                    type: string
-                    description: the application name
+                $ref: '#/components/schemas/Info'
         '500':
           description: The fails to startup due to misconfiguration or unreachable dependencies
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseError'
+                $ref: '#/components/schemas/Info'
   /auth: # /idp/selfcare/resolve-identity
     post:
       tags:
@@ -828,6 +821,37 @@ paths:
           description: Internal server error
 components:
   schemas:
+    Info:
+      type: object
+      properties:
+        version:
+          type: string
+          description: the application version
+        name:
+          type: string
+          description: the application name
+        health:
+          $ref: '#/components/schemas/HealthStatus'
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          description: the application health status
+        failures:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/HealthFailure'
+    HealthFailure:
+      type: object
+      properties:
+        service:
+          type: string
+          description: the service in error
+        errorMesage:
+          type: string
+          description: the component failure message
     ServiceLifecycle:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
     ServicePublication:
