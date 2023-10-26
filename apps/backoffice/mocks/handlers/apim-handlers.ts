@@ -10,6 +10,8 @@ import {
   getDiscoveryInstanceResponse,
   getListByServiceResponse,
   getOpenIdConfig,
+  getProductListByServiceResponse,
+  getSubscriptionResponse,
   getUserResponse
 } from "../data/apim-data";
 import { aMockErrorResponse } from "../data/common-data";
@@ -96,7 +98,7 @@ export const buildHandlers = () => {
       }
     ),
     rest.post(
-      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/listSecrets`,
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId/listSecrets`,
       (_, res, ctx) => {
         const resultArray = [
           [ctx.status(200), ctx.json(aListSecretsResponse)],
@@ -146,6 +148,74 @@ export const buildHandlers = () => {
           [ctx.status(401), ctx.json(null)],
           [ctx.status(403), ctx.json(null)],
           [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.get(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId`,
+      (req, res, ctx) => {
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(
+              getSubscriptionResponse({
+                ...configuration,
+                subscriptionId: req.params.subscriptionId as string
+              })
+            )
+          ],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(403), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.put(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId`,
+      (req, res, ctx) => {
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(
+              getSubscriptionResponse({
+                ...configuration,
+                subscriptionId: req.params.subscriptionId as string
+              })
+            )
+          ],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(403), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
+        ];
+
+        return res(...resultArray[0]);
+      }
+    ),
+    rest.get(
+      `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/products`,
+      (req, res, ctx) => {
+        const filterSearchParam = req.url.searchParams.get("$filter");
+        let productName;
+        if (filterSearchParam) {
+          const matchedGroups = /name\seq\s'(?<name>.*)'/.exec(
+            filterSearchParam
+          )?.groups;
+          if (matchedGroups) {
+            productName = matchedGroups["name"];
+          }
+        }
+        const resultArray = [
+          [
+            ctx.status(200),
+            ctx.json(
+              getProductListByServiceResponse({ ...configuration, productName })
+            )
+          ],
+          [ctx.status(500), ctx.json(getWellKnown500Response())]
         ];
 
         return res(...resultArray[0]);
