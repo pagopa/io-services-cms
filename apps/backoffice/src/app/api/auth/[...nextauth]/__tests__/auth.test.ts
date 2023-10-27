@@ -146,7 +146,11 @@ const { getApimClient, getApimService } = vi.hoisted(() => ({
 }));
 
 vi.mock("@io-services-cms/external-clients", () => ({
-  ApimUtils: { getApimClient, getApimService }
+  ApimUtils: { getApimClient }
+}));
+
+vi.mock("@/lib/be/apim-service", () => ({
+  getApimService
 }));
 
 const { jwtVerify } = vi.hoisted(() => ({
@@ -256,11 +260,6 @@ describe("Authorize", () => {
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -300,11 +299,6 @@ describe("Authorize", () => {
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -348,11 +342,6 @@ describe("Authorize", () => {
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledTimes(2);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledTimes(2);
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -400,11 +389,6 @@ describe("Authorize", () => {
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -444,11 +428,6 @@ describe("Authorize", () => {
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -477,17 +456,12 @@ describe("Authorize", () => {
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(2);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledTimes(2);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -520,17 +494,12 @@ describe("Authorize", () => {
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(3);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
-    expect(getApimService).toHaveBeenCalledTimes(3);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
+    expect(getApimService).toHaveBeenCalledTimes(4);
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -568,17 +537,12 @@ describe("Authorize", () => {
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(3);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
-    expect(getApimService).toHaveBeenCalledTimes(3);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
+    expect(getApimService).toHaveBeenCalledTimes(4);
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -618,17 +582,12 @@ describe("Authorize", () => {
     ).rejects.toThrowError(/is not a valid/);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(3);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
-    expect(getApimService).toHaveBeenCalledTimes(3);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
+    expect(getApimService).toHaveBeenCalledTimes(4);
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -668,17 +627,12 @@ describe("Authorize", () => {
     ).rejects.toThrowError(errorMessage);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(2);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledTimes(2);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -720,17 +674,12 @@ describe("Authorize", () => {
       )
     );
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(2);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
     expect(getApimService).toHaveBeenCalledTimes(2);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(aValidApimUser.email, true);
     expect(getSubscription).toHaveBeenCalledOnce();
@@ -776,17 +725,12 @@ describe("Authorize", () => {
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(3);
+    expect(getApimClient).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledWith(
       mockConfig,
       mockConfig.AZURE_SUBSCRIPTION_ID
     );
-    expect(getApimService).toHaveBeenCalledTimes(4);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
+    expect(getApimService).toHaveBeenCalledTimes(5);
     expect(getUserByEmail).toHaveBeenCalledTimes(2);
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
