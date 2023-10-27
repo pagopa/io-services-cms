@@ -4,13 +4,14 @@ import { arrayOfIPv4CidrSchema } from "@/components/forms/schemas";
 import { AddLocationAlt } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 import { ServiceExtraConfigurator } from "./service-extra-configurator";
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z.object({
-    authorizedCidrs: arrayOfIPv4CidrSchema,
+    authorized_cidrs: arrayOfIPv4CidrSchema,
     metadata: z.object({
       cta: z.object({
         text: z.string(),
@@ -28,11 +29,18 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
 /** Third step of Service create/update process */
 export const ServiceBuilderStep3 = () => {
   const { t } = useTranslation();
-  const { resetField, getFieldState } = useFormContext();
+  const { resetField, getFieldState, watch } = useFormContext();
+  const watchedAuthorizedCidrs = watch("authorized_cidrs");
+  const [areAuthorizedCidrsDirty, setAreAuthorizedCidrsDirty] = useState(false);
 
   const handleCancel = () => {
-    resetField("authorizedCidrs");
+    resetField("authorized_cidrs");
   };
+
+  useEffect(() => {
+    setAreAuthorizedCidrsDirty(getFieldState("authorized_cidrs").isDirty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedAuthorizedCidrs]);
 
   return (
     <>
@@ -42,7 +50,7 @@ export const ServiceBuilderStep3 = () => {
         icon={<AddLocationAlt />}
       >
         <TextFieldArrayController
-          name="authorizedCidrs"
+          name="authorized_cidrs"
           addButtonLabel={t("authorizedCidrs.add")}
           addDefaultValue=""
           size="small"
@@ -56,7 +64,7 @@ export const ServiceBuilderStep3 = () => {
           editable={true}
           readOnly={false}
           addSaveButton={false}
-          addCancelButton={getFieldState("authorizedCidrs").isDirty}
+          addCancelButton={areAuthorizedCidrsDirty}
           onCancelClick={handleCancel}
           showGenericErrorMessage
         />

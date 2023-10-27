@@ -33,7 +33,7 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { openDrawer, closeDrawer } = useDrawer();
-  const { resetField, formState, getValues } = useFormContext();
+  const { formState, getValues, setValue } = useFormContext();
   const [isCtaVisible, setIsCtaVisible] = useState(false);
 
   const handleListItemClick = (type: ServiceExtraConfigurationType) => {
@@ -43,8 +43,8 @@ export const ServiceExtraConfigurator = () => {
 
   const handleRemoveCta = () => {
     setIsCtaVisible(false);
-    resetField("metadata.cta.text");
-    resetField("metadata.cta.url");
+    setValue("metadata.cta.text", "");
+    setValue("metadata.cta.url", "");
   };
 
   const areCtaUrlAndTextEmpty = () =>

@@ -3,14 +3,6 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authorize } from "./auth";
 
-if (
-  getConfiguration().SELFCARE_API_MOCKING ||
-  getConfiguration().API_APIM_MOCKING
-) {
-  const { setupMocks } = require("../../../../../mocks");
-  setupMocks();
-}
-
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({

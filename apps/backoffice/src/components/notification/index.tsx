@@ -43,3 +43,20 @@ export const Notification = forwardRef<HTMLDivElement, NotificationProps>(
 );
 
 Notification.displayName = "Notification";
+
+/** Build snackbar object to enqueue with `enqueueSnackbar` of **notistack** */
+export const buildSnackbarItem = (data: {
+  severity: string;
+  title: string;
+  message: string;
+}) =>
+  ({
+    variant: "custom",
+    anchorOrigin: {
+      vertical: "top",
+      horizontal: "right"
+    },
+    severity: data.severity,
+    title: data.title,
+    message: data.message
+  } as any);

@@ -38,7 +38,6 @@
 | Name | Type |
 |------|------|
 | [azurerm_api_management_api_operation_policy.create_service_policy_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
-| [azurerm_api_management_api_operation_policy.update_service_logo_policy_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
 | [azurerm_api_management_named_value.io_fn_services_cms_key_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_named_value) | resource |
 | [azurerm_cosmosdb_sql_database.db_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/cosmosdb_sql_database) | resource |
 | [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
@@ -84,6 +83,7 @@
 | [azurerm_key_vault_secret.jira_token](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.selfcare_api_key](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.serviceid_quality_check_exclusion_list](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_monitor_action_group.email](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/monitor_action_group) | data source |
@@ -103,7 +103,7 @@
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
-| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name = string<br>  })</pre> | n/a | yes |
+| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name           = string<br>    selfcare_base_path = string<br>    apim_user_groups   = string<br>  })</pre> | n/a | yes |
 | <a name="input_bo_auth_session_secret_rotation_id"></a> [bo\_auth\_session\_secret\_rotation\_id](#input\_bo\_auth\_session\_secret\_rotation\_id) | You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1695908210722"` | no |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |

@@ -75,6 +75,42 @@ export const anEmptyListByServiceResponse = {
   nextLink: ""
 };
 
+export const getProductListByServiceResponse = ({
+  AZURE_SUBSCRIPTION_ID,
+  AZURE_APIM_RESOURCE_GROUP,
+  AZURE_APIM,
+  productName = faker.string.uuid()
+}: {
+  AZURE_SUBSCRIPTION_ID: string;
+  AZURE_APIM_RESOURCE_GROUP: string;
+  AZURE_APIM: string;
+  productName?: string;
+}) => ({
+  value: [
+    {
+      id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/products/${productName}`,
+      name: productName
+    }
+  ],
+  count: 1,
+  nextLink: ""
+});
+
+export const getSubscriptionResponse = ({
+  AZURE_SUBSCRIPTION_ID,
+  AZURE_APIM_RESOURCE_GROUP,
+  AZURE_APIM,
+  subscriptionId = faker.string.uuid()
+}: {
+  AZURE_SUBSCRIPTION_ID: string;
+  AZURE_APIM_RESOURCE_GROUP: string;
+  AZURE_APIM: string;
+  subscriptionId?: string;
+}) => ({
+  id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/subscriptions/${subscriptionId}`,
+  name: subscriptionId
+});
+
 export const getListByServiceResponse = (
   params: Parameters<typeof getUser>[0]
 ) => {
@@ -85,6 +121,8 @@ export const getListByServiceResponse = (
     nextLink: ""
   };
 };
+export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
+  getUser(params);
 
 const getUser = ({
   AZURE_SUBSCRIPTION_ID,

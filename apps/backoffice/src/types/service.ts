@@ -4,55 +4,61 @@ import { ServicePublicationStatusType } from "@/generated/api/ServicePublication
 
 export type ServiceOrganization = {
   name: string;
-  fiscalCode: string;
-  departmentName: string;
+  fiscal_code: string;
+  department_name: string;
 };
 
 export type ServiceCommonData = {
   name: string;
   description: string;
-  requireSecureChannel: boolean;
-  authorizedCidrs: string[];
-  authorizedRecipients: string[];
-  maxAllowedPaymentAmount: number;
+  require_secure_channel: boolean;
+  authorized_cidrs: string[];
+  authorized_recipients: string[];
+  max_allowed_payment_amount: number;
 };
 
 export type ServiceMetadata = {
-  webUrl?: string;
-  appIos?: string;
-  appAndroid?: string;
-  tosUrl?: string;
-  privacyUrl?: string;
+  web_url?: string;
+  app_ios?: string;
+  app_android?: string;
+  tos_url?: string;
+  privacy_url?: string;
   address?: string;
   phone?: string;
   email?: string;
   pec?: string;
   cta?: string;
-  tokenName?: string;
-  supportUrl?: string;
+  token_name?: string;
+  support_url?: string;
   category?: string;
-  customSpecialFlow?: string;
+  custom_special_flow?: string;
   scope: ScopeEnum;
 };
 
-export type AssistanceChannelType = "email" | "pec" | "phone" | "supportUrl";
+export type AssistanceChannelType = "email" | "pec" | "phone" | "support_url";
 export type AssistanceChannel = { type: AssistanceChannelType; value: string };
+export type AssistanceChannelsMetadata = {
+  email?: string;
+  pec?: string;
+  phone?: string;
+  support_url?: string;
+};
 
-export type ServicePayloadMetadata = {
-  webUrl?: string;
-  appIos?: string;
-  appAndroid?: string;
-  tosUrl?: string;
-  privacyUrl?: string;
-  address?: string;
-  cta?: {
+export type ServiceCreateUpdatePayloadMetadata = {
+  web_url: string;
+  app_ios: string;
+  app_android: string;
+  tos_url: string;
+  privacy_url: string;
+  address: string;
+  cta: {
     text: string;
     url: string;
   };
   assistanceChannels: AssistanceChannel[];
-  tokenName?: string;
+  token_name?: string;
   category?: string;
-  customSpecialFlow?: string;
+  custom_special_flow?: string;
   scope: ScopeEnum;
 };
 
@@ -65,9 +71,9 @@ export type Service = {
   metadata: ServiceMetadata;
 } & ServiceCommonData;
 
-/** `ServicePayload` type used to create/update services in frontend forms.\
+/** `ServiceCreateUpdatePayload` type used to create/update services in frontend forms.\
  * It will be converted in _io-services-cms Api ServicePayload_ before call create/update csm service Api. */
-export type ServicePayload = {
+export type ServiceCreateUpdatePayload = {
   organization?: ServiceOrganization;
-  metadata: ServicePayloadMetadata;
+  metadata: ServiceCreateUpdatePayloadMetadata;
 } & ServiceCommonData;

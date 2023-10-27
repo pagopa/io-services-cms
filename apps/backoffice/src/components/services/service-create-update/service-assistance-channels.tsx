@@ -14,9 +14,7 @@ export const ServiceAssistanceChannels = () => {
   const { t } = useTranslation();
   const {
     control,
-    formState: { isValid, errors },
-    getFieldState,
-    watch
+    formState: { isValid, errors }
   } = useFormContext<{
     metadata: { assistanceChannels: AssistanceChannel[] };
   }>();
@@ -41,7 +39,7 @@ export const ServiceAssistanceChannels = () => {
     },
     {
       label: t("forms.service.assistanceChannels.supportUrl"),
-      value: "supportUrl"
+      value: "support_url"
     }
   ];
 

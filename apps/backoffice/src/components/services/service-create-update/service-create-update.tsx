@@ -5,7 +5,7 @@ import {
 } from "@/components/create-update-process";
 import { useDialog } from "@/components/dialog-provider";
 import { ScopeEnum } from "@/generated/api/ServiceMetadata";
-import { ServicePayload } from "@/types/service";
+import { ServiceCreateUpdatePayload } from "@/types/service";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import {
@@ -21,48 +21,48 @@ import {
   getValidationSchema as getVs3
 } from "./service-builder-step-3";
 
-const serviceDefaultData: ServicePayload = {
+const serviceDefaultData: ServiceCreateUpdatePayload = {
   name: "",
   description: "",
   organization: {
     name: "",
-    fiscalCode: "",
-    departmentName: ""
+    fiscal_code: "",
+    department_name: ""
   },
-  requireSecureChannel: false,
-  authorizedCidrs: [],
-  authorizedRecipients: [],
-  maxAllowedPaymentAmount: 0,
+  require_secure_channel: false,
+  authorized_cidrs: [],
+  authorized_recipients: [],
+  max_allowed_payment_amount: 0,
   metadata: {
-    webUrl: "",
-    appIos: "",
-    appAndroid: "",
-    tosUrl: "",
-    privacyUrl: "",
+    web_url: "",
+    app_ios: "",
+    app_android: "",
+    tos_url: "",
+    privacy_url: "",
     address: "",
     assistanceChannels: [{ type: "email", value: "" }],
     cta: {
       text: "",
       url: ""
     },
-    tokenName: "",
+    token_name: "",
     category: "",
-    customSpecialFlow: "",
+    custom_special_flow: "",
     scope: ScopeEnum.LOCAL
   }
 };
 
 export type ServiceCreateUpdateProps = {
   mode: CreateUpdateMode;
-  service?: ServicePayload;
-  onConfirm: (value: ServicePayload) => void;
+  service?: ServiceCreateUpdatePayload;
+  onConfirm: (value: ServiceCreateUpdatePayload) => void;
 };
 
 /** Service create/update process main component.\
  * Here are defined process steps (`BuilderStep[]`), service default data, and process mode. */
 export const ServiceCreateUpdate = ({
   mode,
-  service: serviceData,
+  service,
   onConfirm
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
@@ -106,11 +106,11 @@ export const ServiceCreateUpdate = ({
 
   return (
     <CreateUpdateProcess
-      itemToCreateUpdate={serviceData ? serviceData : serviceDefaultData}
+      itemToCreateUpdate={service ?? serviceDefaultData}
       mode={mode}
       steps={serviceBuilderSteps}
       onCancel={() => handleCancel()}
-      onConfirm={value => onConfirm(value as ServicePayload)}
+      onConfirm={value => onConfirm(value)}
     />
   );
 };

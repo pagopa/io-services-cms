@@ -20,6 +20,7 @@
   "buttons": {
     "back": "Indietro",
     "cancel": "Annulla",
+    "close": "Chiudi",
     "confirm": "Conferma",
     "copyToClipboard": "Copy to clipboard",
     "createDraft": "Crea bozza",
@@ -208,7 +209,8 @@
     },
     "services": {
       "title": "Servizi",
-      "description": "Visualizza e gestisci i servizi del tuo ente."
+      "description": "Visualizza e gestisci i servizi del tuo ente.",
+      "empty": "Non ci sono ancora servizi per questo ente."
     },
     "service": {
       "address": "Indirizzo",
@@ -263,6 +265,7 @@
   },
   "service": {
     "actions": {
+      "create": "Crea un servizio",
       "delete": "Elimina",
       "edit": "Modifica",
       "history": "Vedi storia del servizio",
@@ -348,6 +351,11 @@
     "visibility": {
       "published": "Pubblicato",
       "unpublished": "Nascosto"
+    },
+    "preview": {
+      "title": "Anteprima",
+      "button": "Vedi anteprima",
+      "info": "Ecco come si visualizzerà la descrizione del servizio in app IO."
     }
   },
   "test": "Questo è un test di traduzione"

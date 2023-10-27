@@ -20,6 +20,7 @@
   "buttons": {
     "back": "Back",
     "cancel": "Cancel",
+    "close": "Close",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
     "createDraft": "Create draft",
@@ -208,7 +209,8 @@
     },
     "services": {
       "title": "Services",
-      "description": "View and manage your institution's services."
+      "description": "View and manage your institution's services.",
+      "empty": "There are no services for this institution yet."
     },
     "service": {
       "address": "Address",
@@ -263,6 +265,7 @@
   },
   "service": {
     "actions": {
+      "create": "Create a service",
       "delete": "Delete",
       "edit": "Edit",
       "history": "View service history",
@@ -348,6 +351,11 @@
     "visibility": {
       "published": "Published",
       "unpublished": "Hidden"
+    },
+    "preview": {
+      "title": "Preview",
+      "button": "See preview",
+      "info": "This is how the service description will be displayed in the IO app."
     }
   },
   "test": "This is a translation test"

@@ -8,6 +8,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { cache } from "react";
+import { HealthChecksError } from "./errors";
 
 const Config = t.type({
   LEGACY_COSMOSDB_NAME: NonEmptyString,
@@ -53,7 +54,7 @@ export async function getLegacyCosmosHealth() {
     if (!resource) {
       throw new Error();
     }
-  } catch {
-    throw "legacy-cosmos-db";
+  } catch (e) {
+    throw new HealthChecksError("legacy-cosmos-db", e);
   }
 }
