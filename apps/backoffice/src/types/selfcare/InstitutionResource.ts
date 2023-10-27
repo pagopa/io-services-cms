@@ -76,7 +76,9 @@ const InstitutionResourceO = t.partial({
 
   userProductRoles: t.readonlyArray(t.string, "array of string"),
 
-  zipCode: t.string
+  zipCode: t.string,
+
+  logo: t.string
 });
 
 export const InstitutionResource = t.exact(

@@ -1,5 +1,7 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
+import { getUserAuthorizedInstitutions } from "@/lib/be/institutions/selfcare";
+import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -47,10 +49,16 @@ export const authorize = (
     TE.chain(verifyToken(config)),
     TE.bindTo("identityTokenPayload"),
     TE.bind("apimUser", ({ identityTokenPayload }) =>
-      retrieveOrCreateApimUser(config)(identityTokenPayload)
+      pipe(identityTokenPayload, retrieveOrCreateApimUser(config))
     ),
     TE.bind("subscriptionManage", ({ apimUser }) =>
-      retrieveOrCreateUserSubscriptionManage(config)(apimUser)
+      pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config))
+    ),
+    TE.bind("authorizedInstitutions", ({ identityTokenPayload }) =>
+      TE.tryCatch(
+        () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
+        E.toError
+      )
     ),
     TE.map(toUser),
     TE.getOrElse(e => {
@@ -318,11 +326,13 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 const toUser = ({
   identityTokenPayload,
   apimUser,
-  subscriptionManage
+  subscriptionManage,
+  authorizedInstitutions
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
   subscriptionManage: Subscription;
+  authorizedInstitutions: InstitutionResources;
 }): User => ({
   id: identityTokenPayload.uid,
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
@@ -331,16 +341,15 @@ const toUser = ({
     id: identityTokenPayload.organization.id,
     name: identityTokenPayload.organization.name,
     role: identityTokenPayload.organization.roles[0]?.role,
-    logo_url: "url"
+    logo_url: "url" // TODO: retrieve institution logo from selfcare
   },
   // TODO: retrieve from selfcare
-  authorizedInstitutions: [
-    {
-      id: "id_2",
-      name: "Comune di Roma",
-      role: "operator"
-    }
-  ],
+  authorizedInstitutions: authorizedInstitutions.map(institution => ({
+    id: institution.id,
+    name: institution.description,
+    role: institution.userProductRoles?.[0],
+    logo_url: institution.logo
+  })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
     .map(group => group.name),
