@@ -15,7 +15,6 @@ import * as t from "io-ts";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
-import { ulid } from "ulid";
 import { ApimUser, IdentityTokenPayload, Subscription } from "../types";
 
 if (
@@ -166,22 +165,21 @@ const createApimUser = (config: Configuration, apimClient: ApimClient) => (
   identityTokenPayload: IdentityTokenPayload
 ): TE.TaskEither<Error, void> =>
   pipe(
-    TE.tryCatch(
-      () =>
-        apimClient.user.createOrUpdate(
-          config.AZURE_APIM_RESOURCE_GROUP,
-          config.AZURE_APIM,
-          ulid(),
-          {
-            email: formatApimAccountEmailForSelfcareOrganization(
-              identityTokenPayload.organization
-            ),
-            firstName: identityTokenPayload.organization.name,
-            lastName: identityTokenPayload.organization.id,
-            note: identityTokenPayload.organization.fiscal_code
-          }
+    getApimService(),
+    apimService =>
+      apimService.createOrUpdateUser({
+        email: formatApimAccountEmailForSelfcareOrganization(
+          identityTokenPayload.organization
         ),
-      E.toError
+        firstName: identityTokenPayload.organization.name,
+        lastName: identityTokenPayload.organization.id,
+        note: identityTokenPayload.organization.fiscal_code
+      }),
+    TE.mapLeft(
+      err =>
+        new Error(
+          `Failed to create subscription manage, code: ${err.statusCode}`
+        )
     ),
     TE.chain(apimUser =>
       pipe(

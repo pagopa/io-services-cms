@@ -5,6 +5,7 @@ import {
   SubscriptionContract,
   SubscriptionListSecretsResponse,
   UserContract,
+  UserCreateParameters,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
@@ -27,6 +28,7 @@ import {
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
 
+import { ulid } from "ulid";
 import {
   FilterCompositionEnum,
   FilterFieldEnum,
@@ -129,6 +131,10 @@ export type ApimService = {
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<ApimRestError, Delegate>;
+  readonly createOrUpdateUser: (
+    user: UserCreateParameters,
+    userId?: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, UserContract>;
 };
 
 export const getApimService = (
@@ -191,6 +197,14 @@ export const getApimService = (
       apimResourceGroup,
       apimServiceName,
       serviceId
+    ),
+  createOrUpdateUser: (user, userId = ulid() as NonEmptyString) =>
+    createOrUpdateUser(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      userId,
+      user
     ),
 });
 
@@ -540,6 +554,36 @@ const getDelegateFromServiceId = (
         }))
       )
     )
+  );
+
+/**
+ * Create or updates (if not exists) an user
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param userId
+ * @param user
+ * @returns
+ */
+const createOrUpdateUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  userId: NonEmptyString,
+  user: UserCreateParameters
+): TE.TaskEither<ApimRestError, UserContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.user.createOrUpdate(
+          apimResourceGroup,
+          apimServiceName,
+          userId,
+          user
+        ),
+      identity
+    ),
+    chainApimMappedError
   );
 
 /**
