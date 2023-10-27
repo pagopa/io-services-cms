@@ -142,7 +142,7 @@ describe("Selfcare Client", () => {
       });
 
       const result = await getSelfcareClient().getInstitutionById(
-        mocks.institution.id
+        mocks.institution.id as string
       )();
 
       expect(get).toHaveBeenCalledWith(`/institutions/${mocks.institution.id}`);
@@ -167,7 +167,7 @@ describe("Selfcare Client", () => {
       });
 
       const result = await getSelfcareClient().getInstitutionById(
-        mocks.institution.id
+        mocks.institution.id as string
       )();
 
       expect(get).toHaveBeenCalledWith(`/institutions/${mocks.institution.id}`);
