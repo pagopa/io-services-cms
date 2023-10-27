@@ -8,6 +8,8 @@ import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
 
+// TODO: remove me
+/** @deprecated */
 export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string
 ): Promise<InstitutionResources> => {
@@ -20,6 +22,8 @@ export const retrieveInstitution = async (
   return await getInstitutionById(institutionId);
 };
 
+// TODO: remove me
+/** @deprecated */
 const toInstitution = (
   institutionResource: InstitutionResource
 ): BackofficeInstitution => ({

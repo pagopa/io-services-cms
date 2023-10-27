@@ -2,7 +2,9 @@ import { faker } from "@faker-js/faker/locale/it";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
+import { InstitutionResources } from "../../../../../types/selfcare/InstitutionResource";
 import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
@@ -80,7 +82,8 @@ const getExpectedUserEmailReqParam = (
 const getExpectedUser = (
   jwtPayload: IdentityTokenPayload,
   apimUser: typeof aValidApimUser,
-  manageSubscription: typeof aValidSubscription
+  manageSubscription: typeof aValidSubscription,
+  authorizedInstitutions: InstitutionResources
 ) => ({
   id: jwtPayload.uid,
   name: `${jwtPayload.name} ${jwtPayload.family_name}`,
@@ -91,9 +94,12 @@ const getExpectedUser = (
     role: jwtPayload.organization.roles[0].role,
     logo_url: "url"
   },
-  authorizedInstitutions: [
-    { id: "id_2", name: "Comune di Roma", role: "operator" }
-  ],
+  authorizedInstitutions: authorizedInstitutions.map(institution => ({
+    id: institution.id,
+    name: institution.description,
+    role: institution.userProductRoles?.[0],
+    logo_url: institution.logo
+  })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
     .map(group => group.name),
@@ -103,6 +109,10 @@ const getExpectedUser = (
     subscriptionId: manageSubscription.name
   }
 });
+
+const aValidInstitutions: InstitutionResources = faker.helpers.arrayElements(
+  Array(5).fill(getMockInstitution())
+);
 
 const mockApimClient = vi.hoisted(() => ({
   user: {
@@ -152,6 +162,14 @@ vi.mock("jose", async importOriginal => {
   };
 });
 
+const { getUserAuthorizedInstitutions } = vi.hoisted(() => ({
+  getUserAuthorizedInstitutions: vi.fn()
+}));
+
+vi.mock("@/lib/be/institutions/selfcare", () => ({
+  getUserAuthorizedInstitutions
+}));
+
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -170,6 +188,7 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when token is not a JWT", async () => {
@@ -187,6 +206,7 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when JWT payload is not a valid IdentityToken", async () => {
@@ -214,9 +234,10 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
-  it("should fail when creating a new Apim user", async () => {
+  it("should fail when creating a new Apim user and creation fail", async () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
@@ -256,9 +277,10 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
-  it("should fail when adding a gruop to newly created user", async () => {
+  it("should fail when adding a gruop to newly created user and user-group association fail", async () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
@@ -299,9 +321,10 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
-  it("should fail when fetching the newly created user", async () => {
+  it("should fail when fetching the newly created user and fetch fail", async () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
@@ -357,81 +380,7 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-  });
-
-  it("should return a valid backoffice User when both APIM users and its manage subscription does not exists", async () => {
-    const productId = faker.string.uuid();
-    jwtVerify.mockResolvedValueOnce({
-      payload: aValidJwtPayload
-    });
-    getUserByEmail.mockReturnValueOnce(TE.right(O.none));
-    mockApimClient.user.createOrUpdate.mockResolvedValueOnce(aValidApimUser);
-    mockApimClient.groupUser.create.mockResolvedValue(aValidApimUser);
-    getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
-
-    getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
-    getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
-    upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-
-    const user = await authorize(mockConfig)(
-      { identity_token: "identity_token" },
-      {}
-    );
-
-    expect(user).toEqual(
-      getExpectedUser(aValidJwtPayload, aValidApimUser, aValidSubscription)
-    );
-
-    expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimClient).toHaveBeenCalledTimes(3);
-    expect(getApimClient).toHaveBeenCalledWith(
-      mockConfig,
-      mockConfig.AZURE_SUBSCRIPTION_ID
-    );
-    expect(getApimService).toHaveBeenCalledTimes(4);
-    expect(getApimService).toHaveBeenCalledWith(
-      mockApimClient,
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM
-    );
-    expect(getUserByEmail).toHaveBeenCalledTimes(2);
-    expect(getUserByEmail).toHaveBeenCalledWith(
-      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
-      true
-    );
-    expect(mockApimClient.user.createOrUpdate).toHaveBeenCalledOnce();
-    expect(mockApimClient.user.createOrUpdate).toHaveBeenCalledWith(
-      mockConfig.AZURE_APIM_RESOURCE_GROUP,
-      mockConfig.AZURE_APIM,
-      expect.any(String),
-      getExpectedCreateUserReqParam(aValidJwtPayload.organization)
-    );
-    expect(mockApimClient.groupUser.create).toHaveBeenCalledTimes(
-      mockConfig.APIM_USER_GROUPS.split(",").length
-    );
-    mockConfig.APIM_USER_GROUPS.split(",").forEach((groupId, index) =>
-      expect(mockApimClient.groupUser.create).toHaveBeenNthCalledWith(
-        index + 1, // The count starts at 1 (https://vitest.dev/api/expect.html#tohavebeennthcalledwith)
-        mockConfig.AZURE_APIM_RESOURCE_GROUP,
-        mockConfig.AZURE_APIM,
-        groupId,
-        aValidApimUser.name
-      )
-    );
-    expect(getSubscription).toHaveBeenCalledOnce();
-    expect(getSubscription).toHaveBeenCalledWith(
-      `MANAGE-${aValidApimUser.name}`
-    );
-    expect(getProductByName).toHaveBeenCalledOnce();
-    expect(getProductByName).toHaveBeenCalledWith(
-      mockConfig.AZURE_APIM_PRODUCT_NAME
-    );
-    expect(upsertSubscription).toHaveBeenCalledOnce();
-    expect(upsertSubscription).toHaveBeenCalledWith(
-      productId,
-      aValidApimUser.name,
-      `MANAGE-${aValidApimUser.name}`
-    );
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieved Apim user is not valid", async () => {
@@ -466,6 +415,7 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieved Apim user has not ApiServiceWrite permission", async () => {
@@ -509,6 +459,7 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieving user manage subscription fail", async () => {
@@ -550,6 +501,7 @@ describe("Authorize", () => {
     expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when manage subscription is not found and and fail to fetch APIM product", async () => {
@@ -595,6 +547,7 @@ describe("Authorize", () => {
     expect(mockApimClient.user.createOrUpdate).not.toHaveBeenCalled();
     expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when manage subscription is not found and fail to create it", async () => {
@@ -647,6 +600,7 @@ describe("Authorize", () => {
     );
     expect(mockApimClient.user.createOrUpdate).not.toHaveBeenCalled();
     expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
   });
 
   it("should fail when manage subscription is not found and fail the new one is not valid", async () => {
@@ -696,6 +650,52 @@ describe("Authorize", () => {
     );
     expect(mockApimClient.user.createOrUpdate).not.toHaveBeenCalled();
     expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
+  });
+
+  it("should fail when retrieve user authorized institutions fail", async () => {
+    const productId = faker.string.uuid();
+    const errorMessage = "Rejected getUserAuthorizedInstitutions";
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getUserAuthorizedInstitutions.mockRejectedValueOnce(errorMessage);
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
+    ).rejects.toThrowError(errorMessage);
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimClient).toHaveBeenCalledTimes(2);
+    expect(getApimClient).toHaveBeenCalledWith(
+      mockConfig,
+      mockConfig.AZURE_SUBSCRIPTION_ID
+    );
+    expect(getApimService).toHaveBeenCalledTimes(2);
+    expect(getApimService).toHaveBeenCalledWith(
+      mockApimClient,
+      mockConfig.AZURE_APIM_RESOURCE_GROUP,
+      mockConfig.AZURE_APIM
+    );
+    expect(getUserByEmail).toHaveBeenCalledOnce();
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(getSubscription).toHaveBeenCalledOnce();
+    expect(getSubscription).toHaveBeenCalledWith(
+      `MANAGE-${aValidApimUser.name}`
+    );
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
+      aValidJwtPayload.uid
+    );
+    expect(mockApimClient.user.createOrUpdate).not.toHaveBeenCalled();
+    expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
+    expect(getProductByName).not.toHaveBeenCalled();
+    expect(upsertSubscription).not.toHaveBeenCalled();
   });
 
   it("should return a valid backoffice User when both APIM users and its manage subscription exists", async () => {
@@ -704,6 +704,7 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
 
     const user = await authorize(mockConfig)(
       { identity_token: "identity_token" },
@@ -711,7 +712,12 @@ describe("Authorize", () => {
     );
 
     expect(user).toEqual(
-      getExpectedUser(aValidJwtPayload, aValidApimUser, aValidSubscription)
+      getExpectedUser(
+        aValidJwtPayload,
+        aValidApimUser,
+        aValidSubscription,
+        aValidInstitutions
+      )
     );
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimClient).toHaveBeenCalledTimes(2);
@@ -731,9 +737,97 @@ describe("Authorize", () => {
     expect(getSubscription).toHaveBeenCalledWith(
       `MANAGE-${aValidApimUser.name}`
     );
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
+      aValidJwtPayload.uid
+    );
     expect(mockApimClient.user.createOrUpdate).not.toHaveBeenCalled();
     expect(mockApimClient.groupUser.create).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+  });
+
+  it("should return a valid backoffice User when both APIM users and its manage subscription does not exists", async () => {
+    const productId = faker.string.uuid();
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockReturnValueOnce(TE.right(O.none));
+    mockApimClient.user.createOrUpdate.mockResolvedValueOnce(aValidApimUser);
+    mockApimClient.groupUser.create.mockResolvedValue(aValidApimUser);
+    getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
+    getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
+    upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
+
+    const user = await authorize(mockConfig)(
+      { identity_token: "identity_token" },
+      {}
+    );
+
+    expect(user).toEqual(
+      getExpectedUser(
+        aValidJwtPayload,
+        aValidApimUser,
+        aValidSubscription,
+        aValidInstitutions
+      )
+    );
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimClient).toHaveBeenCalledTimes(3);
+    expect(getApimClient).toHaveBeenCalledWith(
+      mockConfig,
+      mockConfig.AZURE_SUBSCRIPTION_ID
+    );
+    expect(getApimService).toHaveBeenCalledTimes(4);
+    expect(getApimService).toHaveBeenCalledWith(
+      mockApimClient,
+      mockConfig.AZURE_APIM_RESOURCE_GROUP,
+      mockConfig.AZURE_APIM
+    );
+    expect(getUserByEmail).toHaveBeenCalledTimes(2);
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(mockApimClient.user.createOrUpdate).toHaveBeenCalledOnce();
+    expect(mockApimClient.user.createOrUpdate).toHaveBeenCalledWith(
+      mockConfig.AZURE_APIM_RESOURCE_GROUP,
+      mockConfig.AZURE_APIM,
+      expect.any(String),
+      getExpectedCreateUserReqParam(aValidJwtPayload.organization)
+    );
+    expect(mockApimClient.groupUser.create).toHaveBeenCalledTimes(
+      mockConfig.APIM_USER_GROUPS.split(",").length
+    );
+    mockConfig.APIM_USER_GROUPS.split(",").forEach((groupId, index) =>
+      expect(mockApimClient.groupUser.create).toHaveBeenNthCalledWith(
+        index + 1, // The count starts at 1 (https://vitest.dev/api/expect.html#tohavebeennthcalledwith)
+        mockConfig.AZURE_APIM_RESOURCE_GROUP,
+        mockConfig.AZURE_APIM,
+        groupId,
+        aValidApimUser.name
+      )
+    );
+    expect(getSubscription).toHaveBeenCalledOnce();
+    expect(getSubscription).toHaveBeenCalledWith(
+      `MANAGE-${aValidApimUser.name}`
+    );
+    expect(getProductByName).toHaveBeenCalledOnce();
+    expect(getProductByName).toHaveBeenCalledWith(
+      mockConfig.AZURE_APIM_PRODUCT_NAME
+    );
+    expect(upsertSubscription).toHaveBeenCalledOnce();
+    expect(upsertSubscription).toHaveBeenCalledWith(
+      productId,
+      aValidApimUser.name,
+      `MANAGE-${aValidApimUser.name}`
+    );
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
+    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
+      aValidJwtPayload.uid
+    );
   });
 });
