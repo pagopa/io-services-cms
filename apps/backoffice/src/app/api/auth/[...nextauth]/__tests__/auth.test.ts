@@ -97,7 +97,8 @@ const getExpectedUser = (
   authorizedInstitutions: authorizedInstitutions.map(institution => ({
     id: institution.id,
     name: institution.description,
-    role: institution.userProductRoles?.[0]
+    role: institution.userProductRoles?.[0],
+    logo_url: institution.logo
   })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
