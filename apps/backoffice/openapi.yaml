@@ -49,6 +49,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+  /health:
+    get:
+      description: Get health application status
+      operationId: health
+      responses:
+        '200':
+          description: The application is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '500':
+          description: The application is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
   /auth: # /idp/selfcare/resolve-identity
     post:
       tags:
@@ -852,6 +869,12 @@ components:
         errorMessage:
           type: string
           description: the component failure message
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          description: the application health status
     ServiceLifecycle:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
     ServicePublication:
