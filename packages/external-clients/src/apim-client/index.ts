@@ -135,6 +135,10 @@ export type ApimService = {
     user: UserCreateParameters,
     userId?: NonEmptyString
   ) => TE.TaskEither<ApimRestError, UserContract>;
+  readonly createGroupUser: (
+    groupId: NonEmptyString,
+    userId: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, UserContract>;
 };
 
 export const getApimService = (
@@ -205,6 +209,14 @@ export const getApimService = (
       apimServiceName,
       userId,
       user
+    ),
+  createGroupUser: (groupId, userId) =>
+    createGroupUser(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      groupId,
+      userId
     ),
 });
 
@@ -563,7 +575,7 @@ const getDelegateFromServiceId = (
  * @param apimServiceName
  * @param userId
  * @param user
- * @returns
+ * @returns the created user resource **without** groups field
  */
 const createOrUpdateUser = (
   apimClient: ApiManagementClient,
@@ -580,6 +592,36 @@ const createOrUpdateUser = (
           apimServiceName,
           userId,
           user
+        ),
+      identity
+    ),
+    chainApimMappedError
+  );
+
+/**
+ * Create a relationship between a group and user
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param groupIdId
+ * @param userId
+ * @returns the user resource **without** groups field
+ */
+const createGroupUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  groupIdId: NonEmptyString,
+  userId: NonEmptyString
+): TE.TaskEither<ApimRestError, UserContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.groupUser.create(
+          apimResourceGroup,
+          apimServiceName,
+          groupIdId,
+          userId
         ),
       identity
     ),
