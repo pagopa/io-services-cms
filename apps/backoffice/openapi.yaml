@@ -282,7 +282,7 @@ paths:
         - services
       summary: Retrieve all services
       description: Retrieve all services owned by the calling user
-      operationId: serviceList
+      operationId: getServiceList
       security:
         - bearerAuth: []
       parameters:
