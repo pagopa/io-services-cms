@@ -28,9 +28,12 @@ import {
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import {
@@ -59,6 +62,26 @@ type PublishServiceHandler = (
   serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
+const retrieveServicePublicationTask =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (serviceId: NonEmptyString) =>
+    pipe(
+      serviceId,
+      fsmPublicationClient.getStore().fetch,
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.chainW((content) =>
+        pipe(
+          content,
+          O.map(({ id }) => TE.right(id)),
+          O.getOrElseW(() =>
+            TE.left(
+              ResponseErrorNotFound("Not found", `${serviceId} not found`)
+            )
+          )
+        )
+      )
+    );
+
 export const makePublishServiceHandler =
   ({
     fsmPublicationClient,
@@ -73,6 +96,7 @@ export const makePublishServiceHandler =
         auth.subscriptionId,
         auth.userId
       ),
+      TE.chainW(retrieveServicePublicationTask(fsmPublicationClient)),
       TE.chainW(
         flow(
           fsmPublicationClient.publish,
