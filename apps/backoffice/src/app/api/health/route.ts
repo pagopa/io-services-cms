@@ -9,6 +9,7 @@ import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
 /**
  * `api/healt` route handler
  * @returns project _name_ and _version_

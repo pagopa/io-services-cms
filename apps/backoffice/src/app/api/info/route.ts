@@ -10,6 +10,8 @@ import packageJson from "../../../../package.json";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 
+export const dynamic = "force-dynamic";
+
 /**
  * `api/info` route handler
  * @returns project _name_ and _version_
