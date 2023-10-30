@@ -28,8 +28,8 @@ interface BackOfficeUserParameters {
 }
 
 interface BackOfficeUserInstitution {
-  id: string;
-  name: string;
-  role: string;
+  id?: string;
+  name?: string;
+  role?: string;
   logo_url?: string;
 }

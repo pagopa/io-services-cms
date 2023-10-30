@@ -1,5 +1,8 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
+import { getApimService } from "@/lib/be/apim-service";
+import { getUserAuthorizedInstitutions } from "@/lib/be/institutions/selfcare";
+import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -12,7 +15,6 @@ import * as t from "io-ts";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
-import { ulid } from "ulid";
 import { ApimUser, IdentityTokenPayload, Subscription } from "../types";
 
 if (
@@ -25,15 +27,12 @@ if (
 
 type RightType<T> = T extends TE.TaskEither<any, infer L> ? L : never;
 type InnerType<T> = T extends TE.TaskEither<any, O.Option<infer U>> ? U : never;
-type ApimClient = ReturnType<typeof ApimUtils.getApimClient>;
 type UserContract = InnerType<
-  ReturnType<ReturnType<typeof ApimUtils["getApimService"]>["getUserByEmail"]>
+  ReturnType<ReturnType<typeof getApimService>["getUserByEmail"]>
 >;
 type SubscriptionContract = RightType<
-  ReturnType<ReturnType<typeof ApimUtils["getApimService"]>["getSubscription"]>
+  ReturnType<ReturnType<typeof getApimService>["getSubscription"]>
 >;
-
-export const MANAGE_APIKEY_PREFIX = "MANAGE-"; // FIXME: use ApimUtils.definition.MANAGE_APIKEY_PREFIX (currently does not seem to be working)
 
 export const authorize = (
   config: Configuration
@@ -47,10 +46,16 @@ export const authorize = (
     TE.chain(verifyToken(config)),
     TE.bindTo("identityTokenPayload"),
     TE.bind("apimUser", ({ identityTokenPayload }) =>
-      retrieveOrCreateApimUser(config)(identityTokenPayload)
+      pipe(identityTokenPayload, retrieveOrCreateApimUser(config))
     ),
     TE.bind("subscriptionManage", ({ apimUser }) =>
-      retrieveOrCreateUserSubscriptionManage(config)(apimUser)
+      pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config))
+    ),
+    TE.bind("authorizedInstitutions", ({ identityTokenPayload }) =>
+      TE.tryCatch(
+        () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
+        E.toError
+      )
     ),
     TE.map(toUser),
     TE.getOrElse(e => {
@@ -91,37 +96,31 @@ const retrieveOrCreateApimUser = (config: Configuration) => (
   identityTokenPayload: IdentityTokenPayload
 ): TE.TaskEither<Error, ApimUser> =>
   pipe(
-    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
-    apimClient =>
-      pipe(
-        formatApimAccountEmailForSelfcareOrganization(
-          identityTokenPayload.organization
-        ),
-        retrieveUserByEmail(config, apimClient),
-        TE.chain(
-          flow(
-            O.fold(
-              () =>
+    formatApimAccountEmailForSelfcareOrganization(
+      identityTokenPayload.organization
+    ),
+    retrieveUserByEmail,
+    TE.chain(
+      flow(
+        O.fold(
+          () =>
+            pipe(
+              identityTokenPayload,
+              createApimUser(config),
+              TE.chain(() =>
                 pipe(
-                  identityTokenPayload,
-                  createApimUser(config, apimClient),
-                  TE.chain(() =>
-                    pipe(
-                      formatApimAccountEmailForSelfcareOrganization(
-                        identityTokenPayload.organization
-                      ),
-                      retrieveUserByEmail(config, apimClient),
-                      TE.chain(
-                        TE.fromOption(() => new Error(`Cannot find user`))
-                      )
-                    )
-                  )
-                ),
-              TE.right
-            )
-          )
+                  formatApimAccountEmailForSelfcareOrganization(
+                    identityTokenPayload.organization
+                  ),
+                  retrieveUserByEmail,
+                  TE.chain(TE.fromOption(() => new Error(`Cannot find user`)))
+                )
+              )
+            ),
+          TE.right
         )
-      ),
+      )
+    ),
     TE.chain(
       flow(
         ApimUser.decode,
@@ -141,15 +140,11 @@ const formatApimAccountEmailForSelfcareOrganization = (
     })
   );
 
-const retrieveUserByEmail = (config: Configuration, apimClient: ApimClient) => (
+const retrieveUserByEmail = (
   userEmail: EmailString
 ): TE.TaskEither<Error, O.Option<UserContract>> =>
   pipe(
-    ApimUtils.getApimService(
-      apimClient,
-      config.AZURE_APIM_RESOURCE_GROUP,
-      config.AZURE_APIM
-    ),
+    getApimService(),
     apimService => apimService.getUserByEmail(userEmail, true),
     TE.mapLeft(
       err =>
@@ -157,40 +152,40 @@ const retrieveUserByEmail = (config: Configuration, apimClient: ApimClient) => (
     )
   );
 
-const createApimUser = (config: Configuration, apimClient: ApimClient) => (
+const createApimUser = (config: Configuration) => (
   identityTokenPayload: IdentityTokenPayload
 ): TE.TaskEither<Error, void> =>
   pipe(
-    TE.tryCatch(
-      () =>
-        apimClient.user.createOrUpdate(
-          config.AZURE_APIM_RESOURCE_GROUP,
-          config.AZURE_APIM,
-          ulid(),
-          {
-            email: formatApimAccountEmailForSelfcareOrganization(
-              identityTokenPayload.organization
-            ),
-            firstName: identityTokenPayload.organization.name,
-            lastName: identityTokenPayload.organization.id,
-            note: identityTokenPayload.organization.fiscal_code
-          }
+    getApimService(),
+    apimService =>
+      apimService.createOrUpdateUser({
+        email: formatApimAccountEmailForSelfcareOrganization(
+          identityTokenPayload.organization
         ),
-      E.toError
+        firstName: identityTokenPayload.organization.name,
+        lastName: identityTokenPayload.organization.id,
+        note: identityTokenPayload.organization.fiscal_code
+      }),
+    TE.mapLeft(
+      err => new Error(`Failed to create apim user, code: ${err.statusCode}`)
     ),
     TE.chain(apimUser =>
       pipe(
         config.APIM_USER_GROUPS.split(","),
         RA.map(groupId =>
-          TE.tryCatch(
-            () =>
-              apimClient.groupUser.create(
-                config.AZURE_APIM_RESOURCE_GROUP,
-                config.AZURE_APIM,
-                groupId,
-                apimUser.name as string
+          pipe(
+            getApimService(),
+            apimService =>
+              apimService.createGroupUser(
+                groupId as NonEmptyString,
+                apimUser.name as NonEmptyString
               ),
-            E.toError
+            TE.mapLeft(
+              err =>
+                new Error(
+                  `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUser.name}), code: ${err.statusCode}`
+                )
+            )
           )
         ),
         TE.sequenceSeqArray
@@ -229,15 +224,11 @@ const getUserSubscriptionManage = (config: Configuration) => (
   apimUser: ApimUser
 ): TE.TaskEither<Error, O.Option<SubscriptionContract>> =>
   pipe(
-    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
-    apimClient =>
-      ApimUtils.getApimService(
-        apimClient,
-        config.AZURE_APIM_RESOURCE_GROUP,
-        config.AZURE_APIM
-      ),
+    getApimService(),
     apimService =>
-      apimService.getSubscription(MANAGE_APIKEY_PREFIX + apimUser.name),
+      apimService.getSubscription(
+        ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
+      ),
     TE.foldW(
       flow(
         err =>
@@ -257,42 +248,34 @@ const getUserSubscriptionManage = (config: Configuration) => (
 const createSubscriptionManage = (config: Configuration) => (
   apimUser: ApimUser
 ): TE.TaskEither<Error, SubscriptionContract> =>
-  pipe(
-    ApimUtils.getApimClient(config, config.AZURE_SUBSCRIPTION_ID),
-    apimClient =>
-      ApimUtils.getApimService(
-        apimClient,
-        config.AZURE_APIM_RESOURCE_GROUP,
-        config.AZURE_APIM
-      ),
-    apimService =>
-      pipe(
-        getProductId(config, apimService),
-        TE.chain(productId =>
-          pipe(
-            apimService.upsertSubscription(
-              productId,
-              apimUser.name,
-              MANAGE_APIKEY_PREFIX + apimUser.name
-            ),
-            TE.mapLeft(
-              err =>
-                new Error(
-                  `Failed to create subscription manage, code: ${err.statusCode}`
-                )
-            )
+  pipe(getApimService(), apimService =>
+    pipe(
+      getProductId(config),
+      TE.chain(productId =>
+        pipe(
+          apimService.upsertSubscription(
+            productId,
+            apimUser.name,
+            ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
+          ),
+          TE.mapLeft(
+            err =>
+              new Error(
+                `Failed to create subscription manage, code: ${err.statusCode}`
+              )
           )
         )
       )
+    )
   );
 
 // TODO: refactor: move to common package (also used by services-cmsq, see create-service.ts)
-const getProductId = (
-  config: Configuration,
-  apimService: ReturnType<typeof ApimUtils["getApimService"]>
-): TE.TaskEither<Error, NonEmptyString> =>
+const getProductId = ({
+  AZURE_APIM_PRODUCT_NAME
+}: Configuration): TE.TaskEither<Error, NonEmptyString> =>
   pipe(
-    apimService.getProductByName(config.AZURE_APIM_PRODUCT_NAME),
+    getApimService(),
+    apimService => apimService.getProductByName(AZURE_APIM_PRODUCT_NAME),
     TE.mapLeft(
       err =>
         new Error(
@@ -318,11 +301,13 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 const toUser = ({
   identityTokenPayload,
   apimUser,
-  subscriptionManage
+  subscriptionManage,
+  authorizedInstitutions
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
   subscriptionManage: Subscription;
+  authorizedInstitutions: InstitutionResources;
 }): User => ({
   id: identityTokenPayload.uid,
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
@@ -331,16 +316,15 @@ const toUser = ({
     id: identityTokenPayload.organization.id,
     name: identityTokenPayload.organization.name,
     role: identityTokenPayload.organization.roles[0]?.role,
-    logo_url: "url"
+    logo_url: undefined // TODO: retrieve institution logo from selfcare
   },
   // TODO: retrieve from selfcare
-  authorizedInstitutions: [
-    {
-      id: "id_2",
-      name: "Comune di Roma",
-      role: "operator"
-    }
-  ],
+  authorizedInstitutions: authorizedInstitutions.map(institution => ({
+    id: institution.id,
+    name: institution.description,
+    role: institution.userProductRoles?.[0],
+    logo_url: institution.logo
+  })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
     .map(group => group.name),

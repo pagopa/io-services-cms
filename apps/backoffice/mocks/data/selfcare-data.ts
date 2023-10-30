@@ -1,3 +1,4 @@
+import { SelfcareRoles } from "@/types/auth";
 import { faker } from "@faker-js/faker/locale/it";
 
 const MAX_ARRAY_LENGTH = 20;
@@ -81,7 +82,8 @@ export const getMockInstitution = (institutionId?: string) => ({
   rootParent: {
     id: faker.string.uuid(),
     description: faker.company.name()
-  }
+  },
+  userProductRoles: faker.helpers.arrayElements(Object.values(SelfcareRoles))
 });
 
 export const getSelfCareProblemResponse = (status: number) => ({

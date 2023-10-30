@@ -3,22 +3,18 @@ import {
   HTTP_STATUS_OK
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
+import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
-import { NextResponse } from "next/server";
-import packageJson from "../../../../package.json";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
-import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-
 /**
- * `api/info` route handler
+ * `api/healt` route handler
  * @returns project _name_ and _version_
  */
 export async function GET() {
-  // get info from package.json
-
   const health = await healthcheck([
     getLegacyCosmosHealth(),
     getApimHealth(),
@@ -29,9 +25,7 @@ export async function GET() {
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
 
   const response = {
-    name: packageJson.name,
-    version: packageJson.version,
-    health
+    status: health.status
   };
 
   return NextResponse.json(response, { status });

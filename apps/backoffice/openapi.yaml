@@ -49,6 +49,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+  /health:
+    get:
+      description: Get health application status
+      operationId: health
+      responses:
+        '200':
+          description: The application is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '500':
+          description: The application is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
   /auth: # /idp/selfcare/resolve-identity
     post:
       tags:
@@ -251,6 +268,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicePagination'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/list:
+    get:
+      tags:
+        - services
+      summary: Retrieve all services
+      description: Retrieve all services owned by the calling user
+      operationId: getServiceList
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: The number of services to return
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: The number of services to skip before starting to collect the result set
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            default: 0
+        - name: visibility
+          in: query
+          description: Include service visibility
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Services fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceList'
         '401':
           description: Unauthorized
         '403':
@@ -852,6 +919,12 @@ components:
         errorMessage:
           type: string
           description: the component failure message
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          description: the application health status
     ServiceLifecycle:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
     ServicePublication:
@@ -993,6 +1066,24 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
     SelfCareIdentity:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/SelfCareIdentity'
+    ServiceList:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceListItem'
+        pagination:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+    ServiceListItem:
+      description: Service Lifecycle model data
+      allOf:
+        - type: object
+          properties:
+            visibility:
+              type: boolean
+        - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+
   securitySchemes:
     bearerAuth:
       type: http

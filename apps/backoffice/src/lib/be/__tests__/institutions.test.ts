@@ -89,7 +89,7 @@ describe("Institutions", () => {
         getInstitutionById
       });
 
-      const result = await retrieveInstitution(mocks.institution.id);
+      const result = await retrieveInstitution(mocks.institution.id as string);
 
       expect(getInstitutionById).toHaveBeenCalledWith(mocks.institution.id);
       expect(result).toEqual(mocks.institution);
@@ -109,7 +109,9 @@ describe("Institutions", () => {
 
       isAxiosError.mockReturnValueOnce(true);
 
-      expect(retrieveInstitution(mocks.institution.id)).rejects.toThrowError(
+      expect(
+        retrieveInstitution(mocks.institution.id as string)
+      ).rejects.toThrowError(
         new InstitutionNotFoundError(
           `Institution having id '${mocks.institution.id}' does not exists`
         )
