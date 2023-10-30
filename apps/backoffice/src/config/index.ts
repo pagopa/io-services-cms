@@ -16,6 +16,9 @@ export type Configuration = {
   BACK_OFFICE_TITLE: string;
   CDN_URL: string;
   SERVICES_LOGO_PATH: string;
+  BACK_OFFICE_PRIVACY_POLICY_URL: string;
+  BACK_OFFICE_TOS_URL: string;
+  BACK_OFFICE_PERS_DATA_PROTECTION_URL: string;
 
   // Selfcare
   SELFCARE_URL: string;
@@ -72,6 +75,11 @@ export function getConfiguration(): Configuration {
     BACK_OFFICE_TITLE: process.env.NEXT_PUBLIC_BACK_OFFICE_TITLE as string,
     CDN_URL: process.env.NEXT_PUBLIC_CDN_URL as string,
     SERVICES_LOGO_PATH: process.env.NEXT_PUBLIC_SERVICES_LOGO_PATH as string,
+    BACK_OFFICE_PRIVACY_POLICY_URL: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_PRIVACY_POLICY_URL as string,
+    BACK_OFFICE_TOS_URL: process.env.NEXT_PUBLIC_BACK_OFFICE_TOS_URL as string,
+    BACK_OFFICE_PERS_DATA_PROTECTION_URL: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_PERS_DATA_PROTECTION_URL as string,
 
     // Selfcare
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,

@@ -6,6 +6,7 @@ import * as t from "io-ts";
 import { cache } from "react";
 import { HealthChecksError } from "./errors";
 
+type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
@@ -16,7 +17,7 @@ const Config = t.type({
   AZURE_APIM: NonEmptyString
 });
 
-const getApimConfig = cache(() => {
+const getApimConfig: () => Config = cache(() => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -27,7 +28,7 @@ const getApimConfig = cache(() => {
   return result.right;
 });
 
-export const getApimService = cache(() => {
+export const getApimService: () => ApimUtils.ApimService = cache(() => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
   const apimClient = ApimUtils.getApimClient(
@@ -41,7 +42,7 @@ export const getApimService = cache(() => {
   );
 });
 
-export const getApimHealth = async () => {
+export const getApimHealth: () => Promise<void> = async () => {
   try {
     const { AZURE_APIM_PRODUCT_NAME } = getApimConfig();
     const apimService = getApimService();
