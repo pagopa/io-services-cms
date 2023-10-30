@@ -75,7 +75,10 @@ const retrieveServicePublicationTask =
           O.map(({ id }) => TE.right(id)),
           O.getOrElseW(() =>
             TE.left(
-              ResponseErrorNotFound("Not found", `${serviceId} not found`)
+              ResponseErrorNotFound(
+                "Not found",
+                `no item with id ${serviceId} found`
+              )
             )
           )
         )
