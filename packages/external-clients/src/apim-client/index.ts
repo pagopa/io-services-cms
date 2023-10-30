@@ -5,6 +5,7 @@ import {
   SubscriptionContract,
   SubscriptionListSecretsResponse,
   UserContract,
+  UserCreateParameters,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
@@ -22,6 +23,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { ulid } from "ulid";
 import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
@@ -129,6 +131,14 @@ export type ApimService = {
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<ApimRestError, Delegate>;
+  readonly createOrUpdateUser: (
+    user: UserCreateParameters,
+    userId?: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, UserContract>;
+  readonly createGroupUser: (
+    groupId: NonEmptyString,
+    userId: NonEmptyString
+  ) => TE.TaskEither<ApimRestError, UserContract>;
 };
 
 export const getApimService = (
@@ -191,6 +201,22 @@ export const getApimService = (
       apimResourceGroup,
       apimServiceName,
       serviceId
+    ),
+  createOrUpdateUser: (user, userId = ulid() as NonEmptyString) =>
+    createOrUpdateUser(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      userId,
+      user
+    ),
+  createGroupUser: (groupId, userId) =>
+    createGroupUser(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      groupId,
+      userId
     ),
 });
 
@@ -540,6 +566,66 @@ const getDelegateFromServiceId = (
         }))
       )
     )
+  );
+
+/**
+ * Create or updates (if not exists) an user
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param userId
+ * @param user
+ * @returns the created user resource **without** groups field
+ */
+const createOrUpdateUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  userId: NonEmptyString,
+  user: UserCreateParameters
+): TE.TaskEither<ApimRestError, UserContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.user.createOrUpdate(
+          apimResourceGroup,
+          apimServiceName,
+          userId,
+          user
+        ),
+      identity
+    ),
+    chainApimMappedError
+  );
+
+/**
+ * Create a relationship between a group and user
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param groupIdId
+ * @param userId
+ * @returns the user resource **without** groups field
+ */
+const createGroupUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  groupIdId: NonEmptyString,
+  userId: NonEmptyString
+): TE.TaskEither<ApimRestError, UserContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.groupUser.create(
+          apimResourceGroup,
+          apimServiceName,
+          groupIdId,
+          userId
+        ),
+      identity
+    ),
+    chainApimMappedError
   );
 
 /**
