@@ -7836,7 +7836,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "io-services-cms-backoffice@workspace:apps/backoffice"
   dependencies:
+    "@azure/arm-apimanagement": 8.1.2
     "@azure/cosmos": ^3.17.3
+    "@azure/identity": ^3.1.4
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
     "@faker-js/faker": ^8.0.2
