@@ -1,13 +1,13 @@
 import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
-import { isAxiosError } from "axios";
-import * as E from "fp-ts/lib/Either";
-import { Institution } from "@/types/selfcare/Institution";
-import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import {
   InstitutionNotFoundError,
   ManagedInternalError
 } from "@/lib/be/errors";
 import { getSelfcareClient } from "@/lib/be/selfcare-client";
+import { Institution } from "@/types/selfcare/Institution";
+import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
+import { isAxiosError } from "axios";
+import * as E from "fp-ts/lib/Either";
 
 export const getUserAuthorizedInstitutions = async (
   userIdForAuth: string
