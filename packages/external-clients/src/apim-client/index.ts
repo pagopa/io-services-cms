@@ -23,12 +23,12 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { ulid } from "ulid";
 import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
 
-import { ulid } from "ulid";
 import {
   FilterCompositionEnum,
   FilterFieldEnum,
