@@ -1,4 +1,5 @@
 import * as E from "fp-ts/Either";
+import * as TE from "fp-ts/TaskEither";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
@@ -46,10 +47,36 @@ const { getIoServicesCmsClient } = vi.hoisted(() => ({
   })
 }));
 
-vi.mock("../cms-client", () => ({
+const { getApimRestClient } = vi.hoisted(() => ({
+  getApimRestClient: vi.fn().mockReturnValue({
+    getServiceList: vi.fn(() => TE.right({}))
+  })
+}));
+
+const {
+  getServiceLifecycleCosmosStore,
+  getServicePublicationCosmosStore
+} = vi.hoisted(() => ({
+  getServiceLifecycleCosmosStore: vi.fn().mockReturnValue({
+    bulkFetch: vi.fn(() => TE.right({}))
+  }),
+  getServicePublicationCosmosStore: vi.fn().mockReturnValue({
+    bulkFetch: vi.fn(() => TE.right({}))
+  })
+}));
+
+vi.mock("@/lib/be/cms-client", () => ({
   getIoServicesCmsClient
 }));
 
+vi.mock("@/lib/be/apim-service", () => ({
+  getApimRestClient
+}));
+
+vi.mock("@/lib/be/cosmos-store", () => ({
+  getServiceLifecycleCosmosStore,
+  getServicePublicationCosmosStore
+}));
 describe("forwardIoServicesCmsRequest tests", () => {
   it("request without body request and with response body", async () => {
     // Mock io-services-cms client

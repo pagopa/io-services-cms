@@ -15,8 +15,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as T from "fp-ts/lib/Task";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
@@ -24,7 +23,6 @@ import {
   retrieveLifecycleServices,
   retrievePublicationServices
 } from "./cosmos";
-import { th } from "@faker-js/faker";
 
 type PathParameters = {
   serviceId?: string;

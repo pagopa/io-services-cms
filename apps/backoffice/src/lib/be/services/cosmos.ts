@@ -4,7 +4,7 @@ import { pipe } from "fp-ts/lib/function";
 import {
   getServiceLifecycleCosmosStore,
   getServicePublicationCosmosStore
-} from "../cosmos-store";
+} from "@/lib/be/cosmos-store";
 
 export const retrieveLifecycleServices = (subscriptions: Array<string>) =>
   pipe(

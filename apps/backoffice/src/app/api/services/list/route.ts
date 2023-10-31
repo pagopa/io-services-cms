@@ -1,12 +1,10 @@
-import { getApimRestClient } from "@/lib/be/apim-service";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { retrieveServiceList } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
-import * as t from "io-ts";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
-import { retrieveServiceList } from "@/lib/be/services/business";
 /**
  * @description Retrieve all services owned by the calling user
  */
