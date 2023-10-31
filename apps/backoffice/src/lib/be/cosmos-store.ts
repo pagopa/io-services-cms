@@ -42,7 +42,7 @@ const getCosmosDatabase = cache(() => {
 export const getServiceLifecycleCosmosStore = cache(() => {
   const cosmosConfiguration = getCosmosConfig();
   const cosmos = getCosmosDatabase();
-  stores.createCosmosStore(
+  return stores.createCosmosStore(
     cosmos.container(cosmosConfiguration.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
     ServiceLifecycle.ItemType
   );
@@ -51,7 +51,7 @@ export const getServiceLifecycleCosmosStore = cache(() => {
 export const getServicePublicationCosmosStore = cache(() => {
   const cosmosConfiguration = getCosmosConfig();
   const cosmos = getCosmosDatabase();
-  stores.createCosmosStore(
+  return stores.createCosmosStore(
     cosmos.container(
       cosmosConfiguration.COSMOSDB_CONTAINER_SERVICES_PUBLICATION
     ),
@@ -59,7 +59,7 @@ export const getServicePublicationCosmosStore = cache(() => {
   );
 });
 
-export async function getLegacyCosmosHealth() {
+export async function getCosmosStoreHealth() {
   try {
     const cosmos = getCosmosDatabase();
     const { resource } = await cosmos.client.getDatabaseAccount();
@@ -67,6 +67,6 @@ export async function getLegacyCosmosHealth() {
       throw new Error();
     }
   } catch (e) {
-    throw new HealthChecksError("cosmos-db", e);
+    throw new HealthChecksError("cosmos-store", e);
   }
 }
