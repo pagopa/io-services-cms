@@ -33,8 +33,8 @@ export const Header = () => {
   useEffect(() => {
     if (session?.user) {
       const currentParty: PartySwitchItem = {
-        id: session.user.institution.id ?? "",
-        name: session.user.institution.name ?? "",
+        id: session.user.institution.id,
+        name: session.user.institution.name,
         productRole: t(`roles.${session.user.institution.role}`),
         logoUrl: session.user.institution.logo_url
       };
