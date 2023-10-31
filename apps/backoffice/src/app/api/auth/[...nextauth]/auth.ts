@@ -1,7 +1,11 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { getApimService } from "@/lib/be/apim-service";
-import { getUserAuthorizedInstitutions } from "@/lib/be/institutions/selfcare";
+import {
+  getInstitutionById,
+  getUserAuthorizedInstitutions
+} from "@/lib/be/institutions/selfcare";
+import { Institution } from "@/types/selfcare/Institution";
 import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -54,6 +58,12 @@ export const authorize = (
     TE.bind("authorizedInstitutions", ({ identityTokenPayload }) =>
       TE.tryCatch(
         () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
+        E.toError
+      )
+    ),
+    TE.bind("institution", ({ identityTokenPayload }) =>
+      TE.tryCatch(
+        () => pipe(identityTokenPayload.organization.id, getInstitutionById),
         E.toError
       )
     ),
@@ -302,12 +312,14 @@ const toUser = ({
   identityTokenPayload,
   apimUser,
   subscriptionManage,
-  authorizedInstitutions
+  authorizedInstitutions,
+  institution
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
   subscriptionManage: Subscription;
   authorizedInstitutions: InstitutionResources;
+  institution: Institution;
 }): User => ({
   id: identityTokenPayload.uid,
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
@@ -316,9 +328,8 @@ const toUser = ({
     id: identityTokenPayload.organization.id,
     name: identityTokenPayload.organization.name,
     role: identityTokenPayload.organization.roles[0]?.role,
-    logo_url: undefined // TODO: retrieve institution logo from selfcare
+    logo_url: institution.logo
   },
-  // TODO: retrieve from selfcare
   authorizedInstitutions: authorizedInstitutions.map(institution => ({
     id: institution.id,
     name: institution.description,
