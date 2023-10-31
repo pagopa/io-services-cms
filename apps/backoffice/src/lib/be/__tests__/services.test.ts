@@ -1,13 +1,16 @@
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
+import * as O from "fp-ts/Option";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import {
   forwardIoServicesCmsRequest,
-  retrieveServiceList
+  retrieveServiceList,
+  toServiceListItem
 } from "../services/business";
+import { ServiceLifecycle } from "@io-services-cms/models";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -26,10 +29,37 @@ const mocks: {
   statusOK: number;
   statusNoContent: number;
   aSamplePayload: { test: string };
+  aBaseServiceLifecycle: ServiceLifecycle.ItemType;
+  anUserId: string;
 } = vi.hoisted(() => ({
   statusOK: 200,
   statusNoContent: 204,
-  aSamplePayload: { test: "test" }
+  aSamplePayload: { test: "test" },
+  aBaseServiceLifecycle: ({
+    id: "aServiceId",
+    last_update: "aServiceLastUpdate",
+    data: {
+      name: "aServiceName",
+      description: "aServiceDescription",
+      authorized_recipients: [],
+      max_allowed_payment_amount: 123,
+      metadata: {
+        address: "via tal dei tali 123",
+        email: "service@email.it",
+        pec: "service@pec.it",
+        scope: "LOCAL"
+      },
+      organization: {
+        name: "anOrganizationName",
+        fiscal_code: "12345678901"
+      },
+      require_secure_channel: false
+    },
+    fsm: {
+      state: "draft"
+    }
+  } as unknown) as ServiceLifecycle.ItemType,
+  anUserId: "anUserId"
 }));
 
 const { getIoServicesCmsClient } = vi.hoisted(() => ({
@@ -274,12 +304,65 @@ describe("Services TEST", () => {
   });
 
   describe("retrieveServiceList", () => {
-    it("should return a list of services", async () => {
-      const result = await retrieveServiceList("aSubscriptionId", 10, 0);
+    it("should return a list of services with visibility", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() =>
+        TE.right([O.some(mocks.aBaseServiceLifecycle)])
+      );
+      const bulkFetchPublicationMock = vi.fn(() =>
+        TE.right([
+          O.some({
+            id: mocks.aBaseServiceLifecycle.id,
+            name: "aServiceName",
+            fsm: {
+              state: "published"
+            }
+          })
+        ])
+      );
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [
+            {
+              name: mocks.aBaseServiceLifecycle.id
+            }
+          ],
+          count: 1
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+        mocks.aBaseServiceLifecycle.id
+      ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+        mocks.aBaseServiceLifecycle.id
+      ]);
 
       expect(result).toStrictEqual({
-        pagination: { count: 0, limit: 10, offset: 0 },
-        value: []
+        value: [
+          {
+            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            id: "aServiceId",
+            visible: true
+          }
+        ],
+        pagination: { count: 1, limit: 10, offset: 0 }
       });
     });
   });

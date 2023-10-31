@@ -47,7 +47,7 @@ const reducePublicationServicesList = (
 const isServiceVisible = (item: ServicePublication.ItemType): boolean => {
   return item.fsm.state === "published";
 };
-const toServiceListItem = ({
+export const toServiceListItem = ({
   fsm,
   data,
   id,
