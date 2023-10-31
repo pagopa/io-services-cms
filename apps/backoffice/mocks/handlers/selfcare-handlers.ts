@@ -51,7 +51,7 @@ export const buildHandlers = () => {
           [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
         ];
 
-        return res(...resultArray[1]);
+        return res(...resultArray[0]);
       }
     )
   ];
