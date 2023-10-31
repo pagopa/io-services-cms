@@ -7,7 +7,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { IoServicesCmsClient, callIoServicesCms } from "./client";
+import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 
 type PathParameters = {
   serviceId?: string;

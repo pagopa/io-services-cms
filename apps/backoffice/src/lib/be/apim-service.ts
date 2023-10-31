@@ -1,14 +1,12 @@
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
-import {
-  AzureAuthorityHosts,
-  ClientSecretCredential,
-  ErrorResponse
-} from "@azure/identity";
+import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import axios from "axios";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
 import { HealthChecksError } from "./errors";
@@ -71,7 +69,7 @@ const getAxiosInstance = cache(async () => {
   }
 
   return axios.create({
-    baseURL: "https://management.azure.com/subscriptions",
+    baseURL: "https://management.azure.com/subscriptions/", //TODO: Put in env
     timeout: 5000,
     headers: { Authorization: `Bearer ${accessToken}` }
   });
@@ -81,19 +79,42 @@ export const getApimRestClient = cache(async () => {
   const apimConfig = getApimConfig();
   const axiosInstance = await getAxiosInstance();
 
-  const getServiceList = async (
+  // const getServiceList = async (
+  //   userId: string,
+  //   limit: number,
+  //   offset: number
+  // ) => {
+  //   const subscriptionListUrl = `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions?api-version=2022-08-01&%24skip=${offset}&%24top=${limit}`;
+
+  //   const { data } = await axiosInstance.get<SubscriptionCollection>(
+  //     subscriptionListUrl
+  //   );
+
+  //   return data;
+  // };
+
+  const getServiceList = (
     userId: string,
     limit: number,
     offset: number
-  ) => {
-    const subscriptionListUrl = `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions?api-version=2022-08-01&%24skip=${offset}&%24top=${limit}`;
-
-    const { data, status } = await axiosInstance.get<
-      SubscriptionCollection | ErrorResponse
-    >(subscriptionListUrl);
-
-    return { data, status };
-  };
+  ): TE.TaskEither<Error, SubscriptionCollection> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get<SubscriptionCollection>(
+            `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions?api-version=2022-08-01&%24skip=${offset}&%24top=${limit}`
+          ),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(`Axios error catched ${e.message}`);
+        } else {
+          return new Error(`Error calling APIM getServiceList API: ${e}`);
+        }
+      }),
+      TE.map(({ data }) => data)
+    );
 
   return {
     getServiceList

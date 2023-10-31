@@ -3,7 +3,7 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { forwardIoServicesCmsRequest } from "../cms/business";
+import { forwardIoServicesCmsRequest } from "../services/business";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
