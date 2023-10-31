@@ -19,7 +19,9 @@ const Config = t.type({
   AZURE_APIM_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
-  AZURE_APIM: NonEmptyString
+  AZURE_APIM: NonEmptyString,
+  AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString,
+  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString
 });
 
 const getApimConfig: () => Config = cache(() => {
@@ -59,7 +61,7 @@ const getAxiosInstance = cache(async () => {
     }
   );
   const tokenResponse = await credential.getToken(
-    "https://management.azure.com/.default"
+    apimConfig.AZURE_CREDENTIALS_SCOPE_URL
   );
 
   const accessToken = tokenResponse?.token || null;
@@ -69,7 +71,7 @@ const getAxiosInstance = cache(async () => {
   }
 
   return axios.create({
-    baseURL: "https://management.azure.com/subscriptions/", //TODO: Put in env
+    baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
     headers: { Authorization: `Bearer ${accessToken}` }
   });
@@ -78,20 +80,6 @@ const getAxiosInstance = cache(async () => {
 export const getApimRestClient = cache(async () => {
   const apimConfig = getApimConfig();
   const axiosInstance = await getAxiosInstance();
-
-  // const getServiceList = async (
-  //   userId: string,
-  //   limit: number,
-  //   offset: number
-  // ) => {
-  //   const subscriptionListUrl = `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions?api-version=2022-08-01&%24skip=${offset}&%24top=${limit}`;
-
-  //   const { data } = await axiosInstance.get<SubscriptionCollection>(
-  //     subscriptionListUrl
-  //   );
-
-  //   return data;
-  // };
 
   const getServiceList = (
     userId: string,
