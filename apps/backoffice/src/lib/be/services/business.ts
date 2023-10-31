@@ -2,12 +2,29 @@ import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_NO_CONTENT
 } from "@/config/constants";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
+import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import { ServiceList } from "@/generated/api/ServiceList";
+import { ServiceListItem } from "@/generated/api/ServiceListItem";
+import { CategoryEnum, ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { getApimRestClient } from "@/lib/be/apim-service";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as TE from "fp-ts/lib/TaskEither";
+import * as T from "fp-ts/lib/Task";
+import { flow, pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
+import {
+  retrieveLifecycleServices,
+  retrievePublicationServices
+} from "./cosmos";
+import { th } from "@faker-js/faker";
 
 type PathParameters = {
   serviceId?: string;
@@ -15,6 +32,145 @@ type PathParameters = {
   limit?: string;
   offset?: string;
 };
+
+const reducePublicationServicesList = (
+  publicationServices: ReadonlyArray<ServicePublication.ItemType>
+) =>
+  pipe(
+    publicationServices,
+    RA.map(item => [item.id, isServiceVisible(item)] as [string, boolean]),
+    arr =>
+      arr.reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, boolean>)
+  );
+
+const isServiceVisible = (item: ServicePublication.ItemType): boolean => {
+  return item.fsm.state === "published";
+};
+const toServiceListItem = ({
+  fsm,
+  data,
+  id,
+  last_update
+}: ServiceLifecycle.ItemType): ServiceListItem => ({
+  id,
+  status: toServiceStatus(fsm),
+  last_update: last_update ?? new Date().getTime().toString(),
+  name: data.name,
+  description: data.description,
+  organization: data.organization,
+  metadata: {
+    ...data.metadata,
+    scope: toScopeType(data.metadata.scope),
+    category: toCategoryType(data.metadata.category)
+  },
+  authorized_recipients: data.authorized_recipients,
+  authorized_cidrs: data.authorized_cidrs
+});
+
+const toServiceStatus = (
+  fsm: ServiceLifecycle.ItemType["fsm"]
+): ServiceLifecycleStatus => {
+  switch (fsm.state) {
+    case "approved":
+    case "deleted":
+    case "draft":
+    case "submitted":
+      return { value: ServiceLifecycleStatusTypeEnum[fsm.state] };
+    case "rejected":
+      return {
+        value: ServiceLifecycleStatusTypeEnum[fsm.state],
+        reason: (fsm.reason as string) ?? undefined // FIXME
+      };
+
+    default:
+      const _: never = fsm;
+      return ServiceLifecycleStatusTypeEnum[fsm];
+  }
+};
+
+const toScopeType = (
+  s: ServiceLifecycle.ItemType["data"]["metadata"]["scope"]
+): ScopeEnum => {
+  switch (s) {
+    case "LOCAL":
+    case "NATIONAL":
+      return ScopeEnum[s];
+    default:
+      const _: never = s;
+      return ScopeEnum[s];
+  }
+};
+
+const toCategoryType = (
+  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"]
+): CategoryEnum => {
+  switch (s) {
+    case "STANDARD":
+    case "SPECIAL":
+      return CategoryEnum[s];
+    default:
+      return CategoryEnum.STANDARD;
+  }
+};
+
+/**
+ * @description This method Will retrieve the specified list of services partition for the given user
+ *
+ * @param userId
+ * @param limit
+ * @param offset
+ * @returns
+ */
+export const retrieveServiceList = async (
+  userId: string,
+  limit: number,
+  offset: number
+): Promise<ServiceList> =>
+  pipe(
+    TE.tryCatch(() => getApimRestClient(), E.toError),
+    // get services from apim
+    TE.chainW(apimRestClient =>
+      apimRestClient.getServiceList(userId, limit, offset)
+    ),
+    TE.bindTo("apimServices"),
+    // get services from services-lifecycle cosmos containee and map to ServiceListItem
+    TE.bind("lifecycleServices", ({ apimServices }) =>
+      pipe(
+        apimServices.value
+          ? apimServices.value.map(
+              subscription => subscription.name as NonEmptyString
+            )
+          : [],
+        retrieveLifecycleServices,
+        TE.map(RA.map(toServiceListItem))
+      )
+    ),
+    // get services from services-publication cosmos container
+    // create a Record list which contains the service id and its visibility
+    TE.bind("publicationServices", ({ lifecycleServices }) =>
+      pipe(
+        lifecycleServices.map(
+          publicationService => publicationService.id as NonEmptyString
+        ),
+        retrievePublicationServices,
+        TE.map(reducePublicationServicesList)
+      )
+    ),
+    // create response payload
+    TE.map(({ apimServices, lifecycleServices, publicationServices }) => ({
+      value: lifecycleServices.map(service => ({
+        ...service,
+        visible: publicationServices[service.id] ?? false
+      })),
+      pagination: { offset, limit, count: apimServices.count }
+    })),
+    TE.getOrElse(error => {
+      throw error;
+    })
+  )();
 
 /**
  * The Backoffice needs to call io-services-cms APIs,
