@@ -303,14 +303,6 @@ paths:
             type: number
             minimum: 0
             default: 0
-        - name: visibility
-          in: query
-          description: Include service visibility
-          required: false
-          schema:
-            type: number
-            minimum: 0
-            default: 0
       responses:
         '200':
           description: Services fetched successfully
@@ -1081,7 +1073,8 @@ components:
         - type: object
           properties:
             visibility:
-              type: boolean
+              type: string
+              enum: [published, unpublished]
         - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
 
   securitySchemes:
