@@ -17,14 +17,12 @@ export const GET = withJWTAuthHandler(
       const rawlimit = NumberFromString.decode(
         request.nextUrl.searchParams.get("limit")
       );
-      console.log(`rawlimit:`, rawlimit);
       const limit =
         E.isLeft(rawlimit) || rawlimit.right > 100 ? 100 : rawlimit.right;
 
       const rawoffset = NumberFromString.decode(
         request.nextUrl.searchParams.get("offset")
       );
-      console.log(`rawoffset:`, rawoffset);
       const offset =
         E.isLeft(rawoffset) || rawoffset.right < 0 ? 0 : rawoffset.right;
 

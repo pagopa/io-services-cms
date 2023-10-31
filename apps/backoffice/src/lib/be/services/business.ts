@@ -7,7 +7,10 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceList } from "@/generated/api/ServiceList";
-import { ServiceListItem } from "@/generated/api/ServiceListItem";
+import {
+  ServiceListItem,
+  VisibilityEnum
+} from "@/generated/api/ServiceListItem";
 import { CategoryEnum, ScopeEnum } from "@/generated/api/ServiceMetadata";
 import { getApimRestClient } from "@/lib/be/apim-service";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
@@ -36,17 +39,14 @@ const reducePublicationServicesList = (
 ) =>
   pipe(
     publicationServices,
-    RA.map(item => [item.id, isServiceVisible(item)] as [string, boolean]),
+    RA.map(item => [item.id, item.fsm.state] as [string, VisibilityEnum]),
     arr =>
       arr.reduce((acc, [key, value]) => {
         acc[key] = value;
         return acc;
-      }, {} as Record<string, boolean>)
+      }, {} as Record<string, VisibilityEnum>)
   );
 
-const isServiceVisible = (item: ServicePublication.ItemType): boolean => {
-  return item.fsm.state === "published";
-};
 export const toServiceListItem = ({
   fsm,
   data,
@@ -161,7 +161,7 @@ export const retrieveServiceList = async (
     TE.map(({ apimServices, lifecycleServices, publicationServices }) => ({
       value: lifecycleServices.map(service => ({
         ...service,
-        visible: publicationServices[service.id] ?? false
+        visibility: publicationServices[service.id]
       })),
       pagination: { offset, limit, count: apimServices.count }
     })),

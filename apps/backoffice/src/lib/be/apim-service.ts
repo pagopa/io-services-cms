@@ -90,7 +90,14 @@ export const getApimRestClient = cache(async () => {
       TE.tryCatch(
         () =>
           axiosInstance.get<SubscriptionCollection>(
-            `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions?api-version=2022-08-01&%24skip=${offset}&%24top=${limit}`
+            `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions`,
+            {
+              params: {
+                "api-version": "2022-08-01",
+                $skip: offset,
+                $top: limit
+              }
+            }
           ),
         identity
       ),
