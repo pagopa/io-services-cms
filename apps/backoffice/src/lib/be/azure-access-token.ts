@@ -63,18 +63,20 @@ export const getAzureAccessToken = async (): Promise<string> => {
   // Lazy init accessToken
   if (!accessToken) {
     accessToken = await refreshAzureAccessToken();
-    console.log(`Azure AccessToken initialized: Expiration Date is => $${new Date(
+    console.log(
+      `Azure AccessToken initialized: Expiration Date is => $${new Date(
         accessToken.expiresOnTimestamp
-      )}`);
+      )}`
+    );
   } else {
     // Lazy Referesh accessToken
     const now = new Date();
     const expires = new Date(accessToken.expiresOnTimestamp);
     if (now > expires) {
-        accessToken = await refreshAzureAccessToken();
+      accessToken = await refreshAzureAccessToken();
       console.log(
         `Azure AccessToken has expired and was refreshed: Old Expiration Date was => $${expires}, New Expiration Date is => $${new Date(
-            accessToken.expiresOnTimestamp
+          accessToken.expiresOnTimestamp
         )}`
       );
     }
