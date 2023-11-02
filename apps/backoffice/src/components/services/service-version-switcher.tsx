@@ -29,8 +29,7 @@ export type ServiceVersionSwitcherProps = {
 };
 
 /** Renders a modal dialog to choose the two versions (last approved or current) of a service. \
- * _(the Publication one and a different Lifecycle one)_.
- */
+ * _(the Publication one and a different Lifecycle one)_. */
 export const ServiceVersionSwitcher = ({
   service,
   isOpen,
@@ -122,13 +121,6 @@ export const ServiceVersionSwitcher = ({
       </Stack>
     </Box>
   );
-  <Box marginTop={1}>
-    <Stack direction="row" spacing={1}>
-      <Box>
-        <Typography variant="caption"></Typography>
-      </Box>
-    </Stack>
-  </Box>;
 
   return (
     <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
