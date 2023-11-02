@@ -10,7 +10,7 @@ import * as t from "io-ts";
 import { cache } from "react";
 
 //Instanza contentente le credenziali per accedere ad Azure
-let apimAccessToken: AccessToken;
+let accessToken: AccessToken;
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -61,23 +61,23 @@ const refreshAzureAccessToken = async (): Promise<AccessToken> => {
 
 export const getAzureAccessToken = async (): Promise<string> => {
   // Lazy init accessToken
-  if (!apimAccessToken) {
-    apimAccessToken = await refreshAzureAccessToken();
+  if (!accessToken) {
+    accessToken = await refreshAzureAccessToken();
     console.log(`Azure AccessToken initialized: Expiration Date is => $${new Date(
-        apimAccessToken.expiresOnTimestamp
+        accessToken.expiresOnTimestamp
       )}`);
   } else {
     // Lazy Referesh accessToken
     const now = new Date();
-    const expires = new Date(apimAccessToken.expiresOnTimestamp);
+    const expires = new Date(accessToken.expiresOnTimestamp);
     if (now > expires) {
-      apimAccessToken = await refreshAzureAccessToken();
+        accessToken = await refreshAzureAccessToken();
       console.log(
         `Azure AccessToken has expired and was refreshed: Old Expiration Date was => $${expires}, New Expiration Date is => $${new Date(
-          apimAccessToken.expiresOnTimestamp
+            accessToken.expiresOnTimestamp
         )}`
       );
     }
   }
-  return apimAccessToken.token;
+  return accessToken.token;
 };
