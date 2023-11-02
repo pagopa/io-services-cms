@@ -1,5 +1,4 @@
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
-import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -9,6 +8,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
+import { getAzureAccessToken } from "./azure-access-token";
 import { HealthChecksError } from "./errors";
 
 type Config = t.TypeOf<typeof Config>;
@@ -49,37 +49,20 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
   );
 });
 
-const getAxiosInstance = async () => {
+const getAxiosInstance = cache(async (accessToken: string) => {
   const apimConfig = getApimConfig();
-
-  const credential = new ClientSecretCredential(
-    apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-    apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
-    apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
-    {
-      authorityHost: AzureAuthorityHosts.AzurePublicCloud
-    }
-  );
-  const tokenResponse = await credential.getToken(
-    apimConfig.AZURE_CREDENTIALS_SCOPE_URL
-  );
-
-  const accessToken = tokenResponse?.token || null;
-
-  if (!accessToken) {
-    throw new Error("invalid or null accessToken");
-  }
 
   return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
     headers: { Authorization: `Bearer ${accessToken}` }
   });
-};
+});
 
 export const getApimRestClient = async () => {
   const apimConfig = getApimConfig();
-  const axiosInstance = await getAxiosInstance();
+  const azureAccessToken = await getAzureAccessToken();
+  const axiosInstance = await getAxiosInstance(azureAccessToken);
 
   const getServiceList = (
     userId: string,
