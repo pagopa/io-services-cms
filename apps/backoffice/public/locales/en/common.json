@@ -28,7 +28,8 @@
     "edit": "Edit",
     "next": "Next",
     "save": "Save",
-    "showMore": "Show more"
+    "showMore": "Show more",
+    "view": "View"
   },
   "copied": "Copied",
   "footer": {
@@ -210,7 +211,14 @@
     "services": {
       "title": "Services",
       "description": "View and manage your institution's services.",
-      "empty": "There are no services for this institution yet."
+      "empty": "There are no services for this institution yet.",
+      "tableHeader": {
+        "name": "Name",
+        "lastUpdate": "Last update",
+        "id": "ID Code",
+        "status": "Status",
+        "visibility": "Visibility on IO"
+      }
     },
     "service": {
       "address": "Address",
@@ -356,6 +364,13 @@
       "title": "Preview",
       "button": "See preview",
       "info": "This is how the service description will be displayed in the IO app."
+    },
+    "switcher": {
+      "title": "Which version of the service do you want to view?",
+      "description": "The <strong>{{name}}</strong> service has two versions. Select the one you want to view.",
+      "status": "Service status:",
+      "lastApprovedVersion": "Last approved version.",
+      "lastUpdate": "Last update:"
     }
   },
   "test": "This is a translation test"

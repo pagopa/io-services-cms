@@ -5,3 +5,4 @@ export * from "./service-info";
 export * from "./service-logo";
 export * from "./service-preview";
 export * from "./service-status";
+export * from "./service-version-switcher";

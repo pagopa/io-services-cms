@@ -28,7 +28,8 @@
     "edit": "Modifica",
     "next": "Continua",
     "save": "Salva",
-    "showMore": "Scopri di più"
+    "showMore": "Scopri di più",
+    "view": "Visualizza"
   },
   "copied": "Copiato",
   "footer": {
@@ -210,7 +211,14 @@
     "services": {
       "title": "Servizi",
       "description": "Visualizza e gestisci i servizi del tuo ente.",
-      "empty": "Non ci sono ancora servizi per questo ente."
+      "empty": "Non ci sono ancora servizi per questo ente.",
+      "tableHeader": {
+        "name": "Nome",
+        "lastUpdate": "Ultima modifica",
+        "id": "Codice ID",
+        "status": "Stato",
+        "visibility": "Visibilità in IO"
+      }
     },
     "service": {
       "address": "Indirizzo",
@@ -356,6 +364,13 @@
       "title": "Anteprima",
       "button": "Vedi anteprima",
       "info": "Ecco come si visualizzerà la descrizione del servizio in app IO."
+    },
+    "switcher": {
+      "title": "Quale versione del servizio vuoi visualizzare?",
+      "description": "Il servizio <strong>{{name}}</strong> ha due versioni. Seleziona quella che vuoi visualizzare.",
+      "status": "Stato del servizio:",
+      "lastApprovedVersion": "Ultima versione approvata.",
+      "lastUpdate": "Ultima modifica:"
     }
   },
   "test": "Questo è un test di traduzione"
