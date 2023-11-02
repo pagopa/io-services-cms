@@ -21,16 +21,35 @@ type PathParameters = {
  * we chose to implement intermediate APIs to do this in the B4F,
  * the following method is responsible for forwarding requests to the corresponding io-services-cms APIs
  */
-export const forwardIoServicesCmsRequest = async <
+export async function forwardIoServicesCmsRequest<
   T extends keyof IoServicesCmsClient
 >(
   operationId: T,
   nextRequest: NextRequest,
   backofficeUser: BackOfficeUser,
   pathParams?: PathParameters
-) => {
+): Promise<Response>;
+export async function forwardIoServicesCmsRequest<
+  T extends keyof IoServicesCmsClient
+>(
+  operationId: T,
+  jsonBody: any,
+  backofficeUser: BackOfficeUser,
+  pathParams?: PathParameters
+): Promise<Response>;
+export async function forwardIoServicesCmsRequest<
+  T extends keyof IoServicesCmsClient
+>(
+  operationId: T,
+  requestOrBody: NextRequest | any,
+  backofficeUser: BackOfficeUser,
+  pathParams?: PathParameters
+): Promise<Response> {
   // extract jsonBody
-  const jsonBody = nextRequest.bodyUsed && (await nextRequest.json());
+  const jsonBody =
+    "json" in requestOrBody // check NextRequest object
+      ? requestOrBody.bodyUsed && (await requestOrBody.json()) // TODO: are we sure requestOrBody.bodyUsed is the correct check before requestOrBody.json()?!?
+      : requestOrBody;
 
   // create the request payload
   const requestPayload = {
@@ -65,4 +84,4 @@ export const forwardIoServicesCmsRequest = async <
   }
 
   return NextResponse.json(value, { status });
-};
+}

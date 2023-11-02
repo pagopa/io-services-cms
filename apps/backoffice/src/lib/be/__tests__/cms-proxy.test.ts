@@ -130,6 +130,46 @@ describe("forwardIoServicesCmsRequest tests", () => {
     expect(result.body).not.toBe(null);
   });
 
+  it("fn call with explicitly body and expect response body", async () => {
+    // Mock io-services-cms client
+    const createService = vi.fn(() =>
+      Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+    );
+    getIoServicesCmsClient.mockReturnValueOnce({
+      createService
+    });
+
+    // Mock request body
+    const aBodyPayload = {
+      name: "test",
+      description: "test"
+    };
+
+    const result = await forwardIoServicesCmsRequest(
+      "createService",
+      aBodyPayload,
+      jwtMock,
+      {
+        serviceId: "test"
+      }
+    );
+
+    expect(createService).toHaveBeenCalled();
+    expect(createService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        "x-user-email": anUserEmail,
+        "x-user-id": anUserId,
+        "x-subscription-id": aSubscriptionId,
+        "x-user-groups": aUserPermissions.join(","),
+        body: aBodyPayload,
+        serviceId: "test"
+      })
+    );
+
+    expect(result.status).toBe(200);
+    expect(result.body).not.toBe(null);
+  });
+
   it("request without body response", async () => {
     // Mock io-services-cms client
     const reviewService = vi.fn(() =>
