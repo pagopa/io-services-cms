@@ -1,17 +1,16 @@
+import { ServiceLifecycle } from "@io-services-cms/models";
 import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import {
   forwardIoServicesCmsRequest,
-  retrieveServiceList,
-  toServiceListItem
+  retrieveServiceList
 } from "../services/business";
-import { ServiceLifecycle } from "@io-services-cms/models";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { toServiceListItem } from "../services/utils";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
