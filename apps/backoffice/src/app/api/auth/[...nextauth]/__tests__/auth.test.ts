@@ -87,6 +87,7 @@ const getExpectedUser = (
   institution: {
     id: jwtPayload.organization.id,
     name: jwtPayload.organization.name,
+    fiscalCode: jwtPayload.organization.fiscal_code,
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo
   },

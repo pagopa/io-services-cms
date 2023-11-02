@@ -1,4 +1,4 @@
-import { forwardIoServicesCmsRequest } from "@/lib/be/cms/business";
+import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
@@ -7,10 +7,23 @@ import { BackOfficeUser } from "../../../../types/next-auth";
  * @description Create a new Service with the attributes provided in the request payload
  */
 export const POST = withJWTAuthHandler(
-  (
+  async (
     request: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser }
-  ) => forwardIoServicesCmsRequest("createService", request, backofficeUser)
+  ) => {
+    const jsonBody = {
+      ...(await request.json()),
+      organization: {
+        name: backofficeUser.institution.name,
+        fiscal_code: backofficeUser.institution.fiscalCode
+      }
+    };
+    return forwardIoServicesCmsRequest(
+      "createService",
+      jsonBody,
+      backofficeUser
+    );
+  }
 );
 
 /**

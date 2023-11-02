@@ -327,6 +327,7 @@ const toUser = ({
   institution: {
     id: identityTokenPayload.organization.id,
     name: identityTokenPayload.organization.name,
+    fiscalCode: identityTokenPayload.organization.fiscal_code,
     role: identityTokenPayload.organization.roles[0]?.role,
     logo_url: institution.logo
   },

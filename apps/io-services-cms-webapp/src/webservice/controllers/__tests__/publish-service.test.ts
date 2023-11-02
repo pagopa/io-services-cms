@@ -136,7 +136,7 @@ describe("publishService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
@@ -150,12 +150,13 @@ describe("publishService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(500); // FIXME: the publish of a non-existing service is allowed by the 'autopublish' feature, so it is not possible to receive a 404 error.
+    expect(response.statusCode).toBe(404);
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
     await servicePublicationStore.save("s1", {
       ...aServicePub,
+      id: "s1" as NonEmptyString,
       fsm: { state: "published" },
     })();
 
@@ -186,6 +187,7 @@ describe("publishService", () => {
   it("should publish a service", async () => {
     await servicePublicationStore.save("s1", {
       ...aServicePub,
+      id: "s1" as NonEmptyString,
       fsm: { state: "unpublished" },
     })();
 

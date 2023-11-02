@@ -36,8 +36,7 @@ export default function EditService() {
 
   const handleConfirm = (service: ServiceCreateUpdatePayload) => {
     const maybeApiServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
-      service,
-      session?.user
+      service
     );
     if (E.isRight(maybeApiServicePayload)) {
       serviceFetchData(

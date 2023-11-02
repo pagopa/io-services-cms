@@ -922,7 +922,41 @@ components:
     ServicePublication:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
     ServicePayload:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayload'
+      type: object
+      description: Service basic data
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        require_secure_channel:
+          type: boolean
+        authorized_recipients:
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+        authorized_cidrs:
+          description: >-
+            Allowed source IPs or CIDRs for this service.
+            When empty, every IP address it's authorized to call the IO API on
+            behalf of the service.
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
+        max_allowed_payment_amount:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 9999999999
+          default: 0
+        metadata:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+      required:
+        - name
+        - description
+        - metadata
     ServiceData:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
     ServiceMetadata:
