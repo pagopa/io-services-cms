@@ -26,6 +26,9 @@ locals {
     LEGACY_COSMOSDB_CONNECTIONSTRING = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     LEGACY_COSMOSDB_NAME             = var.legacy_cosmosdb_name
     LEGACY_COSMOSDB_URI              = var.legacy_cosmosdb_uri
+
+    AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
+    AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url
   })
 }
 
