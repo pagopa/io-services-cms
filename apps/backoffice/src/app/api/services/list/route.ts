@@ -1,5 +1,5 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { retrieveServiceList } from "@/lib/be/cms/business";
+import { retrieveServiceList } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";

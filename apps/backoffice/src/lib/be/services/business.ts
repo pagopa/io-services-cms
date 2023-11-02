@@ -21,7 +21,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { IoServicesCmsClient, callIoServicesCms } from "./client";
+import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices

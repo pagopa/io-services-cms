@@ -9,7 +9,7 @@ import {
   forwardIoServicesCmsRequest,
   retrieveServiceList,
   toServiceListItem
-} from "../cms/business";
+} from "../services/business";
 import { ServiceLifecycle } from "@io-services-cms/models";
 
 const anUserEmail = "anEmail@email.it";
