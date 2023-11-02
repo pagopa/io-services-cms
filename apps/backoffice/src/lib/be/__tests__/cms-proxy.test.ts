@@ -9,7 +9,7 @@ import {
   forwardIoServicesCmsRequest,
   retrieveServiceList,
   toServiceListItem
-} from "../services/business";
+} from "../cms/business";
 import { ServiceLifecycle } from "@io-services-cms/models";
 
 const anUserEmail = "anEmail@email.it";
@@ -359,7 +359,7 @@ describe("Services TEST", () => {
           {
             ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: "aServiceId",
-            visible: true
+            visibility: "published"
           }
         ],
         pagination: { count: 1, limit: 10, offset: 0 }
