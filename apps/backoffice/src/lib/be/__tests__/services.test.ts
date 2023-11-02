@@ -3,7 +3,7 @@ import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import {
   forwardIoServicesCmsRequest,
@@ -118,7 +118,10 @@ vi.mock("@/lib/be/cosmos-store", () => ({
   getServiceLifecycleCosmosStore,
   getServicePublicationCosmosStore
 }));
-
+afterEach(() => {
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
+});
 describe("Services TEST", () => {
   describe("forwardIoServicesCmsRequest", () => {
     it("request without body request and with response body", async () => {
@@ -426,6 +429,42 @@ describe("Services TEST", () => {
           }
         ],
         pagination: { count: 2, limit: 10, offset: 0 }
+      });
+    });
+
+    it("when no services are found on APIM neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
+      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [],
+          count: 90
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 90);
+      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+
+      expect(result).toStrictEqual({
+        value: [],
+        pagination: { count: 90, limit: 10, offset: 90 }
       });
     });
 
