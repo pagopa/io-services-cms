@@ -6,6 +6,7 @@ import {
   MenuItem,
   Typography
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
 /** Define a single table row menu action item */
@@ -26,6 +27,7 @@ export type TableRowMenuProps = {
 
 /** Renders a row related dropdown menu */
 export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -75,7 +77,7 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
                 variant="body2"
                 fontWeight={600}
               >
-                {action.label}
+                {t(action.label)}
               </Typography>
             </ListItemText>
           </MenuItem>

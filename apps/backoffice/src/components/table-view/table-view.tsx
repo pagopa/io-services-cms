@@ -10,7 +10,9 @@ import {
   TablePagination,
   TableRow
 } from "@mui/material";
-import { ReactElement, useState } from "react";
+import { useTranslation } from "next-i18next";
+import { ReactElement, useEffect, useState } from "react";
+import { LoaderSkeleton } from "../loaders";
 import { TableRowMenu, TableRowMenuAction } from "./table-row-menu";
 
 const BG_COLOR = "#EEEEEE";
@@ -37,7 +39,7 @@ export type TableViewProps<T> = {
   /** describe the list of columns to be displayed */
   columns: TableViewColumn<T>[];
   /** table data source of T-type objects */
-  rows: T[];
+  rows?: T[];
   /** given the T-type object relating to a table row, it defines the menu of the row itself \
    * _(shown at the end of the row with the symbol of the 3 dots aligned vertically)_ */
   rowMenu: (value: T) => TableRowMenuAction[];
@@ -45,15 +47,20 @@ export type TableViewProps<T> = {
   pagination: TableViewPagination;
   /** if true, shows a loading circle state in `Table` body */
   loading?: boolean;
+  /** Callback fired when the page is changed. */
+  onPageChange: (pageIndex: number) => void;
+  /** Callback fired when the number of rows per page is changed. */
+  onRowsPerPageChange: (pageSize: number) => void;
 };
 
 /** Renders a a MUI `Table` with some customizable properties */
 export function TableView<T>({ ...props }: TableViewProps<T>) {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(props.pagination.limit);
 
-  const handlePageChange = (event: unknown, newPage: number) => {
-    setPage(newPage);
+  const handlePageChange = (_event: unknown, newPage: number) => {
+    props.onPageChange(newPage);
   };
 
   const handleRowsPerPageChange = (
@@ -61,7 +68,14 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
   ) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
+    props.onRowsPerPageChange(+event.target.value);
   };
+
+  useEffect(() => {
+    setRowsPerPage(props.pagination.limit);
+    setPage(Math.floor(props.pagination.offset / props.pagination.limit));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.pagination]);
 
   return (
     <Box paddingX={3} paddingY={3} bgcolor={BG_COLOR}>
@@ -71,14 +85,14 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
             <TableRow>
               {props.columns.map((col, thColIndex) => (
                 <TableCell key={`th-col-${thColIndex}`} align={col.alignment}>
-                  {col.label}
+                  {t(col.label)}
                 </TableCell>
               ))}
               <TableCell align="right"> </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {props.rows && !props.loading ? (
+            {props.rows ? (
               props.rows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((item, tbRowIndex) => (
@@ -87,7 +101,8 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
                     sx={{
                       "&:last-child td, &:last-child th": {
                         border: 0
-                      }
+                      },
+                      "&:hover": { backgroundColor: "action.hover" }
                     }}
                   >
                     {props.columns.map((col, tbColIndex) => (
@@ -95,13 +110,20 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
                         key={`tb-row-${tbRowIndex}-col-${tbColIndex}`}
                         align={col.alignment}
                       >
-                        {col.cellTemplate
-                          ? col.cellTemplate(item)
-                          : (item[col.name as keyof typeof item] as string)}
+                        <LoaderSkeleton
+                          loading={props.loading ?? false}
+                          style={{ width: "100%" }}
+                        >
+                          {col.cellTemplate
+                            ? col.cellTemplate(item)
+                            : (item[col.name as keyof typeof item] as string)}
+                        </LoaderSkeleton>
                       </TableCell>
                     ))}
                     <TableCell align="right">
-                      <TableRowMenu actions={props.rowMenu(item)} />
+                      <LoaderSkeleton loading={props.loading ?? false}>
+                        <TableRowMenu actions={props.rowMenu(item)} />
+                      </LoaderSkeleton>
                     </TableCell>
                   </TableRow>
                 ))
