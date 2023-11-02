@@ -11,6 +11,7 @@ import {
   toServiceListItem
 } from "../services/business";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -345,19 +346,174 @@ describe("Services TEST", () => {
 
   describe("retrieveServiceList", () => {
     it("should return a list of services with visibility", async () => {
+      const aServiceinPublicationId = "aServiceInPublicationId";
+      const aServiceNotInPublicationId = "aServiceNotInPublicationId";
+
       const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.right([O.some(mocks.aBaseServiceLifecycle)])
+        TE.right([
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceinPublicationId
+          }),
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceNotInPublicationId
+          })
+        ])
       );
       const bulkFetchPublicationMock = vi.fn(() =>
         TE.right([
           O.some({
-            id: mocks.aBaseServiceLifecycle.id,
+            id: aServiceinPublicationId,
             name: "aServiceName",
             fsm: {
               state: "published"
             }
           })
         ])
+      );
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [
+            {
+              name: aServiceinPublicationId
+            },
+            {
+              name: aServiceNotInPublicationId
+            }
+          ],
+          count: 2
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+        aServiceinPublicationId,
+        aServiceNotInPublicationId
+      ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+        aServiceinPublicationId,
+        aServiceNotInPublicationId
+      ]);
+
+      expect(result).toStrictEqual({
+        value: [
+          {
+            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            id: aServiceinPublicationId,
+            visibility: "published"
+          },
+          {
+            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            id: aServiceNotInPublicationId,
+            visibility: undefined
+          }
+        ],
+        pagination: { count: 2, limit: 10, offset: 0 }
+      });
+    });
+
+    // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
+    // and not on apim, in such remote case we still return the list of services
+    it("when a service is found on apim and not service-lifecycle should not appears on returned list", async () => {
+      const aServiceInLifecycleId = "aServiceInLifecycleId";
+      const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
+
+      const bulkFetchLifecycleMock = vi.fn(() =>
+        TE.right([
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceInLifecycleId
+          })
+        ])
+      );
+      const bulkFetchPublicationMock = vi.fn(() =>
+        TE.right([
+          O.some({
+            id: aServiceInLifecycleId,
+            name: "aServiceName",
+            fsm: {
+              state: "published"
+            }
+          })
+        ])
+      );
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [
+            {
+              name: aServiceInLifecycleId
+            },
+            {
+              name: aServiceNotInLifecycleId
+            }
+          ],
+          count: 2
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+        aServiceInLifecycleId,
+        aServiceNotInLifecycleId
+      ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+        aServiceInLifecycleId
+      ]);
+
+      expect(result).toStrictEqual({
+        value: [
+          {
+            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            id: aServiceInLifecycleId,
+            visibility: "published"
+          }
+        ],
+        pagination: { count: 2, limit: 10, offset: 0 }
+      });
+    });
+
+    it("when service-publication bulk-fetch fails an error is returned", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() =>
+        TE.right([O.some(mocks.aBaseServiceLifecycle)])
+      );
+      const bulkFetchPublicationMock = vi.fn(() =>
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: "error"
+        })
       );
 
       const getServiceListMock = vi.fn(() =>
@@ -384,7 +540,9 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+      await expect(
+        retrieveServiceList(mocks.anUserId, 10, 0)
+      ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
@@ -393,17 +551,83 @@ describe("Services TEST", () => {
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id
       ]);
+    });
 
-      expect(result).toStrictEqual({
-        value: [
-          {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
-            id: "aServiceId",
-            visibility: "published"
-          }
-        ],
-        pagination: { count: 1, limit: 10, offset: 0 }
+    it("when service-lifecycle bulk-fetch fails an error is returned", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() =>
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: "error"
+        })
+      );
+      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [
+            {
+              name: mocks.aBaseServiceLifecycle.id
+            }
+          ],
+          count: 1
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
       });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      await expect(
+        retrieveServiceList(mocks.anUserId, 10, 0)
+      ).rejects.toThrowError();
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+        mocks.aBaseServiceLifecycle.id
+      ]);
+      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+    });
+
+    it("when apim rest call fails an error is returned", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
+      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
+
+      const getServiceListMock = vi.fn(() =>
+        TE.left({
+          message: "Apim Failure",
+          response: { status: 500 }
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      await expect(
+        retrieveServiceList(mocks.anUserId, 10, 0)
+      ).rejects.toThrowError();
+
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     });
   });
 });
