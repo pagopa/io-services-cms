@@ -21,19 +21,27 @@ export const GET = withJWTAuthHandler(
  * @description Update an existing service by ID
  */
 export const PUT = withJWTAuthHandler(
-  (
+  async (
     request: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-  ) =>
-    forwardIoServicesCmsRequest(
+  ) => {
+    const jsonBody = {
+      ...(await request.json()),
+      organization: {
+        name: backofficeUser.institution.name,
+        fiscal_code: backofficeUser.institution.fiscalCode
+      }
+    };
+    return forwardIoServicesCmsRequest(
       "updateService",
-      request,
+      jsonBody,
       backofficeUser,
       params
-    )
+    );
+  }
 );
 
 /**

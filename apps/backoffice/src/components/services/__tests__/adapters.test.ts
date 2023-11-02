@@ -8,14 +8,9 @@ import {
   fromServiceCreateUpdatePayloadToApiServicePayload
 } from "../adapters";
 
-const mockedSessionUser = {
-  institution: { name: "anInstitutionName" }
-} as any;
-
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   name: "aServiceName",
   description: "aServiceDescription",
-  organization: { name: "", fiscal_code: "", department_name: "" },
   metadata: {
     web_url: "aWebUrl",
     app_ios: "anAppIosUrl",
@@ -68,23 +63,15 @@ const anApiServicePayloadResult = ({
 } as unknown) as ApiServicePayload;
 
 describe("[Services] Adapters", () => {
-  it("should return a valid Api ServicePayload if a valid frontend service payload and session user are provided", () => {
+  it("should return a valid Api ServicePayload if a valid frontend service payload is provided", () => {
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      aValidServiceCreateUpdatePayload,
-      mockedSessionUser
+      aValidServiceCreateUpdatePayload
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isRight(result));
 
     if (E.isRight(result)) {
-      const servicePayload = {
-        ...anApiServicePayloadResult,
-        organization: {
-          name: mockedSessionUser.institution.name,
-          fiscal_code: "00000000000"
-        }
-      };
-      expect(result.right).toStrictEqual(servicePayload);
+      expect(result.right).toStrictEqual(anApiServicePayloadResult);
     }
   });
 
@@ -95,8 +82,7 @@ describe("[Services] Adapters", () => {
     };
 
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      anInvalidServiceCreateUpdatePayload,
-      mockedSessionUser
+      anInvalidServiceCreateUpdatePayload
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isLeft(result));
