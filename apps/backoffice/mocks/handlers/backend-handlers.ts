@@ -13,6 +13,7 @@ import {
   anInfoVersion,
   getMockServiceKeys,
   getMockServiceLifecycle,
+  getMockServiceList,
   getMockServicesMigrationDelegate,
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails
@@ -131,6 +132,27 @@ export const buildHandlers = () => {
     rest.get(`${baseURL}/services`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getGetServices200Response())],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/services/list`, (req, res, ctx) => {
+      const url = new URL(req.url);
+      const limit = url.searchParams.get("limit");
+      const offset = url.searchParams.get("offset");
+
+      const resultArray = [
+        [
+          ctx.status(200),
+          ctx.delay(1000),
+          ctx.json(
+            getGetServiceList200Response(limit as string, offset as string)
+          )
+        ],
         [ctx.status(401), ctx.json(null)],
         [ctx.status(403), ctx.json(null)],
         [ctx.status(429), ctx.json(null)],
@@ -408,6 +430,10 @@ export function getCreateService201Response() {
 
 export function getGetServices200Response() {
   return aMockServicePagination;
+}
+
+export function getGetServiceList200Response(limit: string, offset: string) {
+  return getMockServiceList(+limit, +offset);
 }
 
 export function getGetService200Response(serviceId: string) {
