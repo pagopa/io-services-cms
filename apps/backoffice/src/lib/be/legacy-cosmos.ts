@@ -20,7 +20,7 @@ const getLegacyCosmosConfig = cache(() => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
-    throw new Error("error parsing cosmos config", {
+    throw new Error("error parsing legacy cosmos config", {
       cause: readableReport(result.left)
     });
   }

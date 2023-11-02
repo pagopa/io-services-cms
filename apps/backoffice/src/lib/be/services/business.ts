@@ -2,12 +2,23 @@ import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_NO_CONTENT
 } from "@/config/constants";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
+import { ServiceList } from "@/generated/api/ServiceList";
+import { getApimRestClient } from "@/lib/be/apim-service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { IoServicesCmsClient, callIoServicesCms } from "./client";
+import { IoServicesCmsClient, callIoServicesCms } from "./cms";
+import {
+  retrieveLifecycleServices,
+  retrievePublicationServices
+} from "./cosmos";
+import { reducePublicationServicesList, toServiceListItem } from "./utils";
 
 type PathParameters = {
   serviceId?: string;
@@ -15,6 +26,62 @@ type PathParameters = {
   limit?: string;
   offset?: string;
 };
+
+/**
+ * @description This method Will retrieve the specified list of services partition for the given user
+ *
+ * @param userId
+ * @param limit
+ * @param offset
+ * @returns
+ */
+export const retrieveServiceList = async (
+  userId: string,
+  limit: number,
+  offset: number
+): Promise<ServiceList> =>
+  pipe(
+    TE.tryCatch(() => getApimRestClient(), E.toError),
+    // get services from apim
+    TE.chainW(apimRestClient =>
+      apimRestClient.getServiceList(userId, limit, offset)
+    ),
+    TE.bindTo("apimServices"),
+    // get services from services-lifecycle cosmos containee and map to ServiceListItem
+    TE.bind("lifecycleServices", ({ apimServices }) =>
+      pipe(
+        apimServices.value
+          ? apimServices.value.map(
+              subscription => subscription.name as NonEmptyString
+            )
+          : [],
+        retrieveLifecycleServices,
+        TE.map(RA.map(toServiceListItem))
+      )
+    ),
+    // get services from services-publication cosmos container
+    // create a Record list which contains the service id and its visibility
+    TE.bind("publicationServices", ({ lifecycleServices }) =>
+      pipe(
+        lifecycleServices.map(
+          publicationService => publicationService.id as NonEmptyString
+        ),
+        retrievePublicationServices,
+        TE.map(reducePublicationServicesList)
+      )
+    ),
+    // create response payload
+    TE.map(({ apimServices, lifecycleServices, publicationServices }) => ({
+      value: lifecycleServices.map(service => ({
+        ...service,
+        visibility: publicationServices[service.id]
+      })),
+      pagination: { offset, limit, count: apimServices.count }
+    })),
+    TE.getOrElse(error => {
+      throw error;
+    })
+  )();
 
 /**
  * The Backoffice needs to call io-services-cms APIs,
