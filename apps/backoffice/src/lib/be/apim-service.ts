@@ -49,7 +49,7 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
   );
 });
 
-const getAxiosInstance = cache(async () => {
+const getAxiosInstance = async () => {
   const apimConfig = getApimConfig();
 
   const credential = new ClientSecretCredential(
@@ -75,9 +75,9 @@ const getAxiosInstance = cache(async () => {
     timeout: 5000,
     headers: { Authorization: `Bearer ${accessToken}` }
   });
-});
+};
 
-export const getApimRestClient = cache(async () => {
+export const getApimRestClient = async () => {
   const apimConfig = getApimConfig();
   const axiosInstance = await getAxiosInstance();
 
@@ -114,7 +114,7 @@ export const getApimRestClient = cache(async () => {
   return {
     getServiceList
   };
-});
+};
 
 export const getApimHealth: () => Promise<void> = async () => {
   try {
