@@ -49,20 +49,14 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
   );
 });
 
-const getAxiosInstance = cache(async (accessToken: string) => {
-  const apimConfig = getApimConfig();
 
-  return axios.create({
+const buildApimRestClient = cache(async (azureAccessToken: string) => {
+  const apimConfig = getApimConfig();
+  const axiosInstance = axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
-    headers: { Authorization: `Bearer ${accessToken}` }
+    headers: { Authorization: `Bearer ${azureAccessToken}` }
   });
-});
-
-export const getApimRestClient = async () => {
-  const apimConfig = getApimConfig();
-  const azureAccessToken = await getAzureAccessToken();
-  const axiosInstance = await getAxiosInstance(azureAccessToken);
 
   const getServiceList = (
     userId: string,
@@ -97,7 +91,13 @@ export const getApimRestClient = async () => {
   return {
     getServiceList
   };
+});
+
+export const getApimRestClient = async () => {
+  const azureAccessToken = await getAzureAccessToken();
+  return buildApimRestClient(azureAccessToken);
 };
+
 
 export const getApimHealth: () => Promise<void> = async () => {
   try {
