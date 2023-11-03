@@ -50,7 +50,7 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
 });
 
 
-const buildApimRestClient = cache(async (azureAccessToken: string) => {
+const buildApimRestClient = cache((azureAccessToken: string) => {
   const apimConfig = getApimConfig();
   const axiosInstance = axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
