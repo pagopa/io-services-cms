@@ -24,11 +24,6 @@ import {
 const serviceDefaultData: ServiceCreateUpdatePayload = {
   name: "",
   description: "",
-  organization: {
-    name: "",
-    fiscal_code: "",
-    department_name: ""
-  },
   require_secure_channel: false,
   authorized_cidrs: [],
   authorized_recipients: [],
