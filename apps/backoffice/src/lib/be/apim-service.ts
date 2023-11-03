@@ -2,18 +2,22 @@ import {
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_UNAUTHORIZED
 } from "@/config/constants";
+import { HealthChecksError } from "@/lib/be/errors";
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
+import {
+  AccessToken,
+  AzureAuthorityHosts,
+  ClientSecretCredential
+} from "@azure/identity";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
-import { getAzureAccessToken } from "@/lib/be/azure-access-token";
-import { HealthChecksError } from "@/lib/be/errors";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -24,6 +28,7 @@ const Config = t.type({
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM: NonEmptyString,
+  AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString,
   AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString
 });
 
@@ -61,22 +66,44 @@ const getAxiosInstance = cache((azureAccessToken: string) => {
   });
 });
 
-export const getApimRestClient = cache(async () => {
-  // ottengo config
+const getAzureAccessToken = async (): Promise<AccessToken> => {
   const apimConfig = getApimConfig();
 
-  // ottengo token
+  let tokenResponse: AccessToken;
+  try {
+    const credential = new ClientSecretCredential(
+      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
+      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
+      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
+      {
+        authorityHost: AzureAuthorityHosts.AzurePublicCloud
+      }
+    );
+    tokenResponse = await credential.getToken(
+      apimConfig.AZURE_CREDENTIALS_SCOPE_URL
+    );
+  } catch (e) {
+    console.log("Error retrieving on Azure Access Token", e);
+    throw e;
+  }
+
+  if (!tokenResponse.token) {
+    throw new Error("Error retrieving on Azure Access Token => null response");
+  }
+
+  return tokenResponse;
+};
+
+export const getApimRestClient = cache(async () => {
+  const apimConfig = getApimConfig();
+
   let azureAccessToken = await getAzureAccessToken();
+  let axiosInstance = getAxiosInstance(azureAccessToken.token);
 
-  // ottengo client
-  let axiosInstance = getAxiosInstance(azureAccessToken);
-  // creo metodi client
-
+  // refresh token and build a new axios instance
   const refreshClient = async () => {
-    // refresh token
     azureAccessToken = await getAzureAccessToken();
-    // rebuild axios instance
-    axiosInstance = getAxiosInstance(azureAccessToken);
+    axiosInstance = getAxiosInstance(azureAccessToken.token);
   };
 
   const getServiceList = (

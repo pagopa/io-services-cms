@@ -3,13 +3,12 @@ import {
   HTTP_STATUS_OK
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
+import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
+import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
-import { getSelfcareHealth } from "@/lib/be/selfcare-client";
-import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
-import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +23,7 @@ export async function GET() {
     getLegacyCosmosHealth(),
     getApimHealth(),
     getSelfcareHealth(),
-    getIoServicesCmsHealth(),
-    getAzureAccessTokenHealth()
+    getIoServicesCmsHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;

@@ -3,7 +3,6 @@ import {
   HTTP_STATUS_OK
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
-import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
@@ -20,8 +19,7 @@ export async function GET() {
     getLegacyCosmosHealth(),
     getApimHealth(),
     getSelfcareHealth(),
-    getIoServicesCmsHealth(),
-    getAzureAccessTokenHealth()
+    getIoServicesCmsHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;

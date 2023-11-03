@@ -18,10 +18,6 @@ const { getApimHealth } = vi.hoisted(() => ({
   getApimHealth: vi.fn().mockReturnValue(Promise.resolve())
 }));
 
-const { getAzureAccessTokenHealth } = vi.hoisted(() => ({
-  getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve())
-}));
-
 vi.mock("@/lib/be/legacy-cosmos", () => ({
   getLegacyCosmosHealth
 }));
@@ -36,10 +32,6 @@ vi.mock("@/lib/be/cms-client", () => ({
 
 vi.mock("@/lib/be/apim-service", () => ({
   getApimHealth
-}));
-
-vi.mock("@/lib/be/azure-access-token", () => ({
-  getAzureAccessTokenHealth
 }));
 
 describe("test backend api info()", () => {
