@@ -57,14 +57,14 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
   );
 });
 
-const getAxiosInstance = (azureAccessToken: string) => {
+const getAxiosInstance = cache((azureAccessToken: string) => {
   const apimConfig = getApimConfig();
   return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
     headers: { Authorization: `Bearer ${azureAccessToken}` }
   });
-};
+});
 
 const getAzureAccessToken = async (): Promise<AccessToken> => {
   const apimConfig = getApimConfig();
