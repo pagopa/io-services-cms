@@ -1,7 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import axios from "axios";
+import { vi, expect, describe, it } from "vitest";
+import { getConfiguration } from "../../../../config";
+import { GET } from "../route";
 import packageJson from "../../../../../package.json";
 import { HealthChecksError } from "../../../../lib/be/errors";
-import { GET } from "../route";
 
 const { getLegacyCosmosHealth } = vi.hoisted(() => ({
   getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve())
@@ -19,6 +21,10 @@ const { getApimHealth } = vi.hoisted(() => ({
   getApimHealth: vi.fn().mockReturnValue(Promise.resolve())
 }));
 
+const { getAzureAccessTokenHealth } = vi.hoisted(() => ({
+  getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve())
+}));
+
 vi.mock("@/lib/be/legacy-cosmos", () => ({
   getLegacyCosmosHealth
 }));
@@ -33,6 +39,10 @@ vi.mock("@/lib/be/cms-client", () => ({
 
 vi.mock("@/lib/be/apim-service", () => ({
   getApimHealth
+}));
+
+vi.mock("@/lib/be/azure-access-token", () => ({
+  getAzureAccessTokenHealth
 }));
 
 describe("test backend api info()", () => {
