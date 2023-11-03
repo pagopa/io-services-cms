@@ -133,9 +133,7 @@ describe("Services TEST", () => {
       });
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"));
 
       const result = await forwardIoServicesCmsRequest(
         "getServices",
@@ -172,10 +170,10 @@ describe("Services TEST", () => {
       };
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: true,
-        json: () => Promise.resolve(aBodyPayload)
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "POST",
+        body: JSON.stringify(aBodyPayload)
+      });
 
       const result = await forwardIoServicesCmsRequest(
         "createService",
@@ -216,10 +214,10 @@ describe("Services TEST", () => {
       };
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: true,
-        json: () => Promise.resolve(aBodyPayload)
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "POST",
+        body: JSON.stringify(aBodyPayload)
+      });
 
       const result = await forwardIoServicesCmsRequest(
         "reviewService",
@@ -315,10 +313,10 @@ describe("Services TEST", () => {
       };
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: true,
-        json: () => Promise.resolve(aBodyPayload)
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "POST",
+        body: JSON.stringify(aBodyPayload)
+      });
 
       const result = await forwardIoServicesCmsRequest(
         "reviewService",

@@ -58,9 +58,7 @@ describe("Regenerate Manage Keys API", () => {
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await PUT(request, { params: { keyType: "primary" } });
 
@@ -75,9 +73,7 @@ describe("Regenerate Manage Keys API", () => {
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await PUT(request, { params: { keyType: "invalid" } });
 
@@ -90,9 +86,7 @@ describe("Regenerate Manage Keys API", () => {
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await PUT(request, { params: { keyType: "secondary" } });
 
