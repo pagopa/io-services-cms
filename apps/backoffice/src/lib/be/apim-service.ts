@@ -61,7 +61,7 @@ const getAxiosInstance = cache((azureAccessToken: string) => {
   });
 });
 
-export const getApimRestClient = cache(async () => {
+export const getApimRestClient = async () => {
   // ottengo config
   const apimConfig = getApimConfig();
 
@@ -126,7 +126,7 @@ export const getApimRestClient = cache(async () => {
   return {
     getServiceList
   };
-});
+};
 
 export const getApimHealth: () => Promise<void> = async () => {
   try {

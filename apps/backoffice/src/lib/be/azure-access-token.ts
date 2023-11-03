@@ -49,7 +49,7 @@ const refreshAzureAccessToken = async (): Promise<AccessToken> => {
       apimConfig.AZURE_CREDENTIALS_SCOPE_URL
     );
   } catch (e) {
-    console.log("Error retrieving on Azure Access Token", e);
+    console.error("Error retrieving on Azure Access Token", e);
     throw e;
   }
 
@@ -64,7 +64,7 @@ export const getAzureAccessToken = async (): Promise<string> => {
   // Lazy init accessToken
   if (!accessToken) {
     accessToken = await refreshAzureAccessToken();
-    console.log(
+    console.debug(
       `Azure AccessToken initialized: Expiration Date is => $${new Date(
         accessToken.expiresOnTimestamp
       )}`
@@ -75,11 +75,15 @@ export const getAzureAccessToken = async (): Promise<string> => {
     const expires = new Date(accessToken.expiresOnTimestamp);
     if (now > expires) {
       accessToken = await refreshAzureAccessToken();
-      console.log(
+      console.debug(
         `Azure AccessToken has expired and was refreshed: Old Expiration Date was => $${expires}, New Expiration Date is => $${new Date(
           accessToken.expiresOnTimestamp
         )}`
       );
+    }else{
+      console.debug(
+        `Azure AccessToken is still good expired and was refreshed: Expiration Date was => $${expires}`
+      )
     }
   }
   return accessToken.token;
