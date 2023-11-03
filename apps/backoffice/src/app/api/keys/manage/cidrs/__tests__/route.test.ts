@@ -63,9 +63,7 @@ describe("Authorized CIDRs API", () => {
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"));
 
       const result = await GET(request, {});
 
@@ -83,9 +81,7 @@ describe("Authorized CIDRs API", () => {
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"));
 
       const result = await GET(request, {});
 
@@ -101,10 +97,10 @@ describe("Authorized CIDRs API", () => {
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false,
-        json: () => Promise.resolve({ cidrs: mocks.authrizedCIDRs })
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "PUT",
+        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs })
+      });
 
       const result = await PUT(request, {});
 
@@ -122,10 +118,10 @@ describe("Authorized CIDRs API", () => {
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false,
-        json: () => Promise.resolve({ aNotValidProp: "aNotValidProp" })
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "PUT",
+        body: JSON.stringify({ aNotValidProp: "aNotValidProp" })
+      });
 
       const result = await PUT(request, {});
 
@@ -139,10 +135,10 @@ describe("Authorized CIDRs API", () => {
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
-      const request = ({
-        bodyUsed: false,
-        json: () => Promise.resolve({ cidrs: mocks.authrizedCIDRs })
-      } as any) as NextRequest;
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "PUT",
+        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs })
+      });
 
       const result = await PUT(request, {});
 

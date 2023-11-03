@@ -1,11 +1,8 @@
+import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
-
-const getJsonBodyorEmpty = (request: NextRequest) =>
-  request.json().catch(_ => ({}));
 
 /**
  * @description Create a new Service with the attributes provided in the request payload
