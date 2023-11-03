@@ -26,9 +26,19 @@ locals {
     LEGACY_COSMOSDB_CONNECTIONSTRING = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     LEGACY_COSMOSDB_NAME             = var.legacy_cosmosdb_name
     LEGACY_COSMOSDB_URI              = var.legacy_cosmosdb_uri
+    LEGACY_COSMOSDB_KEY              = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
 
     AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url
+
+    API_SERVICES_CMS_URL       = "https://${module.webapp_functions_app.default_hostname}"
+    API_SERVICES_CMS_BASE_PATH = "/api/v1"
+    API_SERVICES_CMS_MOCKING   = true
+
+    SELFCARE_BASE_URL    = var.backoffice_app.selfcare_external_api_base_url
+    SELFCARE_BASE_PATH   = var.backoffice_app.selfcare_external_api_base_path
+    SELFCARE_API_KEY     = "fake-api-key" // TODO: set and get from key vault
+    SELFCARE_API_MOCKING = true
   })
 }
 
