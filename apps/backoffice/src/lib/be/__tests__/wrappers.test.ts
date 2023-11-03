@@ -32,11 +32,7 @@ describe("withJWTAuthHandler", () => {
   it("no token or invalid one provided should end up in 401 response", async () => {
     getToken.mockReturnValueOnce(Promise.resolve(null));
 
-    const nextRequestMock = ({
-      bodyUsed: false,
-      cookies: {},
-      headers: {}
-    } as any) as NextRequest;
+    const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 }))
@@ -53,11 +49,7 @@ describe("withJWTAuthHandler", () => {
   it("valid token provided should end up in 200 response", async () => {
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
-    const nextRequestMock = ({
-      bodyUsed: false,
-      cookies: {},
-      headers: {}
-    } as any) as NextRequest;
+    const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 }))
