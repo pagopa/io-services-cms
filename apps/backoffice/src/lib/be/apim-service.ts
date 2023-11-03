@@ -83,7 +83,7 @@ const getAzureAccessToken = async (): Promise<AccessToken> => {
       apimConfig.AZURE_CREDENTIALS_SCOPE_URL
     );
   } catch (e) {
-    console.log("Error retrieving on Azure Access Token", e);
+    console.error("Error retrieving on Azure Access Token", e);
     throw e;
   }
 
