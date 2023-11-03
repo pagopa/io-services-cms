@@ -27,7 +27,7 @@ export const GET = withJWTAuthHandler(
         E.isLeft(rawoffset) || rawoffset.right < 0 ? 0 : rawoffset.right;
 
       const result = await retrieveServiceList(
-        backofficeUser.parameters.userId,
+        "01GJMF341BZQBP71Q39S1EHBH6",
         limit,
         offset
       );
