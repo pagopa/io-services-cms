@@ -1,18 +1,25 @@
+import {
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_UNAUTHORIZED
+} from "@/config/constants";
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
-import { getAzureAccessToken } from "./azure-access-token";
-import { HealthChecksError } from "./errors";
+import { getAzureAccessToken } from "@/lib/be/azure-access-token";
+import { HealthChecksError } from "@/lib/be/errors";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
+  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
+  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
+  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
   AZURE_APIM_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
@@ -45,19 +52,38 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
   );
 });
 
-
-const buildApimRestClient = cache((azureAccessToken: string) => {
+const getAxiosInstance = cache((azureAccessToken: string) => {
   const apimConfig = getApimConfig();
-  const axiosInstance = axios.create({
+  return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
     headers: { Authorization: `Bearer ${azureAccessToken}` }
   });
+});
+
+export const getApimRestClient = cache(async () => {
+  // ottengo config
+  const apimConfig = getApimConfig();
+
+  // ottengo token
+  let azureAccessToken = await getAzureAccessToken();
+
+  // ottengo client
+  let axiosInstance = getAxiosInstance(azureAccessToken);
+  // creo metodi client
+
+  const refreshClient = async () => {
+    // refresh token
+    azureAccessToken = await getAzureAccessToken();
+    // rebuild axios instance
+    axiosInstance = getAxiosInstance(azureAccessToken);
+  };
 
   const getServiceList = (
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
+    isRetry = false
   ): TE.TaskEither<Error, SubscriptionCollection> =>
     pipe(
       TE.tryCatch(
@@ -74,26 +100,33 @@ const buildApimRestClient = cache((azureAccessToken: string) => {
           ),
         identity
       ),
-      TE.mapLeft(e => {
+      TE.map(({ data }) => data),
+      TE.orElse(e => {
         if (axios.isAxiosError(e)) {
-          return new Error(`Axios error catched ${e.message}`);
-        } else {
-          return new Error(`Error calling APIM getServiceList API: ${e}`);
+          if (
+            !isRetry &&
+            [HTTP_STATUS_FORBIDDEN, HTTP_STATUS_UNAUTHORIZED].includes(
+              e.response?.status ?? 0
+            )
+          ) {
+            return pipe(
+              TE.fromIO(() => refreshClient()),
+              TE.chain(() => getServiceList(userId, limit, offset, true))
+            );
+          }
+          return TE.left(new Error(`Axios error catched ${e.message}`));
         }
-      }),
-      TE.map(({ data }) => data)
+        return TE.left(
+          new Error(`Error calling APIM getServiceList API: ${e}`)
+        );
+      })
     );
 
+  // ritono client
   return {
     getServiceList
   };
 });
-
-export const getApimRestClient = async () => {
-  const azureAccessToken = await getAzureAccessToken();
-  return buildApimRestClient(azureAccessToken);
-};
-
 
 export const getApimHealth: () => Promise<void> = async () => {
   try {
