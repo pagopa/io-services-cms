@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
+import _ from "lodash";
 import { useTranslation } from "next-i18next";
+import { useSnackbar } from "notistack";
 import { ReactNode, useEffect, useState } from "react";
 import {
   DefaultValues,
@@ -11,6 +13,7 @@ import {
 import { ZodType } from "zod";
 import { ProcessActions } from ".";
 import { ButtonShowMore } from "../buttons";
+import { buildSnackbarItem } from "../notification";
 import { StepsPipeline } from "./steps-pipeline";
 
 /** Interface for describe a create/update process step */
@@ -46,10 +49,12 @@ export type CreateUpdateProcessProps<T> = {
 export function CreateUpdateProcess<T extends FieldValues>({
   itemToCreateUpdate,
   steps,
+  mode,
   onCancel,
   onConfirm
 }: CreateUpdateProcessProps<T>) {
   const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [currentStepIndex, setCurrentStep] = useState(0);
   const [sended, setSended] = useState(false);
@@ -88,6 +93,19 @@ export function CreateUpdateProcess<T extends FieldValues>({
 
   const handleComplete = () => {
     if (isValid) {
+      // update mode check:
+      // if initial form values are equals to final form values,
+      // then send a warning notification and abort onConfirm event trigger.
+      if (mode === "update" && _.isEqual(itemToCreateUpdate, getValues())) {
+        enqueueSnackbar(
+          buildSnackbarItem({
+            severity: "warning",
+            title: t("notifications.noChangeError"),
+            message: ""
+          })
+        );
+        return;
+      }
       setSended(true);
       onConfirm(getValues());
     } else {
@@ -97,7 +115,7 @@ export function CreateUpdateProcess<T extends FieldValues>({
 
   useEffect(() => {
     methods.reset(itemToCreateUpdate); // update form values when change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemToCreateUpdate]);
 
   const renderStepDescription = () => {
