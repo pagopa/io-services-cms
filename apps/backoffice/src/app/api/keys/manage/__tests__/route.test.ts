@@ -49,9 +49,7 @@ vi.mock("next-auth/jwt", async () => {
 describe("Retrieve Manage Keys API", () => {
   it("should return 200", async () => {
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await GET(request, {});
 
@@ -68,9 +66,7 @@ describe("Retrieve Manage Keys API", () => {
     );
 
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await GET(request, {});
 
@@ -81,9 +77,7 @@ describe("Retrieve Manage Keys API", () => {
     retrieveManageSubscriptionApiKeys.mockRejectedValueOnce("an error");
 
     // Mock NextRequest
-    const request = ({
-      bodyUsed: false
-    } as any) as NextRequest;
+    const request = new NextRequest(new URL("http://localhost"));
 
     const result = await GET(request, {});
 
