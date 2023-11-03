@@ -13,14 +13,10 @@ import { HealthChecksError } from "./errors";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
   AZURE_APIM_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM: NonEmptyString,
-  AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString,
   AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString
 });
 
