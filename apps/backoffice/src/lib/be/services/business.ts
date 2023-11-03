@@ -114,8 +114,8 @@ export async function forwardIoServicesCmsRequest<
 ): Promise<Response> {
   // extract jsonBody
   const jsonBody =
-    "json" in requestOrBody // check NextRequest object
-      ? requestOrBody.bodyUsed && (await requestOrBody.json()) // TODO: are we sure requestOrBody.bodyUsed is the correct check before requestOrBody.json()?!?
+    requestOrBody && "json" in requestOrBody // check NextRequest object
+      ? await requestOrBody.json().catch((_: unknown) => undefined)
       : requestOrBody;
 
   // create the request payload
