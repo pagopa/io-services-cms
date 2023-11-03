@@ -80,20 +80,21 @@ describe("Services API", () => {
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
-    it("should forward request  when request body is not present", async () => {
+    it("should forward request when request body is not present", async () => {
       // Mock NextRequest
       const jsonBodyMock = { mock: true };
       const request = new NextRequest(new URL("http://localhost"), {
-        method: "POST",
+        method: "PUT",
         body: JSON.stringify(jsonBodyMock)
       });
+      const params = { serviceId: faker.string.uuid() };
 
-      const result = await PUT(request, {});
+      const result = await PUT(request, { params });
 
       expect(result.status).toBe(200);
       expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
       expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
-        "createService",
+        "updateService",
         {
           ...jsonBodyMock,
           organization: {
@@ -101,7 +102,8 @@ describe("Services API", () => {
             fiscal_code: backofficeUserMock.institution.fiscalCode
           }
         },
-        backofficeUserMock
+        backofficeUserMock,
+        params
       );
     });
   });
