@@ -135,12 +135,14 @@ export const ServiceBuilderStep1 = () => {
             />
           </Grid>
           <Grid item xs={6}>
-            <TextFieldController
+            {/*
+             // TODO should be developed in the next MVPs
+             <TextFieldController
               name="metadata.localScope"
               label="Aree locali di competenza"
               placeholder="Inserisci aree locali"
               disabled
-            />
+            /> */}
           </Grid>
         </Grid>
         <TextFieldController
@@ -155,6 +157,8 @@ export const ServiceBuilderStep1 = () => {
             />
           }
         />
+        {/* 
+        // TODO should be developed in the next MVPs
         <TextFieldController
           name="topic"
           label="Argomento del servizio"
@@ -180,7 +184,7 @@ export const ServiceBuilderStep1 = () => {
             />
           }
           disabled
-        />
+        /> */}
       </FormStepSectionWrapper>
       <ServicePreview
         isOpen={isPreviewOpen}

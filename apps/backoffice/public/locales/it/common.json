@@ -196,6 +196,7 @@
   "notifications": {
     "exceptionError": "Eccezione applicativa",
     "httpError": "Errore Http",
+    "noChangeError": "Attenzione, nessuna modifica effettuata",
     "success": "Operazione completata con successo",
     "validationError": "Errore di validazione dati"
   },
