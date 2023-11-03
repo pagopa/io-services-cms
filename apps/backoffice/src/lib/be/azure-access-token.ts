@@ -8,6 +8,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { cache } from "react";
+import { HealthChecksError } from "./errors";
 
 //Instanza contentente le credenziali per accedere ad Azure
 let accessToken: AccessToken;
@@ -82,4 +83,12 @@ export const getAzureAccessToken = async (): Promise<string> => {
     }
   }
   return accessToken.token;
+};
+
+export const getAzureAccessTokenHealth: () => Promise<void> = async () => {
+  try {
+    getAzureConfig();
+  } catch (e) {
+    throw new HealthChecksError("azure-access-token", e);
+  }
 };
