@@ -19,6 +19,15 @@ import {
   retrievePublicationServices
 } from "./cosmos";
 import { reducePublicationServicesList, toServiceListItem } from "./utils";
+import {
+  claimOwnership,
+  getDelegatesByOrganization,
+  getLatestOwnershipClaimStatus,
+  getOwnershipClaimStatus
+} from "./subscriptions-migration";
+import { MigrationItemList } from "@/generated/api/MigrationItemList";
+import { MigrationDataValue } from "@/generated/api/MigrationDataValue";
+import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 
 type PathParameters = {
   serviceId?: string;
@@ -152,3 +161,36 @@ export async function forwardIoServicesCmsRequest<
 
   return NextResponse.json(value, { status });
 }
+
+/**
+ * SUBSCRIPTIONS
+ * MIGRATION
+ * FUNCTIONS
+ **/
+
+export const retrieveOwnershipClaimLatestStatus = async (
+  organizationFiscalCode: string
+): Promise<MigrationItemList> => {
+  return await getLatestOwnershipClaimStatus(organizationFiscalCode);
+};
+
+export const retrieveOwnershipClaimLatestForDelegate = async (
+  organizationFiscalCode: string,
+  delegateId: string
+): Promise<MigrationDataValue> => {
+  return await getOwnershipClaimStatus(organizationFiscalCode, delegateId);
+};
+
+export const claimOwnershipForDelegate = async (
+  organizationFiscalCode: string,
+  delegateId: string,
+  body?: unknown
+): Promise<void> => {
+  return await claimOwnership(organizationFiscalCode, delegateId, body);
+};
+
+export const retrieveOrganizationDelegates = async (
+  organizationFiscalCode: string
+): Promise<MigrationDelegateList> => {
+  return await getDelegatesByOrganization(organizationFiscalCode);
+};

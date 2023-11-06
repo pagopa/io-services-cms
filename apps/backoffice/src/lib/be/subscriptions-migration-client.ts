@@ -11,8 +11,6 @@ import * as t from "io-ts";
 import { cache } from "react";
 import { HealthChecksError } from "./errors";
 
-const institutionsApi = "/institutions";
-
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   SUBSCRIPTION_MIGRATIONS_URL: NonEmptyString,
