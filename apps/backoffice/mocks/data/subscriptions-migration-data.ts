@@ -12,8 +12,8 @@ export const getLatestOwnershipClaimStatusMockResponse = () => ({
     },
     delegate: {
       sourceId: faker.string.uuid(),
-      sourceName: faker.name.firstName(),
-      sourceSurname: faker.name.lastName(),
+      sourceName: faker.person.firstName(),
+      sourceSurname: faker.person.lastName(),
       sourceEmail: faker.internet.email(),
       subscriptionCounter: faker.number.int({ min: 0, max: 100 })
     },
@@ -23,10 +23,10 @@ export const getLatestOwnershipClaimStatusMockResponse = () => ({
 
 export const getOwnershipClaimStatusMockResponse = () => ({
   status: {
-    completed: 0,
-    failed: 0,
-    initial: 0,
-    processing: 0
+    completed: faker.number.int({ min: 0, max: 100 }),
+    failed: faker.number.int({ min: 0, max: 100 }),
+    initial: faker.number.int({ min: 0, max: 100 }),
+    processing: faker.number.int({ min: 0, max: 100 })
   }
 });
 
@@ -35,8 +35,8 @@ export const getDelegatesByOrganizationMockResponse = () => ({
     ...Array.from(Array(faker.number.int({ min: 1, max: 5 })).keys())
   ].map(_ => ({
     sourceId: faker.string.uuid(),
-    sourceName: faker.name.firstName(),
-    sourceSurname: faker.name.lastName(),
+    sourceName: faker.person.firstName(),
+    sourceSurname: faker.person.lastName(),
     sourceEmail: faker.internet.email(),
     subscriptionCounter: faker.number.int({ min: 0, max: 100 })
   }))

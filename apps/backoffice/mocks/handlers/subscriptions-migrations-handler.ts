@@ -19,8 +19,7 @@ export const buildHandlers = () => {
 
   return [
     rest.get(
-      baseURL +
-        `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/latest`,
+      `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/latest`,
       (_, res, ctx) => {
         const resultArray = [
           [

@@ -1071,21 +1071,21 @@ components:
     MigrationData:
       type: object
       properties:
-        data:
+        status:
           $ref: '#/components/schemas/MigrationDataValue'
     MigrationDataValue:
       type: object
       properties:
-        COMPLETED:
+        completed:
           type: number
           minimum: 0
-        FAILED:
+        failed:
           type: number
           minimum: 0
-        INITIAL:
+        initial:
           type: number
           minimum: 0
-        PROCESSING:
+        processing:
           type: number
           minimum: 0
     Institution:

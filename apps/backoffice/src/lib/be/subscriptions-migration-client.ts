@@ -63,11 +63,13 @@ export type SubscriptionsMigrationClient = {
   ) => TE.TaskEither<Error, MigrationDelegateList>;
 };
 
-export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient = cache(
-  () => {
+export const getSubscriptionsMigrationClient = cache(
+  (): SubscriptionsMigrationClient => {
     const axiosInstance = getAxiosInstance();
 
-    const getLatestOwnershipClaimStatus: SubscriptionsMigrationClient["getLatestOwnershipClaimStatus"] = organizationFiscalCode =>
+    const getLatestOwnershipClaimStatus = (
+      organizationFiscalCode: string
+    ): TE.TaskEither<Error, MigrationItemList> =>
       pipe(
         TE.tryCatch(
           () =>
@@ -78,6 +80,7 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
+            console.error("axios error", e);
             return new Error(
               `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`
             );
@@ -97,10 +100,10 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         )
       );
 
-    const getOwnershipClaimStatus: SubscriptionsMigrationClient["getOwnershipClaimStatus"] = (
-      organizationFiscalCode,
-      delegateId
-    ) =>
+    const getOwnershipClaimStatus = (
+      organizationFiscalCode: string,
+      delegateId: string
+    ): TE.TaskEither<Error, MigrationData> =>
       pipe(
         TE.tryCatch(
           () =>
@@ -111,6 +114,7 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
+            console.error("axios error", e);
             return new Error(
               `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`
             );
@@ -130,11 +134,11 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         )
       );
 
-    const claimOwnership: SubscriptionsMigrationClient["claimOwnership"] = (
-      organizationFiscalCode,
-      delegateId,
-      body
-    ) =>
+    const claimOwnership = (
+      organizationFiscalCode: string,
+      delegateId: string,
+      body?: unknown
+    ): TE.TaskEither<Error, void> =>
       pipe(
         TE.tryCatch(
           () =>
@@ -146,6 +150,7 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
+            console.error("axios error", e);
             return new Error(
               `subscriptions migration claimOwnership Axios error catched ${e.message}`
             );
@@ -158,7 +163,9 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         TE.map(_ => void 0)
       );
 
-    const getDelegatesByOrganization: SubscriptionsMigrationClient["getDelegatesByOrganization"] = organizationFiscalCode =>
+    const getDelegatesByOrganization = (
+      organizationFiscalCode: string
+    ): TE.TaskEither<Error, MigrationDelegateList> =>
       pipe(
         TE.tryCatch(
           () =>
@@ -169,8 +176,9 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
+            console.error("axios error", e);
             return new Error(
-              `subscriptions migration getDelegatesByOrganization Axios error catched ${e.message}`
+              `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`
             );
           } else {
             return new Error(
