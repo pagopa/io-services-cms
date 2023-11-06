@@ -80,7 +80,6 @@ export const getSubscriptionsMigrationClient = cache(
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
-            console.error("axios error", e);
             return new Error(
               `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`
             );
@@ -114,7 +113,6 @@ export const getSubscriptionsMigrationClient = cache(
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
-            console.error("axios error", e);
             return new Error(
               `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`
             );
@@ -150,7 +148,6 @@ export const getSubscriptionsMigrationClient = cache(
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
-            console.error("axios error", e);
             return new Error(
               `subscriptions migration claimOwnership Axios error catched ${e.message}`
             );
@@ -176,7 +173,6 @@ export const getSubscriptionsMigrationClient = cache(
         ),
         TE.mapLeft(e => {
           if (axios.isAxiosError(e)) {
-            console.error("axios error", e);
             return new Error(
               `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`
             );
