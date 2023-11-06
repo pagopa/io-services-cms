@@ -23,9 +23,9 @@ export type Configuration = {
   // Selfcare
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
-  SELFCARE_BASE_URL: string;
-  SELFCARE_BASE_PATH: string;
-  SELFCARE_JWKS_PATH: string;
+  SELFCARE_EXTERNAL_API_BASE_URL: string;
+  SELFCARE_JWT_ISSUER: string;
+  SELFCARE_JWKS_URL: string;
   SELFCARE_API_MOCKING: boolean;
 
   // NodeJS Environment mode
@@ -48,7 +48,7 @@ export type Configuration = {
   APIM_USER_GROUPS: string;
   API_APIM_MOCKING: boolean;
 
-  BACKOFFICE_DOMAIN: string;
+  BACKOFFICE_HOST: string;
 
   // Legacy CosmosDB configuration
   LEGACY_COSMOSDB_URI: string;
@@ -85,9 +85,10 @@ export function getConfiguration(): Configuration {
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
-    SELFCARE_BASE_URL: process.env.SELFCARE_BASE_URL as string,
-    SELFCARE_BASE_PATH: process.env.SELFCARE_BASE_PATH as string,
-    SELFCARE_JWKS_PATH: "/.well-known/jwks.json",
+    SELFCARE_EXTERNAL_API_BASE_URL: process.env
+      .SELFCARE_EXTERNAL_API_BASE_URL as string,
+    SELFCARE_JWT_ISSUER: process.env.SELFCARE_JWT_ISSUER as string,
+    SELFCARE_JWKS_URL: process.env.SELFCARE_JWKS_URL as string,
     SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
 
     // NodeJS Environment mode
@@ -115,7 +116,7 @@ export function getConfiguration(): Configuration {
     APIM_USER_GROUPS: process.env.APIM_USER_GROUPS as string, //FIXME: fix cast
     API_APIM_MOCKING: process.env.API_APIM_MOCKING === "true",
 
-    BACKOFFICE_DOMAIN: process.env.BACKOFFICE_DOMAIN as string,
+    BACKOFFICE_HOST: process.env.BACKOFFICE_HOST as string,
 
     // Legacy CosmosDB configuration
     LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,

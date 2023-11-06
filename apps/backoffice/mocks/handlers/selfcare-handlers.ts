@@ -16,10 +16,10 @@ faker.seed(1);
 
 export const buildHandlers = () => {
   const configuration = getConfiguration();
-  const baseURL = configuration.SELFCARE_BASE_URL;
+  const baseURL = configuration.SELFCARE_EXTERNAL_API_BASE_URL;
 
   return [
-    rest.get(baseURL + configuration.SELFCARE_JWKS_PATH, (_, res, ctx) => {
+    rest.get(configuration.SELFCARE_JWKS_URL, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getWellKnown200Response())],
         [ctx.status(500), ctx.json(getWellKnown500Response())]
@@ -27,33 +27,27 @@ export const buildHandlers = () => {
 
       return res(...resultArray[0]);
     }),
-    rest.get(
-      `${baseURL}/${configuration.SELFCARE_BASE_PATH}/institutions`,
-      (_, res, ctx) => {
-        const resultArray = [
-          [ctx.status(200), ctx.json([getMockInstitution()])],
-          [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
-          [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
-        ];
-        return res(...resultArray[0]);
-      }
-    ),
-    rest.get(
-      `${baseURL}/${configuration.SELFCARE_BASE_PATH}/institutions/:institutionId`,
-      (req, res, ctx) => {
-        const { institutionId } = req.params;
-        const resultArray = [
-          [
-            ctx.status(200),
-            ctx.json(getMockInstitution(institutionId as string))
-          ],
-          [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
-          [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
-        ];
+    rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json([getMockInstitution()])],
+        [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
+        [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+      ];
+      return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/institutions/:institutionId`, (req, res, ctx) => {
+      const { institutionId } = req.params;
+      const resultArray = [
+        [
+          ctx.status(200),
+          ctx.json(getMockInstitution(institutionId as string))
+        ],
+        [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
+        [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+      ];
 
-        return res(...resultArray[0]);
-      }
-    )
+      return res(...resultArray[0]);
+    })
   ];
 };
 
