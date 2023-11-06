@@ -82,12 +82,10 @@ const verifyToken = (config: Configuration) => (
       () =>
         jwtVerify(
           identity_token,
-          createRemoteJWKSet(
-            new URL(`${config.SELFCARE_BASE_URL}${config.SELFCARE_JWKS_PATH}`)
-          ),
+          createRemoteJWKSet(new URL(config.SELFCARE_JWKS_URL)),
           {
-            issuer: config.SELFCARE_BASE_URL,
-            audience: config.BACKOFFICE_DOMAIN
+            issuer: config.SELFCARE_JWT_ISSUER,
+            audience: config.BACKOFFICE_HOST
           }
         ),
       E.toError

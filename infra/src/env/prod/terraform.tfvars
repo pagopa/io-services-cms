@@ -65,9 +65,10 @@ reviewer_db_user   = "reviewerusr"
 reviewer_db_table  = "service_review"
 
 # Legacy data
-legacy_cosmosdb_name     = "db"
-legacy_cosmosdb_uri      = "https://io-p-cosmos-api.documents.azure.com:443/"
-legacy_jira_project_name = "IES"
+legacy_cosmosdb_resource_group = "io-p-rg-internal"
+legacy_cosmosdb_resource_name  = "io-p-cosmos-api"
+legacy_cosmosdb_name           = "db"
+legacy_jira_project_name       = "IES"
 
 legacy_service_watcher_max_items_per_invocation = 10
 
@@ -78,12 +79,13 @@ userid_request_review_legacy_inclusion_list      = "*"
 userid_automatic_service_approval_inclusion_list = ""
 
 # Backoffice Configurations
+backoffice_host = "selfcare.io.pagopa.it"
 backoffice_app = {
   sku_name                              = "S1" # FIXME: use "P1v3" before "production launch"
-  selfcare_base_path                    = "external/v2"
   apim_user_groups                      = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
   azure_credentials_scope_url           = "https://management.azure.com/.default"
   azure_apim_subscriptions_api_base_url = "https://management.azure.com/subscriptions/"
-  selfcare_external_api_base_url        = "https://api.selfcare.pagopa.it/external/v2" # FIXME: decide whether to use one var or two vars
-  selfcare_external_api_base_path       = "external/v2"                                # FIXME: decide whether to use one var or two vars
+  selfcare_external_api_base_url        = "https://api.selfcare.pagopa.it/external/v2"
+  selfcare_jwks_path                    = "/.well-known/jwks.json"
+  selfcare_jwt_issuer                   = "api.selfcare.pagopa.it"
 }

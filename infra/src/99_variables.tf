@@ -104,6 +104,12 @@ variable "azure_apim_product_id" {
 # Webapp #
 ##########
 
+variable "backoffice_host" {
+  type        = string
+  description = "Backoffice host name"
+  default     = null
+}
+
 variable "functions_kind" {
   type        = string
   description = "App service plan kind"
@@ -223,14 +229,19 @@ variable "legacy_jira_project_name" {
 # Cosmos DB Legacy Services #
 #############################
 
+variable "legacy_cosmosdb_resource_group" {
+  type        = string
+  description = "The name of the resource group where legacy data is"
+}
+
+variable "legacy_cosmosdb_resource_name" {
+  type        = string
+  description = "The name of the resource where legacy data is"
+}
+
 variable "legacy_cosmosdb_name" {
   type        = string
   description = "The name of the database where legacy data is"
-}
-
-variable "legacy_cosmosdb_uri" {
-  type        = string
-  description = "The uri of the database where legacy data is"
 }
 
 variable "legacy_cosmosdb_container_services" {
@@ -300,12 +311,12 @@ variable "userid_automatic_service_approval_inclusion_list" {
 variable "backoffice_app" {
   type = object({
     sku_name                              = string
-    selfcare_base_path                    = string
     apim_user_groups                      = string
     azure_credentials_scope_url           = string
     azure_apim_subscriptions_api_base_url = string
     selfcare_external_api_base_url        = string
-    selfcare_external_api_base_path       = string
+    selfcare_jwks_path                    = string
+    selfcare_jwt_issuer                   = string
   })
   description = "Configuration of the io-services-cms-backoffice service"
 }

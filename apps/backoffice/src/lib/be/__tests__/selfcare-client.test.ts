@@ -39,8 +39,7 @@ vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
-    SELFCARE_BASE_URL: "https://example.com",
-    SELFCARE_BASE_PATH: "/api",
+    SELFCARE_EXTERNAL_API_BASE_URL: "https://example.com",
     SELFCARE_API_KEY: "abc123",
     SELFCARE_API_MOCKING: "false"
   };
