@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 0.12.1
+
+### Patch Changes
+
+- fb5cbd6: bugfix: handle request body not present from create and update service request handler
+- 5247ad8: bugfix: fix request body read
+- ab001a2: Remove organization data from frontend service payload
+- 902bc18: Add equality check on update service form: avoid to send update and notify user if initial form values are equal to submitted values
+
 ## 0.12.0
 
 ### Minor Changes
