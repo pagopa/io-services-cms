@@ -13,8 +13,6 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      backofficeUser.institution.fiscalCode;
-
       const response = retrieveOwnershipClaimLatestStatus(
         backofficeUser.institution.fiscalCode
       );
@@ -22,7 +20,8 @@ export const GET = withJWTAuthHandler(
       return NextResponse.json(response);
     } catch (error) {
       console.error(
-        `An Error has occurred while retrieving latest Ownership claims for user having selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+        `An Error has occurred while retrieving latest Ownership claims for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
+         requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
         error
       );
       return handleInternalErrorResponse("InstitutionsRetrieveError", error);
