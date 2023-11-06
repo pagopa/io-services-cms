@@ -4,6 +4,7 @@ import { buildHandlers as backendHandlers } from "./backend-handlers";
 import { buildHandlers as cdnHandlers } from "./cdn-handlers";
 import { buildHandlers as selfcareHandlers } from "./selfcare-handlers";
 import { buildHandlers as servicesCmsHandlers } from "./services-cms-handlers";
+import { buildHandlers as subscriptionsMigrationHandlers } from "./subscriptions-migrations-handler";
 
 /** List of handlers managed by MSW */
 export const getHandlers = () => {
@@ -20,6 +21,9 @@ export const getHandlers = () => {
   }
   if (config.API_APIM_MOCKING) {
     handlers.push(...apimHandlers());
+  }
+  if (config.SUBSCRIPTIONS_MIGRATION_MOCKING) {
+    handlers.push(...subscriptionsMigrationHandlers());
   }
   return handlers;
 };

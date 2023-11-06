@@ -37,7 +37,7 @@ export const POST = withJWTAuthHandler(
          by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
         error
       );
-      return handleInternalErrorResponse("InstitutionsRetrieveError", error);
+      return handleInternalErrorResponse("OwnershipClaimsRequestError", error);
     }
   }
 );
@@ -66,7 +66,10 @@ export const GET = withJWTAuthHandler(
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
         error
       );
-      return handleInternalErrorResponse("InstitutionsRetrieveError", error);
+      return handleInternalErrorResponse(
+        "OwnershipClaimsDelegateRetrieveError",
+        error
+      );
     }
   }
 );

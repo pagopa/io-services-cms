@@ -26,7 +26,7 @@ import {
   getOwnershipClaimStatus
 } from "./subscriptions-migration";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
-import { MigrationDataValue } from "@/generated/api/MigrationDataValue";
+import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 
 type PathParameters = {
@@ -177,7 +177,7 @@ export const retrieveOwnershipClaimLatestStatus = async (
 export const retrieveOwnershipClaimLatestForDelegate = async (
   organizationFiscalCode: string,
   delegateId: string
-): Promise<MigrationDataValue> => {
+): Promise<MigrationData> => {
   return await getOwnershipClaimStatus(organizationFiscalCode, delegateId);
 };
 

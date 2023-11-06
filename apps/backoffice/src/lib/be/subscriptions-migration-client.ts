@@ -1,6 +1,7 @@
-import { MigrationDataValue } from "@/generated/api/MigrationDataValue";
+import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import axios, { AxiosInstance } from "axios";
@@ -14,7 +15,8 @@ import { HealthChecksError } from "./errors";
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   SUBSCRIPTION_MIGRATIONS_URL: NonEmptyString,
-  SUBSCRIPTION_MIGRATIONS_APIKEY: NonEmptyString
+  SUBSCRIPTION_MIGRATIONS_APIKEY: NonEmptyString,
+  SUBSCRIPTIONS_MIGRATION_MOCKING: BooleanFromString
 });
 
 const getSubscriptionsMigrationConfig: () => Config = cache(() => {
@@ -26,10 +28,10 @@ const getSubscriptionsMigrationConfig: () => Config = cache(() => {
     });
   }
 
-  //   if (result.right.SELFCARE_API_MOCKING) {
-  //     const { setupMocks } = require("../../../mocks");
-  //     setupMocks();
-  //   }
+  if (result.right.SUBSCRIPTIONS_MIGRATION_MOCKING) {
+    const { setupMocks } = require("../../../mocks");
+    setupMocks();
+  }
   return result.right;
 });
 
@@ -50,7 +52,7 @@ export type SubscriptionsMigrationClient = {
   getOwnershipClaimStatus: (
     organizationFiscalCode: string,
     delegateId: string
-  ) => TE.TaskEither<Error, MigrationDataValue>;
+  ) => TE.TaskEither<Error, MigrationData>;
   claimOwnership: (
     organizationFiscalCode: string,
     delegateId: string,
@@ -121,7 +123,7 @@ export const getSubscriptionsMigrationClient: () => SubscriptionsMigrationClient
         TE.chainW(response =>
           pipe(
             response.data,
-            MigrationDataValue.decode,
+            MigrationData.decode,
             E.mapLeft(flow(readableReport, E.toError)),
             TE.fromEither
           )

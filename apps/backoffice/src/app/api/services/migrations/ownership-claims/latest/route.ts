@@ -13,7 +13,7 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      const response = retrieveOwnershipClaimLatestStatus(
+      const response = await retrieveOwnershipClaimLatestStatus(
         backofficeUser.institution.fiscalCode
       );
 
@@ -24,7 +24,10 @@ export const GET = withJWTAuthHandler(
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
         error
       );
-      return handleInternalErrorResponse("InstitutionsRetrieveError", error);
+      return handleInternalErrorResponse(
+        "LatestOwnershipClaimsRequestError",
+        error
+      );
     }
   }
 );

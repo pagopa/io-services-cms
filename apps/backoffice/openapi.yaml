@@ -191,7 +191,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MigrationDataValue'
+                $ref: '#/components/schemas/MigrationData'
         '401':
           description: Unauthorized
         '403':

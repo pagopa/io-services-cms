@@ -1,4 +1,4 @@
-import { MigrationDataValue } from "@/generated/api/MigrationDataValue";
+import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ManagedInternalError } from "@/lib/be/errors";
@@ -27,7 +27,7 @@ export const getLatestOwnershipClaimStatus = async (
 export const getOwnershipClaimStatus = async (
   organizationFiscalCode: string,
   delegateId: string
-): Promise<MigrationDataValue> => {
+): Promise<MigrationData> => {
   const apiResult = await getSubscriptionsMigrationClient().getOwnershipClaimStatus(
     organizationFiscalCode,
     delegateId
