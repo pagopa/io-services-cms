@@ -84,4 +84,6 @@ backoffice_app = {
   apim_user_groups                      = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
   azure_credentials_scope_url           = "https://management.azure.com/.default"
   azure_apim_subscriptions_api_base_url = "https://management.azure.com/subscriptions/"
+  selfcare_external_api_base_url        = "https://api.selfcare.pagopa.it/external/v2" # FIXME: decide whether to use one var or two vars
+  selfcare_external_api_base_path       = "external/v2"                                # FIXME: decide whether to use one var or two vars
 }

@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
+import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,8 @@ export async function GET() {
     getLegacyCosmosHealth(),
     getApimHealth(),
     getSelfcareHealth(),
-    getIoServicesCmsHealth()
+    getIoServicesCmsHealth(),
+    getAzureAccessTokenHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
