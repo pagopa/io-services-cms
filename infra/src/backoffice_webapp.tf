@@ -2,7 +2,8 @@ locals {
   backoffice_node_version      = "18-lts"
   backoffice_health_check_path = "/api/info"
   backoffice_app_settings = merge({
-    NODE_ENV = "production"
+    NODE_ENV        = "production"
+    BACKOFFICE_HOST = var.backoffice_host
     # Azure
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
@@ -13,20 +14,17 @@ locals {
     AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
     AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_v2_product_services.product_id
     APIM_USER_GROUPS          = var.backoffice_app.apim_user_groups
+    API_APIM_MOCKING          = true
     # Logs
     APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
     # NextAuthJS
-    NEXTAUTH_URL    = "https://selfcare.io.pagopa.it/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
+    NEXTAUTH_URL    = "https://${var.backoffice_host}/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
 
-    SELFCARE_API_KEY   = data.azurerm_key_vault_secret.selfcare_api_key.value
-    SELFCARE_BASE_PATH = var.backoffice_app.selfcare_base_path
-
     # Legacy source data
-    LEGACY_COSMOSDB_CONNECTIONSTRING = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
-    LEGACY_COSMOSDB_NAME             = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_URI              = var.legacy_cosmosdb_uri
-    LEGACY_COSMOSDB_KEY              = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_NAME = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI  = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
+    LEGACY_COSMOSDB_KEY  = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
 
     AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url
@@ -35,10 +33,12 @@ locals {
     API_SERVICES_CMS_BASE_PATH = "/api/v1"
     API_SERVICES_CMS_MOCKING   = true
 
-    SELFCARE_BASE_URL    = var.backoffice_app.selfcare_external_api_base_url
-    SELFCARE_BASE_PATH   = var.backoffice_app.selfcare_external_api_base_path
-    SELFCARE_API_KEY     = "fake-api-key" // TODO: set and get from key vault
-    SELFCARE_API_MOCKING = true
+    # Selfcare
+    SELFCARE_EXTERNAL_API_BASE_URL = var.backoffice_app.selfcare_external_api_base_url
+    SELFCARE_JWKS_PATH             = var.backoffice_app.selfcare_jwks_path
+    SELFCARE_JWT_ISSUER            = var.backoffice_app.selfcare_jwt_issuer
+    SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
+    SELFCARE_API_MOCKING           = true
   })
 }
 

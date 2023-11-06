@@ -15,8 +15,7 @@ const institutionsApi = "/institutions";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  SELFCARE_BASE_URL: NonEmptyString,
-  SELFCARE_BASE_PATH: NonEmptyString,
+  SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
   SELFCARE_API_KEY: NonEmptyString,
   SELFCARE_API_MOCKING: BooleanFromString
 });
@@ -39,7 +38,7 @@ const getSelfcareConfig: () => Config = cache(() => {
 
 const getAxiosInstance: () => AxiosInstance = cache(() => {
   const configuration = getSelfcareConfig();
-  const endpoint = `${configuration.SELFCARE_BASE_URL}/${configuration.SELFCARE_BASE_PATH}`;
+  const endpoint = `${configuration.SELFCARE_EXTERNAL_API_BASE_URL}`;
 
   return axios.create({
     baseURL: endpoint,
