@@ -29,24 +29,11 @@ export const getMockInstitution = (institutionId?: string) => ({
     .alphanumeric({ length: { min: 5, max: 10 } })
     .toUpperCase(),
   description: faker.company.name(),
-  digitalAddress: faker.internet.email(),
+  mailAddress: faker.internet.email(),
   address: faker.location.streetAddress(true),
   zipCode: faker.location.zipCode(),
   taxCode: faker.string.numeric(11),
-  attributes: [
-    {
-      origin: faker.lorem.slug(1),
-      code: faker.lorem.slug(1),
-      description: faker.lorem.slug(1)
-    }
-  ],
   origin: "SELC",
-  geographicTaxonomies: [
-    {
-      code: faker.lorem.slug(1),
-      desc: faker.lorem.slug(1)
-    }
-  ],
   institutionType: faker.helpers.arrayElement([
     "GSP",
     "PA",
@@ -56,7 +43,13 @@ export const getMockInstitution = (institutionId?: string) => ({
     "SCP",
     "SA"
   ]),
-  name: faker.company.name(),
+  attributes: [
+    {
+      origin: faker.lorem.slug(1),
+      code: faker.lorem.slug(1),
+      description: faker.lorem.slug(1)
+    }
+  ],
   paymentServiceProvider: {
     abiCode: faker.string.numeric(5),
     businessRegisterNumber: faker.string.numeric(10),
@@ -69,6 +62,16 @@ export const getMockInstitution = (institutionId?: string) => ({
     email: faker.internet.email(),
     pec: faker.internet.email()
   },
+  geographicTaxonomies: [
+    {
+      code: faker.location.countryCode(),
+      desc: faker.location.state()
+    },
+    {
+      code: faker.location.countryCode(),
+      desc: faker.location.state()
+    }
+  ],
   rea: faker.lorem.slug(1),
   shareCapital: faker.lorem.slug(1),
   businessRegisterPlace: faker.lorem.slug(1),
@@ -82,8 +85,7 @@ export const getMockInstitution = (institutionId?: string) => ({
   rootParent: {
     id: faker.string.uuid(),
     description: faker.company.name()
-  },
-  userProductRoles: faker.helpers.arrayElements(Object.values(SelfcareRoles))
+  }
 });
 
 export const getSelfCareProblemResponse = (status: number) => ({

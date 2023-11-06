@@ -1,10 +1,12 @@
 import { AccessControl } from "@/components/access-control";
-import { CardDetails } from "@/components/cards";
+import { CardDetails, CardShortcut } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
+import { Institution } from "@/generated/api/Institution";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
+import { Add, Category } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -18,8 +20,17 @@ export default function Home() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
+  const { data: instData, fetchData: instFetchData } = useFetch<Institution>();
 
   useEffect(() => {
+    instFetchData(
+      "getInstitution",
+      { institutionId: session?.user?.institution.id as string },
+      Institution,
+      {
+        notify: "errors"
+      }
+    );
     if (
       hasRequiredAuthorizations(session, {
         requiredPermissions: ["ApiServiceWrite"]
@@ -37,23 +48,73 @@ export default function Home() {
         description={pageDescriptionLocaleKey}
       />
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={8} md={8} lg={6} xl={6}>
+        <Grid item xs={12} sm={12} md={7} lg={7} xl={8}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CardDetails
+                title="institution.cardTitle"
+                rows={[
+                  {
+                    label: "institution.name",
+                    value: instData?.description
+                  },
+                  {
+                    label: "institution.institutionType.label",
+                    value: instData?.institutionType
+                      ? t(
+                          `institution.institutionType.${instData.institutionType}`
+                        )
+                      : undefined
+                  },
+                  {
+                    label: "institution.mailAddress",
+                    value: instData?.mailAddress
+                  },
+                  {
+                    label: "institution.fiscalCode",
+                    value: instData?.taxCode
+                  },
+                  {
+                    label: "institution.geographicArea",
+                    value: instData?.geographicTaxonomies
+                      ?.map((g: any) => g.desc)
+                      .join(", ")
+                  }
+                ]}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <AccessControl requiredPermissions={["ApiServiceWrite"]}>
+                <CardDetails
+                  title="routes.keys.manage.title"
+                  cta={{ label: "routes.keys.manage.shortcut", href: "/keys" }}
+                  rows={[
+                    {
+                      label: "keys.primary.title",
+                      value: mkData?.primary_key,
+                      kind: "apikey"
+                    },
+                    {
+                      label: "keys.secondary.title",
+                      value: mkData?.secondary_key,
+                      kind: "apikey"
+                    }
+                  ]}
+                />
+              </AccessControl>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={12} md={5} lg={5} xl={4}>
           <AccessControl requiredPermissions={["ApiServiceWrite"]}>
-            <CardDetails
-              title="routes.keys.manage.title"
-              cta={{ label: "routes.keys.manage.shortcut", href: "/keys" }}
-              rows={[
-                {
-                  label: "keys.primary.title",
-                  value: mkData?.primary_key,
-                  kind: "apikey"
-                },
-                {
-                  label: "keys.secondary.title",
-                  value: mkData?.secondary_key,
-                  kind: "apikey"
-                }
-              ]}
+            <CardShortcut
+              text="service.shortcut.create.description"
+              cta={{
+                label: "service.shortcut.create.label",
+                href: "/services/new-service",
+                startIcon: <Add />
+              }}
+              icon={<Category />}
             />
           </AccessControl>
         </Grid>

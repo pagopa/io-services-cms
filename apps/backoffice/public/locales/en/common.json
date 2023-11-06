@@ -176,6 +176,24 @@
       }
     }
   },
+  "institution": {
+    "cardTitle": "Institution information",
+    "name": "Business name",
+    "mailAddress": "Primary PEC address",
+    "institutionType": {
+      "label": "Tipology",
+      "AS": "Insurance",
+      "GSP": "Public service manager",
+      "PA": "Public administration",
+      "PG": "Legal person, private company",
+      "PSP": "Payment Service Provider",
+      "PT": "Technology Partner",
+      "SCP": "Publicly controlled company",
+      "SA": "Contracting station"
+    },
+    "fiscalCode": "Tax Code / VAT number",
+    "geographicArea": "Geographic area"
+  },
   "keys": {
     "block": "Block",
     "primary": {
@@ -365,6 +383,12 @@
       "title": "Preview",
       "button": "See preview",
       "info": "This is how the service description will be displayed in the IO app."
+    },
+    "shortcut": {
+      "create": {
+        "description": "Start creating a new service",
+        "label": "Create a service"
+      }
     },
     "switcher": {
       "title": "Which version of the service do you want to view?",

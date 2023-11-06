@@ -176,6 +176,24 @@
       }
     }
   },
+  "institution": {
+    "cardTitle": "Informazioni Ente",
+    "name": "Ragione sociale",
+    "mailAddress": "Indirizzo PEC primario",
+    "institutionType": {
+      "label": "Tipologia",
+      "AS": "Assicurazioni",
+      "GSP": "Gestore di servizi pubblici",
+      "PA": "Pubblica Amministrazione",
+      "PG": "Persona Giuridica, azienda privata",
+      "PSP": "Prestatore Servizio Pagamenti",
+      "PT": "Partner Tecnologico",
+      "SCP": "Società a controllo pubblico",
+      "SA": "Stazione appaltanti"
+    },
+    "fiscalCode": "Codice Fiscale / P.IVA",
+    "geographicArea": "Area geografica"
+  },
   "keys": {
     "block": "Blocca",
     "primary": {
@@ -365,6 +383,12 @@
       "title": "Anteprima",
       "button": "Vedi anteprima",
       "info": "Ecco come si visualizzerà la descrizione del servizio in app IO."
+    },
+    "shortcut": {
+      "create": {
+        "description": "Inizia la creazione di un nuovo servizio",
+        "label": "Crea un servizio"
+      }
     },
     "switcher": {
       "title": "Quale versione del servizio vuoi visualizzare?",
