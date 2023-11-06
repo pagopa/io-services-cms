@@ -47,13 +47,11 @@ export const getOwnershipClaimStatus = async (
 
 export const claimOwnership = async (
   organizationFiscalCode: string,
-  delegateId: string,
-  body?: unknown
+  delegateId: string
 ): Promise<void> => {
   const apiResult = await getSubscriptionsMigrationClient().claimOwnership(
     organizationFiscalCode,
-    delegateId,
-    body ?? undefined
+    delegateId
   )();
 
   if (E.isLeft(apiResult)) {

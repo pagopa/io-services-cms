@@ -35,7 +35,7 @@ const getSubscriptionsMigrationConfig: () => Config = cache(() => {
   return result.right;
 });
 
-const getAxiosInstance: () => AxiosInstance = cache(() => {
+const getAxiosInstance: () => AxiosInstance = () => {
   const configuration = getSubscriptionsMigrationConfig();
 
   return axios.create({
@@ -43,7 +43,7 @@ const getAxiosInstance: () => AxiosInstance = cache(() => {
     timeout: 5000,
     headers: { "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATIONS_APIKEY }
   });
-});
+};
 
 export type SubscriptionsMigrationClient = {
   getLatestOwnershipClaimStatus: (
@@ -55,8 +55,7 @@ export type SubscriptionsMigrationClient = {
   ) => TE.TaskEither<Error, MigrationData>;
   claimOwnership: (
     organizationFiscalCode: string,
-    delegateId: string,
-    body?: unknown
+    delegateId: string
   ) => TE.TaskEither<Error, void>;
   getDelegatesByOrganization: (
     organizationFiscalCode: string
@@ -134,15 +133,13 @@ export const getSubscriptionsMigrationClient = cache(
 
     const claimOwnership = (
       organizationFiscalCode: string,
-      delegateId: string,
-      body?: unknown
+      delegateId: string
     ): TE.TaskEither<Error, void> =>
       pipe(
         TE.tryCatch(
           () =>
             axiosInstance.post(
-              `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`,
-              body // TODO: verify f body is necessary
+              `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
             ),
           identity
         ),

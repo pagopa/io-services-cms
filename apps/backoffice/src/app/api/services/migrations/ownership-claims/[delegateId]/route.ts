@@ -24,8 +24,7 @@ export const POST = withJWTAuthHandler(
 
       await claimOwnershipForDelegate(
         backofficeUser.institution.fiscalCode,
-        params.delegateId,
-        requestBody
+        params.delegateId
       );
 
       return new Response(null, {

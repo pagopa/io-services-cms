@@ -183,10 +183,9 @@ export const retrieveOwnershipClaimLatestForDelegate = async (
 
 export const claimOwnershipForDelegate = async (
   organizationFiscalCode: string,
-  delegateId: string,
-  body?: unknown
+  delegateId: string
 ): Promise<void> => {
-  return await claimOwnership(organizationFiscalCode, delegateId, body);
+  return await claimOwnership(organizationFiscalCode, delegateId);
 };
 
 export const retrieveOrganizationDelegates = async (

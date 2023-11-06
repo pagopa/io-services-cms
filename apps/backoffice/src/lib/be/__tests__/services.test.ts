@@ -6,8 +6,12 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { MigrationItem } from "../../../generated/api/MigrationItem";
+import { MigrationData } from "../../../generated/api/MigrationData";
+import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import {
   forwardIoServicesCmsRequest,
+  retrieveOrganizationDelegates,
   retrieveServiceList
 } from "../services/business";
 import { toServiceListItem } from "../services/utils";
@@ -31,6 +35,9 @@ const mocks: {
   aSamplePayload: { test: string };
   aBaseServiceLifecycle: ServiceLifecycle.ItemType;
   anUserId: string;
+  migrationItem: MigrationItem;
+  migrationData: MigrationData;
+  migrationDelegate: MigrationDelegate;
 } = vi.hoisted(() => ({
   statusOK: 200,
   statusNoContent: 204,
@@ -59,7 +66,37 @@ const mocks: {
       state: "draft"
     }
   } as unknown) as ServiceLifecycle.ItemType,
-  anUserId: "anUserId"
+  anUserId: "anUserId",
+  migrationItem: {
+    status: {
+      completed: 99,
+      failed: 7,
+      initial: 63,
+      processing: 94
+    },
+    delegate: {
+      sourceId: "3ef50230-9c1f-4cf0-9f4d-af6c0dcf6288",
+      sourceName: "Name",
+      sourceSurname: "Surname",
+      sourceEmail: "test@email.test"
+    },
+    lastUpdate: "2023-05-05T14:25:49.277Z"
+  } as MigrationItem,
+  migrationData: {
+    status: {
+      completed: 31,
+      failed: 64,
+      initial: 31,
+      processing: 25
+    }
+  } as MigrationData,
+  migrationDelegate: {
+    sourceId: "c7fd5462-7fa2-4321-a4a4-237523445d1c",
+    sourceName: "Name",
+    sourceSurname: "Surname",
+    sourceEmail: "test@test.test",
+    subscriptionCounter: 17
+  } as MigrationDelegate
 }));
 
 const { getIoServicesCmsClient } = vi.hoisted(() => ({
@@ -76,6 +113,23 @@ const { getIoServicesCmsClient } = vi.hoisted(() => ({
     ),
     reviewService: vi.fn(() =>
       Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
+    )
+  })
+}));
+
+const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
+  getSubscriptionsMigrationClient: vi.fn().mockReturnValue({
+    getLatestOwnershipClaimStatus: vi.fn(() =>
+      TE.right({
+        items: [mocks.migrationItem]
+      })
+    ),
+    getOwnershipClaimStatus: vi.fn(() => TE.right(mocks.migrationData)),
+    claimOwnership: vi.fn(() => TE.right(void 0)),
+    getDelegatesByOrganization: vi.fn(() =>
+      TE.right({
+        delegates: [mocks.migrationDelegate]
+      })
     )
   })
 }));
@@ -105,6 +159,10 @@ const {
   })
 }));
 
+vi.mock("@/lib/be/subscriptions-migration-client", () => ({
+  getSubscriptionsMigrationClient
+}));
+
 vi.mock("@/lib/be/cms-client", () => ({
   getIoServicesCmsClient
 }));
@@ -117,6 +175,7 @@ vi.mock("@/lib/be/cosmos-store", () => ({
   getServiceLifecycleCosmosStore,
   getServicePublicationCosmosStore
 }));
+
 afterEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
@@ -664,6 +723,44 @@ describe("Services TEST", () => {
       expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+    });
+  });
+  describe("subscriptions migration", () => {
+    it("should return a list of delegates", async () => {
+      const getDelegatesByOrganization = vi.fn(() =>
+        TE.right({
+          delegates: [mocks.migrationDelegate]
+        })
+      );
+
+      getSubscriptionsMigrationClient.mockReturnValueOnce({
+        getDelegatesByOrganization
+      });
+
+      const result = await retrieveOrganizationDelegates("anOrganizationId");
+
+      expect(getDelegatesByOrganization).toBeCalledWith("anOrganizationId");
+      expect(result).toStrictEqual({
+        delegates: [mocks.migrationDelegate]
+      });
+    });
+
+    it("should propagate a not detailed error", async () => {
+      const getDelegatesByOrganization = vi.fn(() =>
+        TE.left(new Error("Error calling subscriptions migration"))
+      );
+
+      getSubscriptionsMigrationClient.mockReturnValueOnce({
+        getDelegatesByOrganization
+      });
+
+      await expect(
+        retrieveOrganizationDelegates("anOrganizationId")
+      ).rejects.toThrowError(
+        "Error calling subscriptions migration getDelegatesByOrganization API"
+      );
+
+      expect(getDelegatesByOrganization).toBeCalledWith("anOrganizationId");
     });
   });
 });
