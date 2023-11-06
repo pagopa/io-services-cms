@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 0.13.0
+
+### Minor Changes
+
+- 1bd296f: Added institution card and create service shortcut on overview page
+
+### Patch Changes
+
+- f3fd4fa: ADD Azure Access Token Refresh capabilities on token expiration
+- acc0500: fix configurations
+
 ## 0.12.1
 
 ### Patch Changes
