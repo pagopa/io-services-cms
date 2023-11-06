@@ -223,14 +223,19 @@ variable "legacy_jira_project_name" {
 # Cosmos DB Legacy Services #
 #############################
 
+variable "legacy_cosmosdb_resource_group" {
+  type        = string
+  description = "The name of the resource group where legacy data is"
+}
+
+variable "legacy_cosmosdb_resource_name" {
+  type        = string
+  description = "The name of the resource where legacy data is"
+}
+
 variable "legacy_cosmosdb_name" {
   type        = string
   description = "The name of the database where legacy data is"
-}
-
-variable "legacy_cosmosdb_uri" {
-  type        = string
-  description = "The uri of the database where legacy data is"
 }
 
 variable "legacy_cosmosdb_container_services" {

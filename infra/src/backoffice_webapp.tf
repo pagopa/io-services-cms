@@ -23,10 +23,9 @@ locals {
     SELFCARE_BASE_PATH = var.backoffice_app.selfcare_base_path
 
     # Legacy source data
-    LEGACY_COSMOSDB_CONNECTIONSTRING = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
-    LEGACY_COSMOSDB_NAME             = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_URI              = var.legacy_cosmosdb_uri
-    LEGACY_COSMOSDB_KEY              = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_NAME = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI  = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
+    LEGACY_COSMOSDB_KEY  = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
 
     AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url

@@ -65,9 +65,10 @@ reviewer_db_user   = "reviewerusr"
 reviewer_db_table  = "service_review"
 
 # Legacy data
-legacy_cosmosdb_name     = "db"
-legacy_cosmosdb_uri      = "https://io-p-cosmos-api.documents.azure.com:443/"
-legacy_jira_project_name = "IES"
+legacy_cosmosdb_resource_group = "io-p-rg-internal"
+legacy_cosmosdb_resource_name  = "io-p-cosmos-api"
+legacy_cosmosdb_name           = "db"
+legacy_jira_project_name       = "IES"
 
 legacy_service_watcher_max_items_per_invocation = 10
 
