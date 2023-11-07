@@ -4,5 +4,6 @@ export * from "./service-context-menu";
 export * from "./service-info";
 export * from "./service-logo";
 export * from "./service-preview";
+export * from "./service-search-by-id";
 export * from "./service-status";
 export * from "./service-version-switcher";
