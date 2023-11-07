@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.13.2
+
+### Patch Changes
+
+- 779cfb8: fix deploy staging healthcheck url
+
 ## 0.13.1
 
 ### Patch Changes

@@ -47,13 +47,14 @@ type PathParameters = {
 export const retrieveServiceList = async (
   userId: string,
   limit: number,
-  offset: number
+  offset: number,
+  serviceId?: string
 ): Promise<ServiceList> =>
   pipe(
     TE.tryCatch(() => getApimRestClient(), E.toError),
     // get services from apim
     TE.chainW(apimRestClient =>
-      apimRestClient.getServiceList(userId, limit, offset)
+      apimRestClient.getServiceList(userId, limit, offset, serviceId)
     ),
     TE.bindTo("apimServices"),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
