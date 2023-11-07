@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.13.1
+
+### Patch Changes
+
+- f10afb3: add missing configurations
+
 ## 0.13.0
 
 ### Minor Changes

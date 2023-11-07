@@ -2,6 +2,7 @@ import { getConfiguration } from "@/config";
 import { buildHandlers as apimHandlers } from "./apim-handlers";
 import { buildHandlers as backendHandlers } from "./backend-handlers";
 import { buildHandlers as cdnHandlers } from "./cdn-handlers";
+import { buildHandlers as cosmosLegacyHandlers } from "./cosmos-legacy-handlers";
 import { buildHandlers as selfcareHandlers } from "./selfcare-handlers";
 import { buildHandlers as servicesCmsHandlers } from "./services-cms-handlers";
 import { buildHandlers as subscriptionsMigrationHandlers } from "./subscriptions-migrations-handler";
@@ -24,6 +25,9 @@ export const getHandlers = () => {
   }
   if (config.SUBSCRIPTIONS_MIGRATION_MOCKING) {
     handlers.push(...subscriptionsMigrationHandlers());
+  }
+  if (config.LEGACY_COSMOSDB_MOCKING) {
+    handlers.push(...cosmosLegacyHandlers());
   }
   return handlers;
 };

@@ -22,9 +22,17 @@ locals {
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
 
     # Legacy source data
-    LEGACY_COSMOSDB_NAME = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_URI  = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
-    LEGACY_COSMOSDB_KEY  = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_NAME    = var.legacy_cosmosdb_name
+    LEGACY_COSMOSDB_URI     = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
+    LEGACY_COSMOSDB_KEY     = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+    LEGACY_COSMOSDB_MOCKING = true
+
+    # Services CMS source data
+    COSMOSDB_NAME                           = azurerm_cosmosdb_sql_database.db_cms.name
+    COSMOSDB_URI                            = module.cosmosdb_account.endpoint
+    COSMOSDB_KEY                            = module.cosmosdb_account.primary_key
+    COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = local.cosmos_containers.services_lifecycle
+    COSMOSDB_CONTAINER_SERVICES_PUBLICATION = local.cosmos_containers.services_publication
 
     AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url
