@@ -77,9 +77,7 @@ jobs:
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'webapp')
         id: healthcheck
-        run: |
-          # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'webapp')
@@ -101,7 +99,7 @@ jobs:
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'backoffice')
         id: healthcheck_backoffice
-        run: curl --retry 5 --retry-max-time 120 --retry-all-errors 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'backoffice')
