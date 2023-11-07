@@ -101,21 +101,7 @@ jobs:
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'backoffice')
         id: healthcheck_backoffice
-        run: |
-          # fails if response status is not 2xx
-          retryCounter=1
-          resp_status="$(curl --silent --head https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }} | awk '/^HTTP/{print $2}')"
-          while [[ $resp_status != 200 && $retryCounter -le 5 ]]
-          do
-            sleep $(($retryCounter**2))
-            echo resp_status="$(curl --silent --head https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }} | awk '/^HTTP/{print $2}')"
-            retryCounter=$(( $retryCounter + 1 ))
-          done
-          if [[ $resp_status != 200 ]] 
-          then
-            echo "Not Healty (response status $resp_status) after $retryCount retries"
-            exit 1
-          fi
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'backoffice')

@@ -77,6 +77,7 @@
 | [azurerm_api_management_product.apim_v2_product_services](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/api_management_product) | data source |
 | [azurerm_application_insights.application_insights](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/application_insights) | data source |
 | [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/client_config) | data source |
+| [azurerm_cosmosdb_account.cosmos_legacy](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/cosmosdb_account) | data source |
 | [azurerm_key_vault_secret.asset_storage_connectionstring_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.azure_client_secret_credential_client_id](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.azure_client_secret_credential_secret](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/key_vault_secret) | data source |
@@ -103,7 +104,8 @@
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
-| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name                              = string<br>    selfcare_base_path                    = string<br>    apim_user_groups                      = string<br>    azure_credentials_scope_url           = string<br>    azure_apim_subscriptions_api_base_url = string<br>    selfcare_external_api_base_url        = string<br>    selfcare_external_api_base_path       = string<br>  })</pre> | n/a | yes |
+| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name                              = string<br>    apim_user_groups                      = string<br>    azure_credentials_scope_url           = string<br>    azure_apim_subscriptions_api_base_url = string<br>    selfcare_external_api_base_url        = string<br>    selfcare_jwks_path                    = string<br>    selfcare_jwt_issuer                   = string<br>  })</pre> | n/a | yes |
+| <a name="input_backoffice_host"></a> [backoffice\_host](#input\_backoffice\_host) | Backoffice host name | `string` | `null` | no |
 | <a name="input_bo_auth_session_secret_rotation_id"></a> [bo\_auth\_session\_secret\_rotation\_id](#input\_bo\_auth\_session\_secret\_rotation\_id) | You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1695908210722"` | no |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
@@ -126,7 +128,8 @@
 | <a name="input_legacy_cosmosdb_container_services"></a> [legacy\_cosmosdb\_container\_services](#input\_legacy\_cosmosdb\_container\_services) | The collection of the database where legacy data is | `string` | `"services"` | no |
 | <a name="input_legacy_cosmosdb_container_services_lease"></a> [legacy\_cosmosdb\_container\_services\_lease](#input\_legacy\_cosmosdb\_container\_services\_lease) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |
 | <a name="input_legacy_cosmosdb_name"></a> [legacy\_cosmosdb\_name](#input\_legacy\_cosmosdb\_name) | The name of the database where legacy data is | `string` | n/a | yes |
-| <a name="input_legacy_cosmosdb_uri"></a> [legacy\_cosmosdb\_uri](#input\_legacy\_cosmosdb\_uri) | The uri of the database where legacy data is | `string` | n/a | yes |
+| <a name="input_legacy_cosmosdb_resource_group"></a> [legacy\_cosmosdb\_resource\_group](#input\_legacy\_cosmosdb\_resource\_group) | The name of the resource group where legacy data is | `string` | n/a | yes |
+| <a name="input_legacy_cosmosdb_resource_name"></a> [legacy\_cosmosdb\_resource\_name](#input\_legacy\_cosmosdb\_resource\_name) | The name of the resource where legacy data is | `string` | n/a | yes |
 | <a name="input_legacy_jira_project_name"></a> [legacy\_jira\_project\_name](#input\_legacy\_jira\_project\_name) | n/a | `string` | `null` | no |
 | <a name="input_legacy_service_watcher_max_items_per_invocation"></a> [legacy\_service\_watcher\_max\_items\_per\_invocation](#input\_legacy\_service\_watcher\_max\_items\_per\_invocation) | Chunck size for the change feed | `number` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |

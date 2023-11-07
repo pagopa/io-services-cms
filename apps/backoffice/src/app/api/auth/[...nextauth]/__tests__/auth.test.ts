@@ -10,8 +10,7 @@ import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
 const mockConfig = ({
-  SELFCARE_BASE_URL: "http://localhost:7075",
-  SELFCARE_JWKS_PATH: "/.well-known/jwks.json",
+  SELFCARE_JWKS_URL: "http://localhost:7075/.well-known/jwks.json",
   APIM_USER_GROUPS: faker.helpers.multiple(faker.string.alpha).join(","),
   AZURE_APIM_PRODUCT_NAME: faker.string.alpha()
 } as unknown) as Configuration;
