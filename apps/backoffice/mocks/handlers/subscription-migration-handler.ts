@@ -13,7 +13,7 @@ import {
 faker.seed(new Date().getTime());
 
 export const buildHandlers = () => {
-  const baseURL = process.env.SUBSCRIPTION_MIGRATIONS_URL;
+  const baseURL = process.env.SUBSCRIPTION_MIGRATION_API_URL;
 
   return [
     rest.get(
