@@ -129,14 +129,18 @@ export const aMockServicePaginationLimitOffset = (
   offset?: number
 ) => getMockServicePagination(limit, offset);
 
-export const getMockServiceList = (limit?: number, offset?: number) => {
+export const getMockServiceList = (
+  limit?: number,
+  offset?: number,
+  id?: string
+) => {
   const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
   const purifiedOffset =
     offset !== undefined && offset >= 0 && offset < 99
       ? offset
       : faker.number.int({ min: 0, max: 99 });
 
-  const total = [...Array.from(Array(purifiedLimit).keys())];
+  const total = id ? [1] : [...Array.from(Array(purifiedLimit).keys())];
 
   return {
     value: total.map(_ => ({
@@ -150,7 +154,7 @@ export const getMockServiceList = (limit?: number, offset?: number) => {
     pagination: {
       offset: purifiedOffset,
       limit: purifiedLimit,
-      count: 100
+      count: id ? 1 : 100
     }
   };
 };
