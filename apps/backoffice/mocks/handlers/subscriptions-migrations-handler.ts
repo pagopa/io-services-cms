@@ -4,8 +4,6 @@
  */
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
-import { aMockErrorResponse } from "../data/common-data";
-import { aWellKnown } from "../data/selfcare-data";
 import {
   getDelegatesByOrganizationMockResponse,
   getLatestOwnershipClaimStatusMockResponse,
@@ -26,7 +24,10 @@ export const buildHandlers = () => {
             ctx.status(200),
             ctx.json(getLatestOwnershipClaimStatusMockResponse())
           ],
-          [ctx.status(500)]
+          [ctx.status(400), ctx.json(null)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(404), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
         ];
 
         return res(...resultArray[0]);
@@ -37,8 +38,10 @@ export const buildHandlers = () => {
       (_, res, ctx) => {
         const resultArray = [
           [ctx.status(200), ctx.json(getOwnershipClaimStatusMockResponse())],
-          [ctx.status(404)],
-          [ctx.status(500)]
+          [ctx.status(400), ctx.json(null)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(404), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
         ];
         return res(...resultArray[0]);
       }
@@ -47,9 +50,11 @@ export const buildHandlers = () => {
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/:delegateId`,
       (_, res, ctx) => {
         const resultArray = [
-          [ctx.status(201)],
-          [ctx.status(404)],
-          [ctx.status(500)]
+          [ctx.status(202)],
+          [ctx.status(400), ctx.json(null)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(404), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
         ];
         return res(...resultArray[0]);
       }
@@ -59,19 +64,13 @@ export const buildHandlers = () => {
       (_, res, ctx) => {
         const resultArray = [
           [ctx.status(200), ctx.json(getDelegatesByOrganizationMockResponse())],
-          [ctx.status(404)],
-          [ctx.status(500)]
+          [ctx.status(400), ctx.json(null)],
+          [ctx.status(401), ctx.json(null)],
+          [ctx.status(404), ctx.json(null)],
+          [ctx.status(500), ctx.json(null)]
         ];
         return res(...resultArray[0]);
       }
     )
   ];
 };
-
-export function getWellKnown200Response() {
-  return aWellKnown;
-}
-
-export function getWellKnown500Response() {
-  return aMockErrorResponse;
-}
