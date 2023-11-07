@@ -5,6 +5,7 @@ import {
 import { getApimHealth } from "@/lib/be/apim-service";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
+import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
 import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
@@ -21,7 +22,8 @@ export async function GET() {
     getApimHealth(),
     getSelfcareHealth(),
     getIoServicesCmsHealth(),
-    getAzureAccessTokenHealth()
+    getAzureAccessTokenHealth(),
+    getCosmosStoreHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
