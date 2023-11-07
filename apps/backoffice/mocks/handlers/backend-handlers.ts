@@ -144,13 +144,18 @@ export const buildHandlers = () => {
       const url = new URL(req.url);
       const limit = url.searchParams.get("limit");
       const offset = url.searchParams.get("offset");
+      const id = url.searchParams.get("id");
 
       const resultArray = [
         [
           ctx.status(200),
           ctx.delay(1000),
           ctx.json(
-            getGetServiceList200Response(limit as string, offset as string)
+            getGetServiceList200Response(
+              limit as string,
+              offset as string,
+              id as string
+            )
           )
         ],
         [ctx.status(401), ctx.json(null)],
@@ -432,8 +437,12 @@ export function getGetServices200Response() {
   return aMockServicePagination;
 }
 
-export function getGetServiceList200Response(limit: string, offset: string) {
-  return getMockServiceList(+limit, +offset);
+export function getGetServiceList200Response(
+  limit: string,
+  offset: string,
+  id: string
+) {
+  return getMockServiceList(+limit, +offset, id);
 }
 
 export function getGetService200Response(serviceId: string) {
