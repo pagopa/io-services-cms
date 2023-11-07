@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 0.14.0
+
+### Minor Changes
+
+- 36a558e: Add search by serviceId on services page
+
+### Patch Changes
+
+- adb0a0d: ADD queryParam 'id' in GET /services/list Route Handler
+- d814296: fix staging health check
+
 ## 0.13.2
 
 ### Patch Changes
