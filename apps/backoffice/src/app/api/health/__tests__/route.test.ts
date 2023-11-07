@@ -2,24 +2,20 @@ import { describe, expect, it, vi } from "vitest";
 import { HealthChecksError } from "../../../../lib/be/errors";
 import { GET } from "../route";
 
-const { getLegacyCosmosHealth } = vi.hoisted(() => ({
-  getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve())
-}));
-
-const { getSelfcareHealth } = vi.hoisted(() => ({
-  getSelfcareHealth: vi.fn().mockReturnValue(Promise.resolve())
-}));
-
-const { getIoServicesCmsHealth } = vi.hoisted(() => ({
-  getIoServicesCmsHealth: vi.fn().mockReturnValue(Promise.resolve())
-}));
-
-const { getApimHealth } = vi.hoisted(() => ({
-  getApimHealth: vi.fn().mockReturnValue(Promise.resolve())
-}));
-
-const { getAzureAccessTokenHealth } = vi.hoisted(() => ({
-  getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve())
+const {
+  getLegacyCosmosHealth,
+  getSelfcareHealth,
+  getIoServicesCmsHealth,
+  getApimHealth,
+  getAzureAccessTokenHealth,
+  getCosmosStoreHealth
+} = vi.hoisted(() => ({
+  getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getSelfcareHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getIoServicesCmsHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getApimHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getCosmosStoreHealth: vi.fn().mockReturnValue(Promise.resolve())
 }));
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
@@ -40,6 +36,10 @@ vi.mock("@/lib/be/apim-service", () => ({
 
 vi.mock("@/lib/be/azure-access-token", () => ({
   getAzureAccessTokenHealth
+}));
+
+vi.mock("@/lib/be/cosmos-store", () => ({
+  getCosmosStoreHealth
 }));
 
 describe("test backend api info()", () => {

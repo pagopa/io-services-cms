@@ -54,7 +54,9 @@ export type Configuration = {
   LEGACY_COSMOSDB_URI: string;
   LEGACY_COSMOSDB_NAME: string;
   LEGACY_COSMOSDB_KEY: string;
+  LEGACY_COSMOSDB_MOCKING: boolean;
 };
+
 export function getConfiguration(): Configuration {
   return {
     // IO Services CMS API configuration
@@ -121,6 +123,7 @@ export function getConfiguration(): Configuration {
     // Legacy CosmosDB configuration
     LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,
     LEGACY_COSMOSDB_NAME: process.env.LEGACY_COSMOSDB_NAME as string,
-    LEGACY_COSMOSDB_KEY: process.env.LEGACY_COSMOSDB_KEY as string
+    LEGACY_COSMOSDB_KEY: process.env.LEGACY_COSMOSDB_KEY as string,
+    LEGACY_COSMOSDB_MOCKING: process.env.API_APIM_MOCKING === "true"
   };
 }
