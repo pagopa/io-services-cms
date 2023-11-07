@@ -158,7 +158,7 @@ paths:
           schema:
             type: string
       responses:
-        '201':
+        '202':
           description: Delegate's services migrated successfully
         '401':
           description: Unauthorized

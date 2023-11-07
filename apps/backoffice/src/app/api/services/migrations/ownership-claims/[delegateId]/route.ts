@@ -6,7 +6,7 @@ import {
   retrieveOwnershipClaimLatestForDelegate
 } from "@/lib/be/services/business";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { HTTP_STATUS_CREATED } from "@/config/constants";
+import { HTTP_STATUS_ACCEPTED } from "@/config/constants";
 
 /**
  * @description Migrate delegate's services
@@ -28,7 +28,7 @@ export const POST = withJWTAuthHandler(
       );
 
       return new Response(null, {
-        status: HTTP_STATUS_CREATED
+        status: HTTP_STATUS_ACCEPTED
       });
     } catch (error) {
       console.error(
