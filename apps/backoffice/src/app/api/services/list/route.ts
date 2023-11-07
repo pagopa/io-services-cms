@@ -5,6 +5,7 @@ import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { get } from "lodash";
 /**
  * @description Retrieve all services owned by the calling user
  */
@@ -14,22 +15,16 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      const rawlimit = NumberFromString.decode(
-        request.nextUrl.searchParams.get("limit")
-      );
-      const limit =
-        E.isLeft(rawlimit) || rawlimit.right > 100 ? 100 : rawlimit.right;
+      const serviceId = request.nextUrl.searchParams.get("id");
 
-      const rawoffset = NumberFromString.decode(
-        request.nextUrl.searchParams.get("offset")
-      );
-      const offset =
-        E.isLeft(rawoffset) || rawoffset.right < 0 ? 0 : rawoffset.right;
+      const limit = serviceId ? 1 : getLimitQueryParam(request);
+      const offset = serviceId ? 0 : getOffsetQueryParam(request);
 
       const result = await retrieveServiceList(
         backofficeUser.parameters.userId,
         limit,
-        offset
+        offset,
+        serviceId ?? undefined
       );
 
       return NextResponse.json(result);
@@ -42,3 +37,17 @@ export const GET = withJWTAuthHandler(
     }
   }
 );
+
+const getLimitQueryParam = (request: NextRequest): number => {
+  const rawlimit = NumberFromString.decode(
+    request.nextUrl.searchParams.get("limit")
+  );
+  return E.isLeft(rawlimit) || rawlimit.right > 100 ? 100 : rawlimit.right;
+};
+
+const getOffsetQueryParam = (request: NextRequest): number => {
+  const rawoffset = NumberFromString.decode(
+    request.nextUrl.searchParams.get("offset")
+  );
+  return E.isLeft(rawoffset) || rawoffset.right < 0 ? 0 : rawoffset.right;
+};

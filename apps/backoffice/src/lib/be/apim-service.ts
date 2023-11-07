@@ -83,6 +83,7 @@ export const getApimRestClient = async () => {
     userId: string,
     limit: number,
     offset: number,
+    serviceId?: string,
     isRetry = false
   ): TE.TaskEither<Error, SubscriptionCollection> =>
     pipe(
@@ -94,7 +95,8 @@ export const getApimRestClient = async () => {
               params: {
                 "api-version": "2022-08-01",
                 $skip: offset,
-                $top: limit
+                $top: limit,
+                $filter: serviceId ? `name eq '${serviceId}'` : undefined
               }
             }
           ),
@@ -111,7 +113,9 @@ export const getApimRestClient = async () => {
           ) {
             return pipe(
               TE.fromIO(() => refreshClient()),
-              TE.chain(() => getServiceList(userId, limit, offset, true))
+              TE.chain(() =>
+                getServiceList(userId, limit, offset, serviceId, true)
+              )
             );
           }
           return TE.left(new Error(`Axios error catched ${e.message}`));
