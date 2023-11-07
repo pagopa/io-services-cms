@@ -24,7 +24,7 @@ import {
   getDelegatesByOrganization,
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
-} from "./subscriptions-migration";
+} from "./subscription-migration";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";

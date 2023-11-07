@@ -8,7 +8,7 @@ import {
   getDelegatesByOrganizationMockResponse,
   getLatestOwnershipClaimStatusMockResponse,
   getOwnershipClaimStatusMockResponse
-} from "../data/subscriptions-migration-data";
+} from "../data/subscription-migration-data";
 
 faker.seed(new Date().getTime());
 

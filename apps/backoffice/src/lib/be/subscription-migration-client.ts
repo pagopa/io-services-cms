@@ -202,6 +202,6 @@ export async function getSubscriptionsMigrationHealth() {
   try {
     getSubscriptionsMigrationConfig();
   } catch (e) {
-    throw new HealthChecksError("subscriptions-migration", e);
+    throw new HealthChecksError("subscription-migration", e);
   }
 }

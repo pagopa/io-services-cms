@@ -159,7 +159,7 @@ const {
   })
 }));
 
-vi.mock("@/lib/be/subscriptions-migration-client", () => ({
+vi.mock("@/lib/be/subscription-migration-client", () => ({
   getSubscriptionsMigrationClient
 }));
 

@@ -3,7 +3,7 @@ import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ManagedInternalError } from "@/lib/be/errors";
 import * as E from "fp-ts/lib/Either";
-import { getSubscriptionsMigrationClient } from "../subscriptions-migration-client";
+import { getSubscriptionsMigrationClient } from "../subscription-migration-client";
 
 export const getLatestOwnershipClaimStatus = async (
   organizationFiscalCode: string
