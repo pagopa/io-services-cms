@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
 import {
   ServiceContextMenuActions,
+  ServiceSearchById,
   ServiceStatus,
   ServiceVersionSwitcher,
   ServiceVersionSwitcherType
@@ -325,7 +326,7 @@ export default function Services() {
     );
   };
 
-  const getServices = () => {
+  const getServices = (id?: string) => {
     servicesFetchData(
       "getServiceList",
       { limit: pagination.limit, offset: pagination.offset },
@@ -401,15 +402,21 @@ export default function Services() {
           requiredPermissions={["ApiServiceWrite"]}
         />
       ) : (
-        <TableView
-          columns={tableViewColumns}
-          rows={services}
-          rowMenu={getServiceMenu}
-          pagination={pagination}
-          loading={servicesLoading}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
+        <>
+          <ServiceSearchById
+            onSearchClick={getServices}
+            onEmptySearch={getServices}
+          />
+          <TableView
+            columns={tableViewColumns}
+            rows={services}
+            rowMenu={getServiceMenu}
+            pagination={pagination}
+            loading={servicesLoading}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
+        </>
       )}
       <ServiceVersionSwitcher
         service={serviceForVersionSwitcher}
