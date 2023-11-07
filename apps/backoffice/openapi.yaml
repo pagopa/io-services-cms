@@ -303,6 +303,12 @@ paths:
             type: number
             minimum: 0
             default: 0
+        - name: id
+          in: query
+          description: The serviceId to filter, when passed limit and offset will be ignored
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Services fetched successfully

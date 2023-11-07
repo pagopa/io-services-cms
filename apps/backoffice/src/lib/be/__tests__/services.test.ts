@@ -461,7 +461,7 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 0);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId
@@ -514,7 +514,7 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 90);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 90);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 90, undefined);
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
 
@@ -579,7 +579,7 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 0);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
         aServiceNotInLifecycleId
@@ -639,7 +639,7 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id
       ]);
@@ -685,7 +685,7 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id
       ]);
@@ -720,7 +720,7 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0);
+      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     });
