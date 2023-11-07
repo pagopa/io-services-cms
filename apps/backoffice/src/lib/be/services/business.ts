@@ -4,8 +4,10 @@ import {
 } from "@/config/constants";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
+import { MigrationData } from "@/generated/api/MigrationData";
+import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
+import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
-import { getApimRestClient } from "@/lib/be/apim-service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -13,23 +15,19 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { getServiceList } from "./apim";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
 } from "./cosmos";
-import { reducePublicationServicesList, toServiceListItem } from "./utils";
-import { getServiceList } from "./apim";
-import { use } from "i18next";
 import {
   claimOwnership,
   getDelegatesByOrganization,
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
 } from "./subscription-migration";
-import { MigrationItemList } from "@/generated/api/MigrationItemList";
-import { MigrationData } from "@/generated/api/MigrationData";
-import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
+import { reducePublicationServicesList, toServiceListItem } from "./utils";
 
 
 type PathParameters = {
