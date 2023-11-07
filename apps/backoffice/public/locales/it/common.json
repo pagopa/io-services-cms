@@ -62,6 +62,7 @@
     "service": {
       "searchById": {
         "clear": "Cancella filtro",
+        "search": "Avvia ricerca",
         "helperText": "Inserisci un codice ID alfanumerico di 26 caratteri",
         "validText": "Clicca sull'icona a destra del campo per effettuare la ricerca",
         "errorText": "Codice ID servizio non valido",

@@ -142,6 +142,9 @@ export default function Services() {
     count: 0
   });
   const [noService, setNoService] = useState(false);
+  const [currentSearchByServiceId, setCurrentSearchByServiceId] = useState<
+    string
+  >();
 
   const [isVersionSwitcherOpen, setIsVersionSwitcherOpen] = useState(false);
   const [serviceForVersionSwitcher, setServiceForVersionSwitcher] = useState<
@@ -167,7 +170,7 @@ export default function Services() {
   const handlePageChange = (pageIndex: number) =>
     setPagination({
       limit: pagination.limit,
-      offset: pagination.limit * pageIndex + 1,
+      offset: pagination.limit * pageIndex,
       count: pagination.count
     });
 
@@ -329,7 +332,11 @@ export default function Services() {
   const getServices = (id?: string) => {
     servicesFetchData(
       "getServiceList",
-      { limit: pagination.limit, offset: pagination.offset },
+      {
+        limit: pagination.limit,
+        offset: pagination.offset,
+        id: currentSearchByServiceId
+      },
       ServiceList,
       {
         notify: "errors"
@@ -337,18 +344,34 @@ export default function Services() {
     );
   };
 
-  // fetch services when table pagination change
+  const handleSearchByServiceIdClick = (id?: string) => {
+    setPagination({
+      ...pagination,
+      offset: 0
+    });
+    setCurrentSearchByServiceId(id);
+  };
+
+  const resetSearchByServiceId = () => {
+    setCurrentSearchByServiceId(undefined);
+  };
+
+  // fetch services when table pagination or search by serviceId change
   useEffect(() => {
     getServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination]);
+  }, [pagination, currentSearchByServiceId]);
 
   // make some checks and adjustments on services fetch result
   useEffect(() => {
     const maybeServiceData = ServiceList.decode(servicesData);
     if (E.isRight(maybeServiceData)) {
       // check services result (if no services, an EmptyState component will be displayed)
-      if (maybeServiceData.right.value.length === 0) setNoService(true);
+      if (
+        maybeServiceData.right.value.length === 0 &&
+        !currentSearchByServiceId // no active search by serviceId in progress
+      )
+        setNoService(true);
       // check pagination data and build a full pagination.count array of services
       // filling empty items with some placeholders (in order to have a working paginated MUI Table)
       if (
@@ -359,9 +382,7 @@ export default function Services() {
           maybeServiceData.right.pagination.count
         ).fill(servicePlaceholder);
         servicesPlaceholders.splice(
-          maybeServiceData.right.pagination.offset > 0
-            ? maybeServiceData.right.pagination.offset - 1
-            : 0,
+          maybeServiceData.right.pagination.offset,
           maybeServiceData.right.value.length,
           ...maybeServiceData.right.value
         );
@@ -404,8 +425,8 @@ export default function Services() {
       ) : (
         <>
           <ServiceSearchById
-            onSearchClick={getServices}
-            onEmptySearch={getServices}
+            onSearchClick={handleSearchByServiceIdClick}
+            onEmptySearch={resetSearchByServiceId}
           />
           <TableView
             columns={tableViewColumns}

@@ -5,12 +5,14 @@ import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 
 export type ServiceSearchByIdProps = {
+  /** event triggered when the search icon is clicked. \
+   * _(assumes a validated serviceId  `id` output)_ */
   onSearchClick: (id: string) => void;
+  /** event triggered when the search field is empty */
   onEmptySearch: () => void;
 };
 
-/** Renders a modal dialog to choose the two versions (last approved or current) of a service. \
- * _(the Publication one and a different Lifecycle one)_. */
+/** Renders a search by `serviceId` field */
 export const ServiceSearchById = ({
   onSearchClick,
   onEmptySearch
@@ -75,9 +77,14 @@ export const ServiceSearchById = ({
             </Tooltip>
           ) : null,
           endAdornment: (
-            <IconButton onClick={handleSearchClick} disabled={!isValid}>
-              <Search color={isValid ? "primary" : "disabled"} />
-            </IconButton>
+            <Tooltip
+              title={t("forms.service.searchById.search")}
+              placement="top"
+            >
+              <IconButton onClick={handleSearchClick} disabled={!isValid}>
+                <Search color={isValid ? "primary" : "disabled"} />
+              </IconButton>
+            </Tooltip>
           )
         }}
         error={!isValid && NonEmptyString.is(inputValue)}
