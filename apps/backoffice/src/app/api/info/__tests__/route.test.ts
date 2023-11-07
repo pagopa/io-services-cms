@@ -9,14 +9,16 @@ const {
   getIoServicesCmsHealth,
   getApimHealth,
   getAzureAccessTokenHealth,
-  getCosmosStoreHealth
+  getCosmosStoreHealth,
+  getSubscriptionsMigrationHealth
 } = vi.hoisted(() => ({
   getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getSelfcareHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getIoServicesCmsHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getApimHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve()),
-  getCosmosStoreHealth: vi.fn().mockReturnValue(Promise.resolve())
+  getCosmosStoreHealth: vi.fn().mockReturnValue(Promise.resolve()),
+  getSubscriptionsMigrationHealth: vi.fn().mockReturnValue(Promise.resolve())
 }));
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
@@ -41,6 +43,10 @@ vi.mock("@/lib/be/azure-access-token", () => ({
 
 vi.mock("@/lib/be/cosmos-store", () => ({
   getCosmosStoreHealth
+}));
+
+vi.mock("@/lib/be/subscription-migration-client", () => ({
+  getSubscriptionsMigrationHealth
 }));
 
 describe("test backend api info()", () => {

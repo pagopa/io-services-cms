@@ -158,7 +158,7 @@ paths:
           schema:
             type: string
       responses:
-        '201':
+        '202':
           description: Delegate's services migrated successfully
         '401':
           description: Unauthorized
@@ -1077,21 +1077,21 @@ components:
     MigrationData:
       type: object
       properties:
-        data:
+        status:
           $ref: '#/components/schemas/MigrationDataValue'
     MigrationDataValue:
       type: object
       properties:
-        COMPLETED:
+        completed:
           type: number
           minimum: 0
-        FAILED:
+        failed:
           type: number
           minimum: 0
-        INITIAL:
+        initial:
           type: number
           minimum: 0
-        PROCESSING:
+        processing:
           type: number
           minimum: 0
     Institution:
