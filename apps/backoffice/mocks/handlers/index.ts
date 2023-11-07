@@ -5,6 +5,7 @@ import { buildHandlers as cdnHandlers } from "./cdn-handlers";
 import { buildHandlers as cosmosLegacyHandlers } from "./cosmos-legacy-handlers";
 import { buildHandlers as selfcareHandlers } from "./selfcare-handlers";
 import { buildHandlers as servicesCmsHandlers } from "./services-cms-handlers";
+import { buildHandlers as subscriptionsMigrationHandlers } from "./subscription-migration-handler";
 
 /** List of handlers managed by MSW */
 export const getHandlers = () => {
@@ -21,6 +22,9 @@ export const getHandlers = () => {
   }
   if (config.API_APIM_MOCKING) {
     handlers.push(...apimHandlers());
+  }
+  if (config.SUBSCRIPTIONS_MIGRATION_MOCKING) {
+    handlers.push(...subscriptionsMigrationHandlers());
   }
   if (config.LEGACY_COSMOSDB_MOCKING) {
     handlers.push(...cosmosLegacyHandlers());

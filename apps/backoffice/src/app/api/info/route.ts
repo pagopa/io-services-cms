@@ -11,6 +11,7 @@ import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
 import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
+import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,8 @@ export async function GET() {
     getSelfcareHealth(),
     getIoServicesCmsHealth(),
     getAzureAccessTokenHealth(),
-    getCosmosStoreHealth()
+    getCosmosStoreHealth(),
+    getSubscriptionsMigrationHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;

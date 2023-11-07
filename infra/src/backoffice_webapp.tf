@@ -47,6 +47,11 @@ locals {
     SELFCARE_JWT_ISSUER            = var.backoffice_app.selfcare_jwt_issuer
     SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
     SELFCARE_API_MOCKING           = true
+
+    # Subscriptions Migration
+    SUBSCRIPTIONS_MIGRATION_API_BASE_URL = var.backoffice_app.subscriptions_migration_api_base_url
+    SUBSCRIPTIONS_MIGRATION_API_KEY      = data.azurerm_key_vault_secret.subscriptions_migration_api_key.value
+    SUBSCRIPTIONS_MIGRATION_API_MOCKING  = true
   })
 }
 
