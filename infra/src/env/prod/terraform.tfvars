@@ -81,7 +81,7 @@ userid_automatic_service_approval_inclusion_list = ""
 # Backoffice Configurations
 backoffice_host = "selfcare.io.pagopa.it"
 backoffice_app = {
-  sku_name                              = "S1" # FIXME: use "P1v3" before "production launch"
+  sku_name                              = "P1v3"
   apim_user_groups                      = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
   azure_credentials_scope_url           = "https://management.azure.com/.default"
   azure_apim_subscriptions_api_base_url = "https://management.azure.com/subscriptions/"
