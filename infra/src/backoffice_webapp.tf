@@ -49,9 +49,9 @@ locals {
     SELFCARE_API_MOCKING           = true
 
     # Subscriptions Migration
-    SUBSCRIPTIONS_MIGRATION_API_BASE_URL = var.backoffice_app.subscriptions_migration_api_base_url
-    SUBSCRIPTIONS_MIGRATION_API_KEY      = data.azurerm_key_vault_secret.subscriptions_migration_api_key.value
-    SUBSCRIPTIONS_MIGRATION_API_MOCKING  = true
+    SUBSCRIPTIONS_MIGRATION_API_URL     = var.backoffice_app.subscriptions_migration_api_url
+    SUBSCRIPTIONS_MIGRATION_API_KEY     = data.azurerm_key_vault_secret.subscriptions_migration_api_key.value
+    SUBSCRIPTIONS_MIGRATION_API_MOCKING = true
   })
 }
 

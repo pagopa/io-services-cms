@@ -317,7 +317,7 @@ variable "backoffice_app" {
     selfcare_external_api_base_url        = string
     selfcare_jwks_path                    = string
     selfcare_jwt_issuer                   = string
-    subscriptions_migration_api_base_url  = string
+    subscriptions_migration_api_url       = string
   })
   description = "Configuration of the io-services-cms-backoffice service"
 }
