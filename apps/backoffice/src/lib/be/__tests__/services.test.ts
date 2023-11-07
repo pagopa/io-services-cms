@@ -105,6 +105,14 @@ const {
   })
 }));
 
+const { isAxiosError } = vi.hoisted(() => ({
+  isAxiosError: vi.fn().mockReturnValue(false)
+}));
+
+vi.mock("axios", async () => ({
+  isAxiosError
+}));
+
 vi.mock("@/lib/be/cms-client", () => ({
   getIoServicesCmsClient
 }));
@@ -402,7 +410,12 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 0);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId
@@ -455,13 +468,61 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 90);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 90, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        90,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
 
       expect(result).toStrictEqual({
         value: [],
         pagination: { count: 90, limit: 10, offset: 90 }
+      });
+    });
+
+    it("when APIM returns 404 neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
+      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
+      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
+
+      const getServiceListMock = vi.fn(() =>
+        TE.left({
+          message: "Received 404 response",
+          response: { status: 404 }
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      isAxiosError.mockReturnValueOnce(true);
+
+      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        90,
+        undefined
+      );
+      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+
+      expect(result).toStrictEqual({
+        value: [],
+        pagination: { count: 0, limit: 10, offset: 90 }
       });
     });
 
@@ -520,7 +581,12 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(mocks.anUserId, 10, 0);
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
         aServiceNotInLifecycleId
@@ -580,7 +646,12 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id
       ]);
@@ -626,7 +697,12 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id
       ]);
@@ -661,7 +737,12 @@ describe("Services TEST", () => {
         retrieveServiceList(mocks.anUserId, 10, 0)
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledWith(mocks.anUserId, 10, 0, undefined);
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     });

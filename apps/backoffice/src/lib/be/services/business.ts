@@ -19,6 +19,8 @@ import {
   retrievePublicationServices
 } from "./cosmos";
 import { reducePublicationServicesList, toServiceListItem } from "./utils";
+import { getServiceList } from "./apim";
+import { use } from "i18next";
 
 type PathParameters = {
   serviceId?: string;
@@ -42,11 +44,7 @@ export const retrieveServiceList = async (
   serviceId?: string
 ): Promise<ServiceList> =>
   pipe(
-    TE.tryCatch(() => getApimRestClient(), E.toError),
-    // get services from apim
-    TE.chainW(apimRestClient =>
-      apimRestClient.getServiceList(userId, limit, offset, serviceId)
-    ),
+    getServiceList(userId, limit, offset, serviceId),
     TE.bindTo("apimServices"),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind("lifecycleServices", ({ apimServices }) =>
