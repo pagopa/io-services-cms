@@ -17,15 +17,7 @@ export const buildHandlers = () => {
     configuration.API_SERVICES_CMS_URL +
     configuration.API_SERVICES_CMS_BASE_PATH;
 
-  return [
-    rest.get(`${baseURL}/info`, (_, res, ctx) => {
-      const resultArray = [
-        [ctx.status(200), ctx.json(getInfo200Response())],
-        [ctx.status(500), ctx.json(getInfo500Response())]
-      ];
-
-      return res(...resultArray[0]);
-    }),
+  const handlers = [
     rest.post(`${baseURL}/services`, (req, res, ctx) => {
       const resultArray = [
         [ctx.status(201), ctx.json(getCreateService201Response())],
@@ -197,45 +189,56 @@ export const buildHandlers = () => {
       return res(...resultArray[0]);
     })
   ];
+  return configuration.IS_DEVELOPMENT
+    ? [
+        ...handlers,
+        rest.get(`${baseURL}/info`, (_, res, ctx) => {
+          const resultArray = [
+            [ctx.status(200), ctx.json(getInfo200Response())],
+            [ctx.status(500), ctx.json(getInfo500Response())]
+          ];
+
+          return res(...resultArray[0]);
+        })
+      ]
+    : handlers;
 };
 
-export function getInfo200Response() {
+function getInfo200Response() {
   return {
     version: faker.lorem.slug(1),
     name: faker.person.fullName()
   };
 }
 
-export function getInfo500Response() {
+function getInfo500Response() {
   return aMockErrorResponse;
 }
 
-export function getCreateService201Response() {
+function getCreateService201Response() {
   return getMockServiceLifecycle();
 }
 
-export function getGetServices200Response(limit?: number, offset?: number) {
+function getGetServices200Response(limit?: number, offset?: number) {
   return aMockServicePaginationLimitOffset(limit, offset);
 }
 
-export function getGetService200Response(serviceId: string) {
+function getGetService200Response(serviceId: string) {
   return getMockServiceLifecycle(serviceId);
 }
 
-export function getUpdateService200Response(serviceId: string) {
+function getUpdateService200Response(serviceId: string) {
   return getMockServiceLifecycle(serviceId);
 }
 
-export function getGetServiceKeys200Response() {
+function getGetServiceKeys200Response() {
   return getMockServiceKeys();
 }
 
-export function getRegenerateServiceKey200Response() {
+function getRegenerateServiceKey200Response() {
   return getMockServiceKeys();
 }
 
-export function getGetPublishedService200Response() {
+function getGetPublishedService200Response() {
   return aMockServicePublication;
 }
-
-export const mockApiServicesCmsUrl = "https://mock-rest-endpoint/api/manage";
