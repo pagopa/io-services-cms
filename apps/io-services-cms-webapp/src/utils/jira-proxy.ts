@@ -61,7 +61,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       service.data.organization.fiscal_code
     );
     customFields.set(jiraClient.config.JIRA_CONTRACT_CUSTOM_FIELD, {
-      value: "Assente",
+      value: "Null",
     });
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_NAME_CUSTOM_FIELD,
