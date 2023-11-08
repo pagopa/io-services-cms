@@ -1,6 +1,11 @@
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
+import {
+  getKeepAliveAgentOptions,
+  newHttpAgent,
+  newHttpsAgent
+} from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -41,7 +46,11 @@ const getAxiosInstance: () => AxiosInstance = () => {
   return axios.create({
     baseURL: configuration.SUBSCRIPTION_MIGRATION_API_URL,
     timeout: 5000,
-    headers: { "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY }
+    headers: {
+      "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY
+    },
+    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
 };
 
