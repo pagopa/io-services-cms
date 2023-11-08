@@ -6,7 +6,7 @@ import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
@@ -85,7 +85,7 @@ export const getApimRestClient = async () => {
     offset: number,
     serviceId?: string,
     isRetry = false
-  ): TE.TaskEither<Error, SubscriptionCollection> =>
+  ): TE.TaskEither<Error | AxiosError, SubscriptionCollection> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -118,7 +118,7 @@ export const getApimRestClient = async () => {
               )
             );
           }
-          return TE.left(new Error(`Axios error catched ${e.message}`));
+          return TE.left(e);
         }
         return TE.left(
           new Error(`Error calling APIM getServiceList API: ${e}`)
