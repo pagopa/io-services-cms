@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.15.4
+
+### Patch Changes
+
+- 0e99e42: ADD agentkeepalive on backoffice B4F rest client
+
 ## 0.15.3
 
 ### Patch Changes
