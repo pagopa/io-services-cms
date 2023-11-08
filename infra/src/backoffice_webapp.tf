@@ -2,8 +2,9 @@ locals {
   backoffice_node_version      = "18-lts"
   backoffice_health_check_path = "/api/info"
   backoffice_app_settings = merge({
-    NODE_ENV        = "production"
-    BACKOFFICE_HOST = var.backoffice_host
+    NODE_ENV                 = "production"
+    WEBSITE_RUN_FROM_PACKAGE = "1"
+    BACKOFFICE_HOST          = var.backoffice_host
     # Azure
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
