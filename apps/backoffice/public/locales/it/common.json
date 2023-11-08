@@ -28,7 +28,8 @@
     "edit": "Modifica",
     "next": "Continua",
     "save": "Salva",
-    "showMore": "Scopri di più"
+    "showMore": "Scopri di più",
+    "view": "Visualizza"
   },
   "copied": "Copiato",
   "footer": {
@@ -59,6 +60,14 @@
     },
     "testUrl": "Prova URL",
     "service": {
+      "searchById": {
+        "clear": "Cancella filtro",
+        "search": "Avvia ricerca",
+        "helperText": "Inserisci un codice ID alfanumerico di 26 caratteri",
+        "validText": "Clicca sull'icona a destra del campo per effettuare la ricerca",
+        "errorText": "Codice ID servizio non valido",
+        "label": "Cerca per ID servizio"
+      },
       "assistanceChannels": {
         "label": "Canali di assistenza",
         "add": "Aggiungi canale",
@@ -175,6 +184,24 @@
       }
     }
   },
+  "institution": {
+    "cardTitle": "Informazioni Ente",
+    "name": "Ragione sociale",
+    "mailAddress": "Indirizzo PEC primario",
+    "institutionType": {
+      "label": "Tipologia",
+      "AS": "Assicurazioni",
+      "GSP": "Gestore di servizi pubblici",
+      "PA": "Pubblica Amministrazione",
+      "PG": "Persona Giuridica, azienda privata",
+      "PSP": "Prestatore Servizio Pagamenti",
+      "PT": "Partner Tecnologico",
+      "SCP": "Società a controllo pubblico",
+      "SA": "Stazione appaltanti"
+    },
+    "fiscalCode": "Codice Fiscale / P.IVA",
+    "geographicArea": "Area geografica"
+  },
   "keys": {
     "block": "Blocca",
     "primary": {
@@ -195,6 +222,7 @@
   "notifications": {
     "exceptionError": "Eccezione applicativa",
     "httpError": "Errore Http",
+    "noChangeError": "Attenzione, nessuna modifica effettuata",
     "success": "Operazione completata con successo",
     "validationError": "Errore di validazione dati"
   },
@@ -210,7 +238,14 @@
     "services": {
       "title": "Servizi",
       "description": "Visualizza e gestisci i servizi del tuo ente.",
-      "empty": "Non ci sono ancora servizi per questo ente."
+      "empty": "Non ci sono ancora servizi per questo ente.",
+      "tableHeader": {
+        "name": "Nome",
+        "lastUpdate": "Ultima modifica",
+        "id": "Codice ID",
+        "status": "Stato",
+        "visibility": "Visibilità in IO"
+      }
     },
     "service": {
       "address": "Indirizzo",
@@ -356,6 +391,19 @@
       "title": "Anteprima",
       "button": "Vedi anteprima",
       "info": "Ecco come si visualizzerà la descrizione del servizio in app IO."
+    },
+    "shortcut": {
+      "create": {
+        "description": "Inizia la creazione di un nuovo servizio",
+        "label": "Crea un servizio"
+      }
+    },
+    "switcher": {
+      "title": "Quale versione del servizio vuoi visualizzare?",
+      "description": "Il servizio <strong>{{name}}</strong> ha due versioni. Seleziona quella che vuoi visualizzare.",
+      "status": "Stato del servizio:",
+      "lastApprovedVersion": "Ultima versione approvata.",
+      "lastUpdate": "Ultima modifica:"
     }
   },
   "test": "Questo è un test di traduzione"

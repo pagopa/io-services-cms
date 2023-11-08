@@ -9,6 +9,11 @@ import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
+import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
+import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
+import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
+
+export const dynamic = "force-dynamic";
 
 /**
  * `api/info` route handler
@@ -21,7 +26,10 @@ export async function GET() {
     getLegacyCosmosHealth(),
     getApimHealth(),
     getSelfcareHealth(),
-    getIoServicesCmsHealth()
+    getIoServicesCmsHealth(),
+    getAzureAccessTokenHealth(),
+    getCosmosStoreHealth(),
+    getSubscriptionsMigrationHealth()
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;

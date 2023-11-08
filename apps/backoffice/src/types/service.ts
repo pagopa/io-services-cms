@@ -74,6 +74,5 @@ export type Service = {
 /** `ServiceCreateUpdatePayload` type used to create/update services in frontend forms.\
  * It will be converted in _io-services-cms Api ServicePayload_ before call create/update csm service Api. */
 export type ServiceCreateUpdatePayload = {
-  organization?: ServiceOrganization;
   metadata: ServiceCreateUpdatePayloadMetadata;
 } & ServiceCommonData;

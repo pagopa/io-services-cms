@@ -15,8 +15,8 @@ declare module "next-auth/jwt" {
 }
 
 interface BackOfficeUser extends DefaultUser {
-  institution: BackOfficeUserInstitution;
-  authorizedInstitutions: BackOfficeUserInstitution[];
+  institution: Institution;
+  authorizedInstitutions: AuthorizedInstitution[];
   permissions: string[];
   parameters: BackOfficeUserParameters;
 }
@@ -27,9 +27,18 @@ interface BackOfficeUserParameters {
   subscriptionId: string;
 }
 
-interface BackOfficeUserInstitution {
+interface Institution {
+  id: string;
+  name: string;
+  fiscalCode: string;
+  role: string;
+  logo_url?: string;
+}
+
+interface AuthorizedInstitution {
   id?: string;
   name?: string;
+  fiscalCode?: string;
   role?: string;
   logo_url?: string;
 }

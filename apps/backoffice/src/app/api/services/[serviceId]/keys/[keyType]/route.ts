@@ -1,4 +1,4 @@
-import { forwardIoServicesCmsRequest } from "@/lib/be/cms/business";
+import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";

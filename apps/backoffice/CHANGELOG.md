@@ -1,5 +1,82 @@
 # io-services-cms-backoffice
 
+## 0.15.1
+
+### Patch Changes
+
+- 7416536: Fix subscription migration config
+
+## 0.15.0
+
+### Minor Changes
+
+- 45c0aed: ADD API Subscriptions Migrations
+
+## 0.14.0
+
+### Minor Changes
+
+- 36a558e: Add search by serviceId on services page
+
+### Patch Changes
+
+- adb0a0d: ADD queryParam 'id' in GET /services/list Route Handler
+- d814296: fix staging health check
+
+## 0.13.2
+
+### Patch Changes
+
+- 779cfb8: fix deploy staging healthcheck url
+
+## 0.13.1
+
+### Patch Changes
+
+- f10afb3: add missing configurations
+
+## 0.13.0
+
+### Minor Changes
+
+- 1bd296f: Added institution card and create service shortcut on overview page
+
+### Patch Changes
+
+- f3fd4fa: ADD Azure Access Token Refresh capabilities on token expiration
+- acc0500: fix configurations
+
+## 0.12.1
+
+### Patch Changes
+
+- fb5cbd6: bugfix: handle request body not present from create and update service request handler
+- 5247ad8: bugfix: fix request body read
+- ab001a2: Remove organization data from frontend service payload
+- 902bc18: Add equality check on update service form: avoid to send update and notify user if initial form values are equal to submitted values
+
+## 0.12.0
+
+### Minor Changes
+
+- 58a205a: refactor: move apim service to external-clients package
+- 600702d: Make the setting of organization fields transparent to the user when creating and updating the service.
+- 3275674: Add Services Page with TableView and ServiceVersionSwitcher components
+- f642e3a: retrieve user authorized institutions from selfcare
+- 37b5b16: add logged institution logo to session token
+- a2cb7c2: retrieve or create (if not exists) manage subscription during token exchange process
+- b4c9993: ADD GET /services/list API endpoint
+- 1bc220a: Added frontend update service, added redirection feature on useFetch
+
+### Patch Changes
+
+- fcb4a8a: Added privacy, tos and personal data protection URLs on footer
+- 76a7fa6: Health and Info API Route Segment Dynamic Configuration
+- fd23925: ADD GET /health API in Backoffice B4F
+- 623ec28: ADD HealthChecks to backoffice B4F
+- Updated dependencies [58a205a]
+  - @io-services-cms/external-clients@1.1.0
+
 ## 0.11.0
 
 ### Minor Changes

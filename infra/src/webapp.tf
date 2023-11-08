@@ -63,7 +63,7 @@ locals {
     # Legacy source data
     LEGACY_COSMOSDB_CONNECTIONSTRING                = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     LEGACY_COSMOSDB_NAME                            = var.legacy_cosmosdb_name
-    LEGACY_COSMOSDB_URI                             = var.legacy_cosmosdb_uri
+    LEGACY_COSMOSDB_URI                             = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
     LEGACY_COSMOSDB_KEY                             = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
     LEGACY_COSMOSDB_CONTAINER_SERVICES              = var.legacy_cosmosdb_container_services
     LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = var.legacy_cosmosdb_container_services_lease
@@ -157,7 +157,8 @@ module "webapp_functions_app" {
 
   allowed_subnets = [
     module.app_snet.id,
-    data.azurerm_subnet.apim_v2_snet[0].id
+    data.azurerm_subnet.apim_v2_snet[0].id,
+    module.backoffice_app_snet.id
   ]
 
   application_insights_instrumentation_key = data.azurerm_application_insights.application_insights.instrumentation_key

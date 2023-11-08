@@ -14,7 +14,6 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
-import { User } from "next-auth";
 
 const adaptServiceCommonData = (
   service: ServiceLifecycle | ServicePublication
@@ -82,16 +81,14 @@ export const fromServicePublicationToService = (
 /**
  * Convert _'frontend'_ service payload to `@/generated/api/ServicePayload`
  * @param feService service _(as result of frontend create/update process)_
- * @param sessionUser `next-auth` session user
  * @returns `Validation<ApiServicePayload>`
  */
 export const fromServiceCreateUpdatePayloadToApiServicePayload = (
-  feService: ServiceCreateUpdatePayload,
-  sessionUser?: User
+  feService: ServiceCreateUpdatePayload
 ) =>
   pipe(
     convertAssistanceChannelsArrayToObj(feService.metadata.assistanceChannels),
-    buildBaseServicePayload(feService, sessionUser),
+    buildBaseServicePayload(feService),
     clearUndefinedEmptyProperties,
     removeAssistanceChannelsArray,
     ApiServicePayload.decode
@@ -108,12 +105,6 @@ export const fromApiServicePayloadToServiceCreateUpdatePayload = (
 ): ServiceCreateUpdatePayload => ({
   name: apiService.name,
   description: apiService.description,
-  organization: {
-    // TODO same check as `inferOrganizationFromUser`
-    name: "",
-    fiscal_code: "",
-    department_name: ""
-  },
   require_secure_channel: apiService.require_secure_channel ?? false,
   authorized_cidrs: apiService.authorized_cidrs
     ? Array.from(apiService.authorized_cidrs.values())
@@ -141,15 +132,13 @@ export const fromApiServicePayloadToServiceCreateUpdatePayload = (
 });
 
 const buildBaseServicePayload = (
-  s: ServiceCreateUpdatePayload,
-  u?: User
+  s: ServiceCreateUpdatePayload
 ) => (assistanceChannels: { [key: string]: string }) => ({
   ...s,
   require_secure_channel: s.require_secure_channel,
   authorized_cidrs: s.authorized_cidrs,
   authorized_recipients: s.authorized_recipients,
   max_allowed_payment_amount: s.max_allowed_payment_amount,
-  organization: inferOrganizationFromUser(u),
   metadata: {
     ...s.metadata,
     cta: buildCtaString(s.metadata.cta),
@@ -187,12 +176,6 @@ const convertAssistanceChannelsObjToArray = (
   }
   return channels;
 };
-
-const inferOrganizationFromUser = (sessionUser?: User) => ({
-  name: sessionUser?.institution.name,
-  fiscal_code: "00000000000", // TODO Check how to get this
-  department_name: "" // TODO Check if is useful
-});
 
 const buildCtaString = (ctaObj: { text: string; url: string }) => {
   if (ctaObj.text !== "" && ctaObj.url !== "") {

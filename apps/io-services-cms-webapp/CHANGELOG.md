@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.21.7
+
+### Patch Changes
+
+- 388e98d: Fix response on Publish Service for non approved service
+- Updated dependencies [58a205a]
+  - @io-services-cms/external-clients@1.1.0
+
 ## 1.21.6
 
 ### Patch Changes

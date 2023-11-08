@@ -1,7 +1,7 @@
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
@@ -13,14 +13,14 @@ import { HealthChecksError } from "./errors";
 
 const institutionsApi = "/institutions";
 
+type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  SELFCARE_BASE_URL: NonEmptyString,
-  SELFCARE_BASE_PATH: NonEmptyString,
+  SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
   SELFCARE_API_KEY: NonEmptyString,
   SELFCARE_API_MOCKING: BooleanFromString
 });
 
-const getSelfcareConfig = cache(() => {
+const getSelfcareConfig: () => Config = cache(() => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -36,9 +36,9 @@ const getSelfcareConfig = cache(() => {
   return result.right;
 });
 
-const getAxiosInstance = cache(() => {
+const getAxiosInstance: () => AxiosInstance = cache(() => {
   const configuration = getSelfcareConfig();
-  const endpoint = `${configuration.SELFCARE_BASE_URL}/${configuration.SELFCARE_BASE_PATH}`;
+  const endpoint = `${configuration.SELFCARE_EXTERNAL_API_BASE_URL}`;
 
   return axios.create({
     baseURL: endpoint,
@@ -47,12 +47,18 @@ const getAxiosInstance = cache(() => {
   });
 });
 
-export const getSelfcareClient = cache(() => {
+export type SelfcareClient = {
+  getUserAuthorizedInstitutions: (
+    userIdForAuth: string
+  ) => TE.TaskEither<Error, InstitutionResources>;
+  getInstitutionById: (
+    id: string
+  ) => TE.TaskEither<Error | AxiosError, Institution>;
+};
+export const getSelfcareClient: () => SelfcareClient = cache(() => {
   const axiosInstance = getAxiosInstance();
 
-  const getUserAuthorizedInstitutions = (
-    userIdForAuth: string
-  ): TE.TaskEither<Error, InstitutionResources> =>
+  const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] = userIdForAuth =>
     pipe(
       TE.tryCatch(
         () =>
@@ -82,9 +88,7 @@ export const getSelfcareClient = cache(() => {
       )
     );
 
-  const getInstitutionById = (
-    id: string
-  ): TE.TaskEither<Error | AxiosError, Institution> =>
+  const getInstitutionById: SelfcareClient["getInstitutionById"] = id =>
     pipe(
       TE.tryCatch(
         () => axiosInstance.get(`${institutionsApi}/${id}`),

@@ -28,7 +28,8 @@
     "edit": "Edit",
     "next": "Next",
     "save": "Save",
-    "showMore": "Show more"
+    "showMore": "Show more",
+    "view": "View"
   },
   "copied": "Copied",
   "footer": {
@@ -59,6 +60,14 @@
     },
     "testUrl": "Try URL",
     "service": {
+      "searchById": {
+        "clear": "Clear filter",
+        "search": "Start search",
+        "helperText": "Enter a 26-character alphanumeric ID code and click on right search icon",
+        "validText": "Click on right search icon inside field to perform search",
+        "errorText": "Invalid service ID code",
+        "label": "Search by service ID"
+      },
       "assistanceChannels": {
         "label": "Assistance channels",
         "add": "Add assistance channel",
@@ -175,6 +184,24 @@
       }
     }
   },
+  "institution": {
+    "cardTitle": "Institution information",
+    "name": "Business name",
+    "mailAddress": "Primary PEC address",
+    "institutionType": {
+      "label": "Tipology",
+      "AS": "Insurance",
+      "GSP": "Public service manager",
+      "PA": "Public administration",
+      "PG": "Legal person, private company",
+      "PSP": "Payment Service Provider",
+      "PT": "Technology Partner",
+      "SCP": "Publicly controlled company",
+      "SA": "Contracting station"
+    },
+    "fiscalCode": "Tax Code / VAT number",
+    "geographicArea": "Geographic area"
+  },
   "keys": {
     "block": "Block",
     "primary": {
@@ -195,6 +222,7 @@
   "notifications": {
     "exceptionError": "Applicative exception",
     "httpError": "Http error",
+    "noChangeError": "Warning, no changes made",
     "success": "Operation completed successfully",
     "validationError": "Data validation error"
   },
@@ -210,7 +238,14 @@
     "services": {
       "title": "Services",
       "description": "View and manage your institution's services.",
-      "empty": "There are no services for this institution yet."
+      "empty": "There are no services for this institution yet.",
+      "tableHeader": {
+        "name": "Name",
+        "lastUpdate": "Last update",
+        "id": "ID Code",
+        "status": "Status",
+        "visibility": "Visibility on IO"
+      }
     },
     "service": {
       "address": "Address",
@@ -356,6 +391,19 @@
       "title": "Preview",
       "button": "See preview",
       "info": "This is how the service description will be displayed in the IO app."
+    },
+    "shortcut": {
+      "create": {
+        "description": "Start creating a new service",
+        "label": "Create a service"
+      }
+    },
+    "switcher": {
+      "title": "Which version of the service do you want to view?",
+      "description": "The <strong>{{name}}</strong> service has two versions. Select the one you want to view.",
+      "status": "Service status:",
+      "lastApprovedVersion": "Last approved version.",
+      "lastUpdate": "Last update:"
     }
   },
   "test": "This is a translation test"
