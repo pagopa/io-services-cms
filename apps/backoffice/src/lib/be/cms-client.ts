@@ -1,12 +1,13 @@
-import { createClient } from "@/generated/services-cms/client";
+import { Client, createClient } from "@/generated/services-cms/client";
 import { getFetch } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { cache } from "react";
 import { HealthChecksError } from "./errors";
+
+let ioServicesCmsClient: Client;
 
 const Config = t.type({
   API_SERVICES_CMS_URL: NonEmptyString,
@@ -25,7 +26,7 @@ const getIoServicesCmsClientConfig = () => {
   return result.right;
 };
 
-export const getIoServicesCmsClient = cache(() => {
+const buildIoServicesCmsClient = (): Client => {
   const configuration = getIoServicesCmsClientConfig();
 
   if (configuration.API_SERVICES_CMS_MOCKING) {
@@ -38,7 +39,14 @@ export const getIoServicesCmsClient = cache(() => {
     fetchApi: getFetch(process.env),
     basePath: configuration.API_SERVICES_CMS_BASE_PATH
   });
-});
+};
+
+export const getIoServicesCmsClient = (): Client => {
+  if (!ioServicesCmsClient) {
+    ioServicesCmsClient = buildIoServicesCmsClient();
+  }
+  return ioServicesCmsClient;
+};
 
 export async function getIoServicesCmsHealth() {
   try {

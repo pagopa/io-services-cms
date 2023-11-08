@@ -17,6 +17,25 @@ import * as t from "io-ts";
 import { cache } from "react";
 import { HealthChecksError } from "./errors";
 
+let subscriptionsMigrationClient: SubscriptionsMigrationClient;
+
+export type SubscriptionsMigrationClient = {
+  getLatestOwnershipClaimStatus: (
+    organizationFiscalCode: string
+  ) => TE.TaskEither<Error, MigrationItemList>;
+  getOwnershipClaimStatus: (
+    organizationFiscalCode: string,
+    delegateId: string
+  ) => TE.TaskEither<Error, MigrationData>;
+  claimOwnership: (
+    organizationFiscalCode: string,
+    delegateId: string
+  ) => TE.TaskEither<Error, void>;
+  getDelegatesByOrganization: (
+    organizationFiscalCode: string
+  ) => TE.TaskEither<Error, MigrationDelegateList>;
+};
+
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
@@ -54,158 +73,146 @@ const getAxiosInstance: () => AxiosInstance = () => {
   });
 };
 
-export type SubscriptionsMigrationClient = {
-  getLatestOwnershipClaimStatus: (
+const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
+  const axiosInstance = getAxiosInstance();
+
+  const getLatestOwnershipClaimStatus = (
     organizationFiscalCode: string
-  ) => TE.TaskEither<Error, MigrationItemList>;
-  getOwnershipClaimStatus: (
+  ): TE.TaskEither<Error, MigrationItemList> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(
+            `/organizations/${organizationFiscalCode}/ownership-claims/latest`
+          ),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(
+            `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`
+          );
+        } else {
+          return new Error(
+            `Error calling subscriptions migration getLatestOwnershipClaimStatus API: ${e}`
+          );
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          MigrationItemList.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
+
+  const getOwnershipClaimStatus = (
     organizationFiscalCode: string,
     delegateId: string
-  ) => TE.TaskEither<Error, MigrationData>;
-  claimOwnership: (
+  ): TE.TaskEither<Error, MigrationData> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(
+            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
+          ),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(
+            `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`
+          );
+        } else {
+          return new Error(
+            `Error calling subscriptions migration getOwnershipClaimStatus API: ${e}`
+          );
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          MigrationData.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
+
+  const claimOwnership = (
     organizationFiscalCode: string,
     delegateId: string
-  ) => TE.TaskEither<Error, void>;
-  getDelegatesByOrganization: (
+  ): TE.TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.post(
+            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
+          ),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(
+            `subscriptions migration claimOwnership Axios error catched ${e.message}`
+          );
+        } else {
+          return new Error(
+            `Error calling subscriptions migration claimOwnership API: ${e}`
+          );
+        }
+      }),
+      TE.map(_ => void 0)
+    );
+
+  const getDelegatesByOrganization = (
     organizationFiscalCode: string
-  ) => TE.TaskEither<Error, MigrationDelegateList>;
+  ): TE.TaskEither<Error, MigrationDelegateList> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(
+            `/organizations/${organizationFiscalCode}/delegates`
+          ),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(
+            `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`
+          );
+        } else {
+          return new Error(
+            `Error calling subscriptions migration getDelegatesByOrganization API: ${e}`
+          );
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          MigrationDelegateList.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
+
+  return {
+    getLatestOwnershipClaimStatus,
+    getOwnershipClaimStatus,
+    claimOwnership,
+    getDelegatesByOrganization
+  };
 };
 
-export const getSubscriptionsMigrationClient = cache(
-  (): SubscriptionsMigrationClient => {
-    const axiosInstance = getAxiosInstance();
-
-    const getLatestOwnershipClaimStatus = (
-      organizationFiscalCode: string
-    ): TE.TaskEither<Error, MigrationItemList> =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.get(
-              `/organizations/${organizationFiscalCode}/ownership-claims/latest`
-            ),
-          identity
-        ),
-        TE.mapLeft(e => {
-          if (axios.isAxiosError(e)) {
-            return new Error(
-              `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`
-            );
-          } else {
-            return new Error(
-              `Error calling subscriptions migration getLatestOwnershipClaimStatus API: ${e}`
-            );
-          }
-        }),
-        TE.chainW(response =>
-          pipe(
-            response.data,
-            MigrationItemList.decode,
-            E.mapLeft(flow(readableReport, E.toError)),
-            TE.fromEither
-          )
-        )
-      );
-
-    const getOwnershipClaimStatus = (
-      organizationFiscalCode: string,
-      delegateId: string
-    ): TE.TaskEither<Error, MigrationData> =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.get(
-              `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
-            ),
-          identity
-        ),
-        TE.mapLeft(e => {
-          if (axios.isAxiosError(e)) {
-            return new Error(
-              `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`
-            );
-          } else {
-            return new Error(
-              `Error calling subscriptions migration getOwnershipClaimStatus API: ${e}`
-            );
-          }
-        }),
-        TE.chainW(response =>
-          pipe(
-            response.data,
-            MigrationData.decode,
-            E.mapLeft(flow(readableReport, E.toError)),
-            TE.fromEither
-          )
-        )
-      );
-
-    const claimOwnership = (
-      organizationFiscalCode: string,
-      delegateId: string
-    ): TE.TaskEither<Error, void> =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.post(
-              `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
-            ),
-          identity
-        ),
-        TE.mapLeft(e => {
-          if (axios.isAxiosError(e)) {
-            return new Error(
-              `subscriptions migration claimOwnership Axios error catched ${e.message}`
-            );
-          } else {
-            return new Error(
-              `Error calling subscriptions migration claimOwnership API: ${e}`
-            );
-          }
-        }),
-        TE.map(_ => void 0)
-      );
-
-    const getDelegatesByOrganization = (
-      organizationFiscalCode: string
-    ): TE.TaskEither<Error, MigrationDelegateList> =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.get(
-              `/organizations/${organizationFiscalCode}/delegates`
-            ),
-          identity
-        ),
-        TE.mapLeft(e => {
-          if (axios.isAxiosError(e)) {
-            return new Error(
-              `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`
-            );
-          } else {
-            return new Error(
-              `Error calling subscriptions migration getDelegatesByOrganization API: ${e}`
-            );
-          }
-        }),
-        TE.chainW(response =>
-          pipe(
-            response.data,
-            MigrationDelegateList.decode,
-            E.mapLeft(flow(readableReport, E.toError)),
-            TE.fromEither
-          )
-        )
-      );
-
-    return {
-      getLatestOwnershipClaimStatus,
-      getOwnershipClaimStatus,
-      claimOwnership,
-      getDelegatesByOrganization
-    };
+export const getSubscriptionsMigrationClient = () => {
+  if (!subscriptionsMigrationClient) {
+    subscriptionsMigrationClient = buildSubscriptionsMigrationClient();
   }
-);
+  return subscriptionsMigrationClient;
+};
 
 export async function getSubscriptionsMigrationHealth() {
   try {
