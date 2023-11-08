@@ -5,7 +5,10 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["@pagopa/mui-italia"],
   i18n,
-  output: "standalone"
+  output: "standalone",
+  experimental: {
+    instrumentationHook: true
+  }
 };
 
 module.exports = nextConfig;
