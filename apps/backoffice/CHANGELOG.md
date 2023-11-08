@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.15.5
+
+### Patch Changes
+
+- e1acb56: remove getIoServicesCmsHealth on info api
+
 ## 0.15.4
 
 ### Patch Changes

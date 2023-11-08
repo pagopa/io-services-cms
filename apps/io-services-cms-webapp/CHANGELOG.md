@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.8
+
+### Patch Changes
+
+- 2567058: change contract field on jira ticket creation
+
 ## 1.21.7
 
 ### Patch Changes
