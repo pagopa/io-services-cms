@@ -3,6 +3,7 @@ import {
   HTTP_STATUS_OK
 } from "@/config/constants";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
+import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
 import healthcheck from "@/lib/be/healthcheck";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
@@ -22,7 +23,7 @@ export async function GET() {
     //getLegacyCosmosHealth(),
     //getApimHealth(),
     getSelfcareHealth(),
-    //getIoServicesCmsHealth(),
+    getIoServicesCmsHealth(),
     getAzureAccessTokenHealth(),
     //getCosmosStoreHealth(),
     getSubscriptionsMigrationHealth()
