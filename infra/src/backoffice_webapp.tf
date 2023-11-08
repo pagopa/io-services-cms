@@ -17,7 +17,7 @@ locals {
     APIM_USER_GROUPS          = var.backoffice_app.apim_user_groups
     API_APIM_MOCKING          = true
     # Logs
-    APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
+    APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.application_insights.connection_string
     # NextAuthJS
     NEXTAUTH_URL    = "https://${var.backoffice_host}/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
