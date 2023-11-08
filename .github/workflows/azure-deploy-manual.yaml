@@ -71,7 +71,7 @@ jobs:
 
       - name: Deploy to staging
         if: contains(github.event.inputs.package_url, 'webapp')
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: artifact.zip
@@ -94,11 +94,12 @@ jobs:
 
       - name: Deploy to staging
         if: contains(github.event.inputs.package_url, 'backoffice')
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_BACKOFFICE_NAME }}
           package: artifact.zip
           slot-name: staging
+          clean: true
 
       - name: 'Healthcheck'
         if: contains(github.event.inputs.package_url, 'backoffice')
