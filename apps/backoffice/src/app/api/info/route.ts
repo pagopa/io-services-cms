@@ -2,11 +2,8 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_OK
 } from "@/config/constants";
-import { getApimHealth } from "@/lib/be/apim-service";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
-import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
 import healthcheck from "@/lib/be/healthcheck";
-import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
 import { NextResponse } from "next/server";
@@ -22,11 +19,12 @@ export async function GET() {
   // get info from package.json
 
   const health = await healthcheck([
-    getLegacyCosmosHealth(),
-    getApimHealth(),
+    //getLegacyCosmosHealth(),
+    //getApimHealth(),
     getSelfcareHealth(),
+    //getIoServicesCmsHealth(),
     getAzureAccessTokenHealth(),
-    getCosmosStoreHealth(),
+    //getCosmosStoreHealth(),
     getSubscriptionsMigrationHealth()
   ]);
   const status =
