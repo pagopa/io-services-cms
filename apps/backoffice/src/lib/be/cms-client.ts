@@ -1,4 +1,5 @@
 import { createClient } from "@/generated/services-cms/client";
+import { getFetch } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -34,7 +35,7 @@ export const getIoServicesCmsClient = cache(() => {
 
   return createClient({
     baseUrl: configuration.API_SERVICES_CMS_URL,
-    fetchApi: (fetch as any) as typeof fetch,
+    fetchApi: getFetch(process.env),
     basePath: configuration.API_SERVICES_CMS_BASE_PATH
   });
 });

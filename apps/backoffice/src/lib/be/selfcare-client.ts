@@ -1,3 +1,8 @@
+import {
+  getKeepAliveAgentOptions,
+  newHttpAgent,
+  newHttpsAgent
+} from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -43,7 +48,9 @@ const getAxiosInstance: () => AxiosInstance = cache(() => {
   return axios.create({
     baseURL: endpoint,
     timeout: 5000,
-    headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY }
+    headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY },
+    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
 });
 
