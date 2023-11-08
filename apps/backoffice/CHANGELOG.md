@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.15.2
+
+### Patch Changes
+
+- 83059a6: Handle 404 Apim getServiceList response
+
 ## 0.15.1
 
 ### Patch Changes
