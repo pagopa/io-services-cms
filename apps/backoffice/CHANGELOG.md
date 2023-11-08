@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 0.16.0
+
+### Minor Changes
+
+- 0d5c76d: Integrate Application Insights
+
+### Patch Changes
+
+- 2c34239: removed healtcheck which calls external services
+
 ## 0.15.5
 
 ### Patch Changes
