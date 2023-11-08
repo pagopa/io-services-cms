@@ -405,12 +405,12 @@ export function getGetServicesMigrationStatus200Response() {
   return {
     items: [
       ...Array.from(
-        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
+        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH / 2 })).keys()
       )
     ].map(_ => ({
       status: getMockServicesMigrationLatestStatus(),
       delegate: getMockServicesMigrationDelegate(),
-      lastUpdate: new Date().toISOString()
+      lastUpdate: faker.date.recent({ days: 60 }).toISOString()
     }))
   };
 }
