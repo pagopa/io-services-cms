@@ -47,7 +47,7 @@ export async function getIoServicesCmsHealth() {
 
     if (E.isLeft(infoRes)) {
       throw new Error(
-        `Service CMS info response in error ${readableReport(infoRes.left)}`
+        `Service CMS client encounter the error => ${infoRes.left}`
       );
     }
     const { status, value } = infoRes.right;
