@@ -1,5 +1,40 @@
 # io-services-cms-backoffice
 
+## 0.15.3
+
+### Patch Changes
+
+- 0f56282: ock services-cms /info only in development environment
+
+## 0.15.2
+
+### Patch Changes
+
+- 83059a6: Handle 404 Apim getServiceList response
+
+## 0.15.1
+
+### Patch Changes
+
+- 7416536: Fix subscription migration config
+
+## 0.15.0
+
+### Minor Changes
+
+- 45c0aed: ADD API Subscriptions Migrations
+
+## 0.14.0
+
+### Minor Changes
+
+- 36a558e: Add search by serviceId on services page
+
+### Patch Changes
+
+- adb0a0d: ADD queryParam 'id' in GET /services/list Route Handler
+- d814296: fix staging health check
+
 ## 0.13.2
 
 ### Patch Changes

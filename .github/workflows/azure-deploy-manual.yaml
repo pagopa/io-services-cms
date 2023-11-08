@@ -1,4 +1,4 @@
-name: "Azure Deploy Manual"
+name: 'Azure Deploy Manual'
 
 on:
   workflow_dispatch:
@@ -13,17 +13,48 @@ permissions:
 
 env:
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
+  AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
   RESOURCE_GROUP: io-p-services-cms-rg
-  HEALTHCHECK_PATH: "api/v1/info"
+  WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
+  BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
 
 jobs:
-  deploy_app:
-    name: Deploy App Job
+  create_runner:
+    name: Create Runner
     runs-on: ubuntu-22.04
+    environment: prod-runner
+    outputs:
+      runner_name: ${{ steps.create_github_runner.outputs.runner_name }}
+    steps:
+      - name: Create GitHub Runner
+        id: create_github_runner
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
+        with:
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          container_app_environment_name: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
+          resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          pat_token: ${{ secrets.BOT_TOKEN }}
+
+  runner_job:
+    name: Runner Job
+    runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
     environment: prod-app-cd
+    needs: [create_runner]
+
     steps:
       - name: Download artifact
-        run: "curl --output artifact.zip --location ${{ github.event.inputs.package_url }}"
+        id: download_artifact
+        run: 'curl --output artifact.zip --location ${{ github.event.inputs.package_url }}'
+
+      - name: Identify workload
+        id: workload
+        shell: bash
+        run: |
+          # Parse the release artifact name to retrieve app name
+          echo name=$(echo "${{ contains(github.event.inputs.package_url, 'webapp') && env.AZURE_WEBAPP_NAME || env.AZURE_BACKOFFICE_NAME }}") >> "$GITHUB_OUTPUT"
 
       - name: Login
         id: login
@@ -34,22 +65,67 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      #################
+      # Webapp Deploy #
+      #################
+
       - name: Deploy to staging
-        uses: azure/webapps-deploy@v2
+        if: contains(github.event.inputs.package_url, 'webapp')
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          resource-group-name: ${{ env.RESOURCE_GROUP }}
           package: artifact.zip
           slot-name: staging
+          clean: true
 
-      # healthcheck
-      - name: "Healthcheck"
+      - name: 'Healthcheck'
+        if: contains(github.event.inputs.package_url, 'webapp')
         id: healthcheck
-        run: |
-          # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.HEALTHCHECK_PATH }}'
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
-      # swap staging to production
-      - name: "Swap staging to production"
+      - name: 'Swap staging to production'
+        if: contains(github.event.inputs.package_url, 'webapp')
         id: swap_to_production
         run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
+
+      #####################
+      # Backoffice Deploy #
+      #####################
+
+      - name: Deploy to staging
+        if: contains(github.event.inputs.package_url, 'backoffice')
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
+        with:
+          app-name: ${{ env.AZURE_BACKOFFICE_NAME }}
+          package: artifact.zip
+          slot-name: staging
+          clean: true
+
+      - name: 'Healthcheck'
+        if: contains(github.event.inputs.package_url, 'backoffice')
+        id: healthcheck_backoffice
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
+
+      - name: 'Swap staging to production'
+        if: contains(github.event.inputs.package_url, 'backoffice')
+        id: swap_to_production_backoffice
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
+
+  cleanup_runner:
+    name: Cleanup Runner
+    if: always()
+    runs-on: ubuntu-22.04
+    environment: prod-runner
+    needs: [create_runner, runner_job]
+    steps:
+      - name: Cleanup GitHub Runner
+        id: cleanup_github_runner
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-cleanup-action
+        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-cleanup-action@main
+        with:
+          client_id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
+          runner_name: ${{ needs.create_runner.outputs.runner_name }}
+          pat_token: ${{ secrets.BOT_TOKEN }}

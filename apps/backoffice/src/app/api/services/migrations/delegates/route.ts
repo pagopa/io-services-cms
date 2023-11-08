@@ -1,10 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server'; 
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NextRequest, NextResponse } from "next/server";
+import { BackOfficeUser } from "../../../../../../types/next-auth";
+import { retrieveOrganizationDelegates } from "@/lib/be/services/business";
+import { handleInternalErrorResponse } from "@/lib/be/errors";
 
 /**
  * @description Retrieve delegates with the number of services to migrate
- * TODO:!!!!This is a placeholder!!!!
- * FIXME:!!!!Update the implementation!!!!
  */
-export async function GET(request: NextRequest) {
-  return NextResponse.json({ message: 'Hello World' });
-}
+export const GET = withJWTAuthHandler(
+  async (
+    request: NextRequest,
+    { backofficeUser }: { backofficeUser: BackOfficeUser }
+  ) => {
+    try {
+      const response = await retrieveOrganizationDelegates(
+        backofficeUser.institution.fiscalCode
+      );
+
+      return NextResponse.json(response);
+    } catch (error) {
+      console.error(
+        `An Error has occurred while retrieving Delegates for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
+         requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+        error
+      );
+      return handleInternalErrorResponse(
+        "InstitutionDelegatesRetrieveError",
+        error
+      );
+    }
+  }
+);

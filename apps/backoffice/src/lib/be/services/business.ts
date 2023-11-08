@@ -4,8 +4,10 @@ import {
 } from "@/config/constants";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
+import { MigrationData } from "@/generated/api/MigrationData";
+import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
+import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
-import { getApimRestClient } from "@/lib/be/apim-service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -13,12 +15,20 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { getServiceList } from "./apim";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
 } from "./cosmos";
+import {
+  claimOwnership,
+  getDelegatesByOrganization,
+  getLatestOwnershipClaimStatus,
+  getOwnershipClaimStatus
+} from "./subscription-migration";
 import { reducePublicationServicesList, toServiceListItem } from "./utils";
+
 
 type PathParameters = {
   serviceId?: string;
@@ -42,11 +52,7 @@ export const retrieveServiceList = async (
   serviceId?: string
 ): Promise<ServiceList> =>
   pipe(
-    TE.tryCatch(() => getApimRestClient(), E.toError),
-    // get services from apim
-    TE.chainW(apimRestClient =>
-      apimRestClient.getServiceList(userId, limit, offset, serviceId)
-    ),
+    getServiceList(userId, limit, offset, serviceId),
     TE.bindTo("apimServices"),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind("lifecycleServices", ({ apimServices }) =>
@@ -153,3 +159,35 @@ export async function forwardIoServicesCmsRequest<
 
   return NextResponse.json(value, { status });
 }
+
+/**
+ * SUBSCRIPTIONS
+ * MIGRATION
+ * FUNCTIONS
+ **/
+
+export const retrieveOwnershipClaimLatestStatus = async (
+  organizationFiscalCode: string
+): Promise<MigrationItemList> => {
+  return await getLatestOwnershipClaimStatus(organizationFiscalCode);
+};
+
+export const retrieveOwnershipClaimLatestForDelegate = async (
+  organizationFiscalCode: string,
+  delegateId: string
+): Promise<MigrationData> => {
+  return await getOwnershipClaimStatus(organizationFiscalCode, delegateId);
+};
+
+export const claimOwnershipForDelegate = async (
+  organizationFiscalCode: string,
+  delegateId: string
+): Promise<void> => {
+  return await claimOwnership(organizationFiscalCode, delegateId);
+};
+
+export const retrieveOrganizationDelegates = async (
+  organizationFiscalCode: string
+): Promise<MigrationDelegateList> => {
+  return await getDelegatesByOrganization(organizationFiscalCode);
+};

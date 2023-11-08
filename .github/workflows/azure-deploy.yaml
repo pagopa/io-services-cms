@@ -68,18 +68,17 @@ jobs:
 
       - name: Deploy to staging
         if: contains(github.event.release.assets[0].name, 'webapp')
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: artifact.zip
           slot-name: staging
+          clean: true
 
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'webapp')
         id: healthcheck
-        run: |
-          # fails if response status is not 2xx
-          curl -f 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'webapp')
@@ -92,16 +91,17 @@ jobs:
 
       - name: Deploy to staging
         if: contains(github.event.release.assets[0].name, 'backoffice')
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_BACKOFFICE_NAME }}
           package: artifact.zip
           slot-name: staging
+          clean: true
 
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'backoffice')
         id: healthcheck_backoffice
-        run: curl --retry 5 --retry-max-time 120 --retry-all-errors 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
+        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'backoffice')
