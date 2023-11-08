@@ -73,6 +73,7 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: artifact.zip
           slot-name: staging
+          clean: true
 
       - name: 'Healthcheck'
         if: contains(github.event.release.assets[0].name, 'webapp')

@@ -57,7 +57,7 @@ export type Configuration = {
   LEGACY_COSMOSDB_MOCKING: boolean;
 
   // Subscriptions migration configuration
-  SUBSCRIPTIONS_MIGRATION_MOCKING: boolean;
+  SUBSCRIPTION_MIGRATION_API_MOCKING: boolean;
 
 };
 
@@ -131,7 +131,7 @@ export function getConfiguration(): Configuration {
     LEGACY_COSMOSDB_MOCKING: process.env.API_APIM_MOCKING === "true",
 
     // Subscriptions migration configuration
-    SUBSCRIPTIONS_MIGRATION_MOCKING:
-      process.env.SUBSCRIPTIONS_MIGRATION_MOCKING === "true"
+    SUBSCRIPTION_MIGRATION_API_MOCKING:
+      process.env.SUBSCRIPTION_MIGRATION_API_MOCKING === "true"
   };
 }

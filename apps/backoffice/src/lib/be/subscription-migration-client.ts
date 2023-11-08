@@ -14,9 +14,9 @@ import { HealthChecksError } from "./errors";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  SUBSCRIPTION_MIGRATIONS_URL: NonEmptyString,
-  SUBSCRIPTION_MIGRATIONS_APIKEY: NonEmptyString,
-  SUBSCRIPTIONS_MIGRATION_MOCKING: BooleanFromString
+  SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
+  SUBSCRIPTION_MIGRATION_API_KEY: NonEmptyString,
+  SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString
 });
 
 const getSubscriptionsMigrationConfig: () => Config = cache(() => {
@@ -28,7 +28,7 @@ const getSubscriptionsMigrationConfig: () => Config = cache(() => {
     });
   }
 
-  if (result.right.SUBSCRIPTIONS_MIGRATION_MOCKING) {
+  if (result.right.SUBSCRIPTION_MIGRATION_API_MOCKING) {
     const { setupMocks } = require("../../../mocks");
     setupMocks();
   }
@@ -39,9 +39,9 @@ const getAxiosInstance: () => AxiosInstance = () => {
   const configuration = getSubscriptionsMigrationConfig();
 
   return axios.create({
-    baseURL: configuration.SUBSCRIPTION_MIGRATIONS_URL,
+    baseURL: configuration.SUBSCRIPTION_MIGRATION_API_URL,
     timeout: 5000,
-    headers: { "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATIONS_APIKEY }
+    headers: { "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY }
   });
 };
 
