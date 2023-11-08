@@ -88,5 +88,5 @@ backoffice_app = {
   selfcare_external_api_base_url        = "https://api.selfcare.pagopa.it/external/v2"
   selfcare_jwks_path                    = "/.well-known/jwks.json"
   selfcare_jwt_issuer                   = "api.selfcare.pagopa.it"
-  subscriptions_migration_api_url       = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
+  subscription_migration_api_url        = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
 }

@@ -23,7 +23,7 @@ export const getHandlers = () => {
   if (config.API_APIM_MOCKING) {
     handlers.push(...apimHandlers());
   }
-  if (config.SUBSCRIPTIONS_MIGRATION_MOCKING) {
+  if (config.SUBSCRIPTION_MIGRATION_API_MOCKING) {
     handlers.push(...subscriptionsMigrationHandlers());
   }
   if (config.LEGACY_COSMOSDB_MOCKING) {

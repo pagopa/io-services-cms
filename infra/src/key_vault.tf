@@ -107,7 +107,7 @@ data "azurerm_key_vault_secret" "selfcare_api_key" {
 }
 
 
-data "azurerm_key_vault_secret" "subscriptions_migration_api_key" {
-  name         = "SUBSCRIPTIONS-MIGRATION-API-KEY"
+data "azurerm_key_vault_secret" "subscription_migration_api_key" {
+  name         = "SUBSCRIPTION-MIGRATION-API-KEY"
   key_vault_id = module.key_vault_domain.id
 }
