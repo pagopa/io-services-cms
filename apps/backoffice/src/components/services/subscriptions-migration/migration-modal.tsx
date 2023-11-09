@@ -17,13 +17,29 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
-import { DelegateStatusPair, MigrationStatus } from ".";
+import { DelegateStatusPair, MigrationStatus } from "./migration-manager";
 
 export type MigrationModalProps = {
   isOpen: boolean;
   migrationStatusList?: DelegateStatusPair[];
   onOpenChange: (isOpen: boolean) => void;
   onImportClick: (delegates: string[]) => void;
+};
+
+// porting from developer portal frontend
+export const computeMigrationStatus = (
+  data?: MigrationData
+): MigrationStatus => {
+  if (data?.status?.failed) {
+    return "failed";
+  }
+  if (data?.status?.initial) {
+    return "todo";
+  }
+  if (data?.status?.processing) {
+    return "doing";
+  }
+  return "done";
 };
 
 /** Render subscriptions migration modal:
@@ -59,20 +75,6 @@ export const MigrationModal = ({
       newChecked.splice(currentIndex, 1);
     }
     setCheckedDelegates(newChecked);
-  };
-
-  // porting from developer portal frontend
-  const computeMigrationStatus = (data?: MigrationData): MigrationStatus => {
-    if (data?.status?.failed ?? 0 > 0) {
-      return "failed";
-    }
-    if (data?.status?.initial ?? 0 > 0) {
-      return "todo";
-    }
-    if (data?.status?.processing ?? 0 > 0) {
-      return "doing";
-    }
-    return "done";
   };
 
   useEffect(() => {
