@@ -21,6 +21,18 @@ import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
 
+let apimService: ApimUtils.ApimService;
+
+export type ApimRestClient = {
+  getServiceList: (
+    userId: string,
+    limit: number,
+    offset: number,
+    serviceId?: string,
+    isRetry?: boolean
+  ) => TE.TaskEither<Error | AxiosError, SubscriptionCollection>;
+};
+
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
@@ -51,7 +63,7 @@ const getApimConfig: () => Config = cache(() => {
   return result.right;
 });
 
-export const getApimService: () => ApimUtils.ApimService = cache(() => {
+const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
   const apimClient = ApimUtils.getApimClient(
@@ -63,9 +75,16 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM
   );
-});
+};
 
-const getAxiosInstance = cache((azureAccessToken: string) => {
+export const getApimService: () => ApimUtils.ApimService = () => {
+  if (!apimService) {
+    apimService = buildApimService();
+  }
+  return apimService;
+};
+
+const getAxiosInstance = (azureAccessToken: string) => {
   const apimConfig = getApimConfig();
 
   return axios.create({
@@ -75,9 +94,9 @@ const getAxiosInstance = cache((azureAccessToken: string) => {
     httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
     httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
-});
+};
 
-export const getApimRestClient = async () => {
+export const getApimRestClient = async (): Promise<ApimRestClient> => {
   // ottengo config
   const apimConfig = getApimConfig();
 

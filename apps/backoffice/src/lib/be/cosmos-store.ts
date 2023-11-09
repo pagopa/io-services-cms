@@ -1,4 +1,4 @@
-import { CosmosClient } from "@azure/cosmos";
+import { CosmosClient, Database } from "@azure/cosmos";
 import {
   ServiceLifecycle,
   ServicePublication,
@@ -10,6 +10,10 @@ import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { cache } from "react";
 import { HealthChecksError } from "./errors";
+
+let cosmosDatabase: Database;
+let serviceLifecycleCosmosStore: ReturnType<typeof buildServiceLifecycleCosmosStore>;
+let servicePublicationCosmosStore: ReturnType<typeof buildServicePublicationCosmosStore>;
 
 const Config = t.type({
   COSMOSDB_NAME: NonEmptyString,
@@ -30,25 +34,39 @@ const getCosmosConfig = cache(() => {
   return result.right;
 });
 
-const getCosmosDatabase = cache(() => {
+const buildCosmosDatabase = (): Database => {
   const cosmosConfiguration = getCosmosConfig();
   const cosmosdbClient = new CosmosClient({
     endpoint: cosmosConfiguration.COSMOSDB_URI,
     key: cosmosConfiguration.COSMOSDB_KEY
   });
   return cosmosdbClient.database(cosmosConfiguration.COSMOSDB_NAME);
-});
+};
 
-export const getServiceLifecycleCosmosStore = cache(() => {
+const getCosmosDatabase = (): Database => {
+  if (!cosmosDatabase) {
+    cosmosDatabase = buildCosmosDatabase();
+  }
+  return cosmosDatabase;
+};
+
+const buildServiceLifecycleCosmosStore = () => {
   const cosmosConfiguration = getCosmosConfig();
   const cosmos = getCosmosDatabase();
   return stores.createCosmosStore(
     cosmos.container(cosmosConfiguration.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
     ServiceLifecycle.ItemType
   );
-});
+};
 
-export const getServicePublicationCosmosStore = cache(() => {
+export const getServiceLifecycleCosmosStore = () => {
+  if (!serviceLifecycleCosmosStore) {
+    serviceLifecycleCosmosStore = buildServiceLifecycleCosmosStore();
+  }
+  return serviceLifecycleCosmosStore;
+};
+
+const buildServicePublicationCosmosStore = () => {
   const cosmosConfiguration = getCosmosConfig();
   const cosmos = getCosmosDatabase();
   return stores.createCosmosStore(
@@ -57,7 +75,14 @@ export const getServicePublicationCosmosStore = cache(() => {
     ),
     ServicePublication.ItemType
   );
-});
+};
+
+export const getServicePublicationCosmosStore = () => {
+  if (!servicePublicationCosmosStore) {
+    servicePublicationCosmosStore = buildServicePublicationCosmosStore();
+  }
+  return servicePublicationCosmosStore;
+};
 
 export async function getCosmosStoreHealth() {
   try {

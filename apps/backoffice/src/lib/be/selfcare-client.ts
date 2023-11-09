@@ -17,6 +17,16 @@ import { InstitutionResources } from "../../types/selfcare/InstitutionResource";
 import { HealthChecksError } from "./errors";
 
 const institutionsApi = "/institutions";
+let selfcareClient: SelfcareClient;
+
+export type SelfcareClient = {
+  getUserAuthorizedInstitutions: (
+    userIdForAuth: string
+  ) => TE.TaskEither<Error, InstitutionResources>;
+  getInstitutionById: (
+    id: string
+  ) => TE.TaskEither<Error | AxiosError, Institution>;
+};
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -41,7 +51,7 @@ const getSelfcareConfig: () => Config = cache(() => {
   return result.right;
 });
 
-const getAxiosInstance: () => AxiosInstance = cache(() => {
+const getAxiosInstance = (): AxiosInstance => {
   const configuration = getSelfcareConfig();
   const endpoint = `${configuration.SELFCARE_EXTERNAL_API_BASE_URL}`;
 
@@ -52,17 +62,9 @@ const getAxiosInstance: () => AxiosInstance = cache(() => {
     httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
     httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
-});
-
-export type SelfcareClient = {
-  getUserAuthorizedInstitutions: (
-    userIdForAuth: string
-  ) => TE.TaskEither<Error, InstitutionResources>;
-  getInstitutionById: (
-    id: string
-  ) => TE.TaskEither<Error | AxiosError, Institution>;
 };
-export const getSelfcareClient: () => SelfcareClient = cache(() => {
+
+const buildSelfcareClient = (): SelfcareClient => {
   const axiosInstance = getAxiosInstance();
 
   const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] = userIdForAuth =>
@@ -124,7 +126,18 @@ export const getSelfcareClient: () => SelfcareClient = cache(() => {
     getUserAuthorizedInstitutions,
     getInstitutionById
   };
-});
+};
+
+export const getSelfcareClient = (): SelfcareClient => {
+  if (!selfcareClient) {
+    selfcareClient = buildSelfcareClient();
+  }
+  return selfcareClient;
+};
+
+export const resetInstance = () => {
+  selfcareClient = buildSelfcareClient();
+};
 
 export async function getSelfcareHealth() {
   try {
