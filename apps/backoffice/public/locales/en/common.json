@@ -26,6 +26,7 @@
     "createDraft": "Create draft",
     "delete": "Delete",
     "edit": "Edit",
+    "import": "Import",
     "next": "Next",
     "save": "Save",
     "showMore": "Show more",
@@ -181,6 +182,31 @@
           "label": "Extra configuration",
           "description": "These features allow you to enrich the service with many additional parameters. Be careful, some of these require the signing of an ad hoc contract."
         }
+      }
+    }
+  },
+  "subscriptions": {
+    "migration": {
+      "title": "Import services from the Developer Portal",
+      "disclaimer": {
+        "title": "The Developer Portal is being decommissioned",
+        "description": "At the moment you can use both portals, but soon IO services will only be able to be managed from the Reserved Area. You don't have to import all the services at the same time: it is possible to do multiple imports."
+      },
+      "action": "Import services",
+      "refresh": "Refresh status",
+      "status": {
+        "title": "Import status",
+        "description": "Below is the list of delegates with the import status and the last update date.",
+        "success": "The services, or a part of them, have been imported and you can find them in the Services section.",
+        "noData": "No import was started.",
+        "done": "Completed",
+        "doing": "In progress",
+        "todo": "To start",
+        "failed": "Failed"
+      },
+      "modal": {
+        "title": "Select the delegates who created the services",
+        "description": "The imported services will only be visible in the Reserved Area and will be accessible to all users of the organisation."
       }
     }
   },
