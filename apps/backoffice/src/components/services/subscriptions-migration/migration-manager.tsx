@@ -1,3 +1,12 @@
+/**
+ * Azure Apim Subscription Manager
+ * Main component that manages the ownership change of Azure subscriptions from a user-centric model to an institution-centric model.
+ * This component manages:
+ * - viewing the current status of subscriptions migration (grouped by user)
+ * - the status update of this current view
+ * - the delegate selection modal for importing subscriptions into the Institution: this means that the ownership of the subscriptions,
+ *   once imported, passes from the individual user to the Institution of which these users are delegates.
+ */
 import { ButtonWithLoader } from "@/components/buttons";
 import { CardBaseContainer } from "@/components/cards";
 import { buildSnackbarItem } from "@/components/notification";
