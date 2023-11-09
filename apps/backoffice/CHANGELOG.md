@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.16.2
+
+### Patch Changes
+
+- de7a814: temporany log to trace millis spent in external calls and general api completion
+
 ## 0.16.1
 
 ### Patch Changes
