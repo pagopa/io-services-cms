@@ -20,8 +20,13 @@ export const GET = withJWTAuthHandler(
     }: { params: { institutionId: string }; backofficeUser: BackOfficeUser }
   ) => {
     try {
+      const startTime = Date.now();
+
       const institutionResponse = await retrieveInstitution(
         params.institutionId
+      );
+      console.info(
+        `[GET Institution] completed in ${Date.now() - startTime}ms`
       );
       return NextResponse.json(institutionResponse);
     } catch (error) {

@@ -51,7 +51,13 @@ export const getIoServicesCmsClient = (): Client => {
 export async function getIoServicesCmsHealth() {
   try {
     const client = getIoServicesCmsClient();
+
+    const startTime = Date.now();
     const infoRes = await client.info({});
+    console.info(
+      `[GET IoServicesCms Health] call to io-services-cms info API completed in ${Date.now() -
+        startTime}ms`
+    );
 
     if (E.isLeft(infoRes)) {
       throw new Error(
