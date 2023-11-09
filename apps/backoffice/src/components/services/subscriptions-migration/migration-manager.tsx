@@ -94,18 +94,28 @@ export const MigrationManager = () => {
     }
   };
 
-  const fetchDelegateStatusPairs = () => {
+  const fetchDelegateStatusPairs = async () => {
     const pairs: Array<DelegateStatusPair> = [];
-    migrationDelegatesData?.delegates?.forEach(async delegate => {
-      const result = await getDelegateMigrationStatus(delegate.sourceId);
-      if (result.status === 200) {
-        pairs.push({
-          delegate,
-          data: result.data
-        });
+    try {
+      if (migrationDelegatesData && migrationDelegatesData.delegates) {
+        const promises = migrationDelegatesData.delegates.map(
+          async delegate => {
+            const result = await getDelegateMigrationStatus(delegate.sourceId);
+            if (result.status === 200) {
+              pairs.push({
+                delegate,
+                data: result.data
+              });
+            }
+          }
+        );
+        await Promise.all(promises);
+        setMigrationStatusList([...pairs]);
       }
-      setMigrationStatusList([...pairs]);
-    });
+    } catch (error) {
+      console.log(JSON.stringify(error));
+      setMigrationStatusList(undefined);
+    }
   };
 
   // claim owneship for selected delegates
