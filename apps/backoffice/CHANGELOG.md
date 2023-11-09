@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.16.1
+
+### Patch Changes
+
+- 9540e6f: Transform external clients into regular singleton instead of caching instance using react cache
+
 ## 0.16.0
 
 ### Minor Changes
