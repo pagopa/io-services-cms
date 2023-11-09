@@ -12,7 +12,7 @@ import {
   Typography
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { MigrationChipStatus } from ".";
 
 export type MigrationLatestProps = {
@@ -26,7 +26,7 @@ export const MigrationLatest = ({
   onRefreshClick
 }: MigrationLatestProps) => {
   const { t } = useTranslation();
-  const [isEmptyState, setIsEmptyState] = useState(false);
+  const isEmptyState = migrationItems?.items?.length === 0;
 
   // the full migration status report is reduced so that it's ready to be rendered
   const computeMigrationStatus = (
@@ -41,11 +41,6 @@ export const MigrationLatest = ({
       : // for every other case, we consider it done
         { label: "done", color: "success" };
   };
-
-  useEffect(() => {
-    setIsEmptyState(migrationItems?.items?.length === 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [migrationItems]);
 
   return (
     <Stack direction="column" spacing={3}>
