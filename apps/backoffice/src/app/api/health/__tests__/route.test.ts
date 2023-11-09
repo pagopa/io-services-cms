@@ -62,12 +62,9 @@ describe("test backend api info()", () => {
   });
 
   it("should return 500 on at least one healthcheck fails", async () => {
-    getLegacyCosmosHealth.mockReturnValueOnce(
+    getSelfcareHealth.mockReturnValueOnce(
       Promise.reject(
-        new HealthChecksError(
-          "legacy-cosmos-db",
-          new Error("error reaching db")
-        )
+        new HealthChecksError("selfcare", new Error("config error"))
       )
     );
 

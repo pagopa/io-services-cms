@@ -1,5 +1,33 @@
 # io-services-cms-backoffice
 
+## 0.16.1
+
+### Patch Changes
+
+- 9540e6f: Transform external clients into regular singleton instead of caching instance using react cache
+
+## 0.16.0
+
+### Minor Changes
+
+- 0d5c76d: Integrate Application Insights
+
+### Patch Changes
+
+- 2c34239: removed healtcheck which calls external services
+
+## 0.15.5
+
+### Patch Changes
+
+- e1acb56: remove getIoServicesCmsHealth on info api
+
+## 0.15.4
+
+### Patch Changes
+
+- 0e99e42: ADD agentkeepalive on backoffice B4F rest client
+
 ## 0.15.3
 
 ### Patch Changes

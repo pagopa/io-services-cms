@@ -1,3 +1,8 @@
+import {
+  getKeepAliveAgentOptions,
+  newHttpAgent,
+  newHttpsAgent
+} from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -12,6 +17,16 @@ import { InstitutionResources } from "../../types/selfcare/InstitutionResource";
 import { HealthChecksError } from "./errors";
 
 const institutionsApi = "/institutions";
+let selfcareClient: SelfcareClient;
+
+export type SelfcareClient = {
+  getUserAuthorizedInstitutions: (
+    userIdForAuth: string
+  ) => TE.TaskEither<Error, InstitutionResources>;
+  getInstitutionById: (
+    id: string
+  ) => TE.TaskEither<Error | AxiosError, Institution>;
+};
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -36,26 +51,20 @@ const getSelfcareConfig: () => Config = cache(() => {
   return result.right;
 });
 
-const getAxiosInstance: () => AxiosInstance = cache(() => {
+const getAxiosInstance = (): AxiosInstance => {
   const configuration = getSelfcareConfig();
   const endpoint = `${configuration.SELFCARE_EXTERNAL_API_BASE_URL}`;
 
   return axios.create({
     baseURL: endpoint,
     timeout: 5000,
-    headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY }
+    headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY },
+    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
-});
-
-export type SelfcareClient = {
-  getUserAuthorizedInstitutions: (
-    userIdForAuth: string
-  ) => TE.TaskEither<Error, InstitutionResources>;
-  getInstitutionById: (
-    id: string
-  ) => TE.TaskEither<Error | AxiosError, Institution>;
 };
-export const getSelfcareClient: () => SelfcareClient = cache(() => {
+
+const buildSelfcareClient = (): SelfcareClient => {
   const axiosInstance = getAxiosInstance();
 
   const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] = userIdForAuth =>
@@ -117,7 +126,18 @@ export const getSelfcareClient: () => SelfcareClient = cache(() => {
     getUserAuthorizedInstitutions,
     getInstitutionById
   };
-});
+};
+
+export const getSelfcareClient = (): SelfcareClient => {
+  if (!selfcareClient) {
+    selfcareClient = buildSelfcareClient();
+  }
+  return selfcareClient;
+};
+
+export const resetInstance = () => {
+  selfcareClient = buildSelfcareClient();
+};
 
 export async function getSelfcareHealth() {
   try {

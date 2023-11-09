@@ -2,18 +2,36 @@ import {
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_UNAUTHORIZED
 } from "@/config/constants";
+import { getAzureAccessToken } from "@/lib/be/azure-access-token";
+import { HealthChecksError } from "@/lib/be/errors";
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import {
+  getKeepAliveAgentOptions,
+  newHttpAgent,
+  newHttpsAgent
+} from "@pagopa/ts-commons/lib/agent";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
-import { getAzureAccessToken } from "@/lib/be/azure-access-token";
-import { HealthChecksError } from "@/lib/be/errors";
+
+let apimService: ApimUtils.ApimService;
+
+export type ApimRestClient = {
+  getServiceList: (
+    userId: string,
+    limit: number,
+    offset: number,
+    serviceId?: string,
+    isRetry?: boolean
+  ) => TE.TaskEither<Error | AxiosError, SubscriptionCollection>;
+};
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -24,7 +42,8 @@ const Config = t.type({
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM: NonEmptyString,
-  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString
+  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
+  API_APIM_MOCKING: BooleanFromString
 });
 
 const getApimConfig: () => Config = cache(() => {
@@ -35,10 +54,16 @@ const getApimConfig: () => Config = cache(() => {
       `error parsing apim config, ${readableReport(result.left)}`
     );
   }
+
+  if (result.right.API_APIM_MOCKING) {
+    const { setupMocks } = require("../../../mocks");
+    setupMocks();
+  }
+
   return result.right;
 });
 
-export const getApimService: () => ApimUtils.ApimService = cache(() => {
+const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
   const apimClient = ApimUtils.getApimClient(
@@ -50,18 +75,28 @@ export const getApimService: () => ApimUtils.ApimService = cache(() => {
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM
   );
-});
+};
 
-const getAxiosInstance = cache((azureAccessToken: string) => {
+export const getApimService: () => ApimUtils.ApimService = () => {
+  if (!apimService) {
+    apimService = buildApimService();
+  }
+  return apimService;
+};
+
+const getAxiosInstance = (azureAccessToken: string) => {
   const apimConfig = getApimConfig();
+
   return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     timeout: 5000,
-    headers: { Authorization: `Bearer ${azureAccessToken}` }
+    headers: { Authorization: `Bearer ${azureAccessToken}` },
+    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
   });
-});
+};
 
-export const getApimRestClient = async () => {
+export const getApimRestClient = async (): Promise<ApimRestClient> => {
   // ottengo config
   const apimConfig = getApimConfig();
 

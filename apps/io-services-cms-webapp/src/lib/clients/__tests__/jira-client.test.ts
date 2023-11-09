@@ -158,7 +158,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set("customfield_10364", "12345678901");
     customFields.set("customfield_10365", {
-      value: "Assente",
+      value: "Null",
     });
 
     const issue = await client.createJiraIssue(

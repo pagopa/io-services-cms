@@ -3,15 +3,15 @@ import {
   HTTP_STATUS_OK
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
+import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
+import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
+import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
 import healthcheck from "@/lib/be/healthcheck";
 import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
+import { getSelfcareHealth } from "@/lib/be/selfcare-client";
+import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
 import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
-import { getSelfcareHealth } from "@/lib/be/selfcare-client";
-import { getIoServicesCmsHealth } from "@/lib/be/cms-client";
-import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
-import { getCosmosStoreHealth } from "@/lib/be/cosmos-store";
-import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
 
 export const dynamic = "force-dynamic";
 

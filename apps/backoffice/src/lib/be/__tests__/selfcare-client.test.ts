@@ -5,7 +5,7 @@ import {
   InstitutionResource,
   InstitutionResources
 } from "../../../types/selfcare/InstitutionResource";
-import { getSelfcareClient } from "../selfcare-client";
+import { getSelfcareClient, resetInstance } from "../selfcare-client";
 
 const mocks: {
   institution: Institution;
@@ -67,6 +67,9 @@ describe("Selfcare Client", () => {
         get
       });
 
+      //reset selfcare client instance
+      resetInstance();
+
       const result = await getSelfcareClient().getUserAuthorizedInstitutions(
         mocks.aSelfcareUserId
       )();
@@ -96,6 +99,9 @@ describe("Selfcare Client", () => {
         get
       });
 
+      //reset selfcare client instance
+      resetInstance();
+
       const result = await getSelfcareClient().getUserAuthorizedInstitutions(
         mocks.aSelfcareUserId
       )();
@@ -115,6 +121,9 @@ describe("Selfcare Client", () => {
       create.mockReturnValueOnce({
         get
       });
+
+      //reset selfcare client instance
+      resetInstance();
 
       const result = await getSelfcareClient().getUserAuthorizedInstitutions(
         mocks.aSelfcareUserId
@@ -139,6 +148,9 @@ describe("Selfcare Client", () => {
       create.mockReturnValueOnce({
         get
       });
+
+      //reset selfcare client instance
+      resetInstance();
 
       const result = await getSelfcareClient().getInstitutionById(
         mocks.institution.id as string
@@ -165,6 +177,9 @@ describe("Selfcare Client", () => {
         get
       });
 
+      //reset selfcare client instance
+      resetInstance();
+
       const result = await getSelfcareClient().getInstitutionById(
         mocks.institution.id as string
       )();
@@ -181,8 +196,11 @@ describe("Selfcare Client", () => {
         get
       });
 
+      //reset selfcare client instance
+      resetInstance();
+
       const result = await getSelfcareClient().getInstitutionById(
-        mocks.institution.id
+        mocks.institution.id as string
       )();
 
       expect(get).toHaveBeenCalledWith(`/institutions/${mocks.institution.id}`);

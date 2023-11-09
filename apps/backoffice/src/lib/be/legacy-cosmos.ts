@@ -8,8 +8,10 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { cache } from "react";
 import { HealthChecksError } from "./errors";
+
+let legacyCosmosClient: CosmosClient;
+let subscriptionCIDRsModel: SubscriptionCIDRsModel;
 
 const Config = t.type({
   LEGACY_COSMOSDB_NAME: NonEmptyString,
@@ -18,7 +20,7 @@ const Config = t.type({
   LEGACY_COSMOSDB_MOCKING: BooleanFromString
 });
 
-const getLegacyCosmosConfig = cache(() => {
+const getLegacyCosmosConfig = () => {
   const result = Config.decode(process.env);
 
   if (E.isLeft(result)) {
@@ -27,27 +29,38 @@ const getLegacyCosmosConfig = cache(() => {
     });
   }
   return result.right;
-});
+};
 
-const getLegacyCosmosClient = cache(() => {
+const buildLegacyCosmosClient = (): CosmosClient => {
   const { LEGACY_COSMOSDB_URI, LEGACY_COSMOSDB_KEY } = getLegacyCosmosConfig();
   return new CosmosClient({
     endpoint: LEGACY_COSMOSDB_URI,
     key: LEGACY_COSMOSDB_KEY
   });
-});
-
-export const getLegacyCosmosContainerClient = (cosmosContainerName: string) => {
-  const { LEGACY_COSMOSDB_NAME } = getLegacyCosmosConfig();
-  return getLegacyCosmosClient()
-    .database(LEGACY_COSMOSDB_NAME)
-    .container(cosmosContainerName);
 };
 
-export const getSubscriptionCIDRsModel = () =>
-  new SubscriptionCIDRsModel(
-    getLegacyCosmosContainerClient(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
-  );
+const getLegacyCosmosClient = (): CosmosClient => {
+  if (!legacyCosmosClient) {
+    legacyCosmosClient = buildLegacyCosmosClient();
+  }
+  return legacyCosmosClient;
+};
+
+const buildSubscriptionCIDRsModel = (): SubscriptionCIDRsModel => {
+  const { LEGACY_COSMOSDB_NAME } = getLegacyCosmosConfig();
+  const cosmosContainer = getLegacyCosmosClient()
+    .database(LEGACY_COSMOSDB_NAME)
+    .container(SUBSCRIPTION_CIDRS_COLLECTION_NAME);
+
+  return new SubscriptionCIDRsModel(cosmosContainer);
+};
+
+export const getSubscriptionCIDRsModel = (): SubscriptionCIDRsModel => {
+  if (!subscriptionCIDRsModel) {
+    subscriptionCIDRsModel = buildSubscriptionCIDRsModel();
+  }
+  return subscriptionCIDRsModel;
+};
 
 export async function getLegacyCosmosHealth() {
   try {

@@ -2,8 +2,9 @@ locals {
   backoffice_node_version      = "18-lts"
   backoffice_health_check_path = "/api/info"
   backoffice_app_settings = merge({
-    NODE_ENV        = "production"
-    BACKOFFICE_HOST = var.backoffice_host
+    NODE_ENV                 = "production"
+    WEBSITE_RUN_FROM_PACKAGE = "1"
+    BACKOFFICE_HOST          = var.backoffice_host
     # Azure
     AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
     AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
@@ -16,7 +17,7 @@ locals {
     APIM_USER_GROUPS          = var.backoffice_app.apim_user_groups
     API_APIM_MOCKING          = true
     # Logs
-    APPINSIGHTS_INSTRUMENTATIONKEY = sensitive(data.azurerm_application_insights.application_insights.instrumentation_key)
+    APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.application_insights.connection_string
     # NextAuthJS
     NEXTAUTH_URL    = "https://${var.backoffice_host}/" # FIXME: move into terraform.tfvars or use a terraform resource/data ref
     NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
@@ -52,6 +53,16 @@ locals {
     SUBSCRIPTION_MIGRATION_API_URL     = var.backoffice_app.subscription_migration_api_url
     SUBSCRIPTION_MIGRATION_API_KEY     = data.azurerm_key_vault_secret.subscription_migration_api_key.value
     SUBSCRIPTION_MIGRATION_API_MOCKING = true
+
+
+    // Fetch keepalive
+    FETCH_KEEPALIVE_ENABLED             = "true"
+    FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL   = "110000"
+    FETCH_KEEPALIVE_MAX_SOCKETS         = "40"
+    FETCH_KEEPALIVE_MAX_FREE_SOCKETS    = "10"
+    FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT = "30000"
+    FETCH_KEEPALIVE_TIMEOUT             = "60000"
+
   })
 }
 
