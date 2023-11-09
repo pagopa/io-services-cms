@@ -185,19 +185,24 @@
       }
     }
   },
-  "import": {
-    "migrator": {
+  "subscriptions": {
+    "migration": {
       "title": "Import services from the Developer Portal",
       "disclaimer": {
         "title": "The Developer Portal is being decommissioned",
         "description": "At the moment you can use both portals, but soon IO services will only be able to be managed from the Reserved Area. You don't have to import all the services at the same time: it is possible to do multiple imports."
       },
       "action": "Import services",
+      "refresh": "Refresh status",
       "status": {
         "title": "Import status",
         "description": "Below is the list of delegates with the import status and the last update date.",
         "success": "The services, or a part of them, have been imported and you can find them in the Services section.",
-        "noData": "No import was started."
+        "noData": "No import was started.",
+        "done": "Completed",
+        "doing": "In progress",
+        "todo": "To start",
+        "failed": "Failed"
       },
       "modal": {
         "title": "Select the delegates who created the services",

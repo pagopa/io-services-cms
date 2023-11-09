@@ -185,19 +185,24 @@
       }
     }
   },
-  "import": {
-    "migrator": {
+  "subscriptions": {
+    "migration": {
       "title": "Importa i servizi dal Developer Portal",
       "disclaimer": {
         "title": "Il Developer Portal è in corso di dismissione",
         "description": "Al momento si possono usare entrambi i portali, ma presto i servizi di IO si potranno gestire solo dall’Area Riservata. Non bisogna importare tutti i servizi nello stesso momento: è possibile fare più importazioni."
       },
       "action": "Importa i servizi",
+      "refresh": "Aggiorna stato",
       "status": {
         "title": "Stato dell’importazione",
         "description": "In basso è riportata la lista dei delegati con il relativo stato dell'importazione e la data di ultimo aggiornamento.",
         "success": "I servizi, o una parte di essi, sono stati importati e puoi trovarli nella sezione Servizi.",
-        "noData": "Non è stata avviata nessuna importazione."
+        "noData": "Non è stata avviata nessuna importazione.",
+        "done": "Completata",
+        "doing": "In corso",
+        "todo": "Da avviare",
+        "failed": "Fallita"
       },
       "modal": {
         "title": "Seleziona i delegati che hanno creati i servizi",
