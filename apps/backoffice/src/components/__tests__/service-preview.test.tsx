@@ -24,9 +24,9 @@ describe("[ServicePreview] Component", () => {
     isOpen = false;
     render(getServicePreviewComponent());
 
-    expect(document.getElementById("title")).not.toBeInTheDocument();
-    expect(document.getElementById("info")).not.toBeInTheDocument();
-    expect(document.getElementById("close-button")).not.toBeInTheDocument();
+    expect(document.getElementById("s-preview-title")).not.toBeInTheDocument();
+    expect(document.getElementById("s-preview-info")).not.toBeInTheDocument();
+    expect(document.getElementById("s-preview-close-button")).not.toBeInTheDocument();
   });
 
   it("shoud render Dialog with service title , info and close button if preview is open", () => {
@@ -37,11 +37,11 @@ describe("[ServicePreview] Component", () => {
       name: "buttons.close"
     });
 
-    expect(document.getElementById("title")).toBeVisible();
-    expect(document.getElementById("title")).toHaveTextContent(seviceTitle);
+    expect(document.getElementById("s-preview-title")).toBeVisible();
+    expect(document.getElementById("s-preview-title")).toHaveTextContent(seviceTitle);
 
-    expect(document.getElementById("info")).toBeVisible();
-    expect(document.getElementById("info")).toHaveTextContent(serviceInfo);
+    expect(document.getElementById("s-preview-info")).toBeVisible();
+    expect(document.getElementById("s-preview-info")).toHaveTextContent(serviceInfo);
 
     expect(aButton).toBeVisible();
   });
@@ -56,8 +56,8 @@ describe("[ServicePreview] Component", () => {
 
     fireEvent.click(aButton);
 
-    expect(document.getElementById("title")).not.toBeVisible();
-    expect(document.getElementById("info")).not.toBeVisible();
+    expect(document.getElementById("s-preview-title")).not.toBeVisible();
+    expect(document.getElementById("s-preview-info")).not.toBeVisible();
     expect(aButton).not.toBeVisible();
   });
 });
