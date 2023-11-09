@@ -43,9 +43,7 @@ export const MigrationLatest = ({
   };
 
   useEffect(() => {
-    migrationItems?.items?.length === 0
-      ? setIsEmptyState(true)
-      : setIsEmptyState(false);
+    setIsEmptyState(migrationItems?.items?.length === 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [migrationItems]);
 
