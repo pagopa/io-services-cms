@@ -82,7 +82,7 @@ export default function Services() {
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
-              : router.push(`/services/${service.id}/edit-service`)
+              : router.push(`/services/${service.id}`)
           }
         >
           {service.name}

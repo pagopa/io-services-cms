@@ -2,8 +2,8 @@ import { Grid } from "@mui/material";
 import {
   ButtonBack,
   ButtonCancel,
-  ButtonCreateDraft,
-  ButtonNext
+  ButtonNext,
+  ButtonWithLoader
 } from "../buttons";
 
 export type ProcessActionsProps = {
@@ -39,7 +39,8 @@ export const ProcessActions = ({
         {currentStepIndex < stepsNumber - 1 ? (
           <ButtonNext onClick={onNext} disabled={disabled} />
         ) : (
-          <ButtonCreateDraft
+          <ButtonWithLoader
+            label="buttons.createDraft"
             onClick={onComplete}
             loading={disabled}
             disabled={disabled}
