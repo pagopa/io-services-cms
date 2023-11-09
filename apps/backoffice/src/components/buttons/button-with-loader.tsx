@@ -2,15 +2,19 @@ import { Button, CircularProgress } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ButtonBaseProps } from ".";
 
-export type ButtonCreateDraftProps = {
+export type ButtonWithLoaderProps = {
   loading?: boolean;
+  label: string;
+  fullWidth?: boolean;
 } & ButtonBaseProps;
 
-export const ButtonCreateDraft = ({
+export const ButtonWithLoader = ({
   loading,
+  label,
+  fullWidth,
   disabled,
   onClick
-}: ButtonCreateDraftProps) => {
+}: ButtonWithLoaderProps) => {
   const { t } = useTranslation();
 
   const handleButtonClick = () => {
@@ -20,15 +24,16 @@ export const ButtonCreateDraft = ({
   };
 
   return (
-    <span style={{ position: "relative" }}>
+    <span style={{ position: "relative", width: fullWidth ? "100%" : "" }}>
       <Button
         type="submit"
         size="medium"
         variant="contained"
         disabled={disabled || loading}
         onClick={handleButtonClick}
+        fullWidth={fullWidth}
       >
-        {t("buttons.createDraft")}
+        {t(label)}
       </Button>
       {loading && (
         <CircularProgress
