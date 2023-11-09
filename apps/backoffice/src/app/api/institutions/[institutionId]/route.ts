@@ -25,6 +25,7 @@ export const GET = withJWTAuthHandler(
       const institutionResponse = await retrieveInstitution(
         params.institutionId
       );
+      //TODO: remove me
       console.info(
         `[GET Institution] completed in ${Date.now() - startTime}ms`
       );
