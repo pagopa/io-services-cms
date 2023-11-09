@@ -171,17 +171,17 @@ export const getMockServicesMigrationDelegate = () => ({
 });
 
 export const getMockServicesMigrationLatestStatus = () => ({
-  completed: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  failed: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  initial: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  processing: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH })
+  completed: faker.number.int({ min: 0, max: 3 }),
+  failed: faker.number.int({ min: 0, max: 3 }),
+  initial: 0,
+  processing: faker.number.int({ min: 0, max: 3 })
 });
 
 export const getMockServicesMigrationStatusDetails = () => ({
-  data: {
-    COMPLETED: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    FAILED: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    INITIAL: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    PROCESSING: faker.string.numeric({ length: { min: 0, max: 2 } })
+  status: {
+    completed: faker.number.int({ min: 0, max: 3 }),
+    failed: faker.number.int({ min: 0, max: 3 }),
+    initial: faker.number.int({ min: 0, max: 3 }),
+    processing: faker.number.int({ min: 0, max: 3 })
   }
 });

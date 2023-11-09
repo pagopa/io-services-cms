@@ -59,6 +59,7 @@ export const buildHandlers = () => {
         const resultArray = [
           [
             ctx.status(200),
+            ctx.delay(1000),
             ctx.json(getGetServicesMigrationStatus200Response())
           ],
           [ctx.status(401), ctx.json(null)],
@@ -74,6 +75,7 @@ export const buildHandlers = () => {
       const resultArray = [
         [
           ctx.status(200),
+          ctx.delay(1000),
           ctx.json(getGetServicesMigrationDelegates200Response())
         ],
         [ctx.status(401), ctx.json(null)],
@@ -88,7 +90,7 @@ export const buildHandlers = () => {
       `${baseURL}/services/migrations/ownership-claims/:delegateId`,
       (_, res, ctx) => {
         const resultArray = [
-          [ctx.status(201), ctx.json(null)],
+          [ctx.status(201), ctx.delay(1000), ctx.json(null)],
           [ctx.status(401), ctx.json(null)],
           [ctx.status(403), ctx.json(null)],
           [ctx.status(404), ctx.json(null)],
@@ -105,6 +107,7 @@ export const buildHandlers = () => {
         const resultArray = [
           [
             ctx.status(200),
+            ctx.delay(1000),
             ctx.json(getGetServicesMigrationDetails200Response())
           ],
           [ctx.status(401), ctx.json(null)],
@@ -405,7 +408,7 @@ export function getGetServicesMigrationStatus200Response() {
   return {
     items: [
       ...Array.from(
-        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH / 2 })).keys()
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
       )
     ].map(_ => ({
       status: getMockServicesMigrationLatestStatus(),
@@ -419,7 +422,7 @@ export function getGetServicesMigrationDelegates200Response() {
   return {
     delegates: [
       ...Array.from(
-        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH })).keys()
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
       )
     ].map(_ => getMockServicesMigrationDelegate())
   };
