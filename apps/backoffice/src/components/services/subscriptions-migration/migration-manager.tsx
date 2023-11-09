@@ -1,11 +1,17 @@
 /**
- * Azure Apim Subscription Manager
- * Main component that manages the ownership change of Azure subscriptions from a user-centric model to an institution-centric model.
- * This component manages:
- * - viewing the current status of subscriptions migration (grouped by user)
- * - the status update of this current view
- * - the delegate selection modal for importing subscriptions into the Institution: this means that the ownership of the subscriptions,
- *   once imported, passes from the individual user to the Institution of which these users are delegates.
+ * MigrationManager Component
+ * 
+ * The MigrationManager serves as the central interface for managing the migration of Azure subscriptions from individual user ownership to institutional ownership. 
+ * This React component is part of the Azure Apim Subscription Manager and includes both UI and logic to handle various aspects of the migration process.
+ * 
+ * Capabilities:
+ * - Displaying the current migration status of Azure subscriptions, grouped by user.
+ * - Providing real-time updates on the migration progress.
+ * - Allowing administrators to initiate and monitor the migration process.
+ * - Facilitating the selection of delegates responsible for importing subscriptions into the institution, effectively transferring ownership from individual users to the institution.
+ * 
+ * Usage:
+ * This component is intended for use within the administrative dashboard of the Azure Apim Subscription Manager, providing administrators with the tools needed to oversee and control the subscription migration process.
  */
 import { ButtonWithLoader } from "@/components/buttons";
 import { CardBaseContainer } from "@/components/cards";
