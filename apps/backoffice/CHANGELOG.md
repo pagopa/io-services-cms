@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.2
+
+### Patch Changes
+
+- e793695: handle io-services-cms error response
+
 ## 0.17.1
 
 ### Patch Changes
