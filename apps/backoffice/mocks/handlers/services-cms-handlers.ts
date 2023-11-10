@@ -4,6 +4,7 @@ import { rest } from "msw";
 import {
   aMockServicePaginationLimitOffset,
   aMockServicePublication,
+  getIoServicesError,
   getMockServiceKeys,
   getMockServiceLifecycle
 } from "../data/backend-data";
@@ -21,11 +22,11 @@ export const buildHandlers = () => {
     rest.post(`${baseURL}/services`, (req, res, ctx) => {
       const resultArray = [
         [ctx.status(201), ctx.json(getCreateService201Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(400), ctx.json(getIoServicesError(400))],
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -33,10 +34,10 @@ export const buildHandlers = () => {
     rest.get(`${baseURL}/services`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getGetServices200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -48,11 +49,11 @@ export const buildHandlers = () => {
           ctx.status(200),
           ctx.json(getGetService200Response(serviceId as string))
         ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(404), ctx.json(getIoServicesError(404))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -64,12 +65,12 @@ export const buildHandlers = () => {
           ctx.status(200),
           ctx.json(getUpdateService200Response(serviceId as string))
         ],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(400), ctx.json(getIoServicesError(400))],
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(404), ctx.json(getIoServicesError(404))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -77,11 +78,11 @@ export const buildHandlers = () => {
     rest.delete(`${baseURL}/services/:serviceId`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(404), ctx.json(getIoServicesError(404))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -89,12 +90,12 @@ export const buildHandlers = () => {
     rest.put(`${baseURL}/services/:serviceId/logo`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(400), ctx.json(getIoServicesError(400))],
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(404), ctx.json(getIoServicesError(404))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
       ];
 
       return res(...resultArray[0]);
@@ -102,11 +103,11 @@ export const buildHandlers = () => {
     rest.get(`${baseURL}/services/:serviceId/keys`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getGetServiceKeys200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);
@@ -114,12 +115,12 @@ export const buildHandlers = () => {
     rest.put(`${baseURL}/services/:serviceId/keys/:keyType`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(400), ctx.json(getIoServicesError(400))],
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);
@@ -127,12 +128,12 @@ export const buildHandlers = () => {
     rest.put(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(409), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);
@@ -140,13 +141,13 @@ export const buildHandlers = () => {
     rest.patch(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(400), ctx.json(getIoServicesError(400))],
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(409), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);
@@ -154,12 +155,12 @@ export const buildHandlers = () => {
     rest.post(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(409), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);
@@ -167,23 +168,23 @@ export const buildHandlers = () => {
     rest.get(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getGetPublishedService200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(404))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
-      return res(...resultArray[0]);
+      return res(...resultArray[3]);
     }),
     rest.delete(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        [ctx.status(401), ctx.json(getIoServicesError(400))],
+        [ctx.status(403), ctx.json(getIoServicesError(400))],
+        [ctx.status(404), ctx.json(getIoServicesError(400))],
+        [ctx.status(429), ctx.json(getIoServicesError(400))],
+        [ctx.status(500), ctx.json(getIoServicesError(400))]
       ];
 
       return res(...resultArray[0]);

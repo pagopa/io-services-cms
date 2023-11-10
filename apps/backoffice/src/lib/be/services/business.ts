@@ -1,5 +1,6 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NO_CONTENT
 } from "@/config/constants";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -28,7 +29,6 @@ import {
   getOwnershipClaimStatus
 } from "./subscription-migration";
 import { reducePublicationServicesList, toServiceListItem } from "./utils";
-
 
 type PathParameters = {
   serviceId?: string;
@@ -119,45 +119,61 @@ export async function forwardIoServicesCmsRequest<
   backofficeUser: BackOfficeUser,
   pathParams?: PathParameters
 ): Promise<Response> {
-  // extract jsonBody
-  const jsonBody =
-    requestOrBody && "json" in requestOrBody // check NextRequest object
-      ? await requestOrBody.json().catch((_: unknown) => undefined)
-      : requestOrBody;
+  try {
+    // extract jsonBody
+    const jsonBody =
+      requestOrBody && "json" in requestOrBody // check NextRequest object
+        ? await requestOrBody.json().catch((_: unknown) => undefined)
+        : requestOrBody;
 
-  // create the request payload
-  const requestPayload = {
-    ...pathParams,
-    body: jsonBody,
-    "x-user-email": backofficeUser.parameters.userEmail,
-    "x-user-id": backofficeUser.parameters.userId,
-    "x-subscription-id": backofficeUser.parameters.subscriptionId,
-    "x-user-groups": backofficeUser.permissions.join(",")
-  } as any;
+    // create the request payload
+    const requestPayload = {
+      ...pathParams,
+      body: jsonBody,
+      "x-user-email": backofficeUser.parameters.userEmail,
+      "x-user-id": backofficeUser.parameters.userId,
+      "x-subscription-id": backofficeUser.parameters.subscriptionId,
+      "x-user-groups": backofficeUser.permissions.join(",")
+    } as any;
 
-  // call the io-services-cms API and return the response
-  const result = await callIoServicesCms(operationId, requestPayload);
+    // call the io-services-cms API and return the response
+    const result = await callIoServicesCms(operationId, requestPayload);
 
-  if (E.isLeft(result)) {
+    if (E.isLeft(result)) {
+      return NextResponse.json(
+        {
+          title: "validationError",
+          status: HTTP_STATUS_BAD_REQUEST as any,
+          detail: readableReport(result.left)
+        },
+        { status: HTTP_STATUS_BAD_REQUEST }
+      );
+    }
+
+    const { status, value } = result.right;
+    // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
+    if (status === HTTP_STATUS_NO_CONTENT || value === undefined) {
+      return new Response(null, {
+        status
+      });
+    }
+
+    return NextResponse.json(value, { status });
+  } catch (error) {
+    console.error(
+      `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
+      error
+    );
+
     return NextResponse.json(
       {
-        title: "validationError",
-        status: HTTP_STATUS_BAD_REQUEST as any,
-        detail: readableReport(result.left)
+        title: "InternalError",
+        status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        detail: "Error forwarding io-services-cms request"
       },
-      { status: HTTP_STATUS_BAD_REQUEST }
+      { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
     );
   }
-
-  const { status, value } = result.right;
-  // NextResponse.json() does not support 204 status code https://github.com/vercel/next.js/discussions/51475
-  if (status === HTTP_STATUS_NO_CONTENT) {
-    return new Response(null, {
-      status
-    });
-  }
-
-  return NextResponse.json(value, { status });
 }
 
 /**

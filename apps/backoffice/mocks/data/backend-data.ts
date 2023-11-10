@@ -185,3 +185,9 @@ export const getMockServicesMigrationStatusDetails = () => ({
     processing: faker.number.int({ min: 0, max: 3 })
   }
 });
+
+export const getIoServicesError = (status: number) => ({
+  detail: faker.lorem.sentence(),
+  status: status,
+  title: faker.lorem.sentence()
+});
