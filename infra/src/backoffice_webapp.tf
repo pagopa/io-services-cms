@@ -81,7 +81,13 @@ module "backoffice_app" {
 
   health_check_path = local.backoffice_health_check_path
 
-  app_settings = local.backoffice_app_settings
+  app_settings = merge(local.backoffice_app_settings, {
+    IS_MSW_ENABLED = false
+  })
+
+  sticky_settings = [
+    "IS_MSW_ENABLED"
+  ]
 
   always_on        = true
   vnet_integration = true
@@ -110,7 +116,9 @@ module "backoffice_app_staging" {
 
   health_check_path = local.backoffice_health_check_path
 
-  app_settings = local.backoffice_app_settings
+  app_settings = merge(local.backoffice_app_settings, {
+    IS_MSW_ENABLED = true
+  })
 
   always_on        = true
   vnet_integration = true
