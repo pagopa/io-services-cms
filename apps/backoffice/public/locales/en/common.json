@@ -401,7 +401,7 @@
     "submitReview": {
       "modal": {
         "title": "Do you want to send this service for review?",
-        "description": "The service will be reviewed by the IO team. You will receive a communication with the outcome, positive or negative, on the email of the institution and the user who sent the service for review.",
+        "description": "The service will be reviewed by the IO team. Monitor the outcome of the review in <strong>Services</strong>: <br/><ul><li>if the service is <strong>approved</strong>, it will be automatically published;</li><li> in the event that the service is <strong>rejected</strong>, you will be able to consult the reason and make the necessary changes to be able to send it again for review.</li></ul>",
         "button": "Send for review"
       }
     },
