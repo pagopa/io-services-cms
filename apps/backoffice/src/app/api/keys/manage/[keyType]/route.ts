@@ -22,6 +22,7 @@ export const PUT = withJWTAuthHandler(
     }: { params: { keyType: string }; backofficeUser: BackOfficeUser }
   ) => {
     try {
+      const startTime = Date.now();
       const decodedKeyType = SubscriptionKeyType.decode(params.keyType);
 
       if (E.isLeft(decodedKeyType)) {
@@ -38,6 +39,11 @@ export const PUT = withJWTAuthHandler(
       const manageKeysResponse = await regenerateManageSubscritionApiKey(
         backofficeUser.parameters.subscriptionId,
         decodedKeyType.right
+      );
+
+      //TODO: remove me
+      console.info(
+        `[Regenerate Managed key] completed in ${Date.now() - startTime}ms`
       );
       return NextResponse.json(manageKeysResponse);
     } catch (error) {
