@@ -3,8 +3,8 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Typography
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, createContext, useContext, useState } from "react";
@@ -68,9 +68,11 @@ const DialogProvider: React.FC<{
       <Dialog open={open} onClose={handleCancel} disableScrollLock>
         <DialogTitle>{options.title}</DialogTitle>
         <DialogContent sx={{ minWidth: "600px" }}>
-          {options.message && (
-            <DialogContentText>{options.message}</DialogContentText>
-          )}
+          <Typography
+            dangerouslySetInnerHTML={{
+              __html: options.message ?? ""
+            }}
+          ></Typography>
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
           <Button variant="outlined" onClick={handleCancel}>

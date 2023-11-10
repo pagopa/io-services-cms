@@ -23,7 +23,6 @@
     "close": "Close",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
-    "createDraft": "Create draft",
     "delete": "Delete",
     "edit": "Edit",
     "import": "Import",
@@ -61,9 +60,13 @@
     },
     "testUrl": "Try URL",
     "service": {
+      "buttons": {
+        "create": "Create service",
+        "update": "Update service"
+      },
       "searchById": {
         "clear": "Clear filter",
-        "search": "Start search",
+        "search": "Filter",
         "helperText": "Enter a 26-character alphanumeric ID code and click on right search icon",
         "validText": "Click on right search icon inside field to perform search",
         "errorText": "Invalid service ID code",
@@ -85,7 +88,7 @@
       "attributes": "Attributes",
       "authorizedCidrs": "Authorized IP address",
       "description": {
-        "helperText": "Read how to use the <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">markdown syntax</a> correctly.",
+        "helperText": "Read how to write <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">service description</a> correctly.",
         "label": "Description",
         "placeholder": ""
       },
@@ -398,7 +401,7 @@
     "submitReview": {
       "modal": {
         "title": "Do you want to send this service for review?",
-        "description": "The service will be reviewed by the IO team. You will receive a communication with the outcome, positive or negative, on the email of the institution and the user who sent the service for review.",
+        "description": "The service will be reviewed by the IO team. Monitor the outcome of the review in <strong>Services</strong>: <br/><ul><li>if the service is <strong>approved</strong>, it will be automatically published;</li><li> in the event that the service is <strong>rejected</strong>, you will be able to consult the reason and make the necessary changes to be able to send it again for review.</li></ul>",
         "button": "Send for review"
       }
     },

@@ -1,5 +1,5 @@
-import { HighlightOff, Search } from "@mui/icons-material";
-import { Box, IconButton, TextField, Tooltip } from "@mui/material";
+import { Search } from "@mui/icons-material";
+import { Button, Stack, TextField } from "@mui/material";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
@@ -20,6 +20,7 @@ export const ServiceSearchById = ({
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const buttonHeightStyle = { height: "44px" };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sanitizedInput = e.target.value
@@ -56,7 +57,7 @@ export const ServiceSearchById = ({
   }, [inputValue]);
 
   return (
-    <Box paddingY={3} width="50%">
+    <Stack paddingY={3} direction="row" spacing={1} alignItems="flex-start">
       <TextField
         id="service-id"
         label={t("forms.service.searchById.label")}
@@ -64,32 +65,30 @@ export const ServiceSearchById = ({
         value={inputValue}
         onChange={handleInputChange}
         size="small"
-        fullWidth
+        sx={{ width: "450px" }}
         InputProps={{
-          startAdornment: isValid ? (
-            <Tooltip
-              title={t("forms.service.searchById.clear")}
-              placement="top"
-            >
-              <IconButton onClick={resetSearchInput}>
-                <HighlightOff color="primary" />
-              </IconButton>
-            </Tooltip>
-          ) : null,
-          endAdornment: (
-            <Tooltip
-              title={t("forms.service.searchById.search")}
-              placement="top"
-            >
-              <IconButton onClick={handleSearchClick} disabled={!isValid}>
-                <Search color={isValid ? "primary" : "disabled"} />
-              </IconButton>
-            </Tooltip>
-          )
+          endAdornment: <Search color="disabled" />
         }}
         error={!isValid && NonEmptyString.is(inputValue)}
         helperText={handleHelperText()}
       />
-    </Box>
+      <Button
+        variant="outlined"
+        disabled={!isValid}
+        sx={buttonHeightStyle}
+        onClick={handleSearchClick}
+      >
+        {t("forms.service.searchById.search")}
+      </Button>
+      {isValid ? (
+        <Button
+          variant="text"
+          sx={buttonHeightStyle}
+          onClick={resetSearchInput}
+        >
+          {t("forms.service.searchById.clear")}
+        </Button>
+      ) : null}
+    </Stack>
   );
 };

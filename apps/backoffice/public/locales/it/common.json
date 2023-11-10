@@ -23,7 +23,6 @@
     "close": "Chiudi",
     "confirm": "Conferma",
     "copyToClipboard": "Copy to clipboard",
-    "createDraft": "Crea bozza",
     "delete": "Elimina",
     "edit": "Modifica",
     "import": "Importa",
@@ -61,9 +60,13 @@
     },
     "testUrl": "Prova URL",
     "service": {
+      "buttons": {
+        "create": "Crea servizio",
+        "update": "Modifica servizio"
+      },
       "searchById": {
-        "clear": "Cancella filtro",
-        "search": "Avvia ricerca",
+        "clear": "Rimuovi filtro",
+        "search": "Filtra",
         "helperText": "Inserisci un codice ID alfanumerico di 26 caratteri",
         "validText": "Clicca sull'icona a destra del campo per effettuare la ricerca",
         "errorText": "Codice ID servizio non valido",
@@ -85,7 +88,7 @@
       "attributes": "Attributi",
       "authorizedCidrs": "Indirizzi IP autorizzati",
       "description": {
-        "helperText": "Leggi come usare correttamente il <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">linguaggio markdown</a>",
+        "helperText": "Leggi come scrivere correttamente la <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">descrizione di un servizio</a>",
         "label": "Descrizione",
         "placeholder": ""
       },
@@ -398,7 +401,7 @@
     "submitReview": {
       "modal": {
         "title": "Vuoi inviare questo servizio in revisione?",
-        "description": "Il servizio verrà revisionato dal team di IO. Riceverai una comunicazione con l’esito, positivo o negativo, sulla mail dell’ente e dell’utente che ha inviato in revisione il servizio.",
+        "description": "Il servizio verrà revisionato dal team di IO. Monitora in <strong>Servizi</strong> l’esito della revisione: <br/><ul><li>se il servizio viene <strong>approvato</strong>, verrà automaticamente pubblicato;</li><li>nel caso in cui il servizio venga <strong>rifiutato</strong>, potrai consultare la motivazione e apportare le modifiche necessarie per poterlo inviare nuovamente in revisione.</li></ul>",
         "button": "Invia in revisione"
       }
     },
