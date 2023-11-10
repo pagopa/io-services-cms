@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.4
+
+### Patch Changes
+
+- d3c1ae6: fix JWKS config
+
 ## 0.17.3
 
 ### Patch Changes
