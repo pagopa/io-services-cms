@@ -101,7 +101,7 @@ export function getConfiguration(): Configuration {
       .SELFCARE_EXTERNAL_API_BASE_URL as string,
     SELFCARE_JWT_ISSUER: process.env.SELFCARE_JWT_ISSUER as string,
     SELFCARE_JWKS_URL: ((process.env.NEXT_PUBLIC_SELFCARE_URL as string) +
-      process.env.SELFCARE_JWKS_URL) as string,
+      process.env.SELFCARE_JWKS_PATH) as string,
     SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
 
     // NodeJS Environment mode
