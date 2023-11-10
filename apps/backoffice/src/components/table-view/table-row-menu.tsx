@@ -46,6 +46,7 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
     handleMenuClose();
   };
 
+  if (hasNoActions()) return <></>;
   return (
     <>
       <IconButton
@@ -53,12 +54,8 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
         id="row-menu-button"
         aria-haspopup="true"
         onClick={handleMenuClick}
-        disabled={hasNoActions()}
       >
-        <MoreVertRounded
-          fontSize="small"
-          color={hasNoActions() ? "disabled" : "primary"}
-        />
+        <MoreVertRounded fontSize="small" color={"primary"} />
       </IconButton>
       <Menu
         id="basic-menu"
