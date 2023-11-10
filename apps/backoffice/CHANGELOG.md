@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.3
+
+### Patch Changes
+
+- 15d3892: fix configurations
+
 ## 0.17.2
 
 ### Patch Changes
