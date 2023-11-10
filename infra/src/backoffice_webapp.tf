@@ -82,11 +82,13 @@ module "backoffice_app" {
   health_check_path = local.backoffice_health_check_path
 
   app_settings = merge(local.backoffice_app_settings, {
-    IS_MSW_ENABLED = false
+    IS_MSW_ENABLED = false,
+    APP_ENV        = "production"
   })
 
   sticky_settings = [
-    "IS_MSW_ENABLED"
+    "IS_MSW_ENABLED",
+    "APP_ENV"
   ]
 
   always_on        = true
@@ -117,7 +119,8 @@ module "backoffice_app_staging" {
   health_check_path = local.backoffice_health_check_path
 
   app_settings = merge(local.backoffice_app_settings, {
-    IS_MSW_ENABLED = true
+    IS_MSW_ENABLED = true,
+    APP_ENV        = "staging"
   })
 
   always_on        = true
