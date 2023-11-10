@@ -1,6 +1,8 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 export type Configuration = {
+  IS_MSW_ENABLED: boolean;
+
   // IO Services CMS API configuration
   API_SERVICES_CMS_URL: string;
   API_SERVICES_CMS_BASE_PATH: string;
@@ -63,6 +65,8 @@ export type Configuration = {
 
 export function getConfiguration(): Configuration {
   return {
+    IS_MSW_ENABLED: process.env.IS_MSW_ENABLED === "true",
+
     // IO Services CMS API configuration
     API_SERVICES_CMS_URL: process.env.API_SERVICES_CMS_URL as string,
     API_SERVICES_CMS_BASE_PATH: process.env

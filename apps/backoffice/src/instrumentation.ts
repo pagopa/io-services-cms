@@ -3,7 +3,7 @@
  * https://learn.microsoft.com/en-us/azure/azure-monitor/app/nodejs
  */
 export async function register() {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.APP_ENV === "production") {
     if (process.env.NEXT_RUNTIME === "nodejs") {
       const appInsights = await import("applicationinsights");
       appInsights

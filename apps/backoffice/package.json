@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "0.17.0",
+  "version": "0.17.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -37,7 +37,7 @@
     "@pagopa/io-functions-commons": "^28.2.0",
     "@pagopa/mui-italia": "^1.0.1",
     "applicationinsights": "^2.9.0",
-    "axios": "^1.5.0",
+    "axios": "^1.6.0",
     "eslint": "8.50.0",
     "eslint-config-next": "^13.5.3",
     "fp-ts": "^2.13.1",
