@@ -13,51 +13,59 @@ import { useSession } from "next-auth/react";
 import { ReactNode, useState } from "react";
 
 import styles from "@/styles/app-layout.module.css";
+import { getConfiguration } from "@/config";
 
 type AppLayoutProps = {
   hideSidenav?: boolean;
   children: ReactNode;
 };
 
-/** List of sidenav menu items _(displayed on left side column)_ */
-const menu: Array<SidenavItem> = [
-  {
-    href: "/",
-    icon: <ViewSidebar fontSize="inherit" />,
-    text: "routes.overview.title",
-    linkType: "internal"
-  },
-  {
-    href: "/services",
-    icon: <Category fontSize="inherit" />,
-    text: "routes.services.title",
-    linkType: "internal"
-  },
-  {
-    href: "/keys",
-    icon: <VpnKey fontSize="inherit" />,
-    text: "routes.keys.title",
-    linkType: "internal",
-    hasBottomDivider: true,
-    requiredPermissions: ["ApiServiceWrite"]
-  },
-  {
-    href: "",
-    icon: <People fontSize="inherit" />,
-    text: "routes.users.title",
-    linkType: "external"
-  },
-  {
-    href: "",
-    icon: <SupervisedUserCircle fontSize="inherit" />,
-    text: "routes.groups.title",
-    linkType: "external"
-  }
-];
-
 export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
   const { data: session } = useSession();
   const [sidenavWidth, setSidenavWidth] = useState(320);
+
+  const getSelfcareInstitutionDashboardUrl = () =>
+    `${getConfiguration().SELFCARE_URL}/dashboard/${
+      session?.user?.institution.id
+    }`;
+
+  /** List of sidenav menu items _(displayed on left side column)_ */
+  const menu: Array<SidenavItem> = [
+    {
+      href: "/",
+      icon: <ViewSidebar fontSize="inherit" />,
+      text: "routes.overview.title",
+      linkType: "internal"
+    },
+    {
+      href: "/services",
+      icon: <Category fontSize="inherit" />,
+      text: "routes.services.title",
+      linkType: "internal"
+    },
+    {
+      href: "/keys",
+      icon: <VpnKey fontSize="inherit" />,
+      text: "routes.keys.title",
+      linkType: "internal",
+      hasBottomDivider: true,
+      requiredPermissions: ["ApiServiceWrite"]
+    },
+    {
+      href: `${getSelfcareInstitutionDashboardUrl()}/users`,
+      icon: <People fontSize="inherit" />,
+      text: "routes.users.title",
+      linkType: "external",
+      requiredRole: "admin"
+    },
+    {
+      href: `${getSelfcareInstitutionDashboardUrl()}/groups`,
+      icon: <SupervisedUserCircle fontSize="inherit" />,
+      text: "routes.groups.title",
+      linkType: "external",
+      requiredRole: "admin"
+    }
+  ];
 
   return (
     <Box>
