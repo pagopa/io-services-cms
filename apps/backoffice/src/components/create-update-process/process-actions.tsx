@@ -5,11 +5,17 @@ import {
   ButtonNext,
   ButtonWithLoader
 } from "../buttons";
+import {
+  ConfirmButtonLabelsType,
+  CreateUpdateMode
+} from "./create-update-process";
 
 export type ProcessActionsProps = {
   disabled?: boolean;
   stepsNumber: number;
   currentStepIndex: number;
+  mode: CreateUpdateMode;
+  confirmButtonLabels: ConfirmButtonLabelsType;
   onCancel: () => void;
   onBack: () => void;
   onNext: () => void;
@@ -21,6 +27,8 @@ export const ProcessActions = ({
   disabled,
   stepsNumber,
   currentStepIndex,
+  mode,
+  confirmButtonLabels,
   onCancel,
   onBack,
   onNext,
@@ -40,7 +48,7 @@ export const ProcessActions = ({
           <ButtonNext onClick={onNext} disabled={disabled} />
         ) : (
           <ButtonWithLoader
-            label="buttons.createDraft"
+            label={confirmButtonLabels[mode]}
             onClick={onComplete}
             loading={disabled}
             disabled={disabled}

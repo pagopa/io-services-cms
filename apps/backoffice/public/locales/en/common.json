@@ -23,7 +23,6 @@
     "close": "Close",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
-    "createDraft": "Create draft",
     "delete": "Delete",
     "edit": "Edit",
     "import": "Import",
@@ -61,6 +60,10 @@
     },
     "testUrl": "Try URL",
     "service": {
+      "buttons": {
+        "create": "Create service",
+        "update": "Update service"
+      },
       "searchById": {
         "clear": "Clear filter",
         "search": "Filter",

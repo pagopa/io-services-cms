@@ -104,6 +104,10 @@ export const ServiceCreateUpdate = ({
       itemToCreateUpdate={service ?? serviceDefaultData}
       mode={mode}
       steps={serviceBuilderSteps}
+      confirmButtonLabels={{
+        create: "forms.service.buttons.create",
+        update: "forms.service.buttons.update"
+      }}
       onCancel={() => handleCancel()}
       onConfirm={value => onConfirm(value)}
     />
