@@ -19,6 +19,7 @@ export type Configuration = {
   BACK_OFFICE_PRIVACY_POLICY_URL: string;
   BACK_OFFICE_TOS_URL: string;
   BACK_OFFICE_PERS_DATA_PROTECTION_URL: string;
+  BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
 
   // Selfcare
   SELFCARE_URL: string;
@@ -58,7 +59,6 @@ export type Configuration = {
 
   // Subscriptions migration configuration
   SUBSCRIPTION_MIGRATION_API_MOCKING: boolean;
-
 };
 
 export function getConfiguration(): Configuration {
@@ -86,6 +86,8 @@ export function getConfiguration(): Configuration {
     BACK_OFFICE_TOS_URL: process.env.NEXT_PUBLIC_BACK_OFFICE_TOS_URL as string,
     BACK_OFFICE_PERS_DATA_PROTECTION_URL: process.env
       .NEXT_PUBLIC_BACK_OFFICE_PERS_DATA_PROTECTION_URL as string,
+    BACK_OFFICE_OPERATIVE_MANUAL_URL: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_OPERATIVE_MANUAL_URL as string,
 
     // Selfcare
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
