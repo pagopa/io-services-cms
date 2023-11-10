@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 0.17.0
+
+### Minor Changes
+
+- f41aeb3: Add frontend subscriptions migration components and section logic
+
+### Patch Changes
+
+- 6c7cbe1: add time debug log on regenerate manage key
+
 ## 0.16.2
 
 ### Patch Changes
