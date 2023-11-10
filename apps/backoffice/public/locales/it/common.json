@@ -85,7 +85,7 @@
       "attributes": "Attributi",
       "authorizedCidrs": "Indirizzi IP autorizzati",
       "description": {
-        "helperText": "Leggi come usare correttamente il <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">linguaggio markdown</a>",
+        "helperText": "Leggi come scrivere correttamente la <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">descrizione di un servizio</a>",
         "label": "Descrizione",
         "placeholder": ""
       },
