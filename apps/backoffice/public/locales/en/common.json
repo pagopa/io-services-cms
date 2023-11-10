@@ -63,7 +63,7 @@
     "service": {
       "searchById": {
         "clear": "Clear filter",
-        "search": "Start search",
+        "search": "Filter",
         "helperText": "Enter a 26-character alphanumeric ID code and click on right search icon",
         "validText": "Click on right search icon inside field to perform search",
         "errorText": "Invalid service ID code",
