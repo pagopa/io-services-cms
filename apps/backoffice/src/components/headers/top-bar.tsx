@@ -21,6 +21,7 @@ export const TopBar = ({ user }: TopBarProps) => {
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
+      enableAssistanceButton={false}
       onAssistanceClick={() => {
         console.log("Clicked/Tapped on Assistance");
       }}
