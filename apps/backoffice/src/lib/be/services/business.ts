@@ -151,22 +151,11 @@ export async function forwardIoServicesCmsRequest<
     }
 
     const { status, value } = result.right;
-    // NextResponse.json() does not support 204 status code https://github.com/vercel/next.js/discussions/51475
-    if (status === HTTP_STATUS_NO_CONTENT) {
+    // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
+    if (status === HTTP_STATUS_NO_CONTENT || value === undefined) {
       return new Response(null, {
         status
       });
-    }
-    // TODO: Workaround cause the generated client using codegen-ts does not map the response in case of status code !== 2XX/content-type !== application/json
-    if (value === undefined) {
-      return NextResponse.json(
-        {
-          title: "IoServicesCmsError",
-          status: status,
-          detail: "Io Services CMS response with error"
-        },
-        { status }
-      );
     }
 
     return NextResponse.json(value, { status });
