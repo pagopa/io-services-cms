@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 0.17.7
+
+### Patch Changes
+
+- 03fada0: add ApiServiceWrite permission to user (if missing)
+- aeaf8e1: adapt ownership claim response
+
 ## 0.17.6
 
 ### Patch Changes
