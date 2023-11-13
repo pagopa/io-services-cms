@@ -22,7 +22,7 @@ export const getLatestOwnershipClaimStatusMockResponse = () => ({
 });
 
 export const getOwnershipClaimStatusMockResponse = () => ({
-  status: {
+  data: {
     completed: faker.number.int({ min: 0, max: 100 }),
     failed: faker.number.int({ min: 0, max: 100 }),
     initial: faker.number.int({ min: 0, max: 100 }),

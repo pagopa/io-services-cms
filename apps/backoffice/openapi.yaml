@@ -1077,7 +1077,7 @@ components:
     MigrationData:
       type: object
       properties:
-        status:
+        data:
           $ref: '#/components/schemas/MigrationDataValue'
     MigrationDataValue:
       type: object
