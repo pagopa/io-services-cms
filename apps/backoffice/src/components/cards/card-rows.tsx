@@ -1,17 +1,19 @@
 import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
-import React from "react";
+import { MarkdownView } from "../markdown-view";
 
 export type CardRowType = {
   /** row label, shown on left */
   label: string;
   /** row value, shown on right */
   value?: string | ReactNode;
+  /** if `true`, renders value on a new line _(the default behaviour renders value inline, with its label on left)_ */
+  renderValueOnNewLine?: boolean;
   /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis.
    * _(This is the default behaviour)_ */
   noWrap?: boolean;
@@ -76,17 +78,20 @@ export const CardRows = ({ rows }: CardRowsProps) => {
       case "link":
         return renderValue(
           row.value,
-          <NextLink
-            href={(row.value as string) ?? "/"}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {renderTextValue(row)}
-          </NextLink>
+          row.value ? (
+            <NextLink
+              href={row.value as string}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {renderTextValue(row)}
+            </NextLink>
+          ) : (
+            renderTextValue(row)
+          )
         );
       case "markdown":
-        // todo: to be implemented
-        return <span>{row.value}</span>;
+        return <MarkdownView>{(row.value as string) ?? ""}</MarkdownView>;
       default:
         return renderValue(
           row.value,
@@ -111,12 +116,12 @@ export const CardRows = ({ rows }: CardRowsProps) => {
           marginTop={2}
           alignItems="center"
         >
-          <Grid item xs={4}>
+          <Grid item xs={row.renderValueOnNewLine ? 12 : 4}>
             <Typography variant="body2" noWrap>
               {t(row.label)}
             </Typography>
           </Grid>
-          <Grid item xs={8}>
+          <Grid item xs={row.renderValueOnNewLine ? 12 : 8}>
             <Stack direction="row" alignItems="center" spacing={0.5}>
               {manageRowValue(row)}
             </Stack>

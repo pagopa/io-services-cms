@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
-import Markdown from "react-markdown";
+import { MarkdownView } from "../markdown-view";
 
 export type ServicePreviewProps = {
   isOpen: boolean;
@@ -75,12 +75,7 @@ export const ServicePreview = ({
               }
             }}
           >
-            <Markdown
-              unwrapDisallowed
-              allowedElements={["p", "strong", "em", "ul", "ol", "li", "a"]}
-            >
-              {description}
-            </Markdown>
+            <MarkdownView>{description}</MarkdownView>
           </Grid>
         </Grid>
       </DialogContent>
