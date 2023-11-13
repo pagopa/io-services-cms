@@ -178,7 +178,7 @@ export const getMockServicesMigrationLatestStatus = () => ({
 });
 
 export const getMockServicesMigrationStatusDetails = () => ({
-  status: {
+  data: {
     completed: faker.number.int({ min: 0, max: 3 }),
     failed: faker.number.int({ min: 0, max: 3 }),
     initial: faker.number.int({ min: 0, max: 3 }),

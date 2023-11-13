@@ -28,15 +28,15 @@ export type MigrationModalProps = {
 
 // porting from developer portal frontend
 export const computeMigrationStatus = (
-  data?: MigrationData
+  migrationData?: MigrationData
 ): MigrationStatus => {
-  if (data?.status?.failed) {
+  if (migrationData?.data?.failed) {
     return "failed";
   }
-  if (data?.status?.initial) {
+  if (migrationData?.data?.initial) {
     return "todo";
   }
-  if (data?.status?.processing) {
+  if (migrationData?.data?.processing) {
     return "doing";
   }
   return "done";
