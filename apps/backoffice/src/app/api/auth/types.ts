@@ -106,7 +106,7 @@ export const IdentityTokenPayload = t.type({
 
 export type ApimUser = t.TypeOf<typeof ApimUser>;
 export const ApimUser = t.type({
-  name: NonEmptyString,
+  name: NonEmptyString, // FIXME: define and use a custom coder SimpleIdFromFullyQualifiedId
   email: EmailString,
   groups: t.readonlyArray(
     t.type({
@@ -115,7 +115,7 @@ export const ApimUser = t.type({
         t.literal("system"),
         t.literal("external")
       ]),
-      name: NonEmptyString
+      name: NonEmptyString // FIXME: define and use a custom coder SimpleIdFromFullyQualifiedId
     })
   )
 });

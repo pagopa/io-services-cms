@@ -355,33 +355,9 @@ describe("Authorize", () => {
     expect(getInstitutionById).not.toHaveBeenCalled();
   });
 
-  it("should fail when retrieved Apim user is not valid", async () => {
-    jwtVerify.mockResolvedValueOnce({
-      payload: aValidJwtPayload
-    });
-    getUserByEmail.mockReturnValueOnce(TE.right(O.some({})));
-
-    await expect(() =>
-      authorize(mockConfig)({ identity_token: "identity_token" }, {})
-    ).rejects.toThrowError(/is not a valid/);
-
-    expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledOnce();
-    expect(getUserByEmail).toHaveBeenCalledOnce();
-    expect(getUserByEmail).toHaveBeenCalledWith(
-      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
-      true
-    );
-    expect(createOrUpdateUser).not.toHaveBeenCalled();
-    expect(createGroupUser).not.toHaveBeenCalled();
-    expect(getSubscription).not.toHaveBeenCalled();
-    expect(getProductByName).not.toHaveBeenCalled();
-    expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
-    expect(getInstitutionById).not.toHaveBeenCalled();
-  });
-
-  it("should fail when retrieved Apim user has not ApiServiceWrite permission", async () => {
+  it("should fail when adding missing ApiServiceWrite group to existing user", async () => {
+    const statusCode = 500;
+    const missingUserGroup = "apiservicewrite";
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
@@ -395,10 +371,132 @@ describe("Authorize", () => {
         })
       )
     );
+    createGroupUser.mockReturnValueOnce(TE.left({ statusCode }));
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
-    ).rejects.toThrowError("Forbidden not authorized");
+    ).rejects.toThrowError(
+      `Failed to create relationship between group (id = ${missingUserGroup}) and user (id = ${aValidApimUser.name}), code: ${statusCode}`
+    );
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimService).toHaveBeenCalledTimes(2);
+    expect(getUserByEmail).toHaveBeenCalledOnce();
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(createGroupUser).toHaveBeenCalledOnce();
+    expect(createGroupUser).toHaveBeenCalledWith(
+      missingUserGroup,
+      aValidApimUser.name
+    );
+    expect(createOrUpdateUser).not.toHaveBeenCalled();
+    expect(getSubscription).not.toHaveBeenCalled();
+    expect(getProductByName).not.toHaveBeenCalled();
+    expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
+    expect(getInstitutionById).not.toHaveBeenCalled();
+  });
+
+  it("should fail when fetching user after adding missing ApiServiceWrite group to existing user", async () => {
+    const statusCode = 500;
+    const missingUserGroup = "apiservicewrite";
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockReturnValueOnce(
+      TE.right(
+        O.some({
+          ...aValidApimUser,
+          groups: aValidApimUser.groups.filter(
+            g => g.name !== "ApiServiceWrite"
+          )
+        })
+      )
+    );
+    createGroupUser.mockReturnValueOnce(TE.right(aValidApimUser));
+    getUserByEmail.mockReturnValueOnce(TE.left({ statusCode }));
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
+    ).rejects.toThrowError(
+      `Failed to fetch user by its email, code: ${statusCode}`
+    );
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimService).toHaveBeenCalledTimes(3);
+    expect(getUserByEmail).toHaveBeenCalledTimes(2);
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(createGroupUser).toHaveBeenCalledOnce();
+    expect(createGroupUser).toHaveBeenCalledWith(
+      missingUserGroup,
+      aValidApimUser.name
+    );
+    expect(createOrUpdateUser).not.toHaveBeenCalled();
+    expect(getSubscription).not.toHaveBeenCalled();
+    expect(getProductByName).not.toHaveBeenCalled();
+    expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
+    expect(getInstitutionById).not.toHaveBeenCalled();
+  });
+
+  it("should fail if no user is retrieved after adding missing ApiServiceWrite group to existing user", async () => {
+    const missingUserGroup = "apiservicewrite";
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockReturnValueOnce(
+      TE.right(
+        O.some({
+          ...aValidApimUser,
+          groups: aValidApimUser.groups.filter(
+            g => g.name !== "ApiServiceWrite"
+          )
+        })
+      )
+    );
+    createGroupUser.mockReturnValueOnce(TE.right(aValidApimUser));
+    getUserByEmail.mockReturnValueOnce(TE.right(O.none));
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
+    ).rejects.toThrowError("Cannot find user");
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimService).toHaveBeenCalledTimes(3);
+    expect(getUserByEmail).toHaveBeenCalledTimes(2);
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(createGroupUser).toHaveBeenCalledOnce();
+    expect(createGroupUser).toHaveBeenCalledWith(
+      missingUserGroup,
+      aValidApimUser.name
+    );
+    expect(createOrUpdateUser).not.toHaveBeenCalled();
+    expect(getSubscription).not.toHaveBeenCalled();
+    expect(getProductByName).not.toHaveBeenCalled();
+    expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
+    expect(getInstitutionById).not.toHaveBeenCalled();
+  });
+
+  it("should fail when retrieved Apim user is not valid", async () => {
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockReturnValueOnce(
+      TE.right(O.some({ ...aValidApimUser, name: undefined }))
+    );
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
+    ).rejects.toThrowError(/is not a valid/);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledOnce();

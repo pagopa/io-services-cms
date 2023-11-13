@@ -125,7 +125,30 @@ const retrieveOrCreateApimUser = (config: Configuration) => (
                 )
               )
             ),
-          TE.right
+          apimUser =>
+            pipe(
+              apimUser,
+              O.fromPredicate(
+                user =>
+                  !!user.groups &&
+                  user.groups.some(
+                    (group: any) => group.name === "ApiServiceWrite" // FIXME: remove any
+                  )
+              ),
+              O.map(TE.right),
+              O.getOrElse(() =>
+                pipe(
+                  createUserGroup(
+                    apimUser.name as NonEmptyString,
+                    "apiservicewrite"
+                  ),
+                  TE.chain(user =>
+                    retrieveUserByEmail(user.email as EmailString)
+                  ),
+                  TE.chain(TE.fromOption(() => new Error(`Cannot find user`)))
+                )
+              )
+            )
         )
       )
     ),
@@ -181,20 +204,7 @@ const createApimUser = (config: Configuration) => (
       pipe(
         config.APIM_USER_GROUPS.split(","),
         RA.map(groupId =>
-          pipe(
-            getApimService(),
-            apimService =>
-              apimService.createGroupUser(
-                groupId as NonEmptyString,
-                apimUser.name as NonEmptyString
-              ),
-            TE.mapLeft(
-              err =>
-                new Error(
-                  `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUser.name}), code: ${err.statusCode}`
-                )
-            )
-          )
+          createUserGroup(apimUser.name as NonEmptyString, groupId)
         ),
         TE.sequenceSeqArray
       )
@@ -202,18 +212,28 @@ const createApimUser = (config: Configuration) => (
     TE.map(_ => void 0)
   );
 
+const createUserGroup = (
+  apimUserId: NonEmptyString,
+  groupId: string
+): TE.TaskEither<Error, UserContract> =>
+  pipe(
+    getApimService(),
+    apimService =>
+      apimService.createGroupUser(groupId as NonEmptyString, apimUserId),
+    TE.mapLeft(
+      err =>
+        new Error(
+          `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`
+        )
+    )
+  );
+
 const retrieveOrCreateUserSubscriptionManage = (config: Configuration) => (
   apimUser: ApimUser
 ): TE.TaskEither<Error, Subscription> =>
   pipe(
     apimUser,
-    E.fromPredicate(
-      apimUser =>
-        apimUser.groups.some(group => group.name === "ApiServiceWrite"), // TODO: is this a useful check? What about users (not the new ones) without this permission?!
-      () => new Error("Forbidden not authorized") // TODO: if possible, raise a specific error in order to manage it and return a 403 error status code
-    ),
-    TE.fromEither,
-    TE.chain(getUserSubscriptionManage(config)),
+    getUserSubscriptionManage,
     TE.chain(
       flow(
         O.fold(() => pipe(apimUser, createSubscriptionManage(config)), TE.right)
@@ -228,7 +248,7 @@ const retrieveOrCreateUserSubscriptionManage = (config: Configuration) => (
     )
   );
 
-const getUserSubscriptionManage = (config: Configuration) => (
+const getUserSubscriptionManage = (
   apimUser: ApimUser
 ): TE.TaskEither<Error, O.Option<SubscriptionContract>> =>
   pipe(
