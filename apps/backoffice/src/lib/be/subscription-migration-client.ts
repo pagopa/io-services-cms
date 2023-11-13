@@ -43,6 +43,16 @@ const Config = t.type({
   SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString
 });
 
+type MigrationDataAdapter = t.TypeOf<typeof MigrationDataAdapter>;
+const MigrationDataAdapter = t.partial({
+  data: t.partial({
+    COMPLETED: t.string,
+    FAILED: t.string,
+    INITIAL: t.string,
+    PROCESSING: t.string
+  })
+});
+
 const getSubscriptionsMigrationConfig: () => Config = cache(() => {
   const result = Config.decode(process.env);
 
@@ -64,7 +74,7 @@ const getAxiosInstance: () => AxiosInstance = () => {
 
   return axios.create({
     baseURL: configuration.SUBSCRIPTION_MIGRATION_API_URL,
-    timeout: 5000,
+    timeout: 9000,
     headers: {
       "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY
     },
@@ -134,8 +144,28 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
       TE.chainW(response =>
         pipe(
           response.data,
-          MigrationData.decode,
+          MigrationDataAdapter.decode,
           E.mapLeft(flow(readableReport, E.toError)),
+          // This is an adapter cause io-subscriptions-migration API returns a different shape than the one defined in the openapi spec
+          E.map(
+            migrationData =>
+              ({
+                data: {
+                  completed: migrationData?.data?.COMPLETED
+                    ? +migrationData?.data?.COMPLETED
+                    : undefined,
+                  failed: migrationData?.data?.FAILED
+                    ? +migrationData?.data?.FAILED
+                    : undefined,
+                  initial: migrationData?.data?.INITIAL
+                    ? +migrationData?.data?.INITIAL
+                    : undefined,
+                  processing: migrationData?.data?.PROCESSING
+                    ? +migrationData?.data?.PROCESSING
+                    : undefined
+                }
+              } as MigrationData)
+          ),
           TE.fromEither
         )
       )
@@ -205,6 +235,14 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
     claimOwnership,
     getDelegatesByOrganization
   };
+};
+
+const transoform = (myObject: { [key: string]: string }) => {
+  const transformedObject: { [key: string]: number } = {};
+
+  return Object.keys(myObject).forEach(key => {
+    transformedObject[key.toLowerCase()] = Number(myObject[key]);
+  });
 };
 
 export const getSubscriptionsMigrationClient = () => {
