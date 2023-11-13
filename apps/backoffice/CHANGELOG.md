@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.6
+
+### Patch Changes
+
+- 1096a77: Change MigrationData schema on frontend
+
 ## 0.17.5
 
 ### Patch Changes
