@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 0.17.5
+
+### Patch Changes
+
+- 5828b71: UX/UI refinements for the MVP0 release
+- d9da47f: Update service details drawer
+- 864c1b9: change response schema MigrationData
+
 ## 0.17.4
 
 ### Patch Changes
