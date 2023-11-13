@@ -293,6 +293,7 @@
       "pec": "Pec",
       "phone": "Phone",
       "privacyUrl": "Privacy",
+      "sensitive": "Sensitive service",
       "serviceId": "Service ID",
       "status": "Status",
       "supportUrl": "Support url",
