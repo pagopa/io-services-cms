@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 0.17.9
+
+### Patch Changes
+
+- 6d0c2e9: initialize manage cidrs when creating subscription manage
+- 84a70d7: fix selfcare JWT configuration
+- 206e3a5: filter manage subscription on service list
+- ae688e5: Hide service history action button and add scope in service info drawer
+
 ## 0.17.8
 
 ### Patch Changes
