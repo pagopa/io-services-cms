@@ -169,6 +169,14 @@ vi.mock("@/lib/be/institutions/selfcare", () => ({
   getInstitutionById
 }));
 
+const { upsertSubscriptionAuthorizedCIDRs } = vi.hoisted(() => ({
+  upsertSubscriptionAuthorizedCIDRs: vi.fn()
+}));
+
+vi.mock("@/lib/be/keys/cosmos", () => ({
+  upsertSubscriptionAuthorizedCIDRs
+}));
+
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -188,6 +196,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when token is not a JWT", async () => {
@@ -206,6 +215,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when JWT payload is not a valid IdentityToken", async () => {
@@ -234,6 +244,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when creating a new Apim user and creation fail", async () => {
@@ -265,6 +276,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when adding a gruop to newly created user and user-group association fail", async () => {
@@ -311,6 +323,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when fetching the newly created user and fetch fail", async () => {
@@ -354,6 +367,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when adding missing ApiServiceWrite group to existing user", async () => {
@@ -398,6 +412,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when fetching user after adding missing ApiServiceWrite group to existing user", async () => {
@@ -443,6 +458,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail if no user is retrieved after adding missing ApiServiceWrite group to existing user", async () => {
@@ -485,6 +501,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieved Apim user is not valid", async () => {
@@ -513,6 +530,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieving user manage subscription fail", async () => {
@@ -546,6 +564,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when manage subscription is not found and and fail to fetch APIM product", async () => {
@@ -583,6 +602,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when manage subscription is not found and fail to create it", async () => {
@@ -627,17 +647,70 @@ describe("Authorize", () => {
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
-  it("should fail when manage subscription is not found and fail the new one is not valid", async () => {
+  it("should fail when creation of default manage subscription cidrs return error", async () => {
     const productId = faker.string.uuid();
+    const errorMessage = "rejected";
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload
     });
     getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
     getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
-    upsertSubscription.mockReturnValueOnce(TE.right({}));
+    upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    upsertSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(errorMessage);
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {})
+    ).rejects.toThrowError(errorMessage);
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimService).toHaveBeenCalledTimes(4);
+    expect(getUserByEmail).toHaveBeenCalledOnce();
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true
+    );
+    expect(getSubscription).toHaveBeenCalledOnce();
+    expect(getSubscription).toHaveBeenCalledWith(
+      `MANAGE-${aValidApimUser.name}`
+    );
+    expect(getProductByName).toHaveBeenCalledOnce();
+    expect(getProductByName).toHaveBeenCalledWith(
+      mockConfig.AZURE_APIM_PRODUCT_NAME
+    );
+    expect(upsertSubscription).toHaveBeenCalledOnce();
+    expect(upsertSubscription).toHaveBeenCalledWith(
+      productId,
+      aValidApimUser.id,
+      `MANAGE-${aValidApimUser.name}`
+    );
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledOnce();
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
+      aValidSubscription.name,
+      []
+    );
+    expect(createOrUpdateUser).not.toHaveBeenCalled();
+    expect(createGroupUser).not.toHaveBeenCalled();
+    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
+    expect(getInstitutionById).not.toHaveBeenCalled();
+  });
+
+  it("should fail when manage subscription is not found and the new one is not valid", async () => {
+    const productId = faker.string.uuid();
+    const invalidSubscriptionName = undefined;
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload
+    });
+    getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
+    getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
+    upsertSubscription.mockReturnValueOnce(
+      TE.right({ ...aValidSubscription, name: invalidSubscriptionName })
+    );
+    upsertSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(void 0);
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
@@ -663,6 +736,11 @@ describe("Authorize", () => {
       productId,
       aValidApimUser.id,
       `MANAGE-${aValidApimUser.name}`
+    );
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledOnce();
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
+      invalidSubscriptionName,
+      []
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
@@ -703,6 +781,7 @@ describe("Authorize", () => {
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieve logged institution details", async () => {
@@ -742,6 +821,7 @@ describe("Authorize", () => {
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should return a valid backoffice User when both APIM users and its manage subscription exists", async () => {
@@ -787,6 +867,7 @@ describe("Authorize", () => {
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
+    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should return a valid backoffice User when both APIM users and its manage subscription does not exists", async () => {
@@ -801,6 +882,7 @@ describe("Authorize", () => {
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
     getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
     upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    upsertSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(void 0);
     getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
     getInstitutionById.mockResolvedValueOnce(aValidInstitution);
 
@@ -852,6 +934,11 @@ describe("Authorize", () => {
       productId,
       aValidApimUser.id,
       `MANAGE-${aValidApimUser.name}`
+    );
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledOnce();
+    expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
+      aValidSubscription.name,
+      []
     );
     expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
     expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
