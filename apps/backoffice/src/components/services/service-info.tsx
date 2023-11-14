@@ -53,6 +53,13 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   const rowsExt: CardRowType[] = [
     ...buildRowsMin(true),
     {
+      label: "forms.service.metadata.scope.label",
+      value: t(
+        `forms.service.metadata.scope.${data?.metadata.scope.toLowerCase()}`
+      ),
+      renderValueOnNewLine: true
+    },
+    {
       label: "routes.service.name",
       value: data?.name,
       renderValueOnNewLine: true
