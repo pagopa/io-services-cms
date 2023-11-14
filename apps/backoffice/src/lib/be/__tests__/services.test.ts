@@ -698,7 +698,7 @@ describe("Services TEST", () => {
           expect.objectContaining({
             description: MISSING_SERVICE_DESCRIPTION,
             id: aServiceNotInLifecycleId,
-            last_update: aServiceNotInLifecycleCreateDate.getTime().toString(),
+            last_update: aServiceNotInLifecycleCreateDate.toISOString(),
             name: MISSING_SERVICE_NAME,
             organization: {
               fiscal_code: mocks.anInstitution.fiscalCode,
