@@ -9,10 +9,13 @@ import {
   ScopeEnum
 } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/lib/Either";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RA from "fp-ts/lib/ReadonlyArray";
-import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+
+export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_ORGANIZATION = "Istituzione non disponibile" as NonEmptyString;
 
 export const reducePublicationServicesList = (
   publicationServices: ReadonlyArray<ServicePublication.ItemType>
@@ -93,3 +96,21 @@ const toCategoryType = (
       return CategoryEnum.STANDARD;
   }
 };
+
+export const buildMissingService = (serviceId: string): ServiceListItem => ({
+  id: serviceId,
+  status: { value: ServiceLifecycleStatusTypeEnum.deleted },
+  last_update: new Date().getTime().toString(),
+  name: MISSING_SERVICE_NAME,
+  description: MISSING_SERVICE_DESCRIPTION,
+  organization: {
+    name: MISSING_SERVICE_ORGANIZATION,
+    fiscal_code: "00000000000" as any
+  },
+  metadata: {
+    scope: ScopeEnum.LOCAL,
+    category: CategoryEnum.STANDARD
+  },
+  authorized_recipients: [],
+  authorized_cidrs: []
+});

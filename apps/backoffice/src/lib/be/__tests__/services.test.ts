@@ -6,15 +6,21 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
-import { MigrationItem } from "../../../generated/api/MigrationItem";
 import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
+import { MigrationItem } from "../../../generated/api/MigrationItem";
+import { ServiceLifecycleStatusTypeEnum } from "../../../generated/services-cms/ServiceLifecycleStatusType";
 import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
   retrieveServiceList
 } from "../services/business";
-import { toServiceListItem } from "../services/utils";
+import {
+  MISSING_SERVICE_DESCRIPTION,
+  MISSING_SERVICE_NAME,
+  MISSING_SERVICE_ORGANIZATION,
+  toServiceListItem
+} from "../services/utils";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -587,7 +593,7 @@ describe("Services TEST", () => {
 
     // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
     // and not on apim, in such remote case we still return the list of services
-    it("when a service is found on apim and not service-lifecycle should not appears on returned list", async () => {
+    it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
       const aServiceInLifecycleId = "aServiceInLifecycleId";
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
 
@@ -660,7 +666,20 @@ describe("Services TEST", () => {
             ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: aServiceInLifecycleId,
             visibility: "published"
-          }
+          },
+          expect.objectContaining({
+            description: MISSING_SERVICE_DESCRIPTION,
+            id: aServiceNotInLifecycleId,
+
+            name: MISSING_SERVICE_NAME,
+            organization: {
+              fiscal_code: "00000000000",
+              name: MISSING_SERVICE_ORGANIZATION
+            },
+            status: {
+              value: ServiceLifecycleStatusTypeEnum.deleted
+            }
+          })
         ],
         pagination: { count: 2, limit: 10, offset: 0 }
       });

@@ -28,7 +28,11 @@ import {
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
 } from "./subscription-migration";
-import { reducePublicationServicesList, toServiceListItem } from "./utils";
+import {
+  buildMissingService,
+  reducePublicationServicesList,
+  toServiceListItem
+} from "./utils";
 
 type PathParameters = {
   serviceId?: string;
@@ -46,49 +50,78 @@ type PathParameters = {
  * @returns
  */
 export const retrieveServiceList = async (
-  userId: string,
-  limit: number,
-  offset: number,
-  serviceId?: string
-): Promise<ServiceList> =>
-  pipe(
-    getServiceList(userId, limit, offset, serviceId),
-    TE.bindTo("apimServices"),
-    // get services from services-lifecycle cosmos containee and map to ServiceListItem
-    TE.bind("lifecycleServices", ({ apimServices }) =>
-      pipe(
-        apimServices.value
-          ? apimServices.value.map(
-              subscription => subscription.name as NonEmptyString
-            )
-          : [],
-        retrieveLifecycleServices,
-        TE.map(RA.map(toServiceListItem))
-      )
-    ),
-    // get services from services-publication cosmos container
-    // create a Record list which contains the service id and its visibility
-    TE.bind("publicationServices", ({ lifecycleServices }) =>
-      pipe(
-        lifecycleServices.map(
-          publicationService => publicationService.id as NonEmptyString
-        ),
-        retrievePublicationServices,
-        TE.map(reducePublicationServicesList)
-      )
-    ),
-    // create response payload
-    TE.map(({ apimServices, lifecycleServices, publicationServices }) => ({
-      value: lifecycleServices.map(service => ({
-        ...service,
-        visibility: publicationServices[service.id]
-      })),
-      pagination: { offset, limit, count: apimServices.count }
-    })),
-    TE.getOrElse(error => {
-      throw error;
-    })
-  )();
+         userId: string,
+         limit: number,
+         offset: number,
+         serviceId?: string
+       ): Promise<ServiceList> =>
+         pipe(
+           getServiceList(userId, limit, offset, serviceId),
+           TE.bindTo("apimServices"),
+           // get services from services-lifecycle cosmos containee and map to ServiceListItem
+           TE.bind("lifecycleServices", ({ apimServices }) =>
+             pipe(
+               apimServices.value
+                 ? apimServices.value.map(
+                     subscription => subscription.name as NonEmptyString
+                   )
+                 : [],
+               retrieveLifecycleServices,
+               TE.map(RA.map(toServiceListItem))
+             )
+           ),
+           // get services from services-publication cosmos container
+           // create a Record list which contains the service id and its visibility
+           TE.bind("publicationServices", ({ lifecycleServices }) =>
+             pipe(
+               lifecycleServices.map(
+                 publicationService => publicationService.id as NonEmptyString
+               ),
+               retrievePublicationServices,
+               TE.map(reducePublicationServicesList)
+             )
+           ),
+           TE.bindW(
+             "missingServiceIds",
+             ({ apimServices, lifecycleServices }) =>
+               pipe(
+                 // Extract service names from apimServices
+                 apimServices.value
+                   ? apimServices.value.map(
+                       subscription => subscription.name as NonEmptyString
+                     )
+                   : [],
+
+                 // Find the difference between apimServices and lifecycleServices using service names
+                 names =>
+                   names.filter(
+                     name => !lifecycleServices.map(s => s.id).includes(name)
+                   ),
+                 TE.right
+               )
+           ),
+           // create response payload
+           TE.map(
+             ({
+               apimServices,
+               lifecycleServices,
+               publicationServices,
+               missingServiceIds
+             }) => ({
+               value: [
+                 ...lifecycleServices.map(service => ({
+                   ...service,
+                   visibility: publicationServices[service.id]
+                 })),
+                 ...missingServiceIds.map(buildMissingService)
+               ],
+               pagination: { offset, limit, count: apimServices.count }
+             })
+           ),
+           TE.getOrElse(error => {
+             throw error;
+           })
+         )();
 
 /**
  * The Backoffice needs to call io-services-cms APIs,
