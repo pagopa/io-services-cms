@@ -283,7 +283,7 @@ const createSubscriptionManage = (config: Configuration) => (
         pipe(
           apimService.upsertSubscription(
             productId,
-            apimUser.name,
+            apimUser.id,
             ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
           ),
           TE.mapLeft(
