@@ -131,7 +131,9 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
                 "api-version": "2022-08-01",
                 $skip: offset,
                 $top: limit,
-                $filter: serviceId ? `name eq '${serviceId}'` : undefined
+                $filter: serviceId
+                  ? `name eq '${serviceId}' and not startswith(name, 'MANAGE-')`
+                  : `not startswith(name, 'MANAGE-')`
               }
             }
           ),

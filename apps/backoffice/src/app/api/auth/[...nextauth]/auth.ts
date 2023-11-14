@@ -85,7 +85,7 @@ const verifyToken = (config: Configuration) => (
           identity_token,
           createRemoteJWKSet(new URL(config.SELFCARE_JWKS_URL)),
           {
-            issuer: config.SELFCARE_JWT_ISSUER,
+            issuer: config.SELFCARE_URL,
             audience: config.BACKOFFICE_HOST
           }
         ),
