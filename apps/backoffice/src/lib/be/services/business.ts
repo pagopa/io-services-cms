@@ -15,7 +15,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
@@ -51,6 +51,7 @@ type PathParameters = {
  */
 export const retrieveServiceList = async (
   userId: string,
+  institution: Institution,
   limit: number,
   offset: number,
   serviceId?: string
@@ -81,19 +82,20 @@ export const retrieveServiceList = async (
         TE.map(reducePublicationServicesList)
       )
     ),
-    TE.bindW("missingServiceIds", ({ apimServices, lifecycleServices }) =>
+    TE.bindW("missingServices", ({ apimServices, lifecycleServices }) =>
       pipe(
         // Extract service names from apimServices
         apimServices.value
-          ? apimServices.value.map(
-              subscription => subscription.name as NonEmptyString
-            )
+          ? apimServices.value.map(subscription => ({
+              id: subscription.name as NonEmptyString,
+              createdDate: subscription.createdDate
+            }))
           : [],
 
         // Find the difference between apimServices and lifecycleServices using service names
-        names =>
-          names.filter(
-            name => !lifecycleServices.map(s => s.id).includes(name)
+        services =>
+          services.filter(
+            service => !lifecycleServices.map(s => s.id).includes(service.id)
           ),
         TE.right
       )
@@ -104,14 +106,20 @@ export const retrieveServiceList = async (
         apimServices,
         lifecycleServices,
         publicationServices,
-        missingServiceIds
+        missingServices
       }) => ({
         value: [
           ...lifecycleServices.map(service => ({
             ...service,
             visibility: publicationServices[service.id]
           })),
-          ...missingServiceIds.map(buildMissingService)
+          ...missingServices.map(missingService =>
+            buildMissingService(
+              missingService.id,
+              institution,
+              missingService.createdDate
+            )
+          )
         ],
         pagination: { offset, limit, count: apimServices.count }
       })

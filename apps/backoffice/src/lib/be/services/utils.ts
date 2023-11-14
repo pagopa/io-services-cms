@@ -9,9 +9,13 @@ import {
   ScopeEnum
 } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "@pagopa/ts-commons/lib/strings";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
+import { Institution } from "../../../../types/next-auth";
 
 export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
 export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
@@ -97,15 +101,20 @@ const toCategoryType = (
   }
 };
 
-export const buildMissingService = (serviceId: string): ServiceListItem => ({
+export const buildMissingService = (
+  serviceId: string,
+  institution: Institution,
+  lastUpdate = new Date()
+): ServiceListItem => ({
   id: serviceId,
   status: { value: ServiceLifecycleStatusTypeEnum.deleted },
-  last_update: new Date().getTime().toString(),
+  last_update: lastUpdate.getTime().toString(),
   name: MISSING_SERVICE_NAME,
   description: MISSING_SERVICE_DESCRIPTION,
   organization: {
-    name: MISSING_SERVICE_ORGANIZATION,
-    fiscal_code: "00000000000" as any
+    name: (institution.name as NonEmptyString) ?? MISSING_SERVICE_ORGANIZATION,
+    fiscal_code: (institution.fiscalCode ??
+      "00000000000") as OrganizationFiscalCode
   },
   metadata: {
     scope: ScopeEnum.LOCAL,

@@ -5,7 +5,7 @@ import * as TE from "fp-ts/TaskEither";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import { MigrationItem } from "../../../generated/api/MigrationItem";
@@ -18,7 +18,6 @@ import {
 import {
   MISSING_SERVICE_DESCRIPTION,
   MISSING_SERVICE_NAME,
-  MISSING_SERVICE_ORGANIZATION,
   toServiceListItem
 } from "../services/utils";
 
@@ -41,6 +40,7 @@ const mocks: {
   aSamplePayload: { test: string };
   aBaseServiceLifecycle: ServiceLifecycle.ItemType;
   anUserId: string;
+  anInstitution: Institution;
   migrationItem: MigrationItem;
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
@@ -73,6 +73,12 @@ const mocks: {
     }
   } as unknown) as ServiceLifecycle.ItemType,
   anUserId: "anUserId",
+  anInstitution: {
+    id: "anInstitutionId",
+    name: "anInstitutionName",
+    fiscalCode: "12345678901",
+    role: "admin"
+  },
   migrationItem: {
     status: {
       completed: 99,
@@ -473,7 +479,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        0
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -531,7 +542,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        90
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -574,7 +590,12 @@ describe("Services TEST", () => {
 
       isAxiosError.mockReturnValueOnce(true);
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        90
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -596,6 +617,7 @@ describe("Services TEST", () => {
     it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
       const aServiceInLifecycleId = "aServiceInLifecycleId";
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
+      const aServiceNotInLifecycleCreateDate = new Date();
 
       const bulkFetchLifecycleMock = vi.fn(() =>
         TE.right([
@@ -624,7 +646,8 @@ describe("Services TEST", () => {
               name: aServiceInLifecycleId
             },
             {
-              name: aServiceNotInLifecycleId
+              name: aServiceNotInLifecycleId,
+              createdDate: aServiceNotInLifecycleCreateDate
             }
           ],
           count: 2
@@ -644,7 +667,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        0
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -670,11 +698,11 @@ describe("Services TEST", () => {
           expect.objectContaining({
             description: MISSING_SERVICE_DESCRIPTION,
             id: aServiceNotInLifecycleId,
-
+            last_update: aServiceNotInLifecycleCreateDate.getTime().toString(),
             name: MISSING_SERVICE_NAME,
             organization: {
-              fiscal_code: "00000000000",
-              name: MISSING_SERVICE_ORGANIZATION
+              fiscal_code: mocks.anInstitution.fiscalCode,
+              name: mocks.anInstitution.name
             },
             status: {
               value: ServiceLifecycleStatusTypeEnum.deleted
@@ -721,7 +749,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -772,7 +800,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -812,7 +840,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
