@@ -5,6 +5,7 @@ import {
   getInstitutionById,
   getUserAuthorizedInstitutions
 } from "@/lib/be/institutions/selfcare";
+import { upsertSubscriptionAuthorizedCIDRs } from "@/lib/be/keys/cosmos";
 import { Institution } from "@/types/selfcare/Institution";
 import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -236,7 +237,21 @@ const retrieveOrCreateUserSubscriptionManage = (config: Configuration) => (
     getUserSubscriptionManage,
     TE.chain(
       flow(
-        O.fold(() => pipe(apimUser, createSubscriptionManage(config)), TE.right)
+        O.fold(
+          () =>
+            pipe(
+              apimUser,
+              createSubscriptionManage(config),
+              TE.chain(manageSub =>
+                pipe(
+                  manageSub.name as NonEmptyString,
+                  createEmptyManageCidrs,
+                  TE.map(_ => manageSub)
+                )
+              )
+            ),
+          TE.right
+        )
       )
     ),
     TE.chain(
@@ -246,6 +261,17 @@ const retrieveOrCreateUserSubscriptionManage = (config: Configuration) => (
         TE.fromEither
       )
     )
+  );
+
+const createEmptyManageCidrs = (
+  subscriptionId: NonEmptyString
+): TE.TaskEither<Error, void> =>
+  pipe(
+    TE.tryCatch(
+      () => upsertSubscriptionAuthorizedCIDRs(subscriptionId, []),
+      E.toError
+    ),
+    TE.map(_ => void 0)
   );
 
 const getUserSubscriptionManage = (
