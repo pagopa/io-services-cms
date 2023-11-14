@@ -256,7 +256,7 @@ export const ServiceContextMenu = ({
   return (
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
-      {renderHistoryAction()}
+      {/* {renderHistoryAction()} */}
       {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>
