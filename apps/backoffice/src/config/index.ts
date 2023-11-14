@@ -27,7 +27,6 @@ export type Configuration = {
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
   SELFCARE_EXTERNAL_API_BASE_URL: string;
-  SELFCARE_JWT_ISSUER: string;
   SELFCARE_JWKS_URL: string;
   SELFCARE_API_MOCKING: boolean;
 
@@ -99,7 +98,6 @@ export function getConfiguration(): Configuration {
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
     SELFCARE_EXTERNAL_API_BASE_URL: process.env
       .SELFCARE_EXTERNAL_API_BASE_URL as string,
-    SELFCARE_JWT_ISSUER: process.env.SELFCARE_JWT_ISSUER as string,
     SELFCARE_JWKS_URL: ((process.env.NEXT_PUBLIC_SELFCARE_URL as string) +
       process.env.SELFCARE_JWKS_PATH) as string,
     SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
