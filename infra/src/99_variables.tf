@@ -316,7 +316,6 @@ variable "backoffice_app" {
     azure_apim_subscriptions_api_base_url = string
     selfcare_external_api_base_url        = string
     selfcare_jwks_path                    = string
-    selfcare_jwt_issuer                   = string
     subscription_migration_api_url        = string
   })
   description = "Configuration of the io-services-cms-backoffice service"
