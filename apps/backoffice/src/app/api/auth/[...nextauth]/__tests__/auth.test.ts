@@ -42,6 +42,7 @@ const aValidJwtPayload = {
 };
 
 const aValidApimUser = {
+  id: faker.string.uuid(),
   name: faker.string.uuid(),
   email: `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
   groups: [
@@ -619,7 +620,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       productId,
-      aValidApimUser.name,
+      aValidApimUser.id,
       `MANAGE-${aValidApimUser.name}`
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
@@ -660,7 +661,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       productId,
-      aValidApimUser.name,
+      aValidApimUser.id,
       `MANAGE-${aValidApimUser.name}`
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
@@ -849,7 +850,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       productId,
-      aValidApimUser.name,
+      aValidApimUser.id,
       `MANAGE-${aValidApimUser.name}`
     );
     expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
