@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 0.17.8
+
+### Patch Changes
+
+- 650d0d6: Fix layout main content overflow break
+- 31116e8: ADD missing service placeholder on service list Route Handler result's
+- 5524506: fix payload create subscription manage
+
 ## 0.17.7
 
 ### Patch Changes
