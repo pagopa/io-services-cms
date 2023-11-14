@@ -42,7 +42,7 @@ export const toServiceListItem = ({
 }: ServiceLifecycle.ItemType): ServiceListItem => ({
   id,
   status: toServiceStatus(fsm),
-  last_update: last_update ?? new Date().getTime().toString(),
+  last_update: last_update ?? new Date().toISOString(),
   name: data.name,
   description: data.description,
   organization: data.organization,
@@ -108,7 +108,7 @@ export const buildMissingService = (
 ): ServiceListItem => ({
   id: serviceId,
   status: { value: ServiceLifecycleStatusTypeEnum.deleted },
-  last_update: lastUpdate.getTime().toString(),
+  last_update: lastUpdate.toISOString(),
   name: MISSING_SERVICE_NAME,
   description: MISSING_SERVICE_DESCRIPTION,
   organization: {
