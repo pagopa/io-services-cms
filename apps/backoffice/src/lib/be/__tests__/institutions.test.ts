@@ -7,10 +7,7 @@ import {
   InstitutionResources
 } from "../../../types/selfcare/InstitutionResource";
 import { InstitutionNotFoundError, ManagedInternalError } from "../errors";
-import {
-  retrieveInstitution,
-  retrieveUserAuthorizedInstitutions
-} from "../institutions/business";
+import { retrieveInstitution } from "../institutions/business";
 
 const mocks: {
   institution: Institution;
@@ -45,43 +42,6 @@ vi.mock("axios", () => ({
 }));
 
 describe("Institutions", () => {
-  describe("retrireveUserAuthorizedInstitutions", () => {
-    it("should return the institutions found", async () => {
-      const getUserAuthorizedInstitutions = vi.fn(() =>
-        TE.right(mocks.institutions)
-      );
-      getSelfcareClient.mockReturnValueOnce({
-        getUserAuthorizedInstitutions
-      });
-
-      const result = await retrieveUserAuthorizedInstitutions(
-        mocks.aSelfcareUserId
-      );
-
-      expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-        mocks.aSelfcareUserId
-      );
-      expect(result).toEqual(mocks.institutions);
-    });
-
-    it("should rejects", async () => {
-      const getUserAuthorizedInstitutions = vi.fn(() =>
-        TE.left({ message: "error" })
-      );
-      getSelfcareClient.mockReturnValueOnce({
-        getUserAuthorizedInstitutions
-      });
-
-      expect(
-        retrieveUserAuthorizedInstitutions(mocks.aSelfcareUserId)
-      ).rejects.toThrowError();
-
-      expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-        mocks.aSelfcareUserId
-      );
-    });
-  });
-
   describe("retieveInstitution", () => {
     it("should return the institution found", async () => {
       const getInstitutionById = vi.fn(() => TE.right(mocks.institution));
