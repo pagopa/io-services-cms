@@ -29,7 +29,7 @@ export const getMockInstitution = (institutionId?: string) => ({
     .alphanumeric({ length: { min: 5, max: 10 } })
     .toUpperCase(),
   description: faker.company.name(),
-  mailAddress: faker.internet.email(),
+  digitalAddress: faker.internet.email(),
   address: faker.location.streetAddress(true),
   zipCode: faker.location.zipCode(),
   taxCode: faker.string.numeric(11),

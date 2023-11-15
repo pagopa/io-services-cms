@@ -67,8 +67,8 @@ export default function Home() {
                       : undefined
                   },
                   {
-                    label: "institution.mailAddress",
-                    value: instData?.mailAddress
+                    label: "institution.digitalAddress",
+                    value: instData?.digitalAddress
                   },
                   {
                     label: "institution.fiscalCode",
