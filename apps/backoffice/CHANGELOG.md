@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.11
+
+### Patch Changes
+
+- c821f9a: fix services logo url configuration
+
 ## 0.17.10
 
 ### Patch Changes
