@@ -70,7 +70,11 @@ export const authorize = (
     ),
     TE.map(toUser),
     TE.getOrElse(e => {
-      console.error(e); //TODO: use "proper" log
+      if (e instanceof Error) {
+        console.error(e);
+      } else {
+        console.error("unknown error", e);
+      }
       throw e;
     })
   )();
