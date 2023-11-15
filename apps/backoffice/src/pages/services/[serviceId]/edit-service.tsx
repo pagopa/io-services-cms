@@ -34,12 +34,12 @@ export default function EditService() {
     ServiceCreateUpdatePayload
   >();
 
-  const handleConfirm = (service: ServiceCreateUpdatePayload) => {
+  const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
     const maybeApiServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
       service
     );
     if (E.isRight(maybeApiServicePayload)) {
-      serviceFetchData(
+      await serviceFetchData(
         "updateService",
         {
           serviceId,
