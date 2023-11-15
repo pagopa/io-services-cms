@@ -216,7 +216,7 @@
   "institution": {
     "cardTitle": "Institution information",
     "name": "Business name",
-    "mailAddress": "Primary PEC address",
+    "digitalAddress": "Primary PEC address",
     "institutionType": {
       "label": "Tipology",
       "AS": "Insurance",

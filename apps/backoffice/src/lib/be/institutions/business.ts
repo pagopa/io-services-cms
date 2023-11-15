@@ -31,7 +31,7 @@ const toInstitution = (
   externalId: institutionResource.externalId,
   originId: institutionResource.originId,
   description: institutionResource.description,
-  mailAddress: pipe(
+  digitalAddress: pipe(
     institutionResource.digitalAddress,
     EmailString.decode,
     O.fromEither,

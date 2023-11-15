@@ -216,7 +216,7 @@
   "institution": {
     "cardTitle": "Informazioni Ente",
     "name": "Ragione sociale",
-    "mailAddress": "Indirizzo PEC primario",
+    "digitalAddress": "Indirizzo PEC primario",
     "institutionType": {
       "label": "Tipologia",
       "AS": "Assicurazioni",
