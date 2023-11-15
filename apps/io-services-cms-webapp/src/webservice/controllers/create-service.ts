@@ -52,15 +52,15 @@ import {
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
 import {
-  IResponseJsonWithStatusJson,
-  ResponseJsonWithStatusJson,
+  IResponseJsonWithStatus,
+  ResponseJsonWithStatus,
 } from "../../utils/custom-response";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 
 const logPrefix = "CreateServiceHandler";
 
 type HandlerResponseTypes =
-  | IResponseJsonWithStatusJson<ServiceResponsePayload>
+  | IResponseJsonWithStatus<ServiceResponsePayload>
   | ErrorResponseTypes;
 
 type ICreateServiceHandler = (
@@ -176,7 +176,7 @@ export const makeCreateServiceHandler =
       }),
       TE.map(itemToResponse),
       TE.map((result) =>
-        ResponseJsonWithStatusJson(result, HttpStatusCodeEnum.HTTP_STATUS_201)
+        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201)
       ),
       TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );

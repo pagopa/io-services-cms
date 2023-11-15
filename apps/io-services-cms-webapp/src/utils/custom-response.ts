@@ -6,8 +6,8 @@ import {
 /**
  * Interface for a successful response returning a json object.
  */
-export interface IResponseJsonWithStatusJson<T>
-  extends IResponse<"IResponseJsonWithStatusJson"> {
+export interface IResponseJsonWithStatus<T>
+  extends IResponse<"IResponseJsonWithStatus"> {
   readonly value: T; // needed to discriminate from other T subtypes
 }
 
@@ -16,17 +16,17 @@ export interface IResponseJsonWithStatusJson<T>
  *
  * @param o The object to return to the client
  */
-export const ResponseJsonWithStatusJson = <T>(
+export const ResponseJsonWithStatus = <T>(
   o: T,
   statusCode: HttpStatusCodeEnum
-): IResponseJsonWithStatusJson<T> => {
+): IResponseJsonWithStatus<T> => {
   const kindlessObject = Object.assign(Object.assign({}, o), {
     kind: undefined,
   });
   return {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     apply: (res) => res.status(statusCode).json(kindlessObject),
-    kind: "IResponseJsonWithStatusJson",
+    kind: "IResponseJsonWithStatus",
     value: o,
   };
 };
