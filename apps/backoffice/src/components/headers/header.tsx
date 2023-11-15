@@ -61,7 +61,7 @@ export const Header = () => {
       productsList={products}
       onSelectedProduct={p => console.log("Selected Product:", p.title)}
       onSelectedParty={selectedPartyChange}
-      partyList={parties}
+      partyList={[parties[0]]} // TODO FIXME
       partyId={selectedPartyId}
     />
   );
