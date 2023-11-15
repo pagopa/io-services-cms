@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 0.17.12
+
+### Patch Changes
+
+- 6c4c3cb: Fix service name left alignment on services table, await create/update service completion before going to services page, add table pagination translated labels
+- dd7c11c: fix-istitution-open-api-part-2
+- Updated dependencies [1ef54a1]
+  - @io-services-cms/models@1.14.1
+
 ## 0.17.11
 
 ### Patch Changes

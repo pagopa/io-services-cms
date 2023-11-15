@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.14.1
+
+### Patch Changes
+
+- 1ef54a1: change mailAddress to digitalAddress in istitution openapi
+
 ## 1.14.0
 
 ### Minor Changes
