@@ -4,7 +4,7 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 
 /**
- * Interface for a successful response returning a json object.
+ * Interface for response returning a json object.
  */
 export interface IResponseJsonWithStatus<T>
   extends IResponse<"IResponseJsonWithStatus"> {
@@ -12,9 +12,10 @@ export interface IResponseJsonWithStatus<T>
 }
 
 /**
- * Returns a successful json response.
+ * Returns a json response with the specified response statusCode.
  *
  * @param o The object to return to the client
+ * @param statusCode The response status code
  */
 export const ResponseJsonWithStatus = <T>(
   o: T,
