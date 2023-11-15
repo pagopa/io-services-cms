@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.14
+
+### Patch Changes
+
+- 18f38e7: Fix frontend service rejection reason drawer
+
 ## 0.17.13
 
 ### Patch Changes
