@@ -436,5 +436,14 @@
       "lastUpdate": "Last update:"
     }
   },
+  "table": {
+    "pagination": {
+      "labelRowsPerPage": "Rows per page:",
+      "labelDisplayedRows": {
+        "of": "of",
+        "moreThan": "more than"
+      }
+    }
+  },
   "test": "This is a translation test"
 }

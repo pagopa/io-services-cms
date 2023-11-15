@@ -436,5 +436,14 @@
       "lastUpdate": "Ultima modifica:"
     }
   },
+  "table": {
+    "pagination": {
+      "labelRowsPerPage": "Righe per pagina:",
+      "labelDisplayedRows": {
+        "of": "di",
+        "moreThan": "più di"
+      }
+    }
+  },
   "test": "Questo è un test di traduzione"
 }

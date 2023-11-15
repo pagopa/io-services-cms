@@ -76,7 +76,7 @@ export default function Services() {
               <CallSplit fontSize="small" color="primary" />
             ) : null
           }
-          sx={{ fontWeight: 700 }}
+          sx={{ fontWeight: 700, textAlign: "left" }}
           disabled={
             service.status.value === ServiceLifecycleStatusTypeEnum.deleted
           }
