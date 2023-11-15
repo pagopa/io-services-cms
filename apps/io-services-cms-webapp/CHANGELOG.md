@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.21.10
+
+### Patch Changes
+
+- Updated dependencies [1ef54a1]
+  - @io-services-cms/models@1.14.1
+
 ## 1.21.9
 
 ### Patch Changes
