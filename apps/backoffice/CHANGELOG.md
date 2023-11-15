@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 1.0.0
+
+### Major Changes
+
+- 18dba64: Backoffice MVP0 public major version
+
+### Patch Changes
+
+- ac29609: Temporary remove institution selection on page header
+
 ## 0.17.14
 
 ### Patch Changes
