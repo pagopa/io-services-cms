@@ -23,7 +23,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
       "rejected",
       "deleted"
     ]),
-    reason: faker.lorem.sentence()
+    reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
   version: faker.number.int({ min: undefined, max: undefined }),
   last_update: faker.date.recent({ days: 30 }).toISOString(),
