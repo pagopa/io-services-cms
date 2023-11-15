@@ -31,9 +31,8 @@ import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strin
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
-  IResponseSuccessJson,
+  HttpStatusCodeEnum,
   ResponseErrorInternal,
-  ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
@@ -52,12 +51,16 @@ import {
   itemToResponse,
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
+import {
+  IResponseJsonWithStatus,
+  ResponseJsonWithStatus,
+} from "../../utils/custom-response";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 
 const logPrefix = "CreateServiceHandler";
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<ServiceResponsePayload>
+  | IResponseJsonWithStatus<ServiceResponsePayload>
   | ErrorResponseTypes;
 
 type ICreateServiceHandler = (
@@ -172,7 +175,9 @@ export const makeCreateServiceHandler =
         ),
       }),
       TE.map(itemToResponse),
-      TE.map(ResponseSuccessJson),
+      TE.map((result) =>
+        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201)
+      ),
       TE.mapLeft((err) => ResponseErrorInternal(err.message))
     );
 

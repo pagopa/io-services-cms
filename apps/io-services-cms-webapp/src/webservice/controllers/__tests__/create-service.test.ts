@@ -127,7 +127,7 @@ describe("createService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService:mockBlobService,
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
@@ -178,7 +178,7 @@ describe("createService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(201);
     expect(response.body.status.value).toBe("draft");
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.id).toEqual(expect.any(String));
@@ -199,9 +199,6 @@ describe("createService", () => {
   });
 
   it("should fail when cannot find apim user", async () => {
-
-
-    
     vi.mocked(mockApimService.getUserByEmail).mockImplementation(() =>
       TE.left({ statusCode: 500 })
     );
