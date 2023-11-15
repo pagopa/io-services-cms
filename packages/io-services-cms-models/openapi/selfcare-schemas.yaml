@@ -16,8 +16,9 @@ Institution:
     description:
       type: string
       example: AGENCY X
-    mailAddress:
+    digitalAddress:
       type: string
+      description: Institution's digitalAddress
       format: email
       example: email@pec.mail.org
     address:
