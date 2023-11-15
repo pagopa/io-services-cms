@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 0.17.10
+
+### Patch Changes
+
+- d5b29f0: log unknown error
+
 ## 0.17.9
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.21.9
+
+### Patch Changes
+
+- 1c080eb: Change response statusCode on createService API
+
 ## 1.21.8
 
 ### Patch Changes
