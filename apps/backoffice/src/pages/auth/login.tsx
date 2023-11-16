@@ -39,11 +39,9 @@ export default function Login() {
 
   useEffect(() => {
     if (session && router.isReady) {
-      setTimeout(() => {
-        // redirect to the return url or home page
-        // router.push((router.query.returnUrl as string) || "/");
-        router.push("/");
-      }, 2000);
+      // redirect to the return url or home page
+      // router.push((router.query.returnUrl as string) || "/");
+      router.push("/");
     } else {
       handleIdentity();
     }
