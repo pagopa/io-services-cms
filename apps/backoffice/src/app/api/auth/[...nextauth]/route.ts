@@ -3,6 +3,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authorize } from "./auth";
 
+const maxAgeSeconds = 12 * 60 * 60; // 12 hours
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -50,6 +51,12 @@ const authOptions: NextAuthOptions = {
         return url;
       return baseUrl;
     }
+  },
+  jwt: {
+    maxAge: maxAgeSeconds
+  },
+  session: {
+    maxAge: maxAgeSeconds
   }
 };
 
