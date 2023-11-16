@@ -37,6 +37,18 @@ const authOptions: NextAuthOptions = {
         session.user.parameters = token.parameters;
       }
       return session;
+    },
+    redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      // Allows callback URLs on the Selfcare origin
+      else if (
+        new URL(url).origin === new URL(getConfiguration().SELFCARE_URL).origin
+      )
+        return url;
+      return baseUrl;
     }
   }
 };
