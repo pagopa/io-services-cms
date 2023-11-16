@@ -42,6 +42,22 @@ export class HealthChecksError extends Error {
   }
 }
 
+export class AuthorizeError extends Error {
+  constructor(message: string, public readonly reason: unknown) {
+    super(message);
+    this.name = "AuthorizeError";
+    this.message = message;
+    this.reason = reason;
+  }
+}
+
+export const toAuthorizeError = (error: unknown): AuthorizeError => {
+  if (error instanceof AuthorizeError) {
+    return error;
+  }
+  return new AuthorizeError("Error on authorized", error);
+}
+
 export const handleInternalErrorResponse = (
   title: string,
   error: unknown

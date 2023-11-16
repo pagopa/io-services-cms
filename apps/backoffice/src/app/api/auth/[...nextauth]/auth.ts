@@ -1,6 +1,7 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { getApimService } from "@/lib/be/apim-service";
+import { AuthorizeError } from "@/lib/be/errors";
 import {
   getInstitutionById,
   getUserAuthorizedInstitutions
@@ -48,29 +49,39 @@ export const authorize = (
     E.mapLeft(flow(readableReport, E.toError)),
     E.map(selfCareIdentity => selfCareIdentity.identity_token),
     TE.fromEither,
-    TE.chain(verifyToken(config)),
+    TE.chainW(verifyToken(config)),
     TE.bindTo("identityTokenPayload"),
-    TE.bind("apimUser", ({ identityTokenPayload }) =>
+    a => a,
+    TE.bindW("apimUser", ({ identityTokenPayload }) =>
       pipe(identityTokenPayload, retrieveOrCreateApimUser(config))
     ),
-    TE.bind("subscriptionManage", ({ apimUser }) =>
+    a => a,
+    TE.bindW("subscriptionManage", ({ apimUser }) =>
       pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config))
     ),
-    TE.bind("authorizedInstitutions", ({ identityTokenPayload }) =>
+    a => a,
+    TE.bindW("authorizedInstitutions", ({ identityTokenPayload }) =>
       TE.tryCatch(
         () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
         E.toError
       )
     ),
-    TE.bind("institution", ({ identityTokenPayload }) =>
+    a => a,
+    TE.bindW("institution", ({ identityTokenPayload }) =>
       TE.tryCatch(
         () => pipe(identityTokenPayload.organization.id, getInstitutionById),
         E.toError
       )
     ),
+    a => a,
     TE.map(toUser),
+    a => a,
     TE.getOrElse(e => {
-      if (e instanceof Error) {
+      if (e instanceof AuthorizeError) {
+        console.error(
+          `AutorizeError: ${e.message} reason => ${JSON.stringify(e.reason)}`
+        );
+      } else if (e instanceof Error) {
         console.error(e);
       } else {
         console.error("unknown error", e);
@@ -107,7 +118,7 @@ const verifyToken = (config: Configuration) => (
 
 const retrieveOrCreateApimUser = (config: Configuration) => (
   identityTokenPayload: IdentityTokenPayload
-): TE.TaskEither<Error, ApimUser> =>
+): TE.TaskEither<Error | AuthorizeError, ApimUser> =>
   pipe(
     formatApimAccountEmailForSelfcareOrganization(
       identityTokenPayload.organization
@@ -147,7 +158,7 @@ const retrieveOrCreateApimUser = (config: Configuration) => (
                     apimUser.name as NonEmptyString,
                     "apiservicewrite"
                   ),
-                  TE.chain(user =>
+                  TE.chainW(user =>
                     retrieveUserByEmail(user.email as EmailString)
                   ),
                   TE.chain(TE.fromOption(() => new Error(`Cannot find user`)))
@@ -178,13 +189,16 @@ const formatApimAccountEmailForSelfcareOrganization = (
 
 const retrieveUserByEmail = (
   userEmail: EmailString
-): TE.TaskEither<Error, O.Option<UserContract>> =>
+): TE.TaskEither<AuthorizeError, O.Option<UserContract>> =>
   pipe(
     getApimService(),
     apimService => apimService.getUserByEmail(userEmail, true),
     TE.mapLeft(
       err =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
+        new AuthorizeError(
+          `Failed to fetch user by its email, code: ${err.statusCode}`,
+          err
+        )
     )
   );
 
@@ -227,8 +241,9 @@ const createUserGroup = (
       apimService.createGroupUser(groupId as NonEmptyString, apimUserId),
     TE.mapLeft(
       err =>
-        new Error(
-          `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`
+        new AuthorizeError(
+          `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`,
+          err
         )
     )
   );
@@ -280,7 +295,7 @@ const createEmptyManageCidrs = (
 
 const getUserSubscriptionManage = (
   apimUser: ApimUser
-): TE.TaskEither<Error, O.Option<SubscriptionContract>> =>
+): TE.TaskEither<AuthorizeError, O.Option<SubscriptionContract>> =>
   pipe(
     getApimService(),
     apimService =>
@@ -293,8 +308,9 @@ const getUserSubscriptionManage = (
           err.statusCode === 404
             ? E.right(O.none)
             : E.left(
-                new Error(
-                  `Failed to fetch user subscription manage, code: ${err.statusCode}`
+                new AuthorizeError(
+                  `Failed to fetch user subscription manage, code: ${err.statusCode}`,
+                  err
                 )
               ),
         TE.fromEither
@@ -305,11 +321,11 @@ const getUserSubscriptionManage = (
 
 const createSubscriptionManage = (config: Configuration) => (
   apimUser: ApimUser
-): TE.TaskEither<Error, SubscriptionContract> =>
+): TE.TaskEither<Error | AuthorizeError, SubscriptionContract> =>
   pipe(getApimService(), apimService =>
     pipe(
       getProductId(config),
-      TE.chain(productId =>
+      TE.chainW(productId =>
         pipe(
           apimService.upsertSubscription(
             productId,
@@ -318,8 +334,9 @@ const createSubscriptionManage = (config: Configuration) => (
           ),
           TE.mapLeft(
             err =>
-              new Error(
-                `Failed to create subscription manage, code: ${err.statusCode}`
+              new AuthorizeError(
+                `Failed to create subscription manage, code: ${err.statusCode}`,
+                err
               )
           )
         )
@@ -330,14 +347,15 @@ const createSubscriptionManage = (config: Configuration) => (
 // TODO: refactor: move to common package (also used by services-cmsq, see create-service.ts)
 const getProductId = ({
   AZURE_APIM_PRODUCT_NAME
-}: Configuration): TE.TaskEither<Error, NonEmptyString> =>
+}: Configuration): TE.TaskEither<Error | AuthorizeError, NonEmptyString> =>
   pipe(
     getApimService(),
     apimService => apimService.getProductByName(AZURE_APIM_PRODUCT_NAME),
     TE.mapLeft(
       err =>
-        new Error(
-          `Failed to fetch product by its name, code: ${err.statusCode}`
+        new AuthorizeError(
+          `Failed to fetch product by its name, code: ${err.statusCode}`,
+          err
         )
     ),
     TE.chain(TE.fromOption(() => new Error(`Cannot find product`))),
