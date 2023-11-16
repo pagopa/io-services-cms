@@ -39,7 +39,7 @@
     "applicationinsights": "^2.9.0",
     "axios": "^1.6.0",
     "eslint": "8.50.0",
-    "eslint-config-next": "^13.5.3",
+    "eslint-config-next": "^13.5.6",
     "fp-ts": "^2.13.1",
     "i18next": "^23.5.1",
     "io-ts": "^2.2.20",
