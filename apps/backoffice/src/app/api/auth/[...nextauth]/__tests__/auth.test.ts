@@ -755,7 +755,7 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    getUserAuthorizedInstitutions.mockRejectedValueOnce(errorMessage);
+    getUserAuthorizedInstitutions.mockRejectedValueOnce(new Error(errorMessage));
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
@@ -792,7 +792,7 @@ describe("Authorize", () => {
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
     getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
-    getInstitutionById.mockRejectedValueOnce(errorMessage);
+    getInstitutionById.mockRejectedValueOnce(new Error(errorMessage));
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
