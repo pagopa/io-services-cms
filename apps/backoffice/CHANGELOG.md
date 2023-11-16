@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.1.0
+
+### Minor Changes
+
+- 6b3c6f7: Enable institution selection (party switch)
+
+### Patch Changes
+
+- 8ad86f2: decrease session duration to 12 hours
+- ca612ae: Detailed logs on auth Route Handler
+
 ## 1.0.0
 
 ### Major Changes
