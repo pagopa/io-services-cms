@@ -660,7 +660,7 @@ describe("Authorize", () => {
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
     getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
     upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    upsertSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(errorMessage);
+    upsertSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(new Error(errorMessage));
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
