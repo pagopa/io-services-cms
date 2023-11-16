@@ -74,7 +74,7 @@ export const authorize = (
       let errorToThrow: Error;
       if (e instanceof ManagedInternalError) {
         console.error(
-          `AutorizeError: ${e.message} additionalDetails => ${e.additionalDetails}`
+          `An error has occurred when authorize user, ${e.message} additionalDetails => ${e.additionalDetails}`
         );
         errorToThrow = new Error(e.message);
       } else if (e instanceof Error) {

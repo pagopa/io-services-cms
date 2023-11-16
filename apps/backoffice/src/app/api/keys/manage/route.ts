@@ -2,7 +2,7 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND
 } from "@/config/constants";
-import { ApiKeyNotFoundError } from "@/lib/be/errors";
+import { ApiKeyNotFoundError, handlerErrorLog } from "@/lib/be/errors";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -24,8 +24,8 @@ export const GET = withJWTAuthHandler(
 
       return NextResponse.json(manageKeysResponse);
     } catch (error) {
-      console.log(
-        `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+      handlerErrorLog(
+        `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,
         error
       );
       if (error instanceof ApiKeyNotFoundError) {

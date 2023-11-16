@@ -3,6 +3,7 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR
 } from "@/config/constants";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
+import { handlerErrorLog } from "@/lib/be/errors";
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -42,8 +43,8 @@ export const PUT = withJWTAuthHandler(
 
       return NextResponse.json(manageKeysResponse);
     } catch (error) {
-      console.log(
-        `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+      handlerErrorLog(
+        `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,
         error
       );
       return NextResponse.json(

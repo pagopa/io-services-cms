@@ -67,6 +67,24 @@ export const handleInternalErrorResponse = (
   );
 };
 
+export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
+  if (e instanceof ManagedInternalError) {
+    console.error(
+      `${logPrefix}, caused by: ${e.message} , additionalDetails: ${e.additionalDetails}`
+    );
+    return;
+  } else if (e instanceof Error) {
+    console.error(`${logPrefix}, caused by: `, e);
+    return;
+  } else {
+    console.error(
+      `${logPrefix} , caused by: unknown error ,additionalDetails: ${JSON.stringify(
+        e
+      )}`
+    );
+  }
+};
+
 export const cosmosErrorsToManagedInternalError = (
   message: string,
   errs: CosmosErrors

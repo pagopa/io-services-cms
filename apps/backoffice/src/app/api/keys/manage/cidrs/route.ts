@@ -3,11 +3,12 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR
 } from "@/config/constants";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { handlerErrorLog } from "@/lib/be/errors";
 import {
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs
 } from "@/lib/be/keys/business";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
@@ -30,8 +31,8 @@ export const GET = withJWTAuthHandler(
         cidrs: authorizedCIDRsResponse
       });
     } catch (error) {
-      console.log(
-        `An Error has occurred while retrieving Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
+      handlerErrorLog(
+        `An Error has occurred while retrieving Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,
         error
       );
       return NextResponse.json(
@@ -78,8 +79,8 @@ export const PUT = withJWTAuthHandler(
         cidrs: authorizedCIDRsResponse
       });
     } catch (error) {
-      console.log(
-        `An Error has occurred while upserting Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by:`,
+      handlerErrorLog(
+        `An Error has occurred while upserting Manage Key CIDRs for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,
         error
       );
       return NextResponse.json(

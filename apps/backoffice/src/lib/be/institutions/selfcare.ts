@@ -18,12 +18,9 @@ export const getUserAuthorizedInstitutions = async (
 
   // errore validazione parametri chiamata
   if (E.isLeft(apiResult)) {
-    console.error(
-      `An error has occurred while calling selfcare getInstitutionsUsingGET API, caused by: `,
-      apiResult.left
-    );
     throw new ManagedInternalError(
-      "Error calling selfcare getInstitutionsUsingGET API"
+      "Error calling selfcare getInstitutionsUsingGET API",
+      apiResult.left
     );
   }
 
@@ -43,11 +40,11 @@ export const getInstitutionById = async (id: string): Promise<Institution> => {
         `Institution having id '${id}' does not exists`
       );
     }
-    console.error(
-      `An error has occurred while calling selfcare getInstitution API, caused by: `,
+
+    throw new ManagedInternalError(
+      "Error calling selfcare getInstitution API",
       apiResult.left
     );
-    throw new ManagedInternalError("Error calling selfcare getInstitution API");
   }
 
   return apiResult.right;
