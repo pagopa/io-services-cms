@@ -51,31 +51,25 @@ export const authorize = (
     TE.fromEither,
     TE.chainW(verifyToken(config)),
     TE.bindTo("identityTokenPayload"),
-    a => a,
     TE.bindW("apimUser", ({ identityTokenPayload }) =>
       pipe(identityTokenPayload, retrieveOrCreateApimUser(config))
     ),
-    a => a,
     TE.bindW("subscriptionManage", ({ apimUser }) =>
       pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config))
     ),
-    a => a,
     TE.bindW("authorizedInstitutions", ({ identityTokenPayload }) =>
       TE.tryCatch(
         () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
         extractTryCatchError
       )
     ),
-    a => a,
     TE.bindW("institution", ({ identityTokenPayload }) =>
       TE.tryCatch(
         () => pipe(identityTokenPayload.organization.id, getInstitutionById),
         extractTryCatchError
       )
     ),
-    a => a,
     TE.map(toUser),
-    a => a,
     TE.getOrElse(e => {
       let errorToThrow: Error;
       if (e instanceof ManagedInternalError) {
