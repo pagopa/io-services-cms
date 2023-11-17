@@ -110,3 +110,21 @@ export const extractTryCatchError = (
   }
   return new ManagedInternalError("Unknown Error", e);
 };
+
+type ApimErrorAdapter = {
+  name?: string;
+  code?: string;
+  statusCode: number;
+  details?: unknown;
+};
+
+export const apimErrorToManagedInternalError = (
+  message: string,
+  err: ApimErrorAdapter
+): ManagedInternalError => {
+  return new ManagedInternalError(message, {
+    name: err.name,
+    code: err.code,
+    details: err.details
+  });
+};

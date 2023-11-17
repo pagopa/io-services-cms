@@ -1,7 +1,11 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { getApimService } from "@/lib/be/apim-service";
-import { ManagedInternalError, extractTryCatchError } from "@/lib/be/errors";
+import {
+  ManagedInternalError,
+  apimErrorToManagedInternalError,
+  extractTryCatchError
+} from "@/lib/be/errors";
 import {
   getInstitutionById,
   getUserAuthorizedInstitutions
@@ -180,8 +184,12 @@ const formatApimAccountEmailForSelfcareOrganization = (
 ): EmailString =>
   pipe(
     EmailString.decode(`org.${organization.id}@selfcare.io.pagopa.it`),
-    E.getOrElseW((e) => {
-      throw new Error(`Cannot format APIM account email for the organization, ${readableReport(e)}`);
+    E.getOrElseW(e => {
+      throw new Error(
+        `Cannot format APIM account email for the organization, ${readableReport(
+          e
+        )}`
+      );
     })
   );
 
@@ -191,12 +199,11 @@ const retrieveUserByEmail = (
   pipe(
     getApimService(),
     apimService => apimService.getUserByEmail(userEmail, true),
-    TE.mapLeft(
-      err =>
-        new ManagedInternalError(
-          `Failed to fetch user by its email, code: ${err.statusCode}`,
-          err
-        )
+    TE.mapLeft(err =>
+      apimErrorToManagedInternalError(
+        `Failed to fetch user by its email, code: ${err.statusCode}`,
+        err
+      )
     )
   );
 
@@ -214,8 +221,11 @@ const createApimUser = (config: Configuration) => (
         lastName: identityTokenPayload.organization.id,
         note: identityTokenPayload.organization.fiscal_code
       }),
-    TE.mapLeft(
-      err => new Error(`Failed to create apim user, code: ${err.statusCode}`)
+    TE.mapLeft(err =>
+      apimErrorToManagedInternalError(
+        `Failed to create apim user, code: ${err.statusCode}`,
+        err
+      )
     ),
     TE.chainW(apimUser =>
       pipe(
@@ -237,12 +247,11 @@ const createUserGroup = (
     getApimService(),
     apimService =>
       apimService.createGroupUser(groupId as NonEmptyString, apimUserId),
-    TE.mapLeft(
-      err =>
-        new ManagedInternalError(
-          `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`,
-          err
-        )
+    TE.mapLeft(err =>
+      apimErrorToManagedInternalError(
+        `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`,
+        err
+      )
     )
   );
 
@@ -306,7 +315,7 @@ const getUserSubscriptionManage = (
           err.statusCode === 404
             ? E.right(O.none)
             : E.left(
-                new ManagedInternalError(
+                apimErrorToManagedInternalError(
                   `Failed to fetch user subscription manage, code: ${err.statusCode}`,
                   err
                 )
@@ -330,12 +339,11 @@ const createSubscriptionManage = (config: Configuration) => (
             apimUser.id,
             ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
           ),
-          TE.mapLeft(
-            err =>
-              new ManagedInternalError(
-                `Failed to create subscription manage, code: ${err.statusCode}`,
-                err
-              )
+          TE.mapLeft(err =>
+            apimErrorToManagedInternalError(
+              `Failed to create subscription manage, code: ${err.statusCode}`,
+              err
+            )
           )
         )
       )
@@ -349,12 +357,11 @@ const getProductId = ({
   pipe(
     getApimService(),
     apimService => apimService.getProductByName(AZURE_APIM_PRODUCT_NAME),
-    TE.mapLeft(
-      err =>
-        new ManagedInternalError(
-          `Failed to fetch product by its name, code: ${err.statusCode}`,
-          err
-        )
+    TE.mapLeft(err =>
+      apimErrorToManagedInternalError(
+        `Failed to fetch product by its name, code: ${err.statusCode}`,
+        err
+      )
     ),
     TE.chain(
       TE.fromOption(() => new ManagedInternalError(`Cannot find product`))
