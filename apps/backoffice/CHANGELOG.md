@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.1.1
+
+### Patch Changes
+
+- e9dca06: apim rest error shrink log
+
 ## 1.1.0
 
 ### Minor Changes
