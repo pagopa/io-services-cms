@@ -24,6 +24,8 @@ export type Configuration = {
   BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
 
   // Selfcare
+  SELFCARE_ID: string;
+  SELFCARE_TITLE: string;
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
   SELFCARE_EXTERNAL_API_BASE_URL: string;
@@ -93,6 +95,8 @@ export function getConfiguration(): Configuration {
       .NEXT_PUBLIC_BACK_OFFICE_OPERATIVE_MANUAL_URL as string,
 
     // Selfcare
+    SELFCARE_ID: process.env.NEXT_PUBLIC_SELFCARE_ID as string,
+    SELFCARE_TITLE: process.env.NEXT_PUBLIC_SELFCARE_TITLE as string,
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
