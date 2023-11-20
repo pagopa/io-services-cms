@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.2.0
+
+### Minor Changes
+
+- cecb2e9: Added product switch on header
+
 ## 1.1.1
 
 ### Patch Changes
