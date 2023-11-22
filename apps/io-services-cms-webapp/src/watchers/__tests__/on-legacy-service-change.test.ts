@@ -153,6 +153,57 @@ describe("On Legacy Service Change Handler", () => {
     }
   });
 
+  it("should map a deleted item having DELETE name with -", async () => {
+    const item = {
+      ...aLegacyService,
+      serviceName: "DELETED",
+    } as unknown as LegacyService;
+
+    const mockConfig = {
+      USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
+    } as unknown as IConfig;
+
+    const mockServiceModel = {
+      find: vi.fn(() => TE.right(O.some(aLegacyService))),
+    } as unknown as ServiceModel;
+
+    const result = await handler(
+      mockConfig,
+      mockApimService,
+      mockServiceModel
+    )({ item })();
+
+    expect(mockServiceModel.find).not.toHaveBeenCalled();
+    expect(E.isRight(result)).toBeTruthy();
+
+    if (E.isRight(result)) {
+      expect(result.right).toStrictEqual({
+        requestSyncCms: [
+          {
+            ...aServiceLifecycleItem,
+            data: {
+              ...aServiceLifecycleItem.data,
+              name: "-" as NonEmptyString,
+            },
+            fsm: {
+              state: "deleted",
+            },
+            kind: "LifecycleItemType",
+          },
+          {
+            ...aServicePublicationItem,
+            data: {
+              ...aServicePublicationItem.data,
+              name: "-" as NonEmptyString,
+            },
+            fsm: { state: "unpublished" },
+            kind: "PublicationItemType",
+          },
+        ],
+      });
+    }
+  });
+
   it("should map a new item to a requestSyncCms action containing a service lifecycle with the description placeholder", async () => {
     const item = {
       authorizedCIDRs: ["127.0.0.1"],
