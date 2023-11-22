@@ -181,7 +181,10 @@ describe("On Legacy Service Change Handler", () => {
         requestSyncCms: [
           {
             ...aServiceLifecycleItem,
-            name: "-",
+            data: {
+              ...aServiceLifecycleItem.data,
+              name: "-" as NonEmptyString,
+            },
             fsm: {
               state: "deleted",
             },
@@ -189,7 +192,10 @@ describe("On Legacy Service Change Handler", () => {
           },
           {
             ...aServicePublicationItem,
-            name: "-",
+            data: {
+              ...aServicePublicationItem.data,
+              name: "-" as NonEmptyString,
+            },
             fsm: { state: "unpublished" },
             kind: "PublicationItemType",
           },
