@@ -69,7 +69,9 @@ type FSM = {
     Transition<Action<"release">, State<"published">, State<"published">>,
     Transition<Action<"publish">, void, State<"published">>,
     Transition<Action<"publish">, State<"unpublished">, State<"published">>,
-    Transition<Action<"unpublish">, State<"published">, State<"unpublished">>
+    Transition<Action<"publish">, State<"published">, State<"published">>,
+    Transition<Action<"unpublish">, State<"published">, State<"unpublished">>,
+    Transition<Action<"unpublish">, State<"unpublished">, State<"unpublished">>
   ];
 };
 
@@ -98,6 +100,7 @@ const FSM: FSM = {
             state: "unpublished",
             lastTransition: "apply release on empty",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -113,6 +116,7 @@ const FSM: FSM = {
             state: "unpublished",
             lastTransition: "apply release on unpublished",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -128,6 +132,7 @@ const FSM: FSM = {
             state: "published",
             lastTransition: "apply release on published",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -142,6 +147,7 @@ const FSM: FSM = {
             state: "published",
             lastTransition: "apply publish on empty",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -156,6 +162,18 @@ const FSM: FSM = {
             state: "published",
             lastTransition: "apply publish on unpublished",
           },
+          hasChanges: true,
+        }),
+    },
+    {
+      id: "apply publish on published",
+      action: "publish",
+      from: "published",
+      to: "published",
+      exec: ({ current }) =>
+        E.right({
+          ...current,
+          hasChanges: false,
         }),
     },
     {
@@ -170,6 +188,18 @@ const FSM: FSM = {
             state: "unpublished",
             lastTransition: "apply unpublish on published",
           },
+          hasChanges: true,
+        }),
+    },
+    {
+      id: "apply unpublish on unpublished",
+      action: "unpublish",
+      from: "unpublished",
+      to: "unpublished",
+      exec: ({ current }) =>
+        E.right({
+          ...current,
+          hasChanges: false,
         }),
     },
   ],
@@ -267,7 +297,10 @@ function apply(
                 E.map(
                   RA.map(
                     (tr) =>
-                      (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                      (): E.Either<
+                        FsmTransitionExecutionError,
+                        AllResults & { hasChanges: boolean }
+                      > =>
                         // FIXME: avoid this forcing
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
@@ -298,7 +331,10 @@ function apply(
                     //  bind all data into a lazy implementation of exec
                     E.map(
                       (current) =>
-                        (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                        (): E.Either<
+                          FsmTransitionExecutionError,
+                          AllResults & { hasChanges: boolean }
+                        > =>
                           tr.exec({
                             // FIXME: avoid this forcing
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -336,10 +372,13 @@ function apply(
       TE.map((exec) => exec()),
       TE.map(TE.fromEither),
       TE.flattenW,
-      // save new status in the store
-      TE.chain((newItem) =>
+      TE.chain(({ hasChanges, ...newItem }) =>
         pipe(
-          store.save(id, newItem),
+          hasChanges
+            ? // save new status in the store
+              store.save(id, newItem)
+            : // no changes to save
+              TE.right(newItem),
           TE.mapLeft((_) => new FsmStoreSaveError())
         )
       )

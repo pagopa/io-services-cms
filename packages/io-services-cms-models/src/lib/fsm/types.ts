@@ -83,7 +83,10 @@ export type Transition<
         ? { args: Action[1] }
         : { args: undefined }) &
       Record<string, never>
-  ) => E.Either<FsmTransitionExecutionError, WithState<ToState[0], ToState[1]>>;
+  ) => E.Either<
+    FsmTransitionExecutionError,
+    WithState<ToState[0], ToState[1]> & { hasChanges: boolean }
+  >;
 };
 
 export class FsmItemNotFoundError extends Error {
