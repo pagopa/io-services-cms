@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.22.0
+
+### Minor Changes
+
+- b6ae125: make publish and unpublish actions idempotent
+
+### Patch Changes
+
+- a102d23: Add workaround to handle DELETED as service name on OnLegacyServiceChange AZF
+- Updated dependencies [b6ae125]
+  - @io-services-cms/models@1.15.0
+
 ## 1.21.10
 
 ### Patch Changes
