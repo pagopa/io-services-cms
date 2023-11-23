@@ -110,6 +110,7 @@ const FSM: FSM = {
         E.right({
           ...service,
           fsm: { state: "draft", lastTransition: "apply create on *" },
+          hasChanges: true,
         }),
     },
     {
@@ -122,6 +123,7 @@ const FSM: FSM = {
           ...current,
           ...data,
           fsm: { state: "draft", lastTransition: "apply edit on draft" },
+          hasChanges: true,
         }),
     },
     {
@@ -133,6 +135,7 @@ const FSM: FSM = {
         E.right({
           ...current,
           fsm: { state: "deleted", lastTransition: "apply delete on draft" },
+          hasChanges: true,
         }),
     },
     {
@@ -148,6 +151,7 @@ const FSM: FSM = {
             autoPublish,
             lastTransition: "apply submit on draft",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -159,6 +163,7 @@ const FSM: FSM = {
         E.right({
           ...current,
           fsm: { state: "draft", lastTransition: "apply abort on submitted" },
+          hasChanges: true,
         }),
     },
     {
@@ -175,6 +180,7 @@ const FSM: FSM = {
             autoPublish: getAutoPublish(current),
             lastTransition: "apply approve on submitted",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -190,6 +196,7 @@ const FSM: FSM = {
             reason,
             lastTransition: "apply reject on submitted",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -204,6 +211,7 @@ const FSM: FSM = {
             state: "deleted",
             lastTransition: "apply delete on rejected",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -218,6 +226,7 @@ const FSM: FSM = {
             state: "deleted",
             lastTransition: "apply delete on approved",
           },
+          hasChanges: true,
         }),
     },
     {
@@ -230,6 +239,7 @@ const FSM: FSM = {
           ...current,
           ...data,
           fsm: { state: "draft", lastTransition: "apply edit on reject" },
+          hasChanges: true,
         }),
     },
     {
@@ -242,6 +252,7 @@ const FSM: FSM = {
           ...current,
           ...data,
           fsm: { state: "draft", lastTransition: "apply edit on approved" },
+          hasChanges: true,
         }),
     },
   ],
@@ -353,7 +364,10 @@ function apply(
                 E.map(
                   RA.map(
                     (tr) =>
-                      (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                      (): E.Either<
+                        FsmTransitionExecutionError,
+                        AllResults & { hasChanges: boolean }
+                      > =>
                         // FIXME: avoid this forcing
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
@@ -384,7 +398,10 @@ function apply(
                     //  bind all data into a lazy implementation of exec
                     E.map(
                       (current) =>
-                        (): E.Either<FsmTransitionExecutionError, AllResults> =>
+                        (): E.Either<
+                          FsmTransitionExecutionError,
+                          AllResults & { hasChanges: boolean }
+                        > =>
                           tr.exec({
                             // FIXME: avoid this forcing
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -422,10 +439,13 @@ function apply(
       TE.map((exec) => exec()),
       TE.map(TE.fromEither),
       TE.flattenW,
-      // save new status in the store
-      TE.chain((newItem) =>
+      TE.chain(({ hasChanges, ...newItem }) =>
         pipe(
-          store.save(id, newItem),
+          hasChanges
+            ? // save new status in the store
+              store.save(id, newItem)
+            : // no changes to save
+              TE.right(newItem),
           TE.mapLeft((_) => new FsmStoreSaveError())
         )
       )
