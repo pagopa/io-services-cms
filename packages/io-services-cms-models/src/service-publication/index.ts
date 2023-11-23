@@ -196,6 +196,7 @@ const FSM: FSM = {
       action: "unpublish",
       from: "unpublished",
       to: "unpublished",
+      // eslint-disable-next-line sonarjs/no-identical-functions
       exec: ({ current }) =>
         E.right({
           ...current,
