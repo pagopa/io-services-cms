@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.15.1
+
+### Patch Changes
+
+- e66c6d3: fix autopublish action
+
 ## 1.15.0
 
 ### Minor Changes
