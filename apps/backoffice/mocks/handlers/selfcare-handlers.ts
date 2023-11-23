@@ -29,16 +29,7 @@ export const buildHandlers = () => {
     }),
     rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(
-            [
-              ...Array.from(
-                Array(faker.number.int({ min: 140, max: 145 })).keys()
-              )
-            ].map(_ => getMockInstitution())
-          )
-        ],
+        [ctx.status(200), ctx.json([getMockInstitution()])],
         [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
         [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
       ];
