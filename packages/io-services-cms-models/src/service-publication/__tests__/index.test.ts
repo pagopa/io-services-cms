@@ -272,6 +272,36 @@ describe("apply", () => {
     expect(mockStore.save).not.toHaveBeenCalled();
   });
 
+  it("should override service data when publishing an already published item", async () => {
+    const currentItem = { ...aService, fsm: { state: "published" } };
+    const editedService = {
+      id: aService.id,
+      data: { ...aService.data, description: "edited" as NonEmptyString },
+    };
+    const editedItem = { ...editedService, fms: currentItem.fsm };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.right(editedItem);
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.publish(aServiceId, {
+      data: editedService,
+    })();
+
+    if (E.isLeft(result)) {
+      console.log(result);
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(editedItem);
+    expect(mockStore.save).toHaveBeenCalledOnce();
+  });
+
   it("should 'do nothing' when unpublishing an already unpublished item", async () => {
     const currentItem = { ...aService, fsm: { state: "unpublished" } };
     const mockStore = {

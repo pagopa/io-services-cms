@@ -170,11 +170,28 @@ const FSM: FSM = {
       action: "publish",
       from: "published",
       to: "published",
-      exec: ({ current }) =>
-        E.right({
-          ...current,
-          hasChanges: false,
-        }),
+      exec: ({ current, args }) => {
+        // eslint-disable-next-line no-console
+        console.log(
+          "CALLED APPLY publish FROM published TO published WITH DATA",
+          args
+        );
+        return args
+          ? // publish with service data overriding
+            E.right({
+              ...args.data,
+              fsm: {
+                state: "published",
+                lastTransition: "apply publish on publish",
+              },
+              hasChanges: true,
+            })
+          : // publish without service data overriding
+            E.right({
+              ...current,
+              hasChanges: false,
+            });
+      },
     },
     {
       id: "apply unpublish on published",
