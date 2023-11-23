@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.15.0
+
+### Minor Changes
+
+- b6ae125: make publish and unpublish actions idempotent
+
 ## 1.14.1
 
 ### Patch Changes
