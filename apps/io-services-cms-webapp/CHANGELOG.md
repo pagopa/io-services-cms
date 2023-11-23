@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.22.1
+
+### Patch Changes
+
+- e66c6d3: fix autopublish action
+- Updated dependencies [e66c6d3]
+  - @io-services-cms/models@1.15.1
+
 ## 1.22.0
 
 ### Minor Changes
