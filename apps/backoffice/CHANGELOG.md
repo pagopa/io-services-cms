@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 1.2.3
+
+### Patch Changes
+
+- 610b086: UPDATE User Authorized institution API response type
+- e350173: reintroduced GET /api/institutions API, which returns all the user's authorized institutions
+- 44d7988: Frontend header: get user authorized institutions from api instead of session token
+- cbded9f: remove uthorized institutions from session token
+- aad15fe: truncate organization name to 100 characters before set apim user lastName fields during apim user creation
+
 ## 1.2.2
 
 ### Patch Changes
