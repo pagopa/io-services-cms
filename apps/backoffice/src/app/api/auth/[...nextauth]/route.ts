@@ -22,7 +22,6 @@ const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.institution = user.institution;
-        token.authorizedInstitutions = user.authorizedInstitutions;
         token.permissions = user.permissions;
         token.parameters = user.parameters;
       }
@@ -33,7 +32,6 @@ const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.institution = token.institution;
-        session.user.authorizedInstitutions = token.authorizedInstitutions;
         session.user.permissions = token.permissions;
         session.user.parameters = token.parameters;
       }

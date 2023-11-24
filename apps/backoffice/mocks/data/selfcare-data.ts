@@ -1,7 +1,4 @@
-import { SelfcareRoles } from "@/types/auth";
 import { faker } from "@faker-js/faker/locale/it";
-
-const MAX_ARRAY_LENGTH = 20;
 
 export const aMockedIdentiyToken =
   "eyJraWQiOiJkNDoxZDo4YzpkOTo4ZjowMDpiMjowNDplOTo4MDowOTo5ODplYzpmODo0Mjo3ZSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJlbWFpbCI6Im0uY3VyaWVAdGVzdC5lbWFpbC5pdCIsImZhbWlseV9uYW1lIjoiQ3VyaWUiLCJmaXNjYWxfbnVtYmVyIjoiQ1JVTVJBNzZTNThBOTQ0ViIsIm5hbWUiOiJNYXJpZSIsImZyb21fYWEiOmZhbHNlLCJ1aWQiOiIyYjEwODUyZi1hNGZkLTRhZTgtOWRmYy1hYzM1NzhmYzViMjEiLCJsZXZlbCI6IkwyIiwiaWF0IjoxNjk2NTExNDI1LCJleHAiOjE3OTY1MTE0NDAsImF1ZCI6ImxvY2FsaG9zdCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9tb2Nrcy9zZWxmY2FyZSIsImp0aSI6IjUyMjE2OTkyLTY3MGEtNDUzYi1hYTVmLWU4NmI0ZGM3OGM3YSIsIm9yZ2FuaXphdGlvbiI6eyJpZCI6Ijc0ZGFlZmRhLTdlNzItNDZlMi04MTVhLWIyNmQzYmY5ODk4OCIsIm5hbWUiOiJDb211bmUgZGkgQ2lzdGVybmlubyIsInJvbGVzIjpbeyJwYXJ0eVJvbGUiOiJERUxFR0FURSIsInJvbGUiOiJhZG1pbiJ9XSwic3ViVW5pdENvZGUiOm51bGwsInN1YlVuaXRUeXBlIjoiRUMiLCJhb29QYXJlbnQiOm51bGwsInBhcmVudERlc2NyaXB0aW9uIjpudWxsLCJyb290UGFyZW50Ijp7ImlkIjpudWxsLCJkZXNjcmlwdGlvbiI6bnVsbH0sImZpc2NhbF9jb2RlIjoiODEwMDE0NzA3NDkiLCJpcGFDb2RlIjoiY19jNzQxIn0sImRlc2lyZWRfZXhwIjoxNjk2NTQzNzczfQ.raB5wxcW-GqsyvYN151qL4FvX-0se--OwDyWOFZ6qjkSvLjHdXW2VhaDLM1bt-KI2GE_ytXq-WmsMH9ZtmkAbV9BqjrtgxavnPxnWrH9PlabccFfssaUpR2pdpMExV4Lkl0qykNIvW2dUV72Hua4nMutG8I5Gb5ON24yn5ISisTe8x7R1vfDhAYKRs86Jx_vKpWAcGuyTAe1NZWN3yefxTt5_589bPvNq9htYT4DtJkLQQSxBi25Tv-O6ap_L40eMK0HHbi0r62NZ-cl_kZ5oX0Rf5WUAcLcrLuCXTxXNgqaIFlqlqoFsqxYtgXQYqJhB3vLfN6f6CiTZxeXDiA8bA";
@@ -21,6 +18,20 @@ export const aWellKnown = {
     }
   ]
 };
+
+export const aMockCurrentUserAuthorizedInstitution = {
+  id: "74daefda-7e72-46e2-815a-b26d3bf98988",
+  name: "Comune di Cisternino",
+  role: "admin",
+  logo_url: ""
+};
+
+export const getMockUserAuthorizedInstitution = () => ({
+  id: faker.string.uuid(),
+  name: faker.company.name(),
+  role: faker.helpers.arrayElement(["admin", "operator"]),
+  logo_url: ""
+});
 
 export const getMockInstitution = (institutionId?: string) => ({
   id: institutionId ?? faker.string.uuid(),
