@@ -49,6 +49,7 @@ export const JiraConfig = t.type({
   JIRA_DELEGATE_NAME_CUSTOM_FIELD: NonEmptyString,
   JIRA_ORGANIZATION_CF_CUSTOM_FIELD: NonEmptyString,
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
+  JIRA_TRANSITION_UPDATED_ID: NonEmptyString,
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
