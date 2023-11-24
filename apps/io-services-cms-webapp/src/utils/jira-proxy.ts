@@ -41,6 +41,14 @@ export type JiraProxy = {
   readonly getPendingJiraIssueByServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
+  readonly updateJiraIssue: (
+    ticketKey: NonEmptyString,
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ) => TE.TaskEither<Error, void>;
+  readonly reOpenJiraIssue: (
+    ticketKey: NonEmptyString
+  ) => TE.TaskEither<Error, void>;
 };
 
 export type Delegate = {
@@ -116,6 +124,28 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       buildIssueDescription(service, delegate),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
+    );
+
+  const updateJiraIssue = (
+    ticketKey: NonEmptyString,
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ): TE.TaskEither<Error, void> =>
+    jiraClient.updateJiraIssue(
+      ticketKey,
+      formatIssueTitle(service.id),
+      buildIssueDescription(service, delegate),
+      [`service-${service.id}` as NonEmptyString],
+      buildIssueCustomFields(service, delegate)
+    );
+
+  const reOpenJiraIssue = (
+    ticketKey: NonEmptyString
+  ): TE.TaskEither<Error, void> =>
+    jiraClient.applyJiraIssueTransition(
+      ticketKey,
+      jiraClient.config.JIRA_TRANSITION_UPDATED_ID,
+      "L'ente ha richiesto una nuova review"
     );
 
   const buildSearchIssuesBasePayload = (
@@ -202,5 +232,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     searchJiraIssuesByKeyAndStatus,
     getJiraIssueByServiceId,
     getPendingJiraIssueByServiceId,
+    updateJiraIssue,
+    reOpenJiraIssue,
   };
 };
