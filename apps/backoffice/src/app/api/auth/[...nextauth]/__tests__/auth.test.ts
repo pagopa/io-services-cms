@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
 import { Institution } from "../../../../../types/selfcare/Institution";
-import { InstitutionResources } from "../../../../../types/selfcare/InstitutionResource";
 import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
@@ -43,7 +42,7 @@ const aValidJwtPayload = {
     ],
     groups: [faker.string.alpha()]
   }
-};
+} as IdentityTokenPayload;
 
 const aValidApimUser = {
   id: faker.string.uuid(),
@@ -82,7 +81,6 @@ const getExpectedUser = (
   jwtPayload: IdentityTokenPayload,
   apimUser: typeof aValidApimUser,
   manageSubscription: typeof aValidSubscription,
-  authorizedInstitutions: InstitutionResources,
   institution: Institution
 ) => ({
   id: jwtPayload.uid,
@@ -95,12 +93,6 @@ const getExpectedUser = (
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo
   },
-  authorizedInstitutions: authorizedInstitutions.map(institution => ({
-    id: institution.id,
-    name: institution.description,
-    role: institution.userProductRoles?.[0],
-    logo_url: institution.logo
-  })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
     .map(group => group.name),
@@ -110,10 +102,6 @@ const getExpectedUser = (
     subscriptionId: manageSubscription.name
   }
 });
-
-const aValidInstitutions: InstitutionResources = faker.helpers.arrayElements(
-  Array(5).fill(getMockInstitution())
-);
 
 const aValidInstitution = (getMockInstitution() as unknown) as Institution;
 
@@ -161,15 +149,11 @@ vi.mock("jose", async importOriginal => {
   };
 });
 
-const { getUserAuthorizedInstitutions, getInstitutionById } = vi.hoisted(
-  () => ({
-    getUserAuthorizedInstitutions: vi.fn(),
-    getInstitutionById: vi.fn()
-  })
-);
+const { getInstitutionById } = vi.hoisted(() => ({
+  getInstitutionById: vi.fn()
+}));
 
 vi.mock("@/lib/be/institutions/selfcare", () => ({
-  getUserAuthorizedInstitutions,
   getInstitutionById
 }));
 
@@ -198,7 +182,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -217,7 +200,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -244,7 +226,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -276,7 +257,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -323,7 +303,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -367,7 +346,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -412,7 +390,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -458,7 +435,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -501,7 +477,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -530,7 +505,6 @@ describe("Authorize", () => {
     expect(getSubscription).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -564,7 +538,6 @@ describe("Authorize", () => {
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(getProductByName).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -602,7 +575,6 @@ describe("Authorize", () => {
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -647,7 +619,6 @@ describe("Authorize", () => {
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
     expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
@@ -698,7 +669,6 @@ describe("Authorize", () => {
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
   });
 
@@ -748,46 +718,7 @@ describe("Authorize", () => {
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
-    expect(getUserAuthorizedInstitutions).not.toHaveBeenCalled();
     expect(getInstitutionById).not.toHaveBeenCalled();
-  });
-
-  it("should fail when retrieve user authorized institutions fail", async () => {
-    const errorMessage = "Rejected getUserAuthorizedInstitutions";
-    jwtVerify.mockResolvedValueOnce({
-      payload: aValidJwtPayload
-    });
-    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
-    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    getUserAuthorizedInstitutions.mockRejectedValueOnce(
-      new Error(errorMessage)
-    );
-
-    await expect(() =>
-      authorize(mockConfig)({ identity_token: "identity_token" }, {})
-    ).rejects.toThrowError(errorMessage);
-
-    expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledTimes(2);
-    expect(getUserByEmail).toHaveBeenCalledOnce();
-    expect(getUserByEmail).toHaveBeenCalledWith(
-      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
-      true
-    );
-    expect(getSubscription).toHaveBeenCalledOnce();
-    expect(getSubscription).toHaveBeenCalledWith(
-      `MANAGE-${aValidApimUser.name}`
-    );
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-      aValidJwtPayload.uid
-    );
-    expect(createOrUpdateUser).not.toHaveBeenCalled();
-    expect(createGroupUser).not.toHaveBeenCalled();
-    expect(getProductByName).not.toHaveBeenCalled();
-    expect(upsertSubscription).not.toHaveBeenCalled();
-    expect(getInstitutionById).not.toHaveBeenCalled();
-    expect(upsertSubscriptionAuthorizedCIDRs).not.toHaveBeenCalled();
   });
 
   it("should fail when retrieve logged institution details", async () => {
@@ -797,7 +728,6 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
     getInstitutionById.mockRejectedValueOnce(new Error(errorMessage));
 
     await expect(() =>
@@ -814,10 +744,6 @@ describe("Authorize", () => {
     expect(getSubscription).toHaveBeenCalledOnce();
     expect(getSubscription).toHaveBeenCalledWith(
       `MANAGE-${aValidApimUser.name}`
-    );
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-      aValidJwtPayload.uid
     );
     expect(getInstitutionById).toHaveBeenCalledOnce();
     expect(getInstitutionById).toHaveBeenCalledWith(
@@ -836,7 +762,6 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
     getInstitutionById.mockResolvedValueOnce(aValidInstitution);
 
     const user = await authorize(mockConfig)(
@@ -849,7 +774,6 @@ describe("Authorize", () => {
         aValidJwtPayload,
         aValidApimUser,
         aValidSubscription,
-        aValidInstitutions,
         aValidInstitution
       )
     );
@@ -860,10 +784,6 @@ describe("Authorize", () => {
     expect(getSubscription).toHaveBeenCalledOnce();
     expect(getSubscription).toHaveBeenCalledWith(
       `MANAGE-${aValidApimUser.name}`
-    );
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-      aValidJwtPayload.uid
     );
     expect(getInstitutionById).toHaveBeenCalledOnce();
     expect(getInstitutionById).toHaveBeenCalledWith(
@@ -889,7 +809,6 @@ describe("Authorize", () => {
     getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
     upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
     upsertSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(void 0);
-    getUserAuthorizedInstitutions.mockResolvedValueOnce(aValidInstitutions);
     getInstitutionById.mockResolvedValueOnce(aValidInstitution);
 
     const user = await authorize(mockConfig)(
@@ -902,7 +821,6 @@ describe("Authorize", () => {
         aValidJwtPayload,
         aValidApimUser,
         aValidSubscription,
-        aValidInstitutions,
         aValidInstitution
       )
     );
@@ -945,10 +863,6 @@ describe("Authorize", () => {
     expect(upsertSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
       aValidSubscription.name,
       []
-    );
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledOnce();
-    expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
-      aValidJwtPayload.uid
     );
     expect(getInstitutionById).toHaveBeenCalledOnce();
     expect(getInstitutionById).toHaveBeenCalledWith(

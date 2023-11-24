@@ -6,13 +6,9 @@ import {
   apimErrorToManagedInternalError,
   extractTryCatchError
 } from "@/lib/be/errors";
-import {
-  getInstitutionById,
-  getUserAuthorizedInstitutions
-} from "@/lib/be/institutions/selfcare";
+import { getInstitutionById } from "@/lib/be/institutions/selfcare";
 import { upsertSubscriptionAuthorizedCIDRs } from "@/lib/be/keys/cosmos";
 import { Institution } from "@/types/selfcare/Institution";
-import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -60,12 +56,6 @@ export const authorize = (
     ),
     TE.bindW("subscriptionManage", ({ apimUser }) =>
       pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config))
-    ),
-    TE.bindW("authorizedInstitutions", ({ identityTokenPayload }) =>
-      TE.tryCatch(
-        () => pipe(identityTokenPayload.uid, getUserAuthorizedInstitutions),
-        extractTryCatchError
-      )
     ),
     TE.bindW("institution", ({ identityTokenPayload }) =>
       TE.tryCatch(
@@ -385,13 +375,11 @@ const toUser = ({
   identityTokenPayload,
   apimUser,
   subscriptionManage,
-  authorizedInstitutions,
   institution
 }: {
   identityTokenPayload: IdentityTokenPayload;
   apimUser: ApimUser;
   subscriptionManage: Subscription;
-  authorizedInstitutions: InstitutionResources;
   institution: Institution;
 }): User => ({
   id: identityTokenPayload.uid,
@@ -404,12 +392,6 @@ const toUser = ({
     role: identityTokenPayload.organization.roles[0]?.role,
     logo_url: institution.logo
   },
-  authorizedInstitutions: authorizedInstitutions.map(institution => ({
-    id: institution.id,
-    name: institution.description,
-    role: institution.userProductRoles?.[0],
-    logo_url: institution.logo
-  })),
   permissions: apimUser.groups
     .filter(group => group.type === "custom")
     .map(group => group.name),
