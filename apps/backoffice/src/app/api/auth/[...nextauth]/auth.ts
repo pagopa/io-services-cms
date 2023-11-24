@@ -217,7 +217,7 @@ const createApimUser = (config: Configuration) => (
         email: formatApimAccountEmailForSelfcareOrganization(
           identityTokenPayload.organization
         ),
-        firstName: identityTokenPayload.organization.name,
+        firstName: identityTokenPayload.organization.name.substring(0, 100),
         lastName: identityTokenPayload.organization.id,
         note: identityTokenPayload.organization.fiscal_code
       }),
