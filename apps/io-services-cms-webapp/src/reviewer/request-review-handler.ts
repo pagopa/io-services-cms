@@ -75,7 +75,7 @@ const sendServiceToReview =
   (service: Queue.RequestReviewItem): TE.TaskEither<Error, void> =>
     pipe(
       service.id,
-      jiraProxy.getPendingJiraIssueByServiceId,
+      jiraProxy.getPendingAndRejectedJiraIssueByServiceId,
       TE.chain(
         flow(
           O.fold(
