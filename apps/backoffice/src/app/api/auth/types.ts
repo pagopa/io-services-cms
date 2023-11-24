@@ -1,5 +1,10 @@
 import * as t from "io-ts";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import {
+  EmailString,
+  NonEmptyString,
+  OrganizationFiscalCode,
+  FiscalCode
+} from "@pagopa/ts-commons/lib/strings";
 
 export type SessionTokenInstitution = t.TypeOf<typeof SessionTokenInstitution>;
 export const SessionTokenInstitution = t.intersection([
@@ -55,21 +60,21 @@ export type IdentityTokenOrganizationRole = t.TypeOf<
   typeof IdentityTokenOrganizationRole
 >;
 export const IdentityTokenOrganizationRole = t.type({
-  partyRole: t.string,
-  role: t.string
+  partyRole: NonEmptyString,
+  role: NonEmptyString
 });
 export type IdentityTokenOrganization = t.TypeOf<
   typeof IdentityTokenOrganization
 >;
 export const IdentityTokenOrganization = t.intersection([
   t.type({
-    id: t.string,
-    fiscal_code: t.string,
-    name: t.string,
+    id: NonEmptyString,
+    fiscal_code: OrganizationFiscalCode,
+    name: NonEmptyString,
     roles: t.array(IdentityTokenOrganizationRole)
   }),
   t.partial({
-    groups: t.array(t.string)
+    groups: t.array(NonEmptyString)
   })
 ]);
 
@@ -88,16 +93,16 @@ export const IdentityTokenPayload = t.type({
   /** (JWT ID) Claim */
   jti: t.string,
   /** (Surname or last name) Claim */
-  family_name: t.string,
+  family_name: NonEmptyString,
   /** (Given name or first name) Claim */
-  name: t.string,
+  name: NonEmptyString,
   /** (Preferred e-mail address) Claim */
-  email: t.string,
+  email: EmailString,
   // Custom Claims
   /** (User ID) Claim */
-  uid: t.string,
+  uid: NonEmptyString,
   /** (Fiscal code) Custom Claim */
-  fiscal_number: t.string,
+  fiscal_number: FiscalCode,
   /** (Desired Expired Time) Claim */
   desired_exp: t.number,
   /** (Selfcare Institution) Custom Claim */

@@ -15,6 +15,8 @@ const mockConfig = ({
   AZURE_APIM_PRODUCT_NAME: faker.string.alpha()
 } as unknown) as Configuration;
 
+const first100CharsOrgName = faker.string.alpha(100);
+
 const aValidJwtPayload = {
   exp: faker.number.int(),
   iat: faker.number.int(),
@@ -25,12 +27,14 @@ const aValidJwtPayload = {
   name: faker.person.firstName(),
   email: faker.internet.email(),
   uid: faker.string.uuid(),
-  fiscal_number: faker.string.alphanumeric(),
+  fiscal_number: faker.helpers.fromRegExp(
+    /[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]/
+  ),
   desired_exp: faker.number.int(),
   organization: {
     id: faker.string.uuid(),
-    fiscal_code: faker.string.numeric(),
-    name: faker.company.name(),
+    fiscal_code: faker.helpers.fromRegExp(/[0-9]{11}/),
+    name: `${first100CharsOrgName} ${faker.company.name()}`,
     roles: [
       {
         partyRole: faker.string.alpha(),
@@ -65,7 +69,7 @@ const getExpectedCreateUserReqParam = (
   organization: IdentityTokenPayload["organization"]
 ) => ({
   email: `org.${organization.id}@selfcare.io.pagopa.it`,
-  firstName: organization.name,
+  firstName: first100CharsOrgName,
   lastName: organization.id,
   note: organization.fiscal_code
 });
@@ -231,9 +235,7 @@ describe("Authorize", () => {
         },
         {}
       )
-    ).rejects.toThrowError(
-      "value [undefined] at [root.uid] is not a valid [string]"
-    );
+    ).rejects.toThrowError(/is not a valid/);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimService).not.toHaveBeenCalled();
@@ -660,7 +662,9 @@ describe("Authorize", () => {
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
     getProductByName.mockReturnValueOnce(TE.right(O.some({ id: productId })));
     upsertSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    upsertSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(new Error(errorMessage));
+    upsertSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
+      new Error(errorMessage)
+    );
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
@@ -755,7 +759,9 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
-    getUserAuthorizedInstitutions.mockRejectedValueOnce(new Error(errorMessage));
+    getUserAuthorizedInstitutions.mockRejectedValueOnce(
+      new Error(errorMessage)
+    );
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
