@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-getUserAuthorizedInstitutions now returns necessary parameters to caller
+UPDATE User Authorized institution API response type
