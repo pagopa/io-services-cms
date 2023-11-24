@@ -198,7 +198,7 @@ describe("Service Review Proxy", () => {
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
-    const serviceReview = await proxy.getPendingJiraIssueByServiceId(
+    const serviceReview = await proxy.getPendingAndRejectedJiraIssueByServiceId(
       "aWrongServiceId" as NonEmptyString
     )();
 
