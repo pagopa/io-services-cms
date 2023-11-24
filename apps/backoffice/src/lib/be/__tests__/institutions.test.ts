@@ -14,20 +14,32 @@ import {
 
 const mocks: {
   institution: Institution;
-  institutions: InstitutionResources;
+  institutionResources: InstitutionResources;
   aSelfcareUserId: string;
 } = vi.hoisted(() => ({
   institution: { id: "institutionId" } as Institution,
-  institutions: [
-    { id: "institutionId1" } as InstitutionResource,
-    { id: "institutionId2" } as InstitutionResource
+  institutionResources: [
+    {
+      id: "institutionId1",
+      description: "institutionName1",
+      userProductRoles: ["operator"],
+      logo: "institutionLogo1"
+    } as InstitutionResource,
+    {
+      id: "institutionId2",
+      description: "institutionName2",
+      userProductRoles: ["admin"],
+      logo: "institutionLogo2"
+    } as InstitutionResource
   ],
   aSelfcareUserId: "aSelfcareUserId"
 }));
 
 const { getSelfcareClient } = vi.hoisted(() => ({
   getSelfcareClient: vi.fn().mockReturnValue({
-    getUserAuthorizedInstitutions: vi.fn(() => TE.right(mocks.institutions)),
+    getUserAuthorizedInstitutions: vi.fn(() =>
+      TE.right(mocks.institutionResources)
+    ),
     getInstitutionById: vi.fn(() => TE.right(mocks.institution))
   })
 }));
@@ -48,7 +60,7 @@ describe("Institutions", () => {
   describe("retrireveUserAuthorizedInstitutions", () => {
     it("should return the institutions found", async () => {
       const getUserAuthorizedInstitutions = vi.fn(() =>
-        TE.right(mocks.institutions)
+        TE.right(mocks.institutionResources)
       );
       getSelfcareClient.mockReturnValueOnce({
         getUserAuthorizedInstitutions
@@ -61,7 +73,16 @@ describe("Institutions", () => {
       expect(getUserAuthorizedInstitutions).toHaveBeenCalledWith(
         mocks.aSelfcareUserId
       );
-      expect(result).toEqual(mocks.institutions);
+      expect(result).toEqual({
+        authorizedInstitutions: mocks.institutionResources.map(
+          institutionResource => ({
+            id: institutionResource.id,
+            name: institutionResource.description,
+            role: institutionResource.userProductRoles?.[0],
+            logo_url: institutionResource.logo
+          })
+        )
+      });
     });
 
     it("should rejects", async () => {

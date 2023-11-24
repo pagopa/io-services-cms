@@ -710,9 +710,9 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all institutions
+      summary: Retrieve all user authorized institutions
       description: Retrieves all the onboarded institutions related to the provided user and the product retrieved from Subscription Key
-      operationId: getInstitutions
+      operationId: getUserAuthorizedInstitutions
       security:
         - bearerAuth: []
       responses:
@@ -723,7 +723,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Institution'
+                  $ref: '#/components/schemas/UserAuthorizedInstitutions'
         '401':
           description: Unauthorized
         '403':
@@ -1096,6 +1096,26 @@ components:
           minimum: 0
     Institution:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
+    UserAuthorizedInstitutions:
+      type: object
+      properties:
+        authorizedInstitutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAuthorizedInstitution'
+      required:
+        - institutions
+    UserAuthorizedInstitution:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        logo_url:
+          type: string
     SelfCareIdentity:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/SelfCareIdentity'
     ServiceList:
