@@ -19,7 +19,11 @@ import {
   getMockServicesMigrationStatusDetails
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
-import { getMockInstitution } from "../data/selfcare-data";
+import {
+  aMockCurrentUserAuthorizedInstitution,
+  getMockInstitution,
+  getMockUserAuthorizedInstitution
+} from "../data/selfcare-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -318,7 +322,7 @@ export const buildHandlers = () => {
     }),
     rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetInstitutions200Response())],
+        [ctx.status(200), ctx.json(getUserAuthorizedInstitutions200Response())],
         [ctx.status(401), ctx.json(null)],
         [ctx.status(403), ctx.json(null)],
         [ctx.status(429), ctx.json(null)],
@@ -472,12 +476,15 @@ export function getGetPublishedService200Response() {
   return aMockServicePublication;
 }
 
-export function getGetInstitutions200Response() {
-  return [
-    ...Array.from(
-      Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
-    )
-  ].map(_ => getMockInstitution());
+export function getUserAuthorizedInstitutions200Response() {
+  return {
+    authorizedInstitutions: [
+      aMockCurrentUserAuthorizedInstitution,
+      ...Array.from(
+        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
+      )
+    ].map(_ => getMockUserAuthorizedInstitution())
+  };
 }
 
 export function getGetInstitution200Response() {
