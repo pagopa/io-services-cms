@@ -15,6 +15,8 @@ import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler
 import { JiraProxy } from "../utils/jira-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 
+const jiraIssuesStatusRejectedId = "10986";
+
 const parseIncomingMessage = (
   queueItem: Json
 ): E.Either<Error, Queue.RequestReviewItem> =>
@@ -36,6 +38,24 @@ const createJiraTicket =
       TE.chain((delegate) =>
         pipe(
           jiraProxy.createJiraIssue(service, delegate),
+          TE.mapLeft(E.toError)
+        )
+      )
+    );
+
+const updateJiraTicket =
+  (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
+  (
+    service: Queue.RequestReviewItem,
+    ticketKey: NonEmptyString
+  ): TE.TaskEither<Error, void> =>
+    pipe(
+      service.id,
+      apimService.getDelegateFromServiceId,
+      TE.mapLeft(E.toError),
+      TE.chain((delegate) =>
+        pipe(
+          jiraProxy.updateJiraIssue(ticketKey, service, delegate),
           TE.mapLeft(E.toError)
         )
       )
@@ -80,7 +100,27 @@ const sendServiceToReview =
         flow(
           O.fold(
             () => createJiraTicket(apimService, jiraProxy)(service),
-            TE.right
+            (existingTicket) =>
+              pipe(
+                jiraIssuesStatusRejectedId === existingTicket.fields.status.id,
+                B.foldW(
+                  () => TE.right(existingTicket),
+                  () =>
+                    pipe(
+                      updateJiraTicket(apimService, jiraProxy)(
+                        service,
+                        existingTicket.key
+                      ),
+                      TE.chain((_) =>
+                        jiraProxy.reOpenJiraIssue(existingTicket.key)
+                      ),
+                      TE.map((_) => ({
+                        id: existingTicket.id,
+                        key: existingTicket.key,
+                      }))
+                    )
+                )
+              )
           )
         )
       ),
