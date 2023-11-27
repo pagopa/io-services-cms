@@ -10,7 +10,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
-import { CreateJiraIssueResponse } from "../lib/clients/jira-client";
+import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
@@ -47,32 +47,53 @@ const updateJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
   (
     service: Queue.RequestReviewItem,
-    ticketKey: NonEmptyString
-  ): TE.TaskEither<Error, void> =>
+    existingTicket: JiraIssue
+  ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     pipe(
       service.id,
       apimService.getDelegateFromServiceId,
       TE.mapLeft(E.toError),
       TE.chain((delegate) =>
         pipe(
-          jiraProxy.updateJiraIssue(ticketKey, service, delegate),
-          TE.mapLeft(E.toError)
+          jiraProxy.updateJiraIssue(existingTicket.key, service, delegate),
+          TE.mapLeft(E.toError),
+          TE.chain((_) => jiraProxy.reOpenJiraIssue(existingTicket.key)),
+          TE.map((_) => ({
+            id: existingTicket.id,
+            key: existingTicket.key,
+          }))
         )
       )
     );
 
-const saveTicketReference =
+const referenceTicket =
   (dao: ServiceReviewDao, service: Queue.RequestReviewItem) =>
   (ticket: CreateJiraIssueResponse) =>
     pipe(
-      dao.insert({
-        service_id: service.id,
-        service_version: service.version,
-        ticket_id: ticket.id,
-        ticket_key: ticket.key,
-        status: "PENDING",
-        extra_data: {},
-      }),
+      // retrieve the existing record
+      dao.selectByPrimaryKey(service.id, service.version),
+      TE.chainW(
+        flow(
+          O.fold(
+            // if there is no record, create a new one
+            () =>
+              dao.insert({
+                service_id: service.id,
+                service_version: service.version,
+                ticket_id: ticket.id,
+                ticket_key: ticket.key,
+                status: "PENDING",
+                extra_data: {},
+              }),
+            // if there is a record, update status
+            (existing) =>
+              dao.updateStatus({
+                ...existing,
+                status: "PENDING",
+              })
+          )
+        )
+      ),
       TE.mapLeft(E.toError)
     );
 
@@ -95,36 +116,30 @@ const sendServiceToReview =
   (service: Queue.RequestReviewItem): TE.TaskEither<Error, void> =>
     pipe(
       service.id,
-      jiraProxy.getPendingAndRejectedJiraIssueByServiceId,
+      jiraProxy.getPendingAndRejectedJiraIssueByServiceId, // Check if there is already a ticket for this service
       TE.chain(
         flow(
           O.fold(
-            () => createJiraTicket(apimService, jiraProxy)(service),
+            () => createJiraTicket(apimService, jiraProxy)(service), // No ticket found, so we can create a new one
             (existingTicket) =>
               pipe(
                 jiraIssuesStatusRejectedId === existingTicket.fields.status.id,
                 B.foldW(
-                  () => TE.right(existingTicket),
+                  () => TE.right(existingTicket), // Ticket is not rejected, so we can use it as is
                   () =>
+                    // Ticket is rejected, so we need to reopen it and update it
                     pipe(
                       updateJiraTicket(apimService, jiraProxy)(
                         service,
-                        existingTicket.key
-                      ),
-                      TE.chain((_) =>
-                        jiraProxy.reOpenJiraIssue(existingTicket.key)
-                      ),
-                      TE.map((_) => ({
-                        id: existingTicket.id,
-                        key: existingTicket.key,
-                      }))
+                        existingTicket
+                      )
                     )
                 )
               )
           )
         )
       ),
-      TE.chain(saveTicketReference(dao, service)),
+      TE.chain(referenceTicket(dao, service)), //
       TE.map((_) => void 0)
     );
 

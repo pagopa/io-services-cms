@@ -1,7 +1,9 @@
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool, QueryResult } from "pg";
@@ -64,6 +66,41 @@ const createReadSql = ({
     .where("status", "PENDING")
     .toQuery();
 
+const createSelectSql =
+  ({ REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig) =>
+  (service_id: NonEmptyString, service_version: NonEmptyString): string =>
+    knex
+      .withSchema(REVIEWER_DB_SCHEMA)
+      .table(REVIEWER_DB_TABLE)
+      .where({
+        service_id,
+        service_version,
+      })
+      .toQuery();
+
+const selectByPrimaryKey =
+  (pool: Pool, dbConfig: PostgreSqlConfig) =>
+  (service_id: NonEmptyString, service_version: NonEmptyString) =>
+    // ): TE.TaskEither<DatabaseError, QueryResult> =>
+    pipe(
+      createSelectSql(dbConfig)(service_id, service_version),
+      queryDataTable(pool),
+      TE.chainW((result) =>
+        pipe(
+          result,
+          O.fromPredicate((result) => result.rowCount > 0),
+          O.map(({ rows }) =>
+            pipe(
+              rows[0],
+              ServiceReviewRowDataTable.decode,
+              E.mapLeft(flow(readableReport, E.toError))
+            )
+          ),
+          O.fold(() => E.right(O.none), E.map(O.some)),
+          TE.fromEither
+        )
+      )
+    );
 const createUpdateStatusSql = (
   { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
   service: ServiceReviewRowDataTable
@@ -122,6 +159,7 @@ export const getDao = (dbConfig: PostgreSqlConfig) =>
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),
     updateStatus: updateStatus(pool, dbConfig),
+    selectByPrimaryKey: selectByPrimaryKey(pool, dbConfig),
   }));
 
 export type ServiceReviewDao = ReturnType<typeof getDao>;
