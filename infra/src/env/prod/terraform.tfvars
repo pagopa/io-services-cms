@@ -51,6 +51,7 @@ jira_delegate_email_custom_field    = "customfield_10383"
 jira_delegate_name_custom_field     = "customfield_10382"
 jira_organization_cf_custom_field   = "customfield_10364"
 jira_organization_name_custom_field = "customfield_10381"
+jira_transition_updated_id          = "4"
 
 ## Apim
 azure_apim                = "io-p-apim-api"

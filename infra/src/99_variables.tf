@@ -194,6 +194,12 @@ variable "jira_organization_name_custom_field" {
   default     = null
 }
 
+variable "jira_transition_updated_id"{
+  type        = string
+  description = "id that identifies the passage of a jira ticket from rejected to new"
+  default     = null
+}
+
 variable "reviewer_db_name" {
   type        = string
   description = ""
