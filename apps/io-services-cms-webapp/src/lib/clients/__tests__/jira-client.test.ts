@@ -20,6 +20,7 @@ const getMockFetchWithStatus = (status: number) =>
 
 const aJiraIssueSummary = "Titolo della Card" as NonEmptyString;
 const aJiraIssueDescription = "aDescription" as NonEmptyString;
+const aJiraIssueKey = "aJiraIssueKey" as NonEmptyString;
 const aJiraIssueId = "1" as NonEmptyString;
 const aCreateJiraIssueResponse = {
   id: aJiraIssueId,
@@ -221,5 +222,133 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
       method: "POST",
     });
     expect(E.isRight(issues)).toBeTruthy();
+  });
+});
+
+describe("[JiraAPIClient] updateJiraIssue", () => {
+  it("should return a generic error if updateJiraIssue returns a status code 500 or above", async () => {
+    const mockFetch = getMockFetchWithStatus(500);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const issue = await client.updateJiraIssue(
+      aJiraIssueKey,
+      aJiraIssueSummary,
+      aJiraIssueDescription
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "PUT",
+    });
+
+    expect(E.isLeft(issue)).toBeTruthy();
+    if (E.isLeft(issue)) {
+      expect(issue.left).toHaveProperty("message", "Jira API returns an error");
+    }
+  });
+
+  it("should return a misconfiguration error if updateJiraIssue returns a status code 401", async () => {
+    const mockFetch = getMockFetchWithStatus(401);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const issue = await client.updateJiraIssue(
+      aJiraIssueKey,
+      aJiraIssueSummary,
+      aJiraIssueDescription
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "PUT",
+    });
+
+    expect(E.isLeft(issue)).toBeTruthy();
+    if (E.isLeft(issue)) {
+      expect(issue.left).toHaveProperty(
+        "message",
+        "Jira secrets misconfiguration"
+      );
+    }
+  });
+
+  it("should return an invalid request error if updateJiraIssue returns a status code 400", async () => {
+    const mockFetch = getMockFetchWithStatus(400);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const issue = await client.updateJiraIssue(
+      aJiraIssueKey,
+      aJiraIssueSummary,
+      aJiraIssueDescription
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "PUT",
+    });
+
+    expect(E.isLeft(issue)).toBeTruthy();
+    if (E.isLeft(issue)) {
+      expect(issue.left).toHaveProperty("message", "Invalid request");
+    }
+  });
+
+  it("should return an unknown status code response error if updateJiraIssue returns a not expected status code", async () => {
+    const mockFetch = getMockFetchWithStatus(123);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const issue = await client.updateJiraIssue(
+      aJiraIssueKey,
+      aJiraIssueSummary,
+      aJiraIssueDescription
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "PUT",
+    });
+
+    expect(E.isLeft(issue)).toBeTruthy();
+    if (E.isLeft(issue)) {
+      expect(issue.left).toHaveProperty(
+        "message",
+        `Unknown status code 123 received`
+      );
+    }
+  });
+
+  it("should update an Issue with right parameters", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(void 0)
+    );
+    const mockFetch = getMockFetchWithStatus(204);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const customFields: Map<string, unknown> = new Map<string, unknown>();
+    customFields.set("customfield_10364", "12345678901");
+    customFields.set("customfield_10365", {
+      value: "Null",
+    });
+
+    const issue = await client.updateJiraIssue(
+      aJiraIssueKey,
+      aJiraIssueSummary,
+      aJiraIssueDescription,
+      ["TEST-LABEL" as NonEmptyString],
+      customFields
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body:
+        expect.any(String) &&
+        expect.stringContaining('"customfield_10364":"12345678901"'),
+      headers: expect.any(Object),
+      method: "PUT",
+    });
+
+    expect(E.isRight(issue)).toBeTruthy();
   });
 });
