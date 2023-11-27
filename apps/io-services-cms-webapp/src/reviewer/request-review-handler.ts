@@ -43,7 +43,7 @@ const createJiraTicket =
       )
     );
 
-const updateJiraTicket =
+const updateExistingJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
   (
     service: Queue.RequestReviewItem,
@@ -52,18 +52,17 @@ const updateJiraTicket =
     pipe(
       service.id,
       apimService.getDelegateFromServiceId,
-      TE.mapLeft(E.toError),
-      TE.chain((delegate) =>
+      TE.chainW((delegate) =>
         pipe(
           jiraProxy.updateJiraIssue(existingTicket.key, service, delegate),
-          TE.mapLeft(E.toError),
           TE.chain((_) => jiraProxy.reOpenJiraIssue(existingTicket.key)),
           TE.map((_) => ({
             id: existingTicket.id,
             key: existingTicket.key,
           }))
         )
-      )
+      ),
+      TE.mapLeft(E.toError)
     );
 
 const saveTicketReference =
@@ -91,6 +90,28 @@ const approveService =
       TE.map((_) => void 0)
     );
 
+const processExistingJiraTicket =
+  (
+    apimService: ApimUtils.ApimService,
+    jiraProxy: JiraProxy,
+    service: Queue.RequestReviewItem
+  ) =>
+  (existingTicket: JiraIssue) =>
+    pipe(
+      jiraIssuesStatusRejectedId === existingTicket.fields.status.id,
+      B.foldW(
+        () => TE.right(existingTicket), // Ticket is not rejected, so we can use it as is
+        () =>
+          // Ticket is rejected, so we need to reopen it and update it
+          pipe(
+            updateExistingJiraTicket(apimService, jiraProxy)(
+              service,
+              existingTicket
+            )
+          )
+      )
+    );
+
 const sendServiceToReview =
   (
     dao: ServiceReviewDao,
@@ -105,21 +126,7 @@ const sendServiceToReview =
         flow(
           O.fold(
             () => createJiraTicket(apimService, jiraProxy)(service), // No ticket found, so we can create a new one
-            (existingTicket) =>
-              pipe(
-                jiraIssuesStatusRejectedId === existingTicket.fields.status.id,
-                B.foldW(
-                  () => TE.right(existingTicket), // Ticket is not rejected, so we can use it as is
-                  () =>
-                    // Ticket is rejected, so we need to reopen it and update it
-                    pipe(
-                      updateJiraTicket(apimService, jiraProxy)(
-                        service,
-                        existingTicket
-                      )
-                    )
-                )
-              )
+            processExistingJiraTicket(apimService, jiraProxy, service) // Ticket found, so we need to reopen it and update it
           )
         )
       ),
