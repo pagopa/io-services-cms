@@ -22,6 +22,8 @@ const aJiraIssueSummary = "Titolo della Card" as NonEmptyString;
 const aJiraIssueDescription = "aDescription" as NonEmptyString;
 const aJiraIssueKey = "aJiraIssueKey" as NonEmptyString;
 const aJiraIssueId = "1" as NonEmptyString;
+const aJiraIssueTransitionId = "4" as NonEmptyString;
+const aMessage = "aMessage" as NonEmptyString;
 const aCreateJiraIssueResponse = {
   id: aJiraIssueId,
   key: "anIssueKey",
@@ -321,9 +323,7 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
   });
 
   it("should update an Issue with right parameters", async () => {
-    mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(void 0)
-    );
+    mockFetchJson.mockImplementationOnce(() => Promise.resolve(void 0));
     const mockFetch = getMockFetchWithStatus(204);
     const client = jiraClient(JIRA_CONFIG, mockFetch);
 
@@ -347,6 +347,27 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
         expect.stringContaining('"customfield_10364":"12345678901"'),
       headers: expect.any(Object),
       method: "PUT",
+    });
+
+    expect(E.isRight(issue)).toBeTruthy();
+  });
+});
+
+describe("[JiraAPIClient] applyJiraIssueTransition", () => {
+  it("should applyJiraIssueTransition", async () => {
+    const mockFetch = getMockFetchWithStatus(204);
+    const client = jiraClient(JIRA_CONFIG, mockFetch);
+
+    const issue = await client.applyJiraIssueTransition(
+      aJiraIssueKey,
+      aJiraIssueTransitionId,
+      aMessage
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.any(String),
+      headers: expect.any(Object),
+      method: "POST",
     });
 
     expect(E.isRight(issue)).toBeTruthy();
