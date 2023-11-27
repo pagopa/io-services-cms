@@ -66,34 +66,18 @@ const updateJiraTicket =
       )
     );
 
-const referenceTicket =
+const saveTicketReference =
   (dao: ServiceReviewDao, service: Queue.RequestReviewItem) =>
   (ticket: CreateJiraIssueResponse) =>
     pipe(
-      // retrieve the existing record
-      dao.selectByPrimaryKey(service.id, service.version),
-      TE.chainW(
-        flow(
-          O.fold(
-            // if there is no record, create a new one
-            () =>
-              dao.insert({
-                service_id: service.id,
-                service_version: service.version,
-                ticket_id: ticket.id,
-                ticket_key: ticket.key,
-                status: "PENDING",
-                extra_data: {},
-              }),
-            // if there is a record, update status
-            (existing) =>
-              dao.updateStatus({
-                ...existing,
-                status: "PENDING",
-              })
-          )
-        )
-      ),
+      dao.insert({
+        service_id: service.id,
+        service_version: service.version,
+        ticket_id: ticket.id,
+        ticket_key: ticket.key,
+        status: "PENDING",
+        extra_data: {},
+      }),
       TE.mapLeft(E.toError)
     );
 
@@ -139,7 +123,7 @@ const sendServiceToReview =
           )
         )
       ),
-      TE.chain(referenceTicket(dao, service)), //
+      TE.chain(saveTicketReference(dao, service)), // save ticketReference in db
       TE.map((_) => void 0)
     );
 

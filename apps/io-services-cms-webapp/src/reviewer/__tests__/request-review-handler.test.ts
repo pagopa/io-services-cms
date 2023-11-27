@@ -128,7 +128,7 @@ const aRejectDbInsertData: ServiceReviewRowDataTable = {
   service_version: aService.version as NonEmptyString,
   ticket_id: aRejectedJiraIssue.id,
   ticket_key: aRejectedJiraIssue.key,
-  status: "REJECTED",
+  status: "PENDING",
   extra_data: {},
 };
 
@@ -148,12 +148,6 @@ const mainMockServiceReviewDao = {
   updateStatus: vi.fn((data: ServiceReviewRowDataTable) => {
     return TE.of(anInsertQueryResult);
   }),
-
-  selectByPrimaryKey: vi.fn(
-    (service_id: NonEmptyString, service_version: NonEmptyString) => {
-      return TE.of(O.none);
-    }
-  ),
 };
 
 const mainMockJiraProxy = {
@@ -245,16 +239,6 @@ describe("Service Review Handler", () => {
   });
 
   it("should update a existing rejected ticket for a new service review", async () => {
-    const mockServiceReviewDao = {
-      ...mainMockServiceReviewDao,
-      selectByPrimaryKey: vi.fn(
-        (service_id: NonEmptyString, service_version: NonEmptyString) => {
-          console.log("selectByPrimaryKey called");
-          return TE.of(O.some(aRejectDbInsertData));
-        }
-      ),
-    };
-
     const mockJiraProxy = {
       ...mainMockJiraProxy,
       getPendingAndRejectedJiraIssueByServiceId: vi.fn(
@@ -265,7 +249,7 @@ describe("Service Review Handler", () => {
     };
 
     const handler = createRequestReviewHandler(
-      mockServiceReviewDao,
+      mainMockServiceReviewDao,
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
@@ -288,11 +272,9 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key
     );
-    expect(mockServiceReviewDao.insert).not.toHaveBeenCalled();
-    expect(mockServiceReviewDao.updateStatus).toHaveBeenCalledWith({
-      ...aRejectDbInsertData,
-      status: "PENDING",
-    });
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith(
+      aRejectDbInsertData
+    );
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
