@@ -202,7 +202,7 @@ export const jiraClient = (
                 },
               }),
               headers: jiraHeaders,
-              method: "POST",
+              method: "PUT",
             }
           ),
         toError
