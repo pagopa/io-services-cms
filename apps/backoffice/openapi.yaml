@@ -13,7 +13,7 @@ info:
     url: https://docs.pagopa.it/io-guida-tecnica/
   version: 1.0.0
 servers:
-  - url: http://localhost:3000/api #FIXME
+  - url: https://selfcare.io.pagopa.it/api
 tags:
   - name: services
     description: Services API specification
