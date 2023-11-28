@@ -438,7 +438,7 @@ describe("Service Review Handler", () => {
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
-  it("should have a generic error if updateJiraIssue returns an Error", async () => {
+  it("should have a generic error if updateJiraIssue returns an Error and shoul not reopen a ticket", async () => {
     const mockJiraProxy = {
       ...mainMockJiraProxy,
       getPendingAndRejectedJiraIssueByServiceId: vi.fn(
@@ -483,6 +483,7 @@ describe("Service Review Handler", () => {
       aService,
       aDelegate
     );
+    expect(mockJiraProxy.reOpenJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
