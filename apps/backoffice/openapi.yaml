@@ -11,12 +11,10 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.2.0
+  version: 1.0.0
 servers:
-  - url: http://localhost:3000/api #FIXME
+  - url: https://selfcare.io.pagopa.it/api
 tags:
-  - name: auth
-    description: Authentication API specification
   - name: services
     description: Services API specification
   - name: service-review
@@ -66,34 +64,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Health'
-  /auth: # /idp/selfcare/resolve-identity
-    post:
-      tags:
-        - auth
-      summary: Resolve selfcare identity
-      description: Resolve selfcare identity
-      operationId: resolveSelfCareIdentity
-      requestBody:
-        description: The _**IdentityToken**_ that SelfCare issues to BackOffice to communicate _**identity, company, role**_ tuple
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SelfCareIdentity'
-        required: true
-      responses:
-        '200':
-          description: BackOffice JWT session token.
-          content:
-            application/jwt:
-              schema:
-                type: string
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '500':
-          description: Internal server error
-  /services/migrations/ownership-claims/latest: #? valutare se mantenere la rotta as-is
+  /services/migrations/ownership-claims/latest:
     get:
       tags:
         - service-migration
@@ -101,7 +72,7 @@ paths:
       description: Retrieve latest service migration status, intended as a list of items containing delegate data, relative service migration status and last update date
       operationId: getServicesMigrationStatus
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Service migration status fetched successfully
@@ -117,7 +88,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /services/migrations/delegates: #? valutare se mantenere la rotta as-is
+  /services/migrations/delegates:
     get:
       tags:
         - service-migration
@@ -125,7 +96,7 @@ paths:
       description: Retrieve delegates with the number of services to migrate
       operationId: getServicesMigrationDelegates
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Delegates with service to migrate fetched successfully
@@ -141,7 +112,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /services/migrations/ownership-claims/{delegateId}: #? valutare se mantenere la rotta as-is
+  /services/migrations/ownership-claims/{delegateId}:
     post:
       tags:
         - service-migration
@@ -149,7 +120,7 @@ paths:
       description: Migrate delegate's services
       operationId: migrateDelegatesServices
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: delegateId
           in: path
@@ -177,7 +148,7 @@ paths:
       description: Get delegate's services migration status
       operationId: getServicesMigrationDetails
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: delegateId
           in: path
@@ -210,7 +181,7 @@ paths:
       description: Create a new Service with the attributes provided in the request payload
       operationId: createService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         description: A service body payload
         content:
@@ -242,7 +213,7 @@ paths:
       description: Retrieve all services owned by the calling user
       operationId: getServices
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: limit
           in: query
@@ -284,7 +255,7 @@ paths:
       description: Retrieve all services owned by the calling user
       operationId: getServiceList
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: limit
           in: query
@@ -332,7 +303,7 @@ paths:
       description: Retrieve a service by ID
       operationId: getService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -364,7 +335,7 @@ paths:
       description: Update an existing service by ID
       operationId: updateService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -405,7 +376,7 @@ paths:
       description: Delete a service by ID
       operationId: deleteService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -434,7 +405,7 @@ paths:
       description: Upload service logo by service ID
       operationId: updateServiceLogo
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -472,7 +443,7 @@ paths:
       description: Retrieve service keys by service ID
       operationId: getServiceKeys
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -505,7 +476,7 @@ paths:
       description: Regenerate service key by service ID and key type
       operationId: regenerateServiceKey
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -546,7 +517,7 @@ paths:
       description: Send service to review by service ID
       operationId: reviewService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -583,7 +554,7 @@ paths:
       description: Explain service review by service ID
       operationId: explainService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -623,7 +594,7 @@ paths:
       description: Publish service by ID on __IO Platform__
       operationId: releaseService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -653,7 +624,7 @@ paths:
       description: Retrieve last version of service published on __IO Platform__
       operationId: getPublishedService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -685,7 +656,7 @@ paths:
       description: Unpublish service by ID from __IO Platform__
       operationId: unpublishService
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -714,7 +685,7 @@ paths:
       description: Retrieves all the onboarded institutions related to the provided user and the product retrieved from Subscription Key
       operationId: getUserAuthorizedInstitutions
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Institutions fetched successfully
@@ -738,7 +709,7 @@ paths:
       description: Retrieve an institution by ID
       operationId: getInstitution
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: institutionId
           in: path
@@ -771,7 +742,7 @@ paths:
       description: Retrieve manage keys
       operationId: getManageKeys
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Manage keys fetched successfully
@@ -797,7 +768,7 @@ paths:
       description: Regenerate manage key by key type
       operationId: regenerateManageKey
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: keyType
           in: path
@@ -832,7 +803,7 @@ paths:
       description: Retrieve manage key authorized CIDRs
       operationId: getManageKeysAuthorizedCidrs
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Manage key authorized CIDRs fetched successfully
@@ -857,7 +828,7 @@ paths:
       description: Update manage key authorized CIDRs
       operationId: updateManageKeysAuthorizedCidrs
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         description: An Authorized CIDRs body payload
         content:
@@ -1139,7 +1110,7 @@ components:
         - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
 
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: __Secure-next-auth.session-token  # next-auth default cookie name

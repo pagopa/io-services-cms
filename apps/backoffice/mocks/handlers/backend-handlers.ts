@@ -6,7 +6,6 @@ import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import {
-  aMockJwtSessionToken,
   aMockManageKeysCIDRs,
   aMockServicePagination,
   aMockServicePublication,
@@ -39,20 +38,6 @@ export const buildHandlers = () => {
       const resultArray = [
         [ctx.status(200), ctx.json(getInfo200Response())],
         [ctx.status(500), ctx.json(getInfo500Response())]
-      ];
-
-      return res(...resultArray[0]);
-    }),
-    rest.post(`${baseURL}/auth`, (_, res, ctx) => {
-      const resultArray = [
-        [
-          ctx.status(200),
-          ctx.set("Media-Type", "application/jwt"),
-          ctx.body(getResolveSelfCareIdentity200Response())
-        ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
       ];
 
       return res(...resultArray[0]);
@@ -402,10 +387,6 @@ export function getInfo200Response() {
 
 export function getInfo500Response() {
   return aMockErrorResponse;
-}
-
-export function getResolveSelfCareIdentity200Response() {
-  return aMockJwtSessionToken;
 }
 
 export function getGetServicesMigrationStatus200Response() {
