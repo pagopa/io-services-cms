@@ -23,7 +23,7 @@ env:
 jobs:
   create_runner:
     name: Create Runner
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: prod-runner
     outputs:
       runner_name: ${{ steps.create_github_runner.outputs.runner_name }}
@@ -72,7 +72,7 @@ jobs:
   cleanup_runner:
     name: Cleanup Runner
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: prod-runner
     needs: [create_runner, terraform_plan_job]
     steps:
