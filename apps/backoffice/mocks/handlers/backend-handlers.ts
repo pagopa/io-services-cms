@@ -9,6 +9,7 @@ import {
   aMockManageKeysCIDRs,
   aMockServicePagination,
   aMockServicePublication,
+  aMockServiceTopics,
   anInfoVersion,
   getMockServiceKeys,
   getMockServiceLifecycle,
@@ -150,6 +151,17 @@ export const buildHandlers = () => {
             )
           )
         ],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/services/topics`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getGetServiceTopics200Response())],
         [ctx.status(401), ctx.json(null)],
         [ctx.status(403), ctx.json(null)],
         [ctx.status(429), ctx.json(null)],
@@ -431,6 +443,10 @@ export function getGetServiceList200Response(
   id: string
 ) {
   return getMockServiceList(+limit, +offset, id);
+}
+
+export function getGetServiceTopics200Response() {
+  return aMockServiceTopics;
 }
 
 export function getGetService200Response(serviceId: string) {
