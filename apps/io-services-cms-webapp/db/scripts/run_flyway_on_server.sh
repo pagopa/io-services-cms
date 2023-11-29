@@ -48,7 +48,7 @@ fi
 export DB_URL="jdbc:postgresql://${DB_SERVER_HOST}:${DB_SERVER_PORT}/${DB_NAME}"
 export FLYWAY_USER="${DB_ADMIN_USER}"
 export FLYWAY_PASSWORD="${DB_ADMIN_PASSWORD}"
-export FLYWAY_DOCKER_TAG="7.11.1-alpine@sha256:88e1b077dd10fd115184383340cd02fe99f30a4def08d1505c1a4db3c97c5278"
+export FLYWAY_DOCKER_TAG="10.1.0-alpine@sha256:8fc732d96d575b2b1f495be8d4bbb2d81fa0c712809dbd8320407cf76912d2cc"
 export FLYWAY_SQL_DIR="$(pwd)/${SQL_MIGRATIONS_DIR}/${DB_NAME}"
 
 printf "Running Flyway docker container\n"
