@@ -10,6 +10,81 @@ export const anInfoVersion = {
   version: packageJson.version
 };
 
+export const aMockServiceTopicsArray = [
+  {
+    id: 0,
+    name: "Altro"
+  },
+  {
+    id: 1,
+    name: "Ambiente e animali"
+  },
+  {
+    id: 2,
+    name: "Attività produttive e commercio"
+  },
+  {
+    id: 3,
+    name: "Benessere sociale"
+  },
+  {
+    id: 4,
+    name: "Casa e utenze"
+  },
+  {
+    id: 5,
+    name: "Cultura, tempo libero e sport"
+  },
+  {
+    id: 6,
+    name: "Educazione e formazione"
+  },
+  {
+    id: 7,
+    name: "Giustizia e legge"
+  },
+  {
+    id: 8,
+    name: "Lavori edilizi, catasto e urbanistica"
+  },
+  {
+    id: 9,
+    name: "Mobilità e trasporti"
+  },
+  {
+    id: 10,
+    name: "Redditi, patrimoni e fisco"
+  },
+  {
+    id: 11,
+    name: "Servizi anagrafici e civici"
+  },
+  {
+    id: 12,
+    name: "Servizi elettorali"
+  },
+  {
+    id: 13,
+    name: "Sicurezza e Protezione Civile"
+  },
+  {
+    id: 14,
+    name: "Suolo, spazi e beni pubblici"
+  },
+  {
+    id: 15,
+    name: "Viaggi e turismo"
+  },
+  {
+    id: 16,
+    name: "Vita lavorativa"
+  },
+  {
+    id: 17,
+    name: "Salute"
+  }
+];
+
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   id: serviceId ?? faker.string.alphanumeric(26).toUpperCase(),
   status: {
@@ -22,6 +97,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     ]),
     reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
+  topic: faker.helpers.arrayElement(aMockServiceTopicsArray),
   version: faker.number.int({ min: undefined, max: undefined }),
   last_update: faker.date.recent({ days: 30 }).toISOString(),
   name: faker.lorem.words({ min: 3, max: 5 }),
@@ -154,6 +230,10 @@ export const getMockServiceList = (
       count: id ? 1 : 100
     }
   };
+};
+
+export const aMockServiceTopics = {
+  topics: aMockServiceTopicsArray
 };
 
 // **********************************************************************
