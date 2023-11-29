@@ -237,3 +237,6 @@ ServiceTopic:
       type: string
       description: The topic name
       example: 'Benessere sociale'
+  required:
+    - id
+    - name
