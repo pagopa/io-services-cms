@@ -11,7 +11,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: https://selfcare.io.pagopa.it/api
 tags:
@@ -25,6 +25,8 @@ tags:
     description: Service Authorization API specification
   - name: service-migration
     description: Services migration API specification
+  - name: service-topics
+    description: Services thematic taxonomy
   - name: institutions
     description: Institutions API specification
   - name: manage-keys
@@ -287,6 +289,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all service topics
+      description: Retrieve all service topics
+      operationId: getServiceTopics
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTopicList'
         '401':
           description: Unauthorized
         '403':
@@ -928,6 +954,10 @@ components:
           default: 0
         metadata:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+        topic_id:
+          type: number
+          description: The topic id
+          example: 3
       required:
         - name
         - description
@@ -944,6 +974,10 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
     ServicePagination:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePagination'
+    ServiceTopicList:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
+    ServiceTopic:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
