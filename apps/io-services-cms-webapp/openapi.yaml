@@ -11,7 +11,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://docs.pagopa.it/io-guida-tecnica/
-  version: 0.12.0
+  version: 1.23.0
 servers:
   - url: https://api.io.pagopa.it/api/v1/manage
 tags:
@@ -23,6 +23,8 @@ tags:
     description: Service Release API specification
   - name: service-authorization
     description: Service Authorization API specification
+  - name: service-topics
+    description: Services thematic taxonomy
 paths:
   /info:
     get:
@@ -113,6 +115,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicePagination'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all services
+      description: Retrieve all service topics
+      operationId: getServiceTopics
+      parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTopicList'
         '401':
           description: Unauthorized
         '403':
@@ -579,6 +608,10 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
     ServicePagination:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePagination'
+    ServiceTopicList:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
+    ServiceTopic:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
