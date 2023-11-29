@@ -32,11 +32,8 @@ DB_USER_APP_PASSWORD=$8
 #  Relative to the project root, the actual sql scripts will be in ${SQL_MIGRATIONS_DIR}/${DB_NAME}
 SQL_MIGRATIONS_DIR=$9
 
-# Miscellaneos values to be used as placeholders by Flyway for sql scripts
-VAR_SCHEMA_NAME=${10}
-
 # Get all other parametemeters, so we can append them to Flyway command
-shift 10
+shift 9
 other=$@
 
 #-------
@@ -61,7 +58,6 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   flyway/flyway:"${FLYWAY_DOCKER_TAG}" \
   -url="${DB_URL}" -user="${FLYWAY_USER}" -password="${FLYWAY_PASSWORD}" \
   -validateMigrationNaming=true \
-  -placeholders.schemaName=${VAR_SCHEMA_NAME} \
   -placeholders.appUser=${DB_USER_APP} \
   -placeholders.appUserPassword=${DB_USER_APP_PASSWORD} \
   "${FLYWAY_COMMAND}" ${other}
