@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "${schemaName}".service_review (
+CREATE TABLE IF NOT EXISTS reviewer.service_review (
 	"service_id" varchar NOT NULL, -- 'the unique identifier for the Service'
 	"service_version" varchar NOT NULL, -- 'the version of the Service'
 	"ticket_id" varchar NULL, -- 'the unique identifier for the Ticket'
@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS "${schemaName}".service_review (
 	CONSTRAINT service_review_pk PRIMARY KEY (service_id,service_version)
 );
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON "${schemaName}".service_review TO "${appUser}";
+GRANT SELECT, INSERT, UPDATE, DELETE ON reviewer.service_review TO "${appUser}";

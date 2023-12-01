@@ -6,16 +6,18 @@ ServiceLifecycle:
         id:
           type: string
         status:
-          $ref: "#/ServiceLifecycleStatus"
+          $ref: '#/ServiceLifecycleStatus'
+        topic:
+          $ref: '#/ServiceTopic'
         version:
           type: integer
         last_update:
-          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
       required:
         - id
         - status
         - last_update
-    - $ref: "#/ServiceData"
+    - $ref: '#/ServiceData'
 ServicePublication:
   description: Service Publication model data
   allOf:
@@ -24,20 +26,28 @@ ServicePublication:
         id:
           type: string
         status:
-          $ref: "#/ServicePublicationStatusType"
+          $ref: '#/ServicePublicationStatusType'
+        topic:
+          $ref: '#/ServiceTopic'
         version:
           type: integer
         last_update:
-          $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp"
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
       required:
         - id
         - status
         - last_update
-    - $ref: "#/ServiceData"
+    - $ref: '#/ServiceData'
 ServicePayload:
   description: A payload used to create or update a service.
   allOf:
-    - $ref: "#/ServiceData"
+    - $ref: '#/ServiceData'
+    - type: object
+      properties:
+        topic_id:
+          type: number
+          description: The topic id
+          example: 3
 ServiceData:
   type: object
   description: Service basic data
@@ -49,13 +59,13 @@ ServiceData:
       type: string
       minLength: 1
     organization:
-      $ref: "#/Organization"
+      $ref: '#/Organization'
     require_secure_channel:
       type: boolean
     authorized_recipients:
       type: array
       items:
-        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode"
+        $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
     authorized_cidrs:
       description: >-
         Allowed source IPs or CIDRs for this service.
@@ -63,7 +73,7 @@ ServiceData:
         behalf of the service.
       type: array
       items:
-        $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr"
+        $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
     max_allowed_payment_amount:
       type: integer
       format: int32
@@ -71,7 +81,7 @@ ServiceData:
       maximum: 9999999999
       default: 0
     metadata:
-      $ref: "#/ServiceMetadata"
+      $ref: '#/ServiceMetadata'
   required:
     - name
     - description
@@ -132,7 +142,7 @@ ServiceLifecycleStatus:
   type: object
   properties:
     value:
-      $ref: "#/ServiceLifecycleStatusType"
+      $ref: '#/ServiceLifecycleStatusType'
     reason:
       description: Reason for status value
       type: string
@@ -164,9 +174,9 @@ ServicePagination:
     value:
       type: array
       items:
-        $ref: "#/ServiceLifecycle"
+        $ref: '#/ServiceLifecycle'
     pagination:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
 Organization:
   type: object
   properties:
@@ -174,7 +184,7 @@ Organization:
       type: string
       minLength: 1
     fiscal_code:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
     department_name:
       type: string
       minLength: 1
@@ -209,3 +219,24 @@ ReviewRequest:
       example: true
   required:
     - auto_publish
+ServiceTopicList:
+  type: object
+  properties:
+    topics:
+      type: array
+      items:
+        $ref: '#/ServiceTopic'
+ServiceTopic:
+  type: object
+  properties:
+    id:
+      type: number
+      description: The topic id
+      example: 3
+    name:
+      type: string
+      description: The topic name
+      example: 'Benessere sociale'
+  required:
+    - id
+    - name

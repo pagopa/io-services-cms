@@ -33,14 +33,11 @@ DB_ADMIN_USER="pgadminusr"
 #  Relative to the project root, the actual sql scripts will be in ${SQL_MIGRATIONS_DIR}/${DB_NAME}
 SQL_MIGRATIONS_DIR=$4
 
-# Miscellaneos values to be used as placeholders by Flyway for sql scripts
-VAR_SCHEMA_NAME=$5
-
 # DB User used by the app with reand and write permission over the DB resources used by the app
-DB_USER_APP=$6
+DB_USER_APP=$5
 
 # Get all other parametemeters, so we can append them to Flyway command
-shift 6
+shift 5
 other=$@
 
 #-------
@@ -94,7 +91,7 @@ fi
 export DB_URL="jdbc:postgresql://${psql_server_private_fqdn}:5432/${DB_NAME}?sslmode=require"
 export FLYWAY_USER="${administrator_login}"
 export FLYWAY_PASSWORD="${administrator_login_password}"
-export FLYWAY_DOCKER_TAG="7.11.1-alpine@sha256:88e1b077dd10fd115184383340cd02fe99f30a4def08d1505c1a4db3c97c5278"
+export FLYWAY_DOCKER_TAG="10.1.0-alpine@sha256:8fc732d96d575b2b1f495be8d4bbb2d81fa0c712809dbd8320407cf76912d2cc"
 export FLYWAY_SQL_DIR="$(pwd)/${SQL_MIGRATIONS_DIR}/${DB_NAME}"
 
 printf "Running Flyway docker container\n"
@@ -104,7 +101,6 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   flyway/flyway:"${FLYWAY_DOCKER_TAG}" \
   -url="${DB_URL}" -user="${FLYWAY_USER}" -password="${FLYWAY_PASSWORD}" \
   -validateMigrationNaming=true \
-  -placeholders.schemaName=${VAR_SCHEMA_NAME} \
   -placeholders.appUser=${DB_USER_APP} \
   -placeholders.appUserPassword=${user_app_password} \
   "${FLYWAY_COMMAND}" ${other}
