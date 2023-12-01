@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.3.0
+
+### Minor Changes
+
+- 4e32029: ADD Service Topics in backoffice openapi.yaml
+
+### Patch Changes
+
+- 7e147dc: Update B4F openapi definition: replace bearerAuth with cookieAuth
+- Updated dependencies [86fa737]
+  - @io-services-cms/models@1.16.0
+
 ## 1.2.3
 
 ### Patch Changes

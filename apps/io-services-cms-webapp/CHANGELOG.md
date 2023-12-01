@@ -1,5 +1,18 @@
 # io-services-cms-webapp
 
+## 1.23.0
+
+### Minor Changes
+
+- 86fa737: ADD Service Topics in openapi.yaml
+- 73bad07: reopen jira reject issue on a new submit
+
+### Patch Changes
+
+- b15ad8f: add require_secure_channel and authorized_recipients in api response
+- Updated dependencies [86fa737]
+  - @io-services-cms/models@1.16.0
+
 ## 1.22.1
 
 ### Patch Changes
