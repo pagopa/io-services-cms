@@ -10,10 +10,9 @@ import { IConfig } from "../../config";
 import {
   CreateJiraIssueResponse,
   JiraIssue,
-  JiraIssueStatus,
   SearchJiraIssuesResponse,
 } from "../../lib/clients/jira-client";
-import { Delegate } from "../../utils/jira-proxy";
+import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
 
@@ -42,6 +41,25 @@ const aJiraIssue: JiraIssue = {
     },
     status: {
       name: "REVIEW",
+    },
+    statuscategorychangedate: "2023-05-10T14:00:15.173+0200" as NonEmptyString,
+  },
+};
+
+const aRejectedJiraIssue: JiraIssue = {
+  id: "aJiraIssueId" as NonEmptyString,
+  key: "aRejectedIssueKey" as NonEmptyString,
+  fields: {
+    comment: {
+      comments: [
+        { body: "comment 1" },
+        { body: "comment 2" },
+        { body: "a *formatted* comment … {{some code}} ." },
+      ],
+    },
+    status: {
+      id: "10986",
+      name: "REJECTED",
     },
     statuscategorychangedate: "2023-05-10T14:00:15.173+0200" as NonEmptyString,
   },
@@ -105,6 +123,15 @@ const aDbInsertData: ServiceReviewRowDataTable = {
   extra_data: {},
 };
 
+const aRejectDbInsertData: ServiceReviewRowDataTable = {
+  service_id: aService.id,
+  service_version: aService.version as NonEmptyString,
+  ticket_id: aRejectedJiraIssue.id,
+  ticket_key: aRejectedJiraIssue.key,
+  status: "PENDING",
+  extra_data: {},
+};
+
 const aVoidFn = () => console.log("");
 
 const mainMockServiceReviewDao = {
@@ -118,7 +145,9 @@ const mainMockServiceReviewDao = {
       return TE.of(aVoidFn());
     }
   ),
-  updateStatus: vi.fn(),
+  updateStatus: vi.fn((data: ServiceReviewRowDataTable) => {
+    return TE.of(anInsertQueryResult);
+  }),
 };
 
 const mainMockJiraProxy = {
@@ -130,7 +159,7 @@ const mainMockJiraProxy = {
   searchJiraIssuesByKeyAndStatus: vi.fn(
     (
       jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-      jiraIssueStatuses: ReadonlyArray<JiraIssueStatus>
+      jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
     ) => {
       return TE.of(aSearchJiraIssuesResponse);
     }
@@ -138,8 +167,23 @@ const mainMockJiraProxy = {
   getJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
     return TE.of(O.none);
   }),
-  getPendingJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
-    return TE.of(O.none);
+  getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+    (serviceId: NonEmptyString) => {
+      return TE.of(O.none);
+    }
+  ),
+  updateJiraIssue: vi.fn(
+    (
+      ticketKey: NonEmptyString,
+      service: ServiceLifecycle.definitions.Service,
+      delegate: Delegate
+    ) => {
+      return TE.of(void 0);
+    }
+  ),
+
+  reOpenJiraIssue: vi.fn((ticketKey: NonEmptyString) => {
+    return TE.of(void 0);
   }),
 };
 
@@ -180,9 +224,9 @@ describe("Service Review Handler", () => {
     const context = createContext();
     const result = await handler(context, JSON.stringify(aService));
 
-    expect(mainMockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
@@ -191,6 +235,46 @@ describe("Service Review Handler", () => {
       aDelegate
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("should update a existing rejected ticket for a new service review", async () => {
+    const mockJiraProxy = {
+      ...mainMockJiraProxy,
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.of(O.some(aRejectedJiraIssue));
+        }
+      ),
+    };
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockConfig
+    );
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key,
+      aService,
+      aDelegate
+    );
+    expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key
+    );
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith(
+      aRejectDbInsertData
+    );
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
@@ -211,7 +295,7 @@ describe("Service Review Handler", () => {
     const result = await handler(context, JSON.stringify(aService));
 
     expect(
-      mainMockJiraProxy.getPendingJiraIssueByServiceId
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
     ).not.toHaveBeenCalled();
     expect(mainMockApimService.getDelegateFromServiceId).not.toHaveBeenCalled();
     expect(mainMockJiraProxy.createJiraIssue).not.toHaveBeenCalled();
@@ -225,9 +309,11 @@ describe("Service Review Handler", () => {
   it("should insert pending review only on db if service already exist on Jira", async () => {
     const mockJiraProxy = {
       ...mainMockJiraProxy,
-      getPendingJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
-        return TE.of(O.some(aJiraIssue));
-      }),
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.of(O.some(aJiraIssue));
+        }
+      ),
     };
 
     const handler = createRequestReviewHandler(
@@ -241,23 +327,23 @@ describe("Service Review Handler", () => {
     const context = createContext();
     const result = await handler(context, JSON.stringify(aService));
 
-    expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mainMockApimService.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
-  it("should have a generic error if getPendingJiraIssueByServiceId returns an Error", async () => {
-    
-    
+  it("should have a generic error if getPendingAndRejectedJiraIssueByServiceId returns an Error", async () => {
     const mockJiraProxy = {
       ...mainMockJiraProxy,
-      getPendingJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
-        return TE.left(new Error());
-      }),
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.left(new Error());
+        }
+      ),
     };
 
     const handler = createRequestReviewHandler(
@@ -275,9 +361,9 @@ describe("Service Review Handler", () => {
       expect(error).toBeDefined();
     }
 
-    expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mainMockApimService.getDelegateFromServiceId).not.toBeCalled();
     expect(mockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
@@ -307,9 +393,9 @@ describe("Service Review Handler", () => {
       expect(error).toBeDefined();
     }
 
-    expect(mainMockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mockApimProxy.getDelegateFromServiceId).toBeCalledWith(aService.id);
     expect(mainMockJiraProxy.createJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
@@ -341,13 +427,63 @@ describe("Service Review Handler", () => {
       expect(error).toBeDefined();
     }
 
-    expect(mockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
     expect(mockJiraProxy.createJiraIssue).toBeCalledWith(aService, aDelegate);
+    expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("should have a generic error if updateJiraIssue returns an Error and shoul not reopen a ticket", async () => {
+    const mockJiraProxy = {
+      ...mainMockJiraProxy,
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.of(O.some(aRejectedJiraIssue));
+        }
+      ),
+      updateJiraIssue: vi.fn(
+        (
+          ticketKey: NonEmptyString,
+          service: ServiceLifecycle.definitions.Service,
+          delegate: Delegate
+        ) => {
+          return TE.left(new Error());
+        }
+      ),
+    };
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    try {
+      await handler(context, JSON.stringify(aService));
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key,
+      aService,
+      aDelegate
+    );
+    expect(mockJiraProxy.reOpenJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
@@ -375,9 +511,9 @@ describe("Service Review Handler", () => {
       expect(error).toBeDefined();
     }
 
-    expect(mainMockJiraProxy.getPendingJiraIssueByServiceId).toBeCalledWith(
-      aService.id
-    );
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
     expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );

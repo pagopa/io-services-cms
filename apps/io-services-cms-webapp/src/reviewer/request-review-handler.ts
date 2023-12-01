@@ -10,10 +10,12 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
-import { CreateJiraIssueResponse } from "../lib/clients/jira-client";
+import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
+
+const jiraIssuesStatusRejectedId = "10986";
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -41,6 +43,28 @@ const createJiraTicket =
       )
     );
 
+const updateExistingJiraTicket =
+  (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
+  (
+    service: Queue.RequestReviewItem,
+    existingTicket: JiraIssue
+  ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
+    pipe(
+      service.id,
+      apimService.getDelegateFromServiceId,
+      TE.chainW((delegate) =>
+        pipe(
+          jiraProxy.updateJiraIssue(existingTicket.key, service, delegate),
+          TE.chain((_) => jiraProxy.reOpenJiraIssue(existingTicket.key)),
+          TE.map((_) => ({
+            id: existingTicket.id,
+            key: existingTicket.key,
+          }))
+        )
+      ),
+      TE.mapLeft(E.toError)
+    );
+
 const saveTicketReference =
   (dao: ServiceReviewDao, service: Queue.RequestReviewItem) =>
   (ticket: CreateJiraIssueResponse) =>
@@ -66,6 +90,28 @@ const approveService =
       TE.map((_) => void 0)
     );
 
+const processExistingJiraTicket =
+  (
+    apimService: ApimUtils.ApimService,
+    jiraProxy: JiraProxy,
+    service: Queue.RequestReviewItem
+  ) =>
+  (existingTicket: JiraIssue) =>
+    pipe(
+      jiraIssuesStatusRejectedId === existingTicket.fields.status.id,
+      B.foldW(
+        () => TE.right(existingTicket), // Ticket is not rejected, so we can use it as is
+        () =>
+          // Ticket is rejected, so we need to reopen it and update it
+          pipe(
+            updateExistingJiraTicket(apimService, jiraProxy)(
+              service,
+              existingTicket
+            )
+          )
+      )
+    );
+
 const sendServiceToReview =
   (
     dao: ServiceReviewDao,
@@ -75,16 +121,16 @@ const sendServiceToReview =
   (service: Queue.RequestReviewItem): TE.TaskEither<Error, void> =>
     pipe(
       service.id,
-      jiraProxy.getPendingJiraIssueByServiceId,
+      jiraProxy.getPendingAndRejectedJiraIssueByServiceId, // Check if there is already a ticket for this service
       TE.chain(
         flow(
           O.fold(
-            () => createJiraTicket(apimService, jiraProxy)(service),
-            TE.right
+            () => createJiraTicket(apimService, jiraProxy)(service), // No ticket found, so we can create a new one
+            processExistingJiraTicket(apimService, jiraProxy, service) // Ticket found, so we need to reopen it and update it
           )
         )
       ),
-      TE.chain(saveTicketReference(dao, service)),
+      TE.chain(saveTicketReference(dao, service)), // save ticketReference in db
       TE.map((_) => void 0)
     );
 
