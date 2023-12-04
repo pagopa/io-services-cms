@@ -9,6 +9,7 @@ import {
   getMockServiceLifecycle
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
+import { getGetServiceTopics200Response } from "./backend-handlers";
 
 faker.seed(1);
 
@@ -34,6 +35,17 @@ export const buildHandlers = () => {
     rest.get(`${baseURL}/services`, (_, res, ctx) => {
       const resultArray = [
         [ctx.status(200), ctx.json(getGetServices200Response())],
+        [ctx.status(401), ctx.json(getIoServicesError(401))],
+        [ctx.status(403), ctx.json(getIoServicesError(403))],
+        [ctx.status(429), ctx.json(getIoServicesError(429))],
+        [ctx.status(500), ctx.json(getIoServicesError(500))]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/services/topics`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getGetServiceTopics200Response())],
         [ctx.status(401), ctx.json(getIoServicesError(401))],
         [ctx.status(403), ctx.json(getIoServicesError(403))],
         [ctx.status(429), ctx.json(getIoServicesError(429))],
