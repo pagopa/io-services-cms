@@ -2727,7 +2727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cidr-matcher@npm:^2.1.1, @types/cidr-matcher@npm:^2.1.2":
+"@types/cidr-matcher@npm:^2.1.1":
   version: 2.1.2
   resolution: "@types/cidr-matcher@npm:2.1.2"
   checksum: d8ec710fa67f21197a5ee47d6c75f5e5485567d3dbe25f36289b2686b65bbe579c3f389a609ae77c4feeaeb11a687ea9f11d8f9a7a4c4d5d033c0161f1945e05
@@ -8161,7 +8161,6 @@ __metadata:
   resolution: "io-services-cms@workspace:."
   dependencies:
     "@changesets/cli": ^2.26.2
-    "@types/cidr-matcher": ^2.1.2
     turbo: ^1.10.14
   languageName: unknown
   linkType: soft
