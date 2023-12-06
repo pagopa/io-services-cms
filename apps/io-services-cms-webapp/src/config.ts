@@ -188,6 +188,13 @@ export type ExternalStorageAccountConfiguration = t.TypeOf<
   typeof ExternalStorageAccountConfiguration
 >;
 
+export const BackofficeInternalSubnetCIDR = t.type({
+  BACKOFFICE_INTERNAL_SUBNET_CIDR: NonEmptyString,
+});
+export type BackofficeInternalSubnetCIDR = t.TypeOf<
+  typeof BackofficeInternalSubnetCIDR
+>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -212,7 +219,10 @@ export const IConfig = t.intersection([
     ApplicationInsightConfig,
     FeatureFlags,
   ]),
-  ExternalStorageAccountConfiguration,
+  t.intersection([
+    ExternalStorageAccountConfiguration,
+    BackofficeInternalSubnetCIDR,
+  ]),
 ]);
 
 export const envConfig = {
