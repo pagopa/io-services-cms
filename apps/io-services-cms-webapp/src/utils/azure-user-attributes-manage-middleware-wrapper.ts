@@ -32,13 +32,14 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       IAzureUserAttributesManage
     >
   > => {
-    // If Request Ip is from the Backoffice Internal subnet, we don't need to check the user's attributes
+    // If Request Ip is from the Backoffice Internal subnet, we don't need to check the user's manage key authorized CIDRs
 
-    // extrat the ip from the request
+    // extract the ip from the request
     const clientIp = request.ip;
 
-    // check if the ip is in the internal subnet by checking the cidr
+    // check if the request ip is in the backoffice internal subnet
     if (isIPInCIDR(clientIp, BACKOFFICE_INTERNAL_SUBNET_CIDR)) {
+      // in this case we returns an empty list of authorized CIDRs, so we will skip the check
       return E.right({
         authorizedCIDRs: new Set(),
         email: "" as EmailAddress,
@@ -46,6 +47,7 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       });
     }
 
+    // when he request comes from outside the backoffice subnet, we need to check the user's manage key authorized CIDRs and so we have to retrieve it
     return await AzureUserAttributesManageMiddleware(subscriptionCIDRsModel)(
       request
     );
