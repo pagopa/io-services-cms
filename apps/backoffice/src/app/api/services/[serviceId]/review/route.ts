@@ -8,18 +8,17 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
  */
 export const PUT = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
   ) =>
-    forwardIoServicesCmsRequest(
-      "reviewService",
-      request,
+    forwardIoServicesCmsRequest("reviewService", {
+      nextRequest,
       backofficeUser,
-      params
-    )
+      pathParams: params
+    })
 );
 
 /**
@@ -27,16 +26,15 @@ export const PUT = withJWTAuthHandler(
  */
 export const PATCH = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
   ) =>
-    forwardIoServicesCmsRequest(
-      "explainService",
-      request,
+    forwardIoServicesCmsRequest("explainService", {
+      nextRequest,
       backofficeUser,
-      params
-    )
+      pathParams: params
+    })
 );
