@@ -6,8 +6,8 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 import { IResponse } from "@pagopa/ts-commons/lib/responses";
+import CIDRMatcher from "cidr-matcher";
 import * as E from "fp-ts/lib/Either";
-import CIDR from "ip-cidr";
 import { BackofficeInternalSubnetCIDR } from "../config";
 
 export const AzureUserAttributesManageMiddlewareWrapper =
@@ -52,6 +52,6 @@ export const AzureUserAttributesManageMiddlewareWrapper =
   };
 
 const isIPInCIDR = (ip: string, cidr: string): boolean => {
-  const cidrObject = new CIDR(cidr);
-  return cidrObject.contains(ip);
+  const matcher = new CIDRMatcher([cidr]);
+  return matcher.contains(ip);
 };

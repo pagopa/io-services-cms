@@ -8126,13 +8126,13 @@ __metadata:
     "@vitest/coverage-v8": ^0.34.1
     azure-functions-core-tools: 4
     body-parser: ^1.20.2
+    cidr-matcher: ^2.1.1
     dotenv-cli: ^7.2.1
     eslint: ^8.38.0
     express: ^4.18.2
     fp-ts: ^2.13.1
     io-ts: ^2.2.20
     io-ts-types: ^0.5.19
-    ip-cidr: ^3.1.0
     knex: ^2.4.2
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
@@ -8175,26 +8175,6 @@ __metadata:
   peerDependencies:
     fp-ts: ^2.5.0
   checksum: 72517bf72ab1ad61b81960cb37f46e7a9f6dc84235b7d9b62f346ca84120dd89134b652fc3a0b9751129331084fd3e059349561bb96587d91ba7b40985fe7aac
-  languageName: node
-  linkType: hard
-
-"ip-address@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "ip-address@npm:7.1.0"
-  dependencies:
-    jsbn: 1.1.0
-    sprintf-js: 1.1.2
-  checksum: b514b93b76639b204e52a16b1cebdc23c69fa71464665583278cbd0adf402d0b0e15f606049010b7230d35f6e9fa4d0a4ffd61d63fbc00f71adf08f00bc7614b
-  languageName: node
-  linkType: hard
-
-"ip-cidr@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "ip-cidr@npm:3.1.0"
-  dependencies:
-    ip-address: ^7.1.0
-    jsbn: ^1.1.0
-  checksum: 148be0fc9b8adddae955429fef76100e9ebd6d22d5f0f91608b445fde2fda9d2bba898ef36476da1c24da49a55e3fa90d7501c4988718342a2c10d7ca829e577
   languageName: node
   linkType: hard
 
@@ -8873,13 +8853,6 @@ __metadata:
   version: 3.2.5
   resolution: "jsbi@npm:3.2.5"
   checksum: 642d1bb139ad1c1e96c4907eb159565e980a0d168487626b493d0d0b7b341da0e43001089d3b21703fe17b18a7a6c0f42c92026f71d54471ed0a0d1b3015ec0f
-  languageName: node
-  linkType: hard
-
-"jsbn@npm:1.1.0, jsbn@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "jsbn@npm:1.1.0"
-  checksum: 944f924f2bd67ad533b3850eee47603eed0f6ae425fd1ee8c760f477e8c34a05f144c1bd4f5a5dd1963141dc79a2c55f89ccc5ab77d039e7077f3ad196b64965
   languageName: node
   linkType: hard
 
@@ -12794,13 +12767,6 @@ __metadata:
   version: 4.2.0
   resolution: "split2@npm:4.2.0"
   checksum: 05d54102546549fe4d2455900699056580cca006c0275c334611420f854da30ac999230857a85fdd9914dc2109ae50f80fda43d2a445f2aa86eccdc1dfce779d
-  languageName: node
-  linkType: hard
-
-"sprintf-js@npm:1.1.2":
-  version: 1.1.2
-  resolution: "sprintf-js@npm:1.1.2"
-  checksum: d4bb46464632b335e5faed381bd331157e0af64915a98ede833452663bc672823db49d7531c32d58798e85236581fb7342fd0270531ffc8f914e186187bf1c90
   languageName: node
   linkType: hard
 
