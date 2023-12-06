@@ -9,10 +9,7 @@ import {
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import {
-  AzureUserAttributesManageMiddleware,
-  IAzureUserAttributesManage,
-} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
+import { IAzureUserAttributesManage } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import {
   ClientIp,
   ClientIpMiddleware,
@@ -47,6 +44,7 @@ import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import {
   itemToResponse,
   payloadToItem,
@@ -201,7 +199,7 @@ export const makeCreateServiceHandler =
   };
 
 export const applyRequestMiddelwares =
-  (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
+  (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: ICreateServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
@@ -211,7 +209,10 @@ export const applyRequestMiddelwares =
       // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
-      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      AzureUserAttributesManageMiddlewareWrapper(
+        subscriptionCIDRsModel,
+        config
+      ),
       // extract the user email from the request headers
       UserEmailMiddleware(),
       // validate the reuqest body to be in the expected shape
