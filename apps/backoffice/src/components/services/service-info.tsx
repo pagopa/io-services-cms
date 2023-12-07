@@ -63,6 +63,11 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
       label: "routes.service.name",
       value: data?.name,
       renderValueOnNewLine: true
+    },
+    {
+      label: "routes.service.topic",
+      value: data?.topic?.name ?? t("undefined"),
+      renderValueOnNewLine: true
     }
   ];
 
