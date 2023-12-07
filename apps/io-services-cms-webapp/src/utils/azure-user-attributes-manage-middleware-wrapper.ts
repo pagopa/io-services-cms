@@ -8,12 +8,12 @@ import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 import { IResponse } from "@pagopa/ts-commons/lib/responses";
 import CIDRMatcher from "cidr-matcher";
 import * as E from "fp-ts/lib/Either";
-import { BackofficeInternalSubnetCIDR } from "../config";
+import { BackofficeInternalSubnetCIDRs } from "../config";
 
 export const AzureUserAttributesManageMiddlewareWrapper =
   (
     subscriptionCIDRsModel: SubscriptionCIDRsModel,
-    { BACKOFFICE_INTERNAL_SUBNET_CIDR }: BackofficeInternalSubnetCIDR
+    { BACKOFFICE_INTERNAL_SUBNET_CIDRS }: BackofficeInternalSubnetCIDRs
   ): IRequestMiddleware<
     | "IResponseErrorForbiddenNotAuthorized"
     | "IResponseErrorQuery"
@@ -38,7 +38,7 @@ export const AzureUserAttributesManageMiddlewareWrapper =
     const clientIp = request.ip;
 
     // check if the request ip is in the backoffice internal subnet
-    if (isIPInCIDR(clientIp, BACKOFFICE_INTERNAL_SUBNET_CIDR)) {
+    if (isIPInCIDR(clientIp, BACKOFFICE_INTERNAL_SUBNET_CIDRS)) {
       // in this case we returns an empty list of authorized CIDRs, so we will skip the check
       return E.right({
         authorizedCIDRs: new Set(),
@@ -53,7 +53,7 @@ export const AzureUserAttributesManageMiddlewareWrapper =
     );
   };
 
-const isIPInCIDR = (ip: string, cidr: string): boolean => {
-  const matcher = new CIDRMatcher([cidr]);
+const isIPInCIDR = (ip: string, cidr: ReadonlyArray<string>): boolean => {
+  const matcher = new CIDRMatcher(cidr);
   return matcher.contains(ip);
 };

@@ -1,7 +1,7 @@
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it, vi } from "vitest";
-import { BackofficeInternalSubnetCIDR } from "../../config";
+import { BackofficeInternalSubnetCIDRs } from "../../config";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../azure-user-attributes-manage-middleware-wrapper";
 
 const mocks: {
@@ -46,8 +46,8 @@ const subscriptionCIDRsModelMock = {
 } as unknown as SubscriptionCIDRsModel;
 
 const BackofficeInternalSubnetCIDRMock = {
-  BACKOFFICE_INTERNAL_SUBNET_CIDR: "127.0.0.0/16",
-} as BackofficeInternalSubnetCIDR;
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
+} as BackofficeInternalSubnetCIDRs;
 
 describe("AzureUserAttributesManageMiddlewareWrapper", () => {
   it("should return empty CIDRs list when request comes from Backoffice Subnet", async () => {
