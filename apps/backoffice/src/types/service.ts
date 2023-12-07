@@ -1,6 +1,7 @@
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ScopeEnum } from "@/generated/api/ServiceMetadata";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
+import { ServiceTopic } from "@/generated/api/ServiceTopic";
 
 export type ServiceOrganization = {
   name: string;
@@ -69,6 +70,7 @@ export type Service = {
   visibility?: ServicePublicationStatusType;
   lastUpdate: string;
   metadata: ServiceMetadata;
+  topic?: ServiceTopic;
 } & ServiceCommonData;
 
 /** `ServiceCreateUpdatePayload` type used to create/update services in frontend forms.\
