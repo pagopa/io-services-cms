@@ -45,7 +45,6 @@ locals {
     # Selfcare
     SELFCARE_EXTERNAL_API_BASE_URL = var.backoffice_app.selfcare_external_api_base_url
     SELFCARE_JWKS_PATH             = var.backoffice_app.selfcare_jwks_path
-    SELFCARE_JWT_ISSUER            = var.backoffice_app.selfcare_jwt_issuer
     SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
     SELFCARE_API_MOCKING           = true
 
@@ -81,7 +80,15 @@ module "backoffice_app" {
 
   health_check_path = local.backoffice_health_check_path
 
-  app_settings = local.backoffice_app_settings
+  app_settings = merge(local.backoffice_app_settings, {
+    IS_MSW_ENABLED = false,
+    APP_ENV        = "production"
+  })
+
+  sticky_settings = [
+    "IS_MSW_ENABLED",
+    "APP_ENV"
+  ]
 
   always_on        = true
   vnet_integration = true
@@ -110,7 +117,10 @@ module "backoffice_app_staging" {
 
   health_check_path = local.backoffice_health_check_path
 
-  app_settings = local.backoffice_app_settings
+  app_settings = merge(local.backoffice_app_settings, {
+    IS_MSW_ENABLED = true,
+    APP_ENV        = "staging"
+  })
 
   always_on        = true
   vnet_integration = true

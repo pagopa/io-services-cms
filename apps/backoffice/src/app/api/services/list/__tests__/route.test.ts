@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { faker } from "@faker-js/faker/locale/it";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { SelfcareRoles } from "../../../../../types/auth";
 import { GET } from "../route";
-import { ServiceLifecycle } from "@io-services-cms/models";
 
 const backofficeUserMock = {
   id: faker.string.uuid(),
@@ -96,6 +96,7 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
+      backofficeUserMock.institution,
       100,
       0,
       undefined
@@ -118,6 +119,7 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
+      backofficeUserMock.institution,
       20,
       5,
       undefined
@@ -141,6 +143,7 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
+      backofficeUserMock.institution,
       1,
       0,
       "aServiceId"

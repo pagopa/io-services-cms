@@ -5,12 +5,11 @@ import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { sequence } from "fp-ts/lib/Array";
 import { pipe } from "fp-ts/lib/function";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ExpectStatic, beforeEach, describe, expect, it, vi } from "vitest";
 import { ItemType, getFsmClient } from "..";
 import {
   FSMStore,
   FsmItemNotFoundError,
-  FsmNoTransitionMatchedError,
   FsmStoreFetchError,
   FsmStoreSaveError,
   WithState,
@@ -66,7 +65,7 @@ const expectFailure = async ({
 }: {
   id: NonEmptyString;
   actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
-  expected: Vi.ExpectStatic | undefined;
+  expected: ExpectStatic | undefined;
   errorType: unknown;
   additionalPreTestFn: Function | undefined;
   additionalPostTestFn: Function | undefined;
@@ -207,22 +206,6 @@ describe("apply", () => {
       additionalPreTestFn: undefined,
       additionalPostTestFn: undefined,
     },
-    {
-      title: "on invalid sequence of actions",
-      id: aServiceId,
-      actions: [
-        /* last ok --> */ () =>
-          fsmClient.release(aServiceId, { data: aService }),
-        /* this ko --> */ () => fsmClient.unpublish(aServiceId),
-      ],
-      expected: expect.objectContaining({
-        ...aService, // we expect the first release to have succeeded
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-      errorType: FsmNoTransitionMatchedError,
-      additionalPreTestFn: undefined,
-      additionalPostTestFn: undefined,
-    },
   ])("should fail $title", expectFailure);
 
   it("should fail with FsmStoreFetchError if fetch on store return an Error", async () => {
@@ -265,6 +248,80 @@ describe("apply", () => {
     }
     const { left: value } = result;
     expect(value).toBeInstanceOf(FsmStoreSaveError);
+  });
+
+  it("should 'do nothing' when publishing an already published item", async () => {
+    const currentItem = { ...aService, fsm: { state: "published" } };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.left(new Error());
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.publish(aServiceId)();
+
+    if (E.isLeft(result)) {
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(currentItem);
+    expect(mockStore.save).not.toHaveBeenCalled();
+  });
+
+  it("should override service data when publishing an already published item", async () => {
+    const currentItem = { ...aService, fsm: { state: "published" } };
+    const editedService = {
+      id: aService.id,
+      data: { ...aService.data, description: "edited" as NonEmptyString },
+    };
+    const editedItem = { ...editedService, fms: currentItem.fsm };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.right(editedItem);
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.publish(aServiceId, {
+      data: editedService,
+    })();
+
+    if (E.isLeft(result)) {
+      console.log(result);
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(editedItem);
+    expect(mockStore.save).toHaveBeenCalledOnce();
+  });
+
+  it("should 'do nothing' when unpublishing an already unpublished item", async () => {
+    const currentItem = { ...aService, fsm: { state: "unpublished" } };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.left(new Error());
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.unpublish(aServiceId)();
+
+    if (E.isLeft(result)) {
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(currentItem);
+    expect(mockStore.save).not.toHaveBeenCalled();
   });
 });
 

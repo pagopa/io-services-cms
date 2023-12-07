@@ -137,7 +137,7 @@ describe("UnPublishService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
@@ -156,7 +156,7 @@ describe("UnPublishService", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
+  it("should allow delete release when service is already unpublished", async () => {
     await servicePublicationStore.save("s2", {
       ...aServicePub,
       fsm: { state: "unpublished" },
@@ -170,8 +170,8 @@ describe("UnPublishService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(409);
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(204);
   });
 
   it("should not allow the operation without right group", async () => {

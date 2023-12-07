@@ -81,7 +81,9 @@ jobs:
       - name: 'Healthcheck'
         if: contains(github.event.inputs.package_url, 'webapp')
         id: healthcheck
-        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
+        run: |
+          sleep 30
+          curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_WEBAPP_NAME }}-staging.azurewebsites.net/${{ env.WEBAPP_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.inputs.package_url, 'webapp')
@@ -104,7 +106,9 @@ jobs:
       - name: 'Healthcheck'
         if: contains(github.event.inputs.package_url, 'backoffice')
         id: healthcheck_backoffice
-        run: curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
+        run: |
+          sleep 30
+          curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_BACKOFFICE_NAME }}-staging.azurewebsites.net/${{ env.BACKOFFICE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap staging to production'
         if: contains(github.event.inputs.package_url, 'backoffice')

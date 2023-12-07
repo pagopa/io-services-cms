@@ -23,9 +23,9 @@
     "close": "Chiudi",
     "confirm": "Conferma",
     "copyToClipboard": "Copy to clipboard",
-    "createDraft": "Crea bozza",
     "delete": "Elimina",
     "edit": "Modifica",
+    "import": "Importa",
     "next": "Continua",
     "save": "Salva",
     "showMore": "Scopri di più",
@@ -60,9 +60,13 @@
     },
     "testUrl": "Prova URL",
     "service": {
+      "buttons": {
+        "create": "Crea servizio",
+        "update": "Modifica servizio"
+      },
       "searchById": {
-        "clear": "Cancella filtro",
-        "search": "Avvia ricerca",
+        "clear": "Rimuovi filtro",
+        "search": "Filtra",
         "helperText": "Inserisci un codice ID alfanumerico di 26 caratteri",
         "validText": "Clicca sull'icona a destra del campo per effettuare la ricerca",
         "errorText": "Codice ID servizio non valido",
@@ -84,7 +88,7 @@
       "attributes": "Attributi",
       "authorizedCidrs": "Indirizzi IP autorizzati",
       "description": {
-        "helperText": "Leggi come usare correttamente il <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">linguaggio markdown</a>",
+        "helperText": "Leggi come scrivere correttamente la <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">descrizione di un servizio</a>",
         "label": "Descrizione",
         "placeholder": ""
       },
@@ -184,10 +188,35 @@
       }
     }
   },
+  "subscriptions": {
+    "migration": {
+      "title": "Importa i servizi dal Developer Portal",
+      "disclaimer": {
+        "title": "Il Developer Portal è in corso di dismissione",
+        "description": "Al momento si possono usare entrambi i portali, ma presto i servizi di IO si potranno gestire solo dall’Area Riservata. Non bisogna importare tutti i servizi nello stesso momento: è possibile fare più importazioni."
+      },
+      "action": "Importa i servizi",
+      "refresh": "Aggiorna stato",
+      "status": {
+        "title": "Stato dell’importazione",
+        "description": "In basso è riportata la lista dei delegati con il relativo stato dell'importazione e la data di ultimo aggiornamento.",
+        "success": "I servizi, o una parte di essi, sono stati importati e puoi trovarli nella sezione Servizi.",
+        "noData": "Non è stata avviata nessuna importazione.",
+        "done": "Completata",
+        "doing": "In corso",
+        "todo": "Da avviare",
+        "failed": "Fallita"
+      },
+      "modal": {
+        "title": "Seleziona i delegati che hanno creati i servizi",
+        "description": "I servizi importati saranno visibili solo nell'Area Riservata e saranno accessibili a tutti gli utenti dell'ente."
+      }
+    }
+  },
   "institution": {
     "cardTitle": "Informazioni Ente",
     "name": "Ragione sociale",
-    "mailAddress": "Indirizzo PEC primario",
+    "digitalAddress": "Indirizzo PEC primario",
     "institutionType": {
       "label": "Tipologia",
       "AS": "Assicurazioni",
@@ -264,9 +293,11 @@
       "pec": "Pec",
       "phone": "Telefono",
       "privacyUrl": "Privacy",
+      "sensitive": "Servizio sensibile",
       "serviceId": "ID Servizio",
       "status": "Stato",
       "supportUrl": "Url di supporto",
+      "topic": "Argomento",
       "tosUrl": "Termini e condizioni",
       "viewDetails": "Vedi dettaglio",
       "visibility": "Visibilità in IO",
@@ -372,7 +403,7 @@
     "submitReview": {
       "modal": {
         "title": "Vuoi inviare questo servizio in revisione?",
-        "description": "Il servizio verrà revisionato dal team di IO. Riceverai una comunicazione con l’esito, positivo o negativo, sulla mail dell’ente e dell’utente che ha inviato in revisione il servizio.",
+        "description": "Il servizio verrà revisionato dal team di IO. Monitora in <strong>Servizi</strong> l’esito della revisione: <br/><ul><li>se il servizio viene <strong>approvato</strong>, verrà automaticamente pubblicato;</li><li>nel caso in cui il servizio venga <strong>rifiutato</strong>, potrai consultare la motivazione e apportare le modifiche necessarie per poterlo inviare nuovamente in revisione.</li></ul>",
         "button": "Invia in revisione"
       }
     },
@@ -406,5 +437,14 @@
       "lastUpdate": "Ultima modifica:"
     }
   },
-  "test": "Questo è un test di traduzione"
+  "table": {
+    "pagination": {
+      "labelRowsPerPage": "Righe per pagina:",
+      "labelDisplayedRows": {
+        "of": "di",
+        "moreThan": "più di"
+      }
+    }
+  },
+  "undefined": "Non definito"
 }

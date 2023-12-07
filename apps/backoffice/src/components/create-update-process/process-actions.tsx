@@ -2,14 +2,20 @@ import { Grid } from "@mui/material";
 import {
   ButtonBack,
   ButtonCancel,
-  ButtonCreateDraft,
-  ButtonNext
+  ButtonNext,
+  ButtonWithLoader
 } from "../buttons";
+import {
+  ConfirmButtonLabelsType,
+  CreateUpdateMode
+} from "./create-update-process";
 
 export type ProcessActionsProps = {
   disabled?: boolean;
   stepsNumber: number;
   currentStepIndex: number;
+  mode: CreateUpdateMode;
+  confirmButtonLabels: ConfirmButtonLabelsType;
   onCancel: () => void;
   onBack: () => void;
   onNext: () => void;
@@ -21,6 +27,8 @@ export const ProcessActions = ({
   disabled,
   stepsNumber,
   currentStepIndex,
+  mode,
+  confirmButtonLabels,
   onCancel,
   onBack,
   onNext,
@@ -39,7 +47,8 @@ export const ProcessActions = ({
         {currentStepIndex < stepsNumber - 1 ? (
           <ButtonNext onClick={onNext} disabled={disabled} />
         ) : (
-          <ButtonCreateDraft
+          <ButtonWithLoader
+            label={confirmButtonLabels[mode]}
             onClick={onComplete}
             loading={disabled}
             disabled={disabled}

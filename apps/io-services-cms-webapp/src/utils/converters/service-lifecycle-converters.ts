@@ -49,8 +49,10 @@ export const itemToResponse = ({
     scope: toScopeType(data.metadata.scope),
     category: toCategoryType(data.metadata.category),
   },
+  require_secure_channel: data.require_secure_channel,
   authorized_recipients: data.authorized_recipients,
   authorized_cidrs: data.authorized_cidrs,
+  max_allowed_payment_amount: data.max_allowed_payment_amount,
 });
 
 export const toServiceStatus = (

@@ -1,5 +1,6 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NO_CONTENT
 } from "@/config/constants";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -14,7 +15,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../types/next-auth";
+import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
 import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
@@ -27,8 +28,11 @@ import {
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
 } from "./subscription-migration";
-import { reducePublicationServicesList, toServiceListItem } from "./utils";
-
+import {
+  buildMissingService,
+  reducePublicationServicesList,
+  toServiceListItem
+} from "./utils";
 
 type PathParameters = {
   serviceId?: string;
@@ -47,6 +51,7 @@ type PathParameters = {
  */
 export const retrieveServiceList = async (
   userId: string,
+  institution: Institution,
   limit: number,
   offset: number,
   serviceId?: string
@@ -77,14 +82,48 @@ export const retrieveServiceList = async (
         TE.map(reducePublicationServicesList)
       )
     ),
+    TE.bindW("missingServices", ({ apimServices, lifecycleServices }) =>
+      pipe(
+        // Extract service names from apimServices
+        apimServices.value
+          ? apimServices.value.map(subscription => ({
+              id: subscription.name as NonEmptyString,
+              createdDate: subscription.createdDate
+            }))
+          : [],
+
+        // Find the difference between apimServices and lifecycleServices using service names
+        services =>
+          services.filter(
+            service => !lifecycleServices.map(s => s.id).includes(service.id)
+          ),
+        TE.right
+      )
+    ),
     // create response payload
-    TE.map(({ apimServices, lifecycleServices, publicationServices }) => ({
-      value: lifecycleServices.map(service => ({
-        ...service,
-        visibility: publicationServices[service.id]
-      })),
-      pagination: { offset, limit, count: apimServices.count }
-    })),
+    TE.map(
+      ({
+        apimServices,
+        lifecycleServices,
+        publicationServices,
+        missingServices
+      }) => ({
+        value: [
+          ...lifecycleServices.map(service => ({
+            ...service,
+            visibility: publicationServices[service.id]
+          })),
+          ...missingServices.map(missingService =>
+            buildMissingService(
+              missingService.id,
+              institution,
+              missingService.createdDate
+            )
+          )
+        ],
+        pagination: { offset, limit, count: apimServices.count }
+      })
+    ),
     TE.getOrElse(error => {
       throw error;
     })
@@ -99,65 +138,72 @@ export async function forwardIoServicesCmsRequest<
   T extends keyof IoServicesCmsClient
 >(
   operationId: T,
-  nextRequest: NextRequest,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
-): Promise<Response>;
-export async function forwardIoServicesCmsRequest<
-  T extends keyof IoServicesCmsClient
->(
-  operationId: T,
-  jsonBody: any,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
-): Promise<Response>;
-export async function forwardIoServicesCmsRequest<
-  T extends keyof IoServicesCmsClient
->(
-  operationId: T,
-  requestOrBody: NextRequest | any,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
+  {
+    nextRequest,
+    backofficeUser,
+    pathParams,
+    jsonBody
+  }: {
+    nextRequest: NextRequest;
+    backofficeUser: BackOfficeUser;
+    pathParams?: PathParameters;
+    jsonBody?: any;
+  }
 ): Promise<Response> {
-  // extract jsonBody
-  const jsonBody =
-    requestOrBody && "json" in requestOrBody // check NextRequest object
-      ? await requestOrBody.json().catch((_: unknown) => undefined)
-      : requestOrBody;
+  try {
+    // extract jsonBody
+    const requestBody =
+      jsonBody ?? (await nextRequest.json().catch((_: unknown) => undefined));
 
-  // create the request payload
-  const requestPayload = {
-    ...pathParams,
-    body: jsonBody,
-    "x-user-email": backofficeUser.parameters.userEmail,
-    "x-user-id": backofficeUser.parameters.userId,
-    "x-subscription-id": backofficeUser.parameters.subscriptionId,
-    "x-user-groups": backofficeUser.permissions.join(",")
-  } as any;
+    // create the request payload
+    const requestPayload = {
+      ...pathParams,
+      body: requestBody,
+      "x-user-email": backofficeUser.parameters.userEmail,
+      "x-user-id": backofficeUser.parameters.userId,
+      "x-subscription-id": backofficeUser.parameters.subscriptionId,
+      "x-user-groups": backofficeUser.permissions.join(","),
+      "X-Forwarded-For": nextRequest.headers.get("X-Forwarded-For") ?? undefined
+    } as any;
 
-  // call the io-services-cms API and return the response
-  const result = await callIoServicesCms(operationId, requestPayload);
+    // call the io-services-cms API and return the response
+    const result = await callIoServicesCms(operationId, requestPayload);
 
-  if (E.isLeft(result)) {
+    if (E.isLeft(result)) {
+      return NextResponse.json(
+        {
+          title: "validationError",
+          status: HTTP_STATUS_BAD_REQUEST as any,
+          detail: readableReport(result.left)
+        },
+        { status: HTTP_STATUS_BAD_REQUEST }
+      );
+    }
+
+    const { status, value } = result.right;
+    // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
+    if (status === HTTP_STATUS_NO_CONTENT || value === undefined) {
+      return new Response(null, {
+        status
+      });
+    }
+
+    return NextResponse.json(value, { status });
+  } catch (error) {
+    console.error(
+      `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
+      error
+    );
+
     return NextResponse.json(
       {
-        title: "validationError",
-        status: HTTP_STATUS_BAD_REQUEST as any,
-        detail: readableReport(result.left)
+        title: "InternalError",
+        status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        detail: "Error forwarding io-services-cms request"
       },
-      { status: HTTP_STATUS_BAD_REQUEST }
+      { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
     );
   }
-
-  const { status, value } = result.right;
-  // NextResponse.json() does not support 204 status code https://github.com/vercel/next.js/discussions/51475
-  if (status === HTTP_STATUS_NO_CONTENT) {
-    return new Response(null, {
-      status
-    });
-  }
-
-  return NextResponse.json(value, { status });
 }
 
 /**

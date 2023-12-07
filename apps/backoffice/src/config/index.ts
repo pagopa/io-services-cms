@@ -1,6 +1,8 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 export type Configuration = {
+  IS_MSW_ENABLED: boolean;
+
   // IO Services CMS API configuration
   API_SERVICES_CMS_URL: string;
   API_SERVICES_CMS_BASE_PATH: string;
@@ -19,12 +21,14 @@ export type Configuration = {
   BACK_OFFICE_PRIVACY_POLICY_URL: string;
   BACK_OFFICE_TOS_URL: string;
   BACK_OFFICE_PERS_DATA_PROTECTION_URL: string;
+  BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
 
   // Selfcare
+  SELFCARE_ID: string;
+  SELFCARE_TITLE: string;
   SELFCARE_URL: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
   SELFCARE_EXTERNAL_API_BASE_URL: string;
-  SELFCARE_JWT_ISSUER: string;
   SELFCARE_JWKS_URL: string;
   SELFCARE_API_MOCKING: boolean;
 
@@ -58,11 +62,12 @@ export type Configuration = {
 
   // Subscriptions migration configuration
   SUBSCRIPTION_MIGRATION_API_MOCKING: boolean;
-
 };
 
 export function getConfiguration(): Configuration {
   return {
+    IS_MSW_ENABLED: process.env.IS_MSW_ENABLED === "true",
+
     // IO Services CMS API configuration
     API_SERVICES_CMS_URL: process.env.API_SERVICES_CMS_URL as string,
     API_SERVICES_CMS_BASE_PATH: process.env
@@ -86,15 +91,19 @@ export function getConfiguration(): Configuration {
     BACK_OFFICE_TOS_URL: process.env.NEXT_PUBLIC_BACK_OFFICE_TOS_URL as string,
     BACK_OFFICE_PERS_DATA_PROTECTION_URL: process.env
       .NEXT_PUBLIC_BACK_OFFICE_PERS_DATA_PROTECTION_URL as string,
+    BACK_OFFICE_OPERATIVE_MANUAL_URL: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_OPERATIVE_MANUAL_URL as string,
 
     // Selfcare
+    SELFCARE_ID: process.env.NEXT_PUBLIC_SELFCARE_ID as string,
+    SELFCARE_TITLE: process.env.NEXT_PUBLIC_SELFCARE_TITLE as string,
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
     SELFCARE_EXTERNAL_API_BASE_URL: process.env
       .SELFCARE_EXTERNAL_API_BASE_URL as string,
-    SELFCARE_JWT_ISSUER: process.env.SELFCARE_JWT_ISSUER as string,
-    SELFCARE_JWKS_URL: process.env.SELFCARE_JWKS_URL as string,
+    SELFCARE_JWKS_URL: ((process.env.NEXT_PUBLIC_SELFCARE_URL as string) +
+      process.env.SELFCARE_JWKS_PATH) as string,
     SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
 
     // NodeJS Environment mode

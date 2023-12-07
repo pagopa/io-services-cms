@@ -25,12 +25,12 @@ export default function NewService() {
   const { enqueueSnackbar } = useSnackbar();
   const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
-  const handleConfirm = (service: ServiceCreateUpdatePayload) => {
+  const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
     const maybeServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
       service
     );
     if (E.isRight(maybeServicePayload)) {
-      serviceFetchData(
+      await serviceFetchData(
         "createService",
         {
           body: maybeServicePayload.right

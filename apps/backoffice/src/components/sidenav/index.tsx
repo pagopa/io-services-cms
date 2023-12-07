@@ -13,7 +13,6 @@ import Tooltip from "@mui/material/Tooltip";
 import { useTheme } from "@mui/material/styles";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { Fragment, ReactElement, useEffect, useRef, useState } from "react";
 
@@ -71,6 +70,18 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
   const setMenuOpen = (width: number) => {
     setSettings({ width, collapse: false });
     updateWidthRef();
+  };
+
+  /** Handle click on menu item:
+   * - `internal` link will perform nextjs router transition
+   * - `external` link, as for external URLs, `window.open` will be used
+   *
+   * https://nextjs.org/docs/pages/api-reference/functions/use-router#routerpush
+   */
+  const handleMenuClick = (item: SidenavItem) => {
+    item.linkType === "internal"
+      ? router.push(item.href)
+      : window.open(item.href, "_blank");
   };
 
   /**
@@ -135,36 +146,35 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
             )
             .map((item, index) => (
               <Fragment key={index}>
-                <NextLink href={item.href} passHref>
-                  {renderTooltipOnCollapse(
-                    t(item.text),
-                    <ListItemButton
-                      selected={
-                        router.pathname === item.href ||
-                        (item.href.length > 1 &&
-                          router.pathname.startsWith(item.href))
+                {renderTooltipOnCollapse(
+                  t(item.text),
+                  <ListItemButton
+                    selected={
+                      router.pathname === item.href ||
+                      (item.href.length > 1 &&
+                        router.pathname.startsWith(item.href))
+                    }
+                    onClick={() => handleMenuClick(item)}
+                  >
+                    <ListItemIcon
+                      sx={
+                        settings.collapse
+                          ? { marginLeft: 2, marginRight: 4 }
+                          : {}
                       }
                     >
-                      <ListItemIcon
-                        sx={
-                          settings.collapse
-                            ? { marginLeft: 2, marginRight: 4 }
-                            : {}
-                        }
-                      >
-                        {item.icon}
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={settings.collapse ? "" : t(item.text)}
+                    />
+                    {item.linkType === "external" && !settings.collapse ? (
+                      <ListItemIcon>
+                        <ExitToAppRounded color="action" />
                       </ListItemIcon>
-                      <ListItemText
-                        primary={settings.collapse ? "" : t(item.text)}
-                      />
-                      {item.linkType === "external" && !settings.collapse ? (
-                        <ListItemIcon>
-                          <ExitToAppRounded color="action" />
-                        </ListItemIcon>
-                      ) : null}
-                    </ListItemButton>
-                  )}
-                </NextLink>
+                    ) : null}
+                  </ListItemButton>
+                )}
                 {item.hasBottomDivider ? <Divider /> : null}
               </Fragment>
             ))}

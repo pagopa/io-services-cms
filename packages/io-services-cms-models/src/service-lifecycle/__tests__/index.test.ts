@@ -5,7 +5,7 @@ import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { sequence } from "fp-ts/lib/Array";
 import { pipe } from "fp-ts/lib/function";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ExpectStatic, beforeEach, describe, expect, it, vi } from "vitest";
 import { FSM, ItemType, getFsmClient } from "..";
 import {
   FSMStore,
@@ -67,7 +67,7 @@ const expectFailure = async ({
 }: {
   id: NonEmptyString;
   actions: RTE.ReaderTaskEither<void, unknown, unknown>[];
-  expected: Vi.ExpectStatic | undefined;
+  expected: ExpectStatic | undefined;
   errorType: unknown;
   additionalPreTestFn: Function | undefined;
   additionalPostTestFn: Function | undefined;

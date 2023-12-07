@@ -9,10 +9,18 @@ import {
   ScopeEnum
 } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
-import { pipe } from "fp-ts/lib/function";
-import * as E from "fp-ts/lib/Either";
+import {
+  NonEmptyString,
+  OrganizationFiscalCode
+} from "@pagopa/ts-commons/lib/strings";
 import * as RA from "fp-ts/lib/ReadonlyArray";
-import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+import { Institution } from "../../../../types/next-auth";
+import { NextRequest } from "next/server";
+
+export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_ORGANIZATION = "Istituzione non disponibile" as NonEmptyString;
 
 export const reducePublicationServicesList = (
   publicationServices: ReadonlyArray<ServicePublication.ItemType>
@@ -35,7 +43,7 @@ export const toServiceListItem = ({
 }: ServiceLifecycle.ItemType): ServiceListItem => ({
   id,
   status: toServiceStatus(fsm),
-  last_update: last_update ?? new Date().getTime().toString(),
+  last_update: last_update ?? new Date().toISOString(),
   name: data.name,
   description: data.description,
   organization: data.organization,
@@ -93,3 +101,26 @@ const toCategoryType = (
       return CategoryEnum.STANDARD;
   }
 };
+
+export const buildMissingService = (
+  serviceId: string,
+  institution: Institution,
+  lastUpdate = new Date()
+): ServiceListItem => ({
+  id: serviceId,
+  status: { value: ServiceLifecycleStatusTypeEnum.deleted },
+  last_update: lastUpdate.toISOString(),
+  name: MISSING_SERVICE_NAME,
+  description: MISSING_SERVICE_DESCRIPTION,
+  organization: {
+    name: (institution.name as NonEmptyString) ?? MISSING_SERVICE_ORGANIZATION,
+    fiscal_code: (institution.fiscalCode ??
+      "00000000000") as OrganizationFiscalCode
+  },
+  metadata: {
+    scope: ScopeEnum.LOCAL,
+    category: CategoryEnum.STANDARD
+  },
+  authorized_recipients: [],
+  authorized_cidrs: []
+});

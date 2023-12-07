@@ -5,16 +5,21 @@ import * as TE from "fp-ts/TaskEither";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../types/next-auth";
-import { MigrationItem } from "../../../generated/api/MigrationItem";
+import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
+import { MigrationItem } from "../../../generated/api/MigrationItem";
+import { ServiceLifecycleStatusTypeEnum } from "../../../generated/services-cms/ServiceLifecycleStatusType";
 import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
   retrieveServiceList
 } from "../services/business";
-import { toServiceListItem } from "../services/utils";
+import {
+  MISSING_SERVICE_DESCRIPTION,
+  MISSING_SERVICE_NAME,
+  toServiceListItem
+} from "../services/utils";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -35,6 +40,7 @@ const mocks: {
   aSamplePayload: { test: string };
   aBaseServiceLifecycle: ServiceLifecycle.ItemType;
   anUserId: string;
+  anInstitution: Institution;
   migrationItem: MigrationItem;
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
@@ -67,6 +73,12 @@ const mocks: {
     }
   } as unknown) as ServiceLifecycle.ItemType,
   anUserId: "anUserId",
+  anInstitution: {
+    id: "anInstitutionId",
+    name: "anInstitutionName",
+    fiscalCode: "12345678901",
+    role: "admin"
+  },
   migrationItem: {
     status: {
       completed: 99,
@@ -202,11 +214,10 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await forwardIoServicesCmsRequest(
-        "getServices",
-        request,
-        jwtMock
-      );
+      const result = await forwardIoServicesCmsRequest("getServices", {
+        nextRequest: request,
+        backofficeUser: jwtMock
+      });
 
       expect(getServices).toHaveBeenCalled();
       expect(getServices).toHaveBeenCalledWith(
@@ -242,14 +253,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "createService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("createService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
@@ -286,14 +296,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "reviewService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("reviewService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
@@ -326,14 +335,20 @@ describe("Services TEST", () => {
         description: "test"
       };
 
-      const result = await forwardIoServicesCmsRequest(
-        "createService",
-        aBodyPayload,
-        jwtMock,
-        {
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "POST",
+        body: JSON.stringify(aBodyPayload)
+      });
+
+      const result = await forwardIoServicesCmsRequest("createService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        jsonBody: aBodyPayload,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
@@ -385,14 +400,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "reviewService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("reviewService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
@@ -467,7 +481,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        0
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -525,7 +544,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        90
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -568,7 +592,12 @@ describe("Services TEST", () => {
 
       isAxiosError.mockReturnValueOnce(true);
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 90);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        90
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -587,9 +616,10 @@ describe("Services TEST", () => {
 
     // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
     // and not on apim, in such remote case we still return the list of services
-    it("when a service is found on apim and not service-lifecycle should not appears on returned list", async () => {
+    it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
       const aServiceInLifecycleId = "aServiceInLifecycleId";
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
+      const aServiceNotInLifecycleCreateDate = new Date();
 
       const bulkFetchLifecycleMock = vi.fn(() =>
         TE.right([
@@ -618,7 +648,8 @@ describe("Services TEST", () => {
               name: aServiceInLifecycleId
             },
             {
-              name: aServiceNotInLifecycleId
+              name: aServiceNotInLifecycleId,
+              createdDate: aServiceNotInLifecycleCreateDate
             }
           ],
           count: 2
@@ -638,7 +669,12 @@ describe("Services TEST", () => {
         })
       );
 
-      const result = await retrieveServiceList(mocks.anUserId, 10, 0);
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        0
+      );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
@@ -660,7 +696,20 @@ describe("Services TEST", () => {
             ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: aServiceInLifecycleId,
             visibility: "published"
-          }
+          },
+          expect.objectContaining({
+            description: MISSING_SERVICE_DESCRIPTION,
+            id: aServiceNotInLifecycleId,
+            last_update: aServiceNotInLifecycleCreateDate.toISOString(),
+            name: MISSING_SERVICE_NAME,
+            organization: {
+              fiscal_code: mocks.anInstitution.fiscalCode,
+              name: mocks.anInstitution.name
+            },
+            status: {
+              value: ServiceLifecycleStatusTypeEnum.deleted
+            }
+          })
         ],
         pagination: { count: 2, limit: 10, offset: 0 }
       });
@@ -702,7 +751,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -753,7 +802,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -793,7 +842,7 @@ describe("Services TEST", () => {
       );
 
       await expect(
-        retrieveServiceList(mocks.anUserId, 10, 0)
+        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(

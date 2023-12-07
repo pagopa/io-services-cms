@@ -1,6 +1,6 @@
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
-import { Client, WithDefaultsT, createClient } from "@/generated/api/client";
+import { Client, createClient } from "@/generated/api/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -79,25 +79,14 @@ const manageHttpResponseStatusCode = (
   }
 };
 
-const withBearer: WithDefaultsT<"bearerAuth"> = wrappedOperation => params => {
-  return wrappedOperation({
-    ...params,
-    bearerAuth: "VALID_TOKEN" // just a placeholder, see `clientWithBearerToken` explanations below
-  });
-};
-
-/**
- * IO Services CMS generated Api Client
- *
- * Client with defaults bearerAuth, to avoid bearer token definition in each component call. */
-export const clientWithBearerToken: Client<"bearerAuth"> = createClient({
+/** IO Services CMS generated Api Client */
+const generatedClient: Client = createClient({
   baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-  fetchApi: (fetch as any) as typeof fetch,
-  withDefaults: withBearer
+  fetchApi: (fetch as any) as typeof fetch
 });
 
 /** List of all client operations */
-type ClientOperations = typeof clientWithBearerToken;
+type ClientOperations = typeof generatedClient;
 
 /** Extract operation request parameters inferred by client operationId */
 type ExtractRequestParams<T extends keyof ClientOperations> = Parameters<

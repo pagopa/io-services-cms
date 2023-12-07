@@ -23,9 +23,9 @@
     "close": "Close",
     "confirm": "Confirm",
     "copyToClipboard": "Copy to clipboard",
-    "createDraft": "Create draft",
     "delete": "Delete",
     "edit": "Edit",
+    "import": "Import",
     "next": "Next",
     "save": "Save",
     "showMore": "Show more",
@@ -60,9 +60,13 @@
     },
     "testUrl": "Try URL",
     "service": {
+      "buttons": {
+        "create": "Create service",
+        "update": "Update service"
+      },
       "searchById": {
         "clear": "Clear filter",
-        "search": "Start search",
+        "search": "Filter",
         "helperText": "Enter a 26-character alphanumeric ID code and click on right search icon",
         "validText": "Click on right search icon inside field to perform search",
         "errorText": "Invalid service ID code",
@@ -84,7 +88,7 @@
       "attributes": "Attributes",
       "authorizedCidrs": "Authorized IP address",
       "description": {
-        "helperText": "Read how to use the <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">markdown syntax</a> correctly.",
+        "helperText": "Read how to write <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione\" target=\"_blank\">service description</a> correctly.",
         "label": "Description",
         "placeholder": ""
       },
@@ -184,10 +188,35 @@
       }
     }
   },
+  "subscriptions": {
+    "migration": {
+      "title": "Import services from the Developer Portal",
+      "disclaimer": {
+        "title": "The Developer Portal is being decommissioned",
+        "description": "At the moment you can use both portals, but soon IO services will only be able to be managed from the Reserved Area. You don't have to import all the services at the same time: it is possible to do multiple imports."
+      },
+      "action": "Import services",
+      "refresh": "Refresh status",
+      "status": {
+        "title": "Import status",
+        "description": "Below is the list of delegates with the import status and the last update date.",
+        "success": "The services, or a part of them, have been imported and you can find them in the Services section.",
+        "noData": "No import was started.",
+        "done": "Completed",
+        "doing": "In progress",
+        "todo": "To start",
+        "failed": "Failed"
+      },
+      "modal": {
+        "title": "Select the delegates who created the services",
+        "description": "The imported services will only be visible in the Reserved Area and will be accessible to all users of the organisation."
+      }
+    }
+  },
   "institution": {
     "cardTitle": "Institution information",
     "name": "Business name",
-    "mailAddress": "Primary PEC address",
+    "digitalAddress": "Primary PEC address",
     "institutionType": {
       "label": "Tipology",
       "AS": "Insurance",
@@ -264,9 +293,11 @@
       "pec": "Pec",
       "phone": "Phone",
       "privacyUrl": "Privacy",
+      "sensitive": "Sensitive service",
       "serviceId": "Service ID",
       "status": "Status",
       "supportUrl": "Support url",
+      "topic": "Topic",
       "tosUrl": "Terms & conditions",
       "viewDetails": "View details",
       "visibility": "Visibility on IO",
@@ -372,7 +403,7 @@
     "submitReview": {
       "modal": {
         "title": "Do you want to send this service for review?",
-        "description": "The service will be reviewed by the IO team. You will receive a communication with the outcome, positive or negative, on the email of the institution and the user who sent the service for review.",
+        "description": "The service will be reviewed by the IO team. Monitor the outcome of the review in <strong>Services</strong>: <br/><ul><li>if the service is <strong>approved</strong>, it will be automatically published;</li><li> in the event that the service is <strong>rejected</strong>, you will be able to consult the reason and make the necessary changes to be able to send it again for review.</li></ul>",
         "button": "Send for review"
       }
     },
@@ -406,5 +437,14 @@
       "lastUpdate": "Last update:"
     }
   },
-  "test": "This is a translation test"
+  "table": {
+    "pagination": {
+      "labelRowsPerPage": "Rows per page:",
+      "labelDisplayedRows": {
+        "of": "of",
+        "moreThan": "more than"
+      }
+    }
+  },
+  "undefined": "Not defined"
 }

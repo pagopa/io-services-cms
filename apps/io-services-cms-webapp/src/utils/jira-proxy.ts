@@ -38,9 +38,17 @@ export type JiraProxy = {
   readonly getJiraIssueByServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
-  readonly getPendingJiraIssueByServiceId: (
+  readonly getPendingAndRejectedJiraIssueByServiceId: (
     serviceId: NonEmptyString
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
+  readonly updateJiraIssue: (
+    ticketKey: NonEmptyString,
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ) => TE.TaskEither<Error, void>;
+  readonly reOpenJiraIssue: (
+    ticketKey: NonEmptyString
+  ) => TE.TaskEither<Error, void>;
 };
 
 export type Delegate = {
@@ -118,6 +126,28 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       buildIssueCustomFields(service, delegate)
     );
 
+  const updateJiraIssue = (
+    ticketKey: NonEmptyString,
+    service: ServiceLifecycle.definitions.Service,
+    delegate: Delegate
+  ): TE.TaskEither<Error, void> =>
+    jiraClient.updateJiraIssue(
+      ticketKey,
+      formatIssueTitle(service.id),
+      buildIssueDescription(service, delegate),
+      [`service-${service.id}` as NonEmptyString],
+      buildIssueCustomFields(service, delegate)
+    );
+
+  const reOpenJiraIssue = (
+    ticketKey: NonEmptyString
+  ): TE.TaskEither<Error, void> =>
+    jiraClient.applyJiraIssueTransition(
+      ticketKey,
+      jiraClient.config.JIRA_TRANSITION_UPDATED_ID,
+      "L'ente ha richiesto una nuova review"
+    );
+
   const buildSearchIssuesBasePayload = (
     jql: string
   ): SearchJiraIssuesPayload => ({
@@ -161,7 +191,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     ),
   });
 
-  const buildGetPendingJiraIssueByServiceIdPayload = (
+  const buildGetPendingAndRejectedJiraIssueByServiceIdPayload = (
     serviceId: NonEmptyString
   ) => ({
     ...buildSearchIssuesBasePayload(
@@ -169,7 +199,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
         jiraClient.config.JIRA_PROJECT_NAME
       } AND summary ~ '${formatIssueTitle(
         serviceId
-      )}' AND status IN (NEW , REVIEW)`
+      )}' AND status IN (NEW , REVIEW , REJECTED)`
     ),
   });
 
@@ -185,12 +215,12 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       )
     );
 
-  const getPendingJiraIssueByServiceId = (
+  const getPendingAndRejectedJiraIssueByServiceId = (
     serviceId: NonEmptyString
   ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
     pipe(
       jiraClient.searchJiraIssues(
-        buildGetPendingJiraIssueByServiceIdPayload(serviceId)
+        buildGetPendingAndRejectedJiraIssueByServiceIdPayload(serviceId)
       ),
       TE.map((response) =>
         response.issues.length > 0 ? O.some(response.issues[0]) : O.none
@@ -201,6 +231,8 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     createJiraIssue,
     searchJiraIssuesByKeyAndStatus,
     getJiraIssueByServiceId,
-    getPendingJiraIssueByServiceId,
+    getPendingAndRejectedJiraIssueByServiceId,
+    updateJiraIssue,
+    reOpenJiraIssue,
   };
 };

@@ -1,6 +1,7 @@
 import {
   Box,
   CircularProgress,
+  LabelDisplayedRowsArgs,
   Paper,
   Table,
   TableBody,
@@ -70,6 +71,23 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
     setPage(0);
     props.onRowsPerPageChange(+event.target.value);
   };
+
+  /**
+   * TablePagination API
+   * https://mui.com/material-ui/api/table-pagination/#TablePagination-prop-labelDisplayedRows
+   * @param param0 `LabelDisplayedRowsArgs`
+   * @returns
+   */
+  const customLabelDisplayedRows = ({
+    from,
+    to,
+    count
+  }: LabelDisplayedRowsArgs) =>
+    `${from}–${to} ${t("table.pagination.labelDisplayedRows.of")} ${
+      count !== -1
+        ? count
+        : `${t("table.pagination.labelDisplayedRows.moreThan")} ${to}`
+    }`;
 
   useEffect(() => {
     setRowsPerPage(props.pagination.limit);
@@ -151,6 +169,8 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
           page={page}
           showFirstButton
           showLastButton
+          labelDisplayedRows={customLabelDisplayedRows}
+          labelRowsPerPage={t("table.pagination.labelRowsPerPage")}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
         />

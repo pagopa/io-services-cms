@@ -1,5 +1,29 @@
 # io-services-cms-models
 
+## 1.16.0
+
+### Minor Changes
+
+- 86fa737: ADD Service Topics in openapi.yaml
+
+## 1.15.1
+
+### Patch Changes
+
+- e66c6d3: fix autopublish action
+
+## 1.15.0
+
+### Minor Changes
+
+- b6ae125: make publish and unpublish actions idempotent
+
+## 1.14.1
+
+### Patch Changes
+
+- 1ef54a1: change mailAddress to digitalAddress in istitution openapi
+
 ## 1.14.0
 
 ### Minor Changes

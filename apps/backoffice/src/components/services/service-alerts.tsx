@@ -139,9 +139,14 @@ export const ServiceAlerts = ({
             {t("service.alerts.rejected.reason.title")}
           </Typography>
         </Stack>
-        <Typography variant="body2" marginTop={1}>
-          {serviceLifecycleStatus?.reason}
-        </Typography>
+        <Typography
+          variant="body2"
+          marginTop={1}
+          dangerouslySetInnerHTML={{
+            __html:
+              serviceLifecycleStatus?.reason?.replaceAll("|", "<br />") ?? ""
+          }}
+        />
       </Box>
     );
     openDrawer(content);

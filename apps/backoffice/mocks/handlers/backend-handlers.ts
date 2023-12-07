@@ -6,10 +6,10 @@ import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
 import { rest } from "msw";
 import {
-  aMockJwtSessionToken,
   aMockManageKeysCIDRs,
   aMockServicePagination,
   aMockServicePublication,
+  aMockServiceTopics,
   anInfoVersion,
   getMockServiceKeys,
   getMockServiceLifecycle,
@@ -19,7 +19,11 @@ import {
   getMockServicesMigrationStatusDetails
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
-import { getMockInstitution } from "../data/selfcare-data";
+import {
+  aMockCurrentUserAuthorizedInstitution,
+  getMockInstitution,
+  getMockUserAuthorizedInstitution
+} from "../data/selfcare-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -39,26 +43,13 @@ export const buildHandlers = () => {
 
       return res(...resultArray[0]);
     }),
-    rest.post(`${baseURL}/auth`, (_, res, ctx) => {
-      const resultArray = [
-        [
-          ctx.status(200),
-          ctx.set("Media-Type", "application/jwt"),
-          ctx.body(getResolveSelfCareIdentity200Response())
-        ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
-      ];
-
-      return res(...resultArray[0]);
-    }),
     rest.get(
       `${baseURL}/services/migrations/ownership-claims/latest`,
       (_, res, ctx) => {
         const resultArray = [
           [
             ctx.status(200),
+            ctx.delay(1000),
             ctx.json(getGetServicesMigrationStatus200Response())
           ],
           [ctx.status(401), ctx.json(null)],
@@ -74,6 +65,7 @@ export const buildHandlers = () => {
       const resultArray = [
         [
           ctx.status(200),
+          ctx.delay(1000),
           ctx.json(getGetServicesMigrationDelegates200Response())
         ],
         [ctx.status(401), ctx.json(null)],
@@ -88,7 +80,7 @@ export const buildHandlers = () => {
       `${baseURL}/services/migrations/ownership-claims/:delegateId`,
       (_, res, ctx) => {
         const resultArray = [
-          [ctx.status(201), ctx.json(null)],
+          [ctx.status(201), ctx.delay(1000), ctx.json(null)],
           [ctx.status(401), ctx.json(null)],
           [ctx.status(403), ctx.json(null)],
           [ctx.status(404), ctx.json(null)],
@@ -105,6 +97,7 @@ export const buildHandlers = () => {
         const resultArray = [
           [
             ctx.status(200),
+            ctx.delay(1000),
             ctx.json(getGetServicesMigrationDetails200Response())
           ],
           [ctx.status(401), ctx.json(null)],
@@ -158,6 +151,17 @@ export const buildHandlers = () => {
             )
           )
         ],
+        [ctx.status(401), ctx.json(null)],
+        [ctx.status(403), ctx.json(null)],
+        [ctx.status(429), ctx.json(null)],
+        [ctx.status(500), ctx.json(null)]
+      ];
+
+      return res(...resultArray[0]);
+    }),
+    rest.get(`${baseURL}/services/topics`, (_, res, ctx) => {
+      const resultArray = [
+        [ctx.status(200), ctx.json(getGetServiceTopics200Response())],
         [ctx.status(401), ctx.json(null)],
         [ctx.status(403), ctx.json(null)],
         [ctx.status(429), ctx.json(null)],
@@ -315,7 +319,7 @@ export const buildHandlers = () => {
     }),
     rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetInstitutions200Response())],
+        [ctx.status(200), ctx.json(getUserAuthorizedInstitutions200Response())],
         [ctx.status(401), ctx.json(null)],
         [ctx.status(403), ctx.json(null)],
         [ctx.status(429), ctx.json(null)],
@@ -397,20 +401,16 @@ export function getInfo500Response() {
   return aMockErrorResponse;
 }
 
-export function getResolveSelfCareIdentity200Response() {
-  return aMockJwtSessionToken;
-}
-
 export function getGetServicesMigrationStatus200Response() {
   return {
     items: [
       ...Array.from(
-        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
       )
     ].map(_ => ({
       status: getMockServicesMigrationLatestStatus(),
       delegate: getMockServicesMigrationDelegate(),
-      lastUpdate: new Date().toISOString()
+      lastUpdate: faker.date.recent({ days: 60 }).toISOString()
     }))
   };
 }
@@ -419,7 +419,7 @@ export function getGetServicesMigrationDelegates200Response() {
   return {
     delegates: [
       ...Array.from(
-        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH })).keys()
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
       )
     ].map(_ => getMockServicesMigrationDelegate())
   };
@@ -443,6 +443,10 @@ export function getGetServiceList200Response(
   id: string
 ) {
   return getMockServiceList(+limit, +offset, id);
+}
+
+export function getGetServiceTopics200Response() {
+  return aMockServiceTopics;
 }
 
 export function getGetService200Response(serviceId: string) {
@@ -469,12 +473,15 @@ export function getGetPublishedService200Response() {
   return aMockServicePublication;
 }
 
-export function getGetInstitutions200Response() {
-  return [
-    ...Array.from(
-      Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
-    )
-  ].map(_ => getMockInstitution());
+export function getUserAuthorizedInstitutions200Response() {
+  return {
+    authorizedInstitutions: [
+      aMockCurrentUserAuthorizedInstitution,
+      ...Array.from(
+        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
+      )
+    ].map(_ => getMockUserAuthorizedInstitution())
+  };
 }
 
 export function getGetInstitution200Response() {

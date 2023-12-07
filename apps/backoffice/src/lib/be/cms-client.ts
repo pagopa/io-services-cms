@@ -51,6 +51,7 @@ export const getIoServicesCmsClient = (): Client => {
 export async function getIoServicesCmsHealth() {
   try {
     const client = getIoServicesCmsClient();
+
     const infoRes = await client.info({});
 
     if (E.isLeft(infoRes)) {

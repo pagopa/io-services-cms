@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { HeaderAccount, JwtUser, RootLinkType } from "@pagopa/mui-italia";
 import { useRouter } from "next/router";
 
@@ -17,16 +18,18 @@ export type TopBarProps = {
 export const TopBar = ({ user }: TopBarProps) => {
   const router = useRouter();
 
+  const handleDocumentationClick = () =>
+    window.open(getConfiguration().BACK_OFFICE_OPERATIVE_MANUAL_URL, "_blank");
+
   return (
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
+      enableAssistanceButton={false}
       onAssistanceClick={() => {
         console.log("Clicked/Tapped on Assistance");
       }}
-      onDocumentationClick={() => {
-        console.log("Clicked/Tapped on Documentation");
-      }}
+      onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
         console.log("User login");
       }}

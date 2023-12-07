@@ -1,5 +1,51 @@
 # io-services-cms-webapp
 
+## 1.23.0
+
+### Minor Changes
+
+- 86fa737: ADD Service Topics in openapi.yaml
+- 73bad07: reopen jira reject issue on a new submit
+
+### Patch Changes
+
+- b15ad8f: add require_secure_channel and authorized_recipients in api response
+- Updated dependencies [86fa737]
+  - @io-services-cms/models@1.16.0
+
+## 1.22.1
+
+### Patch Changes
+
+- e66c6d3: fix autopublish action
+- Updated dependencies [e66c6d3]
+  - @io-services-cms/models@1.15.1
+
+## 1.22.0
+
+### Minor Changes
+
+- b6ae125: make publish and unpublish actions idempotent
+
+### Patch Changes
+
+- a102d23: Add workaround to handle DELETED as service name on OnLegacyServiceChange AZF
+- Updated dependencies [b6ae125]
+  - @io-services-cms/models@1.15.0
+
+## 1.21.10
+
+### Patch Changes
+
+- Updated dependencies [1ef54a1]
+  - @io-services-cms/models@1.14.1
+
+## 1.21.9
+
+### Patch Changes
+
+- 1c080eb: Change response statusCode on createService API
+
 ## 1.21.8
 
 ### Patch Changes

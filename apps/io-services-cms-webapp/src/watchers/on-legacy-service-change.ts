@@ -72,7 +72,7 @@ const fromLegacyToCmsService = (
       tos_url: service.serviceMetadata?.tosUrl,
       web_url: service.serviceMetadata?.webUrl,
     },
-    name: service.serviceName.replace("DELETED", "").trim() as NonEmptyString,
+    name: calculateServiceName(service.serviceName),
     organization: {
       fiscal_code: service.organizationFiscalCode,
       name: service.organizationName,
@@ -192,3 +192,13 @@ export const handler =
       ),
       O.getOrElse(() => TE.right(noAction))
     );
+
+const calculateServiceName = (serviceName: NonEmptyString) => {
+  const calculatedName = serviceName.replace("DELETED", "").trim();
+
+  if (NonEmptyString.is(calculatedName)) {
+    return calculatedName;
+  }
+
+  return "-" as NonEmptyString;
+};

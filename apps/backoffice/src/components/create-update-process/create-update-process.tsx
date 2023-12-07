@@ -31,6 +31,7 @@ export type BuilderStep = {
 };
 
 export type CreateUpdateMode = "create" | "update";
+export type ConfirmButtonLabelsType = { create: string; update: string };
 
 export type CreateUpdateProcessProps<T> = {
   /** item for which to carry out the creation or modification process */
@@ -39,6 +40,8 @@ export type CreateUpdateProcessProps<T> = {
   steps: BuilderStep[];
   /** Process mode: `create` or `update` */
   mode: CreateUpdateMode;
+  /** Label for final confirm button _(in both modes `create` and `update`)_ */
+  confirmButtonLabels: ConfirmButtonLabelsType;
   /** event triggered on process exit */
   onCancel: () => void;
   /** event triggered on process completed, with result item of `T` */
@@ -50,6 +53,7 @@ export function CreateUpdateProcess<T extends FieldValues>({
   itemToCreateUpdate,
   steps,
   mode,
+  confirmButtonLabels,
   onCancel,
   onConfirm
 }: CreateUpdateProcessProps<T>) {
@@ -151,6 +155,8 @@ export function CreateUpdateProcess<T extends FieldValues>({
       <ProcessActions
         stepsNumber={steps.length}
         currentStepIndex={currentStepIndex}
+        mode={mode}
+        confirmButtonLabels={confirmButtonLabels}
         onBack={decreaseStep}
         onCancel={onCancel}
         onNext={handleNext}

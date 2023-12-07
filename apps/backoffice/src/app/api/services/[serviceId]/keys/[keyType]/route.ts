@@ -8,7 +8,7 @@ import { BackOfficeUser } from "../../../../../../../types/next-auth";
  */
 export const PUT = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
@@ -17,10 +17,9 @@ export const PUT = withJWTAuthHandler(
       backofficeUser: BackOfficeUser;
     }
   ) =>
-    forwardIoServicesCmsRequest(
-      "regenerateServiceKey",
-      request,
+    forwardIoServicesCmsRequest("regenerateServiceKey", {
+      nextRequest,
       backofficeUser,
-      params
-    )
+      pathParams: params
+    })
 );

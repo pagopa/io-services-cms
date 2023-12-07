@@ -5,13 +5,85 @@ import packageJson from "../../package.json";
 
 const MAX_ARRAY_LENGTH = 20;
 
-export const aMockJwtSessionToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTQ4Nzg3MzgsImlhdCI6MTY5NDc5MjMzOCwiaXNzIjoiaHR0cHM6Ly9zZWxmY2FyZS5pby5wYWdvcGEuaXQiLCJqdGkiOiIwMUhBN04ySEVRQVhBSzY3OUREVzE2MUNDUSIsImZhbWlseV9uYW1lIjoiUk9TU0kiLCJnaXZlbl9uYW1lIjoiTUFSSU8iLCJlbWFpbCI6Im1hcmlvLnJvc3NpQGVtYWlsLml0IiwiZmlzY2FsX2NvZGUiOiJSU1NNUkEwMEEwMUYyMDVGIiwiaW5zdGl0dXRpb24iOnsiaWQiOiIxNDFiNDAyYi03OWU3LTRkMzktYTcyOS01ZjMxYmY1YzFhNzEiLCJuYW1lIjoiQ29tdW5lIGRpIFRlc3QiLCJyb2xlIjoiYWRtaW4iLCJsb2dvX3VybCI6Imh0dHBzOi8vYWdpZC5kaWdpdGFscGEuaXQvbWVkaWEvaW1hZ2VzL3N0ZW1tYS5wbmcifSwiYXV0aG9yaXplZF9pbnN0aXR1dGlvbnMiOlt7ImlkIjoiMTQxYjQwMmItNzllNy00ZDM5LWE3MjktNWYzMWJmNWMxYTcxIiwibmFtZSI6IkNvbXVuZSBkaSBUZXN0Iiwicm9sZSI6ImFkbWluIn0seyJpZCI6IjI1MmI0MDJiLTc5ZTctNGQzOS1hNzI5LTVmMzFiZjVjMWE3MiIsIm5hbWUiOiJDb211bmUgZGkgRGV2Iiwicm9sZSI6Im9wZXJhdG9yIn1dLCJwYXJhbWV0ZXJzIjp7InVzZXJfaWQiOiIwMUhBN04ySEVRQVhBSzY3OUREVzE2MUNDUSIsInVzZXJfZW1haWwiOiJ0ZXN0QGNvbXVuZS5pdCIsInVzZXJfZ3JvdXBzIjpbImFwaWFkbWluIiwiYXBpaW5mb3JlYWQiLCJhcGlsaW1pdGVkbWVzc2FnZXdyaXRlIiwiYXBpbGltaXRlZHByb2ZpbGVyZWFkIiwiYXBpbWVzc2FnZXJlYWQiLCJhcGlzZXJ2aWNlcmVhZCIsImFwaXNlcnZpY2V3cml0ZSIsImRldmVsb3BlcnMiXSwic3Vic2NyaXB0aW9uX2lkIjoiMDFHTTVOM0hBUUFaQUs2NzlSUlcxMjlCQlIifX0.sTLmYkxADJwPF2IQhm46zj0v_2JRv2dWbxPzkpEGJLw";
-
 export const anInfoVersion = {
   name: packageJson.name,
   version: packageJson.version
 };
+
+export const aMockServiceTopicsArray = [
+  {
+    id: 0,
+    name: "Altro"
+  },
+  {
+    id: 1,
+    name: "Ambiente e animali"
+  },
+  {
+    id: 2,
+    name: "Attività produttive e commercio"
+  },
+  {
+    id: 3,
+    name: "Benessere sociale"
+  },
+  {
+    id: 4,
+    name: "Casa e utenze"
+  },
+  {
+    id: 5,
+    name: "Cultura, tempo libero e sport"
+  },
+  {
+    id: 6,
+    name: "Educazione e formazione"
+  },
+  {
+    id: 7,
+    name: "Giustizia e legge"
+  },
+  {
+    id: 8,
+    name: "Lavori edilizi, catasto e urbanistica"
+  },
+  {
+    id: 9,
+    name: "Mobilità e trasporti"
+  },
+  {
+    id: 10,
+    name: "Redditi, patrimoni e fisco"
+  },
+  {
+    id: 11,
+    name: "Servizi anagrafici e civici"
+  },
+  {
+    id: 12,
+    name: "Servizi elettorali"
+  },
+  {
+    id: 13,
+    name: "Sicurezza e Protezione Civile"
+  },
+  {
+    id: 14,
+    name: "Suolo, spazi e beni pubblici"
+  },
+  {
+    id: 15,
+    name: "Viaggi e turismo"
+  },
+  {
+    id: 16,
+    name: "Vita lavorativa"
+  },
+  {
+    id: 17,
+    name: "Salute"
+  }
+];
 
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   id: serviceId ?? faker.string.alphanumeric(26).toUpperCase(),
@@ -23,8 +95,9 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
       "rejected",
       "deleted"
     ]),
-    reason: faker.lorem.sentence()
+    reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
+  topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined]),
   version: faker.number.int({ min: undefined, max: undefined }),
   last_update: faker.date.recent({ days: 30 }).toISOString(),
   name: faker.lorem.words({ min: 3, max: 5 }),
@@ -159,6 +232,10 @@ export const getMockServiceList = (
   };
 };
 
+export const aMockServiceTopics = {
+  topics: aMockServiceTopicsArray
+};
+
 // **********************************************************************
 // Services import into SelfCare
 // **********************************************************************
@@ -171,17 +248,23 @@ export const getMockServicesMigrationDelegate = () => ({
 });
 
 export const getMockServicesMigrationLatestStatus = () => ({
-  completed: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  failed: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  initial: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH }),
-  processing: faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH })
+  completed: faker.number.int({ min: 0, max: 3 }),
+  failed: faker.number.int({ min: 0, max: 3 }),
+  initial: 0,
+  processing: faker.number.int({ min: 0, max: 3 })
 });
 
 export const getMockServicesMigrationStatusDetails = () => ({
   data: {
-    COMPLETED: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    FAILED: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    INITIAL: faker.string.numeric({ length: { min: 0, max: 2 } }),
-    PROCESSING: faker.string.numeric({ length: { min: 0, max: 2 } })
+    completed: faker.number.int({ min: 0, max: 3 }),
+    failed: faker.number.int({ min: 0, max: 3 }),
+    initial: faker.number.int({ min: 0, max: 3 }),
+    processing: faker.number.int({ min: 0, max: 3 })
   }
+});
+
+export const getIoServicesError = (status: number) => ({
+  detail: faker.lorem.sentence(),
+  status: status,
+  title: faker.lorem.sentence()
 });

@@ -1,4 +1,6 @@
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@/config/constants";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
 
 export class ApiKeyNotFoundError extends Error {
@@ -18,10 +20,15 @@ export class InstitutionNotFoundError extends Error {
 }
 
 export class ManagedInternalError extends Error {
-  constructor(message: string) {
+  additionalDetails?: string;
+  constructor(message: string, additionalDetails?: unknown) {
     super(message);
     this.name = "ManagedInternalError";
     this.message = message;
+    this.additionalDetails =
+      typeof additionalDetails === "string"
+        ? additionalDetails
+        : JSON.stringify(additionalDetails);
   }
 }
 
@@ -58,4 +65,66 @@ export const handleInternalErrorResponse = (
     },
     { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
   );
+};
+
+export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
+  if (e instanceof ManagedInternalError) {
+    console.error(
+      `${logPrefix}, caused by: ${e.message} , additionalDetails: ${e.additionalDetails}`
+    );
+    return;
+  } else if (e instanceof Error) {
+    console.error(`${logPrefix}, caused by: `, e);
+    return;
+  } else {
+    console.error(
+      `${logPrefix} , caused by: unknown error ,additionalDetails: ${JSON.stringify(
+        e
+      )}`
+    );
+  }
+};
+
+export const cosmosErrorsToManagedInternalError = (
+  message: string,
+  errs: CosmosErrors
+): ManagedInternalError => {
+  return new ManagedInternalError(
+    message,
+    `${
+      errs.kind === "COSMOS_EMPTY_RESPONSE" ||
+      errs.kind === "COSMOS_CONFLICT_RESPONSE"
+        ? errs.kind
+        : errs.kind === "COSMOS_DECODING_ERROR"
+        ? errorsToReadableMessages(errs.error).join("/")
+        : JSON.stringify(errs.error)
+    }`
+  );
+};
+
+export const extractTryCatchError = (
+  e: unknown
+): Error | ManagedInternalError => {
+  if (e instanceof ManagedInternalError || e instanceof Error) {
+    return e;
+  }
+  return new ManagedInternalError("Unknown Error", e);
+};
+
+type ApimErrorAdapter = {
+  name?: string;
+  code?: string;
+  statusCode: number;
+  details?: unknown;
+};
+
+export const apimErrorToManagedInternalError = (
+  message: string,
+  err: ApimErrorAdapter
+): ManagedInternalError => {
+  return new ManagedInternalError(message, {
+    name: err.name,
+    code: err.code,
+    details: err.details
+  });
 };

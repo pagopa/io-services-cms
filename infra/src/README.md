@@ -13,7 +13,7 @@
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 2.33.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.42.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.5.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.0 |
 
 ## Modules
 
@@ -105,7 +105,7 @@
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
 | <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
 | <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
-| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name                              = string<br>    apim_user_groups                      = string<br>    azure_credentials_scope_url           = string<br>    azure_apim_subscriptions_api_base_url = string<br>    selfcare_external_api_base_url        = string<br>    selfcare_jwks_path                    = string<br>    selfcare_jwt_issuer                   = string<br>    subscription_migration_api_url        = string<br>  })</pre> | n/a | yes |
+| <a name="input_backoffice_app"></a> [backoffice\_app](#input\_backoffice\_app) | Configuration of the io-services-cms-backoffice service | <pre>object({<br>    sku_name                              = string<br>    apim_user_groups                      = string<br>    azure_credentials_scope_url           = string<br>    azure_apim_subscriptions_api_base_url = string<br>    selfcare_external_api_base_url        = string<br>    selfcare_jwks_path                    = string<br>    subscription_migration_api_url        = string<br>  })</pre> | n/a | yes |
 | <a name="input_backoffice_host"></a> [backoffice\_host](#input\_backoffice\_host) | Backoffice host name | `string` | `null` | no |
 | <a name="input_bo_auth_session_secret_rotation_id"></a> [bo\_auth\_session\_secret\_rotation\_id](#input\_bo\_auth\_session\_secret\_rotation\_id) | You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1695908210722"` | no |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
@@ -125,6 +125,7 @@
 | <a name="input_jira_organization_cf_custom_field"></a> [jira\_organization\_cf\_custom\_field](#input\_jira\_organization\_cf\_custom\_field) | n/a | `string` | `null` | no |
 | <a name="input_jira_organization_name_custom_field"></a> [jira\_organization\_name\_custom\_field](#input\_jira\_organization\_name\_custom\_field) | n/a | `string` | `null` | no |
 | <a name="input_jira_project_name"></a> [jira\_project\_name](#input\_jira\_project\_name) | n/a | `string` | `null` | no |
+| <a name="input_jira_transition_updated_id"></a> [jira\_transition\_updated\_id](#input\_jira\_transition\_updated\_id) | id that identifies the passage of a jira ticket from rejected to new | `string` | `null` | no |
 | <a name="input_jira_username"></a> [jira\_username](#input\_jira\_username) | n/a | `string` | `null` | no |
 | <a name="input_legacy_cosmosdb_container_services"></a> [legacy\_cosmosdb\_container\_services](#input\_legacy\_cosmosdb\_container\_services) | The collection of the database where legacy data is | `string` | `"services"` | no |
 | <a name="input_legacy_cosmosdb_container_services_lease"></a> [legacy\_cosmosdb\_container\_services\_lease](#input\_legacy\_cosmosdb\_container\_services\_lease) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |

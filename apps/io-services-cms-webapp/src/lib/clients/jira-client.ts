@@ -18,6 +18,7 @@ export const CreateJiraIssueResponse = t.type({
   key: NonEmptyString,
 });
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
+export type UpdateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
 export const JiraIssue = t.type({
   id: NonEmptyString,
@@ -73,9 +74,21 @@ export type JiraAPIClient = {
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, CreateJiraIssueResponse>;
+  readonly updateJiraIssue: (
+    ticketKey: NonEmptyString,
+    title: NonEmptyString,
+    description: NonEmptyString,
+    labels?: ReadonlyArray<NonEmptyString>,
+    customFields?: ReadonlyMap<string, unknown>
+  ) => TaskEither<Error, void>;
   readonly searchJiraIssues: (
     bodyData: SearchJiraIssuesPayload
   ) => TaskEither<Error, SearchJiraIssuesResponse>;
+  readonly applyJiraIssueTransition: (
+    ticketKey: NonEmptyString,
+    transitionId: NonEmptyString,
+    message?: string
+  ) => TaskEither<Error, void>;
 };
 
 export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
@@ -91,7 +104,11 @@ export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
 export const checkJiraResponse = (
   response: Response
 ): Either<Error, Response> => {
-  if (response.status === 200 || response.status === 201) {
+  if (
+    response.status === 200 ||
+    response.status === 201 ||
+    response.status === 204
+  ) {
     return E.right(response);
   } else if (response.status === 400) {
     return E.left(new Error("Invalid request"));
@@ -157,6 +174,85 @@ export const jiraClient = (
       )
     );
 
+  const updateJiraIssue = (
+    ticketKey: NonEmptyString,
+    title: NonEmptyString,
+    description: NonEmptyString,
+    labels?: ReadonlyArray<NonEmptyString>,
+    customFields?: ReadonlyMap<string, unknown>
+  ): TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          fetchApi(
+            `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}`,
+            {
+              body: JSON.stringify({
+                fields: {
+                  ...fromMapToObject(customFields),
+                  description,
+                  issuetype: {
+                    name: "Task",
+                  },
+                  labels: labels || [],
+                  project: {
+                    key: config.JIRA_PROJECT_NAME,
+                  },
+                  summary: title,
+                },
+              }),
+              headers: jiraHeaders,
+              method: "PUT",
+            }
+          ),
+        toError
+      ),
+      TE.chainEitherK(checkJiraResponse),
+      TE.map((_) => void 0)
+    );
+
+  const applyJiraIssueTransition = (
+    ticketKey: NonEmptyString,
+    transitionId: NonEmptyString,
+    message?: string
+  ): TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          fetchApi(
+            `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}/transitions`,
+            {
+              body: JSON.stringify({
+                ...pipe(
+                  message,
+                  O.fromNullable,
+                  O.map((_) => ({
+                    update: {
+                      comment: [
+                        {
+                          add: {
+                            body: _,
+                          },
+                        },
+                      ],
+                    },
+                  })),
+                  O.toUndefined
+                ),
+                transition: {
+                  id: transitionId,
+                },
+              }),
+              headers: jiraHeaders,
+              method: "POST",
+            }
+          ),
+        toError
+      ),
+      TE.chainEitherK(checkJiraResponse),
+      TE.map((_) => void 0)
+    );
+
   const searchJiraIssues = (
     bodyData: SearchJiraIssuesPayload
   ): TaskEither<Error, SearchJiraIssuesResponse> =>
@@ -186,5 +282,7 @@ export const jiraClient = (
     config,
     createJiraIssue,
     searchJiraIssues,
+    updateJiraIssue,
+    applyJiraIssueTransition,
   };
 };

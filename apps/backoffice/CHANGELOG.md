@@ -1,5 +1,185 @@
 # io-services-cms-backoffice
 
+## 1.3.0
+
+### Minor Changes
+
+- 4e32029: ADD Service Topics in backoffice openapi.yaml
+
+### Patch Changes
+
+- 7e147dc: Update B4F openapi definition: replace bearerAuth with cookieAuth
+- Updated dependencies [86fa737]
+  - @io-services-cms/models@1.16.0
+
+## 1.2.3
+
+### Patch Changes
+
+- 610b086: UPDATE User Authorized institution API response type
+- e350173: reintroduced GET /api/institutions API, which returns all the user's authorized institutions
+- 44d7988: Frontend header: get user authorized institutions from api instead of session token
+- cbded9f: remove uthorized institutions from session token
+- aad15fe: truncate organization name to 100 characters before set apim user lastName fields during apim user creation
+
+## 1.2.2
+
+### Patch Changes
+
+- Updated dependencies [e66c6d3]
+  - @io-services-cms/models@1.15.1
+
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [b6ae125]
+  - @io-services-cms/models@1.15.0
+
+## 1.2.0
+
+### Minor Changes
+
+- cecb2e9: Added product switch on header
+
+## 1.1.1
+
+### Patch Changes
+
+- e9dca06: apim rest error shrink log
+
+## 1.1.0
+
+### Minor Changes
+
+- 6b3c6f7: Enable institution selection (party switch)
+
+### Patch Changes
+
+- 8ad86f2: decrease session duration to 12 hours
+- ca612ae: Detailed logs on auth Route Handler
+
+## 1.0.0
+
+### Major Changes
+
+- 18dba64: Backoffice MVP0 public major version
+
+### Patch Changes
+
+- ac29609: Temporary remove institution selection on page header
+
+## 0.17.14
+
+### Patch Changes
+
+- 18f38e7: Fix frontend service rejection reason drawer
+
+## 0.17.13
+
+### Patch Changes
+
+- 93ad5de: CleanUp BackOffice
+
+## 0.17.12
+
+### Patch Changes
+
+- 6c4c3cb: Fix service name left alignment on services table, await create/update service completion before going to services page, add table pagination translated labels
+- dd7c11c: fix-istitution-open-api-part-2
+- Updated dependencies [1ef54a1]
+  - @io-services-cms/models@1.14.1
+
+## 0.17.11
+
+### Patch Changes
+
+- c821f9a: fix services logo url configuration
+
+## 0.17.10
+
+### Patch Changes
+
+- d5b29f0: log unknown error
+
+## 0.17.9
+
+### Patch Changes
+
+- 6d0c2e9: initialize manage cidrs when creating subscription manage
+- 84a70d7: fix selfcare JWT configuration
+- 206e3a5: filter manage subscription on service list
+- ae688e5: Hide service history action button and add scope in service info drawer
+
+## 0.17.8
+
+### Patch Changes
+
+- 650d0d6: Fix layout main content overflow break
+- 31116e8: ADD missing service placeholder on service list Route Handler result's
+- 5524506: fix payload create subscription manage
+
+## 0.17.7
+
+### Patch Changes
+
+- 03fada0: add ApiServiceWrite permission to user (if missing)
+- aeaf8e1: adapt ownership claim response
+
+## 0.17.6
+
+### Patch Changes
+
+- 1096a77: Change MigrationData schema on frontend
+
+## 0.17.5
+
+### Patch Changes
+
+- 5828b71: UX/UI refinements for the MVP0 release
+- d9da47f: Update service details drawer
+- 864c1b9: change response schema MigrationData
+
+## 0.17.4
+
+### Patch Changes
+
+- d3c1ae6: fix JWKS config
+
+## 0.17.3
+
+### Patch Changes
+
+- 15d3892: fix configurations
+
+## 0.17.2
+
+### Patch Changes
+
+- e793695: handle io-services-cms error response
+
+## 0.17.1
+
+### Patch Changes
+
+- 804a8ff: Disabled MSW
+
+## 0.17.0
+
+### Minor Changes
+
+- f41aeb3: Add frontend subscriptions migration components and section logic
+
+### Patch Changes
+
+- 6c7cbe1: add time debug log on regenerate manage key
+
+## 0.16.2
+
+### Patch Changes
+
+- de7a814: temporany log to trace millis spent in external calls and general api completion
+
 ## 0.16.1
 
 ### Patch Changes

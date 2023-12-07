@@ -37,6 +37,7 @@ const pageDescriptionLocaleKey = "routes.services.description";
 
 const CREATE_SERVICE_ROUTE = "/services/new-service";
 const DEFAULT_PAGE_LIMIT = 10;
+const TEXT_SECONDARY_COLOR_STYLE = { color: "text.secondary" };
 
 // used to fill TableView rows and simulate a complete pagination
 const servicePlaceholder = {
@@ -75,14 +76,14 @@ export default function Services() {
               <CallSplit fontSize="small" color="primary" />
             ) : null
           }
-          sx={{ fontWeight: 700 }}
+          sx={{ fontWeight: 700, textAlign: "left" }}
           disabled={
             service.status.value === ServiceLifecycleStatusTypeEnum.deleted
           }
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
-              : router.push(`/services/${service.id}/edit-service`)
+              : router.push(`/services/${service.id}`)
           }
         >
           {service.name}
@@ -119,9 +120,9 @@ export default function Services() {
       name: "visibility",
       cellTemplate: service =>
         service.visibility === VisibilityEnum.published ? (
-          <Check color="success" />
+          <Check sx={TEXT_SECONDARY_COLOR_STYLE} />
         ) : service.visibility === VisibilityEnum.unpublished ? (
-          <Close color="error" />
+          <Close sx={TEXT_SECONDARY_COLOR_STYLE} />
         ) : (
           <Block color="disabled" />
         )

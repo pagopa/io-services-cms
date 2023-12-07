@@ -1,5 +1,5 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/services-cms/SubscriptionKeyType";
-import { Block, Sync, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -73,7 +73,7 @@ export const ApiSingleKey = ({
           >
             {t("keys.rotate.button")}
           </Button>
-          <Button //TODO not yet implemented
+          {/* <Button //TODO not yet implemented
             variant="outlined"
             size="small"
             startIcon={<Block fontSize="inherit" />}
@@ -82,7 +82,7 @@ export const ApiSingleKey = ({
             disabled
           >
             {t("keys.block")}
-          </Button>
+          </Button> */}
         </Stack>
       </Grid>
     </Grid>

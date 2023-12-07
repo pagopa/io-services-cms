@@ -7,9 +7,7 @@ import {
 import {
   AddBox,
   AddCircleOutline,
-  CreditCard,
-  RemoveCircleOutline,
-  VpnKey
+  RemoveCircleOutline
 } from "@mui/icons-material";
 import {
   Box,
@@ -104,6 +102,8 @@ export const ServiceExtraConfigurator = () => {
             description: "forms.service.extraConfig.cta.description",
             icon: <AddBox />
           })}
+          {/*
+          // TODO: as we are awaiting official communications, we do not show (even if disabled) extra configurations that are not agreed upon 
           {renderExtraConfigListItem({
             type: "fims",
             disabled: true,
@@ -119,7 +119,7 @@ export const ServiceExtraConfigurator = () => {
             description: "forms.service.extraConfig.idpay.description",
             icon: <CreditCard />,
             arriving: true
-          })}
+          })} */}
         </List>
       </Box>
     );
