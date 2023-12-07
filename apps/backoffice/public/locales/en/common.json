@@ -297,6 +297,7 @@
       "serviceId": "Service ID",
       "status": "Status",
       "supportUrl": "Support url",
+      "topic": "Topic",
       "tosUrl": "Terms & conditions",
       "viewDetails": "View details",
       "visibility": "Visibility on IO",
@@ -445,5 +446,5 @@
       }
     }
   },
-  "test": "This is a translation test"
+  "undefined": "Not defined"
 }
