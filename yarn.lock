@@ -8085,7 +8085,7 @@ __metadata:
     jsdom: ^22.1.0
     lodash: ^4.17.21
     msw: ^1.2.5
-    next: ^13.5.6
+    next: ^13.5.3
     next-auth: ^4.23.2
     next-i18next: ^14.0.3
     notistack: ^3.0.1
@@ -10278,7 +10278,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next@npm:^13.5.6":
+"next@npm:^13.5.3":
   version: 13.5.6
   resolution: "next@npm:13.5.6"
   dependencies:
