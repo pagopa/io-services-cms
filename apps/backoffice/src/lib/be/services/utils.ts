@@ -16,6 +16,7 @@ import {
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { Institution } from "../../../../types/next-auth";
+import { NextRequest } from "next/server";
 
 export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
 export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;

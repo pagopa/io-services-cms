@@ -37,6 +37,7 @@ locals {
     JIRA_DELEGATE_NAME_CUSTOM_FIELD     = var.jira_delegate_name_custom_field
     JIRA_ORGANIZATION_CF_CUSTOM_FIELD   = var.jira_organization_cf_custom_field
     JIRA_ORGANIZATION_NAME_CUSTOM_FIELD = var.jira_organization_name_custom_field
+    JIRA_TRANSITION_UPDATED_ID          = var.jira_transition_updated_id
 
     # JIRA Legacy board
     LEGACY_JIRA_PROJECT_NAME = var.legacy_jira_project_name
@@ -93,6 +94,9 @@ locals {
 
     # External storage account for assets
     ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_key_vault_secret.asset_storage_connectionstring_secret.value
+
+    # Backoffice Configuration
+    BACKOFFICE_INTERNAL_SUBNET_CIDRS = join(",", module.backoffice_app_snet.address_prefixes)
   }
 }
 

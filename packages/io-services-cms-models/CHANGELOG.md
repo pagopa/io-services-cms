@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.16.0
+
+### Minor Changes
+
+- 86fa737: ADD Service Topics in openapi.yaml
+
 ## 1.15.1
 
 ### Patch Changes

@@ -138,41 +138,32 @@ export async function forwardIoServicesCmsRequest<
   T extends keyof IoServicesCmsClient
 >(
   operationId: T,
-  nextRequest: NextRequest,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
-): Promise<Response>;
-export async function forwardIoServicesCmsRequest<
-  T extends keyof IoServicesCmsClient
->(
-  operationId: T,
-  jsonBody: any,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
-): Promise<Response>;
-export async function forwardIoServicesCmsRequest<
-  T extends keyof IoServicesCmsClient
->(
-  operationId: T,
-  requestOrBody: NextRequest | any,
-  backofficeUser: BackOfficeUser,
-  pathParams?: PathParameters
+  {
+    nextRequest,
+    backofficeUser,
+    pathParams,
+    jsonBody
+  }: {
+    nextRequest: NextRequest;
+    backofficeUser: BackOfficeUser;
+    pathParams?: PathParameters;
+    jsonBody?: any;
+  }
 ): Promise<Response> {
   try {
     // extract jsonBody
-    const jsonBody =
-      requestOrBody && "json" in requestOrBody // check NextRequest object
-        ? await requestOrBody.json().catch((_: unknown) => undefined)
-        : requestOrBody;
+    const requestBody =
+      jsonBody ?? (await nextRequest.json().catch((_: unknown) => undefined));
 
     // create the request payload
     const requestPayload = {
       ...pathParams,
-      body: jsonBody,
+      body: requestBody,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-id": backofficeUser.parameters.userId,
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
-      "x-user-groups": backofficeUser.permissions.join(",")
+      "x-user-groups": backofficeUser.permissions.join(","),
+      "X-Forwarded-For": nextRequest.headers.get("X-Forwarded-For") ?? undefined
     } as any;
 
     // call the io-services-cms API and return the response

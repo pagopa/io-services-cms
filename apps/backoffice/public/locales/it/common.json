@@ -297,6 +297,7 @@
       "serviceId": "ID Servizio",
       "status": "Stato",
       "supportUrl": "Url di supporto",
+      "topic": "Argomento",
       "tosUrl": "Termini e condizioni",
       "viewDetails": "Vedi dettaglio",
       "visibility": "Visibilità in IO",
@@ -445,5 +446,5 @@
       }
     }
   },
-  "test": "Questo è un test di traduzione"
+  "undefined": "Non definito"
 }
