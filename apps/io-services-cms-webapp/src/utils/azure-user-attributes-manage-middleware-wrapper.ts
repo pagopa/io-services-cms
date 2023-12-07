@@ -5,7 +5,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 import { IResponse } from "@pagopa/ts-commons/lib/responses";
-import CIDRMatcher from "cidr-matcher";
 import * as E from "fp-ts/lib/Either";
 import { BackofficeInternalSubnetCIDRs } from "../config";
 
@@ -40,46 +39,19 @@ export const AzureUserAttributesManageMiddlewareWrapper =
     // return the originale middleware result
     if (
       E.isLeft(originalMiddelwareResult) ||
-      !isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS)
+      originalMiddelwareResult.right.authorizedCIDRs.size === 0
     ) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "AzureUserAttributesManageMiddlewareWrapper| RETURNING ORIGINAL MIDDLEWARE RESULT | IP: ",
-        request.ip,
-        " | Allowed CIDRs: ",
-        BACKOFFICE_INTERNAL_SUBNET_CIDRS,
-        " | isIPInCIDR: ",
-        isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS),
-        " | E.isLeft(originalMiddelwareResult): ",
-        E.isLeft(originalMiddelwareResult)
-      );
       return originalMiddelwareResult;
     }
 
     // Otherwise, return the original middleware result with an empty list of CIDRs
     // This will skip all Authorized CIDRs checks
 
-    const returningResult: IAzureUserAttributesManage = {
+    return E.right({
       ...originalMiddelwareResult.right,
-      authorizedCIDRs: new Set(),
-    };
-
-    // eslint-disable-next-line no-console
-    console.log(
-      "AzureUserAttributesManageMiddlewareWrapper| RETURNING EMPTY CIDRs | IP: ",
-      request.ip,
-      " | Allowed CIDRs: ",
-      BACKOFFICE_INTERNAL_SUBNET_CIDRS,
-      " | isIPInCIDR: ",
-      isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS),
-      " | returningResult: ",
-      returningResult
-    );
-
-    return E.right(returningResult);
+      authorizedCIDRs: new Set([
+        ...originalMiddelwareResult.right.authorizedCIDRs,
+        ...BACKOFFICE_INTERNAL_SUBNET_CIDRS,
+      ]),
+    });
   };
-
-const isIPInCIDR = (ip: string, cidr: ReadonlyArray<string>): boolean => {
-  const matcher = new CIDRMatcher(cidr);
-  return matcher.contains(ip);
-};

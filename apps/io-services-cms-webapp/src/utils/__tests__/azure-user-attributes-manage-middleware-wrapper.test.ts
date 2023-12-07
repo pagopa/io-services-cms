@@ -7,7 +7,7 @@ import { AzureUserAttributesManageMiddlewareWrapper } from "../azure-user-attrib
 const mocks: {
   authorizedCIDRs: Set<string>;
 } = vi.hoisted(() => ({
-  authorizedCIDRs: new Set(["127.160.0.1/32", "127.193.0.0/20"]),
+  authorizedCIDRs: new Set(),
 }));
 const { AzureUserAttributesManageMiddleware } = vi.hoisted(() => ({
   AzureUserAttributesManageMiddleware: vi.fn(
@@ -50,10 +50,8 @@ const BackofficeInternalSubnetCIDRMock = {
 } as BackofficeInternalSubnetCIDRs;
 
 describe("AzureUserAttributesManageMiddlewareWrapper", () => {
-  it("should return empty CIDRs list when request comes from Backoffice Subnet", async () => {
-    const requestMock = {
-      ip: "127.0.0.2",
-    } as any;
+  it("should return an empty CIDRs list when no authorized CIDRs was set by the user", async () => {
+    const requestMock = {} as any;
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
@@ -71,10 +69,20 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
     }
   });
 
-  it("should return the actual CIDRs list when request comes outside Backoffice Subnet", async () => {
-    const requestMock = {
-      ip: "127.200.0.2",
-    } as any;
+  it("should contains the default CIDR in list when authorized CIDRs was set by the user", async () => {
+    const requestMock = {} as any;
+
+    const returningCIDRs = ["127.160.0.1/32", "127.193.0.0/20"];
+
+    AzureUserAttributesManageMiddleware.mockReturnValueOnce(() =>
+      Promise.resolve(
+        E.of({
+          authorizedCIDRs: new Set(returningCIDRs),
+          email: "" as any,
+          kind: "IAzureUserAttributesManage",
+        })
+      )
+    );
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
@@ -84,8 +92,12 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
+      console.log(result.right);
       expect(result.right).toEqual({
-        authorizedCIDRs: mocks.authorizedCIDRs,
+        authorizedCIDRs: new Set([
+          ...returningCIDRs,
+          ...BackofficeInternalSubnetCIDRMock.BACKOFFICE_INTERNAL_SUBNET_CIDRS,
+        ]),
         email: "" as any,
         kind: "IAzureUserAttributesManage",
       });
