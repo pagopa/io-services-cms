@@ -214,11 +214,10 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await forwardIoServicesCmsRequest(
-        "getServices",
-        request,
-        jwtMock
-      );
+      const result = await forwardIoServicesCmsRequest("getServices", {
+        nextRequest: request,
+        backofficeUser: jwtMock
+      });
 
       expect(getServices).toHaveBeenCalled();
       expect(getServices).toHaveBeenCalledWith(
@@ -254,14 +253,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "createService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("createService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
@@ -298,14 +296,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "reviewService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("reviewService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
@@ -338,14 +335,20 @@ describe("Services TEST", () => {
         description: "test"
       };
 
-      const result = await forwardIoServicesCmsRequest(
-        "createService",
-        aBodyPayload,
-        jwtMock,
-        {
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "POST",
+        body: JSON.stringify(aBodyPayload)
+      });
+
+      const result = await forwardIoServicesCmsRequest("createService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        jsonBody: aBodyPayload,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
@@ -397,14 +400,13 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload)
       });
 
-      const result = await forwardIoServicesCmsRequest(
-        "reviewService",
-        request,
-        jwtMock,
-        {
+      const result = await forwardIoServicesCmsRequest("reviewService", {
+        nextRequest: request,
+        backofficeUser: jwtMock,
+        pathParams: {
           serviceId: "test"
         }
-      );
+      });
 
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(

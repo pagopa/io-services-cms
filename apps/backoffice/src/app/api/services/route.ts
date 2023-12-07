@@ -9,12 +9,12 @@ import { BackOfficeUser } from "../../../../types/next-auth";
  */
 export const POST = withJWTAuthHandler(
   async (
-    request: NextRequest,
+    nextRequest: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     let jsonBody;
     try {
-      jsonBody = await request.json();
+      jsonBody = await nextRequest.json();
     } catch (_) {
       return NextResponse.json(
         {
@@ -29,11 +29,11 @@ export const POST = withJWTAuthHandler(
       name: backofficeUser.institution.name,
       fiscal_code: backofficeUser.institution.fiscalCode
     };
-    return forwardIoServicesCmsRequest(
-      "createService",
-      jsonBody,
-      backofficeUser
-    );
+    return forwardIoServicesCmsRequest("createService", {
+      nextRequest,
+      backofficeUser,
+      jsonBody
+    });
   }
 );
 
@@ -42,15 +42,19 @@ export const POST = withJWTAuthHandler(
  */
 export const GET = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
-    const limit = request.nextUrl.searchParams.get("limit");
-    const offset = request.nextUrl.searchParams.get("offset");
+    const limit = nextRequest.nextUrl.searchParams.get("limit");
+    const offset = nextRequest.nextUrl.searchParams.get("offset");
 
-    return forwardIoServicesCmsRequest("getServices", request, backofficeUser, {
-      limit: limit ?? undefined,
-      offset: offset ?? undefined
+    return forwardIoServicesCmsRequest("getServices", {
+      nextRequest,
+      backofficeUser,
+      pathParams: {
+        limit: limit ?? undefined,
+        offset: offset ?? undefined
+      }
     });
   }
 );
