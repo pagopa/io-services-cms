@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.24.1
+
+### Patch Changes
+
+- ee62761: Add log temporary log on AzureUserAttributesManageMiddlewareWrapper
+
 ## 1.24.0
 
 ### Minor Changes
