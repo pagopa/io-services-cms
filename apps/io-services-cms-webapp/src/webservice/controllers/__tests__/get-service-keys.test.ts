@@ -58,7 +58,9 @@ const mockApimService = {
   listSecrets: vi.fn(() => TE.right(anApimResource)),
 } as unknown as ApimUtils.ApimService;
 
-const mockConfig = {} as unknown as IConfig;
+const mockConfig = {
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
+} as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
   subscriptionId: aManageSubscriptionId as NonEmptyString,

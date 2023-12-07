@@ -62,6 +62,7 @@ const mockApimService = {
 
 const mockConfig = {
   SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.193.0.0/20"],
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
