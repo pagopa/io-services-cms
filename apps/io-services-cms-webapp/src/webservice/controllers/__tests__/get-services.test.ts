@@ -83,6 +83,7 @@ const mockApimService = {
 const mockConfig = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 100,
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
 } as unknown as IConfig;
 
 // FSM client mock *******************************
@@ -154,7 +155,7 @@ const mockBlobService = {
 } as any;
 
 describe("getServices", () => {
-  const app = createWebServer({
+    const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,

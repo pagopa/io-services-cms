@@ -1,4 +1,3 @@
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureUserAttributesManageMiddleware,
@@ -32,25 +31,25 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       IAzureUserAttributesManage
     >
   > => {
-    // If Request Ip is from the Backoffice Internal subnet, we don't need to check the user's manage key authorized CIDRs
+    // Execute the AzureUserAttributesManageMiddleware
+    const originalMiddelwareResult = await AzureUserAttributesManageMiddleware(
+      subscriptionCIDRsModel
+    )(request);
 
-    // extract the ip from the request
-    const clientIp = request.ip;
-
-    // check if the request ip is in the backoffice internal subnet
-    if (isIPInCIDR(clientIp, BACKOFFICE_INTERNAL_SUBNET_CIDRS)) {
-      // in this case we returns an empty list of authorized CIDRs, so we will skip the check
-      return E.right({
-        authorizedCIDRs: new Set(),
-        email: "" as EmailAddress,
-        kind: "IAzureUserAttributesManage",
-      });
+    // If the middleware fails or the request comes outside the Backoffice subnet
+    // return the originale middleware result
+    if (
+      E.isLeft(originalMiddelwareResult) ||
+      !isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS)
+    ) {
+      return originalMiddelwareResult;
     }
 
-    // when he request comes from outside the backoffice subnet, we need to check the user's manage key authorized CIDRs and so we have to retrieve it
-    return await AzureUserAttributesManageMiddleware(subscriptionCIDRsModel)(
-      request
-    );
+    // Otherwise, return the original middleware result with an empty list of CIDRs
+    return E.right({
+      ...originalMiddelwareResult.right,
+      authorizedCIDRs: new Set(),
+    });
   };
 
 const isIPInCIDR = (ip: string, cidr: ReadonlyArray<string>): boolean => {
