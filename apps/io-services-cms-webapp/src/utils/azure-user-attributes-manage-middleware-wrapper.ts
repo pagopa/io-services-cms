@@ -46,6 +46,7 @@ export const AzureUserAttributesManageMiddlewareWrapper =
     }
 
     // Otherwise, return the original middleware result with an empty list of CIDRs
+    // This will skip all Authorized CIDRs checks
     return E.right({
       ...originalMiddelwareResult.right,
       authorizedCIDRs: new Set(),
