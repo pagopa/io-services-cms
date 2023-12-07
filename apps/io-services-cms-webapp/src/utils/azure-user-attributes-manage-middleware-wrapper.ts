@@ -59,6 +59,11 @@ export const AzureUserAttributesManageMiddlewareWrapper =
     // Otherwise, return the original middleware result with an empty list of CIDRs
     // This will skip all Authorized CIDRs checks
 
+    const returningResult: IAzureUserAttributesManage = {
+      ...originalMiddelwareResult.right,
+      authorizedCIDRs: new Set(),
+    };
+
     // eslint-disable-next-line no-console
     console.log(
       "AzureUserAttributesManageMiddlewareWrapper| RETURNING EMPTY CIDRs | IP: ",
@@ -67,13 +72,11 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       BACKOFFICE_INTERNAL_SUBNET_CIDRS,
       " | isIPInCIDR: ",
       isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS),
-      " | E.isLeft(originalMiddelwareResult): ",
-      E.isLeft(originalMiddelwareResult)
+      " | returningResult: ",
+      returningResult
     );
-    return E.right({
-      ...originalMiddelwareResult.right,
-      authorizedCIDRs: new Set(),
-    });
+
+    return E.right(returningResult);
   };
 
 const isIPInCIDR = (ip: string, cidr: ReadonlyArray<string>): boolean => {
