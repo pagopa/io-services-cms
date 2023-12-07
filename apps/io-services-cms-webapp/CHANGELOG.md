@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.24.0
+
+### Minor Changes
+
+- 806ade4: Avoid Checking Authorized CIDRs in B4F Request forwarded to CMS
+
+### Patch Changes
+
+- 6a65cc6: add max_allowed_payment_amount field in api response
+- 0f56eab: reduce default logging level
+- 3321adb: Add X-Forwaded-For header on io-services-cms REST API call from B4F
+
 ## 1.23.0
 
 ### Minor Changes
