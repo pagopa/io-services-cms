@@ -42,15 +42,41 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       E.isLeft(originalMiddelwareResult) ||
       !isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS)
     ) {
+      // eslint-disable-next-line no-console
+      console.log(
+        "AzureUserAttributesManageMiddlewareWrapper| RETURNING ORIGINAL MIDDLEWARE RESULT | IP: ",
+        request.ip,
+        " | Allowed CIDRs: ",
+        BACKOFFICE_INTERNAL_SUBNET_CIDRS,
+        " | isIPInCIDR: ",
+        isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS),
+        " | E.isLeft(originalMiddelwareResult): ",
+        E.isLeft(originalMiddelwareResult)
+      );
       return originalMiddelwareResult;
     }
 
     // Otherwise, return the original middleware result with an empty list of CIDRs
     // This will skip all Authorized CIDRs checks
-    return E.right({
+
+    const returningResult: IAzureUserAttributesManage = {
       ...originalMiddelwareResult.right,
       authorizedCIDRs: new Set(),
-    });
+    };
+
+    // eslint-disable-next-line no-console
+    console.log(
+      "AzureUserAttributesManageMiddlewareWrapper| RETURNING EMPTY CIDRs | IP: ",
+      request.ip,
+      " | Allowed CIDRs: ",
+      BACKOFFICE_INTERNAL_SUBNET_CIDRS,
+      " | isIPInCIDR: ",
+      isIPInCIDR(request.ip, BACKOFFICE_INTERNAL_SUBNET_CIDRS),
+      " | returningResult: ",
+      returningResult
+    );
+
+    return E.right(returningResult);
   };
 
 const isIPInCIDR = (ip: string, cidr: ReadonlyArray<string>): boolean => {
