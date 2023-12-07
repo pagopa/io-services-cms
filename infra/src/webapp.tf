@@ -97,6 +97,7 @@ locals {
 
     # Backoffice Configuration
     BACKOFFICE_INTERNAL_SUBNET_CIDRS = join(",", module.backoffice_app_snet.address_prefixes)
+
   }
 }
 
