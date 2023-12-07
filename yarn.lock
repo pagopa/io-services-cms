@@ -6044,7 +6044,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-next@npm:^13.5.6":
+"eslint-config-next@npm:^13.5.3":
   version: 13.5.6
   resolution: "eslint-config-next@npm:13.5.6"
   dependencies:
@@ -8077,7 +8077,7 @@ __metadata:
     applicationinsights: ^2.9.0
     axios: ^1.6.0
     eslint: 8.50.0
-    eslint-config-next: ^13.5.6
+    eslint-config-next: ^13.5.3
     fp-ts: ^2.13.1
     i18next: ^23.5.1
     io-ts: ^2.2.20
