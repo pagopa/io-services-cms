@@ -8,16 +8,15 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
  */
 export const PUT = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
   ) =>
-    forwardIoServicesCmsRequest(
-      "updateServiceLogo",
-      request,
+    forwardIoServicesCmsRequest("updateServiceLogo", {
+      nextRequest,
       backofficeUser,
-      params
-    )
+      pathParams: params
+    })
 );

@@ -95,13 +95,16 @@ describe("Services API", () => {
       expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
         "createService",
         {
-          ...jsonBodyMock,
-          organization: {
-            name: backofficeUserMock.institution.name,
-            fiscal_code: backofficeUserMock.institution.fiscalCode
+          nextRequest: request,
+          backofficeUser: backofficeUserMock,
+          jsonBody: {
+            ...jsonBodyMock,
+            organization: {
+              name: backofficeUserMock.institution.name,
+              fiscal_code: backofficeUserMock.institution.fiscalCode
+            }
           }
-        },
-        backofficeUserMock
+        }
       );
     });
   });
