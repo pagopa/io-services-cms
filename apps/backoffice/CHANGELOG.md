@@ -1,5 +1,21 @@
 # io-services-cms-backoffice
 
+## 1.4.1
+
+### Patch Changes
+
+- 528bbf3: add request ip logs
+
+## 1.4.0
+
+### Minor Changes
+
+- 0554dc1: Added topic information in service details page
+
+### Patch Changes
+
+- 3321adb: Add X-Forwaded-For header on io-services-cms REST API call from B4F
+
 ## 1.3.0
 
 ### Minor Changes
