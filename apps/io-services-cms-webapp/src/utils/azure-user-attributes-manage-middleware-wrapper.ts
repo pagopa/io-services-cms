@@ -40,9 +40,9 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       "AzureUserAttributesManageMiddlewareWrapper | IP: ",
       request.ip,
       " | headers.forwarded: ",
-      request.headers.forwarded,
+      request.headers?.forwarded,
       " | X-Forwarded-For: ",
-      request.header("X-Forwarded-For")
+      request.header ? request.header("X-Forwarded-For") : undefined
     );
 
     // If the middleware fails or the request comes outside the Backoffice subnet
