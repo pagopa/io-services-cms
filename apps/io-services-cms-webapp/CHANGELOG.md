@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.24.3
+
+### Patch Changes
+
+- 6324265: add express trust proxy config"
+
 ## 1.24.2
 
 ### Patch Changes
