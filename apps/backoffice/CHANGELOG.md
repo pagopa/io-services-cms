@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.4.1
+
+### Patch Changes
+
+- 528bbf3: add request ip logs
+
 ## 1.4.0
 
 ### Minor Changes

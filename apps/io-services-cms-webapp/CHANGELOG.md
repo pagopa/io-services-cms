@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.24.2
+
+### Patch Changes
+
+- 528bbf3: add request ip logs
+- 4d9cf3c: Include Backoffice Subnet CIDRs
+
 ## 1.24.1
 
 ### Patch Changes
