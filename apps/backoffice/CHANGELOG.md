@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.4.2
+
+### Patch Changes
+
+- dc72c8b: Update nextJS to 13.5.6
+
 ## 1.4.1
 
 ### Patch Changes
