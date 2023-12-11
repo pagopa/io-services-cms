@@ -35,6 +35,16 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       subscriptionCIDRsModel
     )(request);
 
+    // eslint-disable-next-line no-console
+    console.log(
+      "AzureUserAttributesManageMiddlewareWrapper | IP: ",
+      request.ip,
+      " | headers.forwarded: ",
+      request.headers.forwarded,
+      " | X-Forwarded-For: ",
+      request.header("X-Forwarded-For")
+    );
+
     // If the middleware fails or the request comes outside the Backoffice subnet
     // return the originale middleware result
     if (
