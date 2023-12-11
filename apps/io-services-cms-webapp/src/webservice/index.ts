@@ -244,6 +244,8 @@ export const createWebServer = ({
   // configure app
   const app = express();
   secureExpressApp(app);
+  // https://expressjs.com/en/guide/behind-proxies.html
+  app.set("trust proxy", true);
 
   // mount router to respond on base path
   app.use(`/${basePath}`, router);
