@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.4.3
+
+### Patch Changes
+
+- 8584589: update vite/vitest to major version
+
 ## 1.4.2
 
 ### Patch Changes
