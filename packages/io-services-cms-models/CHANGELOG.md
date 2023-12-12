@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.16.1
+
+### Patch Changes
+
+- e5eff28: update vitest to major version on packages projects
+
 ## 1.16.0
 
 ### Minor Changes

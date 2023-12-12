@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.1
+
+### Patch Changes
+
+- e5eff28: update vitest to major version on packages projects
+
 ## 1.1.0
 
 ### Minor Changes
