@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.24.4
+
+### Patch Changes
+
+- 8584589: update vite/vitest to major version
+
 ## 1.24.3
 
 ### Patch Changes
