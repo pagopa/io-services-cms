@@ -5,9 +5,12 @@ import {
 } from "@/components/create-update-process";
 import { useDialog } from "@/components/dialog-provider";
 import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
+import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import {
   ServiceBuilderStep1,
   getValidationSchema as getVs1
@@ -44,7 +47,8 @@ const serviceDefaultData: ServiceCreateUpdatePayload = {
     category: "",
     custom_special_flow: "",
     scope: ScopeEnum.LOCAL
-  }
+  },
+  topic_id: ""
 };
 
 export type ServiceCreateUpdateProps = {
@@ -62,6 +66,9 @@ export const ServiceCreateUpdate = ({
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { data: topicsData, fetchData: topicsFetchData } = useFetch<
+    ServiceTopicList
+  >();
 
   const showDialog = useDialog();
   const handleCancel = async () => {
@@ -83,7 +90,7 @@ export const ServiceCreateUpdate = ({
       description: "forms.service.steps.step1.description",
       moreInfoUrl: "https://docs.pagopa.it/manuale-servizi",
       validationSchema: getVs1(t),
-      content: <ServiceBuilderStep1 />
+      content: <ServiceBuilderStep1 topics={topicsData?.topics as any} />
     },
     {
       label: "forms.service.steps.step2.label",
@@ -98,6 +105,11 @@ export const ServiceCreateUpdate = ({
       content: <ServiceBuilderStep3 />
     }
   ];
+
+  useEffect(() => {
+    topicsFetchData("getServiceTopics", {}, ServiceTopicList);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <CreateUpdateProcess

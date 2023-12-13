@@ -4,6 +4,7 @@ import {
   TextFieldController
 } from "@/components/forms/controllers";
 import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ServiceTopic } from "@/generated/api/ServiceTopic";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { Button, Grid } from "@mui/material";
@@ -35,8 +36,12 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     })
   });
 
+export type ServiceBuilderStep1Props = {
+  topics?: ServiceTopic[];
+};
+
 /** First step of Service create/update process */
-export const ServiceBuilderStep1 = () => {
+export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
@@ -46,6 +51,9 @@ export const ServiceBuilderStep1 = () => {
 
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [topicList, setTopicList] = useState<
+    { label: string; value: number }[]
+  >([]);
 
   useEffect(() => {
     NonEmptyString.is(watchedName) && NonEmptyString.is(watchedDescription)
@@ -53,6 +61,13 @@ export const ServiceBuilderStep1 = () => {
       : setIsPreviewEnabled(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedName, watchedDescription]);
+
+  useEffect(() => {
+    if (topics) {
+      setTopicList(topics.map(item => ({ label: item.name, value: item.id })));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topics]);
 
   return (
     <>
@@ -145,6 +160,25 @@ export const ServiceBuilderStep1 = () => {
             /> */}
           </Grid>
         </Grid>
+        <SelectController
+          name="topic_id"
+          label={t("forms.service.topic.label")}
+          placeholder={t("forms.service.topic.placeholder")}
+          items={[
+            {
+              label: "Non definito",
+              value: ""
+            },
+            ...topicList
+          ]}
+          helperText={
+            <span
+              dangerouslySetInnerHTML={{
+                __html: t("forms.service.topic.helperText")
+              }}
+            />
+          }
+        />
         <TextFieldController
           name="metadata.address"
           label={t("forms.service.metadata.address.label")}
@@ -159,19 +193,6 @@ export const ServiceBuilderStep1 = () => {
         />
         {/* 
         // TODO should be developed in the next MVPs
-        <TextFieldController
-          name="topic"
-          label="Argomento del servizio"
-          placeholder=""
-          helperText={
-            <span
-              dangerouslySetInnerHTML={{
-                __html: "Qual è l'argomento del servizio?"
-              }}
-            />
-          }
-          disabled
-        />
         <TextFieldController
           name="functionalities"
           label="Funzionalità del servizio"

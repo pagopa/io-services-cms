@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import { ServicePayload as ApiServicePayload } from "../../../generated/api/ServicePayload";
 import { ServiceCreateUpdatePayload } from "../../../types/service";
 import {
-  fromApiServicePayloadToServiceCreateUpdatePayload,
-  fromServiceCreateUpdatePayloadToApiServicePayload
+  fromServiceCreateUpdatePayloadToApiServicePayload,
+  fromServiceLifecycleToServiceCreateUpdatePayload
 } from "../adapters";
 
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
@@ -88,8 +88,8 @@ describe("[Services] Adapters", () => {
     expect(E.isLeft(result));
   });
 
-  it("should return a valid frontend service payload if a valid Api ServicePayload is provided", () => {
-    const result = fromApiServicePayloadToServiceCreateUpdatePayload(
+  it("should return a valid frontend service payload if a valid Api ServiceLifecycle is provided", () => {
+    const result = fromServiceLifecycleToServiceCreateUpdatePayload(
       anApiServicePayloadResult
     );
     const aServiceCreateUpdatePayload = {
@@ -99,7 +99,26 @@ describe("[Services] Adapters", () => {
         category: "",
         custom_special_flow: "",
         token_name: ""
-      }
+      },
+      topic_id: undefined
+    };
+    expect(result).toStrictEqual(aServiceCreateUpdatePayload);
+  });
+
+  it("should return a valid frontend service payload with topic, if a valid Api ServiceLifecycle is provided", () => {
+    const result = fromServiceLifecycleToServiceCreateUpdatePayload({
+      ...anApiServicePayloadResult,
+      topic: { id: 0, name: "Altro" }
+    });
+    const aServiceCreateUpdatePayload = {
+      ...aValidServiceCreateUpdatePayload,
+      metadata: {
+        ...aValidServiceCreateUpdatePayload.metadata,
+        category: "",
+        custom_special_flow: "",
+        token_name: ""
+      },
+      topic_id: 0
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
