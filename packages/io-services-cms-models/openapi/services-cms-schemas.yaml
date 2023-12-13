@@ -7,8 +7,6 @@ ServiceLifecycle:
           type: string
         status:
           $ref: '#/ServiceLifecycleStatus'
-        topic:
-          $ref: '#/ServiceTopic'
         version:
           type: integer
         last_update:
@@ -18,6 +16,13 @@ ServiceLifecycle:
         - status
         - last_update
     - $ref: '#/ServiceData'
+    - type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            topic:
+              $ref: '#/ServiceTopic'
 ServicePublication:
   description: Service Publication model data
   allOf:
@@ -27,8 +32,6 @@ ServicePublication:
           type: string
         status:
           $ref: '#/ServicePublicationStatusType'
-        topic:
-          $ref: '#/ServiceTopic'
         version:
           type: integer
         last_update:
@@ -38,16 +41,26 @@ ServicePublication:
         - status
         - last_update
     - $ref: '#/ServiceData'
+    - type: object
+      properties:
+        metadata:
+          type: object
+          properties:
+            topic:
+              $ref: '#/ServiceTopic'
 ServicePayload:
   description: A payload used to create or update a service.
   allOf:
     - $ref: '#/ServiceData'
     - type: object
       properties:
-        topic_id:
-          type: number
-          description: The topic id
-          example: 3
+        metadata:
+          type: object
+          properties:
+            topic_id:
+              type: number
+              description: The topic id
+              example: 3
 ServiceData:
   type: object
   description: Service basic data
