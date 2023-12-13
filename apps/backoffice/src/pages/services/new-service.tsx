@@ -8,7 +8,6 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -21,7 +20,6 @@ const pageDescriptionLocaleKey = "routes.new-service.description";
 export default function NewService() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: session } = useSession();
   const { enqueueSnackbar } = useSnackbar();
   const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
