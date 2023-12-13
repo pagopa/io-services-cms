@@ -77,4 +77,5 @@ export type Service = {
  * It will be converted in _io-services-cms Api ServicePayload_ before call create/update csm service Api. */
 export type ServiceCreateUpdatePayload = {
   metadata: ServiceCreateUpdatePayloadMetadata;
+  topic_id?: string | number;
 } & ServiceCommonData;
