@@ -172,6 +172,11 @@
           "placeholder": ""
         }
       },
+      "topic": {
+        "helperText": "Qual è l'argomento del servizio?",
+        "label": "Argomento del servizio",
+        "placeholder": ""
+      },
       "steps": {
         "step1": {
           "label": "Descrizione del servizio",
