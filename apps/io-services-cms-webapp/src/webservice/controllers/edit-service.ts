@@ -101,9 +101,9 @@ export const makeEditServiceHandler =
               config.SANDBOX_FISCAL_CODE
             ),
           }),
-          TE.map(itemToResponse),
-          TE.map(ResponseSuccessJson),
-          TE.mapLeft(fsmToApiError)
+          TE.mapLeft(fsmToApiError),
+          TE.chainW(itemToResponse(config)),
+          TE.map(ResponseSuccessJson)
         )
       ),
       TE.map(
