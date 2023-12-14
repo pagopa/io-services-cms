@@ -54,6 +54,8 @@ import {
   ResponseJsonWithStatus,
 } from "../../utils/custom-response";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { getDao as getServiceTopicDao } from "../../utils/service-topic-dao";
+import { validateServiceTopicRequest } from "../../utils/service-topic-validator";
 
 const logPrefix = "CreateServiceHandler";
 
@@ -180,8 +182,10 @@ export const makeCreateServiceHandler =
     );
 
     return pipe(
-      createSubscriptionStep,
-      TE.chain((_) => createServiceStep),
+      servicePayload.metadata.topic_id,
+      validateServiceTopicRequest(config),
+      TE.chainW(() => createSubscriptionStep),
+      TE.chainW((_) => createServiceStep),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
           userSubscriptionId: auth.subscriptionId,
