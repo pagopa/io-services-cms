@@ -69,6 +69,7 @@ const ServiceMetadata = t.intersection([
     web_url: NonEmptyString,
     category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
     custom_special_flow: NonEmptyString,
+    topic_id: t.number,
   }),
 ]);
 
