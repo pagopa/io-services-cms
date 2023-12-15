@@ -99,7 +99,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
-    \n\nh2. *Area:* ${formatServiceScope(service.data.metadata.scope)}
+    \n\nh3. *Area:* ${formatServiceScope(service.data.metadata.scope)}
     \n\nh2. *Nome Servizio: ${service.data.name}*
     \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
     \n\n----\n\nh3. _Contatti:_
