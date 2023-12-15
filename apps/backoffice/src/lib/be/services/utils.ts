@@ -7,7 +7,7 @@ import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/Service
 import {
   CategoryEnum,
   ScopeEnum
-} from "@/generated/services-cms/ServiceMetadata";
+} from "@/generated/services-cms/ServiceBaseMetadata";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import {
   NonEmptyString,
