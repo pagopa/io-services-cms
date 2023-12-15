@@ -11,18 +11,14 @@ ServiceLifecycle:
           type: integer
         last_update:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+        metadata:
+          $ref: '#/ServiceMetadata'
       required:
         - id
         - status
         - last_update
+        - metadata
     - $ref: '#/ServiceData'
-    - type: object
-      properties:
-        metadata:
-          type: object
-          properties:
-            topic:
-              $ref: '#/ServiceTopic'
 ServicePublication:
   description: Service Publication model data
   allOf:
@@ -36,31 +32,24 @@ ServicePublication:
           type: integer
         last_update:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+        metadata:
+          $ref: '#/ServiceMetadata'
       required:
         - id
         - status
         - last_update
+        - metadata
     - $ref: '#/ServiceData'
-    - type: object
-      properties:
-        metadata:
-          type: object
-          properties:
-            topic:
-              $ref: '#/ServiceTopic'
 ServicePayload:
   description: A payload used to create or update a service.
   allOf:
-    - $ref: '#/ServiceData'
     - type: object
       properties:
         metadata:
-          type: object
-          properties:
-            topic_id:
-              type: number
-              description: The topic id
-              example: 3
+          $ref: '#/ServicePayloadMetadata'
+      required:
+        - metadata
+    - $ref: '#/ServiceData'
 ServiceData:
   type: object
   description: Service basic data
@@ -93,16 +82,13 @@ ServiceData:
       minimum: 0
       maximum: 9999999999
       default: 0
-    metadata:
-      $ref: '#/ServiceMetadata'
   required:
     - name
     - description
     - organization
-    - metadata
-ServiceMetadata:
+ServiceBaseMetadata:
   type: object
-  description: A set of service metadata properties
+  description: A set of common service metadata properties
   properties:
     web_url:
       type: string
@@ -151,6 +137,24 @@ ServiceMetadata:
       enum: [NATIONAL, LOCAL]
   required:
     - scope
+ServiceMetadata:
+  description: A set of service metadata properties
+  allOf:
+    - $ref: '#/ServiceBaseMetadata'
+    - type: object
+      properties:
+        topic:
+          $ref: '#/ServiceTopic'
+ServicePayloadMetadata:
+  description: A set of service metadata properties on request payload
+  allOf:
+    - $ref: '#/ServiceBaseMetadata'
+    - type: object
+      properties:
+        topic_id:
+          type: number
+          description: The topic id
+          example: 3
 ServiceLifecycleStatus:
   type: object
   properties:
