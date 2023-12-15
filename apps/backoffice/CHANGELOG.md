@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 1.4.5
+
+### Patch Changes
+
+- 1112624: fix topic metadata on frontend adapter
+- e22188e: Update MSW library to major v2 release
+- Updated dependencies [5ed009b]
+  - @io-services-cms/models@1.16.2
+
 ## 1.4.4
 
 ### Patch Changes
