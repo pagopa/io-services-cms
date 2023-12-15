@@ -3,7 +3,7 @@
  * Feel free to commit/edit it as you need.
  */
 import { faker } from "@faker-js/faker/locale/it";
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import {
   getDelegatesByOrganizationMockResponse,
   getLatestOwnershipClaimStatusMockResponse,
@@ -16,60 +16,106 @@ export const buildHandlers = () => {
   const baseURL = process.env.SUBSCRIPTION_MIGRATION_API_URL;
 
   return [
-    rest.get(
+    http.get(
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/latest`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [
-            ctx.status(200),
-            ctx.json(getLatestOwnershipClaimStatusMockResponse())
-          ],
-          [ctx.status(400), ctx.json(null)],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(
+            JSON.stringify(getLatestOwnershipClaimStatusMockResponse()),
+            {
+              status: 200
+            }
+          ),
+          new HttpResponse(null, {
+            status: 400
+          }),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
 
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     ),
-    rest.get(
+    http.get(
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/:delegateId`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [ctx.status(200), ctx.json(getOwnershipClaimStatusMockResponse())],
-          [ctx.status(400), ctx.json(null)],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(
+            JSON.stringify(getOwnershipClaimStatusMockResponse()),
+            {
+              status: 200
+            }
+          ),
+          new HttpResponse(null, {
+            status: 400
+          }),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     ),
-    rest.post(
+    http.post(
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/:delegateId`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [ctx.status(202)],
-          [ctx.status(400), ctx.json(null)],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(null, {
+            status: 202
+          }),
+          new HttpResponse(null, {
+            status: 400
+          }),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     ),
-    rest.get(
+    http.get(
       `${baseURL}/organizations/:organizationFiscalCode/delegates`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [ctx.status(200), ctx.json(getDelegatesByOrganizationMockResponse())],
-          [ctx.status(400), ctx.json(null)],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(
+            JSON.stringify(getDelegatesByOrganizationMockResponse()),
+            {
+              status: 200
+            }
+          ),
+          new HttpResponse(null, {
+            status: 400
+          }),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     )
   ];

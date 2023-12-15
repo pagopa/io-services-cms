@@ -4,7 +4,7 @@
  */
 import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { aMockErrorResponse } from "../data/common-data";
 import {
   aWellKnown,
@@ -19,34 +19,43 @@ export const buildHandlers = () => {
   const baseURL = configuration.SELFCARE_EXTERNAL_API_BASE_URL;
 
   return [
-    rest.get(configuration.SELFCARE_JWKS_URL, (_, res, ctx) => {
+    http.get(configuration.SELFCARE_JWKS_URL, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getWellKnown200Response())],
-        [ctx.status(500), ctx.json(getWellKnown500Response())]
+        HttpResponse.json(getWellKnown200Response() as any, { status: 200 }),
+        HttpResponse.json(getWellKnown500Response() as any, { status: 500 })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
+    http.get(`${baseURL}/institutions`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json([getMockInstitution()])],
-        [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
-        [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+        HttpResponse.json(getMockInstitution() as any, {
+          status: 200
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(404) as any, {
+          status: 404
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(500) as any, {
+          status: 500
+        })
       ];
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/institutions/:institutionId`, (req, res, ctx) => {
-      const { institutionId } = req.params;
+    http.get(`${baseURL}/institutions/:institutionId`, ({ params }) => {
+      const { institutionId } = params;
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(getMockInstitution(institutionId as string))
-        ],
-        [ctx.status(404), ctx.json(getSelfCareProblemResponse(404))],
-        [ctx.status(500), ctx.json(getSelfCareProblemResponse(500))]
+        HttpResponse.json(getMockInstitution(institutionId as string) as any, {
+          status: 200
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(404) as any, {
+          status: 404
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(500) as any, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     })
   ];
 };
