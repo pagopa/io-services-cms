@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.24.6
+
+### Patch Changes
+
+- 4b1e07a: ADD ServiceBaseMetadata and ServicePayloadMetadata missing on webapp openapi.yaml
+- 7c2d4a3: Edit jira issue scope layout
+- Updated dependencies [5ed009b]
+  - @io-services-cms/models@1.16.2
+
 ## 1.24.5
 
 ### Patch Changes
