@@ -14,6 +14,11 @@ import {
 const formatOptionalStringValue = (value?: string) =>
   value || `*[ DATO MANCANTE ]*`;
 
+const formatServiceScope = (scope: string) =>
+  scope === "NATIONAL"
+    ? `{color:#EA4436}*${scope} (Verificare che sia effettivamente un servizio nazionale prima di procedere con l'approvazione)*{color}`
+    : scope;
+
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
 
@@ -94,9 +99,9 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
+    \n\nh2. *Area:* ${formatServiceScope(service.data.metadata.scope)}
     \n\nh2. *Nome Servizio: ${service.data.name}*
     \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
-    \n\n*Area:* ${service.data.metadata.scope}
     \n\n----\n\nh3. _Contatti:_
     \n\n*Url di supporto:* ${formatOptionalStringValue(
       service.data.metadata.support_url
