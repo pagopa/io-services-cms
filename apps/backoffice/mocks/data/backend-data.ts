@@ -97,7 +97,6 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     ]),
     reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
-  topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined]),
   version: faker.number.int({ min: undefined, max: undefined }),
   last_update: faker.date.recent({ days: 30 }).toISOString(),
   name: faker.lorem.words({ min: 3, max: 5 }),
@@ -147,7 +146,8 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     support_url: faker.internet.url(),
     category: faker.helpers.arrayElement(["SPECIAL", "STANDARD"]),
     custom_special_flow: faker.lorem.slug(1),
-    scope: faker.helpers.arrayElement(["NATIONAL", "LOCAL"])
+    scope: faker.helpers.arrayElement(["NATIONAL", "LOCAL"]),
+    topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined])
   }
 });
 
