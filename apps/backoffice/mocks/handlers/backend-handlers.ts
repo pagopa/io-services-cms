@@ -4,7 +4,7 @@
  */
 import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import {
   aMockManageKeysCIDRs,
   aMockServicePagination,
@@ -35,360 +35,663 @@ export const buildHandlers = () => {
     configuration.API_BACKEND_BASE_URL + configuration.API_BACKEND_BASE_PATH;
 
   return [
-    rest.get(`${baseURL}/info`, (_, res, ctx) => {
+    http.get(`${baseURL}/info`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getInfo200Response())],
-        [ctx.status(500), ctx.json(getInfo500Response())]
+        new HttpResponse(JSON.stringify(getInfo200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getInfo500Response()), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(
-      `${baseURL}/services/migrations/ownership-claims/latest`,
-      (_, res, ctx) => {
-        const resultArray = [
-          [
-            ctx.status(200),
-            ctx.delay(1000),
-            ctx.json(getGetServicesMigrationStatus200Response())
-          ],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(403), ctx.json(null)],
-          [ctx.status(429), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
-        ];
-
-        return res(...resultArray[0]);
-      }
-    ),
-    rest.get(`${baseURL}/services/migrations/delegates`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/migrations/ownership-claims/latest`, () => {
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.delay(1000),
-          ctx.json(getGetServicesMigrationDelegates200Response())
-        ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(
+          JSON.stringify(getGetServicesMigrationStatus200Response()),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.post(
+    http.get(`${baseURL}/services/migrations/delegates`, () => {
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(getGetServicesMigrationDelegates200Response()),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
+      ];
+
+      return resultArray[0];
+    }),
+    http.post(
       `${baseURL}/services/migrations/ownership-claims/:delegateId`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [ctx.status(201), ctx.delay(1000), ctx.json(null)],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(403), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(429), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(null, {
+            status: 201
+          }),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 403
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 429
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
 
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     ),
-    rest.get(
+    http.get(
       `${baseURL}/services/migrations/ownership-claims/:delegateId`,
-      (_, res, ctx) => {
+      () => {
         const resultArray = [
-          [
-            ctx.status(200),
-            ctx.delay(1000),
-            ctx.json(getGetServicesMigrationDetails200Response())
-          ],
-          [ctx.status(401), ctx.json(null)],
-          [ctx.status(403), ctx.json(null)],
-          [ctx.status(404), ctx.json(null)],
-          [ctx.status(429), ctx.json(null)],
-          [ctx.status(500), ctx.json(null)]
+          new HttpResponse(
+            JSON.stringify(getGetServicesMigrationDetails200Response()),
+            {
+              status: 200
+            }
+          ),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 403
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 429
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
 
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     ),
-    rest.post(`${baseURL}/services`, (_, res, ctx) => {
+    http.post(`${baseURL}/services`, () => {
       const resultArray = [
-        [ctx.status(201), ctx.json(getCreateService201Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getCreateService201Response()), {
+          status: 201
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services`, (_, res, ctx) => {
+    http.get(`${baseURL}/services`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServices200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetServices200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/list`, (req, res, ctx) => {
-      const url = new URL(req.url);
+    http.get(`${baseURL}/services/list`, ({ request }) => {
+      const url = new URL(request.url);
       const limit = url.searchParams.get("limit");
       const offset = url.searchParams.get("offset");
       const id = url.searchParams.get("id");
 
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.delay(1000),
-          ctx.json(
+        new HttpResponse(
+          JSON.stringify(
             getGetServiceList200Response(
               limit as string,
               offset as string,
               id as string
             )
-          )
-        ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+          ),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/topics`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServiceTopics200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId`, (req, res, ctx) => {
-      const { serviceId } = req.params;
+    http.get(`${baseURL}/services/:serviceId`, ({ params }) => {
+      const { serviceId } = params;
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(getGetService200Response(serviceId as string))
-        ],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(
+          JSON.stringify(getGetService200Response(serviceId as string)),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId`, (req, res, ctx) => {
-      const { serviceId } = req.params;
+    http.put(`${baseURL}/services/:serviceId`, ({ params }) => {
+      const { serviceId } = params;
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(getUpdateService200Response(serviceId as string))
-        ],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(
+          JSON.stringify(getUpdateService200Response(serviceId as string)),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.delete(`${baseURL}/services/:serviceId`, (_, res, ctx) => {
+    http.delete(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/logo`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/logo`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId/keys`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServiceKeys200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/keys/:keyType`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/keys/:keyType`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 409
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.patch(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
+    http.patch(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 409
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.post(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.post(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(409), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 409
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetPublishedService200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetPublishedService200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.delete(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.delete(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/institutions`, (_, res, ctx) => {
+    http.get(`${baseURL}/institutions`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getUserAuthorizedInstitutions200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(
+          JSON.stringify(getUserAuthorizedInstitutions200Response()),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/institutions/:institutionId`, (_, res, ctx) => {
+    http.get(`${baseURL}/institutions/:institutionId`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetInstitution200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetInstitution200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/keys/manage`, (_, res, ctx) => {
+    http.get(`${baseURL}/keys/manage`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServiceKeys200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/keys/manage/cidrs`, (_, res, ctx) => {
+    http.get(`${baseURL}/keys/manage/cidrs`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getManageKeysCIDRs200Response())],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getManageKeysCIDRs200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/keys/manage/cidrs`, (_, res, ctx) => {
+    http.put(`${baseURL}/keys/manage/cidrs`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getManageKeysCIDRs200Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getManageKeysCIDRs200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/keys/manage/:keyType`, (_, res, ctx) => {
+    http.put(`${baseURL}/keys/manage/:keyType`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
-        [ctx.status(400), ctx.json(null)],
-        [ctx.status(401), ctx.json(null)],
-        [ctx.status(403), ctx.json(null)],
-        [ctx.status(404), ctx.json(null)],
-        [ctx.status(429), ctx.json(null)],
-        [ctx.status(500), ctx.json(null)]
+        new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 404
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     })
   ];
 };

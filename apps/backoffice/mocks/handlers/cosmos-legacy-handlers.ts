@@ -3,7 +3,7 @@
  * Feel free to commit/edit it as you need.
  */
 import { getConfiguration } from "@/config";
-import { rest } from "msw";
+import { http } from "msw";
 import { aMockErrorResponse } from "../data/common-data";
 
 export const buildHandlers = () => {
@@ -11,14 +11,14 @@ export const buildHandlers = () => {
   const baseUrl = new URL(configuration.LEGACY_COSMOSDB_URI).href;
 
   return [
-    // rest.get(baseUrl, (req, res, ctx) => {
+    // http.get(baseUrl, (req, res, ctx) => {
     //   const resultArray = [
     //     [ctx.status(200), ctx.json({})],
     //     [ctx.status(500), ctx.json(getWellKnown500Response())]
     //   ];
     //   return res(...resultArray[0]);
     // })
-    // rest.post(
+    // http.post(
     //   "https://io-p-cosmos-api.documents.azure.com/dbs/db/colls/subscription-cidrs/docs",
     //   async (req, res, ctx) => {
     //     console.log("REQUEST BODY", await req.json());

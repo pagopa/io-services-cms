@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.16.2
+
+### Patch Changes
+
+- 5ed009b: move topic into service metadata object
+
 ## 1.16.1
 
 ### Patch Changes

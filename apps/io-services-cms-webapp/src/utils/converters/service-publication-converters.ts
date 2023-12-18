@@ -1,5 +1,5 @@
 import { ServicePublication } from "@io-services-cms/models";
-import { CategoryEnum } from "../../generated/api/ServiceMetadata";
+import { CategoryEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   ServicePublicationStatusType,

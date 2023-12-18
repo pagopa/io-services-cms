@@ -5,7 +5,7 @@
 import testLogo from "!url-loader!../data/test-logo.png";
 import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 
 faker.seed(1);
 
@@ -14,24 +14,30 @@ export const buildHandlers = () => {
   const baseURL = configuration.CDN_URL;
 
   return [
-    rest.get(
+    http.get(
       baseURL + configuration.SERVICES_LOGO_PATH + ":image",
-      async (_, res, ctx) => {
+      async () => {
         const imageBuffer = await fetch(testLogo as any).then(res =>
           res.arrayBuffer()
         );
 
         const resultArray = [
-          [
-            ctx.set("Content-Length", imageBuffer.byteLength.toString()),
-            ctx.set("Content-Type", "image/png"),
-            ctx.body(imageBuffer)
-          ],
-          [ctx.status(404)],
-          [ctx.status(500)]
+          new HttpResponse(imageBuffer, {
+            status: 200,
+            headers: {
+              "Content-Length": imageBuffer.byteLength.toString(),
+              "Content-Type": "image/png"
+            }
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
         ];
 
-        return res(...resultArray[0]);
+        return resultArray[0];
       }
     )
   ];
