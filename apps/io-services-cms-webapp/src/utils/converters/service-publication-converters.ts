@@ -19,7 +19,10 @@ export const itemToResponse =
   (dbConfig: TopicPostgreSqlConfig) =>
   ({
     fsm: { state },
-    data,
+    data: {
+      metadata: { scope, category, topic_id, ...metadata },
+      ...data
+    },
     id,
     last_update,
   }: ServicePublication.ItemType): TE.TaskEither<
@@ -27,26 +30,20 @@ export const itemToResponse =
     ServiceResponsePayload
   > =>
     pipe(
-      toServiceTopic(dbConfig)(id, data.metadata.topic_id),
+      toServiceTopic(dbConfig)(id, topic_id),
       TE.bimap(
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
           id,
           status: toServiceStatusType(state),
           last_update: last_update ?? new Date().getTime().toString(),
-          name: data.name,
-          description: data.description,
-          organization: data.organization,
+          ...data,
           metadata: {
-            ...data.metadata,
-            scope: toScopeType(data.metadata.scope),
-            category: toCategoryType(data.metadata.category),
+            ...metadata,
+            scope: toScopeType(scope),
+            category: toCategoryType(category),
             topic,
           },
-          require_secure_channel: data.require_secure_channel,
-          authorized_recipients: data.authorized_recipients,
-          authorized_cidrs: data.authorized_cidrs,
-          max_allowed_payment_amount: data.max_allowed_payment_amount,
         })
       )
     );

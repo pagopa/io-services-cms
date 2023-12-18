@@ -16,11 +16,32 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { createWebServer } from "../../index";
+
+const { validateServiceTopicRequest } = vi.hoisted(() => ({
+  validateServiceTopicRequest: vi.fn(),
+}));
+
+vi.mock("../../../utils/service-topic-validator", () => ({
+  validateServiceTopicRequest: validateServiceTopicRequest,
+}));
+
+const { getServiceTopicDao } = vi.hoisted(() => ({
+  getServiceTopicDao: vi.fn(() => ({
+    findById: vi.fn((id: number) =>
+      TE.right(O.some({ id, name: "topic name" }))
+    ),
+  })),
+}));
+
+vi.mock("../../../utils/service-topic-dao", () => ({
+  getDao: getServiceTopicDao,
+}));
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -99,10 +120,12 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
 describe("editService", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  validateServiceTopicRequest.mockReturnValue(() => TE.right(void 0));
 
   const app = createWebServer({
     basePath: "api",
@@ -112,7 +135,7 @@ describe("editService", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
@@ -142,6 +165,7 @@ describe("editService", () => {
       token_name: "string",
       support_url: "string",
       scope: "NATIONAL",
+      topic_id: 1,
     },
   };
 
@@ -157,6 +181,7 @@ describe("editService", () => {
         email: "service@email.it",
         pec: "service@pec.it",
         scope: "LOCAL",
+        topic_id: 1,
       },
       organization: {
         name: "anOrganizationName",
