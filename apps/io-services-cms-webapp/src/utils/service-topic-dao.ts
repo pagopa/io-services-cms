@@ -81,10 +81,19 @@ const findById =
       )
     );
 
-export const getDao = (dbConfig: TopicPostgreSqlConfig) =>
-  pipe(getPool(dbConfig), (pool) => ({
-    existsById: existsById(pool, dbConfig),
-    findById: findById(pool, dbConfig),
-  }));
+// eslint-disable-next-line functional/no-let
+let dao: ServiceTopicDao;
+export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
+  if (!dao) {
+    dao = pipe(getPool(dbConfig), (pool) => ({
+      existsById: existsById(pool, dbConfig),
+      findById: findById(pool, dbConfig),
+    }));
+  }
+  return dao;
+};
 
-export type ServiceTopicDao = ReturnType<typeof getDao>;
+export type ServiceTopicDao = {
+  existsById: ReturnType<typeof existsById>;
+  findById: ReturnType<typeof findById>;
+};
