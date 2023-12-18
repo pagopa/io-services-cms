@@ -1,9 +1,10 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import {
+  AutocompleteController,
   SelectController,
   TextFieldController
 } from "@/components/forms/controllers";
-import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopic } from "@/generated/api/ServiceTopic";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -51,9 +52,9 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
 
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [topicList, setTopicList] = useState<
-    { label: string; value: number }[]
-  >([]);
+  const [topicList, setTopicList] = useState<{ label: string; id: number }[]>(
+    []
+  );
 
   useEffect(() => {
     NonEmptyString.is(watchedName) && NonEmptyString.is(watchedDescription)
@@ -64,7 +65,7 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
 
   useEffect(() => {
     if (topics) {
-      setTopicList(topics.map(item => ({ label: item.name, value: item.id })));
+      setTopicList(topics.map(item => ({ label: item.name, id: item.id })));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics]);
@@ -160,21 +161,15 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
             /> */}
           </Grid>
         </Grid>
-        <SelectController
-          name="topic_id"
-          label={t("forms.service.topic.label")}
-          placeholder={t("forms.service.topic.placeholder")}
-          items={[
-            {
-              label: "Non definito",
-              value: ""
-            },
-            ...topicList
-          ]}
+        <AutocompleteController
+          name="metadata.topic_id"
+          label={t("forms.service.metadata.topic.label")}
+          placeholder={t("forms.service.metadata.topic.placeholder")}
+          items={topicList}
           helperText={
             <span
               dangerouslySetInnerHTML={{
-                __html: t("forms.service.topic.helperText")
+                __html: t("forms.service.metadata.topic.helperText")
               }}
             />
           }

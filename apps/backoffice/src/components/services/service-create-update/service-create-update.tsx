@@ -4,7 +4,7 @@ import {
   CreateUpdateProcess
 } from "@/components/create-update-process";
 import { useDialog } from "@/components/dialog-provider";
-import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
@@ -46,9 +46,9 @@ const serviceDefaultData: ServiceCreateUpdatePayload = {
     token_name: "",
     category: "",
     custom_special_flow: "",
-    scope: ScopeEnum.LOCAL
-  },
-  topic_id: ""
+    scope: ScopeEnum.LOCAL,
+    topic_id: ""
+  }
 };
 
 export type ServiceCreateUpdateProps = {

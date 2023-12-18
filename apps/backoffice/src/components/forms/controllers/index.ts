@@ -1,3 +1,4 @@
+export * from "./autocomplete-controller";
 export * from "./multi-select-controller";
 export * from "./select-controller";
 export * from "./switch-controller";
