@@ -4,6 +4,7 @@ import {
   FormHelperText,
   TextField
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -29,6 +30,7 @@ export function AutocompleteController({
   placeholder,
   helperText
 }: AutocompleteControllerProps) {
+  const { t } = useTranslation();
   const { register, control } = useFormContext();
 
   if (items.length === 0) return; // avoid mui out-of-range error
@@ -46,6 +48,7 @@ export function AutocompleteController({
             fullWidth
             disablePortal
             options={items}
+            noOptionsText={t("forms.noOptionsText")}
             getOptionLabel={o =>
               items.find(i =>
                 typeof o === "number" ? i.id === o : i.id === o.id

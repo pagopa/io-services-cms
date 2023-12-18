@@ -58,6 +58,7 @@
         "privacyCritical": "Mandatory field for a sensitive service"
       }
     },
+    "noOptionsText": "No options",
     "testUrl": "Try URL",
     "service": {
       "buttons": {

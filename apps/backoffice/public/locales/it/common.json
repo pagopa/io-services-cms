@@ -58,6 +58,7 @@
         "privacyCritical": "Campo obbligatorio per un servizio sensibile"
       }
     },
+    "noOptionsText": "Nessuna opzione",
     "testUrl": "Prova URL",
     "service": {
       "buttons": {
