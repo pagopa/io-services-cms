@@ -98,9 +98,9 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         category: "",
         custom_special_flow: "",
-        token_name: ""
-      },
-      topic_id: undefined
+        token_name: "",
+        topic_id: undefined
+      }
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
@@ -108,7 +108,10 @@ describe("[Services] Adapters", () => {
   it("should return a valid frontend service payload with topic, if a valid Api ServiceLifecycle is provided", () => {
     const result = fromServiceLifecycleToServiceCreateUpdatePayload({
       ...anApiServicePayloadResult,
-      topic: { id: 0, name: "Altro" }
+      metadata: {
+        ...anApiServicePayloadResult.metadata,
+        topic: { id: 0, name: "Altro" }
+      }
     });
     const aServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
@@ -116,9 +119,9 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         category: "",
         custom_special_flow: "",
-        token_name: ""
-      },
-      topic_id: 0
+        token_name: "",
+        topic_id: 0
+      }
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });

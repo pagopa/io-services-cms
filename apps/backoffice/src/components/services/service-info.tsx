@@ -66,7 +66,7 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
     },
     {
       label: "routes.service.topic",
-      value: data?.topic?.name ?? t("undefined"),
+      value: data?.metadata.topic?.name ?? t("undefined"),
       renderValueOnNewLine: true
     }
   ];

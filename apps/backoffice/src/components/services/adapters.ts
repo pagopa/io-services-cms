@@ -47,7 +47,8 @@ const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
   support_url: metadata.support_url,
   category: metadata.category,
   custom_special_flow: metadata.custom_special_flow,
-  scope: metadata.scope
+  scope: metadata.scope,
+  topic: metadata.topic
 });
 
 export const fromServiceLifecycleToService = (
@@ -90,7 +91,7 @@ export const fromServiceCreateUpdatePayloadToApiServicePayload = (
   pipe(
     convertAssistanceChannelsArrayToObj(feService.metadata.assistanceChannels),
     buildBaseServicePayload(feService),
-    clearUndefinedEmptyProperties,
+    clearUndefinedNullEmptyProperties,
     removeAssistanceChannelsArray,
     ApiServicePayload.decode
   );
@@ -125,9 +126,9 @@ export const fromServiceLifecycleToServiceCreateUpdatePayload = (
     token_name: sl.metadata.token_name ?? "",
     category: sl.metadata.category ?? "",
     custom_special_flow: sl.metadata.custom_special_flow ?? "",
-    scope: sl.metadata.scope
-  },
-  topic_id: sl.topic?.id
+    scope: sl.metadata.scope,
+    topic_id: sl.metadata.topic?.id
+  }
 });
 
 const buildBaseServicePayload = (
@@ -226,11 +227,11 @@ const getCtaUrlFromCtaString = (value: string) => {
  * or on future uses of such fields which may be undefined.
  * @param s service
  * @returns service without epmpty or undefined properties */
-const clearUndefinedEmptyProperties = (s: any): any => {
+const clearUndefinedNullEmptyProperties = (s: any): any => {
   if (_.isObject(s) && !_.isArray(s)) {
     return _.mapValues(
-      _.pickBy(s, val => !_.isUndefined(val) && val !== ""),
-      clearUndefinedEmptyProperties
+      _.pickBy(s, val => !_.isUndefined(val) && !_.isNull(val) && val !== ""),
+      clearUndefinedNullEmptyProperties
     );
   }
   return s;

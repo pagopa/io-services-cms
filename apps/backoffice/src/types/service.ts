@@ -1,5 +1,5 @@
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
-import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
 import { ServiceTopic } from "@/generated/api/ServiceTopic";
 
@@ -34,6 +34,7 @@ export type ServiceMetadata = {
   category?: string;
   custom_special_flow?: string;
   scope: ScopeEnum;
+  topic?: ServiceTopic;
 };
 
 export type AssistanceChannelType = "email" | "pec" | "phone" | "support_url";
@@ -61,6 +62,7 @@ export type ServiceCreateUpdatePayloadMetadata = {
   category?: string;
   custom_special_flow?: string;
   scope: ScopeEnum;
+  topic_id?: string | number;
 };
 
 /** `Service` type used to view details */
@@ -70,12 +72,10 @@ export type Service = {
   visibility?: ServicePublicationStatusType;
   lastUpdate: string;
   metadata: ServiceMetadata;
-  topic?: ServiceTopic;
 } & ServiceCommonData;
 
 /** `ServiceCreateUpdatePayload` type used to create/update services in frontend forms.\
  * It will be converted in _io-services-cms Api ServicePayload_ before call create/update csm service Api. */
 export type ServiceCreateUpdatePayload = {
   metadata: ServiceCreateUpdatePayloadMetadata;
-  topic_id?: string | number;
 } & ServiceCommonData;
