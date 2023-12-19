@@ -16,11 +16,6 @@ import {
   retrieveOrganizationDelegates,
   retrieveServiceList
 } from "../services/business";
-import {
-  MISSING_SERVICE_DESCRIPTION,
-  MISSING_SERVICE_NAME,
-  toServiceListItem
-} from "../services/utils";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -506,21 +501,46 @@ describe("Services TEST", () => {
         aServiceNotInPublicationId
       ]);
 
-      expect(result).toStrictEqual({
+      expect(result).toEqual({
         value: [
           {
-            ...toServiceListItem(mocks.serviceTopicsMaps)(
-              mocks.aBaseServiceLifecycle
-            ),
             id: aServiceinPublicationId,
-            visibility: "published"
+            visibility: "published",
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: []
           },
           {
-            ...toServiceListItem(mocks.serviceTopicsMaps)(
-              mocks.aBaseServiceLifecycle
-            ),
             id: aServiceNotInPublicationId,
-            visibility: undefined
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: []
           }
         ],
         pagination: { count: 2, limit: 10, offset: 0 }
@@ -697,20 +717,33 @@ describe("Services TEST", () => {
         aServiceInLifecycleId
       ]);
 
-      expect(result).toStrictEqual({
+      expect(result).toEqual({
         value: [
           {
-            ...toServiceListItem(mocks.serviceTopicsMaps)(
-              mocks.aBaseServiceLifecycle
-            ),
             id: aServiceInLifecycleId,
-            visibility: "published"
+            visibility: "published",
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: []
           },
           expect.objectContaining({
-            description: MISSING_SERVICE_DESCRIPTION,
+            description: "Descrizione non disponibile",
             id: aServiceNotInLifecycleId,
             last_update: aServiceNotInLifecycleCreateDate.toISOString(),
-            name: MISSING_SERVICE_NAME,
+            name: "Servizio non disponibile",
             organization: {
               fiscal_code: mocks.anInstitution.fiscalCode,
               name: mocks.anInstitution.name
