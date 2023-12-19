@@ -44,10 +44,12 @@ export const ServicePreview = ({
 
   return (
     <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
-      <DialogTitle>{t("service.preview.title")}</DialogTitle>
+      <DialogTitle id="s-preview-title">{t("service.preview.title")}</DialogTitle>
       <DialogContent sx={{ minWidth: "600px" }}>
         <Alert severity="info">
-          <Typography variant="body2">{t("service.preview.info")}</Typography>
+          <Typography id="s-preview-info" variant="body2">
+            {t("service.preview.info")}
+          </Typography>
         </Alert>
         <Grid container marginY={4}>
           <Grid item xs>
@@ -80,7 +82,7 @@ export const ServicePreview = ({
         </Grid>
       </DialogContent>
       <DialogActions sx={{ paddingX: 3, paddingY: 2 }}>
-        <Button variant="outlined" onClick={handleClose}>
+        <Button id="s-preview-close-button" variant="outlined" onClick={handleClose}>
           {t("buttons.close")}
         </Button>
       </DialogActions>

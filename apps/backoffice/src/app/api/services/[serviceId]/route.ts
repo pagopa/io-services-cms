@@ -9,13 +9,20 @@ import { BackOfficeUser } from "../../../../../types/next-auth";
  */
 export const GET = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-  ) =>
-    forwardIoServicesCmsRequest("getService", request, backofficeUser, params)
+  ) => {
+    console.log("Request IP", nextRequest.ip);
+    console.log("X-Forwarded-For", nextRequest.headers.get("X-Forwarded-For"));
+    return forwardIoServicesCmsRequest("getService", {
+      nextRequest,
+      backofficeUser,
+      pathParams: params
+    });
+  }
 );
 
 /**
@@ -23,7 +30,7 @@ export const GET = withJWTAuthHandler(
  */
 export const PUT = withJWTAuthHandler(
   async (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
@@ -31,7 +38,7 @@ export const PUT = withJWTAuthHandler(
   ) => {
     let jsonBody;
     try {
-      jsonBody = await request.json();
+      jsonBody = await nextRequest.json();
     } catch (_) {
       return NextResponse.json(
         {
@@ -46,12 +53,12 @@ export const PUT = withJWTAuthHandler(
       name: backofficeUser.institution.name,
       fiscal_code: backofficeUser.institution.fiscalCode
     };
-    return forwardIoServicesCmsRequest(
-      "updateService",
-      jsonBody,
+    return forwardIoServicesCmsRequest("updateService", {
+      nextRequest,
       backofficeUser,
-      params
-    );
+      jsonBody,
+      pathParams: params
+    });
   }
 );
 
@@ -60,16 +67,15 @@ export const PUT = withJWTAuthHandler(
  */
 export const DELETE = withJWTAuthHandler(
   (
-    request: NextRequest,
+    nextRequest: NextRequest,
     {
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
   ) =>
-    forwardIoServicesCmsRequest(
-      "deleteService",
-      request,
+    forwardIoServicesCmsRequest("deleteService", {
+      nextRequest,
       backofficeUser,
-      params
-    )
+      pathParams: params
+    })
 );

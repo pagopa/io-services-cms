@@ -1,5 +1,50 @@
 # io-services-cms-backoffice
 
+## 1.4.5
+
+### Patch Changes
+
+- 1112624: fix topic metadata on frontend adapter
+- e22188e: Update MSW library to major v2 release
+- Updated dependencies [5ed009b]
+  - @io-services-cms/models@1.16.2
+
+## 1.4.4
+
+### Patch Changes
+
+- Updated dependencies [e5eff28]
+  - @io-services-cms/models@1.16.1
+  - @io-services-cms/external-clients@1.1.1
+
+## 1.4.3
+
+### Patch Changes
+
+- 8584589: update vite/vitest to major version
+
+## 1.4.2
+
+### Patch Changes
+
+- dc72c8b: Update nextJS to 13.5.6
+
+## 1.4.1
+
+### Patch Changes
+
+- 528bbf3: add request ip logs
+
+## 1.4.0
+
+### Minor Changes
+
+- 0554dc1: Added topic information in service details page
+
+### Patch Changes
+
+- 3321adb: Add X-Forwaded-For header on io-services-cms REST API call from B4F
+
 ## 1.3.0
 
 ### Minor Changes

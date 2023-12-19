@@ -28,7 +28,8 @@ const adaptServiceCommonData = (
   authorized_recipients: service.authorized_recipients
     ? ((service.authorized_recipients as unknown) as string[])
     : [],
-  max_allowed_payment_amount: service.max_allowed_payment_amount ?? 0
+  max_allowed_payment_amount: service.max_allowed_payment_amount ?? 0,
+  topic: service.metadata.topic
 });
 
 const adaptServiceMetadata = (metadata: ServiceMetadata) => ({

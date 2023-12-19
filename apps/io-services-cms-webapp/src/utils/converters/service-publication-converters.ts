@@ -1,5 +1,5 @@
 import { ServicePublication } from "@io-services-cms/models";
-import { CategoryEnum } from "../../generated/api/ServiceMetadata";
+import { CategoryEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   ServicePublicationStatusType,
@@ -27,6 +27,7 @@ export const itemToResponse = ({
   require_secure_channel: data.require_secure_channel,
   authorized_recipients: data.authorized_recipients,
   authorized_cidrs: data.authorized_cidrs,
+  max_allowed_payment_amount: data.max_allowed_payment_amount,
 });
 
 export const toServiceStatusType = (

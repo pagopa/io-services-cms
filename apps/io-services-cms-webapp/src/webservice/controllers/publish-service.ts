@@ -7,10 +7,7 @@ import {
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import {
-  AzureUserAttributesManageMiddleware,
-  IAzureUserAttributesManage,
-} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
+import { IAzureUserAttributesManage } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
 import {
   ClientIp,
   ClientIpMiddleware,
@@ -36,10 +33,12 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import { IConfig } from "../../config";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
+import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
@@ -123,7 +122,7 @@ export const makePublishServiceHandler =
     )();
 
 export const applyRequestMiddelwares =
-  (subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
+  (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: PublishServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
@@ -133,7 +132,10 @@ export const applyRequestMiddelwares =
       // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
-      AzureUserAttributesManageMiddleware(subscriptionCIDRsModel),
+      AzureUserAttributesManageMiddlewareWrapper(
+        subscriptionCIDRsModel,
+        config
+      ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString)
     );

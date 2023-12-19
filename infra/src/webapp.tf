@@ -94,6 +94,9 @@ locals {
 
     # External storage account for assets
     ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_key_vault_secret.asset_storage_connectionstring_secret.value
+
+    # Backoffice Configuration
+    BACKOFFICE_INTERNAL_SUBNET_CIDRS = join(",", module.backoffice_app_snet.address_prefixes)
   }
 }
 

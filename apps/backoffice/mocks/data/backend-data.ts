@@ -97,7 +97,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     ]),
     reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
-  topic: faker.helpers.arrayElement(aMockServiceTopicsArray),
+  topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined]),
   version: faker.number.int({ min: undefined, max: undefined }),
   last_update: faker.date.recent({ days: 30 }).toISOString(),
   name: faker.lorem.words({ min: 3, max: 5 }),

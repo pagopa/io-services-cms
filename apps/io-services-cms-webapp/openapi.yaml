@@ -56,6 +56,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
       requestBody:
         description: A service body payload
         content:
@@ -91,6 +92,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: limit
           in: query
           description: The number of services to return
@@ -135,6 +137,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
       responses:
         '200':
           description: Service topics fetched successfully
@@ -162,6 +165,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -196,6 +200,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -239,6 +244,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -270,6 +276,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -310,6 +317,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -345,6 +353,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -388,6 +397,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -427,6 +437,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -469,6 +480,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -501,6 +513,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -535,6 +548,7 @@ paths:
         - $ref: '#/components/parameters/UserGroups'
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
         - name: serviceId
           in: path
           description: ID of the service
@@ -580,6 +594,12 @@ components:
       required: true
       schema:
         type: string
+    XForwardedFor:
+      in: header
+      name: X-Forwarded-For
+      required: true
+      schema:
+        type: string
   schemas:
     Info:
       type: object
@@ -598,8 +618,12 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayload'
     ServiceData:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
+    ServiceBaseMetadata:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
     ServiceMetadata:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+    ServicePayloadMetadata:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
     ServiceLifecycleStatus:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
     ServiceLifecycleStatusType:

@@ -4,7 +4,10 @@ import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
-import { CategoryEnum, ScopeEnum } from "../../generated/api/ServiceMetadata";
+import {
+  CategoryEnum,
+  ScopeEnum,
+} from "../../generated/api/ServiceBaseMetadata";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 
 export const payloadToItem = (
@@ -52,6 +55,7 @@ export const itemToResponse = ({
   require_secure_channel: data.require_secure_channel,
   authorized_recipients: data.authorized_recipients,
   authorized_cidrs: data.authorized_cidrs,
+  max_allowed_payment_amount: data.max_allowed_payment_amount,
 });
 
 export const toServiceStatus = (

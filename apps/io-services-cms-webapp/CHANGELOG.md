@@ -1,5 +1,59 @@
 # io-services-cms-webapp
 
+## 1.24.6
+
+### Patch Changes
+
+- 4b1e07a: ADD ServiceBaseMetadata and ServicePayloadMetadata missing on webapp openapi.yaml
+- 7c2d4a3: Edit jira issue scope layout
+- Updated dependencies [5ed009b]
+  - @io-services-cms/models@1.16.2
+
+## 1.24.5
+
+### Patch Changes
+
+- Updated dependencies [e5eff28]
+  - @io-services-cms/models@1.16.1
+  - @io-services-cms/external-clients@1.1.1
+
+## 1.24.4
+
+### Patch Changes
+
+- 8584589: update vite/vitest to major version
+
+## 1.24.3
+
+### Patch Changes
+
+- 6324265: add express trust proxy config"
+
+## 1.24.2
+
+### Patch Changes
+
+- 528bbf3: add request ip logs
+- 4d9cf3c: Include Backoffice Subnet CIDRs
+
+## 1.24.1
+
+### Patch Changes
+
+- ee62761: Add log temporary log on AzureUserAttributesManageMiddlewareWrapper
+
+## 1.24.0
+
+### Minor Changes
+
+- 806ade4: Avoid Checking Authorized CIDRs in B4F Request forwarded to CMS
+
+### Patch Changes
+
+- 6a65cc6: add max_allowed_payment_amount field in api response
+- 0f56eab: reduce default logging level
+- 3321adb: Add X-Forwaded-For header on io-services-cms REST API call from B4F
+
 ## 1.23.0
 
 ### Minor Changes

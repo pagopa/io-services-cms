@@ -99,7 +99,7 @@ export const createWebServer = ({
         config,
         telemetryClient,
       }),
-      applyCreateServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyCreateServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -124,7 +124,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyGetServiceLifecycleRequestMiddelwares(subscriptionCIDRsModel)
+      applyGetServiceLifecycleRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -137,7 +137,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyEditServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyEditServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -149,7 +149,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyDeleteServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -161,7 +161,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyReviewServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyReviewServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -173,7 +173,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyPublishServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyPublishServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -185,7 +185,10 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyGetPublicationStatusServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyGetPublicationStatusServiceRequestMiddelwares(
+        config,
+        subscriptionCIDRsModel
+      )
     )
   );
 
@@ -197,7 +200,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyUnpublishServiceRequestMiddelwares(subscriptionCIDRsModel)
+      applyUnpublishServiceRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -208,7 +211,7 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyGetServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
+      applyGetServiceKeysRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
@@ -219,7 +222,10 @@ export const createWebServer = ({
         apimService,
         telemetryClient,
       }),
-      applyRegenerateServiceKeysRequestMiddelwares(subscriptionCIDRsModel)
+      applyRegenerateServiceKeysRequestMiddelwares(
+        config,
+        subscriptionCIDRsModel
+      )
     )
   );
 
@@ -231,13 +237,15 @@ export const createWebServer = ({
         blobService,
         telemetryClient,
       }),
-      applyUploadServiceLogoRequestMiddelwares(subscriptionCIDRsModel)
+      applyUploadServiceLogoRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
   // configure app
   const app = express();
   secureExpressApp(app);
+  // https://expressjs.com/en/guide/behind-proxies.html
+  app.set("trust proxy", true);
 
   // mount router to respond on base path
   app.use(`/${basePath}`, router);

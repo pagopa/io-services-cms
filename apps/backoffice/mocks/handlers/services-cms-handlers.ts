@@ -1,6 +1,6 @@
 import { getConfiguration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import {
   aMockServicePaginationLimitOffset,
   aMockServicePublication,
@@ -20,198 +20,380 @@ export const buildHandlers = () => {
     configuration.API_SERVICES_CMS_BASE_PATH;
 
   const handlers = [
-    rest.post(`${baseURL}/services`, (req, res, ctx) => {
+    http.post(`${baseURL}/services`, () => {
       const resultArray = [
-        [ctx.status(201), ctx.json(getCreateService201Response())],
-        [ctx.status(400), ctx.json(getIoServicesError(400))],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(JSON.stringify(getCreateService201Response()), {
+          status: 201
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(400)), {
+          status: 400
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services`, (_, res, ctx) => {
+    http.get(`${baseURL}/services`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServices200Response())],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(JSON.stringify(getGetServices200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/topics`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServiceTopics200Response())],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId`, (req, res, ctx) => {
-      const { serviceId } = req.params;
+    http.get(`${baseURL}/services/:serviceId`, ({ params }) => {
+      const { serviceId } = params;
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(getGetService200Response(serviceId as string))
-        ],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(404), ctx.json(getIoServicesError(404))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(
+          JSON.stringify(getGetService200Response(serviceId as string)),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId`, (req, res, ctx) => {
-      const { serviceId } = req.params;
+    http.put(`${baseURL}/services/:serviceId`, ({ params }) => {
+      const { serviceId } = params;
       const resultArray = [
-        [
-          ctx.status(200),
-          ctx.json(getUpdateService200Response(serviceId as string))
-        ],
-        [ctx.status(400), ctx.json(getIoServicesError(400))],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(404), ctx.json(getIoServicesError(404))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(
+          JSON.stringify(getUpdateService200Response(serviceId as string)),
+          {
+            status: 200
+          }
+        ),
+        new HttpResponse(JSON.stringify(getIoServicesError(400)), {
+          status: 400
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.delete(`${baseURL}/services/:serviceId`, (_, res, ctx) => {
+    http.delete(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(404), ctx.json(getIoServicesError(404))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/logo`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/logo`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(400), ctx.json(getIoServicesError(400))],
-        [ctx.status(401), ctx.json(getIoServicesError(401))],
-        [ctx.status(403), ctx.json(getIoServicesError(403))],
-        [ctx.status(404), ctx.json(getIoServicesError(404))],
-        [ctx.status(429), ctx.json(getIoServicesError(429))],
-        [ctx.status(500), ctx.json(getIoServicesError(500))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(400)), {
+          status: 400
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId/keys`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetServiceKeys200Response())],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/keys/:keyType`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/keys/:keyType`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getRegenerateServiceKey200Response())],
-        [ctx.status(400), ctx.json(getIoServicesError(400))],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(400)), {
+          status: 400
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.put(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
+    http.put(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(409), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(409)), {
+          status: 409
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.patch(`${baseURL}/services/:serviceId/review`, (_, res, ctx) => {
+    http.patch(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(400), ctx.json(getIoServicesError(400))],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(409), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(409)), {
+          status: 409
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.post(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.post(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(409), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(409)), {
+          status: 409
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     }),
-    rest.get(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.get(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(200), ctx.json(getGetPublishedService200Response())],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(404))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(JSON.stringify(getGetPublishedService200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[3]);
+      return resultArray[0];
     }),
-    rest.delete(`${baseURL}/services/:serviceId/release`, (_, res, ctx) => {
+    http.delete(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
-        [ctx.status(204)],
-        [ctx.status(401), ctx.json(getIoServicesError(400))],
-        [ctx.status(403), ctx.json(getIoServicesError(400))],
-        [ctx.status(404), ctx.json(getIoServicesError(400))],
-        [ctx.status(429), ctx.json(getIoServicesError(400))],
-        [ctx.status(500), ctx.json(getIoServicesError(400))]
+        new HttpResponse(null, {
+          status: 204
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
       ];
 
-      return res(...resultArray[0]);
+      return resultArray[0];
     })
   ];
   return configuration.IS_DEVELOPMENT
     ? [
         ...handlers,
-        rest.get(`${baseURL}/info`, (_, res, ctx) => {
+        http.get(`${baseURL}/info`, () => {
           const resultArray = [
-            [ctx.status(200), ctx.json(getInfo200Response())],
-            [ctx.status(500), ctx.json(getInfo500Response())]
+            new HttpResponse(JSON.stringify(getInfo200Response()), {
+              status: 200
+            }),
+            new HttpResponse(JSON.stringify(getInfo500Response()), {
+              status: 500
+            })
           ];
 
-          return res(...resultArray[0]);
+          return resultArray[0];
         })
       ]
     : handlers;
