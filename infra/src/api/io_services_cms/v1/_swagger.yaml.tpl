@@ -23,6 +23,8 @@ tags:
     description: Service Release API specification
   - name: service-authorization
     description: Service Authorization API specification
+  - name: service-topics
+    description: Services thematic taxonomy
 paths:
   /services:
     post:
@@ -98,7 +100,7 @@ paths:
     get:
       tags:
         - service-topics
-      summary: Retrieve all services
+      summary: Retrieve all services topic
       description: Retrieve all service topics
       operationId: getServiceTopics
       parameters:
@@ -638,7 +640,7 @@ components:
         topics:
           type: array
           items:
-            $ref: '#/ServiceTopic'
+            $ref: '#/components/schemas/ServiceTopic'
     ServiceTopic:
       type: object
       properties:
