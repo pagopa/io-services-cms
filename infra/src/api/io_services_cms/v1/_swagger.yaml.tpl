@@ -94,6 +94,34 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all services
+      description: Retrieve all service topics
+      operationId: getServiceTopics
+      parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTopicList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /services/{serviceId}:
     get:
       tags:
@@ -604,6 +632,27 @@ components:
       type: string
       description: A date-time field in ISO-8601 format and UTC timezone.
       example: '2023-01-22T00:00:00.000Z'
+    ServiceTopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/ServiceTopic'
+    ServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+      required:
+        - id
+        - name
   securitySchemes:
     apiKeyHeader:
       type: apiKey
