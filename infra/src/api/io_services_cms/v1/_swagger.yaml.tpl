@@ -94,6 +94,34 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all services
+      description: Retrieve all service topics
+      operationId: getServiceTopics
+      parameters:
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/XForwardedFor'
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTopicList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /services/{serviceId}:
     get:
       tags:
