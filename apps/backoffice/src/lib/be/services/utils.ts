@@ -2,12 +2,13 @@ import {
   ServiceListItem,
   VisibilityEnum
 } from "@/generated/api/ServiceListItem";
-import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
-import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import {
   CategoryEnum,
   ScopeEnum
 } from "@/generated/services-cms/ServiceBaseMetadata";
+import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
+import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import {
   NonEmptyString,
@@ -16,8 +17,6 @@ import {
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { Institution } from "../../../../types/next-auth";
-import { NextRequest } from "next/server";
-import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 
 export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
 export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
@@ -41,22 +40,25 @@ export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
   data,
   id,
   last_update
-}: ServiceLifecycle.ItemType): ServiceListItem => ({
-  id,
-  status: toServiceStatus(fsm),
-  last_update: last_update ?? new Date().toISOString(),
-  name: data.name,
-  description: data.description,
-  organization: data.organization,
-  metadata: {
-    ...data.metadata,
-    scope: toScopeType(data.metadata.scope),
-    category: toCategoryType(data.metadata.category),
-    topic: decodeServiceTopic(data.metadata.topic_id, topicsMap)
-  },
-  authorized_recipients: data.authorized_recipients,
-  authorized_cidrs: data.authorized_cidrs
-});
+}: ServiceLifecycle.ItemType): ServiceListItem => {
+  const { topic_id, ...otherMetadata } = data.metadata;
+  return {
+    id,
+    status: toServiceStatus(fsm),
+    last_update: last_update ?? new Date().toISOString(),
+    name: data.name,
+    description: data.description,
+    organization: data.organization,
+    metadata: {
+      ...otherMetadata,
+      scope: toScopeType(otherMetadata.scope),
+      category: toCategoryType(otherMetadata.category),
+      topic: decodeServiceTopic(topic_id, topicsMap)
+    },
+    authorized_recipients: data.authorized_recipients,
+    authorized_cidrs: data.authorized_cidrs
+  };
+};
 
 const toServiceStatus = (
   fsm: ServiceLifecycle.ItemType["fsm"]
