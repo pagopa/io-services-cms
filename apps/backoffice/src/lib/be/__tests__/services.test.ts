@@ -10,6 +10,7 @@ import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import { MigrationItem } from "../../../generated/api/MigrationItem";
 import { ServiceLifecycleStatusTypeEnum } from "../../../generated/services-cms/ServiceLifecycleStatusType";
+import { ServiceTopic } from "../../../generated/services-cms/ServiceTopic";
 import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
@@ -44,6 +45,7 @@ const mocks: {
   migrationItem: MigrationItem;
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
+  serviceTopicsMaps: Record<string, ServiceTopic>;
 } = vi.hoisted(() => ({
   statusOK: 200,
   statusNoContent: 204,
@@ -108,7 +110,8 @@ const mocks: {
     sourceSurname: "Surname",
     sourceEmail: "test@test.test",
     subscriptionCounter: 17
-  } as MigrationDelegate
+  } as MigrationDelegate,
+  serviceTopicsMaps: {}
 }));
 
 const { getIoServicesCmsClient } = vi.hoisted(() => ({
@@ -506,12 +509,16 @@ describe("Services TEST", () => {
       expect(result).toStrictEqual({
         value: [
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            ...toServiceListItem(mocks.serviceTopicsMaps)(
+              mocks.aBaseServiceLifecycle
+            ),
             id: aServiceinPublicationId,
             visibility: "published"
           },
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            ...toServiceListItem(mocks.serviceTopicsMaps)(
+              mocks.aBaseServiceLifecycle
+            ),
             id: aServiceNotInPublicationId,
             visibility: undefined
           }
@@ -693,7 +700,9 @@ describe("Services TEST", () => {
       expect(result).toStrictEqual({
         value: [
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
+            ...toServiceListItem(mocks.serviceTopicsMaps)(
+              mocks.aBaseServiceLifecycle
+            ),
             id: aServiceInLifecycleId,
             visibility: "published"
           },

@@ -17,6 +17,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { Institution } from "../../../../types/next-auth";
 import { NextRequest } from "next/server";
+import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 
 export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
 export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
@@ -35,7 +36,7 @@ export const reducePublicationServicesList = (
       }, {} as Record<string, VisibilityEnum>)
   );
 
-export const toServiceListItem = ({
+export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
   fsm,
   data,
   id,
@@ -50,7 +51,8 @@ export const toServiceListItem = ({
   metadata: {
     ...data.metadata,
     scope: toScopeType(data.metadata.scope),
-    category: toCategoryType(data.metadata.category)
+    category: toCategoryType(data.metadata.category),
+    topic: decodeServiceTopic(data.metadata.topic_id, topicsMap)
   },
   authorized_recipients: data.authorized_recipients,
   authorized_cidrs: data.authorized_cidrs
@@ -102,6 +104,16 @@ const toCategoryType = (
   }
 };
 
+const decodeServiceTopic = (
+  topic_id: number | undefined,
+  topicsMap: Record<string, ServiceTopic>
+): ServiceTopic | undefined => {
+  if (topic_id) {
+    return topicsMap[topic_id.toString()];
+  }
+  return undefined;
+};
+
 export const buildMissingService = (
   serviceId: string,
   institution: Institution,
@@ -124,3 +136,13 @@ export const buildMissingService = (
   authorized_recipients: [],
   authorized_cidrs: []
 });
+
+export const reduceServiceTopicsList = (
+  topics: ReadonlyArray<ServiceTopic> | undefined
+): Record<string, ServiceTopic> =>
+  topics
+    ? topics.reduce((acc, topic) => {
+        acc[topic.id] = topic;
+        return acc;
+      }, {} as Record<string, ServiceTopic>)
+    : ({} as Record<string, ServiceTopic>);
