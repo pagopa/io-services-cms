@@ -17,7 +17,11 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
-import { IoServicesCmsClient, callIoServicesCms } from "./cms";
+import {
+  IoServicesCmsClient,
+  callIoServicesCms,
+  getServiceTopics
+} from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
@@ -33,6 +37,7 @@ import {
   reducePublicationServicesList,
   toServiceListItem
 } from "./utils";
+import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 
 type PathParameters = {
   serviceId?: string;
@@ -205,6 +210,10 @@ export async function forwardIoServicesCmsRequest<
     );
   }
 }
+
+export const retrieveServiceTopics = async (): Promise<ServiceTopicList> => {
+  return await getServiceTopics();
+};
 
 /**
  * SUBSCRIPTIONS
