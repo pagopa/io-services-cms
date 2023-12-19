@@ -632,6 +632,27 @@ components:
       type: string
       description: A date-time field in ISO-8601 format and UTC timezone.
       example: '2023-01-22T00:00:00.000Z'
+    ServiceTopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/ServiceTopic'
+    ServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+      required:
+        - id
+        - name
   securitySchemes:
     apiKeyHeader:
       type: apiKey
