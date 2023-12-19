@@ -10,16 +10,12 @@ import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import { MigrationItem } from "../../../generated/api/MigrationItem";
 import { ServiceLifecycleStatusTypeEnum } from "../../../generated/services-cms/ServiceLifecycleStatusType";
+import { ServiceTopicList } from "../../../generated/services-cms/ServiceTopicList";
 import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
   retrieveServiceList
 } from "../services/business";
-import {
-  MISSING_SERVICE_DESCRIPTION,
-  MISSING_SERVICE_NAME,
-  toServiceListItem
-} from "../services/utils";
 
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
@@ -55,6 +51,7 @@ const mocks: {
       name: "aServiceName",
       description: "aServiceDescription",
       authorized_recipients: [],
+      authorized_cidrs: [],
       max_allowed_payment_amount: 123,
       metadata: {
         address: "via tal dei tali 123",
@@ -503,20 +500,157 @@ describe("Services TEST", () => {
         aServiceNotInPublicationId
       ]);
 
-      expect(result).toStrictEqual({
+      expect(result).toEqual({
         value: [
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: aServiceinPublicationId,
-            visibility: "published"
+            visibility: "published",
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: [],
+            authorized_cidrs: []
           },
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: aServiceNotInPublicationId,
-            visibility: undefined
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: [],
+            authorized_cidrs: []
           }
         ],
         pagination: { count: 2, limit: 10, offset: 0 }
+      });
+    });
+    // This test must me updated when getServiceTopics will be implemented in io-services-cms
+    it("should return a list of services with visibility enriched with topic", async () => {
+      const aServiceinPublicationId = "aServiceInPublicationId";
+
+      const bulkFetchLifecycleMock = vi.fn(() =>
+        TE.right([
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceinPublicationId,
+            data: {
+              ...mocks.aBaseServiceLifecycle.data,
+              metadata: {
+                ...mocks.aBaseServiceLifecycle.data.metadata,
+                topic_id: 1
+              }
+            }
+          })
+        ])
+      );
+      const bulkFetchPublicationMock = vi.fn(() =>
+        TE.right([
+          O.some({
+            id: aServiceinPublicationId,
+            name: "aServiceName",
+            fsm: {
+              state: "published"
+            }
+          })
+        ])
+      );
+
+      const getServiceListMock = vi.fn(() =>
+        TE.right({
+          value: [
+            {
+              name: aServiceinPublicationId
+            }
+          ],
+          count: 1
+        })
+      );
+
+      getServiceLifecycleCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchLifecycleMock
+      });
+      getServicePublicationCosmosStore.mockReturnValueOnce({
+        bulkFetch: bulkFetchPublicationMock
+      });
+
+      getApimRestClient.mockReturnValueOnce(
+        Promise.resolve({
+          getServiceList: getServiceListMock
+        })
+      );
+
+      const result = await retrieveServiceList(
+        mocks.anUserId,
+        mocks.anInstitution,
+        10,
+        0
+      );
+
+      expect(getServiceListMock).toHaveBeenCalledWith(
+        mocks.anUserId,
+        10,
+        0,
+        undefined
+      );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+        aServiceinPublicationId
+      ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+        aServiceinPublicationId
+      ]);
+
+      expect(result).toEqual({
+        value: [
+          {
+            id: aServiceinPublicationId,
+            visibility: "published",
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD",
+              topic: {
+                id: 1,
+                name: "Ambiente e animali"
+              }
+            },
+            authorized_recipients: [],
+            authorized_cidrs: []
+          }
+        ],
+        pagination: { count: 1, limit: 10, offset: 0 }
       });
     });
 
@@ -690,18 +824,34 @@ describe("Services TEST", () => {
         aServiceInLifecycleId
       ]);
 
-      expect(result).toStrictEqual({
+      expect(result).toEqual({
         value: [
           {
-            ...toServiceListItem(mocks.aBaseServiceLifecycle),
             id: aServiceInLifecycleId,
-            visibility: "published"
+            visibility: "published",
+            status: { value: "draft" },
+            last_update: "aServiceLastUpdate",
+            name: "aServiceName",
+            description: "aServiceDescription",
+            organization: {
+              name: "anOrganizationName",
+              fiscal_code: "12345678901"
+            },
+            metadata: {
+              address: "via tal dei tali 123",
+              email: "service@email.it",
+              pec: "service@pec.it",
+              scope: "LOCAL",
+              category: "STANDARD"
+            },
+            authorized_recipients: [],
+            authorized_cidrs: []
           },
           expect.objectContaining({
-            description: MISSING_SERVICE_DESCRIPTION,
+            description: "Descrizione non disponibile",
             id: aServiceNotInLifecycleId,
             last_update: aServiceNotInLifecycleCreateDate.toISOString(),
-            name: MISSING_SERVICE_NAME,
+            name: "Servizio non disponibile",
             organization: {
               fiscal_code: mocks.anInstitution.fiscalCode,
               name: mocks.anInstitution.name

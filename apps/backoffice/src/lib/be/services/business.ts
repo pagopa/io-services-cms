@@ -35,7 +35,8 @@ import {
 import {
   buildMissingService,
   reducePublicationServicesList,
-  toServiceListItem
+  toServiceListItem,
+  reduceServiceTopicsList
 } from "./utils";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 
@@ -64,8 +65,14 @@ export const retrieveServiceList = async (
   pipe(
     getServiceList(userId, limit, offset, serviceId),
     TE.bindTo("apimServices"),
+    TE.bind("serviceTopicsMap", ({ apimServices }) =>
+      pipe(
+        TE.tryCatch(getServiceTopics, E.toError),
+        TE.map(({ topics }) => reduceServiceTopicsList(topics))
+      )
+    ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
-    TE.bind("lifecycleServices", ({ apimServices }) =>
+    TE.bind("lifecycleServices", ({ apimServices, serviceTopicsMap }) =>
       pipe(
         apimServices.value
           ? apimServices.value.map(
@@ -73,7 +80,7 @@ export const retrieveServiceList = async (
             )
           : [],
         retrieveLifecycleServices,
-        TE.map(RA.map(toServiceListItem))
+        TE.map(RA.map(toServiceListItem(serviceTopicsMap)))
       )
     ),
     // get services from services-publication cosmos container
