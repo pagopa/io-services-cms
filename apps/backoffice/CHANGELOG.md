@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.5.0
+
+### Minor Changes
+
+- 42c38d0: Add frontend topic management on service create/update
+
 ## 1.4.6
 
 ### Patch Changes
