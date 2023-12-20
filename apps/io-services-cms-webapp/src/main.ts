@@ -39,7 +39,8 @@ import {
   cosmosdbInstance as legacyCosmosDbInstance,
 } from "./utils/cosmos-legacy";
 import { jiraProxy } from "./utils/jira-proxy";
-import { getDao } from "./utils/service-review-dao";
+import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
+import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
@@ -120,13 +121,14 @@ export const httpEntryPoint = pipe(
     subscriptionCIDRsModel,
     telemetryClient,
     blobService,
+    serviceTopicDao: getServiceTopicDao(config),
   },
   createWebServer,
   expressToAzureFunction
 );
 
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
-  getDao(config),
+  getServiceReviewDao(config),
   jiraProxy(jiraClient(config)),
   apimService,
   fsmLifecycleClient,
@@ -148,7 +150,7 @@ export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
-  getDao(config),
+  getServiceReviewDao(config),
   jiraProxy(jiraClient(config)),
   fsmLifecycleClient
 );
@@ -156,7 +158,7 @@ export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
 export const createRequestReviewLegacyEntryPoint =
   createRequestReviewLegacyHandler(
     fsmLifecycleClient,
-    getDao({
+    getServiceReviewDao({
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
@@ -165,7 +167,7 @@ export const createRequestReviewLegacyEntryPoint =
 
 export const serviceReviewLegacyCheckerEntryPoint =
   createReviewLegacyCheckerHandler(
-    getDao({
+    getServiceReviewDao({
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
