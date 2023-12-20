@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.5.1
+
+### Patch Changes
+
+- ea9b420: fix topic id null check
+
 ## 1.5.0
 
 ### Minor Changes
