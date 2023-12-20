@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.25.0
+
+### Minor Changes
+
+- 8415fb4: manage new service topic fields
+
 ## 1.24.6
 
 ### Patch Changes
