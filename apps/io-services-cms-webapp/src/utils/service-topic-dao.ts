@@ -31,6 +31,7 @@ const createExistsByIdSql = (
     .table(TOPIC_DB_TABLE)
     .select(knex.raw("1"))
     .where("id", id)
+    .andWhere("deleted", false)
     .toQuery();
 
 const existsById =
@@ -49,7 +50,9 @@ const createFindByIdSql = (
   knex
     .withSchema(TOPIC_DB_SCHEMA)
     .table(TOPIC_DB_TABLE)
+    .select("id", "name")
     .where("id", id)
+    .andWhere("deleted", false)
     .limit(1) // TODO: check useless
     .toQuery();
 
