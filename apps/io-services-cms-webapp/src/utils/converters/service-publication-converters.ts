@@ -54,7 +54,7 @@ const toServiceTopic =
     serviceId: ServicePublication.ItemType["id"],
     topicId: ServicePublication.ItemType["data"]["metadata"]["topic_id"]
   ): TE.TaskEither<Error, ServiceResponsePayload["metadata"]["topic"]> =>
-    topicId
+    topicId !== undefined && topicId !== null
       ? pipe(
           getServiceTopicDao(dbConfig),
           (dao) => dao.findById(topicId),

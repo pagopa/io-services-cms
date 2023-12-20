@@ -58,6 +58,7 @@
         "privacyCritical": "Campo obbligatorio per un servizio sensibile"
       }
     },
+    "noOptionsText": "Nessuna opzione",
     "testUrl": "Prova URL",
     "service": {
       "buttons": {
@@ -169,6 +170,11 @@
           "national": "Nazionale",
           "helperText": "Puoi modificare in qualsiasi momento le aree di competenza nella tua <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">Area riservata</a>.",
           "label": "Area di competenza",
+          "placeholder": ""
+        },
+        "topic": {
+          "helperText": "Qual è l'argomento del servizio?",
+          "label": "Argomento del servizio",
           "placeholder": ""
         }
       },

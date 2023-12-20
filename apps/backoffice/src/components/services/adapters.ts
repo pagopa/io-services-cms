@@ -47,7 +47,8 @@ const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
   support_url: metadata.support_url,
   category: metadata.category,
   custom_special_flow: metadata.custom_special_flow,
-  scope: metadata.scope
+  scope: metadata.scope,
+  topic: metadata.topic
 });
 
 export const fromServiceLifecycleToService = (
@@ -90,45 +91,43 @@ export const fromServiceCreateUpdatePayloadToApiServicePayload = (
   pipe(
     convertAssistanceChannelsArrayToObj(feService.metadata.assistanceChannels),
     buildBaseServicePayload(feService),
-    clearUndefinedEmptyProperties,
+    clearUndefinedNullEmptyProperties,
     removeAssistanceChannelsArray,
     ApiServicePayload.decode
   );
 
 /**
- * Convert `@/generated/api/ServicePayload` to _'frontend'_ service payload
- * @param apiService service _(as result api getService fetch)_
- * @param sessionUser `next-auth` session user
+ * Convert `@/generated/api/ServiceLifecycle` to _'frontend'_ service payload
+ * @param sl `ServiceLifecycle` _(as result of api getService fetch)_
  * @returns `ServiceCreateUpdatePayload`
  */
-export const fromApiServicePayloadToServiceCreateUpdatePayload = (
-  apiService: ApiServicePayload
+export const fromServiceLifecycleToServiceCreateUpdatePayload = (
+  sl: ServiceLifecycle
 ): ServiceCreateUpdatePayload => ({
-  name: apiService.name,
-  description: apiService.description,
-  require_secure_channel: apiService.require_secure_channel ?? false,
-  authorized_cidrs: apiService.authorized_cidrs
-    ? Array.from(apiService.authorized_cidrs.values())
+  name: sl.name,
+  description: sl.description,
+  require_secure_channel: sl.require_secure_channel ?? false,
+  authorized_cidrs: sl.authorized_cidrs
+    ? Array.from(sl.authorized_cidrs.values())
     : [],
-  authorized_recipients: apiService.authorized_recipients
-    ? Array.from(apiService.authorized_recipients.values())
+  authorized_recipients: sl.authorized_recipients
+    ? Array.from(sl.authorized_recipients.values())
     : [],
-  max_allowed_payment_amount: apiService.max_allowed_payment_amount ?? 0,
+  max_allowed_payment_amount: sl.max_allowed_payment_amount ?? 0,
   metadata: {
-    web_url: apiService.metadata.web_url ?? "",
-    app_ios: apiService.metadata.app_ios ?? "",
-    app_android: apiService.metadata.app_android ?? "",
-    tos_url: apiService.metadata.tos_url ?? "",
-    privacy_url: apiService.metadata.privacy_url ?? "",
-    address: apiService.metadata.address ?? "",
-    assistanceChannels: convertAssistanceChannelsObjToArray(
-      apiService.metadata
-    ),
-    cta: buildCtaObj(apiService.metadata.cta),
-    token_name: apiService.metadata.token_name ?? "",
-    category: apiService.metadata.category ?? "",
-    custom_special_flow: apiService.metadata.custom_special_flow ?? "",
-    scope: apiService.metadata.scope
+    web_url: sl.metadata.web_url ?? "",
+    app_ios: sl.metadata.app_ios ?? "",
+    app_android: sl.metadata.app_android ?? "",
+    tos_url: sl.metadata.tos_url ?? "",
+    privacy_url: sl.metadata.privacy_url ?? "",
+    address: sl.metadata.address ?? "",
+    assistanceChannels: convertAssistanceChannelsObjToArray(sl.metadata),
+    cta: buildCtaObj(sl.metadata.cta),
+    token_name: sl.metadata.token_name ?? "",
+    category: sl.metadata.category ?? "",
+    custom_special_flow: sl.metadata.custom_special_flow ?? "",
+    scope: sl.metadata.scope,
+    topic_id: sl.metadata.topic?.id
   }
 });
 
@@ -228,11 +227,11 @@ const getCtaUrlFromCtaString = (value: string) => {
  * or on future uses of such fields which may be undefined.
  * @param s service
  * @returns service without epmpty or undefined properties */
-const clearUndefinedEmptyProperties = (s: any): any => {
+const clearUndefinedNullEmptyProperties = (s: any): any => {
   if (_.isObject(s) && !_.isArray(s)) {
     return _.mapValues(
-      _.pickBy(s, val => !_.isUndefined(val) && val !== ""),
-      clearUndefinedEmptyProperties
+      _.pickBy(s, val => !_.isUndefined(val) && !_.isNull(val) && val !== ""),
+      clearUndefinedNullEmptyProperties
     );
   }
   return s;

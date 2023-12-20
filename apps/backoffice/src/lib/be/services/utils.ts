@@ -110,7 +110,7 @@ const decodeServiceTopic = (
   topic_id: number | undefined,
   topicsMap: Record<string, ServiceTopic>
 ): ServiceTopic | undefined => {
-  if (topic_id) {
+  if (topic_id !== undefined && topic_id !== null) {
     return topicsMap[topic_id.toString()];
   }
   return undefined;
