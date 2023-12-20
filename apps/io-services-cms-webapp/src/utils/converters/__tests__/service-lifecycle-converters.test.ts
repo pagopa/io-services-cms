@@ -1,6 +1,10 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { describe, expect, test } from "vitest";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+import { describe, expect, test, vi } from "vitest";
+import { TopicPostgreSqlConfig } from "../../../config";
 import { FiscalCode } from "../../../generated/api/FiscalCode";
 import { ServicePayload } from "../../../generated/api/ServicePayload";
 import {
@@ -9,12 +13,26 @@ import {
   toServiceStatus,
 } from "../service-lifecycle-converters";
 
+const { getServiceTopicDao } = vi.hoisted(() => ({
+  getServiceTopicDao: vi.fn(() => ({
+    findById: vi.fn((id: number) =>
+      TE.right(O.some({ id, name: "topic name" }))
+    ),
+  })),
+}));
+
+vi.mock("../../../utils/service-topic-dao", () => ({
+  getDao: getServiceTopicDao,
+}));
+
 const fsm: ServiceLifecycle.ItemType["fsm"] = {
   state: "rejected",
 };
 
 const anAutorizedFiscalCode = "BBBBBB99C88D555I";
 const aSandboxFiscalCode = "AAAAAA00A00A000A";
+
+const mockDbConfig = {} as unknown as TopicPostgreSqlConfig;
 
 describe("test service-lifecycle-converters", () => {
   test("test service-lifecycle-converters", () => {
@@ -70,7 +88,7 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.metadata.category).toBeDefined();
     expect(result.data.metadata.category).toBe("STANDARD");
   });
-  test("Converting an Item which lack of metadata.category the payload should contain the default one", () => {
+  test("Converting an Item which lack of metadata.category the payload should contain the default one", async () => {
     const anItem = {
       id: "anItemId" as NonEmptyString,
       data: {
@@ -88,11 +106,15 @@ describe("test service-lifecycle-converters", () => {
       fsm: { state: "approved" },
     } as unknown as ServiceLifecycle.ItemType;
 
-    const result = itemToResponse(anItem);
+    const result = await itemToResponse(mockDbConfig)(anItem)();
 
-    expect(result.metadata).toBeDefined();
-    expect(result.metadata.category).toBeDefined();
-    expect(result.metadata.category).toBe("STANDARD");
+    if (E.isLeft(result)) {
+      throw new Error("Should be right");
+    } else {
+      expect(result.right.metadata).toBeDefined();
+      expect(result.right.metadata.category).toBeDefined();
+      expect(result.right.metadata.category).toBe("STANDARD");
+    }
   });
 
   test("Converting a Payload have metadata.custom_special_flow the Item should mantain it", () => {
@@ -120,7 +142,7 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.metadata.custom_special_flow).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBe(aCustomSpecialFlow);
   });
-  test("Converting an Item which have metadata.custom_special_flow the payload should mantain it", () => {
+  test("Converting an Item which have metadata.custom_special_flow the payload should mantain it", async () => {
     const aCustomSpecialFlow = "aCustomSpecialFlow";
 
     const anItem = {
@@ -141,10 +163,16 @@ describe("test service-lifecycle-converters", () => {
       fsm: { state: "approved" },
     } as unknown as ServiceLifecycle.ItemType;
 
-    const result = itemToResponse(anItem);
+    const result = await itemToResponse(mockDbConfig)(anItem)();
 
-    expect(result.metadata).toBeDefined();
-    expect(result.metadata.custom_special_flow).toBeDefined();
-    expect(result.metadata.custom_special_flow).toBe(aCustomSpecialFlow);
+    if (E.isLeft(result)) {
+      throw new Error("Should be right");
+    } else {
+      expect(result.right.metadata).toBeDefined();
+      expect(result.right.metadata.custom_special_flow).toBeDefined();
+      expect(result.right.metadata.custom_special_flow).toBe(
+        aCustomSpecialFlow
+      );
+    }
   });
 });

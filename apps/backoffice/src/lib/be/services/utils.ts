@@ -2,12 +2,13 @@ import {
   ServiceListItem,
   VisibilityEnum
 } from "@/generated/api/ServiceListItem";
-import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
-import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import {
   CategoryEnum,
   ScopeEnum
 } from "@/generated/services-cms/ServiceBaseMetadata";
+import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
+import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import {
   NonEmptyString,
@@ -16,7 +17,6 @@ import {
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 import { Institution } from "../../../../types/next-auth";
-import { NextRequest } from "next/server";
 
 export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
 export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
@@ -35,26 +35,30 @@ export const reducePublicationServicesList = (
       }, {} as Record<string, VisibilityEnum>)
   );
 
-export const toServiceListItem = ({
+export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
   fsm,
   data,
   id,
   last_update
-}: ServiceLifecycle.ItemType): ServiceListItem => ({
-  id,
-  status: toServiceStatus(fsm),
-  last_update: last_update ?? new Date().toISOString(),
-  name: data.name,
-  description: data.description,
-  organization: data.organization,
-  metadata: {
-    ...data.metadata,
-    scope: toScopeType(data.metadata.scope),
-    category: toCategoryType(data.metadata.category)
-  },
-  authorized_recipients: data.authorized_recipients,
-  authorized_cidrs: data.authorized_cidrs
-});
+}: ServiceLifecycle.ItemType): ServiceListItem => {
+  const { topic_id, ...otherMetadata } = data.metadata;
+  return {
+    id,
+    status: toServiceStatus(fsm),
+    last_update: last_update ?? new Date().toISOString(),
+    name: data.name,
+    description: data.description,
+    organization: data.organization,
+    metadata: {
+      ...otherMetadata,
+      scope: toScopeType(otherMetadata.scope),
+      category: toCategoryType(otherMetadata.category),
+      topic: decodeServiceTopic(topic_id, topicsMap)
+    },
+    authorized_recipients: data.authorized_recipients,
+    authorized_cidrs: data.authorized_cidrs
+  };
+};
 
 const toServiceStatus = (
   fsm: ServiceLifecycle.ItemType["fsm"]
@@ -102,6 +106,16 @@ const toCategoryType = (
   }
 };
 
+const decodeServiceTopic = (
+  topic_id: number | undefined,
+  topicsMap: Record<string, ServiceTopic>
+): ServiceTopic | undefined => {
+  if (topic_id) {
+    return topicsMap[topic_id.toString()];
+  }
+  return undefined;
+};
+
 export const buildMissingService = (
   serviceId: string,
   institution: Institution,
@@ -124,3 +138,13 @@ export const buildMissingService = (
   authorized_recipients: [],
   authorized_cidrs: []
 });
+
+export const reduceServiceTopicsList = (
+  topics: ReadonlyArray<ServiceTopic> | undefined
+): Record<string, ServiceTopic> =>
+  topics
+    ? topics.reduce((acc, topic) => {
+        acc[topic.id] = topic;
+        return acc;
+      }, {} as Record<string, ServiceTopic>)
+    : ({} as Record<string, ServiceTopic>);

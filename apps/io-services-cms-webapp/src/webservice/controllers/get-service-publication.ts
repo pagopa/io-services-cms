@@ -34,7 +34,6 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
@@ -56,6 +55,7 @@ type Dependencies = {
 
   apimService: ApimUtils.ApimService;
   telemetryClient: ReturnType<typeof initAppInsights>;
+  config: IConfig;
 };
 
 type HandlerResponseTypes =
@@ -75,6 +75,7 @@ export const makeGetServiceHandler =
     store,
     apimService,
     telemetryClient,
+    config,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
@@ -90,21 +91,11 @@ export const makeGetServiceHandler =
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
           TE.chainW(
             flow(
-              O.foldW(
-                () =>
-                  pipe(
-                    ResponseErrorNotFound(
-                      "Not found",
-                      `${serviceId} not found`
-                    ),
-                    TE.left
-                  ),
-                flow(
-                  itemToResponse,
-                  ResponseSuccessJson<ServiceResponsePayload>,
-                  TE.right
-                )
-              )
+              TE.fromOption(() =>
+                ResponseErrorNotFound("Not found", `${serviceId} not found`)
+              ),
+              TE.chainW(itemToResponse(config)),
+              TE.map(ResponseSuccessJson<ServiceResponsePayload>)
             )
           )
         )

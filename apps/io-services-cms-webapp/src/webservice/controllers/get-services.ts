@@ -33,6 +33,7 @@ import {
 } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
+  IResponseErrorInternal,
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson,
@@ -40,6 +41,7 @@ import {
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -125,28 +127,38 @@ const buildServicePagination = (
   },
 });
 
-const getServices = (
-  fsmLifecycleClient: ServiceLifecycle.FsmClient,
-  subscriptions: ReadonlyArray<SubscriptionContract>
-) =>
-  pipe(
-    fsmLifecycleClient
-      .getStore()
-      .bulkFetch(
-        subscriptions.map((subscription) => subscription.name as NonEmptyString)
-      ),
-    TE.map((maybeServiceList) =>
-      // eslint-disable-next-line sonarjs/no-all-duplicated-branches
-      maybeServiceList.map(
-        flow(
-          O.fold(
-            () => ({} as ServiceResponsePayload),
-            (service) => itemToResponse(service) as ServiceResponsePayload
+const getServices =
+  (config: IConfig) =>
+  (
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    subscriptions: ReadonlyArray<SubscriptionContract>
+  ): TE.TaskEither<
+    Error | IResponseErrorInternal,
+    ReadonlyArray<ServiceResponsePayload>
+  > =>
+    pipe(
+      fsmLifecycleClient
+        .getStore()
+        .bulkFetch(
+          subscriptions.map(
+            (subscription) => subscription.name as NonEmptyString
           )
+        ),
+      TE.map(
+        flow(
+          RA.map(
+            flow(
+              O.fold(
+                () => TE.right({} as ServiceResponsePayload),
+                (service) => itemToResponse(config)(service)
+              )
+            )
+          ),
+          RA.sequence(TE.ApplicativeSeq) // TODO: is it better to use TE.ApplicativeSeq?!?
         )
-      )
-    )
-  );
+      ),
+      TE.flattenW
+    );
 
 const getLimit = (limit: O.Option<number>, defaultValue: number) =>
   pipe(
@@ -205,7 +217,7 @@ export const makeGetServicesHandler =
       ),
       TE.chain((subscriptions) =>
         pipe(
-          getServices(fsmLifecycleClient, subscriptions),
+          getServices(config)(fsmLifecycleClient, subscriptions),
           TE.map((services) =>
             buildServiceSubscriptionPairs(subscriptions, services)
           )
@@ -220,7 +232,9 @@ export const makeGetServicesHandler =
           )
         )
       ),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.mapLeft((err) =>
+        "kind" in err ? err : ResponseErrorInternal(err.message)
+      ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServices, {
           userSubscriptionId: auth.subscriptionId,

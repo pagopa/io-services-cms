@@ -5,7 +5,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool, QueryResult } from "pg";
-import { PostgreSqlConfig } from "../config";
+import { ReviewerPostgreSqlConfig } from "../config";
 import {
   createCursor,
   getPool,
@@ -38,7 +38,7 @@ export const ServiceReviewRowDataTable = t.intersection([
 ]);
 
 const createInsertSql = (
-  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
+  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: ReviewerPostgreSqlConfig,
   data: ServiceReviewRowDataTable
 ): string =>
   knex
@@ -48,7 +48,7 @@ const createInsertSql = (
     .toQuery();
 
 const insert =
-  (pool: Pool, dbConfig: PostgreSqlConfig) =>
+  (pool: Pool, dbConfig: ReviewerPostgreSqlConfig) =>
   (
     data: ServiceReviewRowDataTable
   ): TE.TaskEither<DatabaseError, QueryResult> =>
@@ -57,7 +57,7 @@ const insert =
 const createReadSql = ({
   REVIEWER_DB_SCHEMA,
   REVIEWER_DB_TABLE,
-}: PostgreSqlConfig): string =>
+}: ReviewerPostgreSqlConfig): string =>
   knex
     .withSchema(REVIEWER_DB_SCHEMA)
     .table(REVIEWER_DB_TABLE)
@@ -65,7 +65,7 @@ const createReadSql = ({
     .toQuery();
 
 const createUpdateStatusSql = (
-  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: PostgreSqlConfig,
+  { REVIEWER_DB_SCHEMA, REVIEWER_DB_TABLE }: ReviewerPostgreSqlConfig,
   service: ServiceReviewRowDataTable
 ): string =>
   knex
@@ -79,14 +79,14 @@ const createUpdateStatusSql = (
     .toQuery();
 
 const updateStatus =
-  (pool: Pool, dbConfig: PostgreSqlConfig) =>
+  (pool: Pool, dbConfig: ReviewerPostgreSqlConfig) =>
   (
     data: ServiceReviewRowDataTable
   ): TE.TaskEither<DatabaseError, QueryResult> =>
     pipe(createUpdateStatusSql(dbConfig, data), queryDataTable(pool));
 
 const executeOnPending =
-  (pool: Pool, dbConfig: PostgreSqlConfig) =>
+  (pool: Pool, dbConfig: ReviewerPostgreSqlConfig) =>
   (
     fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
   ): TE.TaskEither<Error, void> =>
@@ -117,7 +117,7 @@ const executeOnPending =
       }, E.toError)
     );
 
-export const getDao = (dbConfig: PostgreSqlConfig) =>
+export const getDao = (dbConfig: ReviewerPostgreSqlConfig) =>
   pipe(getPool(dbConfig), (pool) => ({
     insert: insert(pool, dbConfig),
     executeOnPending: executeOnPending(pool, dbConfig),

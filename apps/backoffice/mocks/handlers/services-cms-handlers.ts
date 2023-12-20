@@ -9,6 +9,7 @@ import {
   getMockServiceLifecycle
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
+import { getGetServiceTopics200Response } from "./backend-handlers";
 
 faker.seed(1);
 
@@ -53,6 +54,30 @@ export const buildHandlers = () => {
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
           status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(429)), {
+          status: 429
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(500)), {
+          status: 500
+        })
+      ];
+
+      return resultArray[0];
+    }),
+    http.get(`${baseURL}/services/topics`, () => {
+      const resultArray = [
+        new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
+          status: 200
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(401)), {
+          status: 401
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(403)), {
+          status: 403
+        }),
+        new HttpResponse(JSON.stringify(getIoServicesError(404)), {
+          status: 404
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
           status: 429

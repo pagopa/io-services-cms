@@ -45,6 +45,7 @@ import {
   payloadToItem,
 } from "../../utils/converters/service-lifecycle-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { validateServiceTopicRequest } from "../../utils/service-topic-validator";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "EditServiceHandler";
@@ -84,6 +85,13 @@ export const makeEditServiceHandler =
         auth.subscriptionId,
         auth.userId
       ),
+      TE.chainW((_) =>
+        pipe(
+          servicePayload.metadata.topic_id,
+          validateServiceTopicRequest(config),
+          TE.map(() => _)
+        )
+      ),
       TE.chainW((sId) =>
         pipe(
           fsmLifecycleClient.edit(sId, {
@@ -93,9 +101,9 @@ export const makeEditServiceHandler =
               config.SANDBOX_FISCAL_CODE
             ),
           }),
-          TE.map(itemToResponse),
-          TE.map(ResponseSuccessJson),
-          TE.mapLeft(fsmToApiError)
+          TE.mapLeft(fsmToApiError),
+          TE.chainW(itemToResponse(config)),
+          TE.map(ResponseSuccessJson)
         )
       ),
       TE.map(

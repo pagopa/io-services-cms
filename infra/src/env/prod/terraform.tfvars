@@ -61,9 +61,11 @@ azure_apim_product_id     = "io-services-api"
 
 ## PostgreSQL
 reviewer_db_name   = "reviewer"
-reviewer_db_schema = "reviewer"
 reviewer_db_user   = "reviewerusr"
+reviewer_db_schema = "reviewer"
 reviewer_db_table  = "service_review"
+topic_db_schema    = "taxonomy"
+topic_db_table     = "topic"
 
 # Legacy data
 legacy_cosmosdb_resource_group = "io-p-rg-internal"

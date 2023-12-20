@@ -1,4 +1,11 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
+import {
+  IResponseErrorInternal,
+  ResponseErrorInternal,
+} from "@pagopa/ts-commons/lib/responses";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+import { TopicPostgreSqlConfig } from "../../config";
 import { Cidr } from "../../generated/api/Cidr";
 import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -9,6 +16,7 @@ import {
   ScopeEnum,
 } from "../../generated/api/ServiceBaseMetadata";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { getDao as getServiceTopicDao } from "../service-topic-dao";
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],
@@ -35,28 +43,59 @@ export const payloadToItem = (
   },
 });
 
-export const itemToResponse = ({
-  fsm,
-  data,
-  id,
-  last_update,
-}: ServiceLifecycle.ItemType): ServiceResponsePayload => ({
-  id,
-  status: toServiceStatus(fsm),
-  last_update: last_update ?? new Date().getTime().toString(),
-  name: data.name,
-  description: data.description,
-  organization: data.organization,
-  metadata: {
-    ...data.metadata,
-    scope: toScopeType(data.metadata.scope),
-    category: toCategoryType(data.metadata.category),
-  },
-  require_secure_channel: data.require_secure_channel,
-  authorized_recipients: data.authorized_recipients,
-  authorized_cidrs: data.authorized_cidrs,
-  max_allowed_payment_amount: data.max_allowed_payment_amount,
-});
+export const itemToResponse =
+  (dbConfig: TopicPostgreSqlConfig) =>
+  ({
+    fsm,
+    data: {
+      metadata: { scope, category, topic_id, ...metadata },
+      ...data
+    },
+    id,
+    last_update,
+  }: ServiceLifecycle.ItemType): TE.TaskEither<
+    IResponseErrorInternal,
+    ServiceResponsePayload
+  > =>
+    pipe(
+      toServiceTopic(dbConfig)(id, topic_id),
+      TE.bimap(
+        (err) => ResponseErrorInternal(err.message),
+        (topic) => ({
+          id,
+          status: toServiceStatus(fsm),
+          last_update: last_update ?? new Date().getTime().toString(),
+          ...data,
+          metadata: {
+            ...metadata,
+            scope: toScopeType(scope),
+            category: toCategoryType(category),
+            topic,
+          },
+        })
+      )
+    );
+
+const toServiceTopic =
+  (dbConfig: TopicPostgreSqlConfig) =>
+  (
+    serviceId: ServiceLifecycle.ItemType["id"],
+    topicId: ServiceLifecycle.ItemType["data"]["metadata"]["topic_id"]
+  ): TE.TaskEither<Error, ServiceResponsePayload["metadata"]["topic"]> =>
+    topicId
+      ? pipe(
+          getServiceTopicDao(dbConfig),
+          (dao) => dao.findById(topicId),
+          TE.chain(
+            TE.fromOption(
+              () =>
+                new Error(
+                  `service (${serviceId}) has an invalid topic_id (${topicId})` // TODO: fix error message
+                )
+            )
+          )
+        )
+      : TE.right(undefined);
 
 export const toServiceStatus = (
   fsm: ServiceLifecycle.ItemType["fsm"]

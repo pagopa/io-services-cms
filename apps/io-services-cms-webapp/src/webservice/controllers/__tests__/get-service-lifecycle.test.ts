@@ -16,12 +16,26 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getLifecycleItemToResponse } from "../../../utils/converters/service-lifecycle-converters";
 import { createWebServer } from "../../index";
+
+const { getServiceTopicDao } = vi.hoisted(() => ({
+  getServiceTopicDao: vi.fn(() => ({
+    findById: vi.fn((id: number) =>
+      TE.right(O.some({ id, name: "topic name" }))
+    ),
+  })),
+}));
+
+vi.mock("../../../utils/service-topic-dao", () => ({
+  getDao: getServiceTopicDao,
+}));
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -112,7 +126,7 @@ describe("getServiceLifecycle", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
   });
 
   setAppContext(app, mockContext);
@@ -130,6 +144,7 @@ describe("getServiceLifecycle", () => {
         email: "service@email.it",
         pec: "service@pec.it",
         scope: "LOCAL",
+        topic_id: 1,
       },
       organization: {
         name: "anOrganizationName",
@@ -154,7 +169,7 @@ describe("getServiceLifecycle", () => {
 
   const asServiceLifecycleWithStatus = {
     ...aServiceLifecycle,
-    fsm: { state: "published" },
+    fsm: { state: "approved" },
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should retrieve a service", async () => {
@@ -168,8 +183,11 @@ describe("getServiceLifecycle", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(JSON.stringify(response.body)).toBe(
-      JSON.stringify(getLifecycleItemToResponse(asServiceLifecycleWithStatus))
+    expect(response.body).toStrictEqual(
+      await pipe(
+        getLifecycleItemToResponse(mockConfig)(asServiceLifecycleWithStatus),
+        TE.toUnion
+      )()
     );
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);

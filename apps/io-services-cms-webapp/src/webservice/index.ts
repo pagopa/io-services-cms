@@ -123,6 +123,7 @@ export const createWebServer = ({
         store: fsmLifecycleClient.getStore(),
         apimService,
         telemetryClient,
+        config,
       }),
       applyGetServiceLifecycleRequestMiddelwares(config, subscriptionCIDRsModel)
     )
@@ -184,6 +185,7 @@ export const createWebServer = ({
         store: fsmPublicationClient.getStore(),
         apimService,
         telemetryClient,
+        config,
       }),
       applyGetPublicationStatusServiceRequestMiddelwares(
         config,

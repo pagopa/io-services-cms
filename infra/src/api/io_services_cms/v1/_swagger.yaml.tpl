@@ -23,6 +23,8 @@ tags:
     description: Service Release API specification
   - name: service-authorization
     description: Service Authorization API specification
+  - name: service-topics
+    description: Services thematic taxonomy
 paths:
   /services:
     post:
@@ -86,6 +88,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServicePagination'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all services topic
+      description: Retrieve all service topics
+      operationId: getServiceTopics
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceTopicList'
         '401':
           description: Unauthorized
         '403':
@@ -604,6 +628,27 @@ components:
       type: string
       description: A date-time field in ISO-8601 format and UTC timezone.
       example: '2023-01-22T00:00:00.000Z'
+    ServiceTopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceTopic'
+    ServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+      required:
+        - id
+        - name
   securitySchemes:
     apiKeyHeader:
       type: apiKey

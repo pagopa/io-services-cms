@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.4.6
+
+### Patch Changes
+
+- b8b34b3: Add topics on sevices-cms-handlers msw mock
+- b1e6dec: ADD topic Enrichment on Service List Route Handler
+- 76b20a7: Add Retrieve Service topics Route Handler in Backoffice B4F
+
 ## 1.4.5
 
 ### Patch Changes
