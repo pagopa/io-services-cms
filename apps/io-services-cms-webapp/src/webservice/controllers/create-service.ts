@@ -54,6 +54,7 @@ import {
   ResponseJsonWithStatus,
 } from "../../utils/custom-response";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
+import { validateServiceTopicRequest } from "../../utils/service-topic-validator";
 
 const logPrefix = "CreateServiceHandler";
 
@@ -172,16 +173,18 @@ export const makeCreateServiceHandler =
           config.SANDBOX_FISCAL_CODE
         ),
       }),
-      TE.map(itemToResponse),
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.chain(itemToResponse(config)),
       TE.map((result) =>
         ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201)
-      ),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message))
+      )
     );
 
     return pipe(
-      createSubscriptionStep,
-      TE.chain((_) => createServiceStep),
+      servicePayload.metadata.topic_id,
+      validateServiceTopicRequest(config),
+      TE.chainW(() => createSubscriptionStep),
+      TE.chainW((_) => createServiceStep),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
           userSubscriptionId: auth.subscriptionId,

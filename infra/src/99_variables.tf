@@ -206,19 +206,31 @@ variable "reviewer_db_name" {
   default     = null
 }
 
-variable "reviewer_db_schema" {
-  type        = string
-  description = ""
-  default     = null
-}
-
 variable "reviewer_db_user" {
   type        = string
   description = ""
   default     = null
 }
 
+variable "reviewer_db_schema" {
+  type        = string
+  description = ""
+  default     = null
+}
+
 variable "reviewer_db_table" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "topic_db_schema" {
+  type        = string
+  description = ""
+  default     = null
+}
+
+variable "topic_db_table" {
   type        = string
   description = ""
   default     = null

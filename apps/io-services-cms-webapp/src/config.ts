@@ -68,8 +68,6 @@ export const PostgreSqlConfig = t.type({
   REVIEWER_DB_NAME: NonEmptyString,
   REVIEWER_DB_PASSWORD: NonEmptyString,
   REVIEWER_DB_PORT: NumberFromString,
-  REVIEWER_DB_SCHEMA: NonEmptyString,
-  REVIEWER_DB_TABLE: NonEmptyString,
   REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(
     IntegerFromString,
@@ -80,6 +78,26 @@ export const PostgreSqlConfig = t.type({
     "reviewer" as NonEmptyString
   ),
 });
+
+export type ReviewerPostgreSqlConfig = t.TypeOf<
+  typeof ReviewerPostgreSqlConfig
+>;
+export const ReviewerPostgreSqlConfig = t.intersection([
+  PostgreSqlConfig,
+  t.type({
+    REVIEWER_DB_SCHEMA: NonEmptyString,
+    REVIEWER_DB_TABLE: NonEmptyString,
+  }),
+]);
+
+export type TopicPostgreSqlConfig = t.TypeOf<typeof TopicPostgreSqlConfig>;
+export const TopicPostgreSqlConfig = t.intersection([
+  PostgreSqlConfig,
+  t.type({
+    TOPIC_DB_SCHEMA: NonEmptyString,
+    TOPIC_DB_TABLE: NonEmptyString,
+  }),
+]);
 
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
 export const CosmosConfig = t.type({
@@ -202,7 +220,7 @@ export const IConfig = t.intersection([
     t.type({ isProduction: t.boolean }),
     InternalStorageAccount,
     JiraConfig,
-    PostgreSqlConfig,
+    ReviewerPostgreSqlConfig,
     ServicePayloadConfig,
   ]),
   t.intersection([
@@ -222,6 +240,7 @@ export const IConfig = t.intersection([
   t.intersection([
     ExternalStorageAccountConfiguration,
     BackofficeInternalSubnetCIDRs,
+    TopicPostgreSqlConfig,
   ]),
 ]);
 
