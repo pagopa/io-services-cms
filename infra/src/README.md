@@ -145,6 +145,8 @@
 | <a name="input_reviewer_db_user"></a> [reviewer\_db\_user](#input\_reviewer\_db\_user) | n/a | `string` | `null` | no |
 | <a name="input_subnets_cidrs"></a> [subnets\_cidrs](#input\_subnets\_cidrs) | The CIDR address prefixes of the subnets | <pre>object({<br>    api        = list(string)<br>    postgres   = list(string)<br>    backoffice = list(string)<br>  })</pre> | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
+| <a name="input_topic_db_schema"></a> [topic\_db\_schema](#input\_topic\_db\_schema) | n/a | `string` | `null` | no |
+| <a name="input_topic_db_table"></a> [topic\_db\_table](#input\_topic\_db\_table) | n/a | `string` | `null` | no |
 | <a name="input_userid_automatic_service_approval_inclusion_list"></a> [userid\_automatic\_service\_approval\_inclusion\_list](#input\_userid\_automatic\_service\_approval\_inclusion\_list) | User Ids allowed to automatic service approval | `string` | n/a | yes |
 | <a name="input_userid_cms_to_legacy_sync_inclusion_list"></a> [userid\_cms\_to\_legacy\_sync\_inclusion\_list](#input\_userid\_cms\_to\_legacy\_sync\_inclusion\_list) | User Ids to include in the sync from CMS to legacy | `string` | n/a | yes |
 | <a name="input_userid_legacy_to_cms_sync_inclusion_list"></a> [userid\_legacy\_to\_cms\_sync\_inclusion\_list](#input\_userid\_legacy\_to\_cms\_sync\_inclusion\_list) | User Ids to include in the sync from legacy to CMS | `string` | n/a | yes |

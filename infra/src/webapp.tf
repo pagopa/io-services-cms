@@ -60,6 +60,8 @@ locals {
     REVIEWER_DB_SCHEMA   = var.reviewer_db_schema
     REVIEWER_DB_TABLE    = var.reviewer_db_table
     REVIEWER_DB_USER     = var.reviewer_db_user
+    TOPIC_DB_SCHEMA      = var.topic_db_schema
+    TOPIC_DB_TABLE       = var.topic_db_table
 
     # Legacy source data
     LEGACY_COSMOSDB_CONNECTIONSTRING                = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
