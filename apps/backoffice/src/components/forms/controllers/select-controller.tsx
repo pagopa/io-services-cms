@@ -31,6 +31,7 @@ export function SelectController({
   const { t } = useTranslation();
   const { register, control } = useFormContext();
 
+  if (items.length === 0) return; // avoid mui out-of-range error
   return (
     <Controller
       name={name}

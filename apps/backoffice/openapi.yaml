@@ -953,19 +953,19 @@ components:
           maximum: 9999999999
           default: 0
         metadata:
-          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
-        topic_id:
-          type: number
-          description: The topic id
-          example: 3
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
       required:
         - name
         - description
         - metadata
     ServiceData:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
+    ServiceBaseMetadata:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
     ServiceMetadata:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+    ServicePayloadMetadata:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
     ServiceLifecycleStatus:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
     ServiceLifecycleStatusType:

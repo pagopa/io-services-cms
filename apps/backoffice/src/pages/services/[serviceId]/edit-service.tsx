@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/headers";
 import { buildSnackbarItem } from "@/components/notification";
 import {
-  fromApiServicePayloadToServiceCreateUpdatePayload,
+  fromServiceLifecycleToServiceCreateUpdatePayload,
   fromServiceCreateUpdatePayloadToApiServicePayload
 } from "@/components/services";
 import { ServiceCreateUpdate } from "@/components/services/service-create-update";
@@ -11,7 +11,6 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -25,7 +24,6 @@ export default function EditService() {
   const { t } = useTranslation();
   const router = useRouter();
   const serviceId = router.query.serviceId as string;
-  const { data: session } = useSession();
   const { enqueueSnackbar } = useSnackbar();
   const { data: serviceData, fetchData: serviceFetchData } = useFetch<
     ServiceLifecycle
@@ -72,7 +70,7 @@ export default function EditService() {
   useEffect(() => {
     if (serviceData)
       setServiceCreateUpdatePayload(
-        fromApiServicePayloadToServiceCreateUpdatePayload(serviceData)
+        fromServiceLifecycleToServiceCreateUpdatePayload(serviceData)
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceData]);

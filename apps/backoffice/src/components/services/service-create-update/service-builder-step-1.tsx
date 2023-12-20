@@ -1,9 +1,11 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import {
+  AutocompleteController,
   SelectController,
   TextFieldController
 } from "@/components/forms/controllers";
-import { ScopeEnum } from "@/generated/api/ServiceMetadata";
+import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
+import { ServiceTopic } from "@/generated/api/ServiceTopic";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { Button, Grid } from "@mui/material";
@@ -35,8 +37,12 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     })
   });
 
+export type ServiceBuilderStep1Props = {
+  topics?: ServiceTopic[];
+};
+
 /** First step of Service create/update process */
-export const ServiceBuilderStep1 = () => {
+export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
@@ -46,6 +52,9 @@ export const ServiceBuilderStep1 = () => {
 
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [topicList, setTopicList] = useState<{ label: string; id: number }[]>(
+    []
+  );
 
   useEffect(() => {
     NonEmptyString.is(watchedName) && NonEmptyString.is(watchedDescription)
@@ -53,6 +62,13 @@ export const ServiceBuilderStep1 = () => {
       : setIsPreviewEnabled(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedName, watchedDescription]);
+
+  useEffect(() => {
+    if (topics) {
+      setTopicList(topics.map(item => ({ label: item.name, id: item.id })));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topics]);
 
   return (
     <>
@@ -109,7 +125,7 @@ export const ServiceBuilderStep1 = () => {
         title={t("forms.service.attributes")}
         icon={<PaletteIcon />}
       >
-        <Grid container spacing={2}>
+        <Grid container columnSpacing={2}>
           <Grid item xs={6}>
             <SelectController
               name="metadata.scope"
@@ -144,6 +160,21 @@ export const ServiceBuilderStep1 = () => {
               disabled
             /> */}
           </Grid>
+          <Grid item xs={6}>
+            <AutocompleteController
+              name="metadata.topic_id"
+              label={t("forms.service.metadata.topic.label")}
+              placeholder={t("forms.service.metadata.topic.placeholder")}
+              items={topicList}
+              helperText={
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: t("forms.service.metadata.topic.helperText")
+                  }}
+                />
+              }
+            />
+          </Grid>
         </Grid>
         <TextFieldController
           name="metadata.address"
@@ -159,19 +190,6 @@ export const ServiceBuilderStep1 = () => {
         />
         {/* 
         // TODO should be developed in the next MVPs
-        <TextFieldController
-          name="topic"
-          label="Argomento del servizio"
-          placeholder=""
-          helperText={
-            <span
-              dangerouslySetInnerHTML={{
-                __html: "Qual è l'argomento del servizio?"
-              }}
-            />
-          }
-          disabled
-        />
         <TextFieldController
           name="functionalities"
           label="Funzionalità del servizio"

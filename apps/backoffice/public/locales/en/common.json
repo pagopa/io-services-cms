@@ -58,6 +58,7 @@
         "privacyCritical": "Mandatory field for a sensitive service"
       }
     },
+    "noOptionsText": "No options",
     "testUrl": "Try URL",
     "service": {
       "buttons": {
@@ -168,7 +169,12 @@
           "local": "Local",
           "national": "National",
           "helperText": "You can change the areas of expertise at any time in yours <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">Reserved area</a>.",
-          "label": "Area of ​​competence",
+          "label": "Area of competence",
+          "placeholder": ""
+        },
+        "topic": {
+          "helperText": "What is the service topic?",
+          "label": "Service topic",
           "placeholder": ""
         }
       },
