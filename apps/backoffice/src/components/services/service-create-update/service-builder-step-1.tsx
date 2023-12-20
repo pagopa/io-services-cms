@@ -125,7 +125,7 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
         title={t("forms.service.attributes")}
         icon={<PaletteIcon />}
       >
-        <Grid container spacing={2}>
+        <Grid container columnSpacing={2}>
           <Grid item xs={6}>
             <SelectController
               name="metadata.scope"
@@ -160,20 +160,22 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
               disabled
             /> */}
           </Grid>
-        </Grid>
-        <AutocompleteController
-          name="metadata.topic_id"
-          label={t("forms.service.metadata.topic.label")}
-          placeholder={t("forms.service.metadata.topic.placeholder")}
-          items={topicList}
-          helperText={
-            <span
-              dangerouslySetInnerHTML={{
-                __html: t("forms.service.metadata.topic.helperText")
-              }}
+          <Grid item xs={6}>
+            <AutocompleteController
+              name="metadata.topic_id"
+              label={t("forms.service.metadata.topic.label")}
+              placeholder={t("forms.service.metadata.topic.placeholder")}
+              items={topicList}
+              helperText={
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: t("forms.service.metadata.topic.helperText")
+                  }}
+                />
+              }
             />
-          }
-        />
+          </Grid>
+        </Grid>
         <TextFieldController
           name="metadata.address"
           label={t("forms.service.metadata.address.label")}
