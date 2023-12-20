@@ -16,7 +16,7 @@ export const validateServiceTopicRequest =
   (
     topicId: ServicePayload["metadata"]["topic_id"]
   ): TE.TaskEither<IResponseErrorInternal | IResponseErrorValidation, void> =>
-    topicId
+    topicId !== undefined && topicId !== null
       ? pipe(
           getServiceTopicDao(dbConfig),
           (dao) => dao.existsById(topicId),

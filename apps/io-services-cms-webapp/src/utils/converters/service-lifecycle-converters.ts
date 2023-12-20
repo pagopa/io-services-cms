@@ -82,7 +82,7 @@ const toServiceTopic =
     serviceId: ServiceLifecycle.ItemType["id"],
     topicId: ServiceLifecycle.ItemType["data"]["metadata"]["topic_id"]
   ): TE.TaskEither<Error, ServiceResponsePayload["metadata"]["topic"]> =>
-    topicId
+    topicId !== undefined && topicId !== null
       ? pipe(
           getServiceTopicDao(dbConfig),
           (dao) => dao.findById(topicId),
