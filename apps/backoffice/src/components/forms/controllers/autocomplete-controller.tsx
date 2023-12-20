@@ -47,6 +47,8 @@ export function AutocompleteController({
             onChange={(_, v) => onChange(v?.id ?? "")}
             fullWidth
             disablePortal
+            freeSolo
+            clearOnBlur
             options={items}
             noOptionsText={t("forms.noOptionsText")}
             getOptionLabel={o =>
