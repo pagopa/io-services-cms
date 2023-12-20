@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.25.2
+
+### Patch Changes
+
+- ea9b420: fix topic id null check
+
 ## 1.25.1
 
 ### Patch Changes
