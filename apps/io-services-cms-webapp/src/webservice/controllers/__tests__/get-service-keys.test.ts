@@ -16,6 +16,7 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -112,6 +113,10 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
+const mockServiceTopicDao = {
+  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+} as any;
+
 describe("getServiceKeys", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -125,7 +130,8 @@ describe("getServiceKeys", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   });
 
   setAppContext(app, mockContext);

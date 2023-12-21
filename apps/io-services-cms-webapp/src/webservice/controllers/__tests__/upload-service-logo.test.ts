@@ -16,6 +16,7 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -99,6 +100,10 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
+const mockServiceTopicDao = {
+  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+} as any;
+
 const aValidLogoPayload = {
   logo: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
 };
@@ -121,6 +126,7 @@ describe("uploadServiceLogo", () => {
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   });
 
   setAppContext(app, mockContext);
