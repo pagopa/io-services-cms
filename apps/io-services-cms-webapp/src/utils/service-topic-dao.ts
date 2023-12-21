@@ -107,7 +107,7 @@ const findAllNotDeletedTopics =
       queryDataTable(pool),
       TE.map(
         flow(
-          O.fromPredicate((queryResult) => queryResult.rowCount === 1),
+          O.fromPredicate((queryResult) => queryResult.rowCount > 0),
           O.map((queryResult) => queryResult.rows)
         )
       ),
