@@ -49,17 +49,9 @@ export const makeGetServiceTopicsHandler =
     telemetryClient,
     serviceTopicDao,
   }: Dependencies): GetServiceTopicsHandler =>
-  (context, auth) => {
-    const logger = getLogger(context, logPrefix);
-    return pipe(
+  (context, auth) =>
+    pipe(
       serviceTopicDao.findAllNotDeletedTopics(),
-      TE.mapLeft((err) => {
-        logger.log(
-          "error",
-          `An Error has occurred while retrieving serviceTopics, reason => ${err.message}, stack => ${err.stack}`
-        );
-        return ResponseErrorInternal("An error occurred while fetching topics");
-      }),
       TE.map(
         flow(
           O.fold(
@@ -77,14 +69,15 @@ export const makeGetServiceTopicsHandler =
           }
         )
       ),
-      TE.mapLeft((err) =>
-        logger.logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
-        })
-      ),
+      TE.mapLeft((err) => {
+        getLogger(context, logPrefix).log(
+          "error",
+          `An Error has occurred while retrieving serviceTopics, reason => ${err.message}, stack => ${err.stack}`
+        );
+        return ResponseErrorInternal("An error occurred while fetching topics");
+      }),
       TE.toUnion
     )();
-  };
 
 export const applyRequestMiddelwares = (handler: GetServiceTopicsHandler) => {
   const middlewaresWrap = withRequestMiddlewares(
