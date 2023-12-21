@@ -88,34 +88,6 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.metadata.category).toBeDefined();
     expect(result.data.metadata.category).toBe("STANDARD");
   });
-  test("Converting an Item which lack of metadata.category the payload should contain the default one", async () => {
-    const anItem = {
-      id: "anItemId" as NonEmptyString,
-      data: {
-        name: "a service",
-        description: "a description",
-        organization: {
-          name: "org",
-          fiscal_code: "00000000000",
-        },
-        metadata: {
-          scope: "LOCAL",
-        },
-        authorized_recipients: [anAutorizedFiscalCode],
-      },
-      fsm: { state: "approved" },
-    } as unknown as ServiceLifecycle.ItemType;
-
-    const result = await itemToResponse(mockDbConfig)(anItem)();
-
-    if (E.isLeft(result)) {
-      throw new Error("Should be right");
-    } else {
-      expect(result.right.metadata).toBeDefined();
-      expect(result.right.metadata.category).toBeDefined();
-      expect(result.right.metadata.category).toBe("STANDARD");
-    }
-  });
 
   test("Converting a Payload have metadata.custom_special_flow the Item should mantain it", () => {
     const aCustomSpecialFlow = "aCustomSpecialFlow";
@@ -141,38 +113,5 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.metadata).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBe(aCustomSpecialFlow);
-  });
-  test("Converting an Item which have metadata.custom_special_flow the payload should mantain it", async () => {
-    const aCustomSpecialFlow = "aCustomSpecialFlow";
-
-    const anItem = {
-      id: "anItemId" as NonEmptyString,
-      data: {
-        name: "a service",
-        description: "a description",
-        organization: {
-          name: "org",
-          fiscal_code: "00000000000",
-        },
-        metadata: {
-          scope: "LOCAL",
-          custom_special_flow: aCustomSpecialFlow,
-        },
-        authorized_recipients: [anAutorizedFiscalCode],
-      },
-      fsm: { state: "approved" },
-    } as unknown as ServiceLifecycle.ItemType;
-
-    const result = await itemToResponse(mockDbConfig)(anItem)();
-
-    if (E.isLeft(result)) {
-      throw new Error("Should be right");
-    } else {
-      expect(result.right.metadata).toBeDefined();
-      expect(result.right.metadata.custom_special_flow).toBeDefined();
-      expect(result.right.metadata.custom_special_flow).toBe(
-        aCustomSpecialFlow
-      );
-    }
   });
 });

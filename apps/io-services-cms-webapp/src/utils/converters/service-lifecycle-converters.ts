@@ -48,7 +48,8 @@ export const itemToResponse =
   ({
     fsm,
     data: {
-      metadata: { scope, category, topic_id, ...metadata },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      metadata: { scope, category, custom_special_flow, topic_id, ...metadata },
       ...data
     },
     id,
@@ -69,7 +70,6 @@ export const itemToResponse =
           metadata: {
             ...metadata,
             scope: toScopeType(scope),
-            category: toCategoryType(category),
             topic,
           },
         })
