@@ -42,7 +42,7 @@ export const handleQueueItem = (
     TE.fromEither,
     TE.chainW((item) =>
       pipe(
-        legacyServiceModel.findOneByServiceId(item.serviceId),
+        legacyServiceModel.findLastVersionByModelId([item.serviceId]),
         TE.chainW(
           O.fold(
             () =>
