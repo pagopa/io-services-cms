@@ -84,11 +84,8 @@ const manageServiceName = (item: ServiceHistory) => {
 const manageIsVisibleField = (item: ServiceHistory) => {
   if (item.fsm.state === "published") {
     return { isVisible: true };
-  } else if (item.fsm.state === "unpublished") {
-    return { isVisible: false };
-  } else {
-    return {};
   }
+  return { isVisible: false };
 };
 
 const getSpecialFields = (
@@ -139,7 +136,8 @@ export const handler =
       item,
       O.fromPredicate(
         (itm) =>
-          itm.fsm.lastTransition !== SYNC_FROM_LEGACY && isPublicationItem(itm)
+          itm.fsm.lastTransition !== SYNC_FROM_LEGACY &&
+          (isPublicationItem(itm) || itm.fsm.state === "deleted")
       ),
       O.map(() =>
         pipe(
