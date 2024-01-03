@@ -10,12 +10,12 @@ import { Pool } from "pg";
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
 import { IConfig, envConfig } from "../../config";
-import { queryDataTable } from "../../lib/clients/pg-client";
+import { getPool, queryDataTable } from "../../lib/clients/pg-client";
 
 // TODO: read these values from package json
 const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
 
-export const makeInfoHandler = (pool: Pool) =>
+export const makeInfoHandler = () =>
   pipe(
     envConfig,
     healthcheck.checkApplicationHealth(IConfig, [
@@ -25,7 +25,7 @@ export const makeInfoHandler = (pool: Pool) =>
         ),
       (c) =>
         healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_URI, c.COSMOSDB_KEY),
-      (_) => checkPostgresDbHealth(pool),
+      (c) => checkPostgresDbHealth(getPool(c)),
     ]),
     TE.mapLeft((problems) => ResponseErrorInternal(problems.join("\n\n"))),
     TE.map((_) =>
