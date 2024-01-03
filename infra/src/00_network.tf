@@ -45,7 +45,7 @@ data "azurerm_subnet" "appgateway_snet" {
 }
 
 data "azurerm_subnet" "devportal_snet" {
-  name                 = "${var.prefix}-selfcare-be-common-snet"
+  name                 = "${var.prefix}-p-selfcare-be-common-snet"
   virtual_network_name = var.io_common.vnet_name
   resource_group_name  = var.io_common.resource_group_name
 }
