@@ -116,6 +116,9 @@ const getSpecialFields = (
   }
 };
 
+const isPublicationItem = (itm: ServiceHistory) =>
+  itm.fsm.state === "published" || itm.fsm.state === "unpublished";
+
 const toRequestSyncLegacyAction = (
   serviceHistory: ServiceHistory
 ): RequestSyncLegacyAction => ({
@@ -134,7 +137,10 @@ export const handler =
   ({ item }) =>
     pipe(
       item,
-      O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
+      O.fromPredicate(
+        (itm) =>
+          itm.fsm.lastTransition !== SYNC_FROM_LEGACY && isPublicationItem(itm)
+      ),
       O.map(() =>
         pipe(
           isUserEnabledForCmsToLegacySync(config, apimService, item.serviceId),
