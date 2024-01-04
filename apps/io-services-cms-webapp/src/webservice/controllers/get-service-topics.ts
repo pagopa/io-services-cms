@@ -55,6 +55,7 @@ export const makeGetServiceTopicsHandler =
       TE.map(
         flow(
           O.fold(
+            // QUESTION: when no topics are found on DB should we return an empty list or an error 404?
             () => ResponseSuccessJson({ topics: [] }),
             (topics) => ResponseSuccessJson({ topics })
           )
