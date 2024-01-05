@@ -1,3 +1,7 @@
+variable "tags" {
+  type = map(any)
+}
+
 variable "prefix" {
   type = string
   validation {
@@ -21,6 +25,42 @@ variable "env_short" {
     )
     error_message = "Max length is 1 chars."
   }
+}
+
+variable "domain" {
+  type = string
+}
+
+variable "opex_environment_ci_roles" {
+  type = object({
+    subscription    = list(string)
+    resource_groups = map(list(string))
+  })
+  description = "Continous Integration roles for opex managed identity"
+}
+
+variable "opex_environment_cd_roles" {
+  type = object({
+    subscription    = list(string)
+    resource_groups = map(list(string))
+  })
+  description = "Continous Delivery roles for opex managed identity"
+}
+
+variable "infra_environment_ci_roles" {
+  type = object({
+    subscription    = list(string)
+    resource_groups = map(list(string))
+  })
+  description = "Continous Integration roles for infra managed identity"
+}
+
+variable "infra_environment_cd_roles" {
+  type = object({
+    subscription    = list(string)
+    resource_groups = map(list(string))
+  })
+  description = "Continous Delivery roles for infra managed identity"
 }
 
 variable "github" {

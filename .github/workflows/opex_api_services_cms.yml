@@ -2,6 +2,7 @@ name: Opex Dashboard openapi
 
 # Controls when the workflow will run
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -17,19 +18,11 @@ permissions:
   id-token: write
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-22.04
+    environment: opex-prod-cd
 
-    strategy:
-      matrix:
-        environment: [prod]
-
-    environment: ${{ matrix.environment }}-opex
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
         id: checkout
@@ -42,10 +35,10 @@ jobs:
       # from https://github.com/pagopa/opex-dashboard-azure-action/
       - uses: pagopa/opex-dashboard-azure-action@v1.1.2
         with:
-          environment: ${{ matrix.environment }}
+          environment: prod
           api-name: ${{ env.API_NAME }}
-          config: .opex/${{ env.API_NAME }}/env/${{ matrix.environment }}/config.yaml
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          config: .opex/${{ env.API_NAME }}/env/prod/config.yaml
+          client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
