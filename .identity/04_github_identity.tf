@@ -1,5 +1,5 @@
 module "opex_identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -24,7 +24,7 @@ module "opex_identity_ci" {
 }
 
 module "opex_identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -49,7 +49,7 @@ module "opex_identity_cd" {
 }
 
 module "infra_identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -74,7 +74,7 @@ module "infra_identity_ci" {
 }
 
 module "infra_identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -99,7 +99,7 @@ module "infra_identity_cd" {
 }
 
 module "identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -123,7 +123,7 @@ module "identity_ci" {
 }
 
 module "identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.35.1"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.37.0"
 
   prefix    = var.prefix
   env_short = var.env_short
