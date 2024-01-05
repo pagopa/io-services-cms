@@ -1,6 +1,61 @@
 env       = "prod"
 env_short = "p"
 prefix    = "io"
+domain    = "services-cms"
+
+tags = {
+  CreatedBy   = "Terraform"
+  Environment = "Prod"
+  Owner       = "io"
+  Source      = "https://github.com/pagopa/io-services-cms"
+  CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
+}
+
+opex_environment_ci_roles = {
+  subscription = ["Reader"]
+  resource_groups = {
+    dashboards = [
+      "Reader"
+    ],
+    terraform-state-rg = [
+      "Storage Blob Data Reader",
+      "Reader and Data Access"
+    ]
+  }
+}
+
+opex_environment_cd_roles = {
+  subscription = ["Reader"]
+  resource_groups = {
+    dashboards = [
+      "Contributor"
+    ],
+    terraform-state-rg = [
+      "Storage Blob Data Contributor",
+      "Reader and Data Access"
+    ]
+  }
+}
+
+infra_environment_ci_roles = {
+  subscription = ["Reader"]
+  resource_groups = {
+    terraform-state-rg = [
+      "Storage Blob Data Contributor",
+      "Reader and Data Access"
+    ]
+  }
+}
+
+infra_environment_cd_roles = {
+  subscription = ["Contributor"]
+  resource_groups = {
+    terraform-state-rg = [
+      "Storage Blob Data Contributor",
+      "Reader and Data Access"
+    ]
+  }
+}
 
 environment_cd_roles = {
   subscription = [
@@ -12,7 +67,14 @@ environment_cd_roles = {
     "Storage Table Data Contributor",
     "API Management Service Contributor",
   ]
-  resource_groups = {}
+  resource_groups = {
+    terraform-state-rg = [
+      "Reader and Data Access"
+    ],
+    io-p-services-cms-rg = [
+      "Website Contributor"
+    ]
+  }
 }
 
 environment_ci_roles = {

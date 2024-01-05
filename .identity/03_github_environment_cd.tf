@@ -19,23 +19,15 @@ resource "github_repository_environment" "github_repository_environment_cd" {
   }
 }
 
-#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
-resource "github_actions_environment_secret" "azure_cd_tenant_id" {
+resource "github_actions_environment_secret" "env_cd_secrets" {
+  for_each        = local.env_cd_secrets
   repository      = var.github.repository
-  environment     = "${var.env}-cd"
-  secret_name     = "AZURE_TENANT_ID"
-  plaintext_value = data.azurerm_client_config.current.tenant_id
+  environment     = github_repository_environment.github_repository_environment_cd.environment
+  secret_name     = each.key
+  plaintext_value = each.value
 }
 
-#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
-resource "github_actions_environment_secret" "azure_cd_subscription_id" {
-  repository      = var.github.repository
-  environment     = "${var.env}-cd"
-  secret_name     = "AZURE_SUBSCRIPTION_ID"
-  plaintext_value = data.azurerm_subscription.current.subscription_id
-}
-
-#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
+# TODO: Delete
 resource "github_actions_environment_secret" "azure_cd_client_id" {
   repository      = var.github.repository
   environment     = "${var.env}-cd"
