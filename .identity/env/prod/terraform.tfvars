@@ -43,6 +43,9 @@ infra_environment_ci_roles = {
     terraform-state-rg = [
       "Storage Blob Data Contributor",
       "Reader and Data Access"
+    ],
+    io-p-services-cms-rg = [
+      "Contributor"
     ]
   }
 }
