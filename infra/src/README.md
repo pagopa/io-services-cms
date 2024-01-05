@@ -13,7 +13,7 @@
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 2.33.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.42.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.0 |
 
 ## Modules
 
@@ -41,6 +41,8 @@
 | [azurerm_api_management_api_operation_policy.get_service_topics_policy_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_api_operation_policy) | resource |
 | [azurerm_api_management_named_value.io_fn_services_cms_key_v2](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/api_management_named_value) | resource |
 | [azurerm_cosmosdb_sql_database.db_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/cosmosdb_sql_database) | resource |
+| [azurerm_key_vault_access_policy.access_policy_services_cms_infra_cd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.access_policy_services_cms_infra_ci](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.github_action_cd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/resources/key_vault_access_policy) | resource |
@@ -98,6 +100,8 @@
 | [azurerm_subnet.github_runner_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.private_endpoints_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subnet) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/subscription) | data source |
+| [azurerm_user_assigned_identity.managed_identity_services_cms_infra_cd](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/user_assigned_identity) | data source |
+| [azurerm_user_assigned_identity.managed_identity_services_cms_infra_ci](https://registry.terraform.io/providers/hashicorp/azurerm/3.42.0/docs/data-sources/user_assigned_identity) | data source |
 
 ## Inputs
 
