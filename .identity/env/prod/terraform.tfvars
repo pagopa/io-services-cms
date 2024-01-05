@@ -60,6 +60,23 @@ infra_environment_cd_roles = {
   }
 }
 
+environment_ci_roles = {
+  subscription = [
+    "Reader",
+    "PagoPA IaC Reader",
+    "DocumentDB Account Contributor", # remove after services collection migration from io-p-cosmos-api
+  ]
+  resource_groups = {
+    terraform-state-rg = [
+      "Storage Blob Data Contributor",
+    ],
+    io-p-services-cms-rg = [
+      "Reader and Data Access",
+      "DocumentDB Account Contributor",
+    ]
+  }
+}
+
 environment_cd_roles = {
   subscription = [
     "Contributor",
@@ -76,23 +93,6 @@ environment_cd_roles = {
     ],
     io-p-services-cms-rg = [
       "Website Contributor"
-    ]
-  }
-}
-
-environment_ci_roles = {
-  subscription = [
-    "Reader",
-    "PagoPA IaC Reader",
-    "DocumentDB Account Contributor", # remove after services collection migration from io-p-cosmos-api
-  ]
-  resource_groups = {
-    terraform-state-rg = [
-      "Storage Blob Data Contributor",
-    ],
-    io-p-services-cms-rg = [
-      "Reader and Data Access",
-      "DocumentDB Account Contributor",
     ]
   }
 }
