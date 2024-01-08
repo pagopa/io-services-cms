@@ -134,6 +134,10 @@ export const handler =
   ({ item }) =>
     pipe(
       item,
+      // We skip sincronization for items:
+      // - that comes from legacy (SYNC_FROM_LEGACY)
+      // - that are not publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
+      // BTW this module will be removed when the legacy application will be decommissioned
       O.fromPredicate(
         (itm) =>
           itm.fsm.lastTransition !== SYNC_FROM_LEGACY &&
