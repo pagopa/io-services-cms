@@ -81,6 +81,7 @@ type Dependencies = {
   serviceTopicDao: ServiceTopicDao;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export const createWebServer = ({
   basePath,
   fsmLifecycleClient,
@@ -126,6 +127,17 @@ export const createWebServer = ({
 
   router.get(
     "/services/topicstest",
+    pipe(
+      makeGetServiceTopicsHandler({
+        serviceTopicDao,
+        telemetryClient,
+      }),
+      applyGetServiceTopicsRequestMiddelwares
+    )
+  );
+
+  router.get(
+    "/services/topics",
     pipe(
       makeGetServiceTopicsHandler({
         serviceTopicDao,
