@@ -1,7 +1,7 @@
 <policies>
     <inbound>
         <base />
-        <cache-lookup vary-by-developer="false" vary-by-developer-groups="false" downstream-caching-type="none" />
+        <cache-lookup vary-by-developer="false" vary-by-developer-groups="false" caching-type="internal" downstream-caching-type="none" />
     </inbound>
     <backend>
         <base />
