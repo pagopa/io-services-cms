@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.26.2
+
+### Patch Changes
+
+- 29893cd: Allow Sync to legacy only for Publication an Delete Service History Items
+- 982be43: Replace findOneByServiceId with findLastVersionByModelId in request-sync-legacy-handler
+
 ## 1.26.1
 
 ### Patch Changes
