@@ -48,15 +48,6 @@ resource "azurerm_api_management_api_operation_policy" "get_service_topics_polic
   xml_content = file("./api/io_services_cms/v1/getservicetopics_policy/policy.xml")
 }
 
-resource "azurerm_api_management_api_operation_policy" "get_service_topics_test_policy_v2" {
-  api_name            = "io-services-cms-api"
-  api_management_name = data.azurerm_api_management.apim_v2.name
-  resource_group_name = data.azurerm_api_management.apim_v2.resource_group_name
-  operation_id        = "getServiceTopicsTest"
-
-  xml_content = file("./api/io_services_cms/v1/getservicetopicstest_policy/policy.xml")
-}
-
 # Named Value fn-services-cms
 resource "azurerm_api_management_named_value" "io_fn_services_cms_key_v2" {
   name                = "io-fn-services-cms-key"

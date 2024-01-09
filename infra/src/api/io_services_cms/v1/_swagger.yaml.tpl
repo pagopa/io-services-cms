@@ -118,28 +118,6 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /services/topicstest:
-    get:
-      tags:
-        - service-topics
-      summary: Retrieve all services topic test
-      description: Retrieve all service topics test
-      operationId: getServiceTopicsTest
-      responses:
-        '200':
-          description: Service topics fetched successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceTopicList'
-        '401':
-          description: Unauthorized
-        '403':
-          description: Forbidden
-        '429':
-          description: Too many requests
-        '500':
-          description: Internal server error
   /services/{serviceId}:
     get:
       tags:

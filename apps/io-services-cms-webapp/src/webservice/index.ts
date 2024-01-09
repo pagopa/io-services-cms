@@ -126,17 +126,6 @@ export const createWebServer = ({
   );
 
   router.get(
-    "/services/topicstest",
-    pipe(
-      makeGetServiceTopicsHandler({
-        serviceTopicDao,
-        telemetryClient,
-      }),
-      applyGetServiceTopicsRequestMiddelwares
-    )
-  );
-
-  router.get(
     "/services/topics",
     pipe(
       makeGetServiceTopicsHandler({

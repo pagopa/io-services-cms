@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "services/topicstest",
+      "route": "services/topics",
       "methods": ["get"]
     },
     {
