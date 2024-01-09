@@ -154,6 +154,10 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
+const mockServiceTopicDao = {
+  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+} as any;
+
 describe("getServices", () => {
     const app = createWebServer({
     basePath: "api",
@@ -163,7 +167,8 @@ describe("getServices", () => {
     fsmPublicationClient: mockFsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService
+    blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   });
 
   setAppContext(app, mockContext);

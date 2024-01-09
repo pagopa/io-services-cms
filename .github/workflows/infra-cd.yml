@@ -29,6 +29,7 @@ jobs:
     environment: infra-prod-ci
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      AZURE_ENVIRONMENT: prod
 
     steps:
 
@@ -63,8 +64,6 @@ jobs:
       - name: Terraform plan
         shell: bash
         working-directory: ${{ env.DIR }}
-        env:
-          AZURE_ENVIRONMENT: prod
         run: |
           bash ./terraform.sh plan ${{ env.AZURE_ENVIRONMENT }} -lock-timeout=3000s -out=tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }} -input=false
 
@@ -87,6 +86,7 @@ jobs:
     needs: [terraform_plan_job]
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CD }}
+      AZURE_ENVIRONMENT: prod
 
     steps:
 
@@ -119,12 +119,16 @@ jobs:
           terraform_version: ${{ needs.terraform_plan_job.outputs.terraform_version }}
           terraform_wrapper: true
 
+      - name: Terraform init
+        id: terraform_init
+        shell: bash
+        working-directory: ${{ env.DIR }}
+        run: |
+          bash ./terraform.sh init ${{ env.AZURE_ENVIRONMENT }}
+
       - name: Terraform apply
         id: terraform_apply
         shell: bash
         working-directory: ${{ env.DIR }}
-        env:
-          AZURE_ENVIRONMENT: prod
         run: |
-          bash ./terraform.sh apply -lock-timeout=3000s -auto-approve -input=false tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
-          rm -rf tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
+          terraform apply -lock-timeout=3000s -auto-approve -input=false tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}

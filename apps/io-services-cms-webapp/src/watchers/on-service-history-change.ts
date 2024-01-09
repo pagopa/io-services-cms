@@ -84,11 +84,8 @@ const manageServiceName = (item: ServiceHistory) => {
 const manageIsVisibleField = (item: ServiceHistory) => {
   if (item.fsm.state === "published") {
     return { isVisible: true };
-  } else if (item.fsm.state === "unpublished") {
-    return { isVisible: false };
-  } else {
-    return {};
   }
+  return { isVisible: false };
 };
 
 const getSpecialFields = (
@@ -116,6 +113,9 @@ const getSpecialFields = (
   }
 };
 
+const isPublicationItem = (itm: ServiceHistory) =>
+  itm.fsm.state === "published" || itm.fsm.state === "unpublished";
+
 const toRequestSyncLegacyAction = (
   serviceHistory: ServiceHistory
 ): RequestSyncLegacyAction => ({
@@ -134,7 +134,15 @@ export const handler =
   ({ item }) =>
     pipe(
       item,
-      O.fromPredicate((itm) => itm.fsm.lastTransition !== SYNC_FROM_LEGACY),
+      // We skip sincronization for items:
+      // - that comes from legacy (SYNC_FROM_LEGACY)
+      // - that are not publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
+      // BTW this module will be removed when the legacy application will be decommissioned
+      O.fromPredicate(
+        (itm) =>
+          itm.fsm.lastTransition !== SYNC_FROM_LEGACY &&
+          (isPublicationItem(itm) || itm.fsm.state === "deleted")
+      ),
       O.map(() =>
         pipe(
           isUserEnabledForCmsToLegacySync(config, apimService, item.serviceId),
