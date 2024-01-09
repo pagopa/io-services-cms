@@ -8,7 +8,7 @@
     </backend>
     <outbound>
         <base />
-        <cache-store duration="300" />
+        <cache-store duration="3600" />
     </outbound>
     <on-error>
         <base />
