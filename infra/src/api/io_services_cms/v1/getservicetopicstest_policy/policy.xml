@@ -5,10 +5,10 @@
     </inbound>
     <backend>
         <base />
-        <cache-store duration="300" />
     </backend>
     <outbound>
         <base />
+        <cache-store duration="300" />
     </outbound>
     <on-error>
         <base />
