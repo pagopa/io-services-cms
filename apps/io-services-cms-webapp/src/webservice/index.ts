@@ -125,7 +125,7 @@ export const createWebServer = ({
   );
 
   router.get(
-    "/services/topics",
+    "/services/topicstest",
     pipe(
       makeGetServiceTopicsHandler({
         serviceTopicDao,
