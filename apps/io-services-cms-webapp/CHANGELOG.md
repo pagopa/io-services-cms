@@ -1,5 +1,15 @@
 # io-services-cms-webapp
 
+## 1.26.0
+
+### Minor Changes
+
+- a93c05c: ADD GET /services/topics API implementation
+
+### Patch Changes
+
+- 85a2109: TEST APIM cache policy
+
 ## 1.25.3
 
 ### Patch Changes
