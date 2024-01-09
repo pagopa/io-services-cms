@@ -4,23 +4,16 @@
 name: 'Code Review'
 
 on:
-  push:
-    branches: ['main']
-    paths:
-      - apps/**
-      - packages/**
-      - package.json
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
     paths:
       - apps/**
       - packages/**
       - package.json
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   code_review:
-    timeout-minutes: 10 # temp fix
     runs-on: ubuntu-latest
 
     steps:
