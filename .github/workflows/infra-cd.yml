@@ -126,5 +126,4 @@ jobs:
         env:
           AZURE_ENVIRONMENT: prod
         run: |
-          bash ./terraform.sh apply -lock-timeout=3000s -auto-approve -input=false tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
-          rm -rf tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
+          bash ./terraform.sh apply ${{ env.AZURE_ENVIRONMENT }} -lock-timeout=3000s -auto-approve -input=false tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
