@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.1
+
+### Patch Changes
+
+- d390dc8: Deploy API GET /services/topics
+
 ## 1.26.0
 
 ### Minor Changes
