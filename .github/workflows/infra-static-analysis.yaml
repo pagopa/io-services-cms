@@ -2,7 +2,7 @@ name: Static Analysis
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review]
     paths:
       - infra/**
       - .identity/**
@@ -49,5 +49,5 @@ jobs:
 
       - name: run_pre_commit_terraform
         run: |
-          TAG="v1.80.0@sha256:840b08605df81e6e1cdd443adce13e7ed2de4345345705411a0656eda760c84e"
+          TAG="v1.86.0@sha256:a1ffb8fff155934c1937580eeab8b3f68726485cd54025d2f911b0c21a9becba"
           docker run -v $(pwd):/lint -w /lint ghcr.io/antonbabenko/pre-commit-terraform:$TAG run -a

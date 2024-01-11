@@ -8,7 +8,8 @@ import { pipe } from "fp-ts/lib/function";
 
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
-import { envConfig, IConfig } from "../../config";
+import { IConfig, envConfig } from "../../config";
+import { healthcheck as checkPostgresDbHealth } from "../../lib/clients/pg-client";
 
 // TODO: read these values from package json
 const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
@@ -23,6 +24,7 @@ export const makeInfoHandler = () =>
         ),
       (c) =>
         healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_URI, c.COSMOSDB_KEY),
+      (c) => checkPostgresDbHealth(c),
     ]),
     TE.mapLeft((problems) => ResponseErrorInternal(problems.join("\n\n"))),
     TE.map((_) =>

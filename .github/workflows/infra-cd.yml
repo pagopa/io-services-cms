@@ -2,7 +2,6 @@ name: Infra Continuous Delivery
 
 on:
   workflow_dispatch:
-  # Trigger the workflow on push on the master branch
   push:
     branches:
       - master
@@ -16,34 +15,24 @@ permissions:
 
 env:
   DIR: 'infra/src'
-  AZURE_ENVIRONMENT: prod
+  ARM_USE_OIDC: true
+  ARM_USE_AZUREAD: true
+  ARM_STORAGE_USE_AZUREAD: true
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
 jobs:
-  create_runner:
-    name: Create Runner
-    runs-on: ubuntu-22.04
-    environment: prod-runner
-    outputs:
-      runner_name: ${{ steps.create_github_runner.outputs.runner_name }}
-    steps:
-      - name: Create GitHub Runner
-        id: create_github_runner
-        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-create-action
-        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-create-action@main
-        with:
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          container_app_environment_name: ${{ secrets.AZURE_CONTAINER_APP_ENVIRONMENT_NAME }}
-          resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          pat_token: ${{ secrets.BOT_TOKEN }}
 
-  terraform_preapply_job:
-    name: Terraform Pre Apply
-    runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
-    environment: prod-ci
-    needs: create_runner
+  terraform_plan_job:
+    name: Terraform Plan
+    runs-on: self-hosted
+    environment: infra-prod-ci
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      AZURE_ENVIRONMENT: prod
+
     steps:
+
       - name: Checkout
         id: checkout
         # from https://github.com/actions/checkout/commits/main
@@ -52,52 +41,94 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup terraform
-        id: setup-version
-        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/terraform/terraform-install-action
-        uses: pagopa/eng-github-actions-iac-template/terraform/terraform-install-action@main
-
-      - name: Terraform pre apply
-        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/terraform-preapply-azure-action
-        uses: pagopa/eng-github-actions-iac-template/azure/terraform-preapply-azure-action@main
+      - name: Azure Login
+        id: az_login
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          dir: ${{ env.DIR }}
-          azure_environment: prod
+          client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set Terraform Version
+        id: env_tf_version
+        run: |
+          echo "terraform_version=$(cat .terraform-version)" >> $GITHUB_OUTPUT
+
+      - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
+        id: terraform_setup
+        name: Setup Terraform
+        with:
+          terraform_version: ${{ steps.env_tf_version.outputs.terraform_version}}
+          terraform_wrapper: true
+
+      - name: Terraform plan
+        shell: bash
+        working-directory: ${{ env.DIR }}
+        run: |
+          bash ./terraform.sh plan ${{ env.AZURE_ENVIRONMENT }} -lock-timeout=3000s -out=tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }} -input=false
+
+      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392
+        id: artifact_upload
+        name: Upload plans as artifacts
+        with:
+          name: tfplan-output
+          if-no-files-found: error
+          path: |
+            **/tfplan-prod-*
+
+    outputs:
+      terraform_version: ${{ steps.env_tf_version.outputs.terraform_version}}
 
   terraform_apply_job:
     name: Terraform Apply
-    runs-on: [self-hosted, '${{ needs.create_runner.outputs.runner_name }}']
-    environment: prod-cd
-    needs: [create_runner, terraform_preapply_job]
-    steps:
-      - name: Terraform apply
-        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/terraform-apply-azure-action
-        uses: pagopa/eng-github-actions-iac-template/azure/terraform-apply-azure-action@main
-        with:
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          dir: ${{ env.DIR }}
-          azure_environment: prod
+    runs-on: [self-hosted]
+    environment: infra-prod-cd
+    needs: [terraform_plan_job]
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CD }}
+      AZURE_ENVIRONMENT: prod
 
-  cleanup_runner:
-    name: Cleanup Runner
-    if: always()
-    runs-on: ubuntu-22.04
-    environment: prod-runner
-    needs: [create_runner, terraform_preapply_job, terraform_apply_job]
     steps:
-      - name: Cleanup GitHub Runner
-        id: cleanup_github_runner
-        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/github-self-hosted-runner-azure-cleanup-action
-        uses: pagopa/eng-github-actions-iac-template/azure/github-self-hosted-runner-azure-cleanup-action@main
+
+      - name: Checkout
+        id: checkout
+        # from https://github.com/actions/checkout/commits/main
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
         with:
-          client_id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant_id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resource_group_name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
-          runner_name: ${{ needs.create_runner.outputs.runner_name }}
-          pat_token: ${{ secrets.BOT_TOKEN }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110
+        id: artifact_download
+        name: Download plans as artifact
+        with:
+          name: tfplan-output
+
+      - name: Azure Login
+        id: az_login
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
+        id: terraform_setup
+        name: Setup Terraform
+        with:
+          terraform_version: ${{ needs.terraform_plan_job.outputs.terraform_version }}
+          terraform_wrapper: true
+
+      - name: Terraform init
+        id: terraform_init
+        shell: bash
+        working-directory: ${{ env.DIR }}
+        run: |
+          bash ./terraform.sh init ${{ env.AZURE_ENVIRONMENT }}
+
+      - name: Terraform apply
+        id: terraform_apply
+        shell: bash
+        working-directory: ${{ env.DIR }}
+        run: |
+          terraform apply -lock-timeout=3000s -auto-approve -input=false tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
