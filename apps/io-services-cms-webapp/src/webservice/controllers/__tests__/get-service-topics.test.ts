@@ -18,10 +18,34 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
+import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { createWebServer } from "../../index";
+
+vi.mock("../../lib/clients/apim-client", async () => {
+  const anApimResource = { id: "any-id", name: "any-name" };
+
+  return {
+    getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+    getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+    upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
+  };
+});
+
+const { getServiceTopicDao } = vi.hoisted(() => ({
+  getServiceTopicDao: vi.fn(() => ({
+    findById: vi.fn((id: number) =>
+      TE.right(O.some({ id, name: "topic name" }))
+    ),
+  })),
+}));
+
+vi.mock("../../../utils/service-topic-dao", () => ({
+  getDao: getServiceTopicDao,
+}));
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -36,14 +60,18 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
+const anApimResource = { id: "any-id", name: "any-name" };
 
 const mockApimService = {
   getSubscription: vi.fn(() =>
     TE.right({
       _etag: "_etag",
-      ownerId: anUserId,
+      ownerId,
     })
   ),
+  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
 } as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
@@ -84,6 +112,29 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
+const aServicePub = {
+  id: "aServiceId",
+  last_update: "aServiceLastUpdate",
+  data: {
+    name: "aServiceName",
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      address: "via tal dei tali 123",
+      email: "service@email.it",
+      pec: "service@pec.it",
+      scope: "LOCAL",
+      topic_id: 1,
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+  },
+} as unknown as ServicePublication.ItemType;
+
 const mockAppinsights = {
   trackEvent: vi.fn(),
   trackError: vi.fn(),
@@ -100,15 +151,7 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
-} as any;
-
-describe("deleteService", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
+const mockWebServer = (mockServiceTopicDao: any) => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
@@ -123,116 +166,81 @@ describe("deleteService", () => {
 
   setAppContext(app, mockContext);
 
-  const aService = {
-    id: "aServiceId",
-    data: {
-      name: "aServiceName",
-      description: "aServiceDescription",
-      authorized_recipients: [],
-      max_allowed_payment_amount: 123,
-      metadata: {
-        address: "via tal dei tali 123",
-        email: "service@email.it",
-        pec: "service@pec.it",
-        scope: "LOCAL",
-      },
-      organization: {
-        name: "anOrganizationName",
-        fiscal_code: "12345678901",
-      },
-      require_secure_channel: false,
-    },
-  } as unknown as ServiceLifecycle.ItemType;
+  return app;
+};
 
-  it("should fail when cannot find requested service", async () => {
+describe("getServicePublication", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should retrieve the service topics list", async () => {
+    const mockServiceTopicDao = {
+      findAllNotDeletedTopics: vi.fn(() =>
+        TE.right(O.some([{ id: 1, name: "aTopicName" }]))
+      ),
+    } as any;
+
+    const app = mockWebServer(mockServiceTopicDao);
+
     const response = await request(app)
-      .delete("/api/services/nonExistentServiceId")
+      .get("/api/services/topics")
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(404);
-  });
-
-  it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
-    await serviceLifecycleStore.save(aService.id, {
-      ...aService,
-      fsm: { state: "deleted" },
-    })();
-
-    const response = await request(app)
-      .delete(`/api/services/${aService.id}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
-
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(409);
-  });
-
-  it("should not allow the operation without right group", async () => {
-    const response = await request(app)
-      .delete(`/api/services/${aService.id}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
-
-    expect(response.statusCode).toBe(403);
-  });
-
-  it("should delete a service", async () => {
-    await serviceLifecycleStore.save(aService.id, {
-      ...aService,
-      fsm: { state: "draft" },
-    })();
-
-    const response = await request(app)
-      .delete(`/api/services/${aService.id}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
-
+    expect(response.body).toStrictEqual({
+      topics: [{ id: 1, name: "aTopicName" }],
+    });
     expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(200);
   });
 
-  it("should not allow the operation without right userId", async () => {
-    const aDifferentManageSubscriptionId = "MANAGE-456";
-    const aDifferentUserId = "456";
+  it("handle no topics found", async () => {
+    const mockServiceTopicDao = {
+      findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+    } as any;
+
+    const app = mockWebServer(mockServiceTopicDao);
 
     const response = await request(app)
-      .delete(`/api/services/${aService.id}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", aDifferentUserId)
-      .set("x-subscription-id", aDifferentManageSubscriptionId);
-
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(403);
-  });
-
-  it("should not allow the operation without manageKey", async () => {
-    const aNotManageSubscriptionId = "NOT-MANAGE-123";
-
-    const response = await request(app)
-      .delete(`/api/services/${aService.id}`)
+      .get("/api/services/topics")
       .send()
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+      .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockApimService.getSubscription).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(403);
+    expect(response.body).toStrictEqual({
+      topics: [],
+    });
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("handle error retrieving topics", async () => {
+    const mockServiceTopicDao = {
+      findAllNotDeletedTopics: vi.fn(() => TE.left(new Error("an error"))),
+    } as any;
+
+    const app = mockWebServer(mockServiceTopicDao);
+
+    const response = await request(app)
+      .get("/api/services/topics")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.body).toStrictEqual({
+      detail: "An error occurred while fetching topics",
+      status: 500,
+      title: "Internal server error",
+    });
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(500);
   });
 });

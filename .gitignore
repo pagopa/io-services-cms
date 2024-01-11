@@ -29,18 +29,14 @@ __blobstorage__
 __queuestorage__
 
 # terraform
-# Local .terraform directories
 **/.terraform/*
-# .tfstate files
-*.tfstate
-*.tfstate.*
-*.tfsec
+**/.tfsec/*
 tfplan
+
 # Crash log files
 crash.log
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
-.terraform.lock.hcl
 ignore_features.tf

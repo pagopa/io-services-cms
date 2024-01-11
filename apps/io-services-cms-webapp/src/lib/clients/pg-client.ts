@@ -1,4 +1,6 @@
+import { toHealthProblems } from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import Cursor from "pg-cursor";
 import { PostgreSqlConfig } from "../../config";
@@ -34,3 +36,11 @@ export const queryDataTable =
       () => pool.query(query),
       (error) => error as DatabaseError
     );
+
+export const healthcheck = (config: PostgreSqlConfig) =>
+  pipe(
+    "SELECT 1",
+    queryDataTable(getPool(config)),
+    TE.mapLeft(toHealthProblems("PostgresDB")),
+    TE.map((_) => true as const)
+  );

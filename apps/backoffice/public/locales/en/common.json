@@ -372,7 +372,7 @@
       }
     },
     "logo": {
-      "disclaimerText": "Insert <strong>only</strong> your institution logo.<br />You will be responsible for inserting images other than the one indicated.",
+      "disclaimerText": "Insert <strong>only</strong> your service logo, if it has one.<br />You will be responsible for inserting images other than the one indicated.",
       "dropzoneText": "Upload service logo",
       "loadingText": "Loading",
       "rejectedText": "Unsupported format",

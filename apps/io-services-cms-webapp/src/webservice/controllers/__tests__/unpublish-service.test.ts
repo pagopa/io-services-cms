@@ -126,6 +126,10 @@ const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
 } as any;
 
+const mockServiceTopicDao = {
+  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+} as any;
+
 describe("UnPublishService", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -140,6 +144,7 @@ describe("UnPublishService", () => {
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   });
 
   setAppContext(app, mockContext);

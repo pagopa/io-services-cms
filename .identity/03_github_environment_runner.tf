@@ -8,22 +8,6 @@ resource "github_repository_environment" "github_repository_environment_runner" 
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
-resource "github_actions_environment_secret" "azure_runner_tenant_id" {
-  repository      = var.github.repository
-  environment     = "${var.env}-runner"
-  secret_name     = "AZURE_TENANT_ID"
-  plaintext_value = data.azurerm_client_config.current.tenant_id
-}
-
-#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
-resource "github_actions_environment_secret" "azure_runner_subscription_id" {
-  repository      = var.github.repository
-  environment     = "${var.env}-runner"
-  secret_name     = "AZURE_SUBSCRIPTION_ID"
-  plaintext_value = data.azurerm_subscription.current.subscription_id
-}
-
-#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_environment_secret" "azure_runner_client_id" {
   repository      = var.github.repository
   environment     = "${var.env}-runner"

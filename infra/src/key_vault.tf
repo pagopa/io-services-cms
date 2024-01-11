@@ -111,3 +111,35 @@ data "azurerm_key_vault_secret" "subscription_migration_api_key" {
   name         = "SUBSCRIPTION-MIGRATION-API-KEY"
   key_vault_id = module.key_vault_domain.id
 }
+
+#
+# MANAGED IDENTITIES
+#
+
+data "azurerm_user_assigned_identity" "managed_identity_services_cms_infra_ci" {
+  name                = "${local.project}-${local.application_basename}-infra-github-ci-identity"
+  resource_group_name = "${local.project}-identity-rg"
+}
+
+data "azurerm_user_assigned_identity" "managed_identity_services_cms_infra_cd" {
+  name                = "${local.project}-${local.application_basename}-infra-github-cd-identity"
+  resource_group_name = "${local.project}-identity-rg"
+}
+
+resource "azurerm_key_vault_access_policy" "access_policy_services_cms_infra_ci" {
+  key_vault_id = module.key_vault_domain.id
+
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  object_id = data.azurerm_user_assigned_identity.managed_identity_services_cms_infra_ci.principal_id
+
+  secret_permissions = ["Get", "List"]
+}
+
+resource "azurerm_key_vault_access_policy" "access_policy_services_cms_infra_cd" {
+  key_vault_id = module.key_vault_domain.id
+
+  tenant_id = data.azurerm_client_config.current.tenant_id
+  object_id = data.azurerm_user_assigned_identity.managed_identity_services_cms_infra_cd.principal_id
+
+  secret_permissions = ["Get", "List", "Set"]
+}

@@ -1,5 +1,6 @@
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -84,6 +85,46 @@ const findById =
       )
     );
 
+const createSelectNotDeletedTopicsSql = ({
+  TOPIC_DB_SCHEMA,
+  TOPIC_DB_TABLE,
+}: TopicPostgreSqlConfig): string =>
+  knex
+    .withSchema(TOPIC_DB_SCHEMA)
+    .table(TOPIC_DB_TABLE)
+    .select("id", "name")
+    .where("deleted", false)
+    .toQuery();
+
+const findAllNotDeletedTopics =
+  (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
+  (): TE.TaskEither<
+    DatabaseError | Error,
+    O.Option<ReadonlyArray<ServiceTopicRowDataTable>>
+  > =>
+    pipe(
+      createSelectNotDeletedTopicsSql(dbConfig),
+      queryDataTable(pool),
+      TE.map(
+        flow(
+          O.fromPredicate((queryResult) => queryResult.rowCount > 0),
+          O.map((queryResult) => queryResult.rows)
+        )
+      ),
+      TE.chain(
+        flow(
+          O.fold(
+            () => TE.right(O.none),
+            flow(
+              RA.traverse(E.Applicative)(ServiceTopicRowDataTable.decode),
+              E.bimap(flow(readableReport, E.toError), O.some),
+              TE.fromEither
+            )
+          )
+        )
+      )
+    );
+
 // eslint-disable-next-line functional/no-let
 let dao: ServiceTopicDao;
 export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
@@ -91,6 +132,7 @@ export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
     dao = pipe(getPool(dbConfig), (pool) => ({
       existsById: existsById(pool, dbConfig),
       findById: findById(pool, dbConfig),
+      findAllNotDeletedTopics: findAllNotDeletedTopics(pool, dbConfig),
     }));
   }
   return dao;
@@ -99,4 +141,5 @@ export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
 export type ServiceTopicDao = {
   existsById: ReturnType<typeof existsById>;
   findById: ReturnType<typeof findById>;
+  findAllNotDeletedTopics: ReturnType<typeof findAllNotDeletedTopics>;
 };

@@ -10,6 +10,7 @@ import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/mo
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
+import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
@@ -60,6 +61,11 @@ import {
   makeUploadServiceLogoHandler,
 } from "./controllers/upload-service-logo";
 
+import {
+  applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
+  makeGetServiceTopicsHandler,
+} from "./controllers/get-service-topics";
+
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
 
@@ -72,8 +78,10 @@ type Dependencies = {
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
   telemetryClient: ReturnType<typeof initAppInsights>;
   blobService: BlobService;
+  serviceTopicDao: ServiceTopicDao;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export const createWebServer = ({
   basePath,
   fsmLifecycleClient,
@@ -83,6 +91,7 @@ export const createWebServer = ({
   subscriptionCIDRsModel,
   telemetryClient,
   blobService,
+  serviceTopicDao,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -113,6 +122,17 @@ export const createWebServer = ({
         telemetryClient,
       }),
       applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel)
+    )
+  );
+
+  router.get(
+    "/services/topics",
+    pipe(
+      makeGetServiceTopicsHandler({
+        serviceTopicDao,
+        telemetryClient,
+      }),
+      applyGetServiceTopicsRequestMiddelwares
     )
   );
 
