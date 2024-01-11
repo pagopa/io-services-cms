@@ -14,7 +14,7 @@
   },
   "authorizedCidrs": {
     "add": "Aggiungi indirizzo IP",
-    "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le chiavi API.",
+    "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le API key.",
     "title": "Indirizzi IP"
   },
   "buttons": {
@@ -318,12 +318,12 @@
       "description": "Segui i passaggi e compila i campi richiesti. Una volta modificato, potrai inviare il servizio in revisione e procedere poi alla pubblicazione su app IO."
     },
     "keys": {
-      "title": "Chiavi API",
-      "description": "Qui puoi gestire le chiavi API da utilizzare per autenticare le richieste dell’ente.",
+      "title": "API Key",
+      "description": "Qui puoi gestire le API key da utilizzare per autenticare le richieste dell’ente.",
       "manage": {
-        "title": "Chiave API Manage",
+        "title": "API Key Manage",
         "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente.",
-        "shortcut": "Gestisci chiavi API"
+        "shortcut": "Gestisci API Key"
       }
     },
     "users": {
