@@ -14,8 +14,6 @@ const mockConfig = ({
   AZURE_APIM_PRODUCT_NAME: faker.string.alpha()
 } as unknown) as Configuration;
 
-const first100CharsOrgName = faker.string.alpha(100);
-
 const aValidJwtPayload = {
   exp: faker.number.int(),
   iat: faker.number.int(),
@@ -33,7 +31,7 @@ const aValidJwtPayload = {
   organization: {
     id: faker.string.uuid(),
     fiscal_code: faker.helpers.fromRegExp(/[0-9]{11}/),
-    name: `${first100CharsOrgName} ${faker.company.name()}`,
+    name: faker.company.name(),
     roles: [
       {
         partyRole: faker.string.alpha(),
@@ -68,9 +66,9 @@ const getExpectedCreateUserReqParam = (
   organization: IdentityTokenPayload["organization"]
 ) => ({
   email: `org.${organization.id}@selfcare.io.pagopa.it`,
-  firstName: first100CharsOrgName,
+  firstName: organization.fiscal_code,
   lastName: organization.id,
-  note: organization.fiscal_code
+  note: organization.name
 });
 
 const getExpectedUserEmailReqParam = (
