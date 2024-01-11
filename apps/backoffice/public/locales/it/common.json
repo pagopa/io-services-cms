@@ -372,7 +372,7 @@
       }
     },
     "logo": {
-      "disclaimerText": "Inserisci <strong>solo</strong> il logo del tuo ente.<br />Sarai responsabile dell’inserimento di immagini diverse da quella indicata.",
+      "disclaimerText": "Inserisci <strong>solo</strong> il logo del tuo servizio, se ne ha uno.<br />Sarai responsabile dell’inserimento di immagini diverse da quella indicata.",
       "dropzoneText": "Carica logo del servizio",
       "loadingText": "Caricamento in corso",
       "rejectedText": "Formato non supportato",
