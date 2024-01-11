@@ -56,6 +56,20 @@ const hasTwoDifferentVersions = (service: ServiceListItem) =>
   service.status.value !== ServiceLifecycleStatusTypeEnum.deleted &&
   service.status.value !== ServiceLifecycleStatusTypeEnum.approved;
 
+/** Simply check if service status value is `deleted` */
+const isServiceStatusValueDeleted = (
+  serviceStatusValue: ServiceLifecycleStatusTypeEnum
+) => serviceStatusValue === ServiceLifecycleStatusTypeEnum.deleted;
+
+/**
+ * Returns base color for MUI `Typography` component.
+ * @param serviceStatusValue
+ * @returns `inherit` as default color, `text.disabled` if service status value is `deleted` */
+const getTypographyDefaultColor = (
+  serviceStatusValue: ServiceLifecycleStatusTypeEnum
+) =>
+  isServiceStatusValueDeleted(serviceStatusValue) ? "text.disabled" : "inherit";
+
 export default function Services() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -77,9 +91,7 @@ export default function Services() {
             ) : null
           }
           sx={{ fontWeight: 700, textAlign: "left" }}
-          disabled={
-            service.status.value === ServiceLifecycleStatusTypeEnum.deleted
-          }
+          disabled={isServiceStatusValueDeleted(service.status.value)}
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
@@ -95,7 +107,10 @@ export default function Services() {
       alignment: "left",
       name: "last_update",
       cellTemplate: service => (
-        <Typography variant="body2">
+        <Typography
+          variant="body2"
+          color={getTypographyDefaultColor(service.status.value)}
+        >
           {new Date(service.last_update).toLocaleString()}
         </Typography>
       )
@@ -105,7 +120,12 @@ export default function Services() {
       alignment: "left",
       name: "id",
       cellTemplate: service => (
-        <Typography variant="monospaced">{service.id}</Typography>
+        <Typography
+          variant="monospaced"
+          color={getTypographyDefaultColor(service.status.value)}
+        >
+          {service.id}
+        </Typography>
       )
     },
     {
