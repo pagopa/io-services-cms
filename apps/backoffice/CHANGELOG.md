@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.5.3
+
+### Patch Changes
+
+- f3d966c: Rename "Chiavi API" to "API Key" in IT translations
+- 9e9a11b: Upgrade Axios and follow-redirects dependencies
+- acb4a9f: flip apim user firstName and note values
+
 ## 1.5.2
 
 ### Patch Changes
