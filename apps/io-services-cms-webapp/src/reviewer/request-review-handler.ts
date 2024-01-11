@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import {
+  Queue,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -29,7 +33,8 @@ const parseIncomingMessage = (
 const createJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
   (
-    service: Queue.RequestReviewItem
+    service: Queue.RequestReviewItem,
+    firstPublication: boolean
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     pipe(
       service.id,
@@ -37,7 +42,7 @@ const createJiraTicket =
       TE.mapLeft(E.toError),
       TE.chain((delegate) =>
         pipe(
-          jiraProxy.createJiraIssue(service, delegate),
+          jiraProxy.createJiraIssue(service, delegate, firstPublication),
           TE.mapLeft(E.toError)
         )
       )
@@ -116,7 +121,8 @@ const sendServiceToReview =
   (
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    apimService: ApimUtils.ApimService
+    apimService: ApimUtils.ApimService,
+    fsmPublicationClient: ServicePublication.FsmClient
   ) =>
   (service: Queue.RequestReviewItem): TE.TaskEither<Error, void> =>
     pipe(
@@ -125,7 +131,16 @@ const sendServiceToReview =
       TE.chain(
         flow(
           O.fold(
-            () => createJiraTicket(apimService, jiraProxy)(service), // No ticket found, so we can create a new one
+            () =>
+              pipe(
+                isFirstServicePublication(fsmPublicationClient)(service.id),
+                TE.chainW((firstPublication) =>
+                  createJiraTicket(apimService, jiraProxy)(
+                    service,
+                    firstPublication
+                  )
+                )
+              ), // No ticket found, so we can create a new one
             processExistingJiraTicket(apimService, jiraProxy, service) // Ticket found, so we need to reopen it and update it
           )
         )
@@ -134,11 +149,28 @@ const sendServiceToReview =
       TE.map((_) => void 0)
     );
 
+const isFirstServicePublication =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (serviceId: NonEmptyString): TE.TaskEither<Error, boolean> =>
+    pipe(
+      serviceId,
+      fsmPublicationClient.getStore().fetch,
+      TE.map(
+        flow(
+          O.fold(
+            () => true,
+            (_) => false
+          )
+        )
+      )
+    );
+
 export const createRequestReviewHandler = (
   dao: ServiceReviewDao,
   jiraProxy: JiraProxy,
   apimService: ApimUtils.ApimService,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
+  fsmPublicationClient: ServicePublication.FsmClient,
   config: IConfig
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((_context, queueItem) =>
@@ -151,7 +183,13 @@ export const createRequestReviewHandler = (
           isUserAllowedForAutomaticApproval(config, apimService, service.id),
           TE.chain(
             B.fold(
-              () => sendServiceToReview(dao, jiraProxy, apimService)(service),
+              () =>
+                sendServiceToReview(
+                  dao,
+                  jiraProxy,
+                  apimService,
+                  fsmPublicationClient
+                )(service),
               () => approveService(fsmLifecycleClient)(service)
             )
           )

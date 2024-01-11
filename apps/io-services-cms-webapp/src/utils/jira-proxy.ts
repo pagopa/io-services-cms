@@ -19,6 +19,12 @@ const formatServiceScope = (scope: string) =>
     ? `{color:#EA4436}*${scope} (Verificare che sia effettivamente un servizio nazionale prima di procedere con l'approvazione)*{color}`
     : scope;
 
+// TODO: this is placeholder, we are waiting for the right copy
+const formatFirtPublication = (firstPublication: boolean) =>
+  firstPublication
+    ? "{color:#EA4436}*PRIMA PUBBLICAZIONE*{color}"
+    : "{color:#EA4436}*AGGIORNAMENTO*{color}";
+
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
 
@@ -34,7 +40,8 @@ export type JiraIssueStatusFilter =
 export type JiraProxy = {
   readonly createJiraIssue: (
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
+    firstPublication: boolean
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
   readonly searchJiraIssuesByKeyAndStatus: (
     jiraIssueKeys: ReadonlyArray<NonEmptyString>,
@@ -93,13 +100,15 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
 
   const buildIssueDescription = (
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
+    firstPublication: boolean
   ) =>
     `h1. Dati Servizio
     \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
     \n\nh3. *Area:* ${formatServiceScope(service.data.metadata.scope)}
+    \n\nh3. *Area:* ${formatFirtPublication(firstPublication)}
     \n\nh2. *Nome Servizio: ${service.data.name}*
     \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
     \n\n----\n\nh3. _Contatti:_
@@ -122,11 +131,12 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
 
   const createJiraIssue = (
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
+    firstPublication: boolean
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     jiraClient.createJiraIssue(
       formatIssueTitle(service.id),
-      buildIssueDescription(service, delegate),
+      buildIssueDescription(service, delegate, firstPublication),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );
@@ -139,7 +149,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     jiraClient.updateJiraIssue(
       ticketKey,
       formatIssueTitle(service.id),
-      buildIssueDescription(service, delegate),
+      buildIssueDescription(service, delegate, false),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );
