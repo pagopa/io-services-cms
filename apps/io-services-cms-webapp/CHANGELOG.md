@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.3
+
+### Patch Changes
+
+- 0d0a06e: ADD PostgresSQL DB healthcheck
+
 ## 1.26.2
 
 ### Patch Changes

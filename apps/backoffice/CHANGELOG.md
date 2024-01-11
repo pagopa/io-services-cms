@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.5.2
+
+### Patch Changes
+
+- 85d2fec: Fix upload service logo copy
+
 ## 1.5.1
 
 ### Patch Changes
