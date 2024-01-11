@@ -207,9 +207,9 @@ const createApimUser = (config: Configuration) => (
         email: formatApimAccountEmailForSelfcareOrganization(
           identityTokenPayload.organization
         ),
-        firstName: identityTokenPayload.organization.name.substring(0, 100),
+        firstName: identityTokenPayload.organization.fiscal_code,
         lastName: identityTokenPayload.organization.id,
-        note: identityTokenPayload.organization.fiscal_code
+        note: identityTokenPayload.organization.name
       }),
     TE.mapLeft(err =>
       apimErrorToManagedInternalError(
