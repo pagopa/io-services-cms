@@ -13,6 +13,7 @@ export type ServiceStatusProps = {
 export const ServiceStatus = ({ status }: ServiceStatusProps) => {
   const { t } = useTranslation();
   const [color, setColor] = useState<string>("default");
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     switch (status?.value) {
@@ -20,8 +21,6 @@ export const ServiceStatus = ({ status }: ServiceStatusProps) => {
         setColor("success");
         break;
       case ServiceLifecycleStatusTypeEnum.deleted:
-        setColor("error");
-        break;
       case ServiceLifecycleStatusTypeEnum.draft:
         setColor("default");
         break;
@@ -35,6 +34,7 @@ export const ServiceStatus = ({ status }: ServiceStatusProps) => {
         setColor("default");
         break;
     }
+    setDisabled(status?.value === ServiceLifecycleStatusTypeEnum.deleted);
   }, [status]);
 
   return (
@@ -45,6 +45,7 @@ export const ServiceStatus = ({ status }: ServiceStatusProps) => {
         label={t(`service.status.${status?.value}`)}
         size="small"
         color={color as any}
+        disabled={disabled}
       />
     </LoaderSkeleton>
   );
