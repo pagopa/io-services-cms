@@ -52,14 +52,20 @@ const updateExistingJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
   (
     service: Queue.RequestReviewItem,
-    existingTicket: JiraIssue
+    existingTicket: JiraIssue,
+    firstPublication: boolean
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     pipe(
       service.id,
       apimService.getDelegateFromServiceId,
       TE.chainW((delegate) =>
         pipe(
-          jiraProxy.updateJiraIssue(existingTicket.key, service, delegate),
+          jiraProxy.updateJiraIssue(
+            existingTicket.key,
+            service,
+            delegate,
+            firstPublication
+          ),
           TE.chain((_) => jiraProxy.reOpenJiraIssue(existingTicket.key)),
           TE.map((_) => ({
             id: existingTicket.id,
@@ -99,7 +105,8 @@ const processExistingJiraTicket =
   (
     apimService: ApimUtils.ApimService,
     jiraProxy: JiraProxy,
-    service: Queue.RequestReviewItem
+    service: Queue.RequestReviewItem,
+    firstPublication: boolean
   ) =>
   (existingTicket: JiraIssue) =>
     pipe(
@@ -111,7 +118,8 @@ const processExistingJiraTicket =
           pipe(
             updateExistingJiraTicket(apimService, jiraProxy)(
               service,
-              existingTicket
+              existingTicket,
+              firstPublication
             )
           )
       )
@@ -128,20 +136,25 @@ const sendServiceToReview =
     pipe(
       service.id,
       jiraProxy.getPendingAndRejectedJiraIssueByServiceId, // Check if there is already a ticket for this service
-      TE.chain(
-        flow(
+      TE.bindTo("existingTicket"),
+      TE.bind("firstPublication", () =>
+        isFirstServicePublication(fsmPublicationClient)(service.id)
+      ),
+      TE.chain(({ existingTicket, firstPublication }) =>
+        pipe(
+          existingTicket,
           O.fold(
             () =>
-              pipe(
-                isFirstServicePublication(fsmPublicationClient)(service.id),
-                TE.chainW((firstPublication) =>
-                  createJiraTicket(apimService, jiraProxy)(
-                    service,
-                    firstPublication
-                  )
-                )
+              createJiraTicket(apimService, jiraProxy)(
+                service,
+                firstPublication
               ), // No ticket found, so we can create a new one
-            processExistingJiraTicket(apimService, jiraProxy, service) // Ticket found, so we need to reopen it and update it
+            processExistingJiraTicket(
+              apimService,
+              jiraProxy,
+              service,
+              firstPublication
+            ) // Ticket found, so we need to reopen it and update it
           )
         )
       ),

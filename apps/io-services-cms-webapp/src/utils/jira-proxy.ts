@@ -56,7 +56,8 @@ export type JiraProxy = {
   readonly updateJiraIssue: (
     ticketKey: NonEmptyString,
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
+    firstPublication: boolean
   ) => TE.TaskEither<Error, void>;
   readonly reOpenJiraIssue: (
     ticketKey: NonEmptyString
@@ -144,12 +145,13 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
   const updateJiraIssue = (
     ticketKey: NonEmptyString,
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
+    firstPublication: boolean
   ): TE.TaskEither<Error, void> =>
     jiraClient.updateJiraIssue(
       ticketKey,
       formatIssueTitle(service.id),
-      buildIssueDescription(service, delegate, false),
+      buildIssueDescription(service, delegate, firstPublication),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );
