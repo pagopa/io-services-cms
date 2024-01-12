@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.4
+
+### Patch Changes
+
+- d2a5303: ADD GET /internal/services/:serviceId and GET /internal/services/:serviceId/release API
+
 ## 1.26.3
 
 ### Patch Changes

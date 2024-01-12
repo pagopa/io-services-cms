@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.5.4
+
+### Patch Changes
+
+- 89d6e10: Update deleted service table row layout in Services Page
+
 ## 1.5.3
 
 ### Patch Changes
