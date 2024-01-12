@@ -1,7 +1,7 @@
 import useScreenSize from "@/hooks/use-screen-size";
 import { RequiredAuthorizations } from "@/types/auth";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
-import { ExitToAppRounded, MenuOpen } from "@mui/icons-material";
+import { ExitToAppRounded, Menu } from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -41,14 +41,6 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
 
   const [settings, setSettings] = useState({ width: 300, collapse: false });
   const prevWidthRef = useRef<number | null>(null);
-
-  // styles used to rotate the open/close button icon
-  const menuOpenStyle = {
-    transform: "rotate(0deg)"
-  };
-  const menuCloseStyle = {
-    transform: "rotate(-180deg)"
-  };
 
   /** Render a tooltip wrapper on menu item text when menu is closed _(collapse=true)_ */
   const renderTooltipOnCollapse = (text: string, children: ReactElement) =>
@@ -181,19 +173,16 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
         </List>
       </Box>
 
-      <Box id="open-close" textAlign="right">
+      <Box id="open-close">
         <Divider />
         <IconButton
           aria-label="open-close"
-          sx={{ margin: 1 }}
+          sx={{ margin: 2.75 }}
           onClick={_ =>
             settings.collapse ? manageMenuOpen(true) : setMenuCollapsed()
           }
         >
-          <MenuOpen
-            fontSize="inherit"
-            style={settings.collapse ? menuCloseStyle : menuOpenStyle}
-          />
+          <Menu />
         </IconButton>
       </Box>
     </Box>
