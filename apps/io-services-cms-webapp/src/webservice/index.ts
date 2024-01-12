@@ -31,6 +31,11 @@ import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
+
+import {
+  applyRequestMiddelwares as applyGetServiceLifecycleInternalRequestMiddelwares,
+  makeGetServiceLifecycleInternalHandler,
+} from "./controllers/get-service-lifecycle-internal";
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
@@ -141,6 +146,20 @@ export const createWebServer = ({
     )
   );
 
+  // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
+  router.get(
+    `/internal${serviceLifecyclePath}`,
+    pipe(
+      makeGetServiceLifecycleInternalHandler({
+        store: fsmLifecycleClient.getStore(),
+        apimService,
+        telemetryClient,
+        config,
+      }),
+      applyGetServiceLifecycleInternalRequestMiddelwares
+    )
+  );
+
   router.get(
     serviceLifecyclePath,
     pipe(
@@ -218,9 +237,9 @@ export const createWebServer = ({
       )
     )
   );
-  // This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
+  // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
   router.get(
-    "/internal/services/:serviceId/release",
+    `/internal${servicePublicationPath}`,
     pipe(
       makeGetServicePublicationInternalHandler({
         store: fsmPublicationClient.getStore(),

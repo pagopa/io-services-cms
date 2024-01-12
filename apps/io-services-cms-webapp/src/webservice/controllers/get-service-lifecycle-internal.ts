@@ -1,10 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import {
-  FSMStore,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -26,46 +22,46 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
+import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
+
 import { IConfig } from "../../config";
-import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   EventNameEnum,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
-import { itemToResponse } from "../../utils/converters/service-publication-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 // FIXME: This Handler is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
 
-const logPrefix = "GetServicePublicationInternalHandler";
-
-type Dependencies = {
-  // A store of ServicePublication objects
-  store: FSMStore<ServicePublication.ItemType>;
-
-  apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
-  config: IConfig;
-};
+const logPrefix = "GetServiceLifecycleInternalHandler";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
   | ErrorResponseTypes;
 
-type GetServicePublicationServiceInternalHandler = (
+type GetServiceLifecycleInternalHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
-export const makeGetServicePublicationInternalHandler =
+type Dependencies = {
+  // A store od ServiceLifecycle objects
+  store: FSMStore<ServiceLifecycle.ItemType>;
+  apimService: ApimUtils.ApimService;
+  telemetryClient: ReturnType<typeof initAppInsights>;
+  config: IConfig;
+};
+
+export const makeGetServiceLifecycleInternalHandler =
   ({
     store,
     apimService,
     telemetryClient,
     config,
-  }: Dependencies): GetServicePublicationServiceInternalHandler =>
+  }: Dependencies): GetServiceLifecycleInternalHandler =>
   (context, auth, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -92,7 +88,7 @@ export const makeGetServicePublicationInternalHandler =
       TE.map(
         trackEventOnResponseOK(
           telemetryClient,
-          EventNameEnum.GetServicePublicationInternal,
+          EventNameEnum.GetServiceLifecycle,
           {
             userSubscriptionId: auth.subscriptionId,
             serviceId,
@@ -109,7 +105,7 @@ export const makeGetServicePublicationInternalHandler =
     )();
 
 export const applyRequestMiddelwares = (
-  handler: GetServicePublicationServiceInternalHandler
+  handler: GetServiceLifecycleInternalHandler
 ) => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
