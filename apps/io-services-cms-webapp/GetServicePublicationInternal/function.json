@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "services/{serviceId}/releaseinternal",
+      "route": "internal/services/{serviceId}/release",
       "methods": ["get"]
     },
     {

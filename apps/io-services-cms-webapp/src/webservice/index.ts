@@ -220,7 +220,7 @@ export const createWebServer = ({
   );
   // This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
   router.get(
-    "/services/:serviceId/releaseinternal",
+    "/internal/services/:serviceId/release",
     pipe(
       makeGetServicePublicationInternalHandler({
         store: fsmPublicationClient.getStore(),
