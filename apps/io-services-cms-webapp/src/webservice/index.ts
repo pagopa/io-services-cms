@@ -35,6 +35,11 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
+
+import {
+  applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
+  makeGetServicePublicationInternalHandler,
+} from "./controllers/get-service-publication-internal";
 import {
   applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
   makeGetServicesHandler,
@@ -211,6 +216,19 @@ export const createWebServer = ({
         config,
         subscriptionCIDRsModel
       )
+    )
+  );
+  // This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
+  router.get(
+    "/services/:serviceId/releaseinternal",
+    pipe(
+      makeGetServicePublicationInternalHandler({
+        store: fsmPublicationClient.getStore(),
+        apimService,
+        telemetryClient,
+        config,
+      }),
+      applyGetPublicationServiceInternalRequestMiddelwares
     )
   );
 

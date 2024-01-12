@@ -46,6 +46,7 @@ export enum EventNameEnum {
   GetServiceKeys = "keys.get",
   GetServiceLifecycle = "lifecycle.get",
   GetServicePublication = "publication.get",
+  GetServicePublicationInternal = "publication.get.internal",
   GetServices = "all.get",
   PublishService = "publish",
   RegenerateServiceKeys = "keys.regenerate",
