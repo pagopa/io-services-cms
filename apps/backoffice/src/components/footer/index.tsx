@@ -9,7 +9,7 @@ import {
 } from "@pagopa/mui-italia";
 import { Trans, useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const pagoPACompanyLabel = "PagoPa S.p.A.";
 
@@ -22,6 +22,7 @@ const pagoPALink: RootLinkType = {
 
 const companyLegalInfo = <Trans i18nKey="footer.legalInfo" />;
 
+const supportedLocales = ["it", "en"];
 const languages: Languages = {
   it: {
     it: "Italiano",
@@ -91,6 +92,15 @@ export const AppFooter = ({ loggedUser, currentLanguage }: AppFooterProps) => {
     },
     [router]
   );
+
+  useEffect(() => {
+    // Detect the browser's preferred language
+    const browserLanguage = navigator.language;
+
+    if (supportedLocales.includes(browserLanguage)) {
+      setLang(browserLanguage as any);
+    }
+  }, []);
 
   return (
     <Footer
