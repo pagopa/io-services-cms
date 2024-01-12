@@ -88,7 +88,7 @@ export const makeGetServiceLifecycleInternalHandler =
       TE.map(
         trackEventOnResponseOK(
           telemetryClient,
-          EventNameEnum.GetServiceLifecycle,
+          EventNameEnum.GetServiceLifecycleInternal,
           {
             userSubscriptionId: auth.subscriptionId,
             serviceId,
