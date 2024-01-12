@@ -2,4 +2,4 @@
 "io-services-cms-webapp": patch
 ---
 
-ADD GET /services/:serviceId/releaseinternal API
+ADD GET /internal/services/:serviceId/release API
