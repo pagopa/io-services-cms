@@ -15,6 +15,7 @@ import {
 import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
+import { a } from "vitest/dist/suite-9ReVEt_h";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -250,6 +251,42 @@ describe("Service Review Handler", () => {
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
+  it("when a new ticket is created it should contains the fact that a service is not the first time it is published", async () => {
+    const mockFsmPublicationClient = {
+      getStore: vi.fn(() => ({
+        fetch: vi.fn((serviceId: NonEmptyString) => {
+          return TE.of(O.some(aService));
+        }),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mainMockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
+      aService,
+      aDelegate,
+      false
+    );
+    expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
   it("should update a existing rejected ticket for a new service review", async () => {
     const mockJiraProxy = {
       ...mainMockJiraProxy,
@@ -282,6 +319,56 @@ describe("Service Review Handler", () => {
       aService,
       aDelegate,
       isFirstReview
+    );
+    expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key
+    );
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith(
+      aRejectDbInsertData
+    );
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("rejected ticket is reopened and is related to an already published service", async () => {
+    const mockFsmPublicationClient = {
+      getStore: vi.fn(() => ({
+        fetch: vi.fn((serviceId: NonEmptyString) => {
+          return TE.of(O.some(aService));
+        }),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    const mockJiraProxy = {
+      ...mainMockJiraProxy,
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.of(O.some(aRejectedJiraIssue));
+        }
+      ),
+    };
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key,
+      aService,
+      aDelegate,
+      false
     );
     expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key
