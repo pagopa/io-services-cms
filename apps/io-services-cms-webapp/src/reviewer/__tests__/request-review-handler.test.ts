@@ -23,6 +23,7 @@ afterEach(() => {
 });
 
 const isFirstReview = true;
+const isNotFirstReview = false;
 
 const createContext = () =>
   ({
@@ -281,7 +282,7 @@ describe("Service Review Handler", () => {
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
       aDelegate,
-      false
+      isNotFirstReview
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
@@ -368,7 +369,7 @@ describe("Service Review Handler", () => {
       aRejectedJiraIssue.key,
       aService,
       aDelegate,
-      false
+      isNotFirstReview
     );
     expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key
