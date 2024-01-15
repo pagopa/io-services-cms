@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 export type FormStepSectionWrapperProps = {
   title: string;
-  icon: ReactNode;
+  icon?: ReactNode;
   children: ReactNode;
 };
 
