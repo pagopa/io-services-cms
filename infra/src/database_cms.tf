@@ -1,6 +1,6 @@
 # Database instance
 module "cosmosdb_account" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v7.44.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v7.45.0"
 
   name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
@@ -66,7 +66,7 @@ locals {
 }
 
 module "db_cms_containers" {
-  source   = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v7.44.0"
+  source   = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v7.45.0"
   for_each = { for c in local.database_containers : c.name => c }
 
   name                = each.value.name

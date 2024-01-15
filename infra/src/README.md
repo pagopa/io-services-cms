@@ -20,19 +20,19 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_api_services_cms_v2"></a> [api\_services\_cms\_v2](#module\_api\_services\_cms\_v2) | github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v7.44.0 |
-| <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.44.0 |
-| <a name="module_backoffice_app"></a> [backoffice\_app](#module\_backoffice\_app) | github.com/pagopa/terraform-azurerm-v3.git//app_service | v7.44.0 |
-| <a name="module_backoffice_app_snet"></a> [backoffice\_app\_snet](#module\_backoffice\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.44.0 |
-| <a name="module_backoffice_app_staging"></a> [backoffice\_app\_staging](#module\_backoffice\_app\_staging) | github.com/pagopa/terraform-azurerm-v3.git//app_service_slot | v7.44.0 |
-| <a name="module_cosmosdb_account"></a> [cosmosdb\_account](#module\_cosmosdb\_account) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account | v7.44.0 |
-| <a name="module_db_cms_containers"></a> [db\_cms\_containers](#module\_db\_cms\_containers) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container | v7.44.0 |
-| <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v3.git//key_vault | v7.44.0 |
-| <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v7.44.0 |
-| <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.44.0 |
-| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/pagopa/terraform-azurerm-v3.git//storage_account | v7.44.0 |
+| <a name="module_api_services_cms_v2"></a> [api\_services\_cms\_v2](#module\_api\_services\_cms\_v2) | github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v7.45.0 |
+| <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_backoffice_app"></a> [backoffice\_app](#module\_backoffice\_app) | github.com/pagopa/terraform-azurerm-v3.git//app_service | v7.45.0 |
+| <a name="module_backoffice_app_snet"></a> [backoffice\_app\_snet](#module\_backoffice\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_backoffice_app_staging"></a> [backoffice\_app\_staging](#module\_backoffice\_app\_staging) | github.com/pagopa/terraform-azurerm-v3.git//app_service_slot | v7.45.0 |
+| <a name="module_cosmosdb_account"></a> [cosmosdb\_account](#module\_cosmosdb\_account) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account | v7.45.0 |
+| <a name="module_db_cms_containers"></a> [db\_cms\_containers](#module\_db\_cms\_containers) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container | v7.45.0 |
+| <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v3.git//key_vault | v7.45.0 |
+| <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v7.45.0 |
+| <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/pagopa/terraform-azurerm-v3.git//storage_account | v7.45.0 |
 | <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | github.com/pagopa/terraform-azurerm-v3.git//function_app | v7.45.0 |
-| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.44.0 |
+| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.45.0 |
 
 ## Resources
 

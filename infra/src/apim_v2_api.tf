@@ -1,5 +1,5 @@
 module "api_services_cms_v2" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v7.44.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v7.45.0"
 
   name                = "io-services-cms-api"
   api_management_name = data.azurerm_api_management.apim_v2.name
