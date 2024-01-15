@@ -21,6 +21,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+const isFirstReview = true;
+
 const createContext = () =>
   ({
     bindings: {},
@@ -242,7 +244,7 @@ describe("Service Review Handler", () => {
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
       aDelegate,
-      true
+      isFirstReview
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
@@ -279,7 +281,7 @@ describe("Service Review Handler", () => {
       aRejectedJiraIssue.key,
       aService,
       aDelegate,
-      true
+      isFirstReview
     );
     expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key
@@ -453,7 +455,7 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
       aDelegate,
-      true
+      isFirstReview
     );
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
@@ -504,7 +506,7 @@ describe("Service Review Handler", () => {
       aRejectedJiraIssue.key,
       aService,
       aDelegate,
-      true
+      isFirstReview
     );
     expect(mockJiraProxy.reOpenJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
@@ -544,7 +546,7 @@ describe("Service Review Handler", () => {
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
       aDelegate,
-      true
+      isFirstReview
     );
     expect(mockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
