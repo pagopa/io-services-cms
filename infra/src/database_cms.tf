@@ -1,6 +1,6 @@
 # Database instance
 module "cosmosdb_account" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v6.19.1"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v7.45.0"
 
   name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
@@ -11,11 +11,13 @@ module "cosmosdb_account" {
 
   domain = "${local.project}-${local.application_basename}"
 
-  public_network_access_enabled     = var.cosmos_public_network_access_enabled
-  private_endpoint_enabled          = var.cosmos_private_endpoint_enabled
-  private_dns_zone_ids              = local.is_prod ? [data.azurerm_private_dns_zone.privatelink_documents_azure_com[0].id] : []
-  subnet_id                         = local.is_prod ? data.azurerm_subnet.private_endpoints_subnet[0].id : null
-  is_virtual_network_filter_enabled = false
+  public_network_access_enabled       = var.cosmos_public_network_access_enabled
+  private_endpoint_enabled            = var.cosmos_private_endpoint_enabled
+  private_dns_zone_sql_ids            = local.is_prod ? [data.azurerm_private_dns_zone.privatelink_documents_azure_com[0].id] : []
+  private_endpoint_sql_name           = "${local.project}-cosmos-${local.application_basename}"
+  private_service_connection_sql_name = "${local.project}-cosmos-services-cms-private-endpoint"
+  subnet_id                           = local.is_prod ? data.azurerm_subnet.private_endpoints_subnet[0].id : null
+  is_virtual_network_filter_enabled   = false
 
   main_geo_location_location       = azurerm_resource_group.rg.location
   main_geo_location_zone_redundant = true
@@ -64,7 +66,7 @@ locals {
 }
 
 module "db_cms_containers" {
-  source   = "git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v6.19.1"
+  source   = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v7.45.0"
   for_each = { for c in local.database_containers : c.name => c }
 
   name                = each.value.name

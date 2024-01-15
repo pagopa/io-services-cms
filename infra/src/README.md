@@ -13,26 +13,26 @@
 | Name | Version |
 |------|---------|
 | <a name="provider_azuread"></a> [azuread](#provider\_azuread) | 2.33.0 |
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.45.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 3.84.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_api_services_cms_v2"></a> [api\_services\_cms\_v2](#module\_api\_services\_cms\_v2) | git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v6.20.0 |
-| <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet | v6.19.1 |
-| <a name="module_backoffice_app"></a> [backoffice\_app](#module\_backoffice\_app) | git::https://github.com/pagopa/terraform-azurerm-v3.git//app_service | v6.20.2 |
-| <a name="module_backoffice_app_snet"></a> [backoffice\_app\_snet](#module\_backoffice\_app\_snet) | git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet | v6.20.2 |
-| <a name="module_backoffice_app_staging"></a> [backoffice\_app\_staging](#module\_backoffice\_app\_staging) | git::https://github.com/pagopa/terraform-azurerm-v3.git//app_service_slot | v6.20.2 |
-| <a name="module_cosmosdb_account"></a> [cosmosdb\_account](#module\_cosmosdb\_account) | git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account | v6.19.1 |
-| <a name="module_db_cms_containers"></a> [db\_cms\_containers](#module\_db\_cms\_containers) | git::https://github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container | v6.19.1 |
-| <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | git::https://github.com/pagopa/terraform-azurerm-v3.git//key_vault | v6.19.1 |
-| <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | git::https://github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v6.19.1 |
-| <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | git::https://github.com/pagopa/terraform-azurerm-v3.git//subnet | v6.19.1 |
-| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | git::https://github.com/pagopa/terraform-azurerm-v3.git//storage_account | v6.19.1 |
-| <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app | v6.20.0 |
-| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | git::https://github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v6.20.0 |
+| <a name="module_api_services_cms_v2"></a> [api\_services\_cms\_v2](#module\_api\_services\_cms\_v2) | github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v7.45.0 |
+| <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_backoffice_app"></a> [backoffice\_app](#module\_backoffice\_app) | github.com/pagopa/terraform-azurerm-v3.git//app_service | v7.45.0 |
+| <a name="module_backoffice_app_snet"></a> [backoffice\_app\_snet](#module\_backoffice\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_backoffice_app_staging"></a> [backoffice\_app\_staging](#module\_backoffice\_app\_staging) | github.com/pagopa/terraform-azurerm-v3.git//app_service_slot | v7.45.0 |
+| <a name="module_cosmosdb_account"></a> [cosmosdb\_account](#module\_cosmosdb\_account) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account | v7.45.0 |
+| <a name="module_db_cms_containers"></a> [db\_cms\_containers](#module\_db\_cms\_containers) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container | v7.45.0 |
+| <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v3.git//key_vault | v7.45.0 |
+| <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v7.45.0 |
+| <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
+| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/pagopa/terraform-azurerm-v3.git//storage_account | v7.45.0 |
+| <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | github.com/pagopa/terraform-azurerm-v3.git//function_app | v7.45.0 |
+| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.45.0 |
 
 ## Resources
 
@@ -46,6 +46,7 @@
 | [azurerm_key_vault_access_policy.access_policy_services_cms_infra_ci](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_services_cms](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.apim](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.github_action_cd](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.github_action_ci](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_secret.bo_auth_session_secret](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
@@ -85,6 +86,7 @@
 | [azurerm_key_vault_secret.asset_storage_connectionstring_secret](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.azure_client_secret_credential_client_id](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.azure_client_secret_credential_secret](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.function_apim_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.jira_token](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.legacy_cosmosdb_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
