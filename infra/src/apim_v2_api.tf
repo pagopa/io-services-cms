@@ -1,5 +1,5 @@
 module "api_services_cms_v2" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v7.44.0"
 
   name                = "io-services-cms-api"
   api_management_name = data.azurerm_api_management.apim_v2.name
@@ -54,6 +54,9 @@ resource "azurerm_api_management_named_value" "io_fn_services_cms_key_v2" {
   api_management_name = data.azurerm_api_management.apim_v2.name
   resource_group_name = data.azurerm_api_management.apim_v2.resource_group_name
   display_name        = "io-fn-services-cms-key"
-  value               = module.webapp_functions_app.primary_key
   secret              = "true"
+
+  value_from_key_vault {
+    secret_id = data.azurerm_key_vault_secret.function_apim_key.versionless_id
+  }
 }

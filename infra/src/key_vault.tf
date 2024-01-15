@@ -1,5 +1,5 @@
 module "key_vault_domain" {
-  source = "git::https://github.com/pagopa/terraform-azurerm-v3.git//key_vault?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//key_vault?ref=v7.44.0"
 
   name                       = "${local.project}-${local.application_basename}-kv"
   location                   = azurerm_resource_group.rg.location
@@ -30,6 +30,11 @@ data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
 
 data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "function_apim_key" {
+  name         = "${local.project}-services-cms-webapp-fn-apim-key"
   key_vault_id = module.key_vault_domain.id
 }
 
@@ -74,6 +79,17 @@ resource "azurerm_key_vault_access_policy" "github_action_cd" {
   object_id    = data.azuread_service_principal.github_action_iac_cd.object_id
 
   secret_permissions      = ["Get", "List", "Set", ]
+  storage_permissions     = []
+  certificate_permissions = []
+  key_permissions         = []
+}
+
+resource "azurerm_key_vault_access_policy" "apim" {
+  key_vault_id = module.key_vault_domain.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_api_management.apim_v2.identity[0].principal_id
+
+  secret_permissions      = ["Get", "List", ]
   storage_permissions     = []
   certificate_permissions = []
   key_permissions         = []
