@@ -4,7 +4,7 @@ import {
   UrlFieldController
 } from "@/components/forms/controllers";
 import { AssistanceChannelType } from "@/types/service";
-import LinkIcon from "@mui/icons-material/Link";
+import { SupportAgent } from "@mui/icons-material";
 import MobileScreenShareIcon from "@mui/icons-material/MobileScreenShare";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { TFunction } from "i18next";
@@ -143,14 +143,13 @@ export const ServiceBuilderStep2 = () => {
       <FormStepSectionWrapper
         key={1}
         title={t("forms.service.assistanceChannels.label")}
-        icon={<LinkIcon />}
+        icon={<SupportAgent />}
       >
         <ServiceAssistanceChannels />
       </FormStepSectionWrapper>
       <FormStepSectionWrapper
         key={2}
         title={t("forms.service.otherChannels")}
-        icon={<MobileScreenShareIcon />}
       >
         <UrlFieldController
           name="metadata.web_url"

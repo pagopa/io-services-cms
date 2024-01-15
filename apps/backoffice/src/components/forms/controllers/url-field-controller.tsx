@@ -1,4 +1,4 @@
-import CallMadeIcon from "@mui/icons-material/CallMade";
+import { OpenInNew } from "@mui/icons-material";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import { Grid, InputAdornment, TextField, TextFieldProps } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
@@ -53,8 +53,8 @@ export function UrlFieldController({
           </Grid>
           <Grid item xs="auto">
             <ButtonNaked
-              color="text"
-              endIcon={<CallMadeIcon />}
+              color="primary"
+              startIcon={<OpenInNew />}
               onFocusVisible={function noRefCheck() {}}
               size="large"
               disabled={value ? value.length === 0 ?? false : true}

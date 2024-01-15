@@ -5,8 +5,8 @@ import {
   UrlFieldController
 } from "@/components/forms/controllers";
 import {
-  AddBox,
   AddCircleOutline,
+  Link,
   RemoveCircleOutline
 } from "@mui/icons-material";
 import {
@@ -100,7 +100,7 @@ export const ServiceExtraConfigurator = () => {
             disabled: false,
             label: "forms.service.extraConfig.cta.label",
             description: "forms.service.extraConfig.cta.description",
-            icon: <AddBox />
+            icon: <Link />
           })}
           {/*
           // TODO: as we are awaiting official communications, we do not show (even if disabled) extra configurations that are not agreed upon 
@@ -130,7 +130,7 @@ export const ServiceExtraConfigurator = () => {
     <FormStepSectionWrapper
       key={1}
       title={t("forms.service.extraConfig.cta.label")}
-      icon={<AddBox />}
+      icon={<Link />}
     >
       <TextFieldController
         required
