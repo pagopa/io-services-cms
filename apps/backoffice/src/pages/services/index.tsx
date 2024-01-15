@@ -23,7 +23,7 @@ import {
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Add, Block, CallSplit, Check, Close } from "@mui/icons-material";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
@@ -138,14 +138,17 @@ export default function Services() {
       label: "routes.services.tableHeader.visibility",
       alignment: "center",
       name: "visibility",
-      cellTemplate: service =>
-        service.visibility === VisibilityEnum.published ? (
-          <Check fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
-        ) : service.visibility === VisibilityEnum.unpublished ? (
-          <Close fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
-        ) : (
-          <Block fontSize="small" color="disabled" />
-        )
+      cellTemplate: service => (
+        <Stack direction="row" justifyContent="center" alignItems="center">
+          {service.visibility === VisibilityEnum.published ? (
+            <Check fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
+          ) : service.visibility === VisibilityEnum.unpublished ? (
+            <Close fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
+          ) : (
+            <Block fontSize="small" color="disabled" />
+          )}
+        </Stack>
+      )
     }
   ];
 
