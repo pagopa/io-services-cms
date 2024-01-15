@@ -6,9 +6,11 @@ import {
 } from "@/components/forms/controllers";
 import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopic } from "@/generated/api/ServiceTopic";
+import { Preview } from "@mui/icons-material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PaletteIcon from "@mui/icons-material/Palette";
-import { Button, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { TFunction } from "i18next";
 import { useSession } from "next-auth/react";
@@ -90,7 +92,12 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
             />
           }
         />
-        <Grid container spacing={2} justifyContent="center" alignItems="center">
+        <Grid
+          container
+          spacing={2}
+          justifyContent="center"
+          alignItems="flex-start"
+        >
           <Grid item xs>
             <TextFieldController
               required
@@ -109,14 +116,16 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
             />
           </Grid>
           <Grid item xs="auto">
-            <Button
-              size="small"
-              variant="text"
+            <ButtonNaked
+              color="primary"
+              startIcon={<Preview />}
+              size="medium"
+              sx={{ fontWeight: 700, marginTop: 3 }}
               disabled={!isPreviewEnabled}
               onClick={() => setIsPreviewOpen(true)}
             >
               {t("service.preview.button")}
-            </Button>
+            </ButtonNaked>
           </Grid>
         </Grid>
       </FormStepSectionWrapper>
