@@ -140,11 +140,11 @@ export default function Services() {
       name: "visibility",
       cellTemplate: service =>
         service.visibility === VisibilityEnum.published ? (
-          <Check sx={TEXT_SECONDARY_COLOR_STYLE} />
+          <Check fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
         ) : service.visibility === VisibilityEnum.unpublished ? (
-          <Close sx={TEXT_SECONDARY_COLOR_STYLE} />
+          <Close fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
         ) : (
-          <Block color="disabled" />
+          <Block fontSize="small" color="disabled" />
         )
     }
   ];
