@@ -1,15 +1,15 @@
 /**
  * MigrationManager Component
- * 
- * The MigrationManager serves as the central interface for managing the migration of Azure subscriptions from individual user ownership to institutional ownership. 
+ *
+ * The MigrationManager serves as the central interface for managing the migration of Azure subscriptions from individual user ownership to institutional ownership.
  * This React component is part of the Azure Apim Subscription Manager and includes both UI and logic to handle various aspects of the migration process.
- * 
+ *
  * Capabilities:
  * - Displaying the current migration status of Azure subscriptions, grouped by user.
  * - Providing real-time updates on the migration progress.
  * - Allowing administrators to initiate and monitor the migration process.
  * - Facilitating the selection of delegates responsible for importing subscriptions into the institution, effectively transferring ownership from individual users to the institution.
- * 
+ *
  * Usage:
  * This component is intended for use within the administrative dashboard of the Azure Apim Subscription Manager, providing administrators with the tools needed to oversee and control the subscription migration process.
  */
@@ -22,6 +22,7 @@ import { MigrationDelegate } from "@/generated/api/MigrationDelegate";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import useFetch from "@/hooks/use-fetch";
+import { Upload } from "@mui/icons-material";
 import { Alert, AlertTitle, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import { useTranslation } from "next-i18next";
@@ -202,6 +203,8 @@ export const MigrationManager = () => {
           onClick={handleOpenImportModal}
           loading={importInProgress}
           disabled={importInProgress}
+          startIcon={<Upload fontSize="inherit" />}
+          sx={{ fontWeight: 700 }}
           fullWidth
         />
         <Divider />
