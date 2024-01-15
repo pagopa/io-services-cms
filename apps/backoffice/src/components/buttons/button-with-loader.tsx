@@ -3,8 +3,13 @@ import { useTranslation } from "next-i18next";
 import { ButtonBaseProps } from ".";
 
 export type ButtonWithLoaderProps = {
+  /** If `true`, the component shows a centered `CircularProgress` inside.
+   *
+   * @default false */
   loading?: boolean;
+  /** Button text */
   label: string;
+  /** If `true`, the button will take up the full width of its container. */
   fullWidth?: boolean;
 } & ButtonBaseProps;
 
@@ -12,6 +17,9 @@ export const ButtonWithLoader = ({
   loading,
   label,
   fullWidth,
+  startIcon,
+  endIcon,
+  sx,
   disabled,
   onClick
 }: ButtonWithLoaderProps) => {
@@ -32,6 +40,9 @@ export const ButtonWithLoader = ({
         disabled={disabled || loading}
         onClick={handleButtonClick}
         fullWidth={fullWidth}
+        startIcon={startIcon}
+        endIcon={endIcon}
+        sx={sx}
       >
         {t(label)}
       </Button>
