@@ -1,7 +1,7 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import { TextFieldArrayController } from "@/components/forms/controllers";
 import { arrayOfIPv4CidrSchema } from "@/components/forms/schemas";
-import { AddLocationAlt } from "@mui/icons-material";
+import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
@@ -47,7 +47,7 @@ export const ServiceBuilderStep3 = () => {
       <FormStepSectionWrapper
         key={0}
         title={t("forms.service.authorizedCidrs")}
-        icon={<AddLocationAlt />}
+        icon={<PinDrop />}
       >
         <TextFieldArrayController
           name="authorized_cidrs"
