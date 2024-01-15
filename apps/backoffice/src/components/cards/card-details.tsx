@@ -1,5 +1,6 @@
 import { ArrowForward } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { ReactNode } from "react";
@@ -41,16 +42,15 @@ export const CardDetails = ({
   const { t } = useTranslation();
 
   const renderCallToActionButton = (cta: CardDetailsCtaType) => (
-    <Button
-      variant="text"
+    <ButtonNaked
       color="primary"
       endIcon={cta.icon ?? <ArrowForward />}
-      size="small"
+      size="medium"
       sx={{ fontWeight: 700 }}
       onClick={() => (cta.fn ? cta.fn() : null)}
     >
       {t(cta.label)}
-    </Button>
+    </ButtonNaked>
   );
 
   /** render cta on card footer */
