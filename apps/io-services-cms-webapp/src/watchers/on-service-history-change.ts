@@ -177,9 +177,10 @@ export const handler =
       }),
       TE.chainW((shouldSync) =>
         pipe(
-          // We skip sincronization for items:
-          // - that comes from legacy (SYNC_FROM_LEGACY)
-          // - that are not publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
+          // We sincronize items when:
+          // - that does not comes from legacy (SYNC_FROM_LEGACY)
+          // - that are publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
+          // - that are lifecycle items but have never been published
           // BTW this module will be removed when the legacy application will be decommissioned
           shouldSync ? O.some(item) : O.none,
           O.map(() =>
