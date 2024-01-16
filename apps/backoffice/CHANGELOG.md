@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.5.5
+
+### Patch Changes
+
+- e2c71a8: Change sidenav bottom menu icon for opening/collapsing sidenav
+- 10a0d75: Fix language selector: detect browser language and, in case of supported one, show it correctly on footer language selector
+- 6c76f01: Services import button: add icon and increase font-weight
+- f76b546: Update card tertiary CTA layout
+- bc20e40: Update service create/update form icons
+- 0e1fff0: Reduce visibility icons size in services page
+
 ## 1.5.4
 
 ### Patch Changes

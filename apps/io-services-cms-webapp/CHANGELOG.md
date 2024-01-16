@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.26.5
+
+### Patch Changes
+
+- d33f4e0: Sync on legacy when service was never published
+- ecaf443: Add First Publication Info on Jira Review Ticket
+
 ## 1.26.4
 
 ### Patch Changes
