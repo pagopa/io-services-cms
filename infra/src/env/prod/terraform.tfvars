@@ -90,3 +90,15 @@ backoffice_app = {
   selfcare_jwks_path                    = "/.well-known/jwks.json"
   subscription_migration_api_url        = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
 }
+
+# Container App Job
+key_vault_common = {
+  resource_group_name = "io-p-rg-common"
+  name                = "io-p-kv-common"
+  pat_secret_name     = "github-runner-pat"
+}
+
+container_app_environment = {
+  name                = "io-p-github-runner-cae"
+  resource_group_name = "io-p-github-runner-rg"
+}
