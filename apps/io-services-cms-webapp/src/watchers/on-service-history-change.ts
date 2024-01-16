@@ -170,11 +170,6 @@ export const handler =
     pipe(
       item,
       shouldServiceBeSynced(fsmPublicationClient),
-      TE.map((x) => {
-        // eslint-disable-next-line no-console
-        console.log(`shouldSync: ${x}`);
-        return x;
-      }),
       TE.chainW((shouldSync) =>
         pipe(
           // We sincronize items when:
