@@ -1,6 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -15,11 +15,15 @@ import {
 import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
+import { a } from "vitest/dist/suite-9ReVEt_h";
 
 afterEach(() => {
   vi.resetAllMocks();
   vi.restoreAllMocks();
 });
+
+const isFirstReview = true;
+const isNotFirstReview = false;
 
 const createContext = () =>
   ({
@@ -211,6 +215,14 @@ const mockFsmLifecycleClient = {
   }),
 } as unknown as ServiceLifecycle.FsmClient;
 
+const mockFsmPublicationClient = {
+  getStore: vi.fn(() => ({
+    fetch: vi.fn((serviceId: NonEmptyString) => {
+      return TE.of(O.none);
+    }),
+  })),
+} as unknown as ServicePublication.FsmClient;
+
 describe("Service Review Handler", () => {
   it("should create a non existing ticket for a new service review", async () => {
     const handler = createRequestReviewHandler(
@@ -218,6 +230,7 @@ describe("Service Review Handler", () => {
       mainMockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -232,7 +245,44 @@ describe("Service Review Handler", () => {
     );
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
-      aDelegate
+      aDelegate,
+      isFirstReview
+    );
+    expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("when a new ticket is created it should contains the fact that a service is not the first time it is published", async () => {
+    const mockFsmPublicationClient = {
+      getStore: vi.fn(() => ({
+        fetch: vi.fn((serviceId: NonEmptyString) => {
+          return TE.of(O.some(aService));
+        }),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mainMockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
+      aService,
+      aDelegate,
+      isNotFirstReview
     );
     expect(mainMockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
@@ -253,6 +303,7 @@ describe("Service Review Handler", () => {
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
     const context = createContext();
@@ -267,7 +318,58 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key,
       aService,
-      aDelegate
+      aDelegate,
+      isFirstReview
+    );
+    expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key
+    );
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith(
+      aRejectDbInsertData
+    );
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("rejected ticket is reopened and is related to an already published service", async () => {
+    const mockFsmPublicationClient = {
+      getStore: vi.fn(() => ({
+        fetch: vi.fn((serviceId: NonEmptyString) => {
+          return TE.of(O.some(aService));
+        }),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    const mockJiraProxy = {
+      ...mainMockJiraProxy,
+      getPendingAndRejectedJiraIssueByServiceId: vi.fn(
+        (serviceId: NonEmptyString) => {
+          return TE.of(O.some(aRejectedJiraIssue));
+        }
+      ),
+    };
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
+      aRejectedJiraIssue.key,
+      aService,
+      aDelegate,
+      isNotFirstReview
     );
     expect(mockJiraProxy.reOpenJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key
@@ -288,6 +390,7 @@ describe("Service Review Handler", () => {
       mainMockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -321,6 +424,7 @@ describe("Service Review Handler", () => {
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -351,6 +455,7 @@ describe("Service Review Handler", () => {
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -383,6 +488,7 @@ describe("Service Review Handler", () => {
       mainMockJiraProxy,
       mockApimProxy,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -417,6 +523,7 @@ describe("Service Review Handler", () => {
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -433,7 +540,11 @@ describe("Service Review Handler", () => {
     expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
       aService.id
     );
-    expect(mockJiraProxy.createJiraIssue).toBeCalledWith(aService, aDelegate);
+    expect(mockJiraProxy.createJiraIssue).toBeCalledWith(
+      aService,
+      aDelegate,
+      isFirstReview
+    );
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
@@ -462,6 +573,7 @@ describe("Service Review Handler", () => {
       mockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -481,7 +593,8 @@ describe("Service Review Handler", () => {
     expect(mockJiraProxy.updateJiraIssue).toBeCalledWith(
       aRejectedJiraIssue.key,
       aService,
-      aDelegate
+      aDelegate,
+      isFirstReview
     );
     expect(mockJiraProxy.reOpenJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
@@ -501,6 +614,7 @@ describe("Service Review Handler", () => {
       mainMockJiraProxy,
       mainMockApimService,
       mockFsmLifecycleClient,
+      mockFsmPublicationClient,
       mockConfig
     );
 
@@ -519,7 +633,8 @@ describe("Service Review Handler", () => {
     );
     expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
       aService,
-      aDelegate
+      aDelegate,
+      isFirstReview
     );
     expect(mockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();

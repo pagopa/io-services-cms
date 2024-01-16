@@ -132,6 +132,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   jiraProxy(jiraClient(config)),
   apimService,
   fsmLifecycleClient,
+  fsmPublicationClient,
   config
 );
 

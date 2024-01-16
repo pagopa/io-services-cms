@@ -107,9 +107,11 @@ describe("Service Review Proxy", () => {
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient);
+    const firstPublication = true;
     const serviceReviewTicket = await proxy.createJiraIssue(
       aService,
-      aDelegate
+      aDelegate,
+      firstPublication
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
