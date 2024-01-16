@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { Queue, ServiceHistory } from "@io-services-cms/models";
+import {
+  Queue,
+  ServiceHistory,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
@@ -11,7 +15,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -113,8 +117,38 @@ const getSpecialFields = (
   }
 };
 
-const isPublicationItem = (itm: ServiceHistory) =>
-  itm.fsm.state === "published" || itm.fsm.state === "unpublished";
+const shouldServiceBeSynced =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (itm: ServiceHistory) => {
+    // Already synced to legacy
+    if (itm.fsm.lastTransition === SYNC_FROM_LEGACY) {
+      return TE.of(false);
+    }
+
+    // Publication service always synced to legacy
+    if (itm.fsm.state === "published" || itm.fsm.state === "unpublished") {
+      return TE.of(true);
+    }
+
+    // Deleted service always synced to legacy
+    if (itm.fsm.state === "deleted") {
+      return TE.of(true);
+    }
+
+    // Lifecycle service synced to legacy only if it has never been published before
+    return pipe(
+      itm.serviceId,
+      fsmPublicationClient.getStore().fetch,
+      TE.map(
+        flow(
+          O.fold(
+            () => true,
+            (_) => false
+          )
+        )
+      )
+    );
+  };
 
 const toRequestSyncLegacyAction = (
   serviceHistory: ServiceHistory
@@ -125,7 +159,8 @@ const toRequestSyncLegacyAction = (
 export const handler =
   (
     config: IConfig,
-    apimService: ApimUtils.ApimService
+    apimService: ApimUtils.ApimService,
+    fsmPublicationClient: ServicePublication.FsmClient
   ): RTE.ReaderTaskEither<
     { item: ServiceHistory },
     Error,
@@ -134,28 +169,34 @@ export const handler =
   ({ item }) =>
     pipe(
       item,
-      // We skip sincronization for items:
-      // - that comes from legacy (SYNC_FROM_LEGACY)
-      // - that are not publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
-      // BTW this module will be removed when the legacy application will be decommissioned
-      O.fromPredicate(
-        (itm) =>
-          itm.fsm.lastTransition !== SYNC_FROM_LEGACY &&
-          (isPublicationItem(itm) || itm.fsm.state === "deleted")
-      ),
-      O.map(() =>
+      shouldServiceBeSynced(fsmPublicationClient),
+      TE.chainW((shouldSync) =>
         pipe(
-          isUserEnabledForCmsToLegacySync(config, apimService, item.serviceId),
-          TE.chainW((isUserEnabled) =>
+          // We sincronize items when:
+          // - that does not comes from legacy (SYNC_FROM_LEGACY)
+          // - that are publication items or deleted items, this to prevent draft updates to be synced and directly published on IO App)
+          // - that are lifecycle items but have never been published
+          // BTW this module will be removed when the legacy application will be decommissioned
+          shouldSync ? O.some(item) : O.none,
+          O.map(() =>
             pipe(
-              item,
-              O.fromPredicate((_) => isUserEnabled),
-              O.map(toRequestSyncLegacyAction),
-              O.getOrElse(() => noAction),
-              TE.right
+              isUserEnabledForCmsToLegacySync(
+                config,
+                apimService,
+                item.serviceId
+              ),
+              TE.chainW((isUserEnabled) =>
+                pipe(
+                  item,
+                  O.fromPredicate((_) => isUserEnabled),
+                  O.map(toRequestSyncLegacyAction),
+                  O.getOrElse(() => noAction),
+                  TE.right
+                )
+              )
             )
-          )
+          ),
+          O.getOrElse(() => TE.right(noAction))
         )
-      ),
-      O.getOrElse(() => TE.right(noAction))
+      )
     );

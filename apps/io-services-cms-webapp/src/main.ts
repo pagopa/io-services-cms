@@ -232,7 +232,7 @@ export const onLegacyServiceChangeEntryPoint = pipe(
 );
 
 export const onServiceHistoryChangeEntryPoint = pipe(
-  onServiceHistoryHandler(config, apimService),
+  onServiceHistoryHandler(config, apimService, fsmPublicationClient),
   processBatchOf(ServiceHistory),
   setBindings((results) => ({
     requestSyncLegacy: pipe(
