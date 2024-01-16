@@ -344,3 +344,22 @@ variable "bo_auth_session_secret_rotation_id" {
   default     = "1695908210722"
   description = "You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp)"
 }
+
+#####################
+# container app job #
+#####################
+
+variable "container_app_environment" {
+  type = object({
+    name                = string
+    resource_group_name = string
+  })
+}
+
+variable "key_vault_common" {
+  type = object({
+    resource_group_name = string
+    name                = string
+    pat_secret_name     = string
+  })
+}
