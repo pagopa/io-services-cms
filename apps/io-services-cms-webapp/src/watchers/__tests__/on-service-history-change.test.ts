@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { LegacyService, ServiceHistory } from "@io-services-cms/models";
+import {
+  LegacyService,
+  ServiceHistory,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
@@ -7,7 +11,9 @@ import {
   toAuthorizedCIDRs,
   toAuthorizedRecipients,
 } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
@@ -102,17 +108,32 @@ const mockConfig = {
 
 describe("On Service History Change Handler", () => {
   it.each`
-    scenario                             | item                                                                                         | expected
-    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
-    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                     | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
-    ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}`, isVisible: false } }}
-    ${"no action on Lifecycle Item"}     | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${{}}
-    ${"no action on sync from legacy"}   | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${{}}
-  `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler(mockConfig, mockApimService)({ item })();
-    expect(E.isRight(res)).toBeTruthy();
-    if (E.isRight(res)) {
-      expect(res.right).toStrictEqual(expected);
+    scenario                             | item                                                                                         | publication                       | expected
+    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
+    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                     | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
+    ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}`, isVisible: false } }}
+    ${"no action on Lifecycle Item"}     | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${O.some({ ...aServiceHistory })} | ${{}}
+    ${"no action on sync from legacy"}   | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${O.none}                         | ${{}}
+  `(
+    "should map an item to a $scenario action",
+    async ({ item, publication, expected }) => {
+      const mockFsmPublicationClient = {
+        getStore: vi.fn(() => ({
+          fetch: vi.fn((serviceId: NonEmptyString) => {
+            return TE.of(publication);
+          }),
+        })),
+      } as unknown as ServicePublication.FsmClient;
+
+      const res = await handler(
+        mockConfig,
+        mockApimService,
+        mockFsmPublicationClient
+      )({ item })();
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual(expected);
+      }
     }
-  });
+  );
 });
