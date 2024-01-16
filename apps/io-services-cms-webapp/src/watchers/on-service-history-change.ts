@@ -135,7 +135,7 @@ const shouldServiceBeSynced =
       return TE.of(true);
     }
 
-    // Draft service synced to legacy only if it was never published before
+    // Lifecycle service synced to legacy only if it has never been published before
     return pipe(
       itm.serviceId,
       fsmPublicationClient.getStore().fetch,
