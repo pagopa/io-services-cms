@@ -19,7 +19,6 @@ const formatServiceScope = (scope: string) =>
     ? `{color:#EA4436}*${scope} (Verificare che sia effettivamente un servizio nazionale prima di procedere con l'approvazione)*{color}`
     : scope;
 
-// TODO: this is placeholder, we are waiting for the right copy
 const formatFirtPublication = (firstPublication: boolean) =>
   firstPublication ? "Prima attivazione" : "Modifica Successiva";
 
