@@ -21,9 +21,7 @@ const formatServiceScope = (scope: string) =>
 
 // TODO: this is placeholder, we are waiting for the right copy
 const formatFirtPublication = (firstPublication: boolean) =>
-  firstPublication
-    ? "{color:#EA4436}*PRIMA PUBBLICAZIONE*{color}"
-    : "{color:#EA4436}*AGGIORNAMENTO*{color}";
+  firstPublication ? "Prima attivazione" : "Modifica Successiva";
 
 const formatIssueTitle = (serviceId: NonEmptyString) =>
   `Review #${serviceId}` as NonEmptyString;
@@ -108,8 +106,8 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
       service.id
     }]
+    \n\nh3. *Storia del servizio:* ${formatFirtPublication(firstPublication)}
     \n\nh3. *Area:* ${formatServiceScope(service.data.metadata.scope)}
-    \n\nh3. *Area:* ${formatFirtPublication(firstPublication)}
     \n\nh2. *Nome Servizio: ${service.data.name}*
     \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
     \n\n----\n\nh3. _Contatti:_
