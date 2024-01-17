@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 
 export * from "./button-back";
 export * from "./button-cancel";
+export * from "./button-exit";
 export * from "./button-next";
 export * from "./button-show-more";
 export * from "./button-with-loader";
