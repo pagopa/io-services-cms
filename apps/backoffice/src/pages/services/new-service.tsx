@@ -54,6 +54,9 @@ export default function NewService() {
       <PageHeader
         title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
+        hideBreadcrumbs
+        showExit
+        onExitClick={() => router.push("/services")}
       />
       <ServiceCreateUpdate mode="create" onConfirm={handleConfirm} />
     </>
