@@ -893,10 +893,7 @@ paths:
         content:
           application/json:
             schema:
-                type: object
-                properties:
-                  email:
-                    type: string
+              $ref: '#/components/schemas/AssistanceItem'
         required: true
       responses:
         '200':
@@ -904,10 +901,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  redirectUrl:
-                    type: string
+                $ref: '#/components/schemas/AssistanceResponse'
         '401':
           description: Unauthorized
         '403':
@@ -1181,6 +1175,16 @@ components:
               type: string
               enum: [published, unpublished]
         - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+    AssistanceItem:
+      type: object
+      properties:
+        email:
+          type: string
+    AssistanceResponse:
+      type: object
+      properties:
+        redirectUrl:
+          type: string
 
   securitySchemes:
     cookieAuth:
