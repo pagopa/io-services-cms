@@ -33,7 +33,9 @@ const getValidationSchema = (t: TFunction<"translation", undefined>) =>
       }
     );
 
-/** Wrapper for content rendering based on user permissions/role match */
+/**
+ * Preparatory form for requesting assistance. \
+ * Manages email insertion and confirmation on which to receive assistance. */
 export const AssistanceEmailForm = ({
   onBack,
   onComplete
