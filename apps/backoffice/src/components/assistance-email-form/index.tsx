@@ -55,18 +55,26 @@ export const AssistanceEmailForm = ({
     <>
       <CardBaseContainer>
         <FormProvider {...methods}>
-          <TextFieldController
-            name="email"
-            label={t("forms.assistance.email.label")}
-            placeholder={t("forms.assistance.email.placeholder")}
-            size="small"
-          />
-          <TextFieldController
-            name="confirmEmail"
-            label={t("forms.assistance.confirmEmail.label")}
-            placeholder={t("forms.assistance.confirmEmail.placeholder")}
-            size="small"
-          />
+          <Grid container spacing={4}>
+            <Grid item xs={12}>
+              <TextFieldController
+                name="email"
+                label={t("forms.assistance.email.label")}
+                placeholder={t("forms.assistance.email.placeholder")}
+                size="small"
+                margin="none"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextFieldController
+                name="confirmEmail"
+                label={t("forms.assistance.confirmEmail.label")}
+                placeholder={t("forms.assistance.confirmEmail.placeholder")}
+                size="small"
+                margin="none"
+              />
+            </Grid>
+          </Grid>
         </FormProvider>
       </CardBaseContainer>
       <Typography

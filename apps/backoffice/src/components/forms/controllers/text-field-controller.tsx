@@ -24,7 +24,7 @@ export function TextFieldController({
           {...register(name)}
           {...props}
           fullWidth
-          margin="normal"
+          margin={props.margin ?? "normal"}
           value={value}
           InputProps={{
             endAdornment: error ? (
