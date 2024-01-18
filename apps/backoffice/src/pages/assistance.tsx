@@ -4,6 +4,7 @@ import { AssistanceResponse } from "@/generated/api/AssistanceResponse";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { sanitizePath } from "@/utils/string-util";
+import { Box } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -25,21 +26,28 @@ export default function Assistance() {
   };
 
   useEffect(() => {
-    if (data?.redirectUrl) window.open(data.redirectUrl, "_blank");
+    if (data?.redirectUrl) {
+      window.open(data.redirectUrl, "_blank");
+      router.push(sanitizePath(callbackUrl as string));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   return (
-    <>
+    <Box width="100%" maxWidth={684} marginX="auto">
       <PageHeader
         title={pageTitleLocaleKey}
+        titleVariant="h3"
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
       />
-      <AssistanceEmailForm
-        onBack={() => router.push(sanitizePath(callbackUrl as string))}
-        onComplete={requestAssistance}
-      />
-    </>
+      <Box marginTop={4}>
+        <AssistanceEmailForm
+          onBack={() => router.push(sanitizePath(callbackUrl as string))}
+          onComplete={requestAssistance}
+        />
+      </Box>
+    </Box>
   );
 }
 
