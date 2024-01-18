@@ -5,10 +5,10 @@ import {
   ServicePublicationStatusTypeEnum
 } from "@/generated/api/ServicePublicationStatusType";
 import {
-  CheckCircleOutline,
+  Check,
+  Close,
   Delete,
   Edit,
-  HighlightOff,
   History,
   MoreVert
 } from "@mui/icons-material";
@@ -142,28 +142,39 @@ export const ServiceContextMenu = ({
   /** Show publish/unpublish action button */
   const renderPublicationAction = () => {
     if (hasPublicationAction())
-      return (
-        <Button
-          size="medium"
-          variant="outlined"
-          sx={{ bgcolor: "background.paper" }}
-          startIcon={
-            isPublishable() ? <CheckCircleOutline /> : <HighlightOff />
-          }
-          onClick={_ =>
-            isPublishable()
-              ? handleConfirmationModal(ServiceContextMenuActions.publish)
-              : handleConfirmationModal(ServiceContextMenuActions.unpublish)
-          }
-        >
-          <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
-            {isPublishable()
-              ? t("service.actions.publish")
-              : t("service.actions.unpublish")}
-          </Typography>
-        </Button>
-      );
+      return isPublishable() ? renderPublishAction() : renderUnpublishAction();
   };
+
+  /** Shows "Publish in App IO" action button */
+  const renderPublishAction = () => (
+    <Button
+      size="medium"
+      variant="contained"
+      startIcon={<Check />}
+      onClick={_ => handleConfirmationModal(ServiceContextMenuActions.publish)}
+    >
+      <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
+        {t("service.actions.publish")}
+      </Typography>
+    </Button>
+  );
+
+  /** Shows "Hide from App IO" action button */
+  const renderUnpublishAction = () => (
+    <Button
+      size="medium"
+      variant="outlined"
+      sx={{ bgcolor: "background.paper" }}
+      startIcon={<Close />}
+      onClick={_ =>
+        handleConfirmationModal(ServiceContextMenuActions.unpublish)
+      }
+    >
+      <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
+        {t("service.actions.unpublish")}
+      </Typography>
+    </Button>
+  );
 
   /** Show Send to review action button */
   const renderSubmitReviewAction = () => {
@@ -229,9 +240,9 @@ export const ServiceContextMenu = ({
           >
             <MenuItem onClick={handleEditClick} disabled={releaseMode}>
               <ListItemIcon>
-                <Edit fontSize="inherit" />
+                <Edit fontSize="inherit" color="primary" />
               </ListItemIcon>
-              <Typography variant="inherit" marginLeft={1}>
+              <Typography variant="inherit" color="primary" marginLeft={1}>
                 {t("service.actions.edit")}
               </Typography>
             </MenuItem>
