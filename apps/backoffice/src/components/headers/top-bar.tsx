@@ -25,10 +25,8 @@ export const TopBar = ({ user }: TopBarProps) => {
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
-      enableAssistanceButton={false}
-      onAssistanceClick={() => {
-        console.log("Clicked/Tapped on Assistance");
-      }}
+      enableAssistanceButton
+      onAssistanceClick={() => router.push(`/assistance?callbackUrl=${router.asPath}`)}
       onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
         console.log("User login");
