@@ -906,8 +906,6 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden
-        '404':
-          description: Not found
         '429':
           description: Too many requests
         '500':
