@@ -1,6 +1,7 @@
 import { AppFooter } from "@/components/footer";
 import { Header, TopBar } from "@/components/headers";
 import { Sidenav, SidenavItem } from "@/components/sidenav";
+import { getConfiguration } from "@/config";
 import {
   Category,
   People,
@@ -13,17 +14,18 @@ import { useSession } from "next-auth/react";
 import { ReactNode, useState } from "react";
 
 import styles from "@/styles/app-layout.module.css";
-import { getConfiguration } from "@/config";
 
 type AppLayoutProps = {
   hideSidenav?: boolean;
   hideHeader?: boolean;
+  hideAssistance?: boolean;
   children: ReactNode;
 };
 
 export const AppLayout = ({
   hideSidenav,
   hideHeader,
+  hideAssistance,
   children
 }: AppLayoutProps) => {
   const { data: session } = useSession();
@@ -74,7 +76,10 @@ export const AppLayout = ({
 
   return (
     <Box display="flex" flexDirection="column" minHeight="100vh">
-      <TopBar user={session?.user ? { id: session.user.id } : undefined} />
+      <TopBar
+        user={session?.user ? { id: session.user.id } : undefined}
+        hideAssistance={hideAssistance}
+      />
       {hideHeader ? null : <Header />}
       <Grid container spacing={0} bgcolor={"#F5F5F5"} flexGrow={1}>
         {hideSidenav ? null : (
