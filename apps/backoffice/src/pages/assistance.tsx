@@ -1,6 +1,7 @@
 import { AssistanceEmailForm } from "@/components/assistance-email-form";
 import { PageHeader } from "@/components/headers";
 import { AppLayout, PageLayout } from "@/layouts";
+import { sanitizePath } from "@/utils/string-util";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -19,9 +20,10 @@ export default function Assistance() {
       <PageHeader
         title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
+        hideBreadcrumbs
       />
       <AssistanceEmailForm
-        onBack={() => router.push((callbackUrl as string) ?? "/")}
+        onBack={() => router.push(sanitizePath(callbackUrl as string))}
         onComplete={email => console.log("onComplete", email)}
       />
     </>
