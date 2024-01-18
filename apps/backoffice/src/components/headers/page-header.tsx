@@ -1,21 +1,38 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
+import { ButtonExit } from "../buttons";
+import { LoaderSkeleton } from "../loaders";
 import { PageBreadcrumbs } from "./page-breadcrumbs";
 import { PageHtmlHeadTitle } from "./page-html-head-title";
-import { LoaderSkeleton } from "../loaders";
 
 export type PageHeaderProps = {
   title?: string;
   description?: string;
+  hideBreadcrumbs?: boolean;
+  /** Displays an exit button, to abort the current page operation  */
+  showExit?: boolean;
+  /** Event triggered on exit button click */
+  onExitClick?: () => void;
 };
 
-export const PageHeader = ({ title, description }: PageHeaderProps) => {
+export const PageHeader = ({
+  title,
+  description,
+  hideBreadcrumbs,
+  showExit,
+  onExitClick
+}: PageHeaderProps) => {
   const { t } = useTranslation();
 
   return (
     <>
       <PageHtmlHeadTitle section={title ?? ""} />
-      <PageBreadcrumbs />
+      {showExit ? (
+        <Box id="bo-io-page-exit" marginBottom={2}>
+          <ButtonExit onClick={onExitClick ?? (() => null)} />
+        </Box>
+      ) : null}
+      {hideBreadcrumbs ? null : <PageBreadcrumbs />}
       <Box marginBottom={3} id="bo-io-page-title-descr">
         <Typography marginBottom={2} variant="h4">
           <LoaderSkeleton

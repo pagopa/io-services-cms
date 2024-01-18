@@ -1,8 +1,8 @@
 import { PageHeader } from "@/components/headers";
 import { buildSnackbarItem } from "@/components/notification";
 import {
-  fromServiceLifecycleToServiceCreateUpdatePayload,
-  fromServiceCreateUpdatePayloadToApiServicePayload
+  fromServiceCreateUpdatePayloadToApiServicePayload,
+  fromServiceLifecycleToServiceCreateUpdatePayload
 } from "@/components/services";
 import { ServiceCreateUpdate } from "@/components/services/service-create-update";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
@@ -80,6 +80,9 @@ export default function EditService() {
       <PageHeader
         title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
+        hideBreadcrumbs
+        showExit
+        onExitClick={() => router.push(`/services/${serviceId}`)}
       />
       <ServiceCreateUpdate
         mode="update"
