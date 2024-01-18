@@ -17,10 +17,15 @@ import { getConfiguration } from "@/config";
 
 type AppLayoutProps = {
   hideSidenav?: boolean;
+  hideHeader?: boolean;
   children: ReactNode;
 };
 
-export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
+export const AppLayout = ({
+  hideSidenav,
+  hideHeader,
+  children
+}: AppLayoutProps) => {
   const { data: session } = useSession();
   const [sidenavWidth, setSidenavWidth] = useState(320);
 
@@ -72,9 +77,7 @@ export const AppLayout = ({ hideSidenav, children }: AppLayoutProps) => {
       <Box>
         <TopBar user={session?.user ? { id: session.user.id } : undefined} />
       </Box>
-      <Box>
-        <Header />
-      </Box>
+      <Box>{hideHeader ? null : <Header />}</Box>
       <Grid container spacing={0} bgcolor={"#F5F5F5"}>
         {hideSidenav ? null : (
           <Grid item width={sidenavWidth}>
