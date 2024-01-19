@@ -7,12 +7,15 @@ import {
   Box,
   Button,
   Chip,
-  Grid,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
   Typography
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { Fragment } from "react";
 import { MigrationChipStatus } from ".";
 
 export type MigrationLatestProps = {
@@ -43,7 +46,7 @@ export const MigrationLatest = ({
   };
 
   return (
-    <Stack direction="column" spacing={3}>
+    <Stack direction="column" spacing={3} display="contents">
       <Box>
         <Typography variant="overline">
           {t("subscriptions.migration.status.title")}
@@ -62,7 +65,7 @@ export const MigrationLatest = ({
         </Button>
       </Box>
       {isEmptyState ? (
-        <Alert severity="info">
+        <Alert severity="info" sx={{ width: "100%" }}>
           {t("subscriptions.migration.status.noData")}
         </Alert>
       ) : null}
@@ -70,36 +73,40 @@ export const MigrationLatest = ({
         loading={migrationItems === undefined}
         style={{ width: "100%", height: "50px" }}
       >
-        <Grid container direction="row" alignItems="center">
-          {migrationItems?.items
-            ?.map(item => ({
-              ...item,
-              status: computeMigrationStatus(item.status)
-            }))
-            .map((migrationItem, index) => (
-              <Fragment key={`migration-lates-${index}`}>
-                <Grid item xs={4} marginY={1}>
-                  <Typography variant="body2">
-                    {`${migrationItem.delegate.sourceSurname} ${migrationItem.delegate.sourceName}`}
-                  </Typography>
-                </Grid>
-                <Grid item xs={4} paddingLeft={1}>
-                  <Chip
-                    size="small"
-                    label={t(
-                      `subscriptions.migration.status.${migrationItem.status.label}`
-                    )}
-                    color={migrationItem.status.color}
-                  />
-                </Grid>
-                <Grid item xs paddingLeft={1}>
-                  <Typography variant="body2">
-                    {new Date(migrationItem.lastUpdate).toLocaleString()}
-                  </Typography>
-                </Grid>
-              </Fragment>
-            ))}
-        </Grid>
+        <TableContainer>
+          <Table size="small">
+            <TableBody>
+              {migrationItems?.items
+                ?.map(item => ({
+                  ...item,
+                  status: computeMigrationStatus(item.status)
+                }))
+                .map((migrationItem, index) => (
+                  <TableRow key={`migration-lates-${index}`} hover>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {`${migrationItem.delegate.sourceSurname} ${migrationItem.delegate.sourceName}`}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        label={t(
+                          `subscriptions.migration.status.${migrationItem.status.label}`
+                        )}
+                        color={migrationItem.status.color}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" textAlign="right">
+                        {new Date(migrationItem.lastUpdate).toLocaleString()}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </LoaderSkeleton>
     </Stack>
   );
