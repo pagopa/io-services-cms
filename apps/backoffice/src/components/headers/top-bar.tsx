@@ -28,7 +28,10 @@ export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
       loggedUser={user}
       enableAssistanceButton={!hideAssistance}
       onAssistanceClick={() =>
-        router.push(`/assistance?callbackUrl=${router.asPath}`)
+        router.push({
+          pathname: "/assistance",
+          query: { callbackUrl: router.asPath }
+        })
       }
       onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
