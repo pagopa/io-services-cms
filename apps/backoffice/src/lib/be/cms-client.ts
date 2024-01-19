@@ -2,6 +2,7 @@ import { ServiceTopicList } from "@/generated/services-cms/ServiceTopicList";
 import { Client, createClient } from "@/generated/services-cms/client";
 import { getFetch } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -18,7 +19,8 @@ export type TopicsProvider = {
 const Config = t.type({
   API_SERVICES_CMS_URL: NonEmptyString,
   API_SERVICES_CMS_BASE_PATH: NonEmptyString,
-  API_SERVICES_CMS_MOCKING: BooleanFromString
+  API_SERVICES_CMS_MOCKING: BooleanFromString,
+  API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES: NumberFromString
 });
 
 const getIoServicesCmsClientConfig = () => {
@@ -58,6 +60,10 @@ const buildTopicsProvider = (): TopicsProvider => {
   let cachedServiceTopics: ServiceTopicList;
   let cachedServiceTopicsExpiration: Date;
 
+  const {
+    API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES
+  } = getIoServicesCmsClientConfig();
+
   const getServiceTopics = async (): Promise<ServiceTopicList> => {
     // topic list not expired
     if (
@@ -81,9 +87,12 @@ const buildTopicsProvider = (): TopicsProvider => {
       throw new Error("blank response");
     }
 
-    // caching topics
+    // caching topics for future requests
+    // expiration is set to now + API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES config
     const now = new Date();
-    now.setHours(now.getHours() + 1);
+    now.setMinutes(
+      now.getMinutes() + API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES
+    );
     cachedServiceTopicsExpiration = now;
     cachedServiceTopics = value;
 
