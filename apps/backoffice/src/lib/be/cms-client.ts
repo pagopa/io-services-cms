@@ -1,3 +1,4 @@
+import { ServiceTopicList } from "@/generated/services-cms/ServiceTopicList";
 import { Client, createClient } from "@/generated/services-cms/client";
 import { getFetch } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
@@ -8,6 +9,11 @@ import * as t from "io-ts";
 import { HealthChecksError } from "./errors";
 
 let ioServicesCmsClient: Client;
+let topicsProvider: TopicsProvider;
+
+export type TopicsProvider = {
+  getServiceTopics: () => Promise<ServiceTopicList>;
+};
 
 const Config = t.type({
   API_SERVICES_CMS_URL: NonEmptyString,
@@ -46,6 +52,54 @@ export const getIoServicesCmsClient = (): Client => {
     ioServicesCmsClient = buildIoServicesCmsClient();
   }
   return ioServicesCmsClient;
+};
+
+const buildTopicsProvider = (): TopicsProvider => {
+  let cachedServiceTopics: ServiceTopicList;
+  let cachedServiceTopicsExpiration: Date;
+
+  const getServiceTopics = async (): Promise<ServiceTopicList> => {
+    // topic list not expired
+    if (
+      cachedServiceTopics &&
+      cachedServiceTopicsExpiration &&
+      cachedServiceTopicsExpiration > new Date()
+    ) {
+      return cachedServiceTopics;
+    }
+
+    // Retrieving topics from io-services-cms
+    const response = await getIoServicesCmsClient().getServiceTopics({});
+
+    if (E.isLeft(response)) {
+      throw new Error(readableReport(response.left));
+    }
+
+    const value = response.right.value;
+
+    if (!value) {
+      throw new Error("blank response");
+    }
+
+    // caching topics
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    cachedServiceTopicsExpiration = now;
+    cachedServiceTopics = value;
+
+    return value;
+  };
+
+  return {
+    getServiceTopics
+  };
+};
+
+export const getTopicsProvider = (): TopicsProvider => {
+  if (!topicsProvider) {
+    topicsProvider = buildTopicsProvider();
+  }
+  return topicsProvider;
 };
 
 export async function getIoServicesCmsHealth() {

@@ -1,4 +1,4 @@
-import { getIoServicesCmsClient } from "@/lib/be/cms-client";
+import { getIoServicesCmsClient, getTopicsProvider } from "@/lib/be/cms-client";
 
 export type IoServicesCmsClient = ReturnType<typeof getIoServicesCmsClient>;
 
@@ -15,3 +15,7 @@ export const callIoServicesCms = async <
   operationId: T,
   requestPayload: any
 ) => await getIoServicesCmsClient()[operationId](requestPayload);
+
+export const getServiceTopics = () => {
+  return getTopicsProvider().getServiceTopics();
+};

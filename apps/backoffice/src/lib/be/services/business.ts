@@ -18,7 +18,7 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
-import { IoServicesCmsClient, callIoServicesCms } from "./cms";
+import { IoServicesCmsClient, callIoServicesCms, getServiceTopics } from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
@@ -29,7 +29,6 @@ import {
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
 } from "./subscription-migration";
-import { getServiceTopics } from "./topics-provider";
 import {
   buildMissingService,
   reducePublicationServicesList,

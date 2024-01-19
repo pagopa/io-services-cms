@@ -117,7 +117,7 @@ const mocks: {
   } as ServiceTopicList
 }));
 
-const { getIoServicesCmsClient } = vi.hoisted(() => ({
+const { getIoServicesCmsClient, getTopicsProvider } = vi.hoisted(() => ({
   getIoServicesCmsClient: vi.fn().mockReturnValue({
     getServices: vi.fn(() =>
       Promise.resolve(
@@ -132,13 +132,12 @@ const { getIoServicesCmsClient } = vi.hoisted(() => ({
     reviewService: vi.fn(() =>
       Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
     )
-  })
-}));
-
-const { getServiceTopics } = vi.hoisted(() => ({
-  getServiceTopics: vi.fn(() =>
-    Promise.resolve(mocks.aServiceTopicsListResponse)
-  )
+  }),
+  getTopicsProvider: vi.fn(() => ({
+    getServiceTopics: vi.fn(() =>
+      Promise.resolve(mocks.aServiceTopicsListResponse)
+    )
+  }))
 }));
 
 const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
@@ -196,11 +195,8 @@ vi.mock("@/lib/be/subscription-migration-client", () => ({
 }));
 
 vi.mock("@/lib/be/cms-client", () => ({
-  getIoServicesCmsClient
-}));
-
-vi.mock("../services/topics-provider", () => ({
-  getServiceTopics
+  getIoServicesCmsClient,
+  getTopicsProvider
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({
