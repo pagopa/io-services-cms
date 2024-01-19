@@ -1131,7 +1131,7 @@ components:
           type: number
           minimum: 0
     Institution:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-832-update-selfcare-schema/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
     UserAuthorizedInstitutions:
       type: object
       properties:
@@ -1176,10 +1176,15 @@ components:
               enum: [published, unpublished]
         - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
     AssistanceItem:
+      required:
+        - email
       type: object
       properties:
         email:
           type: string
+          description: Email to receive assistance response
+          format: email
+          example: email@example.com
     AssistanceResponse:
       type: object
       properties:
@@ -1190,4 +1195,4 @@ components:
     cookieAuth:
       type: apiKey
       in: cookie
-      name: __Secure-next-auth.session-token  # next-auth default cookie name
+      name: __Secure-next-auth.session-token # next-auth default cookie name

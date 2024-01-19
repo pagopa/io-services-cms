@@ -4,15 +4,17 @@
  */
 /* eslint-disable  */
 
-import { enumType } from "@pagopa/ts-commons/lib/types";
-import * as t from "io-ts";
 import { AssistanceContactsResource } from "./AssistanceContactsResource";
 import { CompanyInformationsResource } from "./CompanyInformationsResource";
 import { DpoDataResource } from "./DpoDataResource";
 import { PspDataResource } from "./PspDataResource";
 import { RootParentResource } from "./RootParentResource";
+import * as t from "io-ts";
+import { enumType } from "@pagopa/ts-commons/lib/types";
 
 export enum InstitutionTypeEnum {
+  "AS" = "AS",
+
   "GSP" = "GSP",
 
   "PA" = "PA",
@@ -23,9 +25,9 @@ export enum InstitutionTypeEnum {
 
   "PT" = "PT",
 
-  "SCP" = "SCP",
+  "SA" = "SA",
 
-  "SA" = "SA"
+  "SCP" = "SCP"
 }
 
 // required attributes
@@ -39,7 +41,13 @@ const InstitutionResourceO = t.partial({
 
   assistanceContacts: AssistanceContactsResource,
 
+  city: t.string,
+
   companyInformations: CompanyInformationsResource,
+
+  country: t.string,
+
+  county: t.string,
 
   description: t.string,
 
@@ -60,11 +68,11 @@ const InstitutionResourceO = t.partial({
 
   originId: t.string,
 
-  rootParent: RootParentResource,
-
   pspData: PspDataResource,
 
   recipientCode: t.string,
+
+  rootParent: RootParentResource,
 
   status: t.string,
 
@@ -89,10 +97,3 @@ export const InstitutionResource = t.exact(
 );
 
 export type InstitutionResource = t.TypeOf<typeof InstitutionResource>;
-
-export const InstitutionResources = t.readonlyArray(
-  InstitutionResource,
-  "InstitutionResources"
-);
-
-export type InstitutionResources = t.TypeOf<typeof InstitutionResources>;

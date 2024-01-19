@@ -1,3 +1,5 @@
+import { SupportRequestDto } from "@/types/selfcare/SupportRequestDto";
+import { SupportResponse } from "@/types/selfcare/SupportResponse";
 import {
   getKeepAliveAgentOptions,
   newHttpAgent,
@@ -13,10 +15,11 @@ import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { cache } from "react";
 import { Institution } from "../../types/selfcare/Institution";
-import { InstitutionResources } from "../../types/selfcare/InstitutionResource";
+import { InstitutionResources } from "../../types/selfcare/InstitutionResources";
 import { HealthChecksError } from "./errors";
 
 const institutionsApi = "/institutions";
+const supportApi = "/support";
 let selfcareClient: SelfcareClient;
 
 export type SelfcareClient = {
@@ -26,6 +29,9 @@ export type SelfcareClient = {
   getInstitutionById: (
     id: string
   ) => TE.TaskEither<Error | AxiosError, Institution>;
+  sendSupportRequest: (
+    request: SupportRequestDto
+  ) => TE.TaskEither<Error, SupportResponse>;
 };
 
 type Config = t.TypeOf<typeof Config>;
@@ -122,9 +128,31 @@ const buildSelfcareClient = (): SelfcareClient => {
       )
     );
 
+  const sendSupportRequest: SelfcareClient["sendSupportRequest"] = request =>
+    pipe(
+      TE.tryCatch(() => axiosInstance.post(supportApi, request), identity),
+      x => x,
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return new Error(`REST client error catched: ${e.message}`);
+        } else {
+          return new Error(`Unexpected error: ${e}`);
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          SupportResponse.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
+
   return {
     getUserAuthorizedInstitutions,
-    getInstitutionById
+    getInstitutionById,
+    sendSupportRequest
   };
 };
 
