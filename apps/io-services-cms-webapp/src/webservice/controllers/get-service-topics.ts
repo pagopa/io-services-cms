@@ -1,15 +1,9 @@
 import { Context } from "@azure/functions";
-import {
-  AzureApiAuthMiddleware,
-  IAzureApiAuthorization,
-  UserGroup,
-} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -20,10 +14,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { ServiceTopicList } from "../../generated/api/ServiceTopicList";
-import {
-  EventNameEnum,
-  trackEventOnResponseOK,
-} from "../../utils/applicationinsight";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { ServiceTopicDao } from "../../utils/service-topic-dao";
 
@@ -34,22 +24,16 @@ type HandlerResponseTypes =
   | ErrorResponseTypes;
 
 type GetServiceTopicsHandler = (
-  context: Context,
-  auth: IAzureApiAuthorization
+  context: Context
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  // A store od ServiceLifecycle objects
-  telemetryClient: ReturnType<typeof initAppInsights>;
   serviceTopicDao: ServiceTopicDao;
 };
 
 export const makeGetServiceTopicsHandler =
-  ({
-    telemetryClient,
-    serviceTopicDao,
-  }: Dependencies): GetServiceTopicsHandler =>
-  (context, auth) =>
+  ({ serviceTopicDao }: Dependencies): GetServiceTopicsHandler =>
+  (context) =>
     pipe(
       serviceTopicDao.findAllNotDeletedTopics(),
       TE.map(
@@ -58,15 +42,6 @@ export const makeGetServiceTopicsHandler =
             () => ResponseSuccessJson({ topics: [] }),
             (topics) => ResponseSuccessJson({ topics })
           )
-        )
-      ),
-      TE.map(
-        trackEventOnResponseOK(
-          telemetryClient,
-          EventNameEnum.GetServiceLifecycle,
-          {
-            userSubscriptionId: auth.subscriptionId,
-          }
         )
       ),
       TE.mapLeft((err) => {
@@ -82,9 +57,7 @@ export const makeGetServiceTopicsHandler =
 export const applyRequestMiddelwares = (handler: GetServiceTopicsHandler) => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
-    ContextMiddleware(),
-    // only allow requests by users belonging to certain groups
-    AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite]))
+    ContextMiddleware()
   );
   return wrapRequestHandler(
     middlewaresWrap(

@@ -132,12 +132,6 @@ paths:
       summary: Retrieve all services
       description: Retrieve all service topics
       operationId: getServiceTopics
-      parameters:
-        - $ref: '#/components/parameters/UserEmail'
-        - $ref: '#/components/parameters/UserGroups'
-        - $ref: '#/components/parameters/UserID'
-        - $ref: '#/components/parameters/SubscriptionID'
-        - $ref: '#/components/parameters/XForwardedFor'
       responses:
         '200':
           description: Service topics fetched successfully

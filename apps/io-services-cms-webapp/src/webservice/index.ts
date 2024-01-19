@@ -140,7 +140,6 @@ export const createWebServer = ({
     pipe(
       makeGetServiceTopicsHandler({
         serviceTopicDao,
-        telemetryClient,
       }),
       applyGetServiceTopicsRequestMiddelwares
     )
