@@ -9,6 +9,7 @@ import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
+import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -17,11 +18,7 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
-import {
-  IoServicesCmsClient,
-  callIoServicesCms,
-  getServiceTopics
-} from "./cms";
+import { IoServicesCmsClient, callIoServicesCms } from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
@@ -32,13 +29,13 @@ import {
   getLatestOwnershipClaimStatus,
   getOwnershipClaimStatus
 } from "./subscription-migration";
+import { getServiceTopics } from "./topics-provider";
 import {
   buildMissingService,
   reducePublicationServicesList,
-  toServiceListItem,
-  reduceServiceTopicsList
+  reduceServiceTopicsList,
+  toServiceListItem
 } from "./utils";
-import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 
 type PathParameters = {
   serviceId?: string;

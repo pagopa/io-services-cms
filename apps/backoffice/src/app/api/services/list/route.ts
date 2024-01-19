@@ -5,7 +5,6 @@ import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
-import { get } from "lodash";
 /**
  * @description Retrieve all services owned by the calling user
  */

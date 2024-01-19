@@ -40,6 +40,7 @@ const mocks: {
   migrationItem: MigrationItem;
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
+  aServiceTopicsListResponse: ServiceTopicList;
 } = vi.hoisted(() => ({
   statusOK: 200,
   statusNoContent: 204,
@@ -105,7 +106,15 @@ const mocks: {
     sourceSurname: "Surname",
     sourceEmail: "test@test.test",
     subscriptionCounter: 17
-  } as MigrationDelegate
+  } as MigrationDelegate,
+  aServiceTopicsListResponse: {
+    topics: [
+      {
+        id: 1,
+        name: "Ambiente e animali"
+      }
+    ]
+  } as ServiceTopicList
 }));
 
 const { getIoServicesCmsClient } = vi.hoisted(() => ({
@@ -124,6 +133,12 @@ const { getIoServicesCmsClient } = vi.hoisted(() => ({
       Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
     )
   })
+}));
+
+const { getServiceTopics } = vi.hoisted(() => ({
+  getServiceTopics: vi.fn(() =>
+    Promise.resolve(mocks.aServiceTopicsListResponse)
+  )
 }));
 
 const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
@@ -184,6 +199,10 @@ vi.mock("@/lib/be/cms-client", () => ({
   getIoServicesCmsClient
 }));
 
+vi.mock("../services/topics-provider", () => ({
+  getServiceTopics
+}));
+
 vi.mock("@/lib/be/apim-service", () => ({
   getApimRestClient
 }));
@@ -194,7 +213,6 @@ vi.mock("@/lib/be/cosmos-store", () => ({
 }));
 
 afterEach(() => {
-  vi.resetAllMocks();
   vi.restoreAllMocks();
 });
 describe("Services TEST", () => {
@@ -547,7 +565,7 @@ describe("Services TEST", () => {
         pagination: { count: 2, limit: 10, offset: 0 }
       });
     });
-    // This test must me updated when getServiceTopics will be implemented in io-services-cms
+
     it("should return a list of services with visibility enriched with topic", async () => {
       const aServiceinPublicationId = "aServiceInPublicationId";
 
