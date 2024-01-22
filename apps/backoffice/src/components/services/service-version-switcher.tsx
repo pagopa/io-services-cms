@@ -1,5 +1,6 @@
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceListItem } from "@/generated/api/ServiceListItem";
+import { CallSplit } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -124,10 +125,23 @@ export const ServiceVersionSwitcher = ({
 
   return (
     <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
-      <DialogTitle sx={{ width: "425px", paddingX: 4, paddingTop: 4 }}>
+      <DialogTitle
+        sx={{
+          width: "425px",
+          fontWeight: 700,
+          textAlign: "center",
+          paddingX: 4,
+          paddingTop: 4
+        }}
+      >
+        <Box marginBottom={1}>
+          <CallSplit fontSize="small" />
+        </Box>
         {t("service.switcher.title")}
       </DialogTitle>
-      <DialogContent sx={{ width: "425px", paddingX: 4, paddingY: 0 }}>
+      <DialogContent
+        sx={{ width: "425px", textAlign: "center", paddingX: 4, paddingY: 0 }}
+      >
         <Box marginBottom={4}>
           <span
             dangerouslySetInnerHTML={{
@@ -143,12 +157,20 @@ export const ServiceVersionSwitcher = ({
       <DialogActions sx={{ padding: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <Button variant="outlined" onClick={handleClose}>
+            <Button
+              variant="text"
+              sx={{ fontWeight: 700 }}
+              onClick={handleClose}
+            >
               {t("buttons.cancel")}
             </Button>
           </Grid>
           <Grid item xs={6} textAlign="right">
-            <Button variant="contained" onClick={handleConfirm}>
+            <Button
+              variant="contained"
+              sx={{ fontWeight: 700 }}
+              onClick={handleConfirm}
+            >
               {t("buttons.view")}
             </Button>
           </Grid>
