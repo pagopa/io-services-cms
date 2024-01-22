@@ -22,7 +22,16 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { Add, Block, CallSplit, Check, Close } from "@mui/icons-material";
+import {
+  Add,
+  Block,
+  CallSplit,
+  Check,
+  Close,
+  Delete,
+  Edit,
+  FactCheck
+} from "@mui/icons-material";
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
@@ -30,7 +39,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -212,11 +221,13 @@ export default function Services() {
    */
   const addRowMenuItem = (options: {
     action: ServiceContextMenuActions;
+    icon: ReactNode;
     serviceId: string;
     danger?: boolean;
     onClickFn?: () => void;
-  }) => ({
+  }): TableRowMenuAction => ({
     label: `service.actions.${options.action}`,
+    icon: options.icon,
     danger: options.danger,
     onClick: options.onClickFn ?? (() => handleConfirmationModal(options))
   });
@@ -225,6 +236,7 @@ export default function Services() {
   const editRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.edit,
+      icon: <Edit color="primary" fontSize="inherit" />,
       serviceId: service.id,
       onClickFn: () => router.push(`/services/${service.id}/edit-service`)
     });
@@ -232,12 +244,14 @@ export default function Services() {
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.submitReview,
+      icon: <FactCheck color="primary" fontSize="inherit" />,
       serviceId: service.id
     });
   /** Returns a `delete` `TableRowMenuAction` */
   const deleteRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.delete,
+      icon: <Delete color="error" fontSize="inherit" />,
       serviceId: service.id,
       danger: true
     });
@@ -245,12 +259,14 @@ export default function Services() {
   const publishRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.publish,
+      icon: <Check color="primary" fontSize="inherit" />,
       serviceId: service.id
     });
   /** Returns an `unpublish` `TableRowMenuAction` */
   const unpublishRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.unpublish,
+      icon: <Close color="primary" fontSize="inherit" />,
       serviceId: service.id
     });
 
@@ -261,18 +277,12 @@ export default function Services() {
     // Lifecycle actions
     switch (service.status.value) {
       case ServiceLifecycleStatusTypeEnum.draft:
-        result.push(
-          submitReviewRowMenuItem(service),
-          editRowMenuItem(service),
-          deleteRowMenuItem(service)
-        );
+        result.push(submitReviewRowMenuItem(service), editRowMenuItem(service));
         break;
       case ServiceLifecycleStatusTypeEnum.approved:
       case ServiceLifecycleStatusTypeEnum.rejected:
-        result.push(editRowMenuItem(service), deleteRowMenuItem(service));
+        result.push(editRowMenuItem(service));
         break;
-      case ServiceLifecycleStatusTypeEnum.submitted:
-      case ServiceLifecycleStatusTypeEnum.deleted:
       default:
         break;
     }
@@ -283,6 +293,17 @@ export default function Services() {
         result.push(unpublishRowMenuItem(service));
       else if (service.visibility === VisibilityEnum.unpublished)
         result.push(publishRowMenuItem(service));
+    }
+
+    // Delete action
+    switch (service.status.value) {
+      case ServiceLifecycleStatusTypeEnum.draft:
+      case ServiceLifecycleStatusTypeEnum.approved:
+      case ServiceLifecycleStatusTypeEnum.rejected:
+        result.push(deleteRowMenuItem(service));
+        break;
+      default:
+        break;
     }
 
     return result;
