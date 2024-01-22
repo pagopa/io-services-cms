@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.5.6
+
+### Patch Changes
+
+- b6ca2a3: Page Header: Replace breadcrumbs with exit shortcut on service create/update pages
+- 4019e32: Update service-context-menu actions: update publish/unpublish icons and button variant, fix edit action color
+
 ## 1.5.5
 
 ### Patch Changes
