@@ -13,7 +13,9 @@ let ioServicesCmsClient: Client;
 let topicsProvider: TopicsProvider;
 
 export type TopicsProvider = {
-  getServiceTopics: () => Promise<ServiceTopicList>;
+  getServiceTopics: (
+    xForwardedFor: string | undefined
+  ) => Promise<ServiceTopicList>;
 };
 
 const Config = t.type({
@@ -64,7 +66,9 @@ const buildTopicsProvider = (): TopicsProvider => {
     API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES
   } = getIoServicesCmsClientConfig();
 
-  const getServiceTopics = async (): Promise<ServiceTopicList> => {
+  const getServiceTopics = async (
+    xForwardedFor: string | undefined
+  ): Promise<ServiceTopicList> => {
     // topic list not expired
     if (
       cachedServiceTopics &&
@@ -75,7 +79,9 @@ const buildTopicsProvider = (): TopicsProvider => {
     }
 
     // Retrieving topics from io-services-cms
-    const response = await getIoServicesCmsClient().getServiceTopics({});
+    const response = await getIoServicesCmsClient().getServiceTopics({
+      "X-Forwarded-For": xForwardedFor
+    } as any);
 
     if (E.isLeft(response)) {
       throw new Error(readableReport(response.left));

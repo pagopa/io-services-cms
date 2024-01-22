@@ -95,6 +95,7 @@ describe("Retrieve Services List API", () => {
 
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
+      nextRequest,
       backofficeUserMock.parameters.userId,
       backofficeUserMock.institution,
       100,
@@ -118,6 +119,7 @@ describe("Retrieve Services List API", () => {
 
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
+      nextRequest,
       backofficeUserMock.parameters.userId,
       backofficeUserMock.institution,
       20,
@@ -142,6 +144,7 @@ describe("Retrieve Services List API", () => {
 
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
+      nextRequest,
       backofficeUserMock.parameters.userId,
       backofficeUserMock.institution,
       1,

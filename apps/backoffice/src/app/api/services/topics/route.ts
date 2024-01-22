@@ -12,7 +12,7 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser }
   ) => {
     try {
-      const res = await retrieveServiceTopics();
+      const res = await retrieveServiceTopics(request);
       return NextResponse.json(res);
     } catch (error) {
       console.error(

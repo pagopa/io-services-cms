@@ -132,6 +132,8 @@ paths:
       summary: Retrieve all services
       description: Retrieve all service topics
       operationId: getServiceTopics
+      parameters:
+        - $ref: '#/components/parameters/XForwardedFor'
       responses:
         '200':
           description: Service topics fetched successfully

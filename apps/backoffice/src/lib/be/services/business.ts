@@ -18,7 +18,11 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
-import { IoServicesCmsClient, callIoServicesCms, getServiceTopics } from "./cms";
+import {
+  IoServicesCmsClient,
+  callIoServicesCms,
+  getServiceTopics
+} from "./cms";
 import {
   retrieveLifecycleServices,
   retrievePublicationServices
@@ -52,6 +56,7 @@ type PathParameters = {
  * @returns
  */
 export const retrieveServiceList = async (
+  nextRequest: NextRequest,
   userId: string,
   institution: Institution,
   limit: number,
@@ -63,7 +68,7 @@ export const retrieveServiceList = async (
     TE.bindTo("apimServices"),
     TE.bind("serviceTopicsMap", ({ apimServices }) =>
       pipe(
-        TE.tryCatch(getServiceTopics, E.toError),
+        TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
         TE.map(({ topics }) => reduceServiceTopicsList(topics))
       )
     ),
@@ -214,8 +219,12 @@ export async function forwardIoServicesCmsRequest<
   }
 }
 
-export const retrieveServiceTopics = async (): Promise<ServiceTopicList> => {
-  return await getServiceTopics();
+export const retrieveServiceTopics = async (
+  nextRequest: NextRequest
+): Promise<ServiceTopicList> => {
+  return await getServiceTopics(
+    nextRequest.headers.get("X-Forwarded-For") ?? undefined
+  );
 };
 
 /**

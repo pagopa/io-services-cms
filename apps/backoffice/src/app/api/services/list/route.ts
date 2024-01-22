@@ -20,6 +20,7 @@ export const GET = withJWTAuthHandler(
       const offset = serviceId ? 0 : getOffsetQueryParam(request);
 
       const result = await retrieveServiceList(
+        request,
         backofficeUser.parameters.userId,
         backofficeUser.institution,
         limit,

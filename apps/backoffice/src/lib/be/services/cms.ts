@@ -16,6 +16,6 @@ export const callIoServicesCms = async <
   requestPayload: any
 ) => await getIoServicesCmsClient()[operationId](requestPayload);
 
-export const getServiceTopics = () => {
-  return getTopicsProvider().getServiceTopics();
+export const getServiceTopics = (xForwardedFor: string | undefined) => {
+  return getTopicsProvider().getServiceTopics(xForwardedFor);
 };

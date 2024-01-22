@@ -492,7 +492,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       const result = await retrieveServiceList(
+        request,
         mocks.anUserId,
         mocks.anInstitution,
         10,
@@ -616,7 +620,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       const result = await retrieveServiceList(
+        request,
         mocks.anUserId,
         mocks.anInstitution,
         10,
@@ -692,7 +700,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       const result = await retrieveServiceList(
+        request,
         mocks.anUserId,
         mocks.anInstitution,
         10,
@@ -740,7 +752,11 @@ describe("Services TEST", () => {
 
       isAxiosError.mockReturnValueOnce(true);
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       const result = await retrieveServiceList(
+        request,
         mocks.anUserId,
         mocks.anInstitution,
         10,
@@ -817,7 +833,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       const result = await retrieveServiceList(
+        request,
         mocks.anUserId,
         mocks.anInstitution,
         10,
@@ -913,9 +933,11 @@ describe("Services TEST", () => {
           getServiceList: getServiceListMock
         })
       );
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -965,8 +987,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       await expect(
-        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
@@ -1005,8 +1030,11 @@ describe("Services TEST", () => {
         })
       );
 
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
       await expect(
-        retrieveServiceList(mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
