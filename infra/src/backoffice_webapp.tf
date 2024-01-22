@@ -38,9 +38,10 @@ locals {
     AZURE_CREDENTIALS_SCOPE_URL           = var.backoffice_app.azure_credentials_scope_url
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = var.backoffice_app.azure_apim_subscriptions_api_base_url
 
-    API_SERVICES_CMS_URL       = "https://${module.webapp_functions_app.default_hostname}"
-    API_SERVICES_CMS_BASE_PATH = "/api/v1"
-    API_SERVICES_CMS_MOCKING   = true
+    API_SERVICES_CMS_URL                      = "https://${module.webapp_functions_app.default_hostname}"
+    API_SERVICES_CMS_BASE_PATH                = "/api/v1"
+    API_SERVICES_CMS_MOCKING                  = true
+    API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES = var.backoffice_app.api_services_cms_topics_cache_ttl_minutes
 
     # Selfcare
     SELFCARE_EXTERNAL_API_BASE_URL = var.backoffice_app.selfcare_external_api_base_url
