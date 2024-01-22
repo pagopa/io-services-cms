@@ -89,10 +89,9 @@ const buildTopicsProvider = (): TopicsProvider => {
 
     // caching topics for future requests
     // expiration is set to now + API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES config
-    const currentTime = new Date();
-    cachedServiceTopicsExpiration = new Date(
-      currentTime.getTime() + API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES * 60000
-    );
+    const cacheExpirationTimeInMillis =
+      Date.now() + API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES * 60000;
+    cachedServiceTopicsExpiration = new Date(cacheExpirationTimeInMillis);
 
     cachedServiceTopics = value;
 
