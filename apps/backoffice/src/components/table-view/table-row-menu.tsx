@@ -1,18 +1,21 @@
 import { MoreVertRounded } from "@mui/icons-material";
 import {
   IconButton,
+  ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   Typography
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 /** Define a single table row menu action item */
 export type TableRowMenuAction = {
   /** menu label */
   label: string;
+  /** menu icon */
+  icon: ReactNode;
   /** if true, shows menu as danger one _(red text)_ */
   danger?: boolean;
   /** event triggered on menu item click */
@@ -68,6 +71,7 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
             key={`row-action-${index}`}
             onClick={() => handleActionClick(action)}
           >
+            <ListItemIcon>{action.icon}</ListItemIcon>
             <ListItemText>
               <Typography
                 color={action.danger ? "error" : "primary"}
