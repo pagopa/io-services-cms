@@ -131,7 +131,6 @@ const buildSelfcareClient = (): SelfcareClient => {
   const sendSupportRequest: SelfcareClient["sendSupportRequest"] = request =>
     pipe(
       TE.tryCatch(() => axiosInstance.post(supportApi, request), identity),
-      x => x,
       TE.mapLeft(e => {
         if (axios.isAxiosError(e)) {
           return new Error(`REST client error catched: ${e.message}`);
