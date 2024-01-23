@@ -54,7 +54,6 @@ export const ServiceBuilderStep3 = () => {
           addButtonLabel={t("authorizedCidrs.add")}
           addDefaultValue=""
           size="small"
-          variant="filled"
           inputProps={{
             style: {
               textAlign: "center"

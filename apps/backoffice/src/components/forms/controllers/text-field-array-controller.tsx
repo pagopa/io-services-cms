@@ -2,6 +2,7 @@ import { Add, Delete, Edit, ErrorOutline } from "@mui/icons-material";
 import {
   Box,
   Button,
+  IconButton,
   InputAdornment,
   Stack,
   TextField,
@@ -101,90 +102,88 @@ export function TextFieldArrayController({
     <>
       {fields.map((item, index, items) => {
         return (
-          <Box
-            key={item.id}
-            display="inline-block"
-            marginRight={3}
-            sx={index < items.length - 1 ? { float: "left" } : null}
-          >
-            <Controller
-              name={getFieldName(index)}
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <TextField
-                  {...register(getFieldName(index))}
-                  {...props}
-                  margin="normal"
-                  size={props.size}
-                  value={value}
-                  label={itemLabel ? `${t(itemLabel)} - ${index + 1}` : null}
-                  hiddenLabel={!itemLabel}
-                  InputProps={{
-                    ...props.InputProps,
-                    readOnly: renderedFields[index]?.readOnly,
-                    disableUnderline: renderedFields[index]?.readOnly,
-                    endAdornment:
-                      errors && errors[index] ? (
-                        <InputAdornment position="end">
-                          <ErrorOutline color="error" />
-                        </InputAdornment>
-                      ) : (
-                        undefined
-                      )
-                  }}
-                  error={!!errors && !!errors[index]}
-                  helperText={
-                    errors && errors[index]
-                      ? showErrorMessage(errors[index].message)
-                      : null
-                  }
-                  onChange={onChange}
-                />
-              )}
-            />
-            {renderedFields[index]?.editable ? ( // render edit and delete buttons for each field
-              <>
-                {renderedFields[index]?.readOnly ? (
-                  <Button
-                    size="small"
-                    startIcon={<Edit fontSize="inherit" />}
-                    sx={{ marginTop: 2.2 }}
+          <Box key={item.id} paddingY={1}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              display="inline-block"
+              spacing={2}
+              padding={2}
+              bgcolor="#F9F9F9"
+            >
+              <Controller
+                name={getFieldName(index)}
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <TextField
+                    {...register(getFieldName(index))}
+                    {...props}
+                    margin="normal"
+                    size={props.size}
+                    value={value}
+                    label={itemLabel ? `${t(itemLabel)} - ${index + 1}` : null}
+                    hiddenLabel={!itemLabel}
+                    InputProps={{
+                      ...props.InputProps,
+                      readOnly: renderedFields[index]?.readOnly,
+                      endAdornment:
+                        errors && errors[index] ? (
+                          <InputAdornment position="end">
+                            <ErrorOutline color="error" />
+                          </InputAdornment>
+                        ) : (
+                          undefined
+                        )
+                    }}
+                    error={!!errors && !!errors[index]}
+                    helperText={
+                      errors && errors[index]
+                        ? showErrorMessage(errors[index].message)
+                        : null
+                    }
+                    onChange={onChange}
+                  />
+                )}
+              />
+              {renderedFields[index]?.editable ? ( // render edit and delete buttons for each field
+                <>
+                  {renderedFields[index]?.readOnly ? (
+                    <IconButton
+                      color="primary"
+                      onClick={() => {
+                        renderedFields[index].readOnly = false;
+                        renderedFields[index].editable = true;
+                        setRenderedFields({ ...renderedFields });
+                      }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                  <IconButton
+                    color={"error" as any}
                     onClick={() => {
-                      renderedFields[index].readOnly = false;
-                      renderedFields[index].editable = true;
-                      setRenderedFields({ ...renderedFields });
+                      remove(index);
                     }}
                   >
-                    {t("buttons.edit")}
-                  </Button>
-                ) : null}
-                <Button
-                  size="small"
-                  startIcon={<Delete fontSize="inherit" />}
-                  sx={{ marginTop: 2.2 }}
-                  color="error"
-                  onClick={() => {
-                    remove(index);
-                  }}
-                >
-                  {t("buttons.delete")}
-                </Button>
-              </>
-            ) : null}
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </>
+              ) : null}
+            </Stack>
           </Box>
         );
       })}
-      <Box marginTop={3}>
-        <Stack direction="row" spacing={2} justifyContent="flex-start">
-          {editable ? (
-            <Button
-              variant="outlined"
-              startIcon={<Add />}
-              onClick={() => {
-                append(addDefaultValue);
-              }}
-            >
-              {t(addButtonLabel)}
+      {addSaveButton || addCancelButton ? (
+        <Stack
+          direction="row"
+          spacing={2}
+          justifyContent="flex-start"
+          marginTop={1}
+          marginBottom={2}
+        >
+          {addSaveButton ? (
+            <Button variant="contained" onClick={onSaveClick}>
+              {t("buttons.save")}
             </Button>
           ) : null}
           {addCancelButton ? (
@@ -192,13 +191,19 @@ export function TextFieldArrayController({
               {t("buttons.cancel")}
             </Button>
           ) : null}
-          {addSaveButton ? (
-            <Button variant="contained" onClick={onSaveClick}>
-              {t("buttons.save")}
-            </Button>
-          ) : null}
         </Stack>
-      </Box>
+      ) : null}
+      {editable ? (
+        <Button
+          variant="text"
+          startIcon={<Add />}
+          onClick={() => {
+            append(addDefaultValue);
+          }}
+        >
+          {t(addButtonLabel)}
+        </Button>
+      ) : null}
     </>
   );
 }
