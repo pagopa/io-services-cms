@@ -1,5 +1,22 @@
 # io-services-cms-backoffice
 
+## 1.5.7
+
+### Patch Changes
+
+- f9e3100: Update ServiceVersionSwitcher component layout
+- a2c2418: Services TableRowMenu: add icons and set delete action as last
+- 495a49a: Update ux/ui on TextFieldArrayController (used in auth cidrs input)
+- f1ff588: Fix responsive layout on migration overview
+- b0f9a38: Customize MUI Chip theme colors
+
+## 1.5.6
+
+### Patch Changes
+
+- b6ca2a3: Page Header: Replace breadcrumbs with exit shortcut on service create/update pages
+- 4019e32: Update service-context-menu actions: update publish/unpublish icons and button variant, fix edit action color
+
 ## 1.5.5
 
 ### Patch Changes
