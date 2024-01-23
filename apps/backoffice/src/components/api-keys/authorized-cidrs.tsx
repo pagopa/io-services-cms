@@ -72,7 +72,6 @@ export const AuthorizedCidrs = ({
               addButtonLabel={t("authorizedCidrs.add")}
               addDefaultValue=""
               size="small"
-              variant="filled"
               inputProps={{
                 style: {
                   textAlign: "center"
