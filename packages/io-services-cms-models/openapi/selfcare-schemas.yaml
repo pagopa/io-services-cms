@@ -43,6 +43,7 @@ Institution:
         - PT
         - SCP
         - SA
+        - AS
       type: string
     attributes:
       $ref: '#/Attributes'
