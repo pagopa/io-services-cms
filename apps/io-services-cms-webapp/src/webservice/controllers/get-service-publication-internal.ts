@@ -17,24 +17,14 @@ import {
   wrapRequestHandler,
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
-import {
-  IResponseSuccessJson,
-  ResponseErrorInternal,
-  ResponseErrorNotFound,
-  ResponseSuccessJson,
-} from "@pagopa/ts-commons/lib/responses";
+import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
-import {
-  EventNameEnum,
-  trackEventOnResponseOK,
-} from "../../utils/applicationinsight";
+import { EventNameEnum } from "../../utils/applicationinsight";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
-import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
+import { ErrorResponseTypes } from "../../utils/logger";
 
 // FIXME: This Handler is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
 
@@ -67,46 +57,13 @@ export const makeGetServicePublicationInternalHandler =
     config,
   }: Dependencies): GetServicePublicationServiceInternalHandler =>
   (context, auth, serviceId) =>
-    pipe(
-      serviceOwnerCheckManageTask(
-        apimService,
-        serviceId,
-        auth.subscriptionId,
-        auth.userId
-      ),
-      TE.chainW(
-        flow(
-          store.fetch,
-          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.chainW(
-            flow(
-              TE.fromOption(() =>
-                ResponseErrorNotFound("Not found", `${serviceId} not found`)
-              ),
-              TE.chainW(itemToResponse(config)),
-              TE.map(ResponseSuccessJson<ServiceResponsePayload>)
-            )
-          )
-        )
-      ),
-      TE.map(
-        trackEventOnResponseOK(
-          telemetryClient,
-          EventNameEnum.GetServicePublicationInternal,
-          {
-            userSubscriptionId: auth.subscriptionId,
-            serviceId,
-          }
-        )
-      ),
-      TE.mapLeft((err) =>
-        getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
-          serviceId,
-        })
-      ),
-      TE.toUnion
-    )();
+    genericServiceRetrieveHandler(
+      store,
+      apimService,
+      telemetryClient,
+      config,
+      itemToResponse
+    )(context, auth, serviceId, logPrefix, EventNameEnum.GetServicePublication);
 
 export const applyRequestMiddelwares = (
   handler: GetServicePublicationServiceInternalHandler
