@@ -46,7 +46,6 @@ describe("sendSupportRequest", () => {
   });
 
   it("should return a support response", async () => {
-    const error = new Error("rejected");
     sendSupportRequestMock.mockReturnValueOnce(
       TE.right(mocks.aSupportResponse)
     );
