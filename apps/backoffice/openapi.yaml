@@ -1131,7 +1131,7 @@ components:
           type: number
           minimum: 0
     Institution:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/IOPAE-832-update-selfcare-schema/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution' #FIXME
     UserAuthorizedInstitutions:
       type: object
       properties:
