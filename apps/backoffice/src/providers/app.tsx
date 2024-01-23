@@ -1,9 +1,9 @@
 import DialogProvider from "@/components/dialog-provider";
 import { DrawerProvider } from "@/components/drawer-provider";
 import { Notification } from "@/components/notification";
+import { appTheme } from "@/config/app-theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
-import { theme } from "@pagopa/mui-italia"; // MUI Italia theme
 import { SnackbarProvider } from "notistack";
 import { ReactNode } from "react";
 
@@ -19,7 +19,7 @@ type AppProviderProps = {
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={appTheme}>
       <CssBaseline />
       <DialogProvider>
         <DrawerProvider>
