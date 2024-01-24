@@ -61,7 +61,12 @@ export const AuthorizedCidrs = ({
       borderRadius={0.5}
     >
       <Typography variant="h6">{t("authorizedCidrs.title")}</Typography>
-      <Typography variant="body2" marginTop={1} marginBottom={3}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        marginTop={1}
+        marginBottom={3}
+      >
         {t("authorizedCidrs.description")}
       </Typography>
       <LoaderSkeleton loading={cidrs === undefined} style={{ width: "50%" }}>
