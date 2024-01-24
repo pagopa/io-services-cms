@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.7
+
+### Patch Changes
+
+- 3d2081e: add default cidrs in sync
+
 ## 1.26.6
 
 ### Patch Changes
