@@ -1,5 +1,19 @@
 # io-services-cms-backoffice
 
+## 1.6.0
+
+### Minor Changes
+
+- 3260f2d: Zendesk frontend integration
+- 1ec0295: add selfcare/zendesk integration
+
+### Patch Changes
+
+- 4ac95c9: Service details: update text color and fix logo card height
+- e7ff310: ApiKeyValue: fix gray background color which is now only present under the key value and the copy to clipboard button
+- Updated dependencies [4329db6]
+  - @io-services-cms/models@1.17.0
+
 ## 1.5.7
 
 ### Patch Changes
