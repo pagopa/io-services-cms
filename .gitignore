@@ -11,6 +11,8 @@ node_modules
 *.zip
 generated
 
+**/.scripts/*
+
 .pnp.*
 .yarn/*
 !.yarn/patches
