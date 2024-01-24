@@ -13,9 +13,10 @@ const pagoPALink: RootLinkType = {
 
 export type TopBarProps = {
   user: false | JwtUser | undefined;
+  hideAssistance?: boolean;
 };
 
-export const TopBar = ({ user }: TopBarProps) => {
+export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
   const router = useRouter();
 
   const handleDocumentationClick = () =>
@@ -25,10 +26,13 @@ export const TopBar = ({ user }: TopBarProps) => {
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
-      enableAssistanceButton={false}
-      onAssistanceClick={() => {
-        console.log("Clicked/Tapped on Assistance");
-      }}
+      enableAssistanceButton={!hideAssistance}
+      onAssistanceClick={() =>
+        router.push({
+          pathname: "/assistance",
+          query: { callbackUrl: router.asPath }
+        })
+      }
       onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
         console.log("User login");
