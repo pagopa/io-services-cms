@@ -20,7 +20,7 @@ export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
   );
 
   return (
-    <Box paddingY={1} paddingX={1.5} bgcolor="background.default" width="100%">
+    <Box paddingY={1} paddingX={1.5} bgcolor="background.default" overflow="auto">
       <Stack direction="row" alignItems={"center"} spacing={0.5}>
         <LoaderSkeleton loading={keyValue === undefined}>
           {renderKeyValue(keyValue ?? "--------------------------------")}
