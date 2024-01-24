@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Grid, Typography } from "@mui/material";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
 import { FormProvider, useForm } from "react-hook-form";
@@ -10,7 +11,7 @@ import { TextFieldController } from "../forms/controllers";
 
 export type AssistanceEmailFormProps = {
   onBack: () => void;
-  onComplete: (email: string) => void;
+  onComplete: (email: EmailString) => void;
 };
 
 const defaultFormValues = {
@@ -94,7 +95,7 @@ export const AssistanceEmailForm = ({
         <Grid item xs={6} textAlign="right">
           <ButtonNext
             label="buttons.forward"
-            onClick={() => onComplete(getValues("email"))}
+            onClick={() => onComplete(getValues("email") as EmailString)}
             disabled={!isValid}
           />
         </Grid>
