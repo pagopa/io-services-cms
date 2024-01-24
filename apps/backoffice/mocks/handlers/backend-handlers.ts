@@ -692,6 +692,30 @@ export const buildHandlers = () => {
       ];
 
       return resultArray[0];
+    }),
+    http.post(`${baseURL}/assistance`, () => {
+      const resultArray = [
+        new HttpResponse(JSON.stringify(getAssistance200Response()), {
+          status: 200
+        }),
+        new HttpResponse(null, {
+          status: 400
+        }),
+        new HttpResponse(null, {
+          status: 401
+        }),
+        new HttpResponse(null, {
+          status: 403
+        }),
+        new HttpResponse(null, {
+          status: 429
+        }),
+        new HttpResponse(null, {
+          status: 500
+        })
+      ];
+
+      return resultArray[0];
     })
   ];
 };
@@ -789,4 +813,10 @@ export function getUserAuthorizedInstitutions200Response() {
 
 export function getGetInstitution200Response() {
   return getMockInstitution();
+}
+
+export function getAssistance200Response() {
+  return {
+    redirectUrl: "http://localhost:3000/mocks/zendesk?product=prod-io"
+  };
 }

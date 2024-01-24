@@ -1190,7 +1190,6 @@ components:
       properties:
         redirectUrl:
           type: string
-
   securitySchemes:
     cookieAuth:
       type: apiKey

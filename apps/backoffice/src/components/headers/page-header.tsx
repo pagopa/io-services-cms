@@ -7,6 +7,7 @@ import { PageHtmlHeadTitle } from "./page-html-head-title";
 
 export type PageHeaderProps = {
   title?: string;
+  titleVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
   description?: string;
   hideBreadcrumbs?: boolean;
   /** Displays an exit button, to abort the current page operation  */
@@ -17,6 +18,7 @@ export type PageHeaderProps = {
 
 export const PageHeader = ({
   title,
+  titleVariant = "h4",
   description,
   hideBreadcrumbs,
   showExit,
@@ -34,7 +36,7 @@ export const PageHeader = ({
       ) : null}
       {hideBreadcrumbs ? null : <PageBreadcrumbs />}
       <Box marginBottom={3} id="bo-io-page-title-descr">
-        <Typography marginBottom={2} variant="h4">
+        <Typography marginBottom={2} variant={titleVariant}>
           <LoaderSkeleton
             loading={title === undefined}
             style={{ width: "100%" }}
