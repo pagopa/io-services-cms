@@ -7,6 +7,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
+import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { withJsonInput } from "../lib/azure/misc";
 
 const parseIncomingMessage = (
@@ -55,6 +56,10 @@ export const handleQueueItem = (
                 (x) =>
                   legacyServiceModel.create({
                     ...x,
+                    authorizedCIDRs:
+                      x.authorizedCIDRs.size === 0
+                        ? (new Set(["0.0.0.0/0"]) as Set<CIDR>)
+                        : x.authorizedCIDRs,
                     isVisible: x.isVisible ?? false,
                   })
               ),
