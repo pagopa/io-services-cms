@@ -14,7 +14,7 @@
   },
   "authorizedCidrs": {
     "add": "Add IP address",
-    "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys.",
+    "description": "Authorized IP addresses, in CIDR format. Edit the service to update IP addresses.",
     "title": "IP address"
   },
   "buttons": {

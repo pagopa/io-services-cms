@@ -45,7 +45,12 @@ export const ApiKeys = (props: ApiKeysProps) => {
       borderRadius={0.5}
     >
       <Typography variant="h6">{t(props.title)}</Typography>
-      <Typography variant="body2" marginTop={1} marginBottom={3}>
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        marginTop={1}
+        marginBottom={3}
+      >
         {props.description ? t(props.description) : ""}
       </Typography>
       <ApiSingleKey

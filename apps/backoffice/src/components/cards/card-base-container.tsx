@@ -13,6 +13,7 @@ export const CardBaseContainer = ({ children }: CardBaseContainerProps) => {
       id="card-details"
       padding={3}
       borderRadius={0.5}
+      height="100%"
     >
       {children}
     </Box>

@@ -171,7 +171,7 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
           )}
         </Stack>
         <Box marginTop={1}>
-          <Typography variant="body2">
+          <Typography variant="body2" color="text.secondary">
             <Trans i18nKey="service.logo.disclaimerText" />
           </Typography>
         </Box>

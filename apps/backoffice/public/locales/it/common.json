@@ -14,7 +14,7 @@
   },
   "authorizedCidrs": {
     "add": "Aggiungi indirizzo IP",
-    "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le API key.",
+    "description": "Indirizzi IP autorizzati, in formato CIDR. Modifica il servizio per aggiornare gli indirizzi IP.",
     "title": "Indirizzi IP"
   },
   "buttons": {
