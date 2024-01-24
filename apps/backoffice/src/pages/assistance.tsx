@@ -5,6 +5,7 @@ import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { sanitizePath } from "@/utils/string-util";
 import { Box } from "@mui/material";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -19,7 +20,7 @@ export default function Assistance() {
   const { callbackUrl } = router.query;
   const { data, fetchData } = useFetch<AssistanceResponse>();
 
-  const requestAssistance = (email: string) => {
+  const requestAssistance = (email: EmailString) => {
     fetchData("assistance", { body: { email } }, AssistanceResponse, {
       notify: "errors"
     });
