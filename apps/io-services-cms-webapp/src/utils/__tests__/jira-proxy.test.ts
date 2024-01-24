@@ -106,7 +106,7 @@ describe("Service Review Proxy", () => {
     const mockFetch = getMockFetchWithStatus(201);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const firstPublication = true;
     const serviceReviewTicket = await proxy.createJiraIssue(
       aService,
@@ -133,7 +133,7 @@ describe("Service Review Proxy", () => {
     const mockFetch = getMockFetchWithStatus(200);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const searchKeys = [
       "anIssueKey-1" as NonEmptyString,
       "anIssueKey-2" as NonEmptyString,
@@ -167,7 +167,7 @@ describe("Service Review Proxy", () => {
     const mockFetch = getMockFetchWithStatus(200);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getJiraIssueByServiceId(
       "aServiceId" as NonEmptyString
     )();
@@ -199,7 +199,7 @@ describe("Service Review Proxy", () => {
     const mockFetch = getMockFetchWithStatus(200);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getPendingAndRejectedJiraIssueByServiceId(
       "aWrongServiceId" as NonEmptyString
     )();
@@ -225,7 +225,7 @@ describe("Service Review Proxy", () => {
     const mockFetch = getMockFetchWithStatus(500);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getJiraIssueByServiceId(
       "aServiceId" as NonEmptyString
     )();
