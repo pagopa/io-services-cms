@@ -19,6 +19,9 @@
     "services-cms:clean": "rm -rf ./src/generated/services-cms",
     "services-cms:generate": "gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
     "services-cms:all": "yarn services-cms:clean && yarn services-cms:generate",
+    "selfcare-api-models:clean": "rm -rf ./src/types/selfcare",
+    "selfcare-api-models:generate": "gen-api-models --api-spec ./selfcare-openapi.yaml --out-dir ./src/types/selfcare --request-types --response-decoders",
+    "selfcare-api-models": "yarn selfcare-api-models:clean && yarn selfcare-api-models:generate",
     "generate": "yarn api-definitions:all && yarn services-cms:all"
   },
   "dependencies": {

@@ -26,7 +26,9 @@ export enum InstitutionTypeEnum {
 
   "SCP" = "SCP",
 
-  "SA" = "SA"
+  "SA" = "SA",
+
+  "AS" = "AS"
 }
 
 // required attributes
@@ -50,23 +52,23 @@ const InstitutionO = t.partial({
 
   taxCode: t.string,
 
-  attributes: Attributes,
-
   origin: t.string,
-
-  geographicTaxonomies: t.readonlyArray(
-    GeographicTaxonomy,
-    "array of GeographicTaxonomy"
-  ),
 
   institutionType: enumType<InstitutionTypeEnum>(
     InstitutionTypeEnum,
     "institutionType"
   ),
 
+  attributes: Attributes,
+
   paymentServiceProvider: PaymentServiceProvider,
 
   dataProtectionOfficer: DataProtectionOfficer,
+
+  geographicTaxonomies: t.readonlyArray(
+    GeographicTaxonomy,
+    "array of GeographicTaxonomy"
+  ),
 
   rea: t.string,
 

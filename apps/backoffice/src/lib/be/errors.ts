@@ -1,4 +1,7 @@
-import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@/config/constants";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR
+} from "@/config/constants";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
@@ -66,6 +69,19 @@ export const handleInternalErrorResponse = (
     { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
   );
 };
+
+export const handleBadRequestErrorResponse = (
+  title: string,
+  detail: string
+): NextResponse =>
+  NextResponse.json(
+    {
+      title,
+      status: HTTP_STATUS_BAD_REQUEST,
+      detail: detail
+    },
+    { status: HTTP_STATUS_BAD_REQUEST }
+  );
 
 export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
   if (e instanceof ManagedInternalError) {

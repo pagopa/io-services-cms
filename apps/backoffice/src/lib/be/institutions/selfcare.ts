@@ -5,7 +5,10 @@ import {
 } from "@/lib/be/errors";
 import { getSelfcareClient } from "@/lib/be/selfcare-client";
 import { Institution } from "@/types/selfcare/Institution";
-import { InstitutionResources } from "@/types/selfcare/InstitutionResource";
+import { InstitutionResources } from "@/types/selfcare/InstitutionResources";
+import { SupportRequestDto } from "@/types/selfcare/SupportRequestDto";
+import { SupportResponse } from "@/types/selfcare/SupportResponse";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
 import { isAxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 
@@ -43,6 +46,21 @@ export const getInstitutionById = async (id: string): Promise<Institution> => {
 
     throw new ManagedInternalError(
       "Error calling selfcare getInstitution API",
+      apiResult.left
+    );
+  }
+
+  return apiResult.right;
+};
+
+export const sendSupportRequest = async (
+  request: SupportRequestDto
+): Promise<SupportResponse> => {
+  const apiResult = await getSelfcareClient().sendSupportRequest(request)();
+
+  if (E.isLeft(apiResult)) {
+    throw new ManagedInternalError(
+      "Error calling selfcare sendSupportRequest API",
       apiResult.left
     );
   }

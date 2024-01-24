@@ -35,10 +35,13 @@ paths:
                   assistanceContacts:
                     supportEmail: string
                     supportPhone: string
+                  city: string
                   companyInformations:
                     businessRegisterPlace: string
                     rea: string
                     shareCapital: string
+                  country: string
+                  county: string
                   description: string
                   digitalAddress: string
                   dpoData:
@@ -47,12 +50,9 @@ paths:
                     pec: email@example.com
                   externalId: string
                   id: string
-                  institutionType: GSP
+                  institutionType: AS
                   origin: string
                   originId: string
-                  rootParent:
-                    description: string
-                    id: string
                   pspData:
                     abiCode: string
                     businessRegisterNumber: string
@@ -60,6 +60,9 @@ paths:
                     legalRegisterNumber: string
                     vatNumberGroup: false
                   recipientCode: string
+                  rootParent:
+                    description: string
+                    id: string
                   status: string
                   subunitCode: string
                   subunitType: string
@@ -67,6 +70,221 @@ paths:
                   userProductRoles:
                     - string
                   zipCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{institutionId}/users':
+    get:
+      tags:
+        - institutions
+      summary: getInstitutionProductUsers
+      description: Service to get all the active users related to the provided institution and the product retrieved from Subscription Key
+      operationId: getInstitutionProductUsersUsingGET
+      parameters:
+        - name: institutionId
+          in: path
+          description: Institution's unique internal identifier
+          required: true
+          schema:
+            type: string
+        - name: userIdForAuth
+          in: query
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: User's unique identifier
+          schema:
+            type: string
+        - name: productRoles
+          in: query
+          description: User's roles in product
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResource'
+              example:
+                - email: string
+                  id: string
+                  name: string
+                  roles:
+                    - string
+                  surname: string
+                  fiscalCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{institutionId}/products':
+    get:
+      tags:
+        - institutions
+      summary: getInstitutionUserProducts
+      description: Service to retrieve all active products for given institution and user
+      operationId: getInstitutionUserProductsUsingGET
+      parameters:
+        - name: institutionId
+          in: path
+          description: Institution's unique internal Id
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResource'
+              example:
+                - contractTemplatePath: string
+                  contractTemplateUpdatedAt: string
+                  contractTemplateVersion: string
+                  createdAt: string
+                  depictImageUrl: string
+                  description: string
+                  id: string
+                  identityTokenAudience: string
+                  logo: string
+                  logoBgColor: string
+                  parentId: string
+                  roleManagementURL: string
+                  roleMappings: {}
+                  title: string
+                  urlBO: string
+                  urlPublic: string
         '400':
           description: Bad Request
           content:
@@ -220,21 +438,1510 @@ paths:
                 status: 500
                 title: string
                 type: string
+  /user-groups:
+    get:
+      tags:
+        - user-group
+      summary: getUserGroups
+      description: Service that allows to get a list of UserGroup entities filtered by the product related to Subscription Key
+      operationId: getUserGroupsUsingGET
+      parameters:
+        - name: institutionId
+          in: query
+          description: Users group's institutionId
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 'Format - int32. The page number to access (0 indexed, defaults to 0)'
+          schema:
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          description: 'Format - int32. Number of records per page (defaults to 20, max 2000)'
+          schema:
+            type: integer
+            format: int32
+        - name: sort
+          in: query
+          description: 'Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.'
+          schema:
+            type: array
+            items:
+              type: string
+        - name: userId
+          in: query
+          description: Format - uuid. Member's unique identifier
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          description: 'If filter on status is present, it must be used with at least one of the other filters'
+          schema:
+            enum:
+              - ACTIVE
+              - SUSPENDED
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOfUserGroupResource'
+              example:
+                content:
+                  - description: string
+                    id: string
+                    institutionId: string
+                    name: string
+                    productId: string
+                    status: ACTIVE
+                number: 0
+                size: 0
+                totalElements: 0
+                totalPages: 0
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /product:
+    get:
+      tags:
+        - product
+      summary: getProduct
+      description: The service retrieves Product information related to Subscription Key
+      operationId: getProductUsingGET
+      parameters:
+        - name: institutionType
+          in: query
+          description: Institution's type
+          schema:
+            enum:
+              - GSP
+              - PA
+              - PSP
+              - PT
+              - SCP
+              - SA
+              - AS
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResource'
+              example:
+                contractTemplatePath: string
+                contractTemplateUpdatedAt: string
+                contractTemplateVersion: string
+                createdAt: string
+                depictImageUrl: string
+                description: string
+                id: string
+                identityTokenAudience: string
+                logo: string
+                logoBgColor: string
+                parentId: string
+                roleManagementURL: string
+                roleMappings: {}
+                title: string
+                urlBO: string
+                urlPublic: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /institutions/byGeoTaxonomies:
+    get:
+      tags:
+        - institutions
+      summary: getInstitutionsByGeoTaxonomies
+      description: The service retrieves all the institutions based on given a list of geotax ids and a searchMode
+      operationId: getInstitutionsByGeoTaxonomiesUsingGET
+      parameters:
+        - name: geoTaxonomies
+          in: query
+          description: Geotaxonomy's internal Id
+          required: true
+          schema:
+            type: string
+        - name: userIdForAuth
+          in: query
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+        - name: searchMode
+          in: query
+          description: Searching mode to find institutions based on geotax
+          schema:
+            enum:
+              - all
+              - any
+              - exact
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InstitutionDetailResource'
+              example:
+                - address: string
+                  aooParentCode: string
+                  businessRegisterPlace: string
+                  city: string
+                  country: string
+                  county: string
+                  description: string
+                  digitalAddress: string
+                  externalId: string
+                  geographicTaxonomies:
+                    - code: string
+                      desc: string
+                  id: string
+                  imported: false
+                  institutionType: AS
+                  origin: string
+                  originId: string
+                  parentDescription: string
+                  rea: string
+                  shareCapital: string
+                  subunitCode: string
+                  subunitType: string
+                  supportEmail: string
+                  supportPhone: string
+                  taxCode: string
+                  zipCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{institutionId}/geographicTaxonomy':
+    get:
+      tags:
+        - institutions
+      summary: getInstitutionGeographicTaxonomies
+      description: The service retrieve the institution's geographic taxonomy
+      operationId: getInstitutionGeographicTaxonomiesUsingGET
+      parameters:
+        - name: institutionId
+          in: path
+          description: Institution's unique internal Id
+          required: true
+          schema:
+            type: string
+        - name: userIdForAuth
+          in: query
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeographicTaxonomyResource'
+              example:
+                - code: string
+                  desc: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{institutionId}/contract':
+    get:
+      tags:
+        - institutions
+      summary: getContract
+      description: Service to retrieve a contract given institutionId and productId
+      operationId: getContractUsingGET
+      parameters:
+        - name: institutionId
+          in: path
+          description: Institution's unique internal Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: byte
+              examples:
+                default:
+                  value:
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /delegations:
+    get:
+      tags:
+        - Delegation
+      summary: getDelegations
+      description: getDelegations
+      operationId: getDelegationsUsingGET
+      parameters:
+        - name: institutionId
+          in: query
+          description: The internal identifier of the institution
+          schema:
+            type: string
+        - name: brokerId
+          in: query
+          description: The internal identifier of the broker
+          schema:
+            type: string
+        - name: productId
+          in: query
+          description: Product's unique identifier
+          schema:
+            type: string
+        - name: mode
+          in: query
+          description: Mode (full or normal) to retrieve institution's delegations
+          schema:
+            enum:
+              - FULL
+              - NORMAL
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DelegationResponse'
+              example:
+                - brokerId: string
+                  brokerName: string
+                  brokerTaxCode: string
+                  brokerType: string
+                  id: string
+                  institutionId: string
+                  institutionName: string
+                  institutionRootName: string
+                  institutionType: GSP
+                  productId: string
+                  taxCode: string
+                  type: AOO
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/message/{messageId}/status/{status}':
+    post:
+      tags:
+        - interceptor
+      summary: messageAcknowledgment
+      description: Service to acknowledge message consumption by a consumer
+      operationId: messageAcknowledgmentUsingPOST
+      parameters:
+        - name: messageId
+          in: path
+          description: Kafka message unique identifier
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: path
+          description: Kafka message consumption acknowledgment status
+          required: true
+          schema:
+            enum:
+              - ACK
+              - NACK
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AckPayloadRequest'
+            example:
+              message: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /users:
+    post:
+      tags:
+        - users
+      summary: getUserInfo
+      description: Service to retrieve user info including institutions and products linked to him
+      operationId: getUserInfoUsingPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchUserDto'
+            example:
+              fiscalCode: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResource'
+              example:
+                onboardedInstitutions:
+                  - address: string
+                    description: string
+                    digitalAddress: string
+                    id: string
+                    institutionType: GSP
+                    productInfo:
+                      createdAt: string
+                      id: string
+                      role: string
+                    taxCode: string
+                    zipCode: string
+                user:
+                  email: string
+                  id: string
+                  name: string
+                  roles:
+                    - string
+                  surname: string
+                  fiscalCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /institutions/:
+    get:
+      tags:
+        - institutions
+      summary: Gets institutions filtering by taxCode and/or subunitCode
+      description: Gets institutions filtering by taxCode and/or subunitCode
+      operationId: getInstitutionsByTaxCodeUsingGET
+      parameters:
+        - name: taxCode
+          in: query
+          description: Institution's tax code
+          schema:
+            type: string
+        - name: subunitCode
+          in: query
+          description: Institution's subunit code
+          schema:
+            type: string
+        - name: origin
+          in: query
+          description: origin
+          schema:
+            type: string
+        - name: originId
+          in: query
+          description: originId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionsResponse'
+              example:
+                institutions:
+                  - address: string
+                    aooParentCode: string
+                    attributes:
+                      - code: string
+                        description: string
+                        origin: string
+                    businessRegisterPlace: string
+                    dataProtectionOfficer:
+                      address: string
+                      email: string
+                      pec: string
+                    description: string
+                    digitalAddress: string
+                    externalId: string
+                    geographicTaxonomies:
+                      - code: string
+                        desc: string
+                    id: string
+                    imported: true
+                    institutionType: GSP
+                    origin: string
+                    originId: string
+                    parentDescription: string
+                    paymentServiceProvider:
+                      abiCode: string
+                      businessRegisterNumber: string
+                      legalRegisterName: string
+                      legalRegisterNumber: string
+                      vatNumberGroup: true
+                    rea: string
+                    shareCapital: string
+                    subunitCode: string
+                    subunitType: string
+                    supportEmail: string
+                    supportPhone: string
+                    taxCode: string
+                    zipCode: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/institutions/{institutionId}/onboardings':
+    get:
+      tags:
+        - institutions
+      summary: Gets institutions' onboardings by internal identifier
+      description: Gets institutions' onboardings by internal identifier
+      operationId: getOnboardingsInstitutionUsingGET
+      parameters:
+        - name: institutionId
+          in: path
+          description: The internal identifier of the institution
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: query
+          description: productId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingsResponse'
+              example:
+                onboardings:
+                  - billing:
+                      publicServices: true
+                      recipientCode: string
+                      vatNumber: string
+                    closedAt: string
+                    contract: string
+                    createdAt: string
+                    pricingPlan: string
+                    productId: string
+                    status: ACTIVE
+                    tokenId: string
+                    updatedAt: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/users/{id}':
+    get:
+      tags:
+        - users
+      summary: getUserById
+      description: Get user by Id
+      operationId: getUserInfoUsingGET
+      parameters:
+        - name: id
+          in: path
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+        - name: institutionId
+          in: query
+          description: The internal identifier of the institution
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              examples:
+                default:
+                  value:
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  /support:
+    post:
+      tags:
+        - support
+      summary: sendSupportRequest
+      description: Service to retrieve Support contact's form
+      operationId: sendSupportRequestUsingPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestDto'
+            example:
+              email: email@example.com
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportResponse'
+              example:
+                redirectUrl: string
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+  '/tokens/products/{productId}':
+    get:
+      tags:
+        - Token
+      summary: Retrieve tokens given the product identifier
+      description: Retrieve tokens given the product identifier
+      operationId: getTokensFromProductUsingGET
+      parameters:
+        - name: productId
+          in: path
+          description: Product's unique identifier
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Format - int32. The number of the current page
+          schema:
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          description: Format - int32. The size of the page
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TokenListResponse'
+              examples:
+                default:
+                  value:
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                detail: string
+                instance: string
+                invalidParams:
+                  - name: string
+                    reason: string
+                status: 500
+                title: string
+                type: string
 components:
   schemas:
-    Attribute:
+    AckPayloadRequest:
+      title: AckPayloadRequest
+      required:
+        - message
       type: object
       properties:
-        origin:
+        message:
           type: string
+          description: Acknowledgment request payload message
+    GeographicTaxonomyResource:
+      title: GeographicTaxonomyResource
+      type: object
+      properties:
         code:
           type: string
+          description: Institution's geographic taxonomy ISTAT code
+        desc:
+          type: string
+          description: Institution's geographic taxonomy extended name
+    InstitutionDetailResource:
+      title: InstitutionDetailResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: Institution's physical address
+        aooParentCode:
+          type: string
+          description: AOO unit parent institution Code
+        businessRegisterPlace:
+          type: string
+          description: Institution's business register place
+        city:
+          type: string
+          description: Institution's physical address city
+        country:
+          type: string
+          description: Institution's physical address country
+        county:
+          type: string
+          description: Institution's physical address county
         description:
           type: string
-    Attributes:
-      type: array
-      items:
-        $ref: '#/components/schemas/Attribute'
+          description: Institution's legal name
+        digitalAddress:
+          type: string
+          description: Institution's digitalAddress
+        externalId:
+          type: string
+          description: Institution's unique external identifier
+        geographicTaxonomies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeographicTaxonomyResource'
+          description: Institution's geographic taxonomy
+        id:
+          type: string
+          description: Institution's unique internal Id
+          format: uuid
+        imported:
+          type: boolean
+          description: True if institution is stored from batch api
+          example: false
+        institutionType:
+          enum:
+            - AS
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SA
+            - SCP
+          type: string
+          description: Institution's type
+        origin:
+          type: string
+          description: Institution data origin
+        originId:
+          type: string
+          description: Institution's details origin Id
+        parentDescription:
+          type: string
+          description: Institutions AOO/UO unit parent's description
+        rea:
+          type: string
+          description: Institution's REA
+        shareCapital:
+          type: string
+          description: Institution's share capital value
+        subunitCode:
+          type: string
+          description: Institutions AOO/UO unit Code
+        subunitType:
+          type: string
+          description: Institutions AOO/UO unit type
+        supportEmail:
+          type: string
+          description: Institution's support email contact
+        supportPhone:
+          type: string
+          description: Institution's support phone contact
+        taxCode:
+          type: string
+          description: Institution's taxCode
+        zipCode:
+          type: string
+          description: Institution's zipCode
+    InstitutionLocationDataDto:
+      title: InstitutionLocationDataDto
+      required:
+        - city
+        - country
+        - county
+      type: object
+      properties:
+        city:
+          type: string
+          description: Institution's physical address city
+        country:
+          type: string
+          description: Institution's physical address country
+        county:
+          type: string
+          description: Institution's physical address county
+    InstitutionResource:
+      title: InstitutionResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: Institution's physical address
+        aooParentCode:
+          type: string
+          description: AOO unit parent institution Code
+        assistanceContacts:
+          $ref: '#/components/schemas/AssistanceContactsResource'
+        city:
+          type: string
+          description: Institution's physical address city
+        companyInformations:
+          $ref: '#/components/schemas/CompanyInformationsResource'
+        country:
+          type: string
+          description: Institution's physical address country
+        county:
+          type: string
+          description: Institution's physical address county
+        description:
+          type: string
+          description: Institution's legal name
+        digitalAddress:
+          type: string
+          description: Institution's digitalAddress
+        dpoData:
+          $ref: '#/components/schemas/DpoDataResource'
+        externalId:
+          type: string
+          description: Institution's unique external identifier
+        id:
+          type: string
+          description: Institution's unique internal Id
+          format: uuid
+        institutionType:
+          enum:
+            - AS
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SA
+            - SCP
+          type: string
+          description: Institution's type
+        origin:
+          type: string
+          description: Institution data origin
+        originId:
+          type: string
+          description: Institution's details origin Id
+        pspData:
+          $ref: '#/components/schemas/PspDataResource'
+        recipientCode:
+          type: string
+          description: 'Billing recipient code, not required only for institutionType SA'
+        rootParent:
+          $ref: '#/components/schemas/RootParentResource'
+        status:
+          type: string
+          description: Institution onboarding status
+        subunitCode:
+          type: string
+          description: Institutions AOO/UO unit Code
+        subunitType:
+          type: string
+          description: Institutions AOO/UO unit type
+        taxCode:
+          type: string
+          description: Institution's taxCode
+        userProductRoles:
+          type: array
+          items:
+            type: string
+          description: Logged user's roles on product
+        zipCode:
+          type: string
+          description: Institution's zipCode
+    InvalidParam:
+      title: InvalidParam
+      required:
+        - name
+        - reason
+      type: object
+      properties:
+        name:
+          type: string
+          description: Invalid parameter name.
+        reason:
+          type: string
+          description: Invalid parameter reason.
+    Problem:
+      title: Problem
+      required:
+        - status
+        - title
+      type: object
+      properties:
+        detail:
+          type: string
+          description: Human-readable description of this specific problem.
+        instance:
+          type: string
+          description: A URI that describes where the problem occurred.
+        invalidParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvalidParam'
+          description: A list of invalid parameters details.
+        status:
+          type: integer
+          description: The HTTP status code.
+          format: int32
+          example: 500
+        title:
+          type: string
+          description: Short human-readable summary of the problem.
+        type:
+          type: string
+          description: A URL to a page with more details regarding the problem.
+      description: A "problem detail" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)
+    ProductResource:
+      title: ProductResource
+      type: object
+      properties:
+        contractTemplatePath:
+          type: string
+          description: The path of contract
+        contractTemplateUpdatedAt:
+          type: string
+          description: Date the contract was postponed
+          format: date-time
+        contractTemplateVersion:
+          type: string
+          description: Version of the contract
+        createdAt:
+          type: string
+          description: Date the products was activated/created
+          format: date-time
+        depictImageUrl:
+          type: string
+          description: Product's depiction image url
+        description:
+          type: string
+          description: Product's description
+        id:
+          type: string
+          description: Product's unique identifier
+        identityTokenAudience:
+          type: string
+          description: Product's identity token audience
+        logo:
+          type: string
+          description: Product's logo url
+        logoBgColor:
+          pattern: ^#0-9A-F6$
+          type: string
+          description: Product logo's background color
+        parentId:
+          type: string
+          description: Root parent of the sub product
+        roleManagementURL:
+          type: string
+          description: Url of the utilities management
+        roleMappings:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ProductRoleInfoRes'
+          description: Mappings between Party's and Product's role
+        title:
+          type: string
+          description: Product's title
+        urlBO:
+          type: string
+          description: URL that redirects to the back-office section where is possible to manage the product
+        urlPublic:
+          type: string
+          description: URL that redirects to the public information webpage of the product
+    PspDataResource:
+      title: PspDataResource
+      type: object
+      properties:
+        abiCode:
+          type: string
+          description: PSP's ABI code
+        businessRegisterNumber:
+          type: string
+          description: PSP's Business Register number
+        legalRegisterName:
+          type: string
+          description: PSP's legal register name
+        legalRegisterNumber:
+          type: string
+          description: PSP's legal register number
+        vatNumberGroup:
+          type: boolean
+          description: PSP's Vat Number group
+          example: false
+    DpoDataResource:
+      title: DpoDataResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: DPO's address
+        email:
+          type: string
+          description: DPO's email
+          format: email
+          example: email@example.com
+        pec:
+          type: string
+          description: DPO's PEC
+          format: email
+          example: email@example.com
+    RootParentResource:
+      title: RootParentResource
+      type: object
+      properties:
+        description:
+          type: string
+          description: swagger.external_api.institutions.model.parentDescription
+        id:
+          type: string
+          description: Institution's unique internal Id
     CompanyInformationsResource:
       title: CompanyInformationsResource
       type: object
@@ -258,96 +1965,128 @@ components:
         supportPhone:
           type: string
           description: Institution's support phone contact
-    DpoDataResource:
-      title: DpoDataResource
+    ProductRoleInfoRes:
+      title: ProductRoleInfoRes
+      required:
+        - multiroleAllowed
+        - roles
       type: object
       properties:
-        address:
-          type: string
-          description: DPO's address
-        email:
-          type: string
-          description: DPO's email
-          format: email
-          example: email@example.com
-        pec:
-          type: string
-          description: DPO's PEC
-          format: email
-          example: email@example.com
-    InstitutionResource:
-      title: InstitutionResource
+        multiroleAllowed:
+          type: boolean
+          description: Flag indicating if a User can have more than one product role
+          example: false
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductRole'
+          description: Available product roles
+    ProductRole:
+      title: ProductRole
+      required:
+        - code
+        - description
+        - label
       type: object
       properties:
-        address:
+        code:
           type: string
-          description: Institution's physical address
-        aooParentCode:
-          type: string
-          description: AOO unit parent institution Code
-        assistanceContacts:
-          $ref: '#/components/schemas/AssistanceContactsResource'
-        companyInformations:
-          $ref: '#/components/schemas/CompanyInformationsResource'
+          description: Product role internal code
         description:
           type: string
-          description: Institution's legal name
-        digitalAddress:
+          description: Product role description
+        label:
           type: string
-          description: Institution's digitalAddress
-        dpoData:
-          $ref: '#/components/schemas/DpoDataResource'
-        externalId:
+          description: Product role label
+    PageOfUserGroupResource:
+      title: PageOfUserGroupResource
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserGroupResource'
+          description: The page content
+        number:
+          type: integer
+          description: The number of the current page
+          format: int32
+        size:
+          type: integer
+          description: The size of the page
+          format: int32
+        totalElements:
+          type: integer
+          description: The total amount of elements
+          format: int64
+        totalPages:
+          type: integer
+          description: The number of total pages
+          format: int32
+    UserGroupResource:
+      title: UserGroupResource
+      type: object
+      properties:
+        description:
           type: string
-          description: Institution's unique external identifier
+          description: Users group's description
         id:
           type: string
-          description: Institution's unique internal Id
-          format: uuid
-        institutionType:
-          enum:
-            - GSP
-            - PA
-            - PG
-            - PSP
-            - PT
-            - SCP
-            - SA
+          description: Users group's unique identifier
+        institutionId:
           type: string
-          description: Institution's type
-        origin:
+          description: Users group's institutionId
+        name:
           type: string
-          description: Institution data origin
-        originId:
+          description: Users group's name
+        productId:
           type: string
-          description: Institution's details origin Id
-        rootParent:
-          $ref: '#/components/schemas/RootParentResource'
-        pspData:
-          $ref: '#/components/schemas/PspDataResource'
-        recipientCode:
-          type: string
-          description: Billing recipient code
+          description: Users group's productId
         status:
+          enum:
+            - ACTIVE
+            - SUSPENDED
           type: string
-          description: Institution onboarding status
-        subunitCode:
+          description: Users group's status
+    UserResponse:
+      title: UserResponse
+      type: object
+      properties:
+        email:
           type: string
-          description: Institutions AOO/UO unit Code
-        subunitType:
+        id:
           type: string
-          description: Institutions AOO/UO unit type
+        name:
+          type: string
+        surname:
+          type: string
         taxCode:
           type: string
-          description: Institution's taxCode
-        userProductRoles:
+    UserResource:
+      title: UserResource
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's institutional email
+        id:
+          type: string
+          description: User's unique identifier
+          format: uuid
+        name:
+          type: string
+          description: User's name
+        roles:
           type: array
           items:
             type: string
-          description: Logged user's roles on product
-        zipCode:
+          description: User's roles in product
+        surname:
           type: string
-          description: Institution's zipCode
+          description: User's surname
+        fiscalCode:
+          type: string
+          description: User's fiscal code
     Institution:
       type: object
       properties:
@@ -392,6 +2131,7 @@ components:
             - PT
             - SCP
             - SA
+            - AS
           type: string
         attributes:
           $ref: '#/components/schemas/Attributes'
@@ -436,66 +2176,19 @@ components:
         rootParent:
           $ref: '#/components/schemas/RootParentResource'
       additionalProperties: false
-    Problem:
-      title: Problem
-      required:
-        - status
-        - title
+    Attribute:
       type: object
       properties:
-        detail:
+        origin:
           type: string
-          description: Human-readable description of this specific problem.
-        instance:
+        code:
           type: string
-          description: A URI that describes where the problem occurred.
-        invalidParams:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvalidParam'
-          description: A list of invalid parameters details.
-        status:
-          type: integer
-          description: The HTTP status code.
-          format: int32
-          example: 500
-        title:
-          type: string
-          description: Short human-readable summary of the problem.
-        type:
-          type: string
-          description: A URL to a page with more details regarding the problem.
-      description: A "problem detail" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)
-    RootParentResource:
-      title: RootParentResource
-      type: object
-      properties:
         description:
           type: string
-          description: swagger.external_api.institutions.model.parentDescription
-        id:
-          type: string
-          description: Institution's unique internal Id
-    PspDataResource:
-      title: PspDataResource
-      type: object
-      properties:
-        abiCode:
-          type: string
-          description: PSP's ABI code
-        businessRegisterNumber:
-          type: string
-          description: PSP's Business Register number
-        legalRegisterName:
-          type: string
-          description: PSP's legal register name
-        legalRegisterNumber:
-          type: string
-          description: PSP's legal register number
-        vatNumberGroup:
-          type: boolean
-          description: PSP's Vat Number group
-          example: false
+    Attributes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Attribute'
     PaymentServiceProvider:
       type: object
       properties:
@@ -541,19 +2234,464 @@ components:
           type: string
           description: Description of the geographic taxonomy code
       additionalProperties: false
-    InvalidParam:
-      title: InvalidParam
-      required:
-        - name
-        - reason
+    DelegationResponse:
+      title: DelegationResponse
       type: object
       properties:
-        name:
+        brokerId:
           type: string
-          description: Invalid parameter name.
-        reason:
+        brokerName:
           type: string
-          description: Invalid parameter reason.
+        brokerTaxCode:
+          type: string
+        brokerType:
+          type: string
+        id:
+          type: string
+        institutionId:
+          type: string
+        institutionName:
+          type: string
+        institutionRootName:
+          type: string
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SCP
+            - SA
+            - AS
+          type: string
+        productId:
+          type: string
+        taxCode:
+          type: string
+        type:
+          enum:
+            - AOO
+            - PT
+          type: string
+    SearchUserDto:
+      title: SearchUserDto
+      required:
+        - fiscalCode
+      type: object
+      properties:
+        fiscalCode:
+          type: string
+          description: User's fiscal code
+    UserInfoResource:
+      title: UserInfoResource
+      type: object
+      properties:
+        onboardedInstitutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardedInstitutionResource'
+          description: Object that includes all info about onboarded institutions linked to a user
+        user:
+          $ref: '#/components/schemas/UserResource'
+    OnboardedInstitutionResource:
+      title: OnboardedInstitutionResource
+      type: object
+      properties:
+        address:
+          type: string
+          description: Institution's address
+        description:
+          type: string
+          description: Institution's description
+        digitalAddress:
+          type: string
+          description: Institution's digital address
+        id:
+          type: string
+          description: Institution's Id
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SCP
+            - SA
+            - AS
+          type: string
+          description: Institution's type
+        productInfo:
+          $ref: '#/components/schemas/ProductInfo'
+        taxCode:
+          type: string
+          description: Institution's tax code
+        zipCode:
+          type: string
+          description: Institution's zip code
+    ProductInfo:
+      title: ProductInfo
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        id:
+          type: string
+        role:
+          type: string
+    InstitutionsResponse:
+      title: InstitutionsResponse
+      type: object
+      properties:
+        institutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstitutionResponse'
+    InstitutionResponse:
+      title: InstitutionResponse
+      type: object
+      properties:
+        address:
+          type: string
+        aooParentCode:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttributesResponse'
+        businessRegisterPlace:
+          type: string
+        dataProtectionOfficer:
+          $ref: '#/components/schemas/DataProtectionOfficerResponse'
+        description:
+          type: string
+        digitalAddress:
+          type: string
+        externalId:
+          type: string
+        geographicTaxonomies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeoTaxonomies'
+        id:
+          type: string
+        imported:
+          type: boolean
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SCP
+            - SA
+            - AS
+          type: string
+        origin:
+          type: string
+        originId:
+          type: string
+        parentDescription:
+          type: string
+        paymentServiceProvider:
+          $ref: '#/components/schemas/PaymentServiceProviderResponse'
+        rea:
+          type: string
+        shareCapital:
+          type: string
+        subunitCode:
+          type: string
+        subunitType:
+          type: string
+        supportEmail:
+          type: string
+        supportPhone:
+          type: string
+        taxCode:
+          type: string
+        zipCode:
+          type: string
+    AttributesResponse:
+      title: AttributesResponse
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        origin:
+          type: string
+    DataProtectionOfficerResponse:
+      title: DataProtectionOfficerResponse
+      type: object
+      properties:
+        address:
+          type: string
+        email:
+          type: string
+        pec:
+          type: string
+    GeoTaxonomies:
+      title: GeoTaxonomies
+      type: object
+      properties:
+        code:
+          type: string
+        desc:
+          type: string
+    GeographicTaxonomies:
+      title: GeographicTaxonomies
+      type: object
+      properties:
+        code:
+          type: string
+        country:
+          type: string
+        country_abbreviation:
+          type: string
+        desc:
+          type: string
+        enabled:
+          type: boolean
+        istat_code:
+          type: string
+        province_abbreviation:
+          type: string
+        province_id:
+          type: string
+        region_id:
+          type: string
+    PaymentServiceProviderResponse:
+      title: PaymentServiceProviderResponse
+      type: object
+      properties:
+        abiCode:
+          type: string
+        businessRegisterNumber:
+          type: string
+        legalRegisterName:
+          type: string
+        legalRegisterNumber:
+          type: string
+        vatNumberGroup:
+          type: boolean
+    OnboardingsResponse:
+      title: OnboardingsResponse
+      type: object
+      properties:
+        onboardings:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingResponse'
+    OnboardingResponse:
+      title: OnboardingResponse
+      type: object
+      properties:
+        billing:
+          $ref: '#/components/schemas/BillingResponse'
+        closedAt:
+          type: string
+          format: date-time
+        contract:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        pricingPlan:
+          type: string
+        productId:
+          type: string
+        status:
+          enum:
+            - ACTIVE
+            - DELETED
+            - PENDING
+            - REJECTED
+            - SUSPENDED
+            - TOBEVALIDATED
+          type: string
+        tokenId:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    BillingResponse:
+      title: BillingResponse
+      type: object
+      properties:
+        publicServices:
+          type: boolean
+        recipientCode:
+          type: string
+        vatNumber:
+          type: string
+    SupportRequestDto:
+      title: SupportRequestDto
+      required:
+        - email
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's email
+          format: email
+          example: email@example.com
+    SupportResponse:
+      title: SupportResponse
+      type: object
+      properties:
+        redirectUrl:
+          type: string
+    TokenListResponse:
+      title: TokenListResponse
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenResponse'
+    TokenResponse:
+      title: TokenResponse
+      type: object
+      properties:
+        checksum:
+          type: string
+        closedAt:
+          type: string
+          format: date-time
+        contentType:
+          type: string
+        contractSigned:
+          type: string
+        contractTemplate:
+          type: string
+        contractVersion:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        expiringDate:
+          type: string
+          format: date-time
+        id:
+          type: string
+        institutionId:
+          type: string
+        institutionUpdate:
+          $ref: '#/components/schemas/InstitutionUpdate'
+        legals:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegalsResponse'
+        productId:
+          type: string
+        status:
+          enum:
+            - ACTIVE
+            - DELETED
+            - PENDING
+            - REJECTED
+            - SUSPENDED
+            - TOBEVALIDATED
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenUser'
+    TokenUser:
+      title: TokenUser
+      type: object
+      properties:
+        role:
+          enum:
+            - DELEGATE
+            - MANAGER
+            - OPERATOR
+            - SUB_DELEGATE
+          type: string
+        userId:
+          type: string
+    InstitutionUpdate:
+      title: InstitutionUpdate
+      type: object
+      properties:
+        address:
+          type: string
+        businessRegisterPlace:
+          type: string
+        dataProtectionOfficer:
+          $ref: '#/components/schemas/DataProtectionOfficer'
+        description:
+          type: string
+        digitalAddress:
+          type: string
+        geographicTaxonomies:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstitutionGeographicTaxonomies'
+        imported:
+          type: boolean
+        institutionType:
+          enum:
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SA
+            - SCP
+            - AS
+          type: string
+        paymentServiceProvider:
+          $ref: '#/components/schemas/PaymentServiceProvider'
+        rea:
+          type: string
+        shareCapital:
+          type: string
+        supportEmail:
+          type: string
+        supportPhone:
+          type: string
+        taxCode:
+          type: string
+        zipCode:
+          type: string
+    LegalsResponse:
+      title: LegalsResponse
+      type: object
+      properties:
+        env:
+          enum:
+            - COLL
+            - DEV
+            - PROD
+            - ROOT
+          type: string
+        partyId:
+          type: string
+        relationshipId:
+          type: string
+        role:
+          enum:
+            - DELEGATE
+            - MANAGER
+            - OPERATOR
+            - SUB_DELEGATE
+          type: string
+    InstitutionGeographicTaxonomies:
+      title: InstitutionGeographicTaxonomies
+      type: object
+      properties:
+        code:
+          type: string
+        desc:
+          type: string
   securitySchemes:
     apiKeyHeader:
       type: apiKey
@@ -564,8 +2702,8 @@ components:
       name: subscription-key
       in: query
 security:
-  - apiKeyHeader: [ ]
-  - apiKeyQuery: [ ]
+  - apiKeyHeader: []
+  - apiKeyQuery: []
 tags:
   - name: institutions
     description: Institution Controller
