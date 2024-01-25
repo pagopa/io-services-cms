@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.17.0
+
+### Minor Changes
+
+- 4329db6: add 'AS' to institution type enum
+
 ## 1.16.2
 
 ### Patch Changes
