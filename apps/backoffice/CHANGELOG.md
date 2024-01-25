@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.6.1
+
+### Patch Changes
+
+- 211c3b8: Disable assistance button
+
 ## 1.6.0
 
 ### Minor Changes
