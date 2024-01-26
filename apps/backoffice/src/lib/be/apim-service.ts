@@ -19,9 +19,6 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { cache } from "react";
-
-let apimService: ApimUtils.ApimService;
 
 export type ApimRestClient = {
   getServiceList: (
@@ -30,38 +27,45 @@ export type ApimRestClient = {
     offset: number,
     serviceId?: string,
     isRetry?: boolean
-  ) => TE.TaskEither<Error | AxiosError, SubscriptionCollection>;
+    ) => TE.TaskEither<Error | AxiosError, SubscriptionCollection>;
+  };
+  
+  type Config = t.TypeOf<typeof Config>;
+  const Config = t.type({
+    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
+    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
+    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
+    AZURE_APIM_PRODUCT_NAME: NonEmptyString,
+    AZURE_SUBSCRIPTION_ID: NonEmptyString,
+    AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
+    AZURE_APIM: NonEmptyString,
+    AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
+    API_APIM_MOCKING: BooleanFromString
+  });
+  
+  let apimConfig: Config;
+  let apimService: ApimUtils.ApimService;
+
+const getApimConfig = (): Config => {
+  if (!apimConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error(
+        `error parsing apim config, ${readableReport(result.left)}`∏
+      );
+    }
+
+    if (result.right.API_APIM_MOCKING) {
+      const { setupMocks } = require("../../../mocks");
+      setupMocks();
+    }
+
+    apimConfig = result.right;
+  }
+
+  return apimConfig;
 };
-
-type Config = t.TypeOf<typeof Config>;
-const Config = t.type({
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-  AZURE_APIM_PRODUCT_NAME: NonEmptyString,
-  AZURE_SUBSCRIPTION_ID: NonEmptyString,
-  AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
-  AZURE_APIM: NonEmptyString,
-  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
-  API_APIM_MOCKING: BooleanFromString
-});
-
-const getApimConfig: () => Config = cache(() => {
-  const result = Config.decode(process.env);
-
-  if (E.isLeft(result)) {
-    throw new Error(
-      `error parsing apim config, ${readableReport(result.left)}`
-    );
-  }
-
-  if (result.right.API_APIM_MOCKING) {
-    const { setupMocks } = require("../../../mocks");
-    setupMocks();
-  }
-
-  return result.right;
-});
 
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources

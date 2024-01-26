@@ -13,14 +13,9 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { cache } from "react";
 import { Institution } from "../../types/selfcare/Institution";
 import { InstitutionResources } from "../../types/selfcare/InstitutionResources";
 import { HealthChecksError } from "./errors";
-
-const institutionsApi = "/institutions";
-const supportApi = "/support";
-let selfcareClient: SelfcareClient;
 
 export type SelfcareClient = {
   getUserAuthorizedInstitutions: (
@@ -41,21 +36,30 @@ const Config = t.type({
   SELFCARE_API_MOCKING: BooleanFromString
 });
 
-const getSelfcareConfig: () => Config = cache(() => {
-  const result = Config.decode(process.env);
+const institutionsApi = "/institutions";
+const supportApi = "/support";
+let selfcareConfig: Config;
+let selfcareClient: SelfcareClient;
 
-  if (E.isLeft(result)) {
-    throw new Error("error parsing selfcare config", {
-      cause: readableReport(result.left)
-    });
+const getSelfcareConfig = (): Config => {
+  if (!selfcareConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error("error parsing selfcare config", {
+        cause: readableReport(result.left)
+      });
+    }
+
+    if (result.right.SELFCARE_API_MOCKING) {
+      const { setupMocks } = require("../../../mocks");
+      setupMocks();
+    }
+    selfcareConfig = result.right;
   }
 
-  if (result.right.SELFCARE_API_MOCKING) {
-    const { setupMocks } = require("../../../mocks");
-    setupMocks();
-  }
-  return result.right;
-});
+  return selfcareConfig;
+};
 
 const getAxiosInstance = (): AxiosInstance => {
   const configuration = getSelfcareConfig();

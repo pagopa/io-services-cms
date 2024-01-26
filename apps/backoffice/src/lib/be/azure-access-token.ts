@@ -7,7 +7,6 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { cache } from "react";
 import { HealthChecksError } from "./errors";
 
 //Instanza contentente le credenziali per accedere ad Azure
@@ -21,16 +20,24 @@ const Config = t.type({
   AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString
 });
 
-const getAzureConfig: () => Config = cache(() => {
-  const result = Config.decode(process.env);
+let azureConfig: Config;
 
-  if (E.isLeft(result)) {
-    throw new Error(
-      `error parsing azure access-token config, ${readableReport(result.left)}`
-    );
+const getAzureConfig = (): Config => {
+  if (!azureConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error(
+        `error parsing azure access-token config, ${readableReport(
+          result.left
+        )}`
+      );
+    }
+    azureConfig = result.right;
   }
-  return result.right;
-});
+
+  return azureConfig;
+};
 
 const refreshAzureAccessToken = async (): Promise<AccessToken> => {
   const apimConfig = getAzureConfig();
@@ -80,10 +87,10 @@ export const getAzureAccessToken = async (): Promise<string> => {
           accessToken.expiresOnTimestamp
         )}`
       );
-    }else{
+    } else {
       console.debug(
         `Azure AccessToken is still good expired and was refreshed: Expiration Date was => $${expires}`
-      )
+      );
     }
   }
   return accessToken.token;

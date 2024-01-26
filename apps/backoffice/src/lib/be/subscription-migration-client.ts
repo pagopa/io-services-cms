@@ -14,10 +14,7 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { cache } from "react";
 import { HealthChecksError } from "./errors";
-
-let subscriptionsMigrationClient: SubscriptionsMigrationClient;
 
 export type SubscriptionsMigrationClient = {
   getLatestOwnershipClaimStatus: (
@@ -53,21 +50,28 @@ const MigrationDataAdapter = t.partial({
   })
 });
 
-const getSubscriptionsMigrationConfig: () => Config = cache(() => {
-  const result = Config.decode(process.env);
+let subscriptionsMigrationConfig: Config;
+let subscriptionsMigrationClient: SubscriptionsMigrationClient;
 
-  if (E.isLeft(result)) {
-    throw new Error("error parsing subscriptions migration config", {
-      cause: readableReport(result.left)
-    });
+const getSubscriptionsMigrationConfig = (): Config => {
+  if (!subscriptionsMigrationConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error("error parsing subscriptions migration config", {
+        cause: readableReport(result.left)
+      });
+    }
+
+    if (result.right.SUBSCRIPTION_MIGRATION_API_MOCKING) {
+      const { setupMocks } = require("../../../mocks");
+      setupMocks();
+    }
+    subscriptionsMigrationConfig = result.right;
   }
 
-  if (result.right.SUBSCRIPTION_MIGRATION_API_MOCKING) {
-    const { setupMocks } = require("../../../mocks");
-    setupMocks();
-  }
-  return result.right;
-});
+  return subscriptionsMigrationConfig;
+};
 
 const getAxiosInstance: () => AxiosInstance = () => {
   const configuration = getSubscriptionsMigrationConfig();
