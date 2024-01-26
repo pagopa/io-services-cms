@@ -4,13 +4,11 @@ import {
   ServiceHistory,
   ServicePublication,
 } from "@io-services-cms/models";
+import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
-import {
-  toAuthorizedCIDRs,
-  toAuthorizedRecipients,
-} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { toAuthorizedRecipients } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -34,7 +32,6 @@ const cmsToLegacy = (
   serviceHistory: ServiceHistory
 ): Queue.RequestSyncLegacyItem => {
   const legacyServiceBase = {
-    authorizedCIDRs: toAuthorizedCIDRs(serviceHistory.data.authorized_cidrs),
     authorizedRecipients: toAuthorizedRecipients(
       serviceHistory.data.authorized_recipients
     ),
@@ -68,6 +65,7 @@ const cmsToLegacy = (
     ...legacyServiceBase,
     ...manageServiceName(serviceHistory),
     ...manageIsVisibleField(serviceHistory),
+    ...manageAuthorizedCIDRs(serviceHistory),
     serviceMetadata: {
       ...legacyServiceBase.serviceMetadata,
       ...getSpecialFields(
@@ -75,6 +73,15 @@ const cmsToLegacy = (
         serviceHistory.data.metadata.custom_special_flow
       ),
     },
+  };
+};
+
+const manageAuthorizedCIDRs = (serviceHistory: ServiceHistory) => {
+  if (serviceHistory.data.authorized_cidrs.length === 0) {
+    return { authorizedCIDRs: new Set(["0.0.0.0/0" as CIDR]) };
+  }
+  return {
+    authorizedCIDRs: new Set(serviceHistory.data.authorized_cidrs),
   };
 };
 
