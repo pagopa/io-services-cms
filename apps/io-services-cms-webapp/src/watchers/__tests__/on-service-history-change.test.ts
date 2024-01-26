@@ -109,6 +109,7 @@ const mockConfig = {
 describe("On Service History Change Handler", () => {
   it.each`
     scenario                             | item                                                                                         | publication                       | expected
+    scenario                                                                                                    | item | publication | expected
     ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
     ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                     | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
     ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}`, isVisible: false } }}

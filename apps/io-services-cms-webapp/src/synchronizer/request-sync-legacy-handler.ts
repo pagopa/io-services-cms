@@ -2,12 +2,12 @@ import { Context } from "@azure/functions";
 import { Queue } from "@io-services-cms/models";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { withJsonInput } from "../lib/azure/misc";
 
 const parseIncomingMessage = (
@@ -65,7 +65,16 @@ export const handleQueueItem = (
               ),
             (existingService) =>
               pipe(
-                { ...existingService, ...item },
+                {
+                  ...existingService,
+                  ...{
+                    ...item,
+                    authorizedCIDRs:
+                      item.authorizedCIDRs.size === 0
+                        ? (new Set(["0.0.0.0/0"]) as Set<CIDR>)
+                        : item.authorizedCIDRs,
+                  },
+                },
                 (x) => {
                   _context.log.info(`update param: ${JSON.stringify(x)}`);
                   return x;

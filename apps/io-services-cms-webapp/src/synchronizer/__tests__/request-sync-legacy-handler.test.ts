@@ -386,4 +386,69 @@ describe("Sync Legacy Handler", () => {
       })
     );
   });
+
+  it("should update a new legacy service with default cidrs if they are empty", async () => {
+    const context = createContext();
+
+    const aServiceWithoutCidrs = {
+      authorizedCIDRs: toAuthorizedCIDRs([]),
+      authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
+      departmentName: "-",
+      isVisible: true,
+      organizationFiscalCode: "12345678901",
+      organizationName: "anOrganizationName",
+      serviceId: "sid",
+      serviceName: "aServiceName",
+      cmsTag: true,
+      serviceMetadata: {
+        category: StandardServiceCategoryEnum.STANDARD,
+        scope: ServiceScopeEnum.LOCAL,
+        customSpecialFlow: undefined,
+        description: "aDescription",
+      },
+    } as unknown as Service;
+
+    const aRequestSyncLegacyItem = {
+      cmsTag: true,
+      ...aServiceWithoutCidrs,
+    } as unknown as Queue.RequestSyncLegacyItem;
+
+    const legacyServiceModelMock = {
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.some(aRetrievedService));
+      }),
+      create: vi.fn(),
+      update: vi.fn(() =>
+        TE.right({
+          ...aRetrievedService,
+          ...aLegacyService,
+        })
+      ),
+    } as unknown as ServiceModel;
+
+    const res = await handleQueueItem(
+      context,
+      aRequestSyncLegacyItem as unknown as Json,
+      legacyServiceModelMock
+    )();
+
+    expect(res).toBeUndefined();
+    expect(legacyServiceModelMock.create).not.toBeCalled();
+    expect(legacyServiceModelMock.findLastVersionByModelId).toBeCalledTimes(1);
+    expect(legacyServiceModelMock.findLastVersionByModelId).toBeCalledWith([
+      aRequestSyncLegacyItem.serviceId,
+    ]);
+    expect(legacyServiceModelMock.update).toBeCalledTimes(1);
+    const expected = JSON.parse(
+      JSON.stringify({
+        ...aRetrievedService,
+        ...aRequestSyncLegacyItem,
+      })
+    );
+    expect(legacyServiceModelMock.update).toBeCalledWith(
+      expect.objectContaining({
+        authorizedCIDRs: new Set(["0.0.0.0/0"]) as Set<CIDR>,
+      })
+    );
+  });
 });

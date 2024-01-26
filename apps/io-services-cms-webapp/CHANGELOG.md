@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.26.9
+
+### Patch Changes
+
+- a360639: Fix default CIDRs on sync legacy
+
+## 1.26.8
+
+### Patch Changes
+
+- 286e2d4: Default CIDRs on legacy sync
+
 ## 1.26.7
 
 ### Patch Changes

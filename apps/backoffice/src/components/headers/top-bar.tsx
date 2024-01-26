@@ -26,7 +26,7 @@ export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
-      enableAssistanceButton={!hideAssistance}
+      enableAssistanceButton={false}
       onAssistanceClick={() =>
         router.push({
           pathname: "/assistance",
