@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.6.2
+
+### Patch Changes
+
+- 842f1d7: Fix frontend xss vulnerability on ServiceVersionSwitcher component
+
 ## 1.6.1
 
 ### Patch Changes
