@@ -457,7 +457,7 @@
     },
     "switcher": {
       "title": "Quale versione del servizio vuoi visualizzare?",
-      "description": "Il servizio <strong>{{name}}</strong> ha due versioni. Seleziona quella che vuoi visualizzare.",
+      "description": "Il servizio <1><0>{service?.name}</0></1> ha due versioni. Seleziona quella che vuoi visualizzare.",
       "status": "Stato del servizio:",
       "lastApprovedVersion": "Ultima versione approvata.",
       "lastUpdate": "Ultima modifica:"
