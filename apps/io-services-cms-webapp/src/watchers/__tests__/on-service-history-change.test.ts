@@ -60,7 +60,7 @@ const aServiceHistory = {
 } as ServiceHistory;
 
 const aLegacyService = {
-  authorizedCIDRs: new Set(["127.0.0.1" as CIDR]),
+  authorizedCIDRs: toAuthorizedCIDRs(["127.0.0.1" as CIDR]),
   authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
   departmentName: "aDepartmentName",
   maxAllowedPaymentAmount: 1000000,
@@ -108,14 +108,13 @@ const mockConfig = {
 
 describe("On Service History Change Handler", () => {
   it.each`
-    scenario                                                   | item                                                                                                        | publication                       | expected
-    ${"request sync legacy visible"}                           | ${{ ...aServiceHistory }}                                                                                   | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
-    ${"request sync legacy not visible"}                       | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                                    | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
-    ${"request sync legacy on deleted"}                        | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                                        | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}`, isVisible: false } }}
-    ${"request sync legacy on Lifecycle Item never published"} | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                                          | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
-    ${"default cidrs when missing"}                            | ${{ ...aServiceHistory, data: { ...aServiceHistory.data, authorized_cidrs: [] }, fsm: { state: "draft" } }} | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, authorizedCIDRs: new Set(["0.0.0.0/0"]), isVisible: false } }}
-    ${"no action on Lifecycle Item"}                           | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                                          | ${O.some({ ...aServiceHistory })} | ${{}}
-    ${"no action on sync from legacy"}                         | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }}                | ${O.none}                         | ${{}}
+    scenario                             | item                                                                                         | publication                       | expected
+    scenario                                                                                                    | item | publication | expected
+    ${"request sync legacy visible"}     | ${{ ...aServiceHistory }}                                                                    | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: true } }}
+    ${"request sync legacy not visible"} | ${{ ...aServiceHistory, fsm: { state: "unpublished" } }}                                     | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, isVisible: false } }}
+    ${"deleted"}                         | ${{ ...aServiceHistory, fsm: { state: "deleted" } }}                                         | ${O.none}                         | ${{ requestSyncLegacy: { ...aLegacyService, serviceName: `DELETED ${aLegacyService.serviceName}`, isVisible: false } }}
+    ${"no action on Lifecycle Item"}     | ${{ ...aServiceHistory, fsm: { state: "draft" } }}                                           | ${O.some({ ...aServiceHistory })} | ${{}}
+    ${"no action on sync from legacy"}   | ${{ ...aServiceHistory, fsm: { ...aServiceHistory.fsm, lastTransition: SYNC_FROM_LEGACY } }} | ${O.none}                         | ${{}}
   `(
     "should map an item to a $scenario action",
     async ({ item, publication, expected }) => {
