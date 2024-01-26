@@ -4,7 +4,6 @@ import {
   ServiceHistory,
   ServicePublication,
 } from "@io-services-cms/models";
-import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { SpecialServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/SpecialServiceCategory";
 import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
