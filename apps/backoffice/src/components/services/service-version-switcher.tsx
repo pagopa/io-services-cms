@@ -13,7 +13,7 @@ import {
   Stack,
   Typography
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ServiceStatus } from ".";
 
@@ -143,13 +143,10 @@ export const ServiceVersionSwitcher = ({
         sx={{ width: "425px", textAlign: "center", paddingX: 4, paddingY: 0 }}
       >
         <Box marginBottom={4}>
-          <span
-            dangerouslySetInnerHTML={{
-              __html: t(`service.switcher.description`, {
-                name: service?.name
-              })
-            }}
-          />
+          <Trans i18nKey="service.switcher.description">
+            Il servizio <strong>{service?.name}</strong> ha due versioni.
+            Seleziona quella che vuoi visualizzare.
+          </Trans>
         </Box>
         {renderServiceVersionChoice("publication", true)}
         {renderServiceVersionChoice("lifecycle")}
