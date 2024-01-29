@@ -50,6 +50,14 @@ export const JiraConfig = t.type({
   JIRA_ORGANIZATION_CF_CUSTOM_FIELD: NonEmptyString,
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
   JIRA_TRANSITION_UPDATED_ID: NonEmptyString,
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: withDefault(
+    IntegerFromString,
+    "3" as unknown as number
+  ),
+  JIRA_ISSUE_HIGH_PRIORITY_ID: withDefault(
+    IntegerFromString,
+    "2" as unknown as number
+  ),
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 

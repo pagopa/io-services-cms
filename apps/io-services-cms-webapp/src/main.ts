@@ -129,7 +129,7 @@ export const httpEntryPoint = pipe(
 
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getServiceReviewDao(config),
-  jiraProxy(jiraClient(config)),
+  jiraProxy(jiraClient(config), config),
   apimService,
   fsmLifecycleClient,
   fsmPublicationClient,
@@ -152,7 +152,7 @@ export const createRequestHistoricizationEntryPoint =
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getServiceReviewDao(config),
-  jiraProxy(jiraClient(config)),
+  jiraProxy(jiraClient(config), config),
   fsmLifecycleClient
 );
 
@@ -173,7 +173,8 @@ export const serviceReviewLegacyCheckerEntryPoint =
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
     jiraProxy(
-      jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString })
+      jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString }),
+      config
     ),
     fsmLifecycleClient
   );

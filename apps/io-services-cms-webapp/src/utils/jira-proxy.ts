@@ -3,6 +3,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { JiraConfig } from "../config";
 import {
   CreateJiraIssueResponse,
   JiraAPIClient,
@@ -18,6 +19,11 @@ const formatServiceScope = (scope: string) =>
   scope === "NATIONAL"
     ? `{color:#EA4436}*${scope} (Verificare che sia effettivamente un servizio nazionale prima di procedere con l'approvazione)*{color}`
     : scope;
+
+const getTicketPriority = (jiraConfig: JiraConfig, scope: string): number =>
+  scope === "NATIONAL"
+    ? jiraConfig.JIRA_ISSUE_HIGH_PRIORITY_ID
+    : jiraConfig.JIRA_ISSUE_MEDIUM_PRIORITY_ID;
 
 const formatFirtPublication = (firstPublication: boolean) =>
   firstPublication ? "Prima attivazione" : "Modifica Successiva";
@@ -68,7 +74,10 @@ export type Delegate = {
   permissions: Array<string | undefined>;
 };
 
-export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
+export const jiraProxy = (
+  jiraClient: JiraAPIClient,
+  jiraConfig: JiraConfig
+): JiraProxy => {
   const buildIssueCustomFields = (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate
@@ -135,6 +144,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
     jiraClient.createJiraIssue(
       formatIssueTitle(service.id),
       buildIssueDescription(service, delegate, firstPublication),
+      getTicketPriority(jiraConfig, service.data.metadata.scope),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );
@@ -149,6 +159,7 @@ export const jiraProxy = (jiraClient: JiraAPIClient): JiraProxy => {
       ticketKey,
       formatIssueTitle(service.id),
       buildIssueDescription(service, delegate, firstPublication),
+      getTicketPriority(jiraConfig, service.data.metadata.scope),
       [`service-${service.id}` as NonEmptyString],
       buildIssueCustomFields(service, delegate)
     );

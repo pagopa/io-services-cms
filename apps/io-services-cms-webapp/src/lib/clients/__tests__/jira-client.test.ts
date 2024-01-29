@@ -9,6 +9,8 @@ const JIRA_CONFIG = {
   JIRA_PROJECT_NAME: "BOARD",
   JIRA_TOKEN: "token",
   JIRA_USERNAME: "aJiraUsername",
+  JIRA_ISSUE_HIGH_PRIORITY_ID: 2,
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: 3,
 } as config.JiraConfig;
 
 const mockFetchJson = vitest.fn();
@@ -67,7 +69,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -88,7 +91,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -112,7 +116,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -133,7 +138,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -167,6 +173,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     const issue = await client.createJiraIssue(
       aJiraIssueSummary,
       aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID,
       ["TEST-LABEL" as NonEmptyString],
       customFields
     )();
@@ -235,7 +242,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
     const issue = await client.updateJiraIssue(
       aJiraIssueKey,
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -257,7 +265,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
     const issue = await client.updateJiraIssue(
       aJiraIssueKey,
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -282,7 +291,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
     const issue = await client.updateJiraIssue(
       aJiraIssueKey,
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -304,7 +314,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
     const issue = await client.updateJiraIssue(
       aJiraIssueKey,
       aJiraIssueSummary,
-      aJiraIssueDescription
+      aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -337,6 +348,7 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
       aJiraIssueKey,
       aJiraIssueSummary,
       aJiraIssueDescription,
+      JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID,
       ["TEST-LABEL" as NonEmptyString],
       customFields
     )();
