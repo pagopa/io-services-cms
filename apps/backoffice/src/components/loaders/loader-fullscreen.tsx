@@ -11,12 +11,17 @@ import { useTranslation } from "next-i18next";
 export type LoaderFullscreenProps = {
   title: string;
   content: string;
+  loading?: boolean;
 };
 
 /**
  * This loader render a fullscreen backdrop with a centered card, with text and loader icon
  */
-export const LoaderFullscreen = ({ title, content }: LoaderFullscreenProps) => {
+export const LoaderFullscreen = ({
+  title,
+  content,
+  loading = true
+}: LoaderFullscreenProps) => {
   const { t } = useTranslation();
 
   return (
@@ -29,9 +34,11 @@ export const LoaderFullscreen = ({ title, content }: LoaderFullscreenProps) => {
           <Typography variant="body2" align="center">
             {t(content)}
           </Typography>
-          <Box textAlign="center" marginTop={2}>
-            <CircularProgress />
-          </Box>
+          {loading ? (
+            <Box textAlign="center" marginTop={2}>
+              <CircularProgress />
+            </Box>
+          ) : null}
         </CardContent>
       </Card>
     </Backdrop>
