@@ -2,7 +2,7 @@ import { LoaderFullscreen } from "@/components/loaders";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 
-export default function Error() {
+export default function ErrorPage() {
   const router = useRouter();
   const error = router.query.error as string;
 
@@ -21,4 +21,4 @@ export async function getStaticProps({ locale }: any) {
 }
 
 // No Auth required
-Error.publicRoute = true;
+ErrorPage.publicRoute = true;
