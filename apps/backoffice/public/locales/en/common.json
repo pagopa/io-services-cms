@@ -9,6 +9,7 @@
     "title": "IO BackOffice"
   },
   "auth": {
+    "error": "Authentication error",
     "leaving": "Exit in progress",
     "loading": "Access in progress"
   },
