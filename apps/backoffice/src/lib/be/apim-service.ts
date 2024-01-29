@@ -19,9 +19,6 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { cache } from "react";
-
-let apimService: ApimUtils.ApimService;
 
 export type ApimRestClient = {
   getServiceList: (
@@ -46,22 +43,29 @@ const Config = t.type({
   API_APIM_MOCKING: BooleanFromString
 });
 
-const getApimConfig: () => Config = cache(() => {
-  const result = Config.decode(process.env);
+let apimConfig: Config;
+let apimService: ApimUtils.ApimService;
 
-  if (E.isLeft(result)) {
-    throw new Error(
-      `error parsing apim config, ${readableReport(result.left)}`
-    );
+const getApimConfig = (): Config => {
+  if (!apimConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error(
+        `error parsing apim config, ${readableReport(result.left)}`
+      );
+    }
+
+    if (result.right.API_APIM_MOCKING) {
+      const { setupMocks } = require("../../../mocks");
+      setupMocks();
+    }
+
+    apimConfig = result.right;
   }
 
-  if (result.right.API_APIM_MOCKING) {
-    const { setupMocks } = require("../../../mocks");
-    setupMocks();
-  }
-
-  return result.right;
-});
+  return apimConfig;
+};
 
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources

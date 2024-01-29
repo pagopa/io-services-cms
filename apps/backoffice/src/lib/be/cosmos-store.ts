@@ -8,12 +8,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { cache } from "react";
 import { HealthChecksError } from "./errors";
-
-let cosmosDatabase: Database;
-let serviceLifecycleCosmosStore: ReturnType<typeof buildServiceLifecycleCosmosStore>;
-let servicePublicationCosmosStore: ReturnType<typeof buildServicePublicationCosmosStore>;
 
 const Config = t.type({
   COSMOSDB_NAME: NonEmptyString,
@@ -22,17 +17,27 @@ const Config = t.type({
   COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString
 });
+type Config = t.TypeOf<typeof Config>;
 
-const getCosmosConfig = cache(() => {
-  const result = Config.decode(process.env);
+let cosmosConfig: Config;
+let cosmosDatabase: Database;
+let serviceLifecycleCosmosStore: ReturnType<typeof buildServiceLifecycleCosmosStore>;
+let servicePublicationCosmosStore: ReturnType<typeof buildServicePublicationCosmosStore>;
 
-  if (E.isLeft(result)) {
-    throw new Error("error parsing cosmos config", {
-      cause: readableReport(result.left)
-    });
+const getCosmosConfig = (): Config => {
+  if (!cosmosConfig) {
+    const result = Config.decode(process.env);
+
+    if (E.isLeft(result)) {
+      throw new Error("error parsing cosmos config", {
+        cause: readableReport(result.left)
+      });
+    }
+    cosmosConfig = result.right;
   }
-  return result.right;
-});
+
+  return cosmosConfig;
+};
 
 const buildCosmosDatabase = (): Database => {
   const cosmosConfiguration = getCosmosConfig();
