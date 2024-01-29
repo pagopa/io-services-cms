@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.11
+
+### Patch Changes
+
+- c30ab63: Change priority.id type in jira create/update API call
+
 ## 1.26.10
 
 ### Patch Changes
