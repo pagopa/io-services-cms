@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.26.10
+
+### Patch Changes
+
+- 9f1bba9: Generalize get service API handler
+- 9eb5d28: Retrieve topics on Backoffice
+- 9f627ec: Set High Priority for Review Ticket related to National services
+
 ## 1.26.9
 
 ### Patch Changes
