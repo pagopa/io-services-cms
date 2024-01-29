@@ -9,6 +9,7 @@ import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
+import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -35,10 +36,9 @@ import {
 import {
   buildMissingService,
   reducePublicationServicesList,
-  toServiceListItem,
-  reduceServiceTopicsList
+  reduceServiceTopicsList,
+  toServiceListItem
 } from "./utils";
-import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 
 type PathParameters = {
   serviceId?: string;
@@ -56,6 +56,7 @@ type PathParameters = {
  * @returns
  */
 export const retrieveServiceList = async (
+  nextRequest: NextRequest,
   userId: string,
   institution: Institution,
   limit: number,
@@ -67,7 +68,7 @@ export const retrieveServiceList = async (
     TE.bindTo("apimServices"),
     TE.bind("serviceTopicsMap", ({ apimServices }) =>
       pipe(
-        TE.tryCatch(getServiceTopics, E.toError),
+        TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
         TE.map(({ topics }) => reduceServiceTopicsList(topics))
       )
     ),
@@ -218,8 +219,12 @@ export async function forwardIoServicesCmsRequest<
   }
 }
 
-export const retrieveServiceTopics = async (): Promise<ServiceTopicList> => {
-  return await getServiceTopics();
+export const retrieveServiceTopics = async (
+  nextRequest: NextRequest
+): Promise<ServiceTopicList> => {
+  return await getServiceTopics(
+    nextRequest.headers.get("X-Forwarded-For") ?? undefined
+  );
 };
 
 /**
