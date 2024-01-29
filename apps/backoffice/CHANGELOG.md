@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.6.3
+
+### Patch Changes
+
+- 9eb5d28: Retrieve topics on Backoffice
+
 ## 1.6.2
 
 ### Patch Changes
