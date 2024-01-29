@@ -71,7 +71,7 @@ export type JiraAPIClient = {
   readonly createJiraIssue: (
     title: NonEmptyString,
     description: NonEmptyString,
-    priority: number,
+    priority: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, CreateJiraIssueResponse>;
@@ -79,7 +79,7 @@ export type JiraAPIClient = {
     ticketKey: NonEmptyString,
     title: NonEmptyString,
     description: NonEmptyString,
-    priority: number,
+    priority: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ) => TaskEither<Error, void>;
@@ -138,7 +138,7 @@ export const jiraClient = (
   const createJiraIssue = (
     title: NonEmptyString,
     description: NonEmptyString,
-    priority: number,
+    priority: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, CreateJiraIssueResponse> =>
@@ -184,7 +184,7 @@ export const jiraClient = (
     ticketKey: NonEmptyString,
     title: NonEmptyString,
     description: NonEmptyString,
-    priority: number,
+    priority: NonEmptyString,
     labels?: ReadonlyArray<NonEmptyString>,
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, void> =>

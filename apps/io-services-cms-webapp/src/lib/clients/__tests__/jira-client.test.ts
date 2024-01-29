@@ -9,8 +9,8 @@ const JIRA_CONFIG = {
   JIRA_PROJECT_NAME: "BOARD",
   JIRA_TOKEN: "token",
   JIRA_USERNAME: "aJiraUsername",
-  JIRA_ISSUE_HIGH_PRIORITY_ID: 2,
-  JIRA_ISSUE_MEDIUM_PRIORITY_ID: 3,
+  JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
 } as config.JiraConfig;
 
 const mockFetchJson = vitest.fn();
@@ -181,7 +181,10 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body:
         expect.any(String) &&
-        expect.stringContaining('"customfield_10364":"12345678901"'),
+        expect.stringContaining('"customfield_10364":"12345678901"') &&
+        expect.stringContaining(
+          `"priority":{"id":"${JIRA_CONFIG.JIRA_ISSUE_MEDIUM_PRIORITY_ID}"}`
+        ),
       headers: expect.any(Object),
       method: "POST",
     });
