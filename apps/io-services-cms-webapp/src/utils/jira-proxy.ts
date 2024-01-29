@@ -20,7 +20,10 @@ const formatServiceScope = (scope: string) =>
     ? `{color:#EA4436}*${scope} (Verificare che sia effettivamente un servizio nazionale prima di procedere con l'approvazione)*{color}`
     : scope;
 
-const getTicketPriority = (jiraConfig: JiraConfig, scope: string): number =>
+const getTicketPriority = (
+  jiraConfig: JiraConfig,
+  scope: string
+): NonEmptyString =>
   scope === "NATIONAL"
     ? jiraConfig.JIRA_ISSUE_HIGH_PRIORITY_ID
     : jiraConfig.JIRA_ISSUE_MEDIUM_PRIORITY_ID;

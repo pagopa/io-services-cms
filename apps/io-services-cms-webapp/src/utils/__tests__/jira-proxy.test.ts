@@ -22,8 +22,8 @@ const JIRA_CONFIG = {
   JIRA_DELEGATE_NAME_CUSTOM_FIELD: "customfield_3",
   JIRA_ORGANIZATION_CF_CUSTOM_FIELD: "customfield_4",
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: "customfield_5",
-  JIRA_ISSUE_HIGH_PRIORITY_ID: 2,
-  JIRA_ISSUE_MEDIUM_PRIORITY_ID: 3,
+  JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
 } as config.JiraConfig;
 
 const mockFetchJson = vitest.fn();
@@ -158,7 +158,7 @@ describe("Service Review Proxy", () => {
       body:
         expect.any(String) &&
         expect.stringContaining(
-          `"priority":{"id":${JIRA_CONFIG.JIRA_ISSUE_HIGH_PRIORITY_ID}}`
+          `"priority":{"id":"${JIRA_CONFIG.JIRA_ISSUE_HIGH_PRIORITY_ID}"}`
         ),
       headers: expect.any(Object),
       method: "POST",
