@@ -14,7 +14,8 @@ const authOptions: NextAuthOptions = {
   ],
   pages: {
     signIn: "/auth/login",
-    signOut: "/auth/logout"
+    signOut: "/auth/logout",
+    error: "/auth/error"
   },
   callbacks: {
     jwt({ token, user }) {
