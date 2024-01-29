@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.6.4
+
+### Patch Changes
+
+- 95da718: Add custom error page for next-auth errors
+- a8bef49: replace React cache with singleton
+
 ## 1.6.3
 
 ### Patch Changes
