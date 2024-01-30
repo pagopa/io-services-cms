@@ -60,3 +60,26 @@ resource "azurerm_api_management_named_value" "io_fn_services_cms_key_v2" {
     secret_id = data.azurerm_key_vault_secret.function_apim_key.versionless_id
   }
 }
+
+resource "azurerm_api_management_logger" "cache_policy_app_insights" {
+  name                = "cache-policy-appinsight-apimlogger"
+  api_management_name = data.azurerm_api_management.apim_v2.name
+  resource_group_name = data.azurerm_api_management.apim_v2.resource_group_name
+
+  application_insights {
+    instrumentation_key = data.azurerm_application_insights.application_insights.instrumentation_key
+  }
+}
+
+resource "azurerm_api_management_diagnostic" "cache_policy_app_insights" {
+  identifier               = "applicationinsights"
+  resource_group_name      = data.azurerm_api_management.apim_v2.resource_group_name
+  api_management_name      = data.azurerm_api_management.apim_v2.name
+  api_management_logger_id = azurerm_api_management_logger.cache_policy_app_insights.id
+
+  sampling_percentage       = 100.0
+  always_log_errors         = true
+  log_client_ip             = false
+  verbosity                 = "verbose"
+  http_correlation_protocol = "W3C"
+}
