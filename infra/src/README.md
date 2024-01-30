@@ -32,8 +32,8 @@
 | <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v7.45.0 |
 | <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
 | <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/pagopa/terraform-azurerm-v3.git//storage_account | v7.45.0 |
-| <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | github.com/pagopa/terraform-azurerm-v3.git//function_app | v7.45.0 |
-| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.45.0 |
+| <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | github.com/pagopa/terraform-azurerm-v3.git//function_app | v7.50.0 |
+| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.50.0 |
 
 ## Resources
 
