@@ -103,7 +103,7 @@ locals {
 }
 
 module "webapp_functions_app" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v7.50.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
@@ -174,7 +174,7 @@ module "webapp_functions_app" {
 }
 
 module "webapp_functions_app_staging_slot" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v7.50.0"
 
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
