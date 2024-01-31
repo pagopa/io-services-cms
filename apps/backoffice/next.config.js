@@ -26,6 +26,19 @@ const nextConfig = {
       };
     }
     return config;
+  },
+  async headers() {
+    return [
+      {
+        source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY"
+          }
+        ]
+      }
+    ];
   }
 };
 
