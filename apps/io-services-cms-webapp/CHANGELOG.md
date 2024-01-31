@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.26.12
+
+### Patch Changes
+
+- c33c574: Handle Service Not Found on Service Ownership checks
+
 ## 1.26.11
 
 ### Patch Changes
