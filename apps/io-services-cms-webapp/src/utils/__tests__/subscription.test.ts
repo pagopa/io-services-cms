@@ -26,7 +26,6 @@ describe("subscription", () => {
     vi.restoreAllMocks();
   });
   it("should return serviceId in case of valid subscription and userId for the requested service", async () => {
-
     const result = await serviceOwnerCheckManageTask(
       mockApimService,
       aServiceId,
@@ -67,5 +66,31 @@ describe("subscription", () => {
     )();
     expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should return 404 response when the subscription is not found on Apim", async () => {
+    const aNotManageSubscriptionId = "MANAGE-123" as NonEmptyString;
+    const aDifferentUserId = "123" as NonEmptyString;
+
+    const mockApimServiceNotFound = {
+      getSubscription: vi.fn(() =>
+        TE.left({
+          statusCode: 404,
+        })
+      ),
+    } as unknown as ApimUtils.ApimService;
+
+    const result = await serviceOwnerCheckManageTask(
+      mockApimServiceNotFound,
+      aServiceId,
+      aNotManageSubscriptionId,
+      aDifferentUserId
+    )();
+    expect(mockApimServiceNotFound.getSubscription).toHaveBeenCalled();
+    expect(E.isLeft(result)).toBeTruthy();
+
+    if (E.isLeft(result)) {
+      expect(result.left.kind).toEqual("IResponseErrorNotFound");
+    }
   });
 });
