@@ -31,9 +31,9 @@ const isServiceOwnerIncludedInList = (
   return pipe(
     apimService.getSubscription(serviceId),
     TE.mapLeft(
-      (_) =>
+      ({ statusCode }) =>
         new Error(
-          `An error has occurred while retrieving service '${serviceId}'`
+          `An error has occurred while retrieving service '${serviceId}', statusCode : ${statusCode}`
         )
     ),
     TE.map(({ ownerId }) =>

@@ -64,10 +64,12 @@ export const serviceOwnerCheckManageTask = (
       pipe(
         serviceId,
         apimService.getSubscription,
-        TE.mapLeft(() =>
-          ResponseErrorInternal(
-            `An error has occurred while retrieving service '${serviceId}'`
-          )
+        TE.mapLeft(({ statusCode }) =>
+          statusCode === 404
+            ? ResponseErrorNotFound("Not found", `${serviceId} not found`)
+            : ResponseErrorInternal(
+                `An error has occurred while retrieving service '${serviceId}'`
+              )
         )
       )
     ),
