@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import xss from "xss";
 import { sanitizeObject } from "../sanitize";
 
 const aService = {
@@ -49,7 +48,53 @@ describe("sanitizeObject", () => {
     expect(result).not.toEqual(anUnsafeService);
     expect(result).toStrictEqual({
       ...anUnsafeService,
-      name: xss(anUnsafeService.name)
+      name: "<img>"
+    });
+  });
+
+  it("should sanitize the nested property metadata.address", () => {
+    const anUnsafeService = {
+      ...aService,
+      metadata: {
+        ...aService.metadata,
+        address: "<img src/onerror=alert(document.cookie)>"
+      }
+    };
+
+    const result = sanitizeObject(anUnsafeService);
+
+    expect(result).not.toEqual(anUnsafeService);
+    expect(result).toStrictEqual({
+      ...anUnsafeService,
+      metadata: {
+        ...anUnsafeService.metadata,
+        address: "<img>"
+      }
+    });
+  });
+
+  it("should sanitize the array property authorized_recipients", () => {
+    const anUnsafeService = {
+      ...aService,
+      authorized_recipients: [
+        "<img src/onerror=alert(document.cookie)>",
+        "AAAAAA00A00A000A",
+        "<img src/onerror=alert(document.cookie)>",
+        "<script>alert('You Have been Pwned!')</script>"
+      ]
+    };
+
+    const result = sanitizeObject(anUnsafeService);
+
+    expect(result).not.toEqual(anUnsafeService);
+    expect(result).toStrictEqual({
+      ...anUnsafeService,
+      authorized_recipients: [
+        "<img>",
+        "AAAAAA00A00A000A",
+        "<img>",
+        "&lt;script&gt;alert('You Have been Pwned!')&lt;/script&gt;"
+      ]
     });
   });
 });
