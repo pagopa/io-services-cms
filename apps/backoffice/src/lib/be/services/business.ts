@@ -10,6 +10,7 @@ import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -201,7 +202,8 @@ export async function forwardIoServicesCmsRequest<
       });
     }
 
-    return NextResponse.json(value, { status });
+    // return the sanitized response
+    return sanitizedNextResponseJson(value, status);
   } catch (error) {
     console.error(
       `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
