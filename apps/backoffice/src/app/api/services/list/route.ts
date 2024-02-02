@@ -5,6 +5,7 @@ import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 /**
  * @description Retrieve all services owned by the calling user
  */
@@ -28,7 +29,7 @@ export const GET = withJWTAuthHandler(
         serviceId ?? undefined
       );
 
-      return NextResponse.json(result);
+      return sanitizedNextResponseJson(result);
     } catch (error) {
       console.error(
         `An Error has occurred while retrieving service list for user having userId: ${backofficeUser.parameters.subscriptionId}, caused by: `,

@@ -3,6 +3,7 @@ import { retrieveUserAuthorizedInstitutions } from "@/lib/be/institutions/busine
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Retrieves all the onboarded institutions related
@@ -17,7 +18,7 @@ export const GET = withJWTAuthHandler(
       const institutionResponse = await retrieveUserAuthorizedInstitutions(
         backofficeUser.id
       );
-      return NextResponse.json(institutionResponse);
+      return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
       console.error(
         `An Error has occurred while retrieving authorized institution for user having selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,

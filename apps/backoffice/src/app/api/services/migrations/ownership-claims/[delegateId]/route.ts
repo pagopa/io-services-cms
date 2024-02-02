@@ -7,6 +7,7 @@ import {
 } from "@/lib/be/services/business";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { HTTP_STATUS_ACCEPTED } from "@/config/constants";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Migrate delegate's services
@@ -58,7 +59,7 @@ export const GET = withJWTAuthHandler(
         params.delegateId
       );
 
-      return NextResponse.json(response);
+      return sanitizedNextResponseJson(response);
     } catch (error) {
       console.error(
         `An Error has occurred while retrieving delegate ${params.delegateId} Ownership claims for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
