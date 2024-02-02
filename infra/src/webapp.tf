@@ -73,13 +73,13 @@ locals {
     LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = var.legacy_service_watcher_max_items_per_invocation
 
     # Queues
-    REQUEST_REVIEW_QUEUE             = azurerm_storage_queue.request-review.name
-    REQUEST_PUBLICATION_QUEUE        = azurerm_storage_queue.request-publication.name
-    REQUEST_HISTORICIZATION_QUEUE    = azurerm_storage_queue.request-historicization.name
-    REQUEST_SYNC_LEGACY_QUEUE        = azurerm_storage_queue.request-sync-legacy.name
-    REQUEST_SYNC_CMS_QUEUE           = azurerm_storage_queue.request-sync-cms.name
-    REQUEST_REVIEW_LEGACY_QUEUE      = azurerm_storage_queue.request-review-legacy.name
-    REQUEST_SUBMITTED_SERVICES_QUEUE = azurerm_storage_queue.request-submitted-services.name
+    REQUEST_REVIEW_QUEUE          = azurerm_storage_queue.request-review.name
+    REQUEST_PUBLICATION_QUEUE     = azurerm_storage_queue.request-publication.name
+    REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
+    REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
+    REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
+    REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
+    REQUEST_VALIDATION_QUEUE      = azurerm_storage_queue.request-validation-queue.name
 
 
     # List of service ids for which quality control will be bypassed
