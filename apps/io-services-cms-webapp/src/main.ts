@@ -20,6 +20,8 @@ import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
+import { Json, JsonFromString } from "io-ts-types";
 import { getConfigOrThrow } from "./config";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
@@ -31,9 +33,13 @@ import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
+import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
 import { createReviewCheckerHandler } from "./reviewer/review-checker-handler";
+import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
+import { createServiceValidationHandler } from "./reviewer/service-validation-handler";
 import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { createRequestSyncLegacyHandler } from "./synchronizer/request-sync-legacy-handler";
+import { initTelemetryClient } from "./utils/applicationinsight";
 import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
@@ -46,10 +52,6 @@ import { handler as onServiceHistoryHandler } from "./watchers/on-service-histor
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
-
-import { createRequestReviewLegacyHandler } from "./reviewer/request-review-legacy-handler";
-import { createReviewLegacyCheckerHandler } from "./reviewer/review-legacy-checker-handler";
-import { initTelemetryClient } from "./utils/applicationinsight";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -134,6 +136,25 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   fsmLifecycleClient,
   fsmPublicationClient,
   config
+);
+
+export const onRequestValidation = pipe(
+  createServiceValidationHandler(
+    config,
+    fsmLifecycleClient,
+    fsmPublicationClient
+  ),
+  processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
+    parallel: false,
+  }),
+  setBindings((results) => ({
+    requestHistoricization: pipe(
+      results,
+      RA.map(RR.lookup("requestReview")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  }))
 );
 
 export const createRequestPublicationEntryPoint =

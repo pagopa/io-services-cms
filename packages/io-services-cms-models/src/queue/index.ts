@@ -2,12 +2,24 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
 import { LegacyService } from "../service-legacy";
 import { ItemType as LifecycleItemType } from "../service-lifecycle";
-import { Service, ServiceId } from "../service-lifecycle/definitions";
+import {
+  Service,
+  ServiceId,
+  ServiceStrict,
+} from "../service-lifecycle/definitions";
 import { ItemType as PublicationItemType } from "../service-publication";
 
 export type RequestReviewItem = t.TypeOf<typeof RequestReviewItem>;
 export const RequestReviewItem = t.intersection([
   Service,
+  t.type({
+    version: NonEmptyString, // version required
+  }),
+]);
+
+export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
+export const RequestReviewItemStrict = t.intersection([
+  ServiceStrict,
   t.type({
     version: NonEmptyString, // version required
   }),
