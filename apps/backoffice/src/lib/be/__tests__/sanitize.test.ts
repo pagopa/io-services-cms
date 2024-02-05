@@ -80,7 +80,8 @@ describe("sanitizeObject", () => {
         "<img src/onerror=alert(document.cookie)>",
         "AAAAAA00A00A000A",
         "<img src/onerror=alert(document.cookie)>",
-        "<script>alert('You Have been Pwned!')</script>"
+        "<script>alert('You Have been Pwned!')</script>",
+        '<img height="300" src/onerror=alert(document.cookie) width="400">'
       ]
     };
 
@@ -93,7 +94,8 @@ describe("sanitizeObject", () => {
         "<img>",
         "AAAAAA00A00A000A",
         "<img>",
-        "&lt;script&gt;alert('You Have been Pwned!')&lt;/script&gt;"
+        "&lt;script&gt;alert('You Have been Pwned!')&lt;/script&gt;",
+        '<img height="300" width="400">'
       ]
     });
   });
