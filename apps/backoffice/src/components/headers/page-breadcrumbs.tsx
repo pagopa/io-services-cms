@@ -8,9 +8,18 @@ export const PageBreadcrumbs = () => {
   const { t } = useTranslation();
   const router = useRouter();
 
-  /** Starting from current browser route, returns an array of route sections */
+  const removeQueryParamsIfExists = (route: string) => {
+    const queryParamsStartIndex = route.indexOf("?");
+    return queryParamsStartIndex >= 0
+      ? route.substring(0, queryParamsStartIndex)
+      : route;
+  };
+
+  /** Starting from current browser route, returns an array of route sections without query parameters _(if any)_ */
   const getRouteSections = () =>
-    router.asPath.split("/").filter(val => val !== "");
+    removeQueryParamsIfExists(router.asPath)
+      .split("/")
+      .filter(val => val !== "");
 
   const routeSectionsCount = getRouteSections().length;
 
@@ -19,13 +28,6 @@ export const PageBreadcrumbs = () => {
     const routeLocale = t(`routes.${route}.title`);
     if (routeLocale.startsWith("routes.")) return route;
     return routeLocale;
-  };
-
-  const removeQueryParamsIfExists = (route: string) => {
-    const queryParamsStartIndex = route.indexOf("?");
-    return queryParamsStartIndex >= 0
-      ? route.substring(0, queryParamsStartIndex)
-      : route;
   };
 
   /** Manage page breadcrumbs component visibility: `true` only if current route has a nesting level greater than 1. */
@@ -53,7 +55,7 @@ export const PageBreadcrumbs = () => {
         {getRouteSections().map((crumb, index) =>
           isChildRoute(index) ? (
             <Typography key={index} color={"text.disabled"}>
-              {removeQueryParamsIfExists(getRouteLocale(crumb))}
+              {getRouteLocale(crumb)}
             </Typography>
           ) : (
             <NextLink key={index} href={getRouteSectionPath(crumb)}>
