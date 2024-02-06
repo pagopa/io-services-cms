@@ -3,7 +3,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { authorize } from "./auth";
 
-const maxAgeSeconds = 12 * 60 * 60; // 12 hours
+const maxAgeSeconds = 2 * 60 * 60; // 2 hours
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
