@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 1.6.5
+
+### Patch Changes
+
+- e4ed672: add x-frame-option header
+- 14dc5a8: Sanitize Route Handlers response objects
+- a618c6f: Fix inconsistent data in PageBreadcrumbs calling the app url with certain characters as query parameters
+- 0352dac: Decrease session max idle duration on backoffice
+
 ## 1.6.4
 
 ### Patch Changes
