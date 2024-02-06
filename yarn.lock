@@ -1589,7 +1589,7 @@ __metadata:
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
     eslint: ^8.38.0
-    fp-ts: ^2.13.1
+    fp-ts: ^2.14.0
     io-ts: ^2.2.20
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
@@ -1611,7 +1611,7 @@ __metadata:
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
     eslint: ^8.38.0
-    fp-ts: ^2.13.1
+    fp-ts: ^2.14.0
     io-ts: ^2.2.20
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
@@ -7091,7 +7091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.11.0, fp-ts@npm:^2.13.1":
+"fp-ts@npm:^2.11.0":
   version: 2.13.1
   resolution: "fp-ts@npm:2.13.1"
   checksum: 618e0028aca9ff1d52b86f438499ccab149825bdab14c678d22c3e2ccbf9d36fd1f26d463bf0ae1e63f5cd79dd54c8218af2cca0daeea68b039307b751ae9563
@@ -7102,6 +7102,13 @@ __metadata:
   version: 2.16.1
   resolution: "fp-ts@npm:2.16.1"
   checksum: 94e8bb1d037fdc44414ac93bbabecc3f94fb798d6564e77427ae2ecfa0f77681ec35968598d7b0cbf8274566469c7b42e8727390eb889e1121c199341939c2a3
+  languageName: node
+  linkType: hard
+
+"fp-ts@npm:^2.14.0":
+  version: 2.16.2
+  resolution: "fp-ts@npm:2.16.2"
+  checksum: 5c2e3f096ba4be5646bda38a43e3e8ca3bd7693fefb26e6c4d4c451efbc9a227f7f7cad562b087cb134d4e41f4ae615602f0b17890e9e40a9e83f2f8822da666
   languageName: node
   linkType: hard
 
@@ -8173,7 +8180,7 @@ __metadata:
     axios: ^1.6.5
     eslint: 8.50.0
     eslint-config-next: ^13.5.6
-    fp-ts: ^2.13.1
+    fp-ts: ^2.14.0
     i18next: ^23.5.1
     io-ts: ^2.2.20
     jose: ^4.15.2
@@ -8225,7 +8232,7 @@ __metadata:
     dotenv-cli: ^7.2.1
     eslint: ^8.38.0
     express: ^4.18.2
-    fp-ts: ^2.13.1
+    fp-ts: ^2.14.0
     io-ts: ^2.2.20
     io-ts-types: ^0.5.19
     knex: ^2.4.2
