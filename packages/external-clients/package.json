@@ -27,7 +27,7 @@
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",
     "@azure/identity": "^3.1.4",
-    "@pagopa/io-functions-commons": "^28.2.0",
+    "@pagopa/io-functions-commons": "^28.17.2",
     "@pagopa/ts-commons": "^11.0.0",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20",

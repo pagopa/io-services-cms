@@ -47,7 +47,7 @@
     "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",
-    "@pagopa/io-functions-commons": "^28.2.0",
+    "@pagopa/io-functions-commons": "^28.17.2",
     "@pagopa/ts-commons": "^11.0.0",
     "body-parser": "^1.20.2",
     "dotenv-cli": "^7.2.1",

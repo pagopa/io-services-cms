@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@azure/cosmos": "^3.17.3",
-    "@pagopa/io-functions-commons": "^28.2.0",
+    "@pagopa/io-functions-commons": "^28.17.2",
     "@pagopa/ts-commons": "^11.0.0",
     "fp-ts": "^2.13.1",
     "io-ts": "^2.2.20",

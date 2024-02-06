@@ -80,6 +80,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/abort-controller@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@azure/abort-controller@npm:2.0.0"
+  dependencies:
+    tslib: ^2.2.0
+  checksum: 9eece9e860767fb2845b16cd1f66597bedc023c3078482d082be03ecd59d4a0187b36e30d5ee5346aae9baf9e4320dd2b104e1d612eaffce9825d5c3c9b316f7
+  languageName: node
+  linkType: hard
+
 "@azure/arm-apimanagement@npm:8.1.2":
   version: 8.1.2
   resolution: "@azure/arm-apimanagement@npm:8.1.2"
@@ -113,6 +122,21 @@ __metadata:
     "@azure/core-util": ^1.1.0
     tslib: ^2.2.0
   checksum: 11c5ba072902693435dc2930e2fdfe2ff34836f4c2d6c87c6ac0566d48dc49157ebf49f4478cd3784dc0c4d57b502d3a12d74ea29f416725204a6e1aa937ef78
+  languageName: node
+  linkType: hard
+
+"@azure/core-client@npm:^1.0.0":
+  version: 1.8.0
+  resolution: "@azure/core-client@npm:1.8.0"
+  dependencies:
+    "@azure/abort-controller": ^2.0.0
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-rest-pipeline": ^1.9.1
+    "@azure/core-tracing": ^1.0.0
+    "@azure/core-util": ^1.0.0
+    "@azure/logger": ^1.0.0
+    tslib: ^2.2.0
+  checksum: 0527f17cbae93f7f73c9f2176e583c9c90078c362170abef252438adea108c76862596570d9be175b8538377214771ca166bca8c72abeb1461257db91e02aad7
   languageName: node
   linkType: hard
 
@@ -158,7 +182,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-paging@npm:^1.2.0":
+"@azure/core-paging@npm:^1.1.1, @azure/core-paging@npm:^1.2.0":
   version: 1.5.0
   resolution: "@azure/core-paging@npm:1.5.0"
   dependencies:
@@ -258,6 +282,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-xml@npm:^1.0.0":
+  version: 1.3.4
+  resolution: "@azure/core-xml@npm:1.3.4"
+  dependencies:
+    fast-xml-parser: ^4.2.4
+    tslib: ^2.2.0
+  checksum: 8100b014b1c7c4e6afd805c032ac020ae61ad3c541b6c6676cf53b3f486f683394d600f7c438597b650791c1265dcedfc58ea30a50350d2ea94bdbc140a3a2ea
+  languageName: node
+  linkType: hard
+
 "@azure/cosmos@npm:^3.17.1, @azure/cosmos@npm:^3.17.3":
   version: 3.17.3
   resolution: "@azure/cosmos@npm:3.17.3"
@@ -276,6 +310,23 @@ __metadata:
     universal-user-agent: ^6.0.0
     uuid: ^8.3.0
   checksum: 699a18ade93aa206c1dee6cc6afa6992604006489e59b62e7b0f8ba86081b18af277ccfa87b9f8ccf24611b5c955e3ab8ebb7e972c3459aea3399e84c88ebc80
+  languageName: node
+  linkType: hard
+
+"@azure/data-tables@npm:^13.2.2":
+  version: 13.2.2
+  resolution: "@azure/data-tables@npm:13.2.2"
+  dependencies:
+    "@azure/core-auth": ^1.3.0
+    "@azure/core-client": ^1.0.0
+    "@azure/core-paging": ^1.1.1
+    "@azure/core-rest-pipeline": ^1.1.0
+    "@azure/core-tracing": ^1.0.0
+    "@azure/core-xml": ^1.0.0
+    "@azure/logger": ^1.0.0
+    tslib: ^2.2.0
+    uuid: ^8.3.0
+  checksum: 8846ef61958ebd75e9377a107285d33132e8bc34d46517a0b263b58c5c9039d0161571ab544befd11fde1f3545c526d44698fe5ddc3cfeea3192a66de2aad2bc
   languageName: node
   linkType: hard
 
@@ -1532,7 +1583,7 @@ __metadata:
     "@azure/arm-apimanagement": 8.1.2
     "@azure/identity": ^3.1.4
     "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^28.17.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
@@ -1555,7 +1606,7 @@ __metadata:
   dependencies:
     "@azure/cosmos": ^3.17.3
     "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^28.17.2
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
@@ -2290,11 +2341,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/io-functions-commons@npm:^28.2.0":
-  version: 28.2.0
-  resolution: "@pagopa/io-functions-commons@npm:28.2.0"
+"@pagopa/io-functions-commons@npm:^28.17.2":
+  version: 28.17.2
+  resolution: "@pagopa/io-functions-commons@npm:28.17.2"
   dependencies:
     "@azure/cosmos": ^3.17.1
+    "@azure/data-tables": ^13.2.2
     "@pagopa/ts-commons": ^11.0.0
     applicationinsights: ^1.8.10
     azure-storage: ^2.10.5
@@ -2318,7 +2370,7 @@ __metadata:
   peerDependencies:
     "@azure/functions": ^3.2.0
     express: ^4.15.3
-  checksum: 2bb1b79ce059212259ffa7db54bdc45d66313a14b808eb5e1ebf056bd26b11e4e1956fafc2d7450b7b20ca0367379283554298e19e11307b12b047de0337b546
+  checksum: e24ec3302fb8f51e46f4602bceb92038cc709d877b7128cac05b618a4fae23e0960404f1615129f0f3911c548b51c387b138024c4be264863ea2231073fdf148
   languageName: node
   linkType: hard
 
@@ -6771,6 +6823,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-xml-parser@npm:^4.2.4":
+  version: 4.3.4
+  resolution: "fast-xml-parser@npm:4.3.4"
+  dependencies:
+    strnum: ^1.0.5
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: ab88177343f6d3d971d53462db3011003a83eb8a8db704840127ddaaf27105ea90cdf7903a0f9b2e1279ccc4adfca8dfc0277b33bae6262406f10c16bd60ccf9
+  languageName: node
+  linkType: hard
+
 "fastq@npm:^1.6.0":
   version: 1.15.0
   resolution: "fastq@npm:1.15.0"
@@ -8095,7 +8158,7 @@ __metadata:
     "@mui/lab": ^5.0.0-alpha.142
     "@mui/material": ^5.14.5
     "@mui/system": ^5.14.5
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^28.17.2
     "@pagopa/mui-italia": ^1.0.1
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@testing-library/jest-dom": ^6.1.5
@@ -8147,7 +8210,7 @@ __metadata:
     "@io-services-cms/models": "workspace:^"
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/express-azure-functions": ^4.0.1
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^28.17.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@pagopa/ts-commons": ^11.0.0
     "@rushstack/eslint-patch": ^1.2.0
@@ -13198,6 +13261,13 @@ __metadata:
   dependencies:
     acorn: ^8.10.0
   checksum: f5fa7e289df8ebe82e90091fd393974faf8871be087ca50114327506519323cf15f2f8fee6ebe68b5e58bfc795269cae8bdc7cb5a83e27b02b3fe953f37b0a89
+  languageName: node
+  linkType: hard
+
+"strnum@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "strnum@npm:1.0.5"
+  checksum: 651b2031db5da1bf4a77fdd2f116a8ac8055157c5420f5569f64879133825915ad461513e7202a16d7fec63c54fd822410d0962f8ca12385c4334891b9ae6dd2
   languageName: node
   linkType: hard
 
