@@ -10,6 +10,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Regenerate Manage key by key type
@@ -41,7 +42,7 @@ export const PUT = withJWTAuthHandler(
         decodedKeyType.right
       );
 
-      return NextResponse.json(manageKeysResponse);
+      return sanitizedNextResponseJson(manageKeysResponse);
     } catch (error) {
       handlerErrorLog(
         `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,

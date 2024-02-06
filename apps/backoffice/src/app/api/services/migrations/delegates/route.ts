@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { retrieveOrganizationDelegates } from "@/lib/be/services/business";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Retrieve delegates with the number of services to migrate
@@ -17,7 +18,7 @@ export const GET = withJWTAuthHandler(
         backofficeUser.institution.fiscalCode
       );
 
-      return NextResponse.json(response);
+      return sanitizedNextResponseJson(response);
     } catch (error) {
       console.error(
         `An Error has occurred while retrieving Delegates for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},

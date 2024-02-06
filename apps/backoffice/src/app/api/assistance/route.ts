@@ -4,6 +4,7 @@ import {
   handleInternalErrorResponse
 } from "@/lib/be/errors";
 import { sendAssistanceRequest } from "@/lib/be/institutions/business";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -35,7 +36,7 @@ export const POST = withJWTAuthHandler(async (request: NextRequest) => {
     const assistanceResponse = await sendAssistanceRequest(
       decodedAssistanceItem.right
     );
-    return NextResponse.json(assistanceResponse);
+    return sanitizedNextResponseJson(assistanceResponse);
   } catch (error) {
     console.error(
       "An Error has occurred while sending an assistance request, caused by: ",

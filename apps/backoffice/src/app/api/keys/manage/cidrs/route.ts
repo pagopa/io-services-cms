@@ -13,6 +13,7 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Retrieve manage key authorized CIDRs
@@ -27,7 +28,7 @@ export const GET = withJWTAuthHandler(
         backofficeUser.parameters.subscriptionId
       );
 
-      return NextResponse.json({
+      return sanitizedNextResponseJson({
         cidrs: authorizedCIDRsResponse
       });
     } catch (error) {
@@ -75,7 +76,7 @@ export const PUT = withJWTAuthHandler(
         decodedBody.right.cidrs
       );
 
-      return NextResponse.json({
+      return sanitizedNextResponseJson({
         cidrs: authorizedCIDRsResponse
       });
     } catch (error) {

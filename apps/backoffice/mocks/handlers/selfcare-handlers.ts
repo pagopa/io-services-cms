@@ -29,7 +29,7 @@ export const buildHandlers = () => {
     }),
     http.get(`${baseURL}/institutions`, () => {
       const resultArray = [
-        HttpResponse.json(getMockInstitution() as any, {
+        HttpResponse.json([getMockInstitution()] as any, {
           status: 200
         }),
         HttpResponse.json(getSelfCareProblemResponse(404) as any, {

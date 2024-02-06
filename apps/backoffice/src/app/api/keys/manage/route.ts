@@ -7,6 +7,7 @@ import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 
 /**
  * @description Retrieve Manage keys
@@ -22,7 +23,7 @@ export const GET = withJWTAuthHandler(
         backofficeUser.parameters.subscriptionId
       );
 
-      return NextResponse.json(manageKeysResponse);
+      return sanitizedNextResponseJson(manageKeysResponse);
     } catch (error) {
       handlerErrorLog(
         `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${backofficeUser.parameters.subscriptionId}`,
