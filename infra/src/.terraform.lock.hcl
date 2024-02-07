@@ -5,6 +5,7 @@ provider "registry.terraform.io/azure/azapi" {
   version     = "1.11.0"
   constraints = "<= 1.11.0"
   hashes = [
+    "h1:8pru4tJQouV7lc+fVH9jnhxxOPu8O7VQU4wuiySdl5Q=",
     "h1:pAmiyTB57yTBpZHofES31WD35Z/lyKAuXbTWarpNDYU=",
     "zh:240ba0f3d87f8faf3171e1dd0ec74bffc868bde84db7fb2c89913c787b11ef07",
     "zh:422cfbe039f6041525d55aa0641dfed014d970b516d8de058a1869736682b9d3",
@@ -46,7 +47,7 @@ provider "registry.terraform.io/hashicorp/azuread" {
 
 provider "registry.terraform.io/hashicorp/azurerm" {
   version     = "3.84.0"
-  constraints = ">= 3.30.0, >= 3.39.0, <= 3.84.0, <= 3.85.0, <= 3.87.0"
+  constraints = ">= 3.30.0, >= 3.39.0, >= 3.50.0, <= 3.84.0, <= 3.85.0, <= 3.87.0"
   hashes = [
     "h1:1Ucponuagrx5kNeIlcZwG2urqoRXBCTddDKqL265+xM=",
     "h1:3KYwbI62e6u2f7ob9Ps8yahnIaNHkE56UsF0130zRzE=",
