@@ -10,7 +10,6 @@ import {
   PatternString,
 } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
-import { UrlFromString } from "@pagopa/ts-commons/lib/url";
 import * as t from "io-ts";
 
 export type MaxAllowedAmount = t.TypeOf<typeof MaxAllowedAmount>;
@@ -26,6 +25,9 @@ export type Cidr = t.TypeOf<typeof Cidr>;
 export const Cidr = PatternString(
   "^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
 );
+
+export type HttpOrHttpsUrlString = t.TypeOf<typeof HttpOrHttpsUrlString>;
+export const HttpOrHttpsUrlString = PatternString("^https?:\\S+$");
 
 const OrganizationData = t.intersection([
   t.type({
@@ -81,18 +83,18 @@ const ServiceMetadataStrict = t.intersection([
   }),
   t.partial({
     address: NonEmptyString,
-    app_android: UrlFromString,
-    app_ios: UrlFromString,
+    app_android: HttpOrHttpsUrlString,
+    app_ios: HttpOrHttpsUrlString,
     cta: NonEmptyString,
     description: NonEmptyString,
     email: EmailString,
     pec: EmailString,
     phone: NonEmptyString,
-    privacy_url: UrlFromString,
-    support_url: UrlFromString,
+    privacy_url: HttpOrHttpsUrlString,
+    support_url: HttpOrHttpsUrlString,
     token_name: NonEmptyString,
-    tos_url: UrlFromString,
-    web_url: UrlFromString,
+    tos_url: HttpOrHttpsUrlString,
+    web_url: HttpOrHttpsUrlString,
     category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
     custom_special_flow: NonEmptyString,
     topic_id: t.number,
