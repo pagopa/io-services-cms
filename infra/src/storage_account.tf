@@ -75,12 +75,12 @@ resource "azurerm_storage_queue" "request-review-legacy-poison" {
   storage_account_name = module.storage_account.name
 }
 
-resource "azurerm_storage_queue" "request-validation-queue" {
-  name                 = "request-validation-queue"
+resource "azurerm_storage_queue" "request-validation" {
+  name                 = "request-validation"
   storage_account_name = module.storage_account.name
 }
 
-resource "azurerm_storage_queue" "request-validation-queue-poison" {
-  name                 = "request-validation-queue-poison"
+resource "azurerm_storage_queue" "request-validation-poison" {
+  name                 = "request-validation-poison"
   storage_account_name = module.storage_account.name
 }
