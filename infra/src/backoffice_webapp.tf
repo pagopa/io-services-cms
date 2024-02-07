@@ -99,6 +99,7 @@ module "backoffice_app" {
   allowed_subnets = [
     module.backoffice_app_snet.id,
     data.azurerm_subnet.appgateway_snet.id,
+    data.azurerm_subnet.temp_appgateway_snet.id,
   ]
 
   tags = var.tags
