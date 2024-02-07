@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.1
+
+### Patch Changes
+
+- 4bda650: fix output queue context binding name
+
 ## 1.27.0
 
 ### Minor Changes
