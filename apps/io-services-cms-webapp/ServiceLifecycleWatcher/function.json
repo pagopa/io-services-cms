@@ -14,7 +14,7 @@
       "maxItemsPerInvocation": 30
     },
     {
-      "queueName": "%REQUEST_REVIEW_QUEUE%",
+      "queueName": "%REQUEST_VALIDATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestReview",
       "type": "queue",

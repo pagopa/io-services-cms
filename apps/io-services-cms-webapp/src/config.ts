@@ -146,6 +146,7 @@ export const QueueConfig = t.type({
   REQUEST_SYNC_LEGACY_QUEUE: NonEmptyString,
   REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
   REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
+  REQUEST_VALIDATION_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
@@ -221,6 +222,11 @@ export type BackofficeInternalSubnetCIDRs = t.TypeOf<
   typeof BackofficeInternalSubnetCIDRs
 >;
 
+export const ServiceValidationConfig = t.type({
+  MANUAL_REVIEW_PROPERTIES: CommaSeparatedListOf(NonEmptyString),
+});
+export type ServiceValidationConfig = t.TypeOf<typeof ServiceValidationConfig>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -249,6 +255,7 @@ export const IConfig = t.intersection([
     ExternalStorageAccountConfiguration,
     BackofficeInternalSubnetCIDRs,
     TopicPostgreSqlConfig,
+    ServiceValidationConfig,
   ]),
 ]);
 

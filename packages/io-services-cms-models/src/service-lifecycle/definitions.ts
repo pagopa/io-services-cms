@@ -1,15 +1,16 @@
-import * as t from "io-ts";
 import {
+  IWithinRangeIntegerTag,
+  WithinRangeInteger,
+} from "@pagopa/ts-commons/lib/numbers";
+import {
+  EmailString,
   FiscalCode,
   NonEmptyString,
   OrganizationFiscalCode,
   PatternString,
 } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
-import {
-  IWithinRangeIntegerTag,
-  WithinRangeInteger,
-} from "@pagopa/ts-commons/lib/numbers";
+import * as t from "io-ts";
 
 export type MaxAllowedAmount = t.TypeOf<typeof MaxAllowedAmount>;
 export const MaxAllowedAmount = t.union([
@@ -24,6 +25,9 @@ export type Cidr = t.TypeOf<typeof Cidr>;
 export const Cidr = PatternString(
   "^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"
 );
+
+export type HttpOrHttpsUrlString = t.TypeOf<typeof HttpOrHttpsUrlString>;
+export const HttpOrHttpsUrlString = PatternString("^https?:\\S+$");
 
 const OrganizationData = t.intersection([
   t.type({
@@ -73,6 +77,30 @@ const ServiceMetadata = t.intersection([
   }),
 ]);
 
+const ServiceMetadataStrict = t.intersection([
+  t.type({
+    scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
+  }),
+  t.partial({
+    address: NonEmptyString,
+    app_android: HttpOrHttpsUrlString,
+    app_ios: HttpOrHttpsUrlString,
+    cta: NonEmptyString,
+    description: NonEmptyString,
+    email: EmailString,
+    pec: EmailString,
+    phone: NonEmptyString,
+    privacy_url: HttpOrHttpsUrlString,
+    support_url: HttpOrHttpsUrlString,
+    token_name: NonEmptyString,
+    tos_url: HttpOrHttpsUrlString,
+    web_url: HttpOrHttpsUrlString,
+    category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
+    custom_special_flow: NonEmptyString,
+    topic_id: t.number,
+  }),
+]);
+
 export type ServiceId = t.TypeOf<typeof ServiceId>;
 export const ServiceId = NonEmptyString;
 
@@ -83,6 +111,24 @@ export const Service = t.intersection([
     data: t.intersection([
       ServiceData,
       t.type({ organization: OrganizationData, metadata: ServiceMetadata }),
+    ]),
+  }),
+  t.partial({
+    version: NonEmptyString,
+    last_update: NonEmptyString,
+  }),
+]);
+
+export type ServiceStrict = t.TypeOf<typeof ServiceStrict>;
+export const ServiceStrict = t.intersection([
+  t.type({
+    id: ServiceId,
+    data: t.intersection([
+      ServiceData,
+      t.type({
+        organization: OrganizationData,
+        metadata: ServiceMetadataStrict,
+      }),
     ]),
   }),
   t.partial({
