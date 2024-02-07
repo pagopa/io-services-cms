@@ -148,7 +148,7 @@ export const onRequestValidationEntryPoint = pipe(
     parallel: false,
   }),
   setBindings((results) => ({
-    requestHistoricization: pipe(
+    requestReview: pipe(
       results,
       RA.map(RR.lookup("requestReview")),
       RA.filter(O.isSome),

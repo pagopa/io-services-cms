@@ -152,6 +152,7 @@
 | <a name="input_legacy_jira_project_name"></a> [legacy\_jira\_project\_name](#input\_legacy\_jira\_project\_name) | n/a | `string` | `null` | no |
 | <a name="input_legacy_service_watcher_max_items_per_invocation"></a> [legacy\_service\_watcher\_max\_items\_per\_invocation](#input\_legacy\_service\_watcher\_max\_items\_per\_invocation) | Chunck size for the change feed | `number` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |
+| <a name="input_manual_review_properties"></a> [manual\_review\_properties](#input\_manual\_review\_properties) | Comma-separated list of service's properties required to trigger a manual review process | `string` | n/a | yes |
 | <a name="input_postgres_admin_credentials_rotation_id"></a> [postgres\_admin\_credentials\_rotation\_id](#input\_postgres\_admin\_credentials\_rotation\_id) | You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
 | <a name="input_postgres_reviewer_usr_credentials_rotation_id"></a> [postgres\_reviewer\_usr\_credentials\_rotation\_id](#input\_postgres\_reviewer\_usr\_credentials\_rotation\_id) | You can renew reviewer user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"io"` | no |

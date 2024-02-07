@@ -242,6 +242,12 @@ variable "legacy_jira_project_name" {
   default     = null
 }
 
+variable "manual_review_properties" {
+  type        = string
+  description = "Comma-separated list of service's properties required to trigger a manual review process"
+}
+
+
 
 #############################
 # Cosmos DB Legacy Services #

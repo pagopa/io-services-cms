@@ -79,6 +79,9 @@ userid_legacy_to_cms_sync_inclusion_list         = "*"
 userid_request_review_legacy_inclusion_list      = "*"
 userid_automatic_service_approval_inclusion_list = ""
 
+# Automatic service validation
+manual_review_properties = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
+
 # Backoffice Configurations
 backoffice_host = "selfcare.io.pagopa.it"
 backoffice_app = {
