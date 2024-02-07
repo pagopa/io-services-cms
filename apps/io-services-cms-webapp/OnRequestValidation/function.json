@@ -16,5 +16,5 @@
     }
   ],
   "scriptFile": "../dist/main.js",
-  "entryPoint": "onSubmittedServiceEntryPoint"
+  "entryPoint": "onRequestValidationEntryPoint"
 }

@@ -138,7 +138,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   config
 );
 
-export const onRequestValidation = pipe(
+export const onRequestValidationEntryPoint = pipe(
   createServiceValidationHandler(
     config,
     fsmLifecycleClient,
