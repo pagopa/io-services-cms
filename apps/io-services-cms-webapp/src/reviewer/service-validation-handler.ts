@@ -26,32 +26,45 @@ type ValidationError = {
   reason: string;
 };
 
+type ValidSecureChannelFalseConfig = t.TypeOf<
+  typeof ValidSecureChannelFalseConfig
+>;
+const ValidSecureChannelFalseConfig = t.type({
+  data: t.intersection([
+    t.type({
+      require_secure_channel: t.literal(false),
+    }),
+    t.type({
+      metadata: t.type({
+        privacy_url: t.union([t.null, t.undefined]),
+      }),
+    }),
+  ]),
+});
+
+type ValidSecureChannelTrueConfig = t.TypeOf<
+  typeof ValidSecureChannelTrueConfig
+>;
+const ValidSecureChannelTrueConfig = t.type({
+  data: t.intersection([
+    t.type({
+      require_secure_channel: t.literal(true),
+    }),
+    t.type({
+      metadata: t.type({
+        privacy_url: option(
+          Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
+            .props.metadata.types[1].props.privacy_url
+        ),
+      }),
+    }),
+  ]),
+});
+
 type ValidSecureChannelService = t.TypeOf<typeof ValidSecureChannelService>;
 const ValidSecureChannelService = t.union([
-  t.type({
-    data: t.intersection([
-      t.type({
-        require_secure_channel: t.literal(false),
-      }),
-      t.type({
-        metadata: t.type({
-          privacy_url: t.union([t.null, t.undefined]),
-        }),
-      }),
-    ]),
-  }),
-  t.type({
-    data: t.intersection([
-      t.type({
-        require_secure_channel: t.literal(true),
-      }),
-      t.type({
-        metadata: t.type({
-          privacy_url: option(t.any),
-        }),
-      }),
-    ]),
-  }),
+  ValidSecureChannelFalseConfig,
+  ValidSecureChannelTrueConfig,
 ]);
 
 const parseIncomingMessage = (
@@ -87,8 +100,8 @@ const isManualReviewRequested =
   (origin: ServicePublication.ItemType, comparand: Json): boolean =>
     pipe(
       config.MANUAL_REVIEW_PROPERTIES,
-      RA.map((prop) => pipe(comparand, lodash.matchesProperty(prop, origin))),
-      RA.some((isSameValue) => !isSameValue)
+      RA.map((path) => lodash.matchesProperty(path, lodash.get(origin, path))),
+      RA.some((matchesPropertyFn) => !pipe(comparand, matchesPropertyFn))
     );
 
 const onRequestApproveHandler =
