@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.27.0
+
+### Minor Changes
+
+- 56a6820: intercept request review handler to perform automatic validation
+
+### Patch Changes
+
+- Updated dependencies [56a6820]
+  - @io-services-cms/models@1.18.0
+
 ## 1.26.12
 
 ### Patch Changes

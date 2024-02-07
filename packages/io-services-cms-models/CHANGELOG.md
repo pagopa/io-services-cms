@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.18.0
+
+### Minor Changes
+
+- 56a6820: intercept request review handler to perform automatic validation
+
 ## 1.17.0
 
 ### Minor Changes
