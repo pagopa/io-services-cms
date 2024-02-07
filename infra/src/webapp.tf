@@ -101,6 +101,9 @@ locals {
 
     # Backoffice Configuration
     BACKOFFICE_INTERNAL_SUBNET_CIDRS = join(",", module.backoffice_app_snet.address_prefixes)
+
+    # Automatic service validation
+    MANUAL_REVIEW_PROPERTIES = var.manual_review_properties
   }
 }
 
@@ -143,6 +146,7 @@ module "webapp_functions_app" {
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "0"
       "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "0"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "0"
+      "AzureWebJobs.OnRequestValidation.Disabled"        = "0"
     }
   )
 
@@ -159,6 +163,7 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
     "AzureWebJobs.OnRequestReviewLegacy.Disabled",
     "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
+    "AzureWebJobs.OnRequestValidation.Disabled"
   ]
 
   subnet_id = module.app_snet.id
@@ -205,6 +210,7 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.OnRequestSyncLegacy.Disabled"        = "1"
       "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
+      "AzureWebJobs.OnRequestValidation.Disabled"        = "1"
     }
   )
 
