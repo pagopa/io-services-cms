@@ -154,7 +154,8 @@ export const onRequestValidationEntryPoint = pipe(
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),
-  }))
+  })),
+  toAzureFunctionHandler
 );
 
 export const createRequestPublicationEntryPoint =
