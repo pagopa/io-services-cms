@@ -44,6 +44,12 @@ data "azurerm_subnet" "appgateway_snet" {
   resource_group_name  = var.io_common.resource_group_name
 }
 
+data "azurerm_subnet" "temp_appgateway_snet" {
+  name                 = "io-p-temp-appgateway-snet"
+  virtual_network_name = var.io_common.vnet_name
+  resource_group_name  = var.io_common.resource_group_name
+}
+
 # TODO: remove me after "closing" Dev Portal
 data "azurerm_subnet" "devportal_snet" {
   name                 = "${var.prefix}-p-selfcare-be-common-snet"
