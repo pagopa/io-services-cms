@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.6.7
+
+### Patch Changes
+
+- 75f5da1: Force logo CDN refresh
+
 ## 1.6.6
 
 ### Patch Changes
