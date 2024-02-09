@@ -17,14 +17,15 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
   const { t } = useTranslation();
   const configuration = getConfiguration();
 
-  const logoFullPath = `${configuration.CDN_URL}${
-    configuration.SERVICES_LOGO_PATH
-  }${serviceId?.toLowerCase()}.png`;
+  const logoFullPath = () =>
+    `${configuration.CDN_URL}${
+      configuration.SERVICES_LOGO_PATH
+    }${serviceId?.toLowerCase()}.png?${Date.now()}`;
 
   const [logoExists, setLogoExists] = useState(true);
   const [hasPendingLogo, setHasPendingLogo] = useState(false);
   const [logoFile, setLogoFile] = useState<string | ArrayBuffer | null>(
-    logoFullPath
+    logoFullPath()
   );
   const { loading, fetchData } = useFetch<unknown>();
 
@@ -43,7 +44,7 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
 
   const handleCancel = () => {
     setHasPendingLogo(false);
-    setLogoFile(logoFullPath);
+    setLogoFile(logoFullPath());
   };
 
   const handleUploadServiceLogo = async () => {
