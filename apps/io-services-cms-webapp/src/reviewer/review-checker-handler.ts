@@ -215,13 +215,6 @@ export const processBatchOfReviews =
       items,
       buildIssueItemPairs(context, jiraProxy),
       TE.chain(updateReview(context, dao, fsmLifecycleClient)),
-      TE.map((_) => {
-        getLogger(context, logPrefix, "processBatchOfReviews").log(
-          "info",
-          `Processed ${items.length} reviews`
-        );
-        return _;
-      }),
       TE.mapLeft((err) => {
         getLogger(context, logPrefix, "processBatchOfReviews").logError(
           err,
