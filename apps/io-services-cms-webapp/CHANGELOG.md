@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.3
+
+### Patch Changes
+
+- 32aac89: Increase json request maximum size
+
 ## 1.27.2
 
 ### Patch Changes
