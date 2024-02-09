@@ -75,18 +75,16 @@ const imageValidationErrorResponse = (details?: string) =>
     details ?? "The base64 representation of the logo is invalid"
   );
 
-const validateImage = (context: Context) => (bufferImage: Buffer) =>
+const validateImage = (bufferImage: Buffer) =>
   pipe(
     E.tryCatch(
       () => UPNG.decode(bufferImage),
-      (err) => {
-        getLogger(context, logPrefix).logUnknown(err);
-        return imageValidationErrorResponse(
+      (err) =>
+        imageValidationErrorResponse(
           `Fail decoding provided image, the reason is: ${
-            err instanceof Error ? err.message : "unknown"
+            err instanceof Error ? err.message : err
           }`
-        );
-      }
+        )
     ),
     E.chain((img) =>
       pipe(
@@ -145,7 +143,7 @@ export const makeUploadServiceLogoHandler =
       TE.chainW((_) =>
         pipe(
           bufferImage,
-          validateImage(context),
+          validateImage,
           TE.fromEither,
           TE.chainW(() =>
             uploadImage(blobService)(lowerCaseServiceId, bufferImage)
