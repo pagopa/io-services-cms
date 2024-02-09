@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -85,36 +86,70 @@ const updateStatus =
   ): TE.TaskEither<DatabaseError, QueryResult> =>
     pipe(createUpdateStatusSql(dbConfig, data), queryDataTable(pool));
 
-const executeOnPending =
+const buildPool = (pool: Pool) =>
+  pipe(
+    TE.tryCatch(
+      () => pool.connect(),
+      (err) =>
+        new Error(
+          `Error creating pool: ${
+            err instanceof Error ? err.message : "unknown error"
+          }`
+        )
+    )
+  );
+
+export const executeOnPending =
   (pool: Pool, dbConfig: ReviewerPostgreSqlConfig) =>
   (
     fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
   ): TE.TaskEither<Error, void> =>
-    pipe(dbConfig, createReadSql, (sql) =>
-      TE.tryCatch(async () => {
-        const poolClient = await pool.connect();
-        const cursor = createCursor(poolClient)(sql);
-        try {
-          // eslint-disable-next-line functional/no-let
-          let length: number;
-          do {
-            const rows = await cursor.read(dbConfig.REVIEWER_DB_READ_MAX_ROW);
-            length = rows.length;
-            const handler = pipe(
-              rows,
-              t.array(ServiceReviewRowDataTable).decode,
-              E.mapLeft(E.toError),
-              TE.fromEither,
-              TE.chain(fn)
-            );
-            await handler();
-          } while (length > 0);
-        } finally {
-          cursor.close(() => {
-            poolClient.release();
-          });
-        }
-      }, E.toError)
+    pipe(
+      dbConfig,
+      createReadSql,
+      TE.right,
+      TE.chain((sqlStatement) =>
+        pipe(
+          pool,
+          buildPool,
+          TE.bindTo("poolClient"),
+          TE.bindW("cursor", ({ poolClient }) =>
+            pipe(
+              E.tryCatch(
+                () => createCursor(poolClient)(sqlStatement),
+                E.toError
+              ),
+              TE.fromEither
+            )
+          ),
+          TE.chainW(({ cursor, poolClient }) =>
+            TE.tryCatch(async () => {
+              try {
+                // eslint-disable-next-line functional/no-let
+                let length: number;
+                do {
+                  const rows = await cursor.read(
+                    dbConfig.REVIEWER_DB_READ_MAX_ROW
+                  );
+                  length = rows.length;
+                  const handler = pipe(
+                    rows,
+                    t.array(ServiceReviewRowDataTable).decode,
+                    E.mapLeft(E.toError),
+                    TE.fromEither,
+                    TE.chain(fn)
+                  );
+                  await handler();
+                } while (length > 0);
+              } finally {
+                cursor.close(() => {
+                  poolClient.release();
+                });
+              }
+            }, E.toError)
+          )
+        )
+      )
     );
 
 export const getDao = (dbConfig: ReviewerPostgreSqlConfig) =>
