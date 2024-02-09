@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
@@ -62,10 +63,20 @@ export const createReviewCheckerHandler =
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
-  (context: Context): Promise<unknown> =>
-    dao.executeOnPending(
-      processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient)
+  async (context: Context): Promise<unknown> => {
+    const logger = getLogger(context, logPrefix, "createReviewCheckerHandler");
+    return await pipe(
+      processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient),
+      dao.executeOnPending,
+      TE.getOrElse((err) => {
+        logger.logError(
+          err,
+          "An error occurred while processing the batch of reviews"
+        );
+        throw err;
+      })
     )();
+  };
 
 /**
  * Build an array of Issue/Item pairs
@@ -139,7 +150,10 @@ export const updateReview =
                     return pipe(fsmError, E.toError, TE.left);
                   },
                   () => {
-                    logger.log("warn", fsmError.message);
+                    logger.log(
+                      "warn",
+                      `${fsmError.message} - skipping service having id ${item.service_id}`
+                    );
                     return TE.right(void 0);
                   }
                 )
@@ -199,5 +213,12 @@ export const processBatchOfReviews =
     pipe(
       items,
       buildIssueItemPairs(context, jiraProxy),
-      TE.chain(updateReview(context, dao, fsmLifecycleClient))
+      TE.chain(updateReview(context, dao, fsmLifecycleClient)),
+      TE.mapLeft((err) => {
+        getLogger(context, logPrefix, "processBatchOfReviews").logError(
+          err,
+          "An error occurred processing the batch of reviews"
+        );
+        return err;
+      })
     );

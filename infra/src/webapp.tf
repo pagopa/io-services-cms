@@ -104,6 +104,9 @@ locals {
 
     # Automatic service validation
     MANUAL_REVIEW_PROPERTIES = var.manual_review_properties
+
+    # Fix Service Review Checker pg module
+    APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"
   }
 }
 
