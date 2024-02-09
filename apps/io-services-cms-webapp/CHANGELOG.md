@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.2
+
+### Patch Changes
+
+- 9de545d: Fix ServiceReviewChecker pg cursor errors
+
 ## 1.27.1
 
 ### Patch Changes
