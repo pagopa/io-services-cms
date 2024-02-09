@@ -71,10 +71,11 @@ resource "azurerm_api_management_logger" "cache_policy_app_insights" {
   }
 }
 
-resource "azurerm_api_management_diagnostic" "cache_policy_app_insights" {
+resource "azurerm_api_management_api_diagnostic" "services_cms_api_app_insights" {
   identifier               = "applicationinsights"
   resource_group_name      = data.azurerm_api_management.apim_v2.resource_group_name
   api_management_name      = data.azurerm_api_management.apim_v2.name
+  api_name                 = module.api_services_cms_v2.name
   api_management_logger_id = azurerm_api_management_logger.cache_policy_app_insights.id
 
   sampling_percentage       = 100.0
@@ -82,4 +83,12 @@ resource "azurerm_api_management_diagnostic" "cache_policy_app_insights" {
   log_client_ip             = false
   verbosity                 = "verbose"
   http_correlation_protocol = "W3C"
+
+  frontend_response {
+    body_bytes = 32
+  }
+
+  backend_response {
+    body_bytes = 32
+  }
 }
