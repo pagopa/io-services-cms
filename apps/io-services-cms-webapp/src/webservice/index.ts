@@ -105,7 +105,7 @@ export const createWebServer = ({
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
-  router.use(bodyParser.json());
+  router.use(bodyParser.json({ limit: "5mb" }));
 
   router.get("/info", pipe(makeInfoHandler(), wrapRequestHandler));
 

@@ -143,7 +143,7 @@ describe("uploadServiceLogo", () => {
     expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(400);
     expect(response.body.detail).toBe(
-      "The base64 representation of the logo is invalid"
+      "Fail decoding provided image, the reason is: The input is not a PNG file!"
     );
     expect(response.body.status).toBe(400);
     expect(response.body.title).toBe("Image not valid");
