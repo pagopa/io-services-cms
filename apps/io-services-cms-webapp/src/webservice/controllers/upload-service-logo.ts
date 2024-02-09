@@ -69,22 +69,35 @@ type Dependencies = {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const imageValidationErrorResponse = () =>
+const imageValidationErrorResponse = (details?: string) =>
   ResponseErrorValidation(
     "Image not valid",
-    "The base64 representation of the logo is invalid"
+    details ?? "The base64 representation of the logo is invalid"
   );
 
-const validateImage = (bufferImage: Buffer) =>
+const validateImage = (context: Context) => (bufferImage: Buffer) =>
   pipe(
     E.tryCatch(
       () => UPNG.decode(bufferImage),
-      () => imageValidationErrorResponse()
+      (err) => {
+        getLogger(context, logPrefix).logUnknown(err);
+        return imageValidationErrorResponse(
+          `Fail decoding provided image, the reason is: ${
+            err instanceof Error ? err.message : "unknown"
+          }`
+        );
+      }
     ),
-    E.chain(
-      E.fromPredicate(
-        (img: UPNG.Image) => img.width > 0 && img.height > 0,
-        () => imageValidationErrorResponse()
+    E.chain((img) =>
+      pipe(
+        img,
+        E.fromPredicate(
+          () => img.width > 0 && img.height > 0,
+          () =>
+            imageValidationErrorResponse(
+              `Image has invalid dimensions width: ${img.width} height: ${img.height}`
+            )
+        )
       )
     )
   );
@@ -132,7 +145,7 @@ export const makeUploadServiceLogoHandler =
       TE.chainW((_) =>
         pipe(
           bufferImage,
-          validateImage,
+          validateImage(context),
           TE.fromEither,
           TE.chainW(() =>
             uploadImage(blobService)(lowerCaseServiceId, bufferImage)
