@@ -5,7 +5,6 @@ import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as T from "fp-ts/lib/Task";
 import * as B from "fp-ts/lib/boolean";
 import { pipe } from "fp-ts/lib/function";
 import { JiraIssue } from "../lib/clients/jira-client";
