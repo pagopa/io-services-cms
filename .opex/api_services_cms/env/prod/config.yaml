@@ -2,9 +2,9 @@ oa3_spec: apps/io-services-cms-webapp/openapi.yaml
 name: opex_api_service_cms
 location: West Europe
 timespan: 10m
-evaluation_frequency: 40 # default 20
+evaluation_frequency: 20 # default 10
 evaluation_time_window: 40 # default 20
-event_occurrences: 3 # default 1
+event_occurrences: 2 # default 1
 resource_type: app-gateway
 data_source: /subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-rg-external/providers/Microsoft.Network/applicationGateways/io-p-appgateway
 action_groups:
@@ -14,11 +14,5 @@ overrides:
     - api.io.pagopa.it
   endpoints:
     /api/v1/manage/services:
-      response_time_threshold: 5
-      availability_threshold: 0.90
-    /api/v1/manage/services/{serviceId}/review:
-      response_time_threshold: 5
-      availability_threshold: 0.90
-    /api/v1/manage/services/{serviceId}/release:
-      response_time_threshold: 5
+      response_time_threshold: 2
       availability_threshold: 0.90
