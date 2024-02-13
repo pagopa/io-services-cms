@@ -96,7 +96,7 @@ describe("Service Validation Handler", () => {
         require_secure_channel: false,
         metadata: {
           ...aValidRequestValidationItem.data.metadata,
-          privacy_url: "http://localhost",
+          tos_url: "http://localhost",
         },
       },
     };
@@ -136,11 +136,11 @@ describe("Service Validation Handler", () => {
           require_secure_channel: false,
           metadata: {
             ...aValidRequestValidationItem.data.metadata,
-            privacy_url: "http://localhost",
+            tos_url: "http://localhost",
           },
         },
       },
-      expected: /privacy_url\] is not a valid/,
+      expected: /tos_url\] is not a valid/,
     },
     {
       scenario:
@@ -152,11 +152,11 @@ describe("Service Validation Handler", () => {
           require_secure_channel: true,
           metadata: {
             ...aValidRequestValidationItem.data.metadata,
-            privacy_url: "invalid privacy url",
+            tos_url: "invalid url",
           },
         },
       },
-      expected: /privacy_url\] is not a valid/,
+      expected: /tos_url\] is not a valid/,
     },
     {
       scenario: "incoming item fails strict validation",

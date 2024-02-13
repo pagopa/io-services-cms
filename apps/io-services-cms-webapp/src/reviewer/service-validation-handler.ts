@@ -37,7 +37,7 @@ const ValidSecureChannelFalseConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        privacy_url: t.union([t.null, t.undefined]),
+        tos_url: t.union([t.null, t.undefined]),
       }),
     }),
   ]),
@@ -53,9 +53,9 @@ const ValidSecureChannelTrueConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        privacy_url: option(
+        tos_url: option(
           Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-            .props.metadata.types[1].props.privacy_url
+            .props.metadata.types[1].props.tos_url
         ),
       }),
     }),
