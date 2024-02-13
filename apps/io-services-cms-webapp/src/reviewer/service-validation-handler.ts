@@ -3,6 +3,7 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -36,7 +37,7 @@ const ValidSecureChannelFalseConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        privacy_url: t.union([t.null, t.undefined]),
+        tos_url: t.union([t.null, t.undefined]),
       }),
     }),
   ]),
@@ -52,9 +53,9 @@ const ValidSecureChannelTrueConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        privacy_url: option(
+        tos_url: option(
           Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-            .props.metadata.types[1].props.privacy_url
+            .props.metadata.types[1].props.tos_url
         ),
       }),
     }),
@@ -66,6 +67,14 @@ const ValidSecureChannelService = t.union([
   ValidSecureChannelFalseConfig,
   ValidSecureChannelTrueConfig,
 ]);
+
+const EVENT_PREFIX = "services-cms.review";
+
+enum EventNameEnum {
+  AutoApprove = `${EVENT_PREFIX}.auto-approve`,
+  AutoReject = `${EVENT_PREFIX}.auto-reject`,
+  Manual = `${EVENT_PREFIX}.manual`,
+}
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -91,9 +100,24 @@ const validate = (
     )
   );
 
-const onRequestManualValidationHandler = (item: Json): RequestReviewAction => ({
-  requestReview: item,
-});
+const onRequestManualValidationHandler =
+  (telemetryClient: ReturnType<typeof initAppInsights>) =>
+  ({
+    item,
+    serviceId,
+  }: {
+    item: Json;
+    serviceId: ServiceLifecycle.definitions.ServiceId;
+  }): RequestReviewAction =>
+    pipe(
+      telemetryClient.trackEvent({
+        name: EventNameEnum.Manual,
+        properties: { serviceId },
+      }),
+      (_) => ({
+        requestReview: item,
+      })
+    );
 
 const isManualReviewRequested =
   (config: ServiceValidationConfig) =>
@@ -105,7 +129,10 @@ const isManualReviewRequested =
     );
 
 const onRequestApproveHandler =
-  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    telemetryClient: ReturnType<typeof initAppInsights>
+  ) =>
   (
     serviceId: ServiceLifecycle.definitions.ServiceId
   ): TE.TaskEither<ServiceLifecycle.AllFsmErrors, NoAction> =>
@@ -113,11 +140,20 @@ const onRequestApproveHandler =
       fsmLifecycleClient.approve(serviceId, {
         approvalDate: new Date().toISOString(),
       }),
+      TE.map((_) =>
+        telemetryClient.trackEvent({
+          name: EventNameEnum.AutoApprove,
+          properties: { serviceId },
+        })
+      ),
       TE.map((_) => noAction)
     );
 
 const onRequestRejectHandler =
-  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    telemetryClient: ReturnType<typeof initAppInsights>
+  ) =>
   (
     error: ValidationError
   ): TE.TaskEither<ServiceLifecycle.AllFsmErrors, NoAction> =>
@@ -125,19 +161,32 @@ const onRequestRejectHandler =
       fsmLifecycleClient.reject(error.serviceId, {
         reason: error.reason,
       }),
+      TE.map((_) =>
+        telemetryClient.trackEvent({
+          name: EventNameEnum.AutoReject,
+          properties: { serviceId: error.serviceId },
+        })
+      ),
       TE.map((_) => noAction)
     );
 
-export const createServiceValidationHandler =
-  (
-    config: IConfig,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    fsmPublicationClient: ServicePublication.FsmClient
-  ): RTE.ReaderTaskEither<
-    { item: Json },
-    Error,
-    NoAction | RequestReviewAction
-  > =>
+type Dependencies = {
+  config: IConfig;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmPublicationClient: ServicePublication.FsmClient;
+  telemetryClient: ReturnType<typeof initAppInsights>;
+};
+
+type ServiceValidationHandler = (
+  dependencies: Dependencies
+) => RTE.ReaderTaskEither<
+  { item: Json },
+  Error,
+  NoAction | RequestReviewAction
+>;
+
+export const createServiceValidationHandler: ServiceValidationHandler =
+  ({ config, fsmLifecycleClient, fsmPublicationClient, telemetryClient }) =>
   ({ item }) =>
     pipe(
       item,
@@ -145,20 +194,38 @@ export const createServiceValidationHandler =
       E.chainW(validate),
       TE.fromEither,
       TE.chainW((validService) =>
-        pipe(validService.id, fsmPublicationClient.getStore().fetch)
-      ),
-      TE.chainW(
-        O.fold(
-          () => pipe(item, onRequestManualValidationHandler, TE.right),
-          (servicePub) =>
-            isManualReviewRequested(config)(servicePub, item)
-              ? pipe(item, onRequestManualValidationHandler, TE.right)
-              : onRequestApproveHandler(fsmLifecycleClient)(servicePub.id)
+        pipe(
+          validService.id,
+          fsmPublicationClient.getStore().fetch,
+          TE.chainW(
+            O.fold(
+              () =>
+                pipe(
+                  { item, serviceId: validService.id },
+                  onRequestManualValidationHandler(telemetryClient),
+                  TE.right
+                ),
+              (servicePub) =>
+                isManualReviewRequested(config)(servicePub, item)
+                  ? pipe(
+                      { item, serviceId: validService.id },
+                      onRequestManualValidationHandler(telemetryClient),
+                      TE.right
+                    )
+                  : onRequestApproveHandler(
+                      fsmLifecycleClient,
+                      telemetryClient
+                    )(servicePub.id)
+            )
+          )
         )
       ),
       TE.orElse((error) => {
         if ("reason" in error) {
-          return onRequestRejectHandler(fsmLifecycleClient)(error);
+          return onRequestRejectHandler(
+            fsmLifecycleClient,
+            telemetryClient
+          )(error);
         } else {
           return TE.left(error);
         }
