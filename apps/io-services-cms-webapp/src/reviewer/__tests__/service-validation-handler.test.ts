@@ -191,10 +191,10 @@ describe("Service Validation Handler", () => {
       })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
-    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
-      "services-cms.review.auto-reject",
-      { properties: { serviceId: item.id } }
-    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.auto-reject",
+      properties: { serviceId: item.id },
+    });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
   });
@@ -240,10 +240,10 @@ describe("Service Validation Handler", () => {
       aValidRequestValidationItem.id
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
-    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
-      "services-cms.review.manual",
-      { properties: { serviceId: aValidRequestValidationItem.id } }
-    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.manual",
+      properties: { serviceId: aValidRequestValidationItem.id },
+    });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
@@ -273,10 +273,10 @@ describe("Service Validation Handler", () => {
       aValidRequestValidationItem.id
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
-    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
-      "services-cms.review.manual",
-      { properties: { serviceId: aValidRequestValidationItem.id } }
-    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.manual",
+      properties: { serviceId: aValidRequestValidationItem.id },
+    });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
@@ -351,10 +351,10 @@ describe("Service Validation Handler", () => {
       expect.objectContaining({ approvalDate: expect.any(String) })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
-    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
-      "services-cms.review.auto-approve",
-      { properties: { serviceId: aValidRequestValidationItem.id } }
-    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.auto-approve",
+      properties: { serviceId: aValidRequestValidationItem.id },
+    });
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
 });
