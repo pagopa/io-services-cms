@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.4
+
+### Patch Changes
+
+- f421b3e: Trace service validation events and fix ValidSecureChannelConfig
+
 ## 1.27.3
 
 ### Patch Changes
