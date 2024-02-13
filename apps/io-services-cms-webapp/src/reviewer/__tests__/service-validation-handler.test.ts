@@ -3,6 +3,7 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -30,6 +31,10 @@ const fsmPublicationClientMock = {
   }),
 };
 
+const appinsightsMocks = {
+  trackEvent: vi.fn(),
+};
+
 const aValidRequestValidationItem = {
   id: "aServiceId",
   data: {
@@ -54,15 +59,24 @@ const aValidRequestValidationItem = {
 } as unknown as Queue.RequestReviewItem;
 
 describe("Service Validation Handler", () => {
+  const dependenciesMock: Parameters<typeof createServiceValidationHandler>[0] =
+    {
+      config: configMock,
+      fsmLifecycleClient:
+        fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
+      fsmPublicationClient:
+        fsmPublicationClientMock as unknown as ServicePublication.FsmClient,
+      telemetryClient: appinsightsMocks as unknown as ReturnType<
+        typeof initAppInsights
+      >,
+    };
   it("should fail when incoming item is not a valid RequestReviewItem", async () => {
     const { id, ...anInvalidRequestValidationItem } =
       aValidRequestValidationItem;
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: anInvalidRequestValidationItem })();
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item: anInvalidRequestValidationItem,
+    })();
     expect(E.isLeft(res)).toBeTruthy();
     if (E.isLeft(res)) {
       expect(res.left.message).match(/is not a valid/);
@@ -71,6 +85,7 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
+    expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
   });
 
   it("should fail when incoming item has not a valid SecureChannel configuration and reject fails", async () => {
@@ -90,11 +105,9 @@ describe("Service Validation Handler", () => {
       TE.left(new Error(errorMessage))
     );
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: anInvalidSecureChannelItem })();
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item: anInvalidSecureChannelItem,
+    })();
     expect(E.isLeft(res)).toBeTruthy();
     if (E.isLeft(res)) {
       expect(res.left.message).toStrictEqual(errorMessage);
@@ -109,27 +122,62 @@ describe("Service Validation Handler", () => {
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
+    expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
   });
 
-  it("should reject review when incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelFalseConfig)", async () => {
-    const anInvalidSecureChannelItem = {
-      ...aValidRequestValidationItem,
-      data: {
-        ...aValidRequestValidationItem.data,
-        require_secure_channel: false,
-        metadata: {
-          ...aValidRequestValidationItem.data.metadata,
-          privacy_url: "http://localhost",
+  it.each([
+    {
+      scenario:
+        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelFalseConfig)",
+      item: {
+        ...aValidRequestValidationItem,
+        data: {
+          ...aValidRequestValidationItem.data,
+          require_secure_channel: false,
+          metadata: {
+            ...aValidRequestValidationItem.data.metadata,
+            privacy_url: "http://localhost",
+          },
         },
       },
-    };
+      expected: /privacy_url\] is not a valid/,
+    },
+    {
+      scenario:
+        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelTrueConfig)",
+      item: {
+        ...aValidRequestValidationItem,
+        data: {
+          ...aValidRequestValidationItem.data,
+          require_secure_channel: true,
+          metadata: {
+            ...aValidRequestValidationItem.data.metadata,
+            privacy_url: "invalid privacy url",
+          },
+        },
+      },
+      expected: /privacy_url\] is not a valid/,
+    },
+    {
+      scenario: "incoming item fails strict validation",
+      item: {
+        ...aValidRequestValidationItem,
+        data: {
+          ...aValidRequestValidationItem.data,
+          metadata: {
+            ...aValidRequestValidationItem.data.metadata,
+            support_url: "invalid url",
+          },
+        },
+      },
+      expected: /support_url\] is not a valid/,
+    },
+  ])("should reject review when $scenario", async ({ item, expected }) => {
     fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: anInvalidSecureChannelItem })();
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item,
+    })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual({});
@@ -137,80 +185,15 @@ describe("Service Validation Handler", () => {
 
     expect(fsmLifecycleClientMock.reject).toHaveBeenCalledOnce();
     expect(fsmLifecycleClientMock.reject).toHaveBeenCalledWith(
-      anInvalidSecureChannelItem.id,
+      item.id,
       expect.objectContaining({
-        reason: expect.stringMatching(/privacy_url\] is not a valid/),
+        reason: expect.stringMatching(expected),
       })
     );
-    expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
-    expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
-  });
-
-  it("should reject review when incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelTrueConfig)", async () => {
-    const anInvalidSecureChannelItem = {
-      ...aValidRequestValidationItem,
-      data: {
-        ...aValidRequestValidationItem.data,
-        require_secure_channel: true,
-        metadata: {
-          ...aValidRequestValidationItem.data.metadata,
-          privacy_url: "invalid privacy url",
-        },
-      },
-    };
-    fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
-
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: anInvalidSecureChannelItem })();
-    expect(E.isRight(res)).toBeTruthy();
-    if (E.isRight(res)) {
-      expect(res.right).toStrictEqual({});
-    }
-
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledOnce();
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledWith(
-      anInvalidSecureChannelItem.id,
-      expect.objectContaining({
-        reason: expect.stringMatching(/privacy_url\] is not a valid/),
-      })
-    );
-    expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
-    expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
-  });
-
-  it("should reject review when incoming item fails strict validation", async () => {
-    const anInvalidSecureChannelItem = {
-      ...aValidRequestValidationItem,
-      data: {
-        ...aValidRequestValidationItem.data,
-        metadata: {
-          ...aValidRequestValidationItem.data.metadata,
-          support_url: "invalid url",
-        },
-      },
-    };
-
-    fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
-
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: anInvalidSecureChannelItem })();
-    expect(E.isRight(res)).toBeTruthy();
-    if (E.isRight(res)) {
-      expect(res.right).toStrictEqual({});
-    }
-
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledOnce();
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledWith(
-      anInvalidSecureChannelItem.id,
-      expect.objectContaining({
-        reason: expect.stringMatching(/support_url\] is not a valid/),
-      })
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
+      "services-cms.review.auto-reject",
+      { properties: { serviceId: item.id } }
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
@@ -222,11 +205,9 @@ describe("Service Validation Handler", () => {
       .getStore()
       .fetch.mockReturnValue(TE.left(new Error(errorMessage)));
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: aValidRequestValidationItem })();
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item: aValidRequestValidationItem,
+    })();
     expect(E.isLeft(res)).toBeTruthy();
     if (E.isLeft(res)) {
       expect(res.left.message).toStrictEqual(errorMessage);
@@ -238,16 +219,15 @@ describe("Service Validation Handler", () => {
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
+    expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
   });
 
   it("should return a RequestReviewAction when fetch service publication return a void option", async () => {
     fsmPublicationClientMock.getStore().fetch.mockReturnValue(TE.right(O.none));
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({ item: aValidRequestValidationItem })();
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item: aValidRequestValidationItem,
+    })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual({
@@ -258,6 +238,11 @@ describe("Service Validation Handler", () => {
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
       aValidRequestValidationItem.id
+    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
+      "services-cms.review.manual",
+      { properties: { serviceId: aValidRequestValidationItem.id } }
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
@@ -273,11 +258,7 @@ describe("Service Validation Handler", () => {
       )
     );
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({
+    const res = await createServiceValidationHandler(dependenciesMock)({
       item: aValidRequestValidationItem,
     })();
     expect(E.isRight(res)).toBeTruthy();
@@ -290,6 +271,11 @@ describe("Service Validation Handler", () => {
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
       aValidRequestValidationItem.id
+    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
+      "services-cms.review.manual",
+      { properties: { serviceId: aValidRequestValidationItem.id } }
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
@@ -312,11 +298,7 @@ describe("Service Validation Handler", () => {
       TE.left(new Error(errorMessage))
     );
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({
+    const res = await createServiceValidationHandler(dependenciesMock)({
       item: aValidRequestValidationItem,
     })();
     expect(E.isLeft(res)).toBeTruthy();
@@ -334,6 +316,7 @@ describe("Service Validation Handler", () => {
       expect.objectContaining({ approvalDate: expect.any(String) })
     );
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
+    expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
   });
 
   it("should approve review when there is no 'required manual review' properties changed", async () => {
@@ -350,11 +333,7 @@ describe("Service Validation Handler", () => {
     );
     fsmLifecycleClientMock.approve.mockReturnValue(TE.right(void 0));
 
-    const res = await createServiceValidationHandler(
-      configMock,
-      fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
-      fsmPublicationClientMock as unknown as ServicePublication.FsmClient
-    )({
+    const res = await createServiceValidationHandler(dependenciesMock)({
       item: aValidRequestValidationItem,
     })();
     expect(E.isRight(res)).toBeTruthy();
@@ -370,6 +349,11 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledWith(
       aValidRequestValidationItem.id,
       expect.objectContaining({ approvalDate: expect.any(String) })
+    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith(
+      "services-cms.review.auto-approve",
+      { properties: { serviceId: aValidRequestValidationItem.id } }
     );
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });

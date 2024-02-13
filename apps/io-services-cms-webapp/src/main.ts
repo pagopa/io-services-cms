@@ -139,11 +139,12 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 );
 
 export const onRequestValidationEntryPoint = pipe(
-  createServiceValidationHandler(
+  createServiceValidationHandler({
     config,
     fsmLifecycleClient,
-    fsmPublicationClient
-  ),
+    fsmPublicationClient,
+    telemetryClient,
+  }),
   processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
     parallel: false,
   }),
