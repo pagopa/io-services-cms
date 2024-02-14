@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.5
+
+### Patch Changes
+
+- b5532e0: refactor: replace TelemetryClient type import
+
 ## 1.27.4
 
 ### Patch Changes
