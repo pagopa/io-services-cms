@@ -16,12 +16,11 @@ import {
   withRequestMiddlewares,
   wrapRequestHandler,
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
-import { EventNameEnum } from "../../utils/applicationinsight";
+import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { ErrorResponseTypes } from "../../utils/logger";
@@ -35,7 +34,7 @@ type Dependencies = {
   store: FSMStore<ServicePublication.ItemType>;
 
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
   config: IConfig;
 };
 

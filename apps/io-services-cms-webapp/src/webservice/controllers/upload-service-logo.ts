@@ -23,7 +23,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseErrorInternal,
@@ -41,6 +40,7 @@ import { Logo as LogoPayload } from "../../generated/api/Logo";
 import { upsertBlobFromImageBuffer } from "../../lib/azure/blob-storage";
 import {
   EventNameEnum,
+  TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
@@ -65,7 +65,7 @@ type Dependencies = {
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
   blobService: BlobService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

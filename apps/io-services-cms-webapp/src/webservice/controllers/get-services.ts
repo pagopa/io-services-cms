@@ -24,7 +24,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IWithinRangeIntegerTag,
   IntegerFromString,
@@ -51,6 +50,7 @@ import { ServicePagination } from "../../generated/api/ServicePagination";
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import {
   EventNameEnum,
+  TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
@@ -80,7 +80,7 @@ type Dependencies = {
   apimService: ApimUtils.ApimService;
   // The app configuration
   config: IConfig;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 export type ServiceSubscriptionPair = {

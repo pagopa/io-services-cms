@@ -3,13 +3,13 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Mock, afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
+import { TelemetryClient } from "../../utils/applicationinsight";
 import { createServiceValidationHandler } from "../service-validation-handler";
 
 afterEach(() => {
@@ -66,9 +66,7 @@ describe("Service Validation Handler", () => {
         fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
       fsmPublicationClient:
         fsmPublicationClientMock as unknown as ServicePublication.FsmClient,
-      telemetryClient: appinsightsMocks as unknown as ReturnType<
-        typeof initAppInsights
-      >,
+      telemetryClient: appinsightsMocks as unknown as TelemetryClient,
     };
   it("should fail when incoming item is not a valid RequestReviewItem", async () => {
     const { id, ...anInvalidRequestValidationItem } =

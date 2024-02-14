@@ -25,7 +25,6 @@ import {
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
@@ -42,6 +41,7 @@ import { ServicePayload as ServiceRequestPayload } from "../../generated/api/Ser
 import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import {
   EventNameEnum,
+  TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
@@ -77,7 +77,7 @@ type Dependencies = {
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   config: IConfig;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 // TODO: refactor: move to common package (also used by backoffice, see auth.ts)

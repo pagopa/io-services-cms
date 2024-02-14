@@ -26,16 +26,15 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
-import { EventNameEnum } from "../../utils/applicationinsight";
+import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
-import { ErrorResponseTypes } from "../../utils/logger";
-import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
+import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
+import { ErrorResponseTypes } from "../../utils/logger";
 
 const logPrefix = "GetServiceHandler";
 
@@ -44,7 +43,7 @@ type Dependencies = {
   store: FSMStore<ServicePublication.ItemType>;
 
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
   config: IConfig;
 };
 

@@ -7,7 +7,6 @@ import express from "express";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
@@ -71,6 +70,7 @@ import {
   makeUploadServiceLogoHandler,
 } from "./controllers/upload-service-logo";
 
+import { TelemetryClient } from "../utils/applicationinsight";
 import {
   applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
   makeGetServiceTopicsHandler,
@@ -86,7 +86,7 @@ type Dependencies = {
   apimService: ApimUtils.ApimService;
   config: IConfig;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
   blobService: BlobService;
   serviceTopicDao: ServiceTopicDao;
 };
