@@ -3,7 +3,6 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -15,6 +14,7 @@ import * as t from "io-ts";
 import { Json, option } from "io-ts-types";
 import lodash from "lodash";
 import { IConfig, ServiceValidationConfig } from "../config";
+import { TelemetryClient } from "../utils/applicationinsight";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -101,7 +101,7 @@ const validate = (
   );
 
 const onRequestManualValidationHandler =
-  (telemetryClient: ReturnType<typeof initAppInsights>) =>
+  (telemetryClient: TelemetryClient) =>
   ({
     item,
     serviceId,
@@ -131,7 +131,7 @@ const isManualReviewRequested =
 const onRequestApproveHandler =
   (
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    telemetryClient: ReturnType<typeof initAppInsights>
+    telemetryClient: TelemetryClient
   ) =>
   (
     serviceId: ServiceLifecycle.definitions.ServiceId
@@ -152,7 +152,7 @@ const onRequestApproveHandler =
 const onRequestRejectHandler =
   (
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    telemetryClient: ReturnType<typeof initAppInsights>
+    telemetryClient: TelemetryClient
   ) =>
   (
     error: ValidationError
@@ -174,7 +174,7 @@ type Dependencies = {
   config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 type ServiceValidationHandler = (

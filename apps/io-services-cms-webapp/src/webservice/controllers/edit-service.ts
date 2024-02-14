@@ -23,7 +23,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson,
@@ -36,6 +35,7 @@ import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import {
   EventNameEnum,
+  TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
@@ -54,7 +54,7 @@ type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   config: IConfig;
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 type HandlerResponseTypes =

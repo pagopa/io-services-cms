@@ -22,17 +22,16 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
 import { IConfig } from "../../config";
-import { EventNameEnum } from "../../utils/applicationinsight";
+import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
-import { ErrorResponseTypes } from "../../utils/logger";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
+import { ErrorResponseTypes } from "../../utils/logger";
 
 const logPrefix = "GetServiceLifecycleHandler";
 
@@ -52,7 +51,7 @@ type Dependencies = {
   // A store od ServiceLifecycle objects
   store: FSMStore<ServiceLifecycle.ItemType>;
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
   config: IConfig;
 };
 

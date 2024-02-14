@@ -23,7 +23,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseSuccessNoContent,
@@ -33,6 +32,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
+import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
@@ -43,7 +43,7 @@ const logPrefix = "ReviewServiceHandler";
 type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;

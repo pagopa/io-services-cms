@@ -22,7 +22,6 @@ import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseSuccessNoContent,
   ResponseErrorInternal,
@@ -36,6 +35,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import {
   EventNameEnum,
+  TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
@@ -48,7 +48,7 @@ const logPrefix = "PublishServiceHandler";
 type Dependencies = {
   fsmPublicationClient: ServicePublication.FsmClient;
   apimService: ApimUtils.ApimService;
-  telemetryClient: ReturnType<typeof initAppInsights>;
+  telemetryClient: TelemetryClient;
 };
 
 type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;

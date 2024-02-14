@@ -1,7 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { IAzureApiAuthorization } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import {
   IResponseErrorInternal,
   ResponseErrorInternal,
@@ -13,7 +12,11 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import { EventNameEnum, trackEventOnResponseOK } from "./applicationinsight";
+import {
+  EventNameEnum,
+  TelemetryClient,
+  trackEventOnResponseOK,
+} from "./applicationinsight";
 import { getLogger } from "./logger";
 import { serviceOwnerCheckManageTask } from "./subscription";
 
@@ -36,7 +39,7 @@ export const genericServiceRetrieveHandler =
   >(
     store: GenericStore<T>,
     apimService: ApimUtils.ApimService,
-    telemetryClient: ReturnType<typeof initAppInsights>,
+    telemetryClient: TelemetryClient,
     config: IConfig,
     itemToResponse: GenericItemToResponse<T, V>
   ) =>

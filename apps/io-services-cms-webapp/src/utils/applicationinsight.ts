@@ -25,6 +25,8 @@ export const initTelemetryClient = (
         ),
       });
 
+export type TelemetryClient = ReturnType<typeof initTelemetryClient>;
+
 export const trackEventOnResponseOK =
   <R>(
     telemetryClient: ReturnType<typeof initTelemetryClient>,
