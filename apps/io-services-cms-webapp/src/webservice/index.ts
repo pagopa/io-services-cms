@@ -10,6 +10,7 @@ import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/mo
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
+import { TelemetryClient } from "../utils/applicationinsight";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
@@ -70,7 +71,6 @@ import {
   makeUploadServiceLogoHandler,
 } from "./controllers/upload-service-logo";
 
-import { TelemetryClient } from "../utils/applicationinsight";
 import {
   applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
   makeGetServiceTopicsHandler,
