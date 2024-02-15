@@ -37,11 +37,22 @@ export const payloadToItem = (
     ...data,
     require_secure_channel,
     max_allowed_payment_amount,
-    authorized_recipients: [sandboxFiscalCode, ...authorized_recipients],
+    authorized_recipients: calculateItemAuthorizedRecipients(
+      authorized_recipients,
+      sandboxFiscalCode
+    ),
     authorized_cidrs: [...authorized_cidrs],
     metadata: { ...metadata, category: toCategoryType(metadata.category) },
   },
 });
+
+const calculateItemAuthorizedRecipients = (
+  authorizedRecipients: ReadonlyArray<FiscalCode>,
+  sandboxFiscalCode: FiscalCode
+) =>
+  authorizedRecipients.includes(sandboxFiscalCode)
+    ? [...authorizedRecipients]
+    : [...authorizedRecipients, sandboxFiscalCode];
 
 export const itemToResponse =
   (dbConfig: TopicPostgreSqlConfig) =>
