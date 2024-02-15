@@ -12,6 +12,7 @@ import {
   payloadToItem,
   toServiceStatus,
 } from "../service-lifecycle-converters";
+import { a } from "vitest/dist/suite-9ReVEt_h";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
@@ -40,7 +41,7 @@ describe("test service-lifecycle-converters", () => {
     expect(result.reason).not.toBeDefined();
   });
 
-  test("Authorized User should contains the default fiscal code and the one on request", () => {
+  test("Authorized Recipients should contains the default fiscal code and the one on request", () => {
     const aNewService = {
       name: "a service",
       description: "a description",
@@ -63,6 +64,30 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
     expect(result.data.authorized_recipients).toContain(anAutorizedFiscalCode);
     expect(result.data.authorized_recipients).toHaveLength(2);
+  });
+
+  test("Should not add the default sandbox recipient when already present", () => {
+    const aNewService = {
+      name: "a service",
+      description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
+      metadata: {
+        scope: "LOCAL",
+      },
+      authorized_recipients: [aSandboxFiscalCode],
+    } as unknown as ServicePayload;
+
+    const result = payloadToItem(
+      "ffefefe" as NonEmptyString,
+      aNewService,
+      aSandboxFiscalCode as FiscalCode
+    );
+    expect(result.data.authorized_recipients).toBeDefined();
+    expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
+    expect(result.data.authorized_recipients).toHaveLength(1);
   });
 
   test("Converting a Payload which lack of metadata.category the Item should contain the default one", () => {
