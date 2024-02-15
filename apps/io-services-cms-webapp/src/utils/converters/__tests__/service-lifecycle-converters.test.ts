@@ -1,6 +1,5 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, test, vi } from "vitest";
@@ -8,11 +7,9 @@ import { TopicPostgreSqlConfig } from "../../../config";
 import { FiscalCode } from "../../../generated/api/FiscalCode";
 import { ServicePayload } from "../../../generated/api/ServicePayload";
 import {
-  itemToResponse,
   payloadToItem,
   toServiceStatus,
 } from "../service-lifecycle-converters";
-import { a } from "vitest/dist/suite-9ReVEt_h";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
