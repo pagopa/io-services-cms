@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.6
+
+### Patch Changes
+
+- 14b6f95: Avoid adding the default Sandbox Recipient when already present
+
 ## 1.27.5
 
 ### Patch Changes
