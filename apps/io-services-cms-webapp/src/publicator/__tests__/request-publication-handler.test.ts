@@ -111,7 +111,6 @@ describe("Service Publication Handler", () => {
       mockFsmPublicationClient
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
-    const {} = aService;
     expect(mockFsmPublicationClient.release).toBeCalledWith(
       aService.id,
       aService,
