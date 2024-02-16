@@ -25,6 +25,8 @@ tags:
     description: Service Authorization API specification
   - name: service-topics
     description: Services thematic taxonomy
+  - name: service-history
+    description: Services history
 paths:
   /info:
     get:
