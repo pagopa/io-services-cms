@@ -136,7 +136,7 @@ describe("apply", () => {
     {
       title: "on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.release(aServiceId, { data: aService })],
+      actions: [() => fsmClient._release(aServiceId, { data: aService })],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "unpublished" }),
@@ -147,12 +147,12 @@ describe("apply", () => {
       id: aServiceId,
       actions: [
         () =>
-          fsmClient.release(aServiceId, {
+          fsmClient._release(aServiceId, {
             data: aService,
           }),
         () => fsmClient.publish(aServiceId),
         () =>
-          fsmClient.release(aServiceId, {
+          fsmClient._release(aServiceId, {
             data: changeName(aService, "new name"),
           }),
         () => fsmClient.unpublish(aServiceId),
@@ -168,7 +168,7 @@ describe("apply", () => {
     {
       title: "on empty items with autoPublish",
       id: aServiceId,
-      actions: [() => fsmClient.release(aServiceId, { data: aService })],
+      actions: [() => fsmClient._release(aServiceId, { data: aService })],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "unpublished" }),
@@ -183,7 +183,7 @@ describe("apply", () => {
             data: aService,
           }),
         () =>
-          fsmClient.release(aServiceId, {
+          fsmClient._release(aServiceId, {
             data: changeName(aService, "new name after autoPublish"),
           }),
         () => fsmClient.unpublish(aServiceId),
@@ -217,7 +217,7 @@ describe("apply", () => {
     } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.release(aServiceId, {
+    const result = await mockFsmClient._release(aServiceId, {
       data: aService,
     })();
 
@@ -239,7 +239,7 @@ describe("apply", () => {
     } as unknown as FSMStore<ItemType>;
     const mockFsmClient = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.release(aServiceId, {
+    const result = await mockFsmClient._release(aServiceId, {
       data: aService,
     })();
 
@@ -279,6 +279,59 @@ describe("apply", () => {
       data: { ...aService.data, description: "edited" as NonEmptyString },
     };
     const editedItem = { ...editedService, fms: currentItem.fsm };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.right(editedItem);
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.publish(aServiceId, {
+      data: editedService,
+    })();
+
+    if (E.isLeft(result)) {
+      console.log(result);
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(editedItem);
+    expect(mockStore.save).toHaveBeenCalledOnce();
+  });
+
+  it("should do not override service data when publishing an unpublished item", async () => {
+    const currentItem = { ...aService, fsm: { state: "unpublished" } };
+    const savedItem = { ...currentItem, fsm: { state: "published" } };
+    const mockStore = {
+      fetch: vi.fn(() => {
+        return TE.of(O.some(currentItem));
+      }),
+      save: vi.fn(() => {
+        return TE.right(savedItem);
+      }),
+    } as unknown as FSMStore<ItemType>;
+    const mockFsmClient = getFsmClient(mockStore);
+
+    const result = await mockFsmClient.publish(aServiceId)();
+
+    if (E.isLeft(result)) {
+      throw new Error(`Expecting a success`);
+    }
+    const { right: value } = result;
+    expect(value).toStrictEqual(savedItem);
+    expect(mockStore.save).toHaveBeenCalled();
+  });
+
+  it("should override service data when publishing an unpublished item", async () => {
+    const currentItem = { ...aService, fsm: { state: "unpublished" } };
+    const editedService = {
+      id: aService.id,
+      data: { ...aService.data, description: "edited" as NonEmptyString },
+    };
+    const editedItem = { ...editedService, fms: { state: "published" } };
     const mockStore = {
       fetch: vi.fn(() => {
         return TE.of(O.some(currentItem));
@@ -369,4 +422,55 @@ describe("override", () => {
       expect(result.right.fsm.state).eq("published");
     }
   });
+});
+
+describe("release", () => {
+  it("should fails when stored item is not valid", async () => {
+    store
+      .inspect()
+      .set(
+        aServiceId,
+        aService as unknown as WithState<string, Record<string, unknown>>
+      );
+    const item = {} as unknown as ItemType;
+    const result = await fsmClient.release(aServiceId, item, true)();
+    expect(E.isLeft(result)).toBeTruthy();
+    if (E.isLeft(result)) {
+      expect(result.left.message).not.empty;
+    }
+  });
+
+  it.each`
+    initialState     | action
+    ${"empty"}       | ${"publish"}
+    ${"empty"}       | ${"unpublish"}
+    ${"unpublished"} | ${"publish"}
+    ${"unpublished"} | ${"unpublish"}
+    ${"published"}   | ${"publish"}
+    ${"published"}   | ${"unpublish"}
+  `(
+    "should apply a release on $initialState and $action",
+    async ({ initialState, action }) => {
+      if (initialState !== "empty") {
+        store
+          .inspect()
+          .set(aServiceId, { ...aService, fsm: { state: initialState } });
+      }
+      const result = await fsmClient.release(
+        aServiceId,
+        aService,
+        action === "publish"
+      )();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toMatchObject({
+          ...aService,
+          fsm: {
+            state: `${action}ed`,
+            lastTransition: `apply release on ${initialState}`,
+          },
+        });
+      }
+    }
+  );
 });

@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 import { Context } from "@azure/functions";
 import {
+  FsmItemNotFoundError,
   ServiceLifecycle,
   ServicePublication,
-  FsmItemNotFoundError,
 } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { Json } from "io-ts-types";
-import { describe, expect, it, vi, afterEach } from "vitest";
 import * as TE from "fp-ts/lib/TaskEither";
+import { Json } from "io-ts-types";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleQueueItem } from "../request-publication-handler";
 
 const createContext = () =>
@@ -58,16 +58,16 @@ describe("Service Publication Handler", () => {
     ).rejects.toThrowError("Error while parsing incoming message");
   });
 
-  it("handleQueueItem should publish on autoPublish true", async () => {
+  it("handleQueueItem should release and publish when autoPublish true", async () => {
     const autoPublishQueueItem = {
       ...aService,
       autoPublish: true,
       kind: "RequestPublicationItem",
-    } as unknown as Json;
+    };
     const context = createContext();
 
     const mockFsmPublicationClient = {
-      publish: vi.fn(() =>
+      release: vi.fn(() =>
         TE.right({
           ...aService,
           fsm: { state: "published" },
@@ -80,10 +80,12 @@ describe("Service Publication Handler", () => {
       autoPublishQueueItem,
       mockFsmPublicationClient
     )();
-    expect(mockFsmPublicationClient.publish).toBeCalledTimes(1);
-    expect(mockFsmPublicationClient.publish).toBeCalledWith(aService.id, {
-      data: aService,
-    });
+    expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
+    expect(mockFsmPublicationClient.release).toBeCalledWith(
+      aService.id,
+      aService,
+      autoPublishQueueItem.autoPublish
+    );
   });
 
   it("handleQueueItem should release on autoPublish false", async () => {
@@ -91,7 +93,7 @@ describe("Service Publication Handler", () => {
       ...aService,
       autoPublish: false,
       kind: "RequestPublicationItem",
-    } as unknown as Json;
+    };
     const context = createContext();
 
     const mockFsmPublicationClient = {
@@ -105,13 +107,16 @@ describe("Service Publication Handler", () => {
 
     await handleQueueItem(
       context,
-      autoPublishQueueItem,
+      autoPublishQueueItem as unknown as Json,
       mockFsmPublicationClient
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
-    expect(mockFsmPublicationClient.release).toBeCalledWith(aService.id, {
-      data: aService,
-    });
+    const {} = aService;
+    expect(mockFsmPublicationClient.release).toBeCalledWith(
+      aService.id,
+      aService,
+      autoPublishQueueItem.autoPublish
+    );
   });
 
   it("handleQueueItem should unpublish", async () => {

@@ -6,8 +6,8 @@ import {
 } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as T from "fp-ts/lib/Task";
+import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
@@ -31,21 +31,17 @@ export const handleQueueItem = (
     parseIncomingMessage,
     E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
-    TE.chainW((service) =>
-      service.kind === "RequestPublicationItem"
-        ? pipe(
+    TE.chainW((item) =>
+      item.kind === "RequestPublicationItem"
+        ? fsmPublicationClient.release(
+            item.id,
             {
-              data: {
-                id: service.id,
-                data: service.data,
-              },
+              id: item.id,
+              data: item.data,
             },
-            (publicationArgs) =>
-              service.autoPublish
-                ? fsmPublicationClient.publish(service.id, publicationArgs)
-                : fsmPublicationClient.release(service.id, publicationArgs)
+            item.autoPublish
           )
-        : fsmPublicationClient.unpublish(service.id)
+        : fsmPublicationClient.unpublish(item.id)
     ),
     TE.fold(
       (e) => {
