@@ -1,3 +1,35 @@
+ServiceHistory:
+  type: object
+  description: Service basic data
+  properties:
+    continuationToken:
+      type: string
+      description: Continuation token for pagination
+    items:
+      type: array
+      items:
+        $ref: '#/ServiceHistoryItem'
+ServiceHistoryItem:
+  description: Service History model data
+  allOf:
+    - type: object
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/ServiceHistoryStatusType'
+        version:
+          type: integer
+        version_date:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+        metadata:
+          $ref: '#/ServiceMetadata'
+      required:
+        - id
+        - status
+        - last_update
+        - metadata
+    - $ref: '#/ServiceData'
 ServiceLifecycle:
   description: Service Lifecycle model data
   allOf:
