@@ -170,13 +170,8 @@ const FSM: FSM = {
       action: "publish",
       from: "published",
       to: "published",
-      exec: ({ current, args }) => {
-        // eslint-disable-next-line no-console
-        console.log(
-          "CALLED APPLY publish FROM published TO published WITH DATA",
-          args
-        );
-        return args
+      exec: ({ current, args }) =>
+        args
           ? // publish with service data overriding
             E.right({
               ...args.data,
@@ -190,8 +185,7 @@ const FSM: FSM = {
             E.right({
               ...current,
               hasChanges: false,
-            });
-      },
+            }),
     },
     {
       id: "apply unpublish on published",
@@ -241,6 +235,7 @@ type PublicationStore = FSMStore<States[number]>;
  * @param args optional arguments, depending on the action definition
  * @returns either an error or the element in the new state
  */
+/** @deprecated */
 function apply(
   appliedAction: "release",
   id: ServiceId,
@@ -430,10 +425,55 @@ function override(
     );
 }
 
+function release(
+  id: ServiceId,
+  item: Service,
+  publish: boolean
+): ReaderTaskEither<PublicationStore, Error, ItemType> {
+  return (store) =>
+    pipe(
+      store.fetch(id),
+      TE.chain(
+        flow(
+          O.fold<ItemType, E.Either<Error, ItemType["fsm"]["state"] | "empty">>(
+            () => E.right("empty"),
+            flow(
+              ItemType.decode,
+              E.bimap(
+                flow(readableReport, (msg) => new FsmItemValidationError(msg)),
+                ({ fsm }) => fsm.state
+              )
+            )
+          ),
+          TE.fromEither
+        )
+      ),
+      TE.chain((lastState) =>
+        publish
+          ? store.save(id, {
+              ...item,
+              fsm: {
+                state: "published",
+                lastTransition: `apply release on ${lastState}`,
+              },
+            })
+          : store.save(id, {
+              ...item,
+              fsm: {
+                state: "unpublished",
+                lastTransition: `apply release on ${lastState}`,
+              },
+            })
+      )
+    );
+}
+
 const getFsmClient = (store: PublicationStore) => ({
   getStore: () => store,
-  release: (id: ServiceId, args: { data: Service }) =>
+  /** @deprecated */
+  _release: (id: ServiceId, args: { data: Service }) =>
     apply("release", id, args)(store),
+  release: (...args: Parameters<typeof release>) => release(...args)(store),
   unpublish: (id: ServiceId) => apply("unpublish", id)(store),
   publish: (id: ServiceId, args?: { data: Service }) =>
     apply("publish", id, args)(store),
