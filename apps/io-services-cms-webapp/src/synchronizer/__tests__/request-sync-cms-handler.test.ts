@@ -4,6 +4,7 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -79,10 +80,14 @@ const mockFsmLifecycleClient = {
       fsm: aRequestServiceLifecycleSync.fsm,
     } as ServiceLifecycle.ItemType)
   ),
+  fetch: vi.fn(() => TE.right(O.some(aServiceLifecycleItem))),
 } as unknown as ServiceLifecycle.FsmClient;
 
 const mockFsmPublicationClient = {
   override: vi.fn(() => TE.right(aServiceLifecycleItem)),
+  getStore: vi.fn(() => ({
+    fetch: vi.fn(() => TE.right(O.some(aServicePublicationItem))),
+  })),
 } as unknown as ServicePublication.FsmClient;
 
 describe("Sync CMS Handler", () => {
@@ -208,6 +213,9 @@ describe("Sync CMS Handler", () => {
 
     const mockFsmPublicationClientError = {
       override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+      getStore: vi.fn(() => ({
+        fetch: vi.fn(() => TE.right(O.some(aServicePublicationItem))),
+      })),
     } as unknown as ServicePublication.FsmClient;
 
     await expect(() =>
@@ -228,6 +236,7 @@ describe("Sync CMS Handler", () => {
 
     const mockFsmLifecycleClientError = {
       override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+      fetch: vi.fn(() => TE.right(O.some(aServiceLifecycleItem))),
     } as unknown as ServiceLifecycle.FsmClient;
 
     await expect(() =>

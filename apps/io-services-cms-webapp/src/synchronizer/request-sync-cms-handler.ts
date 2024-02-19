@@ -6,6 +6,7 @@ import {
 } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
@@ -22,26 +23,80 @@ const parseIncomingMessage = (
     E.mapLeft(flow(readableReport, E.toError))
   );
 
-const toServiceLifecycle = (
-  state: ServiceLifecycle.ItemType["fsm"]["state"],
-  { id, data }: Queue.RequestSyncCmsItem
-): ServiceLifecycle.ItemType => ({
-  id,
-  data,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-});
+const toServiceLifecycle =
+  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (
+    state: ServiceLifecycle.ItemType["fsm"]["state"],
+    { id, data }: Queue.RequestSyncCmsItem
+  ): TE.TaskEither<Error, ServiceLifecycle.ItemType> =>
+    pipe(
+      id,
+      fsmLifecycleClient.fetch,
+      TE.chainW(
+        O.fold(
+          // eslint-disable-next-line sonarjs/no-identical-functions
+          () =>
+            TE.right({
+              id,
+              data,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+            }),
+          // eslint-disable-next-line sonarjs/no-identical-functions
+          (currentItem) =>
+            TE.right({
+              id,
+              data: {
+                ...data,
+                metadata: {
+                  ...data.metadata,
+                  topic_id: currentItem.data.metadata.topic_id,
+                },
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+            })
+        )
+      )
+    );
 
-const toServicePublication = (
-  state: ServicePublication.ItemType["fsm"]["state"],
-  { id, data }: Queue.RequestSyncCmsItem
-): // eslint-disable-next-line sonarjs/no-identical-functions
-ServicePublication.ItemType => ({
-  id,
-  data,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-});
+const toServicePublication =
+  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (
+    state: ServicePublication.ItemType["fsm"]["state"],
+    { id, data }: Queue.RequestSyncCmsItem
+  ): // eslint-disable-next-line sonarjs/no-identical-functions
+  TE.TaskEither<Error, ServicePublication.ItemType> =>
+    pipe(
+      id,
+      fsmPublicationClient.getStore().fetch,
+      TE.chainW(
+        O.fold(
+          // eslint-disable-next-line sonarjs/no-identical-functions
+          () =>
+            TE.right({
+              id,
+              data,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+            }),
+          // eslint-disable-next-line sonarjs/no-identical-functions
+          (currentItem) =>
+            TE.right({
+              id,
+              data: {
+                ...data,
+                metadata: {
+                  ...data.metadata,
+                  topic_id: currentItem.data.metadata.topic_id,
+                },
+              },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+            })
+        )
+      )
+    );
 
 export const handleQueueItem = (
   _context: Context,
@@ -65,13 +120,15 @@ export const handleQueueItem = (
         RA.filter((item) => item.kind === "LifecycleItemType"),
         RA.traverse(TE.ApplicativePar)((item) =>
           pipe(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            toServiceLifecycle(item.fsm.state as any, item),
-            (serviceLifecycle) =>
-              fsmLifecycleClient.override(
-                serviceLifecycle.id,
-                serviceLifecycle
-              ),
+            toServiceLifecycle(fsmLifecycleClient)(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              item.fsm.state as any,
+              item
+            ),
+
+            TE.chain((serviceLifecycle) =>
+              fsmLifecycleClient.override(serviceLifecycle.id, serviceLifecycle)
+            ),
             TE.map((_) => void 0)
           )
         ),
@@ -81,13 +138,17 @@ export const handleQueueItem = (
             RA.filter((item) => item.kind === "PublicationItemType"),
             RA.traverse(TE.ApplicativePar)((item) =>
               pipe(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                toServicePublication(item.fsm.state as any, item),
-                (servicePublication) =>
+                toServicePublication(fsmPublicationClient)(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  item.fsm.state as any,
+                  item
+                ),
+                TE.chain((servicePublication) =>
                   fsmPublicationClient.override(
                     servicePublication.id,
                     servicePublication
-                  ),
+                  )
+                ),
                 TE.map((_) => void 0)
               )
             )
