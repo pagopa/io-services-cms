@@ -11,6 +11,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
+import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
@@ -24,7 +25,7 @@ const parseIncomingMessage = (
   );
 
 const toServiceLifecycle =
-  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
     { id, data }: Queue.RequestSyncCmsItem
@@ -33,16 +34,19 @@ const toServiceLifecycle =
       id,
       fsmLifecycleClient.fetch,
       TE.chainW(
-        O.fold(
-          () => TE.right(data),
-          (currentServiceLifecycle) =>
-            TE.right({
-              ...data,
-              metadata: {
-                ...data.metadata,
-                topic_id: currentServiceLifecycle.data.metadata.topic_id,
-              },
-            })
+        flow(
+          O.fold(
+            () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
+            (currentServiceLifecycle) =>
+              TE.right(currentServiceLifecycle.data.metadata.topic_id)
+          ),
+          TE.map((topic_id) => ({
+            ...data,
+            metadata: {
+              ...data.metadata,
+              topic_id,
+            },
+          }))
         )
       ),
       TE.map((lifecycleData) => ({
@@ -54,7 +58,11 @@ const toServiceLifecycle =
     );
 
 const toServicePublication =
-  (fsmPublicationClient: ServicePublication.FsmClient) =>
+  (
+    fsmPublicationClient: ServicePublication.FsmClient,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    config: IConfig
+  ) =>
   (
     state: ServicePublication.ItemType["fsm"]["state"],
     { id, data }: Queue.RequestSyncCmsItem
@@ -63,16 +71,33 @@ const toServicePublication =
       id,
       fsmPublicationClient.getStore().fetch,
       TE.chainW(
-        O.fold(
-          () => TE.right(data),
-          (currentServicePublication) =>
-            TE.right({
-              ...data,
-              metadata: {
-                ...data.metadata,
-                topic_id: currentServicePublication.data.metadata.topic_id,
-              },
-            })
+        flow(
+          O.fold(
+            () =>
+              pipe(
+                id,
+                fsmLifecycleClient.fetch,
+                TE.chainW(
+                  flow(
+                    O.fold(
+                      () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
+                      (currentServiceLifecycle) =>
+                        TE.right(currentServiceLifecycle.data.metadata.topic_id)
+                    )
+                  )
+                )
+              ),
+            (currentServicePublication) =>
+              TE.right(currentServicePublication.data.metadata.topic_id)
+          ),
+          // eslint-disable-next-line sonarjs/no-identical-functions
+          TE.map((topic_id) => ({
+            ...data,
+            metadata: {
+              ...data.metadata,
+              topic_id,
+            },
+          }))
         )
       ),
       TE.map((publicationData) => ({
@@ -87,7 +112,8 @@ export const handleQueueItem = (
   _context: Context,
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
-  fsmPublicationClient: ServicePublication.FsmClient
+  fsmPublicationClient: ServicePublication.FsmClient,
+  config: IConfig
 ) =>
   pipe(
     queueItem,
@@ -105,7 +131,7 @@ export const handleQueueItem = (
         RA.filter((item) => item.kind === "LifecycleItemType"),
         RA.traverse(TE.ApplicativePar)((item) =>
           pipe(
-            toServiceLifecycle(fsmLifecycleClient)(
+            toServiceLifecycle(fsmLifecycleClient, config)(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               item.fsm.state as any,
               item
@@ -123,7 +149,11 @@ export const handleQueueItem = (
             RA.filter((item) => item.kind === "PublicationItemType"),
             RA.traverse(TE.ApplicativePar)((item) =>
               pipe(
-                toServicePublication(fsmPublicationClient)(
+                toServicePublication(
+                  fsmPublicationClient,
+                  fsmLifecycleClient,
+                  config
+                )(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   item.fsm.state as any,
                   item
@@ -148,13 +178,15 @@ export const handleQueueItem = (
 
 export const createRequestSyncCmsHandler = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
-  fsmPublicationClient: ServicePublication.FsmClient
+  fsmPublicationClient: ServicePublication.FsmClient,
+  config: IConfig
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
     handleQueueItem(
       context,
       queueItem,
       fsmLifecycleClient,
-      fsmPublicationClient
+      fsmPublicationClient,
+      config
     )()
   );
