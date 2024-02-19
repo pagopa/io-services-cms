@@ -28,36 +28,29 @@ const toServiceLifecycle =
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
     { id, data }: Queue.RequestSyncCmsItem
-  ): TE.TaskEither<Error, ServiceLifecycle.ItemType> =>
+  ) =>
     pipe(
       id,
       fsmLifecycleClient.fetch,
       TE.chainW(
         O.fold(
-          // eslint-disable-next-line sonarjs/no-identical-functions
-          () =>
+          () => TE.right(data),
+          (currentServiceLifecycle) =>
             TE.right({
-              id,
-              data,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-            }),
-          // eslint-disable-next-line sonarjs/no-identical-functions
-          (currentItem) =>
-            TE.right({
-              id,
-              data: {
-                ...data,
-                metadata: {
-                  ...data.metadata,
-                  topic_id: currentItem.data.metadata.topic_id,
-                },
+              ...data,
+              metadata: {
+                ...data.metadata,
+                topic_id: currentServiceLifecycle.data.metadata.topic_id,
               },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
             })
         )
-      )
+      ),
+      TE.map((lifecycleData) => ({
+        id,
+        data: lifecycleData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+      }))
     );
 
 const toServicePublication =
@@ -65,37 +58,29 @@ const toServicePublication =
   (
     state: ServicePublication.ItemType["fsm"]["state"],
     { id, data }: Queue.RequestSyncCmsItem
-  ): // eslint-disable-next-line sonarjs/no-identical-functions
-  TE.TaskEither<Error, ServicePublication.ItemType> =>
+  ) =>
     pipe(
       id,
       fsmPublicationClient.getStore().fetch,
       TE.chainW(
         O.fold(
-          // eslint-disable-next-line sonarjs/no-identical-functions
-          () =>
+          () => TE.right(data),
+          (currentServicePublication) =>
             TE.right({
-              id,
-              data,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-            }),
-          // eslint-disable-next-line sonarjs/no-identical-functions
-          (currentItem) =>
-            TE.right({
-              id,
-              data: {
-                ...data,
-                metadata: {
-                  ...data.metadata,
-                  topic_id: currentItem.data.metadata.topic_id,
-                },
+              ...data,
+              metadata: {
+                ...data.metadata,
+                topic_id: currentServicePublication.data.metadata.topic_id,
               },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
             })
         )
-      )
+      ),
+      TE.map((publicationData) => ({
+        id,
+        data: publicationData,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+      }))
     );
 
 export const handleQueueItem = (
