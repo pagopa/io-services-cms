@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.18.1
+
+### Patch Changes
+
+- 2fa088a: create a new release fn intead of the one that uses publication fsm
+
 ## 1.18.0
 
 ### Minor Changes
