@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.27.7
+
+### Patch Changes
+
+- 2fa088a: create a new release fn intead of the one that uses publication fsm
+- Updated dependencies [2fa088a]
+  - @io-services-cms/models@1.18.1
+
 ## 1.27.6
 
 ### Patch Changes
