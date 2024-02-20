@@ -17,10 +17,10 @@ ServiceHistoryItem:
         id:
           type: string
         status:
-          $ref: '#/ServiceHistoryStatusType'
+          $ref: '#/ServiceHistoryItemStatus'
         version:
           type: integer
-        version_date:
+        last_update:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
         metadata:
           $ref: '#/ServiceMetadata'
@@ -30,6 +30,10 @@ ServiceHistoryItem:
         - last_update
         - metadata
     - $ref: '#/ServiceData'
+ServiceHistoryItemStatus:
+  oneOf:
+    - $ref: '#/ServiceLifecycleStatus'
+    - $ref: '#/ServicePublicationStatusType'
 ServiceLifecycle:
   description: Service Lifecycle model data
   allOf:
