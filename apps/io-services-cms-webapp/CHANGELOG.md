@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.8
+
+### Patch Changes
+
+- 5521898: Handle topic_id on legacy -> CMS sync
+
 ## 1.27.7
 
 ### Patch Changes
