@@ -62,6 +62,6 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   -validateMigrationNaming=true \
   -placeholders.appUser=${DB_USER_APP} \
   -placeholders.appUserPassword=${DB_USER_APP_PASSWORD} \
-  -placeholders.appUser=${DB_READONLY_USER} \
-  -placeholders.appUserPassword=${DB_READONLY_USER_PASSWORD} \
+  -placeholders.readonlyUser=${DB_READONLY_USER} \
+  -placeholders.readonlyUserPassword=${DB_READONLY_USER_PASSWORD} \
   "${FLYWAY_COMMAND}" ${other}

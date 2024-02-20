@@ -32,7 +32,7 @@ From the project root, move into `db/` folder and run `./scripts/run_flyway_on_a
 `run_flyway_on_azure.sh` usage example:
 
 ```
-./scripts/run_flyway_on_azure.sh migrate reviewer PROD-IO schema/migrations reviewerusr
+./scripts/run_flyway_on_azure.sh migrate reviewer PROD-IO schema/migrations
 ```
 
 ### How to run migration by passing all required parameters explicitly
@@ -46,5 +46,5 @@ From the project root, move into `db/` folder and run `./scripts/run_flyway_on_s
 `run_flyway_on_server.sh` usage example:
 
 ```
-./scripts/run_flyway_on_server.sh migrate reviewer localhost 5432 AdminUser AdminPassword reviewerusr UsrPassword schema/migrations
+./scripts/run_flyway_on_server.sh migrate reviewer localhost 5432 AdminPassword AppUsrPassword ReadonlyUsrPassword schema/migrations
 ```
