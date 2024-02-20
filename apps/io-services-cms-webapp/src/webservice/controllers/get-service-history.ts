@@ -44,17 +44,20 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceHistory as ServiceResponsePayload } from "../../generated/api/ServiceHistory";
+import { ServiceHistoryItem } from "../../generated/api/ServiceHistoryItem";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { itemsToResponse } from "../../utils/converters/service-history-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceHistoryHandler";
 
+// Move to a separate file
 type OrderParamType = "ASC" | "DESC";
 
 type HandlerResponseTypes =
@@ -77,7 +80,6 @@ type RequestParameters = {
 };
 
 type Dependencies = {
-  // A store od ServiceLifecycle objects
   container: Container;
   apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
@@ -107,18 +109,29 @@ export const makeGetServiceHistoryHandler =
             getOrder(requestParams.order),
             O.toUndefined(requestParams.continuationToken)
           ),
-          TE.map(
-            O.fold(
-              () =>
-                ResponseSuccessJson({
-                  history: [],
-                } as ServiceResponsePayload),
-              (result) =>
-                // TODO: Item to response conversion needed
-                ResponseSuccessJson({
-                  history: result.resources,
-                  continuationToken: result.continuationToken,
-                } as ServiceResponsePayload)
+          TE.chainW(
+            flow(
+              O.foldW(
+                () =>
+                  TE.right(
+                    ResponseSuccessJson({
+                      items: [] as ReadonlyArray<ServiceHistoryItem>,
+                    })
+                  ),
+                ({ continuationToken, resources }) =>
+                  pipe(
+                    resources,
+                    itemsToResponse(config),
+                    TE.map((mapped) =>
+                      ResponseSuccessJson({
+                        continuationToken: continuationToken
+                          ? encodeURIComponent(continuationToken)
+                          : undefined,
+                        items: mapped,
+                      })
+                    )
+                  )
+              )
             )
           ),
           TE.mapLeft((err) => ResponseErrorInternal(err.message))
@@ -143,6 +156,7 @@ export const makeGetServiceHistoryHandler =
       TE.toUnion
     )();
 
+// TODO: Move to a separate file, maybe an utility file(the stores are not suitable for this application, cause they are relative to FSM stuff)
 const fetchHistory =
   (container: Container) =>
   (

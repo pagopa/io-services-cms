@@ -9,8 +9,9 @@ import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import { ServiceTopicDao } from "../utils/service-topic-dao";
+import { getDatabase } from "../lib/azure/cosmos";
 import { TelemetryClient } from "../utils/applicationinsight";
+import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
@@ -75,6 +76,11 @@ import {
   applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
   makeGetServiceTopicsHandler,
 } from "./controllers/get-service-topics";
+
+import {
+  applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
+  makeGetServiceHistoryHandler,
+} from "./controllers/get-service-history";
 
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
@@ -194,6 +200,22 @@ export const createWebServer = ({
         telemetryClient,
       }),
       applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel)
+    )
+  );
+
+  router.get(
+    `${serviceLifecyclePath}/history`,
+    pipe(
+      makeGetServiceHistoryHandler({
+        // TODO: inject
+        container: getDatabase(config).container(
+          config.COSMOSDB_CONTAINER_SERVICES_HISTORY
+        ),
+        apimService,
+        telemetryClient,
+        config,
+      }),
+      applyGetServiceHistoryRequestMiddelwares(config, subscriptionCIDRsModel)
     )
   );
 
