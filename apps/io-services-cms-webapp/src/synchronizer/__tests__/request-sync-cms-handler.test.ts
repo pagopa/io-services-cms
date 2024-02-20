@@ -4,9 +4,11 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { IConfig } from "../../config";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { handleQueueItem } from "../request-sync-cms-handler";
 
@@ -17,7 +19,7 @@ const createContext = () =>
     log: { ...console, verbose: console.log },
   } as unknown as Context);
 
-const aRequestServiceLifecycleSync = {
+const aBaseServiceLifecycleItem = {
   id: "aServiceLifecycleId",
   data: {
     name: "aServiceLifecycleName",
@@ -38,13 +40,22 @@ const aRequestServiceLifecycleSync = {
     authorized_cidrs: [],
   },
   fsm: { state: "approved" },
+};
+
+const aServiceLifecycleItem = {
+  ...aBaseServiceLifecycleItem,
+  data: {
+    ...aBaseServiceLifecycleItem.data,
+    metadata: { ...aBaseServiceLifecycleItem.data.metadata, topic_id: 123 },
+  },
+} as ServiceLifecycle.ItemType;
+
+const aRequestServiceLifecycleSync = {
+  ...aBaseServiceLifecycleItem,
   kind: "LifecycleItemType",
 } as unknown as Queue.RequestSyncCmsItem;
 
-const { kind: _serviceLifecycleItemType, ...aServiceLifecycleItem } =
-  aRequestServiceLifecycleSync;
-
-const aRequestServicePublicationSync = {
+const aBaseServicePublicationItem = {
   id: "aServicePublicationId",
   data: {
     name: "aServicePublicationName",
@@ -65,11 +76,24 @@ const aRequestServicePublicationSync = {
     authorized_cidrs: [],
   },
   fsm: { state: "published" },
+} as unknown as Queue.RequestSyncCmsItem;
+
+const aServicePublicationItem = {
+  ...aBaseServicePublicationItem,
+  data: {
+    ...aBaseServicePublicationItem.data,
+    metadata: { ...aBaseServicePublicationItem.data.metadata, topic_id: 456 },
+  },
+} as ServicePublication.ItemType;
+
+const aRequestServicePublicationSync = {
+  ...aBaseServicePublicationItem,
   kind: "PublicationItemType",
 } as unknown as Queue.RequestSyncCmsItem;
 
-const { kind: _servicePublicationItemType, ...aServicePublicationItem } =
-  aRequestServicePublicationSync;
+const aMokedConfig = {
+  LEGACY_SYNC_DEFAULT_TOPIC_ID: 0,
+} as unknown as IConfig;
 
 const mockFsmLifecycleClient = {
   override: vi.fn(() =>
@@ -79,10 +103,14 @@ const mockFsmLifecycleClient = {
       fsm: aRequestServiceLifecycleSync.fsm,
     } as ServiceLifecycle.ItemType)
   ),
+  fetch: vi.fn(() => TE.right(O.some(aServiceLifecycleItem))),
 } as unknown as ServiceLifecycle.FsmClient;
 
 const mockFsmPublicationClient = {
   override: vi.fn(() => TE.right(aServiceLifecycleItem)),
+  getStore: vi.fn(() => ({
+    fetch: vi.fn(() => TE.right(O.some(aServicePublicationItem))),
+  })),
 } as unknown as ServicePublication.FsmClient;
 
 describe("Sync CMS Handler", () => {
@@ -98,7 +126,8 @@ describe("Sync CMS Handler", () => {
         context,
         anInvalidQueueItem,
         mockFsmLifecycleClient,
-        mockFsmPublicationClient
+        mockFsmPublicationClient,
+        aMokedConfig
       )()
     ).rejects.toThrowError("Error while parsing incoming message");
   });
@@ -112,7 +141,8 @@ describe("Sync CMS Handler", () => {
         context,
         anInvalidQueueItem,
         mockFsmLifecycleClient,
-        mockFsmPublicationClient
+        mockFsmPublicationClient,
+        aMokedConfig
       )()
     ).rejects.toThrowError("Error while parsing incoming message");
   });
@@ -124,7 +154,8 @@ describe("Sync CMS Handler", () => {
       context,
       [aRequestServiceLifecycleSync] as unknown as Json,
       mockFsmLifecycleClient,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
+      aMokedConfig
     )();
 
     expect(mockFsmPublicationClient.override).not.toBeCalled();
@@ -148,7 +179,8 @@ describe("Sync CMS Handler", () => {
       context,
       [aRequestServicePublicationSync] as unknown as Json,
       mockFsmLifecycleClient,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
+      aMokedConfig
     )();
 
     expect(mockFsmLifecycleClient.override).not.toBeCalled();
@@ -175,7 +207,8 @@ describe("Sync CMS Handler", () => {
         aRequestServicePublicationSync,
       ] as unknown as Json,
       mockFsmLifecycleClient,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
+      aMokedConfig
     )();
 
     expect(mockFsmPublicationClient.override).toBeCalledTimes(1);
@@ -208,6 +241,9 @@ describe("Sync CMS Handler", () => {
 
     const mockFsmPublicationClientError = {
       override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+      getStore: vi.fn(() => ({
+        fetch: vi.fn(() => TE.right(O.some(aServicePublicationItem))),
+      })),
     } as unknown as ServicePublication.FsmClient;
 
     await expect(() =>
@@ -218,7 +254,8 @@ describe("Sync CMS Handler", () => {
           aRequestServicePublicationSync,
         ] as unknown as Json,
         mockFsmLifecycleClient,
-        mockFsmPublicationClientError
+        mockFsmPublicationClientError,
+        aMokedConfig
       )()
     ).rejects.toThrowError("Bad Error occurs");
   });
@@ -228,6 +265,7 @@ describe("Sync CMS Handler", () => {
 
     const mockFsmLifecycleClientError = {
       override: vi.fn(() => TE.left(new Error("Bad Error occurs"))),
+      fetch: vi.fn(() => TE.right(O.some(aServiceLifecycleItem))),
     } as unknown as ServiceLifecycle.FsmClient;
 
     await expect(() =>
@@ -238,10 +276,177 @@ describe("Sync CMS Handler", () => {
           aRequestServicePublicationSync,
         ] as unknown as Json,
         mockFsmLifecycleClientError,
-        mockFsmPublicationClient
+        mockFsmPublicationClient,
+        aMokedConfig
       )()
     ).rejects.toThrowError("Bad Error occurs");
 
     expect(mockFsmPublicationClient.override).not.toBeCalled();
+  });
+
+  it("should use the default topic while sync and no item is found on serviceLifecycle collection", async () => {
+    const context = createContext();
+
+    const mockFsmLifecycleNoItemClient = {
+      override: vi.fn(() =>
+        TE.right({
+          id: aRequestServiceLifecycleSync.id,
+          data: aRequestServiceLifecycleSync.data,
+          fsm: aRequestServiceLifecycleSync.fsm,
+        } as ServiceLifecycle.ItemType)
+      ),
+      fetch: vi.fn(() => TE.right(O.none)),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    await handleQueueItem(
+      context,
+      [aRequestServiceLifecycleSync] as unknown as Json,
+      mockFsmLifecycleNoItemClient,
+      mockFsmPublicationClient,
+      aMokedConfig
+    )();
+
+    expect(mockFsmLifecycleNoItemClient.override).toBeCalledTimes(1);
+    expect(mockFsmLifecycleNoItemClient.override).toBeCalledWith(
+      aServiceLifecycleItem.id,
+      {
+        ...aServiceLifecycleItem,
+        data: {
+          ...aServiceLifecycleItem.data,
+          metadata: {
+            ...aServiceLifecycleItem.data.metadata,
+            topic_id: aMokedConfig.LEGACY_SYNC_DEFAULT_TOPIC_ID,
+          },
+        },
+        fsm: {
+          ...aServiceLifecycleItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+  });
+
+  it("should use the default topic while sync and no item is found on serviceLifecycle and servicePublication collection", async () => {
+    const context = createContext();
+
+    const mockFsmLifecycleNoItemClient = {
+      override: vi.fn(() =>
+        TE.right({
+          id: aRequestServiceLifecycleSync.id,
+          data: aRequestServiceLifecycleSync.data,
+          fsm: aRequestServiceLifecycleSync.fsm,
+        } as ServiceLifecycle.ItemType)
+      ),
+      fetch: vi.fn(() => TE.right(O.none)),
+    } as unknown as ServiceLifecycle.FsmClient;
+
+    const mockFsmPublicationNoItemClient = {
+      override: vi.fn(() => TE.right(aServiceLifecycleItem)),
+      getStore: vi.fn(() => ({
+        fetch: vi.fn(() => TE.right(O.none)),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    await handleQueueItem(
+      context,
+      [
+        aRequestServiceLifecycleSync,
+        aRequestServicePublicationSync,
+      ] as unknown as Json,
+      mockFsmLifecycleNoItemClient,
+      mockFsmPublicationNoItemClient,
+      aMokedConfig
+    )();
+
+    expect(mockFsmPublicationNoItemClient.override).toBeCalledTimes(1);
+    expect(mockFsmPublicationNoItemClient.override).toBeCalledWith(
+      aServicePublicationItem.id,
+      {
+        ...aServicePublicationItem,
+        data: {
+          ...aServicePublicationItem.data,
+          metadata: {
+            ...aServicePublicationItem.data.metadata,
+            topic_id: aMokedConfig.LEGACY_SYNC_DEFAULT_TOPIC_ID,
+          },
+        },
+        fsm: {
+          ...aServicePublicationItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+
+    expect(mockFsmLifecycleNoItemClient.override).toBeCalledTimes(1);
+    expect(mockFsmLifecycleNoItemClient.override).toBeCalledWith(
+      aServiceLifecycleItem.id,
+      {
+        ...aServiceLifecycleItem,
+        data: {
+          ...aServiceLifecycleItem.data,
+          metadata: {
+            ...aServiceLifecycleItem.data.metadata,
+            topic_id: aMokedConfig.LEGACY_SYNC_DEFAULT_TOPIC_ID,
+          },
+        },
+        fsm: {
+          ...aServiceLifecycleItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+  });
+
+  it("should use the Lifecycle Item topic_id while sync in Publication and no item is found on servicePublication collection", async () => {
+    const context = createContext();
+
+    const mockFsmPublicationNoItemClient = {
+      override: vi.fn(() => TE.right(aServiceLifecycleItem)),
+      getStore: vi.fn(() => ({
+        fetch: vi.fn(() => TE.right(O.none)),
+      })),
+    } as unknown as ServicePublication.FsmClient;
+
+    await handleQueueItem(
+      context,
+      [
+        aRequestServiceLifecycleSync,
+        aRequestServicePublicationSync,
+      ] as unknown as Json,
+      mockFsmLifecycleClient,
+      mockFsmPublicationNoItemClient,
+      aMokedConfig
+    )();
+
+    expect(mockFsmPublicationNoItemClient.override).toBeCalledTimes(1);
+    expect(mockFsmPublicationNoItemClient.override).toBeCalledWith(
+      aServicePublicationItem.id,
+      {
+        ...aServicePublicationItem,
+        data: {
+          ...aServicePublicationItem.data,
+          metadata: {
+            ...aServicePublicationItem.data.metadata,
+            topic_id: aServiceLifecycleItem.data.metadata.topic_id,
+          },
+        },
+        fsm: {
+          ...aServicePublicationItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
+
+    expect(mockFsmLifecycleClient.override).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.override).toBeCalledWith(
+      aServiceLifecycleItem.id,
+      {
+        ...aServiceLifecycleItem,
+        fsm: {
+          ...aServiceLifecycleItem.fsm,
+          lastTransition: SYNC_FROM_LEGACY,
+        },
+      }
+    );
   });
 });

@@ -227,6 +227,15 @@ export const ServiceValidationConfig = t.type({
 });
 export type ServiceValidationConfig = t.TypeOf<typeof ServiceValidationConfig>;
 
+// Default Application Values
+const DefaultValues = t.type({
+  // Default Topic ID for services on legacy -> CMS sync
+  LEGACY_SYNC_DEFAULT_TOPIC_ID: withDefault(
+    NumberFromString,
+    "0" as unknown as number
+  ),
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -256,6 +265,7 @@ export const IConfig = t.intersection([
     BackofficeInternalSubnetCIDRs,
     TopicPostgreSqlConfig,
     ServiceValidationConfig,
+    DefaultValues,
   ]),
 ]);
 
