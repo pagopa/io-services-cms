@@ -3,9 +3,9 @@ import {
   SwitchController,
   UrlFieldController
 } from "@/components/forms/controllers";
+import { getOptionalUrlSchema, getUrlSchema } from "@/components/forms/schemas";
 import { AssistanceChannelType } from "@/types/service";
 import { SupportAgent } from "@mui/icons-material";
-import MobileScreenShareIcon from "@mui/icons-material/MobileScreenShare";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
@@ -35,7 +35,7 @@ const getSingleAssistanceChannelSchema = (
     }),
     z.object({
       type: z.literal("support_url"),
-      value: z.string().url(t("forms.errors.field.url"))
+      value: getUrlSchema(t)
     })
   ]);
 
@@ -64,36 +64,12 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     .object({
       require_secure_channel: z.boolean(),
       metadata: z.object({
-        privacy_url: z.string().url(t("forms.errors.field.url")),
-        tos_url: z.union([
-          z.literal(""),
-          z
-            .string()
-            .trim()
-            .url(t("forms.errors.field.url"))
-        ]),
+        privacy_url: getUrlSchema(t),
+        tos_url: getOptionalUrlSchema(t),
         assistanceChannels: getAssistanceChannelsSchema(t),
-        web_url: z.union([
-          z.literal(""),
-          z
-            .string()
-            .trim()
-            .url(t("forms.errors.field.url"))
-        ]),
-        app_android: z.union([
-          z.literal(""),
-          z
-            .string()
-            .trim()
-            .url(t("forms.errors.field.url"))
-        ]),
-        app_ios: z.union([
-          z.literal(""),
-          z
-            .string()
-            .trim()
-            .url(t("forms.errors.field.url"))
-        ])
+        web_url: getOptionalUrlSchema(t),
+        app_android: getOptionalUrlSchema(t),
+        app_ios: getOptionalUrlSchema(t)
       })
     })
     .refine(
@@ -147,10 +123,7 @@ export const ServiceBuilderStep2 = () => {
       >
         <ServiceAssistanceChannels />
       </FormStepSectionWrapper>
-      <FormStepSectionWrapper
-        key={2}
-        title={t("forms.service.otherChannels")}
-      >
+      <FormStepSectionWrapper key={2} title={t("forms.service.otherChannels")}>
         <UrlFieldController
           name="metadata.web_url"
           label={t("forms.service.metadata.webUrl.label")}
