@@ -33,13 +33,16 @@ DB_ADMIN_USER="pgadminusr"
 #  Relative to the project root, the actual sql scripts will be in ${SQL_MIGRATIONS_DIR}/${DB_NAME}
 SQL_MIGRATIONS_DIR=$4
 
-# DB User used by the app with reand and write permission over the DB resources used by the app
-DB_USER_APP=$5
+# DB User used by the app with read and write permission over the DB resources used by the app
+DB_USER_APP="reviewerusr"
+
+# DB User used by the Operatioin/Monitoring team with only read permission over the DB resources
+DB_READONLY_USER="readonlyusr"
 
 # Get all other parametemeters, so we can append them to Flyway command
-shift 5
+shift 4
 other=$@
-
+  
 #-------
 
 #
@@ -103,4 +106,6 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   -validateMigrationNaming=true \
   -placeholders.appUser=${DB_USER_APP} \
   -placeholders.appUserPassword=${user_app_password} \
+  -placeholders.appUser=${DB_READONLY_USER} \
+  -placeholders.appUserPassword=${readonlyUserPassword} \
   "${FLYWAY_COMMAND}" ${other}
