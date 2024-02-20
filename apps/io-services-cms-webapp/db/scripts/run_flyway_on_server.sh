@@ -24,16 +24,18 @@ DB_NAME=$2
 DB_SERVER_HOST=$3
 DB_SERVER_PORT=$4
 # Credentials of the db user running sql scripts
-DB_ADMIN_USER=$5
-DB_ADMIN_PASSWORD=$6
-DB_USER_APP=$7
-DB_USER_APP_PASSWORD=$8
+DB_ADMIN_USER="pgadminusr"
+DB_ADMIN_PASSWORD=$5
+DB_USER_APP="reviewerusr"
+DB_USER_APP_PASSWORD=$6
+DB_READONLY_USER="readonlyusr"
+DB_READONLY_USER_PASSWORD=$7
 # Directory containing migrations for ALL databases.
 #  Relative to the project root, the actual sql scripts will be in ${SQL_MIGRATIONS_DIR}/${DB_NAME}
-SQL_MIGRATIONS_DIR=$9
+SQL_MIGRATIONS_DIR=$8
 
 # Get all other parametemeters, so we can append them to Flyway command
-shift 9
+shift 8
 other=$@
 
 #-------
@@ -60,4 +62,6 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   -validateMigrationNaming=true \
   -placeholders.appUser=${DB_USER_APP} \
   -placeholders.appUserPassword=${DB_USER_APP_PASSWORD} \
+  -placeholders.readonlyUser=${DB_READONLY_USER} \
+  -placeholders.readonlyUserPassword=${DB_READONLY_USER_PASSWORD} \
   "${FLYWAY_COMMAND}" ${other}
