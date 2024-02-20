@@ -164,7 +164,8 @@ export const createRequestPublicationEntryPoint =
 
 export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
   fsmLifecycleClient,
-  fsmPublicationClient
+  fsmPublicationClient,
+  config
 );
 
 export const onRequestSyncLegacyEntryPoint =
