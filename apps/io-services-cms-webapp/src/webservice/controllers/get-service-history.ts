@@ -1,6 +1,9 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { ServiceHistory, ServiceLifecycle } from "@io-services-cms/models";
+import {
+  ServiceHistory as ServiceHistoryCosmosType,
+  ServiceLifecycle,
+} from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
@@ -29,17 +32,13 @@ import {
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { Container } from "@azure/cosmos";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import {
   IWithinRangeIntegerTag,
   IntegerFromString,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
@@ -52,13 +51,14 @@ import {
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { itemsToResponse } from "../../utils/converters/service-history-converters";
+import {
+  CosmosPagedHelper,
+  OrderParamType,
+} from "../../utils/cosmos-paged-helper";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceHistoryHandler";
-
-// Move to a separate file
-type OrderParamType = "ASC" | "DESC";
 
 type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>
@@ -80,7 +80,7 @@ type RequestParameters = {
 };
 
 type Dependencies = {
-  container: Container;
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>;
   apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
   config: IConfig;
@@ -88,7 +88,7 @@ type Dependencies = {
 
 export const makeGetServiceHistoryHandler =
   ({
-    container,
+    serviceHistoryPagedHelper,
     apimService,
     telemetryClient,
     config,
@@ -103,7 +103,7 @@ export const makeGetServiceHistoryHandler =
       ),
       TE.chainW((_) =>
         pipe(
-          fetchHistory(container)(
+          fetchHistory(serviceHistoryPagedHelper)(
             requestParams.serviceId,
             getLimit(requestParams.limit, config.PAGINATION_DEFAULT_LIMIT),
             getOrder(requestParams.order),
@@ -158,59 +158,27 @@ export const makeGetServiceHistoryHandler =
 
 // TODO: Move to a separate file, maybe an utility file(the stores are not suitable for this application, cause they are relative to FSM stuff)
 const fetchHistory =
-  (container: Container) =>
+  (serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>) =>
   (
     serviceId: NonEmptyString,
     limit: number,
     order: OrderParamType,
     continuationToken?: string
   ) =>
-    pipe(
-      E.tryCatch(
-        () =>
-          container.items.query(
-            {
-              query: `SELECT * FROM c WHERE c.serviceId = @serviceId ORDER BY c.id ${order}`,
-              parameters: [
-                {
-                  name: "@serviceId",
-                  value: serviceId,
-                },
-              ],
-            },
-            {
-              maxItemCount: limit,
-              continuation: continuationToken,
-            }
-          ),
-        (err) => new Error(`Failed to query CosmosDB: ${err}`)
-      ),
-      TE.fromEither,
-      TE.chainW((cosmosQueryIterator) =>
-        TE.tryCatch(
-          () => cosmosQueryIterator.fetchNext(),
-          (err) => new Error(`Failed to fetch next page: ${err}`)
-        )
-      ),
-      TE.chainW((page) =>
-        pipe(
-          page.resources,
-          O.fromPredicate((r) => r.length > 0),
-          O.fold(
-            () => TE.right(O.none),
-            flow(
-              RA.traverse(E.Applicative)(ServiceHistory.decode),
-              E.bimap(flow(readableReport, E.toError), (mappedResult) =>
-                O.some({
-                  continuationToken: page.continuationToken,
-                  resources: mappedResult,
-                })
-              ),
-              TE.fromEither
-            )
-          )
-        )
-      )
+    serviceHistoryPagedHelper.pageFetch(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: serviceId,
+          },
+        ],
+        order,
+        orderBy: "id",
+      },
+      limit,
+      continuationToken
     );
 
 const getLimit = (limit: O.Option<number>, defaultValue: number) =>

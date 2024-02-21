@@ -234,6 +234,10 @@ const DefaultValues = t.type({
     NumberFromString,
     "0" as unknown as number
   ),
+  DEFAULT_PAGED_FETCH_LIMIT: withDefault(
+    NumberFromString,
+    "10" as unknown as number
+  ),
 });
 
 // Global app configuration

@@ -5,12 +5,16 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import {
+  ServiceHistory,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import { getDatabase } from "../lib/azure/cosmos";
 import { TelemetryClient } from "../utils/applicationinsight";
+import { CosmosPagedHelper } from "../utils/cosmos-paged-helper";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
@@ -95,6 +99,7 @@ type Dependencies = {
   telemetryClient: TelemetryClient;
   blobService: BlobService;
   serviceTopicDao: ServiceTopicDao;
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -108,6 +113,7 @@ export const createWebServer = ({
   telemetryClient,
   blobService,
   serviceTopicDao,
+  serviceHistoryPagedHelper,
 }: Dependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -207,10 +213,7 @@ export const createWebServer = ({
     `${serviceLifecyclePath}/history`,
     pipe(
       makeGetServiceHistoryHandler({
-        // TODO: inject
-        container: getDatabase(config).container(
-          config.COSMOSDB_CONTAINER_SERVICES_HISTORY
-        ),
+        serviceHistoryPagedHelper,
         apimService,
         telemetryClient,
         config,
