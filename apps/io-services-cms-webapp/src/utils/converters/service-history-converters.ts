@@ -1,7 +1,4 @@
-import {
-  ServiceHistory as ServiceHistoryCosmosItem,
-  ServiceLifecycle,
-} from "@io-services-cms/models";
+import { ServiceHistory as ServiceHistoryCosmosItem } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
