@@ -13,12 +13,14 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
+import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { CosmosPagedHelper } from "../../../utils/cosmos-paged-helper";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { itemsToResponse } from "../../../utils/converters/service-history-converters";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
@@ -152,11 +154,13 @@ describe("getServiceHistory", () => {
   });
 
   it("Should Return the Service History page", async () => {
+    const serviceHistoryList = [aServiceHistoryItem];
+
     const mockServiceHistoryPagedHelper = {
       pageFetch: vi.fn(() =>
         TE.right(
           O.some({
-            resources: [aServiceHistoryItem],
+            resources: serviceHistoryList,
             continuationToken: aContinuationToken,
           })
         )
@@ -170,8 +174,6 @@ describe("getServiceHistory", () => {
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
-
-    console.log(response.body);
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
@@ -188,6 +190,19 @@ describe("getServiceHistory", () => {
       undefined,
       undefined
     );
+
+    const expectedItemList = await itemsToResponse(mockConfig)(
+      serviceHistoryList
+    )();
+
+    if (E.isLeft(expectedItemList)) {
+      throw new Error("Test error Expected Right");
+    }
+
+    expect(response.body).toEqual({
+      continuationToken: encodeURIComponent(aContinuationToken),
+      items: expectedItemList.right,
+    });
 
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
