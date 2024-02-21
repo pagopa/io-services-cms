@@ -11,7 +11,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { Json, option } from "io-ts-types";
+import { Json } from "io-ts-types";
 import lodash from "lodash";
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
@@ -53,10 +53,9 @@ const ValidSecureChannelTrueConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        tos_url: option(
+        tos_url:
           Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-            .props.metadata.types[1].props.tos_url
-        ),
+            .props.metadata.types[1].props.tos_url,
       }),
     }),
   ]),

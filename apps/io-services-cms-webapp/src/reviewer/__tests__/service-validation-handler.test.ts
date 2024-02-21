@@ -138,7 +138,7 @@ describe("Service Validation Handler", () => {
           },
         },
       },
-      expected: /tos_url\] is not a valid/,
+      expected: /tos_url(?=.*is not a valid)/,
     },
     {
       scenario:
@@ -324,7 +324,12 @@ describe("Service Validation Handler", () => {
           ...aValidRequestValidationItem,
           data: {
             ...aValidRequestValidationItem.data,
+            require_secure_channel: true,
             authorized_cidrs: ["0.0.0.0/0"],
+            metadata: {
+              ...aValidRequestValidationItem.data.metadata,
+              tos_url: "https://localhost",
+            },
           },
         })
       )
