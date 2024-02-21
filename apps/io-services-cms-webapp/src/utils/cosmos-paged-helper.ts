@@ -35,9 +35,6 @@ const buildQuerySpec = (
       ? `${querySpecWithOrder.query} ORDER BY c.${querySpecWithOrder.orderBy} ${querySpecWithOrder.order}`
       : querySpecWithOrder.query;
 
-  // eslint-disable-next-line no-console
-  console.log("query beign to be executed", query);
-
   return {
     query,
     parameters: querySpecWithOrder.parameters,
