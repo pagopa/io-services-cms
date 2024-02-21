@@ -23,7 +23,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
-import { createWebServer } from "../../index";
+import { WebServerDependencies, createWebServer } from "../../index";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -162,7 +162,7 @@ const mockWebServer = (mockServiceTopicDao: any) => {
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
-  });
+  } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 

@@ -89,7 +89,7 @@ import {
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
 
-type Dependencies = {
+export type WebServerDependencies = {
   basePath: string;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
@@ -114,7 +114,7 @@ export const createWebServer = ({
   blobService,
   serviceTopicDao,
   serviceHistoryPagedHelper,
-}: Dependencies) => {
+}: WebServerDependencies) => {
   // mount all routers on router
   const router = express.Router();
   router.use(bodyParser.json({ limit: "5mb" }));
@@ -162,7 +162,7 @@ export const createWebServer = ({
     `/internal${serviceLifecyclePath}`,
     pipe(
       makeGetServiceLifecycleInternalHandler({
-        store: fsmLifecycleClient.getStore(),
+        fsmLifecycleClient,
         apimService,
         telemetryClient,
         config,
@@ -175,7 +175,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        store: fsmLifecycleClient.getStore(),
+        fsmLifecycleClient,
         apimService,
         telemetryClient,
         config,
@@ -250,7 +250,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        store: fsmPublicationClient.getStore(),
+        fsmPublicationClient,
         apimService,
         telemetryClient,
         config,
@@ -266,7 +266,7 @@ export const createWebServer = ({
     `/internal${servicePublicationPath}`,
     pipe(
       makeGetServicePublicationInternalHandler({
-        store: fsmPublicationClient.getStore(),
+        fsmPublicationClient,
         apimService,
         telemetryClient,
         config,

@@ -40,7 +40,7 @@ import {
 } from "@pagopa/ts-commons/lib/numbers";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceHistory as ServiceResponsePayload } from "../../generated/api/ServiceHistory";
 import { ServiceHistoryItem } from "../../generated/api/ServiceHistoryItem";
@@ -110,28 +110,26 @@ export const makeGetServiceHistoryHandler =
             O.toUndefined(requestParams.continuationToken)
           ),
           TE.chainW(
-            flow(
-              O.foldW(
-                () =>
-                  TE.right(
+            O.foldW(
+              () =>
+                TE.right(
+                  ResponseSuccessJson({
+                    items: [] as ReadonlyArray<ServiceHistoryItem>,
+                  })
+                ),
+              ({ continuationToken, resources }) =>
+                pipe(
+                  resources,
+                  itemsToResponse(config),
+                  TE.map((mapped) =>
                     ResponseSuccessJson({
-                      items: [] as ReadonlyArray<ServiceHistoryItem>,
+                      continuationToken: continuationToken
+                        ? encodeURIComponent(continuationToken)
+                        : undefined,
+                      items: mapped,
                     })
-                  ),
-                ({ continuationToken, resources }) =>
-                  pipe(
-                    resources,
-                    itemsToResponse(config),
-                    TE.map((mapped) =>
-                      ResponseSuccessJson({
-                        continuationToken: continuationToken
-                          ? encodeURIComponent(continuationToken)
-                          : undefined,
-                        items: mapped,
-                      })
-                    )
                   )
-              )
+                )
             )
           ),
           TE.mapLeft((err) => ResponseErrorInternal(err.message))
@@ -156,7 +154,6 @@ export const makeGetServiceHistoryHandler =
       TE.toUnion
     )();
 
-// TODO: Move to a separate file, maybe an utility file(the stores are not suitable for this application, cause they are relative to FSM stuff)
 const fetchHistory =
   (serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>) =>
   (

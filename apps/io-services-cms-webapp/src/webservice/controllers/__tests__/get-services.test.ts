@@ -17,7 +17,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { createWebServer } from "../../index";
+import { WebServerDependencies, createWebServer } from "../../index";
 
 const aName1 = "a-name-1";
 const aName2 = "a-name-2";
@@ -159,7 +159,7 @@ const mockServiceTopicDao = {
 } as any;
 
 describe("getServices", () => {
-    const app = createWebServer({
+  const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
@@ -169,7 +169,7 @@ describe("getServices", () => {
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
-  });
+  } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 
