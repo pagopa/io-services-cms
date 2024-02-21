@@ -1,5 +1,6 @@
 import { Container, SqlQuerySpec } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -7,7 +8,13 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-export type OrderParamType = "ASC" | "DESC";
+export enum OrderParamEnum {
+  "ASC" = "ASC",
+  "DESC" = "DESC",
+}
+
+export type OrderParam = t.TypeOf<typeof OrderParam>;
+export const OrderParam = enumType<OrderParamEnum>(OrderParamEnum, "order");
 
 export type Page<T> = {
   resources: ReadonlyArray<T>;
@@ -17,13 +24,13 @@ export type Page<T> = {
 export type CosmosPagedHelper<T> = {
   pageFetch: (
     query: SqlQuerySpecWithOrder,
-    limit: number,
+    limit?: number,
     continuationToken?: string | undefined
   ) => TE.TaskEither<Error, O.Option<Page<T>>>;
 };
 
 export type SqlQuerySpecWithOrder = SqlQuerySpec & {
-  order?: OrderParamType;
+  order?: OrderParam;
   orderBy?: string;
 };
 

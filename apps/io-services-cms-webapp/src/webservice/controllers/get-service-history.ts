@@ -51,10 +51,7 @@ import {
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { itemsToResponse } from "../../utils/converters/service-history-converters";
-import {
-  CosmosPagedHelper,
-  OrderParamType,
-} from "../../utils/cosmos-paged-helper";
+import { CosmosPagedHelper, OrderParam } from "../../utils/cosmos-paged-helper";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
@@ -74,7 +71,7 @@ type GetServiceHistoryHandler = (
 
 type RequestParameters = {
   serviceId: ServiceLifecycle.definitions.ServiceId;
-  order: O.Option<NonEmptyString>;
+  order: O.Option<OrderParam>;
   limit: O.Option<number>;
   continuationToken: O.Option<NonEmptyString>;
 };
@@ -105,8 +102,11 @@ export const makeGetServiceHistoryHandler =
         pipe(
           fetchHistory(serviceHistoryPagedHelper)(
             requestParams.serviceId,
-            getLimit(requestParams.limit, config.PAGINATION_DEFAULT_LIMIT),
-            getOrder(requestParams.order),
+            pipe(
+              requestParams.order,
+              O.getOrElse(() => "DESC" as OrderParam)
+            ),
+            O.toUndefined(requestParams.limit),
             O.toUndefined(requestParams.continuationToken)
           ),
           TE.chainW(
@@ -161,8 +161,8 @@ const fetchHistory =
   (serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>) =>
   (
     serviceId: NonEmptyString,
-    limit: number,
-    order: OrderParamType,
+    order: OrderParam,
+    limit?: number,
     continuationToken?: string
   ) =>
     serviceHistoryPagedHelper.pageFetch(
@@ -180,19 +180,6 @@ const fetchHistory =
       limit,
       continuationToken
     );
-
-const getLimit = (limit: O.Option<number>, defaultValue: number) =>
-  pipe(
-    limit,
-    O.getOrElse(() => defaultValue)
-  );
-
-const getOrder = (order: O.Option<NonEmptyString>): OrderParamType =>
-  pipe(
-    order,
-    O.map((v) => (v === "ASC" ? "ASC" : "DESC")),
-    O.getOrElseW(() => "DESC" as OrderParamType)
-  );
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
@@ -212,7 +199,7 @@ export const applyRequestMiddelwares =
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // extract order from query params
-      OptionalQueryParamMiddleware("order", NonEmptyString),
+      OptionalQueryParamMiddleware("order", OrderParam),
       // extract limit as number of records to return from query params
       OptionalQueryParamMiddleware(
         "limit",
