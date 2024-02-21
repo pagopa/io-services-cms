@@ -27,6 +27,7 @@ AZ_POSTGRES_RESOURCE_NAME="io-p-services-cms-private-pgflex"
 KV_NAME="io-p-services-cms-kv"
 KV_DB_ADMIN_PASSWORD_KEY="pgres-flex-admin-pwd"
 KV_DB_USER_APP_PASSWORD_KEY="pgres-flex-reviewer-usr-pwd"
+KV_DB_READONLY_USER_PASSWORD_KEY="pgres-flex-readonly-usr-pwd"
 DB_ADMIN_USER="pgadminusr"
 
 # Directory containing migrations for ALL databases.
@@ -82,6 +83,9 @@ administrator_login_password=${administrator_login_password//[$'\r']}
 user_app_password=$(az keyvault secret show --name ${KV_DB_USER_APP_PASSWORD_KEY} --vault-name "${keyvault_name}" -o tsv --query value)
 user_app_password=${user_app_password//[$'\r']}
 
+readonly_user_password=$(az keyvault secret show --name ${KV_DB_READONLY_USER_PASSWORD_KEY} --vault-name "${keyvault_name}" -o tsv --query value)
+readonly_user_password=${readonly_user_password//[$'\r']}
+
 #-------
 
 BASHDIR="$( cd "$( dirname "$BASH_SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -105,7 +109,7 @@ docker run --rm --network=host -v "${FLYWAY_SQL_DIR}":/flyway/sql \
   -url="${DB_URL}" -user="${FLYWAY_USER}" -password="${FLYWAY_PASSWORD}" \
   -validateMigrationNaming=true \
   -placeholders.appUser=${DB_USER_APP} \
-  -placeholders.appUserPassword=${user_app_password} \
+  -placeholders.appUserPassword="${user_app_password}" \
   -placeholders.readonlyUser=${DB_READONLY_USER} \
-  -placeholders.readonlyUserPassword=${readonlyUserPassword} \
+  -placeholders.readonlyUserPassword="${readonly_user_password}" \
   "${FLYWAY_COMMAND}" ${other}

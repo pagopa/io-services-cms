@@ -1,1 +1,1 @@
-CREATE USER "${readonlyUser}" WITH ENCRYPTED PASSWORD '${readonlyUserPassword}';
+CREATE USER "${readonlyUser}" WITH PASSWORD '${readonlyUserPassword}';
