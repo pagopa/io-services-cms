@@ -98,7 +98,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     reason: faker.lorem.sentence() + "|" + faker.lorem.sentence()
   },
   version: faker.number.int({ min: undefined, max: undefined }),
-  last_update: faker.date.recent({ days: 30 }).toISOString(),
+  last_update: faker.date.recent({ days: 90 }).toISOString(),
   name: faker.lorem.words({ min: 3, max: 5 }),
   description: faker.lorem.sentence({ min: 10, max: 50 }),
   organization: {
@@ -149,6 +149,11 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     scope: faker.helpers.arrayElement(["NATIONAL", "LOCAL"]),
     topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined])
   }
+});
+
+export const getMockServicePublication = (serviceId?: string) => ({
+  ...getMockServiceLifecycle(serviceId),
+  status: faker.helpers.arrayElement(["published", "unpublished"])
 });
 
 export const aMockServicePublication = {
@@ -234,6 +239,44 @@ export const getMockServiceList = (
 
 export const aMockServiceTopics = {
   topics: aMockServiceTopicsArray
+};
+
+export const getMockServiceHistory = (
+  serviceId: string,
+  order: "ASC" | "DESC" | null,
+  limit: string | null,
+  continuationToken: string | null
+) => {
+  const purifiedLimit = limit ? +limit : 10;
+  const total = [
+    ...Array.from(
+      Array(faker.number.int({ min: 1, max: purifiedLimit })).keys()
+    )
+  ];
+
+  return {
+    items: total
+      .map(_ =>
+        faker.helpers.arrayElement([
+          getMockServiceLifecycle(serviceId),
+          getMockServicePublication(serviceId)
+        ])
+      )
+      .sort((a, b) =>
+        order
+          ? order === "DESC"
+            ? new Date(b.last_update).getTime() -
+              new Date(a.last_update).getTime()
+            : new Date(a.last_update).getTime() -
+              new Date(b.last_update).getTime()
+          : new Date(b.last_update).getTime() -
+            new Date(a.last_update).getTime()
+      ),
+    continuationToken: faker.helpers.arrayElement([
+      faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
+      undefined
+    ])
+  };
 };
 
 // **********************************************************************

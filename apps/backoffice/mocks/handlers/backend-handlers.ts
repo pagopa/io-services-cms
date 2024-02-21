@@ -11,6 +11,7 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getMockServiceHistory,
   getMockServiceKeys,
   getMockServiceLifecycle,
   getMockServiceList,
@@ -360,6 +361,49 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(
+      `${baseURL}/services/:serviceId/history`,
+      ({ request, params }) => {
+        const { serviceId } = params;
+        const url = new URL(request.url);
+        const order = url.searchParams.get("order");
+        const limit = url.searchParams.get("limit");
+        const continuationToken = url.searchParams.get("continuationToken");
+
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(
+              getGetServiceHistory200Response(
+                serviceId as string,
+                order as "ASC" | "DESC" | null,
+                limit,
+                continuationToken
+              )
+            ),
+            {
+              status: 200
+            }
+          ),
+          new HttpResponse(null, {
+            status: 401
+          }),
+          new HttpResponse(null, {
+            status: 403
+          }),
+          new HttpResponse(null, {
+            status: 404
+          }),
+          new HttpResponse(null, {
+            status: 429
+          }),
+          new HttpResponse(null, {
+            status: 500
+          })
+        ];
+
+        return resultArray[0];
+      }
+    ),
     http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
@@ -782,6 +826,15 @@ export function getGetService200Response(serviceId: string) {
 
 export function getUpdateService200Response(serviceId: string) {
   return getMockServiceLifecycle(serviceId);
+}
+
+export function getGetServiceHistory200Response(
+  serviceId: string,
+  order: "ASC" | "DESC" | null,
+  limit: string | null,
+  continuationToken: string | null
+) {
+  return getMockServiceHistory(serviceId, order, limit, continuationToken);
 }
 
 export function getGetServiceKeys200Response() {
