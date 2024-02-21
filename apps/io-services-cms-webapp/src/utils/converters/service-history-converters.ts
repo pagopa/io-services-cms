@@ -52,8 +52,8 @@ export const itemToResponse =
 const toServiceTopic =
   (dbConfig: TopicPostgreSqlConfig) =>
   (
-    serviceId: ServiceLifecycle.ItemType["id"],
-    topicId: ServiceLifecycle.ItemType["data"]["metadata"]["topic_id"]
+    serviceId: ServiceHistoryCosmosItem["id"],
+    topicId: ServiceHistoryCosmosItem["data"]["metadata"]["topic_id"]
   ): TE.TaskEither<Error, ServiceResponsePayload["metadata"]["topic"]> =>
     topicId !== undefined && topicId !== null
       ? pipe(
