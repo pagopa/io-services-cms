@@ -12,15 +12,15 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
+import { itemsToResponse } from "../../../utils/converters/service-history-converters";
 import { CosmosPagedHelper } from "../../../utils/cosmos-paged-helper";
 import { WebServerDependencies, createWebServer } from "../../index";
-import { itemsToResponse } from "../../../utils/converters/service-history-converters";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
@@ -78,6 +78,7 @@ const mockApimService = {
 
 const mockConfig = {
   BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
+  PAGINATION_MAX_LIMIT: 100,
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
@@ -153,7 +154,7 @@ describe("getServiceHistory", () => {
     vi.restoreAllMocks();
   });
 
-  it("Should Return the Service History page", async () => {
+  it("Should Use default parameters", async () => {
     const serviceHistoryList = [aServiceHistoryItem];
 
     const mockServiceHistoryPagedHelper = {
@@ -206,5 +207,272 @@ describe("getServiceHistory", () => {
 
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
+  });
+
+  it("Should Use the provided order", async () => {
+    const anOrder = "ASC";
+    const serviceHistoryList = [aServiceHistoryItem];
+
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() =>
+        TE.right(
+          O.some({
+            resources: serviceHistoryList,
+            continuationToken: aContinuationToken,
+          })
+        )
+      ),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(`/api/services/${aServiceId}/history?order=${anOrder}`)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: aServiceId,
+          },
+        ],
+        order: anOrder,
+        orderBy: "id",
+      },
+      undefined,
+      undefined
+    );
+
+    const expectedItemList = await itemsToResponse(mockConfig)(
+      serviceHistoryList
+    )();
+
+    if (E.isLeft(expectedItemList)) {
+      throw new Error("Test error Expected Right");
+    }
+
+    expect(response.body).toEqual({
+      continuationToken: encodeURIComponent(aContinuationToken),
+      items: expectedItemList.right,
+    });
+
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("Should Use the provided limit", async () => {
+    const aLimit = 20;
+    const serviceHistoryList = [aServiceHistoryItem];
+
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() =>
+        TE.right(
+          O.some({
+            resources: serviceHistoryList,
+            continuationToken: aContinuationToken,
+          })
+        )
+      ),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(`/api/services/${aServiceId}/history?limit=${aLimit}`)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: aServiceId,
+          },
+        ],
+        order: "DESC",
+        orderBy: "id",
+      },
+      aLimit,
+      undefined
+    );
+
+    const expectedItemList = await itemsToResponse(mockConfig)(
+      serviceHistoryList
+    )();
+
+    if (E.isLeft(expectedItemList)) {
+      throw new Error("Test error Expected Right");
+    }
+
+    expect(response.body).toEqual({
+      continuationToken: encodeURIComponent(aContinuationToken),
+      items: expectedItemList.right,
+    });
+
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("Should Use the provided continuationToken", async () => {
+    const serviceHistoryList = [aServiceHistoryItem];
+    const anotherContinuationToken = "anotherContinuationToken";
+
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() =>
+        TE.right(
+          O.some({
+            continuationToken: aContinuationToken,
+            resources: serviceHistoryList,
+          })
+        )
+      ),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(
+        `/api/services/${aServiceId}/history?continuationToken=${anotherContinuationToken}`
+      )
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: aServiceId,
+          },
+        ],
+        order: "DESC",
+        orderBy: "id",
+      },
+      undefined,
+      anotherContinuationToken
+    );
+
+    const expectedItemList = await itemsToResponse(mockConfig)(
+      serviceHistoryList
+    )();
+
+    if (E.isLeft(expectedItemList)) {
+      throw new Error("Test error Expected Right");
+    }
+
+    expect(response.body).toEqual({
+      continuationToken: encodeURIComponent(aContinuationToken),
+      items: expectedItemList.right,
+    });
+
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("Should return an empty list when no resources are found", async () => {
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() => TE.right(O.none)),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(`/api/services/${aServiceId}/history`)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: aServiceId,
+          },
+        ],
+        order: "DESC",
+        orderBy: "id",
+      },
+      undefined,
+      undefined
+    );
+
+    expect(response.body).toEqual({
+      items: [],
+    });
+
+    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("Should return an error when cosmos returns an error", async () => {
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() => TE.left(new Error("COSMOS ERROR RETURNED"))),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(`/api/services/${aServiceId}/history`)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
+      {
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: aServiceId,
+          },
+        ],
+        order: "DESC",
+        orderBy: "id",
+      },
+      undefined,
+      undefined
+    );
+
+    expect(response.body.detail).toEqual("COSMOS ERROR RETURNED");
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(500);
+  });
+
+  it("Should fail when provided order is not valid", async () => {
+    const serviceHistoryList = [aServiceHistoryItem];
+
+    const mockServiceHistoryPagedHelper = {
+      pageFetch: vi.fn(() =>
+        TE.right(
+          O.some({
+            resources: serviceHistoryList,
+            continuationToken: aContinuationToken,
+          })
+        )
+      ),
+    } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
+
+    const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
+      .get(`/api/services/${aServiceId}/history?order=invalidOrder`)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockServiceHistoryPagedHelper.pageFetch).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
   });
 });

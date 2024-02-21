@@ -25,7 +25,7 @@ export type CosmosPagedHelper<T> = {
   pageFetch: (
     query: SqlQuerySpecWithOrder,
     limit?: number,
-    continuationToken?: string | undefined
+    continuationToken?: string
   ) => TE.TaskEither<Error, O.Option<Page<T>>>;
 };
 
