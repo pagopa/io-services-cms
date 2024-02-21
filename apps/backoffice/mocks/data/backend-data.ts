@@ -254,13 +254,6 @@ export const getMockServiceHistory = (
     )
   ];
 
-  const newContinuationToken = continuationToken
-    ? faker.helpers.arrayElement([
-        faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
-        undefined
-      ])
-    : undefined;
-
   return {
     items: total
       .map(_ =>
@@ -279,7 +272,10 @@ export const getMockServiceHistory = (
           : new Date(b.last_update).getTime() -
             new Date(a.last_update).getTime()
       ),
-    continuationToken: newContinuationToken
+    continuationToken: faker.helpers.arrayElement([
+      faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
+      undefined
+    ])
   };
 };
 
