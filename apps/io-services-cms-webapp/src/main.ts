@@ -2,7 +2,6 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyService,
   ServiceHistory,
-  ServiceHistory as ServiceHistoryCosmosType,
   ServiceLifecycle,
   ServicePublication,
   stores,
@@ -90,7 +89,7 @@ const servicePublicationStore = stores.createCosmosStore(
 );
 
 const serviceHistoryPagedHelper = makeCosmosPagedHelper(
-  ServiceHistoryCosmosType,
+  ServiceHistory,
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
   config.DEFAULT_PAGED_FETCH_LIMIT
 );
