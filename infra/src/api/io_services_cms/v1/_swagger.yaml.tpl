@@ -25,6 +25,8 @@ tags:
     description: Service Authorization API specification
   - name: service-topics
     description: Services thematic taxonomy
+  - name: service-history
+    description: Services history
 paths:
   /services:
     post:
@@ -220,6 +222,60 @@ paths:
           description: Service logo updated successfully
         '400':
           description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/{serviceId}/history:
+    get:
+      tags:
+        - service-history
+      summary: Retrieve service history
+      description: Retrieve service history by service ID
+      operationId: getServiceHistory
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Order direction
+          required: false
+          schema:
+            type: string
+            enum: [ASC, DESC]
+            default: DESC
+        - name: limit
+          in: query
+          description: The number of services to return
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: continuationToken
+          in: query
+          description: Token to retrieve the next page of results
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceHistory'
         '401':
           description: Unauthorized
         '403':
@@ -649,6 +705,42 @@ components:
       required:
         - id
         - name
+    ServiceHistory:
+      type: object
+      description: Service basic data
+      properties:
+        continuationToken:
+          type: string
+          description: Continuation token for pagination
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceHistoryItem'
+    ServiceHistoryItem:
+      description: Service History model data
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+            status:
+              $ref: '#/components/schemas/ServiceHistoryItemStatus'
+            version:
+              type: integer
+            last_update:
+              $ref: '#/components/schemas/Timestamp'
+            metadata:
+              $ref: '#/components/schemas/ServiceMetadata'
+          required:
+            - id
+            - status
+            - last_update
+            - metadata
+        - $ref: '#/components/schemas/ServiceData'
+    ServiceHistoryItemStatus:
+      oneOf:
+        - $ref: '#/components/schemas/ServiceLifecycleStatus'
+        - $ref: '#/components/schemas/ServicePublicationStatusType'
   securitySchemes:
     apiKeyHeader:
       type: apiKey
