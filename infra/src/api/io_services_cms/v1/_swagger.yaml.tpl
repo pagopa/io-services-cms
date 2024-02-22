@@ -715,7 +715,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/ServiceHistoryItem'
+            $ref: '#/components/schemas/ServiceHistoryItem'
     ServiceHistoryItem:
       description: Service History model data
       allOf:
@@ -724,23 +724,23 @@ components:
             id:
               type: string
             status:
-              $ref: '#/ServiceHistoryItemStatus'
+              $ref: '#/components/schemas/ServiceHistoryItemStatus'
             version:
               type: integer
             last_update:
-              $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+              $ref: '#/components/schemas/Timestamp'
             metadata:
-              $ref: '#/ServiceMetadata'
+              $ref: '#/components/schemas/ServiceMetadata'
           required:
             - id
             - status
             - last_update
             - metadata
-        - $ref: '#/ServiceData'
+        - $ref: '#/components/schemas/ServiceData'
     ServiceHistoryItemStatus:
       oneOf:
-        - $ref: '#/ServiceLifecycleStatus'
-        - $ref: '#/ServicePublicationStatusType'
+        - $ref: '#/components/schemas/ServiceLifecycleStatus'
+        - $ref: '#/components/schemas/ServicePublicationStatusType'
   securitySchemes:
     apiKeyHeader:
       type: apiKey
