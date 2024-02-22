@@ -46,6 +46,8 @@ type PathParameters = {
   keyType?: string;
   limit?: string;
   offset?: string;
+  order?: string;
+  continuationToken?: string;
 };
 
 /**
