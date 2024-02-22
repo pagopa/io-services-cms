@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.28.0
+
+### Minor Changes
+
+- 72891ce: Add GET /services/{serviceId}/history handler
+
 ## 1.27.9
 
 ### Patch Changes
