@@ -44,6 +44,7 @@ import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
 } from "./utils/cosmos-legacy";
+import { makeCosmosPagedHelper } from "./utils/cosmos-paged-helper";
 import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
@@ -87,6 +88,12 @@ const servicePublicationStore = stores.createCosmosStore(
   ServicePublication.ItemType
 );
 
+const serviceHistoryPagedHelper = makeCosmosPagedHelper(
+  ServiceHistory,
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
+  config.DEFAULT_PAGED_FETCH_LIMIT
+);
+
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
   legacyCosmosDbInstance.container(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
 );
@@ -124,6 +131,7 @@ export const httpEntryPoint = pipe(
     telemetryClient,
     blobService,
     serviceTopicDao: getServiceTopicDao(config),
+    serviceHistoryPagedHelper,
   },
   createWebServer,
   expressToAzureFunction

@@ -1,10 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import {
-  FSMStore,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -30,9 +26,7 @@ import { ErrorResponseTypes } from "../../utils/logger";
 const logPrefix = "GetServicePublicationInternalHandler";
 
 type Dependencies = {
-  // A store of ServicePublication objects
-  store: FSMStore<ServicePublication.ItemType>;
-
+  fsmPublicationClient: ServicePublication.FsmClient;
   apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
   config: IConfig;
@@ -50,14 +44,14 @@ type GetServicePublicationServiceInternalHandler = (
 
 export const makeGetServicePublicationInternalHandler =
   ({
-    store,
+    fsmPublicationClient,
     apimService,
     telemetryClient,
     config,
   }: Dependencies): GetServicePublicationServiceInternalHandler =>
   (context, auth, serviceId) =>
     genericServiceRetrieveHandler(
-      store,
+      fsmPublicationClient.getStore(),
       apimService,
       telemetryClient,
       config,

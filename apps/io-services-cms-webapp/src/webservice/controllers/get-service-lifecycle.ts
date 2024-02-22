@@ -1,6 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
@@ -48,8 +48,7 @@ type GetServiceLifecycleHandler = (
 ) => Promise<HandlerResponseTypes>;
 
 type Dependencies = {
-  // A store od ServiceLifecycle objects
-  store: FSMStore<ServiceLifecycle.ItemType>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
   config: IConfig;
@@ -57,14 +56,14 @@ type Dependencies = {
 
 export const makeGetServiceLifecycleHandler =
   ({
-    store,
+    fsmLifecycleClient,
     apimService,
     telemetryClient,
     config,
   }: Dependencies): GetServiceLifecycleHandler =>
   (context, auth, __, ___, serviceId) =>
     genericServiceRetrieveHandler(
-      store,
+      fsmLifecycleClient.getStore(),
       apimService,
       telemetryClient,
       config,

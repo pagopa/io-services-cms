@@ -1,6 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { FSMStore, ServiceLifecycle } from "@io-services-cms/models";
+import { ServiceLifecycle } from "@io-services-cms/models";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -38,7 +38,7 @@ type GetServiceLifecycleInternalHandler = (
 
 type Dependencies = {
   // A store od ServiceLifecycle objects
-  store: FSMStore<ServiceLifecycle.ItemType>;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
   config: IConfig;
@@ -46,14 +46,14 @@ type Dependencies = {
 
 export const makeGetServiceLifecycleInternalHandler =
   ({
-    store,
+    fsmLifecycleClient,
     apimService,
     telemetryClient,
     config,
   }: Dependencies): GetServiceLifecycleInternalHandler =>
   (context, auth, serviceId) =>
     genericServiceRetrieveHandler(
-      store,
+      fsmLifecycleClient.getStore(),
       apimService,
       telemetryClient,
       config,

@@ -21,7 +21,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { createWebServer } from "../../index";
+import { WebServerDependencies, createWebServer } from "../../index";
 
 const apiGetServiceKeysFullPath = "/api/services/aServiceId/keys";
 const aManageSubscriptionId = "MANAGE-123";
@@ -132,7 +132,7 @@ describe("getServiceKeys", () => {
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
-  });
+  } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 

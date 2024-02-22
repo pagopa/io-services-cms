@@ -23,7 +23,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getLifecycleItemToResponse } from "../../../utils/converters/service-lifecycle-converters";
-import { createWebServer } from "../../index";
+import { WebServerDependencies, createWebServer } from "../../index";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
@@ -132,7 +132,7 @@ describe("getServiceLifecycle", () => {
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
-  });
+  } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 

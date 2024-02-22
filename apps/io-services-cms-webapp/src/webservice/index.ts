@@ -5,12 +5,17 @@ import bodyParser from "body-parser";
 import express from "express";
 
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import {
+  ServiceHistory,
+  ServiceLifecycle,
+  ServicePublication,
+} from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
-import { ServiceTopicDao } from "../utils/service-topic-dao";
 import { TelemetryClient } from "../utils/applicationinsight";
+import { CosmosPagedHelper } from "../utils/cosmos-paged-helper";
+import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
@@ -76,10 +81,15 @@ import {
   makeGetServiceTopicsHandler,
 } from "./controllers/get-service-topics";
 
+import {
+  applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
+  makeGetServiceHistoryHandler,
+} from "./controllers/get-service-history";
+
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
 
-type Dependencies = {
+export type WebServerDependencies = {
   basePath: string;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
@@ -89,6 +99,7 @@ type Dependencies = {
   telemetryClient: TelemetryClient;
   blobService: BlobService;
   serviceTopicDao: ServiceTopicDao;
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -102,7 +113,8 @@ export const createWebServer = ({
   telemetryClient,
   blobService,
   serviceTopicDao,
-}: Dependencies) => {
+  serviceHistoryPagedHelper,
+}: WebServerDependencies) => {
   // mount all routers on router
   const router = express.Router();
   router.use(bodyParser.json({ limit: "5mb" }));
@@ -150,7 +162,7 @@ export const createWebServer = ({
     `/internal${serviceLifecyclePath}`,
     pipe(
       makeGetServiceLifecycleInternalHandler({
-        store: fsmLifecycleClient.getStore(),
+        fsmLifecycleClient,
         apimService,
         telemetryClient,
         config,
@@ -163,7 +175,7 @@ export const createWebServer = ({
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        store: fsmLifecycleClient.getStore(),
+        fsmLifecycleClient,
         apimService,
         telemetryClient,
         config,
@@ -197,6 +209,19 @@ export const createWebServer = ({
     )
   );
 
+  router.get(
+    `${serviceLifecyclePath}/history`,
+    pipe(
+      makeGetServiceHistoryHandler({
+        serviceHistoryPagedHelper,
+        apimService,
+        telemetryClient,
+        config,
+      }),
+      applyGetServiceHistoryRequestMiddelwares(config, subscriptionCIDRsModel)
+    )
+  );
+
   router.put(
     "/services/:serviceId/review",
     pipe(
@@ -225,7 +250,7 @@ export const createWebServer = ({
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        store: fsmPublicationClient.getStore(),
+        fsmPublicationClient,
         apimService,
         telemetryClient,
         config,
@@ -241,7 +266,7 @@ export const createWebServer = ({
     `/internal${servicePublicationPath}`,
     pipe(
       makeGetServicePublicationInternalHandler({
-        store: fsmPublicationClient.getStore(),
+        fsmPublicationClient,
         apimService,
         telemetryClient,
         config,

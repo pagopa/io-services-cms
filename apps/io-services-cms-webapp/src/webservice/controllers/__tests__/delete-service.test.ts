@@ -21,7 +21,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { createWebServer } from "../../index";
+import { WebServerDependencies, createWebServer } from "../../index";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -119,7 +119,7 @@ describe("deleteService", () => {
     telemetryClient: mockAppinsights,
     blobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
-  });
+  } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 
