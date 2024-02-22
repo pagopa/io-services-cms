@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.7.0
+
+### Minor Changes
+
+- 6703c1f: Add GetServiceHistory Route Handler in Backoffice
+
 ## 1.6.9
 
 ### Patch Changes
