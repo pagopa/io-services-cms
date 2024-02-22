@@ -14,15 +14,12 @@ export const GET = withJWTAuthHandler(
       params,
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
-  ) => {
-    console.log("Request IP", nextRequest.ip);
-    console.log("X-Forwarded-For", nextRequest.headers.get("X-Forwarded-For"));
-    return forwardIoServicesCmsRequest("getService", {
+  ) =>
+    forwardIoServicesCmsRequest("getService", {
       nextRequest,
       backofficeUser,
       pathParams: params
-    });
-  }
+    })
 );
 
 /**

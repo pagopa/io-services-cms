@@ -14,9 +14,6 @@ export const GET = withJWTAuthHandler(
       backofficeUser
     }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
   ) => {
-    console.log("Request IP", nextRequest.ip);
-    console.log("X-Forwarded-For", nextRequest.headers.get("X-Forwarded-For"));
-
     const limit = nextRequest.nextUrl.searchParams.get("limit");
     const order = nextRequest.nextUrl.searchParams.get("order");
     const continuationToken = nextRequest.nextUrl.searchParams.get(
