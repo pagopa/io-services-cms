@@ -1,6 +1,9 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import { TextFieldArrayController } from "@/components/forms/controllers";
-import { arrayOfIPv4CidrSchema } from "@/components/forms/schemas";
+import {
+  arrayOfIPv4CidrSchema,
+  getOptionalUrlSchema
+} from "@/components/forms/schemas";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
@@ -15,13 +18,7 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     metadata: z.object({
       cta: z.object({
         text: z.string(),
-        url: z.union([
-          z.literal(""),
-          z
-            .string()
-            .trim()
-            .url(t("forms.errors.field.url"))
-        ])
+        url: getOptionalUrlSchema(t)
       })
     })
   });

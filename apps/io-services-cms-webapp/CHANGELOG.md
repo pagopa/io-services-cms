@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.27.9
+
+### Patch Changes
+
+- e4ae8b8: change ValidSecureChannelService tos_url type
+
 ## 1.27.8
 
 ### Patch Changes

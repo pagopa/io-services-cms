@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.6.9
+
+### Patch Changes
+
+- 454b2c6: Fix url fields in service create/update form: blanks at the beginning or end of the value are not allowed and the field display error correctly
+- 49ba925: Add GetServiceHistory into BackOffice backend api specification
+
 ## 1.6.8
 
 ### Patch Changes
