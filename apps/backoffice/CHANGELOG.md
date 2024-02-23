@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.7.1
+
+### Patch Changes
+
+- 1339f4e: replace X-Frame-Options with Content-Security-Policy header
+
 ## 1.7.0
 
 ### Minor Changes
