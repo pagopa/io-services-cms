@@ -33,9 +33,9 @@ const nextConfig = {
         source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
         headers: [
           {
-            key: "Content-Security-Policy",
+            key: "Content-Security-Policy-Report-Only",
             value:
-              "default-src 'self'; img-src https://iopstcdnassets.blob.core.windows.net https://selfcare.pagopa.it"
+              "report-to /csp-reports default-src 'self'; frame-src 'none'; object-src 'none'; img-src https://iopstcdnassets.blob.core.windows.net https://selfcare.pagopa.it"
           }
         ]
       }
