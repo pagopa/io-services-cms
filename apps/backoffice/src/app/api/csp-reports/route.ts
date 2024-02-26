@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as ai from "applicationinsights";
 
-export async function POST(nextRequest: NextRequest) {
+export async function POST(
+  nextRequest: NextRequest,
+  nextResponse: NextResponse
+) {
   const jsonBody = await nextRequest.json();
 
   ai.defaultClient.trackException({
@@ -9,5 +12,7 @@ export async function POST(nextRequest: NextRequest) {
     severity: ai.Contracts.SeverityLevel.Warning
   });
 
-  return NextResponse.json(void 0, { status: 200 });
+  return new Response("Success!", {
+    status: 200
+  });
 }
