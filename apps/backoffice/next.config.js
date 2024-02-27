@@ -33,9 +33,8 @@ const nextConfig = {
         source: "/((?!api|_next/static|_next/image|favicon.ico).*)",
         headers: [
           {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; img-src https://iopstcdnassets.blob.core.windows.net https://selfcare.pagopa.it"
+            key: "X-Frame-Options",
+            value: "DENY"
           }
         ]
       }
