@@ -203,7 +203,7 @@ export const ServiceContextMenu = ({
         size="medium"
         variant="text"
         sx={{ bgcolor: "background.paper", padding: 0 }}
-        onClick={onHistoryClick}
+        onClick={() => onHistoryClick()}
       >
         <History />
       </Button>
@@ -267,7 +267,7 @@ export const ServiceContextMenu = ({
   return (
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
-      {/* {renderHistoryAction()} */}
+      {renderHistoryAction()}
       {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>
