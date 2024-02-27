@@ -29,6 +29,7 @@
     "exit": "Exit",
     "forward": "Forward",
     "import": "Import",
+    "loadMore": "Load more",
     "next": "Next",
     "save": "Save",
     "showMore": "Show more",
@@ -379,7 +380,8 @@
         "message": "This service requires modifications before it can be published in the IO app.",
         "reason": {
           "label": "Read the reasons for refusal here.",
-          "title": "Reasons for refusal"
+          "title": "Reasons for refusal",
+          "value": "<0>{value}</0>"
         }
       },
       "submitted": "This service is <strong>under review</strong>. While waiting for the response from our PagoPA team, the service cannot be modified."
@@ -462,6 +464,19 @@
       "status": "Service status:",
       "lastApprovedVersion": "Last approved version.",
       "lastUpdate": "Last update:"
+    },
+    "history": {
+      "title": "Service history",
+      "status": {
+        "approved": "The service has been approved",
+        "deleted": "The service has been permanently cancelled",
+        "draft": "The service draft has been created",
+        "rejected": "Errors emerged during the review and changes to the service sheet are required",
+        "submitted": "The service has been sent for review",
+        "published": "The service was published in App IO",
+        "unpublished": "The service has been hidden in App IO"
+      },
+      "readRejectReason": "Read the reasons for refusal"
     }
   },
   "table": {

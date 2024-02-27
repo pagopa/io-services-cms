@@ -29,6 +29,7 @@
     "exit": "Esci",
     "forward": "Avanti",
     "import": "Importa",
+    "loadMore": "Mostra di più",
     "next": "Continua",
     "save": "Salva",
     "showMore": "Scopri di più",
@@ -379,7 +380,8 @@
         "message": "Questo servizio richiede delle modifiche prima di poter essere pubblicato in app IO.",
         "reason": {
           "label": "Leggi qui i motivi del rifiuto.",
-          "title": "Motivi del rifiuto"
+          "title": "Motivi del rifiuto",
+          "value": "<0>{value}</0>"
         }
       },
       "submitted": "Questo servizio è <strong>in revisione</strong>. In attesa della risposta del nostro team PagoPA, il servizio non può essere modificato."
@@ -462,6 +464,19 @@
       "status": "Stato del servizio:",
       "lastApprovedVersion": "Ultima versione approvata.",
       "lastUpdate": "Ultima modifica:"
+    },
+    "history": {
+      "title": "Storia del servizio",
+      "status": {
+        "approved": "Il servizio è stato approvato",
+        "deleted": "Il servizio è stato definitivamente cancellato",
+        "draft": "La bozza di servizio è stata creata",
+        "rejected": "Durante la revisione sono emersi errori e sono richieste modifiche alla scheda servizio",
+        "submitted": "Il servizio è stato mandato in revisione",
+        "published": "Il servizio è stato pubblicato in App IO",
+        "unpublished": "Il servizio è stato nascosto in App IO"
+      },
+      "readRejectReason": "Leggi i motivi del rifiuto"
     }
   },
   "table": {
