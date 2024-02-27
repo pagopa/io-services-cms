@@ -1,10 +1,11 @@
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
-import { CallSplit, ErrorOutline } from "@mui/icons-material";
+import { CallSplit } from "@mui/icons-material";
 import { Alert, AlertColor, Box, Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+import { ServiceRejectReasonContent } from ".";
 import { useDrawer } from "../drawer-provider";
 
 type ServiceType = "lifecycle" | "publication";
@@ -131,25 +132,9 @@ export const ServiceAlerts = ({
   };
 
   const openRejectionReasonDrawer = () => {
-    const content = (
-      <Box width="20vw">
-        <Stack direction="row" spacing={1}>
-          <ErrorOutline color="error" />
-          <Typography variant="h6">
-            {t("service.alerts.rejected.reason.title")}
-          </Typography>
-        </Stack>
-        <Typography
-          variant="body2"
-          marginTop={1}
-          dangerouslySetInnerHTML={{
-            __html:
-              serviceLifecycleStatus?.reason?.replaceAll("|", "<br />") ?? ""
-          }}
-        />
-      </Box>
+    openDrawer(
+      <ServiceRejectReasonContent value={serviceLifecycleStatus?.reason} />
     );
-    openDrawer(content);
   };
 
   useEffect(() => {
