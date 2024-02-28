@@ -123,9 +123,7 @@ export const makeGetServiceHistoryHandler =
                   itemsToResponse(config),
                   TE.map((mapped) =>
                     ResponseSuccessJson({
-                      continuationToken: continuationToken
-                        ? encodeURIComponent(continuationToken)
-                        : undefined,
+                      continuationToken,
                       items: mapped,
                     })
                   )
