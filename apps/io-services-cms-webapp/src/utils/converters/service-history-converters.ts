@@ -28,13 +28,13 @@ export const itemToResponse =
       metadata: { scope, category, custom_special_flow, topic_id, ...metadata },
       ...data
     },
-    id,
+    serviceId,
     last_update,
   }: ServiceHistoryCosmosItem): TE.TaskEither<Error, ServiceResponsePayload> =>
     pipe(
-      toServiceTopic(dbConfig)(id, topic_id),
+      toServiceTopic(dbConfig)(serviceId, topic_id),
       TE.bimap(E.toError, (topic) => ({
-        id,
+        id: serviceId,
         status: buildStatus(fsm),
         last_update: last_update ?? new Date().getTime().toString(),
         ...data,
