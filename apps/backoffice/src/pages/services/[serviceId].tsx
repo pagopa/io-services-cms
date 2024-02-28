@@ -3,11 +3,13 @@ import { PageHeader } from "@/components/headers";
 import {
   ServiceAlerts,
   ServiceContextMenu,
+  ServiceHistoryComponent,
   ServiceInfo,
   ServiceLogo,
   fromServiceLifecycleToService,
   fromServicePublicationToService
 } from "@/components/services";
+import { ServiceHistory } from "@/generated/api/ServiceHistory";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
@@ -34,7 +36,11 @@ export default function ServiceDetails() {
    * - `true` shows ServicePublication details */
   const release = router.query.release === "true";
   const [currentService, setCurrentService] = useState<Service>();
+  const [showHistory, setShowHistory] = useState<boolean>(false);
 
+  const { data: shData, loading: shLoading, fetchData: shFetchData } = useFetch<
+    ServiceHistory
+  >();
   const { data: slData, fetchData: slFetchData } = useFetch<ServiceLifecycle>();
   const { data: spData, fetchData: spFetchData } = useFetch<
     ServicePublication
@@ -94,6 +100,18 @@ export default function ServiceDetails() {
     fetchServiceLifecycle(); // reload ServiceLifecycle
   };
 
+  const handleHistory = (continuationToken?: string) => {
+    setShowHistory(true);
+    shFetchData(
+      "getServiceHistory",
+      { serviceId, continuationToken },
+      ServiceHistory,
+      {
+        notify: "errors"
+      }
+    );
+  };
+
   const navigateToServiceLifecycle = () =>
     router.replace(router.asPath.replace(RELEASE_QUERY_PARAM, ""));
 
@@ -136,7 +154,7 @@ export default function ServiceDetails() {
             onPublishClick={handlePublish}
             onUnpublishClick={handleUnpublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
-            onHistoryClick={() => console.log("TODO onHistoryClick")} // TODO da implementare
+            onHistoryClick={handleHistory}
             onEditClick={() =>
               router.push(`/services/${serviceId}/edit-service`)
             }
@@ -150,6 +168,13 @@ export default function ServiceDetails() {
         servicePublicationStatus={spData?.status}
         onServiceLifecycleClick={navigateToServicePublication}
         onServicePublicationClick={navigateToServiceLifecycle}
+      />
+      <ServiceHistoryComponent
+        historyData={shData}
+        showHistory={showHistory}
+        loading={shLoading}
+        onLoadMoreClick={handleHistory}
+        onClose={() => setShowHistory(false)}
       />
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
