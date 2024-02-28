@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.28.1
+
+### Patch Changes
+
+- 82287b8: Fix serviceId and continuationToken in serviceHistory response fields
+
 ## 1.28.0
 
 ### Minor Changes
