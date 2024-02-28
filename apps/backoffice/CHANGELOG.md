@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.8.0
+
+### Minor Changes
+
+- 00b0ba5: Add service history feature in service details page
+
 ## 1.7.1
 
 ### Patch Changes
