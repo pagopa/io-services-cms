@@ -46,19 +46,6 @@
     }
   },
   "forms": {
-    "assistance": {
-      "email": {
-        "helperText": "",
-        "label": "Inserisci l'indirizzo email",
-        "placeholder": ""
-      },
-      "confirmEmail": {
-        "helperText": "",
-        "label": "Conferma l'indirizzo email",
-        "placeholder": ""
-      },
-      "disclaimer": "Proseguendo dichiari di aver letto la <a style=\"color: #0073E6;\" href=\"https://www.pagopa.it/it/privacy-policy-assistenza/\" target=\"_blank\">Privacy Policy Assistenza</a>"
-    },
     "cancel": {
       "title": "Sei sicuro di voler annullare la procedura?",
       "description": "L'azione è irreversibile."
@@ -284,10 +271,6 @@
     "operator": "Operatore"
   },
   "routes": {
-    "assistance": {
-      "title": "Come possiamo aiutarti?",
-      "description": "Indica l’indirizzo email in cui desideri ricevere d’ora in poi le risposte dell’assistenza."
-    },
     "overview": {
       "title": "Panoramica",
       "description": "Tieni sotto controllo tutte le tue attività da qui."
