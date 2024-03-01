@@ -22,17 +22,19 @@ export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
   const handleDocumentationClick = () =>
     window.open(getConfiguration().BACK_OFFICE_OPERATIVE_MANUAL_URL, "_blank");
 
+  const handleAssistanceClick = () =>
+    window.open(
+      `${getConfiguration().SELFCARE_URL}/assistenza?productId=${
+        getConfiguration().BACK_OFFICE_ID
+      }`, "_self"
+    );
+
   return (
     <HeaderAccount
       rootLink={pagoPALink}
       loggedUser={user}
-      enableAssistanceButton={false}
-      onAssistanceClick={() =>
-        router.push({
-          pathname: "/assistance",
-          query: { callbackUrl: router.asPath }
-        })
-      }
+      enableAssistanceButton={hideAssistance}
+      onAssistanceClick={handleAssistanceClick}
       onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
         console.log("User login");
