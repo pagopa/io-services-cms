@@ -46,19 +46,6 @@
     }
   },
   "forms": {
-    "assistance": {
-      "email": {
-        "helperText": "",
-        "label": "Insert email address",
-        "placeholder": ""
-      },
-      "confirmEmail": {
-        "helperText": "",
-        "label": "Confirm email address",
-        "placeholder": ""
-      },
-      "disclaimer": "By continuing you declare that you have read the <a style=\"color: #0073E6;\" href=\"https://www.pagopa.it/it/privacy-policy-assistenza/\" target=\"_blank\">Support Privacy Policy</a>"
-    },
     "cancel": {
       "title": "Are you sure you want to cancel the procedure?",
       "description": "The action is irreversible."
@@ -284,10 +271,6 @@
     "operator": "Operator"
   },
   "routes": {
-    "assistance": {
-      "title": "How can we help you?",
-      "description": "Enter the email address where you would like to receive support responses from now on."
-    },
     "overview": {
       "title": "Overview",
       "description": "Monitor all your activities from here."

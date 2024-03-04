@@ -3,9 +3,9 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 
 /** This is a mock page, for development purpose only */
-export default function Zendesk() {
+export default function Assistenza() {
   const router = useRouter();
-  const { product } = router.query;
+  const { productId } = router.query;
 
   return (
     <Grid
@@ -28,7 +28,7 @@ export default function Zendesk() {
             <Typography variant="h6" gutterBottom>
               Prodotto
             </Typography>
-            <Typography variant="body2">{product}</Typography>
+            <Typography variant="body2">{productId}</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -50,4 +50,4 @@ export async function getStaticProps({ locale }: any) {
 }
 
 // No Auth required
-Zendesk.publicRoute = true;
+Assistenza.publicRoute = true;

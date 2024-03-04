@@ -1,14 +1,8 @@
-import { AssistanceItem } from "@/generated/api/AssistanceItem";
-import { AssistanceResponse } from "@/generated/api/AssistanceResponse";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { InstitutionResource } from "@/types/selfcare/InstitutionResource";
-import {
-  getInstitutionById,
-  getUserAuthorizedInstitutions,
-  sendSupportRequest
-} from "./selfcare";
+import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
 
 export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string
@@ -31,9 +25,3 @@ const toUserAuthorizedInstitution = (
   role: institutionResource.userProductRoles?.[0],
   logo_url: institutionResource.logo
 });
-
-export const sendAssistanceRequest = async (
-  request: AssistanceItem
-): Promise<AssistanceResponse> => {
-  return await sendSupportRequest(request);
-};
