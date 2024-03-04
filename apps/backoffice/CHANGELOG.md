@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.9.0
+
+### Minor Changes
+
+- 2ce0edc: Zendesk webform integration (frontend only implementation)
+
 ## 1.8.0
 
 ### Minor Changes
