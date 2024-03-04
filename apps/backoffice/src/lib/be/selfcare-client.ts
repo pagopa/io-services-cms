@@ -1,5 +1,3 @@
-import { SupportRequestDto } from "@/types/selfcare/SupportRequestDto";
-import { SupportResponse } from "@/types/selfcare/SupportResponse";
 import {
   getKeepAliveAgentOptions,
   newHttpAgent,
@@ -24,9 +22,6 @@ export type SelfcareClient = {
   getInstitutionById: (
     id: string
   ) => TE.TaskEither<Error | AxiosError, Institution>;
-  sendSupportRequest: (
-    request: SupportRequestDto
-  ) => TE.TaskEither<Error, SupportResponse>;
 };
 
 type Config = t.TypeOf<typeof Config>;
@@ -132,30 +127,9 @@ const buildSelfcareClient = (): SelfcareClient => {
       )
     );
 
-  const sendSupportRequest: SelfcareClient["sendSupportRequest"] = request =>
-    pipe(
-      TE.tryCatch(() => axiosInstance.post(supportApi, request), identity),
-      TE.mapLeft(e => {
-        if (axios.isAxiosError(e)) {
-          return new Error(`REST client error catched: ${e.message}`);
-        } else {
-          return new Error(`Unexpected error: ${e}`);
-        }
-      }),
-      TE.chainW(response =>
-        pipe(
-          response.data,
-          SupportResponse.decode,
-          E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
-    );
-
   return {
     getUserAuthorizedInstitutions,
-    getInstitutionById,
-    sendSupportRequest
+    getInstitutionById
   };
 };
 
