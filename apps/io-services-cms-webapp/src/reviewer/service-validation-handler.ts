@@ -4,6 +4,7 @@ import {
   ServicePublication,
 } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -15,6 +16,7 @@ import { Json } from "io-ts-types";
 import lodash from "lodash";
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
+import { CosmosHelper } from "../utils/cosmos-helper";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -99,6 +101,47 @@ const validate = (
     )
   );
 
+const validateDuplicates =
+  (servicePublicationCosmosHelper: CosmosHelper) =>
+  (
+    item: Queue.RequestReviewItemStrict
+  ): TE.TaskEither<Error | ValidationError, Queue.RequestReviewItemStrict> =>
+    pipe(
+      servicePublicationCosmosHelper.fetchSingleItem(
+        {
+          query: `SELECT c.id FROM c WHERE c.data.name = @serviceName AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.serviceId != @currentServiceId`,
+          parameters: [
+            {
+              name: "@serviceName",
+              value: item.data.name,
+            },
+            {
+              name: "@organizationFiscalCode",
+              value: item.data.organization.fiscal_code,
+            },
+            {
+              name: "@currentServiceId",
+              value: item.id,
+            },
+          ],
+        },
+        NonEmptyString
+      ),
+      TE.chainW((queryResult) =>
+        pipe(
+          queryResult,
+          O.fold(
+            () => TE.right(item),
+            (result) =>
+              TE.left({
+                serviceId: item.id,
+                reason: `A service having name '${item.data.name}' already exists, ID ${result}, for the organization ${item.data.organization.name}`,
+              })
+          )
+        )
+      )
+    );
+
 const onRequestManualValidationHandler =
   (telemetryClient: TelemetryClient) =>
   ({
@@ -173,6 +216,7 @@ type Dependencies = {
   config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
+  servicePublicationCosmosHelper: CosmosHelper;
   telemetryClient: TelemetryClient;
 };
 
@@ -185,13 +229,20 @@ type ServiceValidationHandler = (
 >;
 
 export const createServiceValidationHandler: ServiceValidationHandler =
-  ({ config, fsmLifecycleClient, fsmPublicationClient, telemetryClient }) =>
+  ({
+    config,
+    fsmLifecycleClient,
+    fsmPublicationClient,
+    telemetryClient,
+    servicePublicationCosmosHelper,
+  }) =>
   ({ item }) =>
     pipe(
       item,
       parseIncomingMessage,
       E.chainW(validate),
       TE.fromEither,
+      TE.chainW(validateDuplicates(servicePublicationCosmosHelper)),
       TE.chainW((validService) =>
         pipe(
           validService.id,

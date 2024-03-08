@@ -11,6 +11,7 @@ import { Mock, afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { TelemetryClient } from "../../utils/applicationinsight";
 import { createServiceValidationHandler } from "../service-validation-handler";
+import { CosmosHelper } from "../../utils/cosmos-helper";
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -29,6 +30,10 @@ const fsmPublicationClientMock = {
   getStore: vi.fn<[void], { fetch: Mock<any, any> }>().mockReturnValue({
     fetch: vi.fn(),
   }),
+};
+
+const servicePublicationCosmosHelperMock: CosmosHelper = {
+  fetchSingleItem: vi.fn(() => TE.right(O.none)),
 };
 
 const appinsightsMocks = {
@@ -67,6 +72,7 @@ describe("Service Validation Handler", () => {
       fsmPublicationClient:
         fsmPublicationClientMock as unknown as ServicePublication.FsmClient,
       telemetryClient: appinsightsMocks as unknown as TelemetryClient,
+      servicePublicationCosmosHelper: servicePublicationCosmosHelperMock,
     };
   it("should fail when incoming item is not a valid RequestReviewItem", async () => {
     const { id, ...anInvalidRequestValidationItem } =

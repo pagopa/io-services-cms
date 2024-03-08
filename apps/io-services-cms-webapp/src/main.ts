@@ -53,6 +53,7 @@ import { handler as onServiceHistoryHandler } from "./watchers/on-service-histor
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
+import { makeCosmosHelper } from "./utils/cosmos-helper";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -92,6 +93,10 @@ const serviceHistoryPagedHelper = makeCosmosPagedHelper(
   ServiceHistory,
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
   config.DEFAULT_PAGED_FETCH_LIMIT
+);
+
+const servicePublicationCosmosHelper = makeCosmosHelper(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
@@ -152,6 +157,7 @@ export const onRequestValidationEntryPoint = pipe(
     fsmLifecycleClient,
     fsmPublicationClient,
     telemetryClient,
+    servicePublicationCosmosHelper,
   }),
   processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
     parallel: false,
