@@ -9,7 +9,7 @@ data "azurerm_container_app_environment" "container_app_environment_runner" {
 }
 
 module "container_app_job" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//container_app_job_gh_runner?ref=v7.47.2"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//container_app_job_gh_runner?ref=v7.67.1"
 
   location  = var.location
   prefix    = var.prefix
