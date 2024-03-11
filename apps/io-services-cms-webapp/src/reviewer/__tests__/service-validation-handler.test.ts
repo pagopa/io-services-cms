@@ -209,9 +209,9 @@ describe("Service Validation Handler", () => {
     const anAlreadyPresentServiceId =
       "anAlreadyPresentServiceId" as NonEmptyString;
 
-    const servicePublicationCosmosHelperPresentMock: CosmosHelper = {
+    const servicePublicationCosmosHelperPresentMock = {
       fetchSingleItem: vi.fn(() => TE.right(O.some(anAlreadyPresentServiceId))),
-    };
+    } as unknown as CosmosHelper;
 
     const res = await createServiceValidationHandler({
       ...dependenciesMock,
