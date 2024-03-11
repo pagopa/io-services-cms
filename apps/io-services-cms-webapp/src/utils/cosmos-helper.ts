@@ -21,6 +21,17 @@ export type Page<T> = {
   continuationToken?: string;
 };
 
+export type CosmosHelper = {
+  fetchSingleItem: <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ) => TE.TaskEither<Error, O.Option<T>>;
+  fetchItems: <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ) => TE.TaskEither<Error, O.Option<ReadonlyArray<T>>>;
+};
+
 export type CosmosPagedHelper<T> = {
   pageFetch: (
     query: SqlQuerySpecWithOrder,
@@ -32,6 +43,81 @@ export type CosmosPagedHelper<T> = {
 export type SqlQuerySpecWithOrder = SqlQuerySpec & {
   order?: OrderParam;
   orderBy?: string;
+};
+
+export const makeCosmosHelper = (container: Container): CosmosHelper => {
+  const fetchSingleItem = <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ): TE.TaskEither<Error, O.Option<T>> =>
+    pipe(
+      E.tryCatch(
+        () => container.items.query(query),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
+      ),
+      TE.fromEither,
+      TE.chainW((cosmosQueryIterator) =>
+        TE.tryCatch(
+          () => cosmosQueryIterator.fetchAll(),
+          (err) => new Error(`Failed to fetchSingleItem: ${err}`)
+        )
+      ),
+      TE.chainW(({ resources }) =>
+        pipe(
+          resources,
+          RA.head,
+          O.fold(
+            () => TE.right(O.none),
+            flow(
+              codec.decode,
+              E.bimap(flow(readableReport, E.toError), (mappedResult) =>
+                O.some(mappedResult)
+              ),
+              TE.fromEither
+            )
+          )
+        )
+      )
+    );
+
+  const fetchItems = <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ): TE.TaskEither<Error, O.Option<ReadonlyArray<T>>> =>
+    pipe(
+      E.tryCatch(
+        () => container.items.query(query),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
+      ),
+      TE.fromEither,
+      TE.chainW((cosmosQueryIterator) =>
+        TE.tryCatch(
+          () => cosmosQueryIterator.fetchAll(),
+          (err) => new Error(`Failed to fetchItems: ${err}`)
+        )
+      ),
+      TE.chainW(({ resources }) =>
+        pipe(
+          resources,
+          O.fromPredicate((r) => r.length > 0),
+          O.fold(
+            () => TE.right(O.none),
+            flow(
+              RA.traverse(E.Applicative)(codec.decode),
+              E.bimap(flow(readableReport, E.toError), (mappedResult) =>
+                O.some(mappedResult)
+              ),
+              TE.fromEither
+            )
+          )
+        )
+      )
+    );
+
+  return {
+    fetchSingleItem,
+    fetchItems,
+  };
 };
 
 const buildQuerySpec = (
