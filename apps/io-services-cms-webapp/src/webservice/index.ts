@@ -14,7 +14,7 @@ import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/mo
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
-import { CosmosPagedHelper } from "../utils/cosmos-paged-helper";
+import { CosmosPagedHelper } from "../utils/cosmos-helper";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,

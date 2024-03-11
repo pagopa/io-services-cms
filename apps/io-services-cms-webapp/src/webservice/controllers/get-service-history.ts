@@ -51,7 +51,7 @@ import {
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { itemsToResponse } from "../../utils/converters/service-history-converters";
-import { CosmosPagedHelper, OrderParam } from "../../utils/cosmos-paged-helper";
+import { CosmosPagedHelper, OrderParam } from "../../utils/cosmos-helper";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 

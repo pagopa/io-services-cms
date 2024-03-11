@@ -40,11 +40,11 @@ import { createServiceValidationHandler } from "./reviewer/service-validation-ha
 import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { createRequestSyncLegacyHandler } from "./synchronizer/request-sync-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
+import { makeCosmosHelper, makeCosmosPagedHelper } from "./utils/cosmos-helper";
 import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
 } from "./utils/cosmos-legacy";
-import { makeCosmosPagedHelper } from "./utils/cosmos-paged-helper";
 import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
@@ -92,6 +92,14 @@ const serviceHistoryPagedHelper = makeCosmosPagedHelper(
   ServiceHistory,
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
   config.DEFAULT_PAGED_FETCH_LIMIT
+);
+
+const servicePublicationCosmosHelper = makeCosmosHelper(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
+);
+
+const serviceLifecycleCosmosHelper = makeCosmosHelper(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
@@ -152,6 +160,8 @@ export const onRequestValidationEntryPoint = pipe(
     fsmLifecycleClient,
     fsmPublicationClient,
     telemetryClient,
+    servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   }),
   processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
     parallel: false,

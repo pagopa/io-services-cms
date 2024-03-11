@@ -19,7 +19,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemsToResponse } from "../../../utils/converters/service-history-converters";
-import { CosmosPagedHelper } from "../../../utils/cosmos-paged-helper";
+import { CosmosPagedHelper } from "../../../utils/cosmos-helper";
 import { WebServerDependencies, createWebServer } from "../../index";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
