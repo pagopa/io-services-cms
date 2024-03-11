@@ -101,42 +101,82 @@ const validate = (
     )
   );
 
-const validateDuplicates =
+const getDuplicatesOnServicePublication =
   (servicePublicationCosmosHelper: CosmosHelper) =>
+  (item: Queue.RequestReviewItemStrict) =>
+    servicePublicationCosmosHelper.fetchItems(
+      {
+        query: `SELECT VALUE c.id FROM c WHERE c.data.name = @serviceName AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
+        parameters: [
+          {
+            name: "@serviceName",
+            value: item.data.name,
+          },
+          {
+            name: "@organizationFiscalCode",
+            value: item.data.organization.fiscal_code,
+          },
+          {
+            name: "@currentServiceId",
+            value: item.id,
+          },
+        ],
+      },
+      NonEmptyString
+    );
+const getNotDeletedDuplicatesOnServiceLifecycle =
+  (serviceLifecycleCosmosHelper: CosmosHelper) =>
+  (serviceIds: ReadonlyArray<NonEmptyString>) =>
+    serviceLifecycleCosmosHelper.fetchSingleItem(
+      {
+        query: `SELECT VALUE c.id FROM c WHERE c.id IN (@serviceIds) AND c.fsm.state != 'deleted'`,
+        parameters: [
+          {
+            name: "@serviceIds",
+            value: serviceIds.join(","),
+          },
+        ],
+      },
+      NonEmptyString
+    );
+
+const validateDuplicates =
+  (
+    servicePublicationCosmosHelper: CosmosHelper,
+    serviceLifecycleCosmosHelper: CosmosHelper
+  ) =>
   (
     item: Queue.RequestReviewItemStrict
   ): TE.TaskEither<Error | ValidationError, Queue.RequestReviewItemStrict> =>
     pipe(
-      servicePublicationCosmosHelper.fetchSingleItem(
-        {
-          query: `SELECT VALUE c.id FROM c WHERE c.data.name = @serviceName AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
-          parameters: [
-            {
-              name: "@serviceName",
-              value: item.data.name,
-            },
-            {
-              name: "@organizationFiscalCode",
-              value: item.data.organization.fiscal_code,
-            },
-            {
-              name: "@currentServiceId",
-              value: item.id,
-            },
-          ],
-        },
-        NonEmptyString
-      ),
+      // Get Duplicate Services
+      getDuplicatesOnServicePublication(servicePublicationCosmosHelper)(item),
       TE.chainW((queryResult) =>
         pipe(
           queryResult,
           O.fold(
             () => TE.right(item),
             (result) =>
-              TE.left({
-                serviceId: item.id,
-                reason: `A service having name '${item.data.name}' already exists, ID ${result}, for the organization ${item.data.organization.name}`,
-              })
+              pipe(
+                // Check if duplicates found are not related to deleted service
+                getNotDeletedDuplicatesOnServiceLifecycle(
+                  serviceLifecycleCosmosHelper
+                )(result),
+                TE.chainW((queryResult) =>
+                  pipe(
+                    queryResult,
+                    O.fold(
+                      () => TE.right(item),
+                      (result) =>
+                        // check if duplicates found are not related to deleted service
+                        TE.left({
+                          serviceId: item.id,
+                          reason: `A service having name '${item.data.name}' already exists, ID ${result}, for the organization ${item.data.organization.name}`,
+                        })
+                    )
+                  )
+                )
+              )
           )
         )
       )
@@ -217,6 +257,7 @@ type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
   servicePublicationCosmosHelper: CosmosHelper;
+  serviceLifecycleCosmosHelper: CosmosHelper;
   telemetryClient: TelemetryClient;
 };
 
@@ -235,6 +276,7 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     fsmPublicationClient,
     telemetryClient,
     servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   }) =>
   ({ item }) =>
     pipe(
@@ -242,7 +284,12 @@ export const createServiceValidationHandler: ServiceValidationHandler =
       parseIncomingMessage,
       E.chainW(validate),
       TE.fromEither,
-      TE.chainW(validateDuplicates(servicePublicationCosmosHelper)),
+      TE.chainW(
+        validateDuplicates(
+          servicePublicationCosmosHelper,
+          serviceLifecycleCosmosHelper
+        )
+      ),
       TE.chainW((validService) =>
         pipe(
           validService.id,

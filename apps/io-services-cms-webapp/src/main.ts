@@ -98,6 +98,10 @@ const servicePublicationCosmosHelper = makeCosmosHelper(
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
 );
 
+const serviceLifecycleCosmosHelper = makeCosmosHelper(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
+);
+
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
   legacyCosmosDbInstance.container(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
 );
@@ -157,6 +161,7 @@ export const onRequestValidationEntryPoint = pipe(
     fsmPublicationClient,
     telemetryClient,
     servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   }),
   processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
     parallel: false,

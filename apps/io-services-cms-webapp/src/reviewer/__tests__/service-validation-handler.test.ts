@@ -34,6 +34,12 @@ const fsmPublicationClientMock = {
 
 const servicePublicationCosmosHelperMock: CosmosHelper = {
   fetchSingleItem: vi.fn(() => TE.right(O.none)),
+  fetchItems: vi.fn(() => TE.right(O.none)),
+};
+
+const serviceLifecycleCosmosHelperMock: CosmosHelper = {
+  fetchSingleItem: vi.fn(() => TE.right(O.none)),
+  fetchItems: vi.fn(() => TE.right(O.none)),
 };
 
 const appinsightsMocks = {
@@ -73,6 +79,7 @@ describe("Service Validation Handler", () => {
         fsmPublicationClientMock as unknown as ServicePublication.FsmClient,
       telemetryClient: appinsightsMocks as unknown as TelemetryClient,
       servicePublicationCosmosHelper: servicePublicationCosmosHelperMock,
+      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperMock,
     };
   it("should fail when incoming item is not a valid RequestReviewItem", async () => {
     const { id, ...anInvalidRequestValidationItem } =
@@ -210,12 +217,17 @@ describe("Service Validation Handler", () => {
       "anAlreadyPresentServiceId" as NonEmptyString;
 
     const servicePublicationCosmosHelperPresentMock = {
+      fetchItems: vi.fn(() => TE.right(O.some([anAlreadyPresentServiceId]))),
+    } as unknown as CosmosHelper;
+
+    const serviceLifecycleCosmosHelperPresentMock = {
       fetchSingleItem: vi.fn(() => TE.right(O.some(anAlreadyPresentServiceId))),
     } as unknown as CosmosHelper;
 
     const res = await createServiceValidationHandler({
       ...dependenciesMock,
       servicePublicationCosmosHelper: servicePublicationCosmosHelperPresentMock,
+      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperPresentMock,
     })({
       item: aValidRequestValidationItem,
     })();
@@ -240,6 +252,12 @@ describe("Service Validation Handler", () => {
     });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
+    expect(
+      servicePublicationCosmosHelperPresentMock.fetchItems
+    ).toHaveBeenCalledOnce();
+    expect(
+      serviceLifecycleCosmosHelperPresentMock.fetchSingleItem
+    ).toHaveBeenCalledOnce();
   });
 
   it("should fail when fetch service publication fails", async () => {
@@ -289,6 +307,12 @@ describe("Service Validation Handler", () => {
     });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
+    expect(
+      servicePublicationCosmosHelperMock.fetchItems
+    ).toHaveBeenCalledOnce();
+    expect(
+      serviceLifecycleCosmosHelperMock.fetchSingleItem
+    ).not.toHaveBeenCalled();
   });
 
   it("should return a RequestReviewAction when there is at least one 'required manual review' properties changed", async () => {
@@ -322,6 +346,12 @@ describe("Service Validation Handler", () => {
     });
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
+    expect(
+      servicePublicationCosmosHelperMock.fetchItems
+    ).toHaveBeenCalledOnce();
+    expect(
+      serviceLifecycleCosmosHelperMock.fetchSingleItem
+    ).not.toHaveBeenCalled();
   });
 
   it("should fail when there is no 'required manual review' properties changed, but approve fails", async () => {

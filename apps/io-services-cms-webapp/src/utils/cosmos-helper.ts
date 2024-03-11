@@ -26,6 +26,10 @@ export type CosmosHelper = {
     query: SqlQuerySpec,
     codec: t.Type<T>
   ) => TE.TaskEither<Error, O.Option<T>>;
+  fetchItems: <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ) => TE.TaskEither<Error, O.Option<ReadonlyArray<T>>>;
 };
 
 export type CosmosPagedHelper<T> = {
@@ -41,8 +45,8 @@ export type SqlQuerySpecWithOrder = SqlQuerySpec & {
   orderBy?: string;
 };
 
-export const makeCosmosHelper = (container: Container): CosmosHelper => ({
-  fetchSingleItem: <T>(
+export const makeCosmosHelper = (container: Container): CosmosHelper => {
+  const fetchSingleItem = <T>(
     query: SqlQuerySpec,
     codec: t.Type<T>
   ): TE.TaskEither<Error, O.Option<T>> =>
@@ -55,7 +59,7 @@ export const makeCosmosHelper = (container: Container): CosmosHelper => ({
       TE.chainW((cosmosQueryIterator) =>
         TE.tryCatch(
           () => cosmosQueryIterator.fetchAll(),
-          (err) => new Error(`Failed to retrieve data: ${err}`)
+          (err) => new Error(`Failed to fetchSingleItem: ${err}`)
         )
       ),
       TE.chainW(({ resources }) =>
@@ -74,8 +78,47 @@ export const makeCosmosHelper = (container: Container): CosmosHelper => ({
           )
         )
       )
-    ),
-});
+    );
+
+  const fetchItems = <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ): TE.TaskEither<Error, O.Option<ReadonlyArray<T>>> =>
+    pipe(
+      E.tryCatch(
+        () => container.items.query(query),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
+      ),
+      TE.fromEither,
+      TE.chainW((cosmosQueryIterator) =>
+        TE.tryCatch(
+          () => cosmosQueryIterator.fetchAll(),
+          (err) => new Error(`Failed to fetchItems: ${err}`)
+        )
+      ),
+      TE.chainW(({ resources }) =>
+        pipe(
+          resources,
+          O.fromPredicate((r) => r.length > 0),
+          O.fold(
+            () => TE.right(O.none),
+            flow(
+              RA.traverse(E.Applicative)(codec.decode),
+              E.bimap(flow(readableReport, E.toError), (mappedResult) =>
+                O.some(mappedResult)
+              ),
+              TE.fromEither
+            )
+          )
+        )
+      )
+    );
+
+  return {
+    fetchSingleItem,
+    fetchItems,
+  };
+};
 
 const buildQuerySpec = (
   querySpecWithOrder: SqlQuerySpecWithOrder
