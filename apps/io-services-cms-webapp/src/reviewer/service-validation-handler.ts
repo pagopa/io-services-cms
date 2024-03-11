@@ -166,6 +166,7 @@ const validateDuplicates =
                   pipe(
                     queryResult,
                     O.fold(
+                      // No active duplicates found
                       () => TE.right(item),
                       (result) =>
                         // check if duplicates found are not related to deleted service
