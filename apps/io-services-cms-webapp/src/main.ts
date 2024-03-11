@@ -40,11 +40,11 @@ import { createServiceValidationHandler } from "./reviewer/service-validation-ha
 import { createRequestSyncCmsHandler } from "./synchronizer/request-sync-cms-handler";
 import { createRequestSyncLegacyHandler } from "./synchronizer/request-sync-legacy-handler";
 import { initTelemetryClient } from "./utils/applicationinsight";
+import { makeCosmosHelper, makeCosmosPagedHelper } from "./utils/cosmos-helper";
 import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
 } from "./utils/cosmos-legacy";
-import { makeCosmosPagedHelper } from "./utils/cosmos-paged-helper";
 import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
@@ -53,7 +53,6 @@ import { handler as onServiceHistoryHandler } from "./watchers/on-service-histor
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
-import { makeCosmosHelper } from "./utils/cosmos-helper";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;

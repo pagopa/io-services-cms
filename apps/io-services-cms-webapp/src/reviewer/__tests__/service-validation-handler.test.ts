@@ -203,6 +203,45 @@ describe("Service Validation Handler", () => {
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
   });
 
+  it("should reject review when service is duplicate", async () => {
+    fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
+
+    const anAlreadyPresentServiceId =
+      "anAlreadyPresentServiceId" as NonEmptyString;
+
+    const servicePublicationCosmosHelperPresentMock: CosmosHelper = {
+      fetchSingleItem: vi.fn(() => TE.right(O.some(anAlreadyPresentServiceId))),
+    };
+
+    const res = await createServiceValidationHandler({
+      ...dependenciesMock,
+      servicePublicationCosmosHelper: servicePublicationCosmosHelperPresentMock,
+    })({
+      item: aValidRequestValidationItem,
+    })();
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toStrictEqual({});
+    }
+
+    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledOnce();
+    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledWith(
+      aValidRequestValidationItem.id,
+      expect.objectContaining({
+        reason: expect.stringMatching(
+          `A service having name '${aValidRequestValidationItem.data.name}' already exists, ID ${anAlreadyPresentServiceId}, for the organization ${aValidRequestValidationItem.data.organization.name}`
+        ),
+      })
+    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.auto-reject",
+      properties: { serviceId: aValidRequestValidationItem.id },
+    });
+    expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
+    expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
+  });
+
   it("should fail when fetch service publication fails", async () => {
     const errorMessage = "fetch fail";
     fsmPublicationClientMock
