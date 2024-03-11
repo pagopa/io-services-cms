@@ -106,11 +106,11 @@ const getDuplicatesOnServicePublication =
   (item: Queue.RequestReviewItemStrict) =>
     servicePublicationCosmosHelper.fetchItems(
       {
-        query: `SELECT VALUE c.id FROM c WHERE c.data.name = @serviceName AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
+        query: `SELECT VALUE c.id FROM c WHERE UPPER(c.data.name) = @serviceName AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
         parameters: [
           {
             name: "@serviceName",
-            value: item.data.name,
+            value: item.data.name.toUpperCase(),
           },
           {
             name: "@organizationFiscalCode",
