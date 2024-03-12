@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.28.3
+
+### Patch Changes
+
+- 677ea52: Update duplicate rejection message
+- 17a7d73: Fix error decoding status on jira legacy issue
+
 ## 1.28.2
 
 ### Patch Changes
