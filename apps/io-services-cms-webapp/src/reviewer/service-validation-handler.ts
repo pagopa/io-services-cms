@@ -172,7 +172,7 @@ const validateDuplicates =
                         // check if duplicates found are not related to deleted service
                         TE.left({
                           serviceId: item.id,
-                          reason: `A service having name '${item.data.name}' already exists, ID ${result}, for the organization ${item.data.organization.name}`,
+                          reason: `Il servizio '${item.data.name}' ha lo stesso nome di un altro del servizio con ID '${result}'. Per questo motivo non è possibile procedere con l’approvazione del servizio, che risulta essere il duplicato di un altro.`,
                         })
                     )
                   )

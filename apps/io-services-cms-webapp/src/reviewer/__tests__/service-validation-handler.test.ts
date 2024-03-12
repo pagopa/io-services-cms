@@ -241,7 +241,7 @@ describe("Service Validation Handler", () => {
       aValidRequestValidationItem.id,
       expect.objectContaining({
         reason: expect.stringMatching(
-          `A service having name '${aValidRequestValidationItem.data.name}' already exists, ID ${anAlreadyPresentServiceId}, for the organization ${aValidRequestValidationItem.data.organization.name}`
+          `Il servizio '${aValidRequestValidationItem.data.name}' ha lo stesso nome di un altro del servizio con ID '${anAlreadyPresentServiceId}'. Per questo motivo non è possibile procedere con l’approvazione del servizio, che risulta essere il duplicato di un altro.`
         ),
       })
     );
