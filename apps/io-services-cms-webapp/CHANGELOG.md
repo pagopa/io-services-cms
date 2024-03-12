@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.28.2
+
+### Patch Changes
+
+- 72b0866: Automatic reject pure duplicate services
+- 45ef652: Case insensitive duplicate check
+
 ## 1.28.1
 
 ### Patch Changes
