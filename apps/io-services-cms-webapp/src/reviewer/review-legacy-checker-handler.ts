@@ -140,7 +140,7 @@ const makeServiceLifecycleApply =
                 },
                 flow(
                   buildUpdatedServiceLifecycleItem(
-                    jiraIssue.fields.status.name
+                    decodeLegacyJiraIssueStatus(jiraIssue)
                   ),
                   (updateService) =>
                     fsmLifecycleClient.override(
@@ -164,11 +164,11 @@ const buildUpdatedServiceLifecycleItem =
     fsm: {
       ...service.fsm,
       state:
-        issueStatus === "REJECTED"
+        issueStatus === "APPROVED"
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ("rejected" as any)
+            ("approved" as any)
           : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ("approved" as any),
+            ("rejected" as any),
     },
   });
 
