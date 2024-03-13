@@ -1,8 +1,10 @@
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
+import * as B from "fp-ts/boolean";
 import { flow, pipe } from "fp-ts/function";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
 import * as t from "io-ts";
@@ -441,11 +443,13 @@ function apply(
       TE.flattenW,
       TE.chain(({ hasChanges, ...newItem }) =>
         pipe(
-          hasChanges
-            ? // save new status in the store
-              store.save(id, newItem)
-            : // no changes to save
-              TE.right(newItem),
+          hasChanges,
+          B.fold(
+            // no changes to save
+            () => TE.right(newItem),
+            // has changes to save
+            () => saveItem(store)(id, newItem)
+          ),
           TE.mapLeft((_) => new FsmStoreSaveError())
         )
       )
@@ -472,12 +476,21 @@ function override(
           TE.fromEither
         )
       ),
-      TE.chain((_) => store.save(id, item))
+      TE.chain((_) => saveItem(store)(id, item))
     );
 }
 
 export const getAutoPublish = (service: ItemType): boolean =>
   (service.fsm.autoPublish as boolean) ?? false;
+
+// method to save a "normalized" item in the store
+const saveItem =
+  (store: LifecycleStore) =>
+  (id: NonEmptyString, item: ItemType): TE.TaskEither<Error, ItemType> =>
+    store.save(id, {
+      ...item,
+      data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
+    });
 
 const getFsmClient = (store: LifecycleStore) => ({
   getStore: () => store,

@@ -305,4 +305,24 @@ describe("override", () => {
       expect(result.right.fsm.autoPublish).toBeTruthy();
     }
   });
+
+  it("should trim before save an item", async () => {
+    const aServiceWithSpaces = changeName(aService, "  a new name  ");
+    store
+      .inspect()
+      .set(aServiceId, { ...aServiceWithSpaces, fsm: { state: "draft" } });
+
+    const item = {
+      ...aServiceWithSpaces,
+      fsm: { state: "approved", autoPublish: true },
+    } as WithState<"approved", Service>;
+    const result = await fsmClient.override(aServiceId, item)();
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(store.inspect().get(aServiceId)).eq(result.right);
+      expect(result.right.fsm.state).eq("approved");
+      expect(result.right.fsm.autoPublish).toBeTruthy();
+      expect(result.right.data.name).eq("a new name");
+    }
+  });
 });
