@@ -473,6 +473,8 @@ function release(
 }
 
 // method to save a "normalized" item in the store
+// FIXME: can be removed once the sync legacy mechanism will be shut down,
+// as the only service publication entrypoint will be the copy on approval fro lifecycle
 const saveItem =
   (store: PublicationStore) =>
   (id: NonEmptyString, item: ItemType): TE.TaskEither<Error, ItemType> =>
