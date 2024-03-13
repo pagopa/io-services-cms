@@ -139,9 +139,7 @@ const makeServiceLifecycleApply =
                   return TE.right(void 0);
                 },
                 flow(
-                  buildUpdatedServiceLifecycleItem(
-                    decodeLegacyJiraIssueStatus(jiraIssue)
-                  ),
+                  buildUpdatedServiceLifecycleItem(jiraIssue),
                   (updateService) =>
                     fsmLifecycleClient.override(
                       updateService.id,
@@ -158,19 +156,30 @@ const makeServiceLifecycleApply =
   };
 
 const buildUpdatedServiceLifecycleItem =
-  (issueStatus: JiraIssue["fields"]["status"]["name"]) =>
-  (service: ServiceLifecycle.ItemType): ServiceLifecycle.ItemType => ({
-    ...service,
-    fsm: {
-      ...service.fsm,
-      state:
-        issueStatus === "APPROVED"
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ("approved" as any)
-          : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ("rejected" as any),
-    },
-  });
+  (jiraIssue: JiraIssue) =>
+  (service: ServiceLifecycle.ItemType): ServiceLifecycle.ItemType => {
+    const issueStatus = decodeLegacyJiraIssueStatus(jiraIssue);
+
+    return issueStatus === "APPROVED"
+      ? {
+          ...service,
+          fsm: {
+            ...service.fsm,
+            approvalDate: jiraIssue.fields.statuscategorychangedate,
+            state: "approved",
+          },
+        }
+      : {
+          ...service,
+          fsm: {
+            ...service.fsm,
+            reason: jiraIssue.fields.comment.comments
+              .map((value) => value.body)
+              .join("|"),
+            state: "rejected",
+          },
+        };
+  };
 
 const decodeLegacyJiraIssueStatus = (
   issue: JiraIssue
