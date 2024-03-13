@@ -1,7 +1,7 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -120,7 +120,9 @@ const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
   searchJiraIssuesByKeyAndStatus: vi.fn(),
   getJiraIssueByServiceId: vi.fn(),
-  getPendingJiraIssueByServiceId: vi.fn(),
+  getPendingAndRejectedJiraIssueByServiceId: vi.fn(),
+  updateJiraIssue: vi.fn(),
+  reOpenJiraIssue: vi.fn(),
 };
 
 describe("Service Review Legacy Checker Handler tests", () => {
@@ -250,13 +252,21 @@ describe("Service Review Legacy Checker Handler tests", () => {
       // Test1: approve
       expect(mockFsmLifecycleClient.override).toBeCalledWith(aService.id, {
         ...aService,
-        fsm: { state: "approved" },
+        fsm: {
+          state: "approved",
+          approvalDate: aJiraIssue1.fields.statuscategorychangedate,
+        },
       });
 
       // Test2: reject
       expect(mockFsmLifecycleClient.override).toBeCalledWith(aService2.id, {
         ...aService2,
-        fsm: { state: "rejected" },
+        fsm: {
+          state: "rejected",
+          reason: aJiraIssue2.fields.comment.comments
+            .map((value) => value.body)
+            .join("|"),
+        },
       });
 
       expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
