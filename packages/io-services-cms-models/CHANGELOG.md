@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.18.2
+
+### Patch Changes
+
+- 29f62fa: Trim service name before saving in FSM store
+
 ## 1.18.1
 
 ### Patch Changes
