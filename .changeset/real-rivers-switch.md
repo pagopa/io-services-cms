@@ -2,4 +2,4 @@
 "io-services-cms-webapp": patch
 ---
 
-Handling apporval date and reason on ServiceLegacyReviewChecker
+Handling approval date and reason on ServiceLegacyReviewChecker
