@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.28.5
+
+### Patch Changes
+
+- 2d2685f: Handling approval date and reason on ServiceLegacyReviewChecker
+
 ## 1.28.4
 
 ### Patch Changes
