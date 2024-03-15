@@ -13,7 +13,7 @@ Manages Service lifecycle and publication
 
 ## Folder structure
 
-TBD need to clear
+TBD: need to clear
 
 ## Development
 
