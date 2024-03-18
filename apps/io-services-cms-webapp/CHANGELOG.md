@@ -1,5 +1,32 @@
 # io-services-cms-webapp
 
+## 1.28.5
+
+### Patch Changes
+
+- 2d2685f: Handling approval date and reason on ServiceLegacyReviewChecker
+
+## 1.28.4
+
+### Patch Changes
+
+- Updated dependencies [29f62fa]
+  - @io-services-cms/models@1.18.2
+
+## 1.28.3
+
+### Patch Changes
+
+- 677ea52: Update duplicate rejection message
+- 17a7d73: Fix error decoding status on jira legacy issue
+
+## 1.28.2
+
+### Patch Changes
+
+- 72b0866: Automatic reject pure duplicate services
+- 45ef652: Case insensitive duplicate check
+
 ## 1.28.1
 
 ### Patch Changes
