@@ -42,11 +42,11 @@ describe("On Service Lifecycle Change Handler", () => {
     ${"request-unpublication"}                   | ${{ ...aService, fsm: { state: "deleted" } }}                                    | ${{ requestPublication: { id: aPublicationService.id, kind: "RequestUnpublicationItem" }, requestHistoricization: { ...aService, fsm: { state: "deleted" } } }}
     ${"no-op (approved from Legacy)"}            | ${{ ...aService, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } }} | ${{ requestHistoricization: { ...aService, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler({
+    const res = handler({
       MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
     } as unknown as IConfig)({
       item,
-    })();
+    });
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       const actual = res.right;

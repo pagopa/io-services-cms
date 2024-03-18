@@ -1,8 +1,10 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
-import * as TE from "fp-ts/lib/TaskEither";
+import * as RE from "fp-ts/lib/ReaderEither";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/Option";
+import * as B from "fp-ts/boolean";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -78,45 +80,55 @@ const onDeleteHandler = (
   },
 });
 
-// FIXME: fix request historicization action (avoid to call onAnyChangesHandler foreach case)
+const getSpecificAction =
+  (config: IConfig) =>
+  (
+    item: ServiceLifecycle.ItemType
+  ): O.Option<OnSubmitActions | OnApproveActions | OnDeleteActions> => {
+    switch (item.fsm.state) {
+      case "submitted":
+        return pipe(item, onSubmitHandler, O.some);
+      case "approved":
+        return pipe(item, onApproveHandler(config), O.some);
+      case "deleted":
+        return pipe(item, onDeleteHandler, O.some);
+      default:
+        return O.none;
+    }
+  };
+
 export const handler =
   (
     config: IConfig
-  ): RTE.ReaderTaskEither<
+  ): RE.ReaderEither<
     { item: ServiceLifecycle.ItemType },
     Error,
     | RequestHistoricizationAction
     | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &
         RequestHistoricizationAction)
   > =>
-  ({ item }) => {
-    if (item.fsm.lastTransition !== SYNC_FROM_LEGACY) {
-      switch (item.fsm.state) {
-        case "submitted":
-          return pipe(
-            item,
-            onSubmitHandler,
-            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
-            TE.right
-          );
-        case "approved":
-          return pipe(
-            item,
-            onApproveHandler(config),
-            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
-            TE.right
-          );
-        case "deleted":
-          return pipe(
-            item,
-            onDeleteHandler,
-            (actions) => ({ ...actions, ...onAnyChangesHandler(item) }),
-            TE.right
-          );
-        default:
-          return TE.right(onAnyChangesHandler(item));
-      }
-    } else {
-      return TE.right(onAnyChangesHandler(item));
-    }
-  };
+  ({ item }) =>
+    pipe(
+      item,
+      onAnyChangesHandler,
+      E.right,
+      E.chain((historicizationAction) =>
+        pipe(
+          item.fsm.lastTransition !== SYNC_FROM_LEGACY ||
+            item.fsm.state === "deleted",
+          B.fold(
+            () => E.right(historicizationAction),
+            () =>
+              pipe(
+                item,
+                getSpecificAction(config),
+                O.fold(
+                  () => E.right(historicizationAction),
+                  (specificAction) =>
+                    E.right({ ...specificAction, ...historicizationAction })
+                )
+              )
+          )
+        )
+      )
+    );

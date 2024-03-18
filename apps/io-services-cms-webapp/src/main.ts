@@ -19,6 +19,7 @@ import { createBlobService } from "azure-storage";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
@@ -223,6 +224,7 @@ export const serviceReviewLegacyCheckerEntryPoint =
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
+  RTE.fromReaderEither,
   processBatchOf(ServiceLifecycle.ItemType),
   setBindings((results) => ({
     requestReview: pipe(
