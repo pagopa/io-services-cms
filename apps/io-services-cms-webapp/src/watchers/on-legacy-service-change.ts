@@ -34,7 +34,7 @@ const getLegacyToCmsStatus = (
   wasPublished: boolean = false
 ): Array<Queue.RequestSyncCmsItem["fsm"]["state"]> => {
   if (isDeletedService(service)) {
-    return ["deleted", "unpublished"];
+    return ["deleted"];
   } else if (service.isVisible) {
     return ["approved", "published"];
   } else if (wasPublished) {
