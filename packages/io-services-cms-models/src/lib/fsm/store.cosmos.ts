@@ -4,7 +4,7 @@ import {
   ReadOperationInput,
 } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as B from "fp-ts/Boolean";
+import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
