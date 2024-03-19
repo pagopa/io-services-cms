@@ -4,6 +4,7 @@ import {
   ReadOperationInput,
 } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as B from "fp-ts/Boolean";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
@@ -126,6 +127,10 @@ export const createCosmosStore = <
       }))
     );
 
+  // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
+  // expected status code return are:
+  // - 204: The documenti was successfully deleted.
+  // - 404: The documenti was not found.
   const deleteItem = (id: string): TE.TaskEither<Error, void> =>
     pipe(
       TE.tryCatch(
@@ -136,6 +141,20 @@ export const createCosmosStore = <
               E.toError(err).message
             }`
           )
+      ),
+      TE.chain((rr) =>
+        pipe(
+          rr.statusCode === 204 || rr.statusCode === 404,
+          B.fold(
+            () =>
+              TE.left(
+                new Error(
+                  `Error response received from cosmosDB while deleting item id#${id}, status code: ${rr.statusCode}, container: ${container.url}`
+                )
+              ),
+            () => TE.right(void 0)
+          )
+        )
       ),
       TE.map(() => void 0)
     );

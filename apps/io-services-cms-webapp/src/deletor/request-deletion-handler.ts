@@ -1,9 +1,5 @@
 import { Context } from "@azure/functions";
-import {
-  FsmItemNotFoundError,
-  Queue,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { Queue, ServicePublication } from "@io-services-cms/models";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
@@ -11,6 +7,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
+import { PermanentError } from "../utils/errors";
 
 const parseIncomingMessage = (
   queueItem: Json
@@ -29,23 +26,23 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
+    E.mapLeft(
+      (e) => new PermanentError(`Error parsing incoming message: ${e.message}`)
+    ),
     TE.fromEither,
-    TE.chainW(({ id }) => fsmPublicationClient.getStore().delete(id)),
-    TE.fold(
-      (e) => {
-        if (e instanceof FsmItemNotFoundError) {
-          context.log.info(
-            `Operation Completed no more action needed => ${e.message}`,
-            e
-          );
-          return T.of(void 0);
-        } else {
-          throw e;
-        }
-      },
-      (_) => T.of(void 0)
-    )
+    TE.chainW(({ id }) =>
+      pipe(
+        fsmPublicationClient.getStore().delete(id),
+        TE.map((_) => void 0)
+      )
+    ),
+    TE.getOrElse((e) => {
+      if (e instanceof PermanentError) {
+        context.log.error(`Permanent error: ${e.message}`);
+        return T.of(void 0);
+      }
+      throw e;
+    })
   );
 
 export const createRequestDeletionHandler = (
