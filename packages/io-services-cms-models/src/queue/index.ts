@@ -30,23 +30,13 @@ export const RequestPublicationItem = t.intersection([
   Service,
   t.type({
     autoPublish: t.boolean, // autoPublish required
-    kind: t.literal("RequestPublicationItem"),
   }),
 ]);
 
-export type RequestUnpublicationItem = t.TypeOf<
-  typeof RequestUnpublicationItem
->;
-export const RequestUnpublicationItem = t.type({
+export type RequestDeletionItem = t.TypeOf<typeof RequestDeletionItem>;
+export const RequestDeletionItem = t.type({
   id: ServiceId,
-  kind: t.literal("RequestUnpublicationItem"),
 });
-
-export type RequestPubUnpubItem = t.TypeOf<typeof RequestPubUnpubItem>;
-export const RequestPubUnpubItem = t.union([
-  RequestPublicationItem,
-  RequestUnpublicationItem,
-]);
 
 export type RequestHistoricizationItem = t.TypeOf<
   typeof RequestHistoricizationItem
