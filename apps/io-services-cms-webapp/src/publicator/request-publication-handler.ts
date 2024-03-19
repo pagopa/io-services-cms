@@ -14,10 +14,10 @@ import { withJsonInput } from "../lib/azure/misc";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestPubUnpubItem> =>
+): E.Either<Error, Queue.RequestPublicationItem> =>
   pipe(
     queueItem,
-    Queue.RequestPubUnpubItem.decode,
+    Queue.RequestPublicationItem.decode,
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
@@ -32,16 +32,14 @@ export const handleQueueItem = (
     E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((item) =>
-      item.kind === "RequestPublicationItem"
-        ? fsmPublicationClient.release(
-            item.id,
-            {
-              id: item.id,
-              data: item.data,
-            },
-            item.autoPublish
-          )
-        : fsmPublicationClient.unpublish(item.id)
+      fsmPublicationClient.release(
+        item.id,
+        {
+          id: item.id,
+          data: item.data,
+        },
+        item.autoPublish
+      )
     ),
     TE.fold(
       (e) => {
