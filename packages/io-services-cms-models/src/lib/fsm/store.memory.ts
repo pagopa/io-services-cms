@@ -1,3 +1,4 @@
+import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
@@ -32,6 +33,12 @@ export const createMemoryStore = <
       pipe(
         () => Promise.resolve(m.set(id, value)),
         T.map((_) => value),
+        TE.fromTask
+      ),
+    delete: (id: string) =>
+      pipe(
+        () => Promise.resolve(m.delete(id)),
+        T.map(() => undefined),
         TE.fromTask
       ),
     // for testing

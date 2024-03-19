@@ -46,6 +46,7 @@ export type FSMStore<
   fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
   bulkFetch: (id: string[]) => TE.TaskEither<Error, Array<O.Option<TT>>>;
   save: (id: string, data: TT) => TE.TaskEither<Error, TT>;
+  delete: (id: string) => TE.TaskEither<Error, void>;
 };
 
 export type StateSet<

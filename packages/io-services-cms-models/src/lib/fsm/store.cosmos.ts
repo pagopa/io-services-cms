@@ -3,12 +3,12 @@ import {
   Container,
   ReadOperationInput,
 } from "@azure/cosmos";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
-import * as t from "io-ts";
-import { flow, pipe } from "fp-ts/lib/function";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import { flow, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
@@ -126,5 +126,19 @@ export const createCosmosStore = <
       }))
     );
 
-  return { fetch, bulkFetch, save };
+  const deleteItem = (id: string): TE.TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(
+        () => container.item(id, id).delete(),
+        (err) =>
+          new Error(
+            `Failed to delete item id#${id} from database, ${
+              E.toError(err).message
+            }`
+          )
+      ),
+      TE.map(() => void 0)
+    );
+
+  return { fetch, bulkFetch, save, delete: deleteItem };
 };
