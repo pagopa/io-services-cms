@@ -1,10 +1,10 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as RE from "fp-ts/lib/ReaderEither";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/Option";
 import * as B from "fp-ts/boolean";
+import * as E from "fp-ts/lib/Either";
+import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -12,6 +12,7 @@ import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 type Actions =
   | "requestReview"
   | "requestPublication"
+  | "requestDeletion"
   | "requestUnpublication"
   | "requestHistoricization";
 
@@ -26,11 +27,8 @@ type RequestPublicationAction = Action<
 >;
 type OnApproveActions = Action<"requestPublication", unknown>;
 
-type RequestUnpublicationItem = Action<
-  "requestPublication",
-  Queue.RequestUnpublicationItem
->;
-type OnDeleteActions = Action<"requestPublication", unknown>;
+type RequestDeletionItem = Action<"requestDeletion", Queue.RequestDeletionItem>;
+type OnDeleteActions = Action<"requestDeletion", unknown>;
 
 type RequestHistoricizationAction = Action<
   "requestHistoricization",
@@ -67,16 +65,14 @@ const onApproveHandler =
         max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
       },
       autoPublish: ServiceLifecycle.getAutoPublish(item),
-      kind: "RequestPublicationItem",
     },
   });
 
 const onDeleteHandler = (
   item: ServiceLifecycle.ItemType
-): RequestUnpublicationItem => ({
-  requestPublication: {
+): RequestDeletionItem => ({
+  requestDeletion: {
     id: item.id,
-    kind: "RequestUnpublicationItem",
   },
 });
 
