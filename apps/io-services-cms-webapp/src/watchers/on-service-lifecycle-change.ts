@@ -116,7 +116,7 @@ export const handler =
       E.right,
       E.chain((historicizationAction) =>
         pipe(
-          // process all changes except the one synced from legacy and not delete
+          // process all changes except the one synced from legacy and not delete, those are already handled on the legacy service sync flow
           item.fsm.lastTransition !== SYNC_FROM_LEGACY ||
             item.fsm.state === "deleted",
           B.fold(
