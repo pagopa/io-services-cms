@@ -128,8 +128,8 @@ export const createCosmosStore = <
 
   // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
   // expected status code return are:
-  // - 204: The documenti was successfully deleted.
-  // - 404: The documenti was not found.
+  // - 204: The document was successfully deleted.
+  // - 404: The document was not found.
   const deleteItem = (id: string): TE.TaskEither<Error, void> =>
     pipe(
       TE.tryCatch(() => container.item(id, id).delete(), identity),
