@@ -34,6 +34,12 @@ export const createMemoryStore = <
         T.map((_) => value),
         TE.fromTask
       ),
+    delete: (id: string) =>
+      pipe(
+        () => Promise.resolve(m.delete(id)),
+        T.map(() => undefined),
+        TE.fromTask
+      ),
     // for testing
     inspect: () => m,
     clear: () => m.clear(),

@@ -3,12 +3,12 @@ import {
   Container,
   ReadOperationInput,
 } from "@azure/cosmos";
-import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
-import * as t from "io-ts";
-import { flow, pipe } from "fp-ts/lib/function";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import * as E from "fp-ts/Either";
+import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import { flow, identity, pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
@@ -126,5 +126,20 @@ export const createCosmosStore = <
       }))
     );
 
-  return { fetch, bulkFetch, save };
+  // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
+  // expected status code return are:
+  // - 204: The document was successfully deleted.
+  // - 404: The document was not found.
+  const deleteItem = (id: string): TE.TaskEither<Error, void> =>
+    pipe(
+      TE.tryCatch(() => container.item(id, id).delete(), identity),
+      TE.map(() => void 0),
+      TE.orElse((err) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const code = (err as any).code; // Extract code property
+        return code === 404 ? TE.right(void 0) : TE.left(E.toError(err));
+      })
+    );
+
+  return { fetch, bulkFetch, save, delete: deleteItem };
 };

@@ -36,17 +36,18 @@ describe("On Service Lifecycle Change Handler", () => {
     scenario                                     | item                                                                             | expected
     ${"request-review"}                          | ${{ ...aService, version: "aVersion", fsm: { state: "submitted" } }}             | ${{ requestReview: { ...aService, version: "aVersion" }, requestHistoricization: { ...aService, fsm: { state: "submitted" } } }}
     ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "draft" } }}                                      | ${{ requestHistoricization: { ...aService, fsm: { state: "draft" } } }}
-    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}                | ${{ requestPublication: { ...aPublicationService, autoPublish: true, kind: "RequestPublicationItem" }, requestHistoricization: { ...aService, fsm: { state: "approved", autoPublish: true } } }}
-    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                                   | ${{ requestPublication: { ...aPublicationService, autoPublish: false, kind: "RequestPublicationItem" }, requestHistoricization: { ...aService, fsm: { state: "approved" } } }}
+    ${"request-publication"}                     | ${{ ...aService, fsm: { state: "approved", autoPublish: true } }}                | ${{ requestPublication: { ...aPublicationService, autoPublish: true }, requestHistoricization: { ...aService, fsm: { state: "approved", autoPublish: true } } }}
+    ${"request-publication-with-no-autopublish"} | ${{ ...aService, fsm: { state: "approved" } }}                                   | ${{ requestPublication: { ...aPublicationService, autoPublish: false }, requestHistoricization: { ...aService, fsm: { state: "approved" } } }}
     ${"no-op (empty object)"}                    | ${{ ...aService, fsm: { state: "rejected" } }}                                   | ${{ requestHistoricization: { ...aService, fsm: { state: "rejected" } } }}
-    ${"request-unpublication"}                   | ${{ ...aService, fsm: { state: "deleted" } }}                                    | ${{ requestPublication: { id: aPublicationService.id, kind: "RequestUnpublicationItem" }, requestHistoricization: { ...aService, fsm: { state: "deleted" } } }}
+    ${"request-deletion"}                        | ${{ ...aService, fsm: { state: "deleted" } }}                                    | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, fsm: { state: "deleted" } } }}
+    ${"request-deletion legacy"}                 | ${{ ...aService, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } }}  | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } } }}
     ${"no-op (approved from Legacy)"}            | ${{ ...aService, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } }} | ${{ requestHistoricization: { ...aService, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler({
+    const res = handler({
       MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
     } as unknown as IConfig)({
       item,
-    })();
+    });
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       const actual = res.right;

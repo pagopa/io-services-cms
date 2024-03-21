@@ -14,6 +14,13 @@
       "maxItemsPerInvocation": 30
     },
     {
+      "queueName": "%REQUEST_DELETION_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestDeletion",
+      "type": "queue",
+      "direction": "out"
+    },
+    {
       "queueName": "%REQUEST_VALIDATION_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestReview",

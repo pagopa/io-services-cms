@@ -3,7 +3,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
-import { ServiceLifecycle } from "../..";
+import { ServiceLifecycle, ServicePublication } from "../..";
 import { createCosmosStore } from "../fsm/store.cosmos";
 
 const anItem = {
@@ -240,5 +240,82 @@ describe("store cosmos tests", () => {
       expect(result.right).toHaveProperty("version");
       expect(result.right.version).toBe(anEtag);
     }
+  });
+
+  it("should delete the element", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+
+    const deleteMock = vi.fn((_) => ({
+      delete: vi.fn().mockResolvedValue({
+        statusCode: 204,
+        etag: anEtag,
+      }),
+    }));
+    const containerMock = {
+      item: deleteMock,
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServicePublication.ItemType);
+
+    const result = await store.delete(anItemId)();
+
+    expect(containerMock.item).toBeCalledTimes(1);
+    expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+
+    expect(deleteMock).toBeCalledTimes(1);
+    expect(E.isRight(result)).toBeTruthy();
+  });
+
+  it("deleteItem should not return an error when cosmos response is 404", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+
+    const deleteMock = vi.fn((_) => ({
+      delete: vi.fn().mockRejectedValue({
+        etag: anEtag,
+        code: 404,
+        message: "already deleted",
+      }),
+    }));
+    const containerMock = {
+      item: deleteMock,
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServicePublication.ItemType);
+
+    const result = await store.delete(anItemId)();
+
+    expect(containerMock.item).toBeCalledTimes(1);
+    expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+
+    expect(deleteMock).toBeCalledTimes(1);
+    expect(E.isRight(result)).toBeTruthy();
+  });
+
+  it("deleteItem should return an error in case of unknown statusCode delete response", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+
+    const deleteMock = vi.fn((_) => ({
+      delete: vi.fn().mockRejectedValue({
+        etag: anEtag,
+        code: 500,
+        message: "unknown error",
+      }),
+    }));
+    const containerMock = {
+      item: deleteMock,
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServicePublication.ItemType);
+
+    const result = await store.delete(anItemId)();
+
+    expect(containerMock.item).toBeCalledTimes(1);
+    expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+
+    expect(deleteMock).toBeCalledTimes(1);
+    expect(E.isLeft(result)).toBeTruthy();
   });
 });

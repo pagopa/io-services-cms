@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_DELETION_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestDeletionItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestDeletionEntryPoint"
+}

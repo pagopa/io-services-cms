@@ -19,6 +19,7 @@ import { createBlobService } from "azure-storage";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
@@ -53,6 +54,7 @@ import { handler as onServiceHistoryHandler } from "./watchers/on-service-histor
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
+import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -180,6 +182,9 @@ export const onRequestValidationEntryPoint = pipe(
 export const createRequestPublicationEntryPoint =
   createRequestPublicationHandler(fsmPublicationClient);
 
+export const createRequestDeletionEntryPoint =
+  createRequestDeletionHandler(fsmPublicationClient);
+
 export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
   fsmLifecycleClient,
   fsmPublicationClient,
@@ -223,8 +228,15 @@ export const serviceReviewLegacyCheckerEntryPoint =
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
+  RTE.fromReaderEither,
   processBatchOf(ServiceLifecycle.ItemType),
   setBindings((results) => ({
+    requestDeletion: pipe(
+      results,
+      RA.map(RR.lookup("requestDeletion")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
     requestReview: pipe(
       results,
       RA.map(RR.lookup("requestReview")),
