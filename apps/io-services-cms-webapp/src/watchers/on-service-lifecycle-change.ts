@@ -93,6 +93,11 @@ const getSpecificAction =
     }
   };
 
+// Intecept service-lifecycle changes and take the following actions:
+// - When a service is submitted, we should validate by invoking the OnRequestValidation function via the request-validation queue
+// - When a service is approved, we should release by invoking the OnRequestPublication function via the it in reques-publication queue
+// - When a service is deleted, we should delete from publication by invoking the OnRequestDeletion function via the it in request-deletion queue
+// - In any case we should historicize the change by invocking the OnRequestHistoricization function via the it in request-historicization queue
 export const handler =
   (
     config: IConfig
@@ -106,10 +111,12 @@ export const handler =
   ({ item }) =>
     pipe(
       item,
+      // always historicize service-lifecycle changes
       onAnyChangesHandler,
       E.right,
       E.chain((historicizationAction) =>
         pipe(
+          // process all changes except the one synced from legacy and not delete
           item.fsm.lastTransition !== SYNC_FROM_LEGACY ||
             item.fsm.state === "deleted",
           B.fold(
@@ -117,6 +124,7 @@ export const handler =
             () =>
               pipe(
                 item,
+                // get change specific action
                 getSpecificAction(config),
                 O.fold(
                   () => E.right(historicizationAction),
