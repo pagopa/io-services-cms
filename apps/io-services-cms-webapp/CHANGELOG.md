@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.29.0
+
+### Minor Changes
+
+- 62fd6ef: Physically delete a service from service-publication on Service Deletion action
+
+### Patch Changes
+
+- Updated dependencies [62fd6ef]
+  - @io-services-cms/models@1.19.0
+
 ## 1.28.5
 
 ### Patch Changes

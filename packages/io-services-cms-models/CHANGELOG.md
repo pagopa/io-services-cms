@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.0
+
+### Minor Changes
+
+- 62fd6ef: Physically delete a service from service-publication on Service Deletion action
+
 ## 1.18.2
 
 ### Patch Changes
