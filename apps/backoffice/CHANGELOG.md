@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.9.2
+
+### Patch Changes
+
+- d345cfb: update jose library
+- Updated dependencies [62fd6ef]
+  - @io-services-cms/models@1.19.0
+
 ## 1.9.1
 
 ### Patch Changes
