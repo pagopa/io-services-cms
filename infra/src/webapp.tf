@@ -80,6 +80,7 @@ locals {
     REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
     REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
     REQUEST_VALIDATION_QUEUE      = azurerm_storage_queue.request-validation.name
+    REQUEST_DELETION_QUEUE        = azurerm_storage_queue.request-deletion.name
 
 
     # List of service ids for which quality control will be bypassed

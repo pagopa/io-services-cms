@@ -84,3 +84,13 @@ resource "azurerm_storage_queue" "request-validation-poison" {
   name                 = "request-validation-poison"
   storage_account_name = module.storage_account.name
 }
+
+resource "azurerm_storage_queue" "request-deletion" {
+  name                 = "request-deletion"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-deletion-poison" {
+  name                 = "request-deletion-poison"
+  storage_account_name = module.storage_account.name
+}
