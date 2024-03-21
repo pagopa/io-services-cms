@@ -267,14 +267,41 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
   });
 
-  it("shold return an error in case of unknown statusCode delete response", async () => {
+  it("deleteItem shold not return an error when cosmos response is 404", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
 
     const deleteMock = vi.fn((_) => ({
-      delete: vi.fn().mockResolvedValue({
-        statusCode: 500,
+      delete: vi.fn().mockRejectedValue({
         etag: anEtag,
+        code: 404,
+        message: "already deleted",
+      }),
+    }));
+    const containerMock = {
+      item: deleteMock,
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServicePublication.ItemType);
+
+    const result = await store.delete(anItemId)();
+
+    expect(containerMock.item).toBeCalledTimes(1);
+    expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+
+    expect(deleteMock).toBeCalledTimes(1);
+    expect(E.isRight(result)).toBeTruthy();
+  });
+
+  it("deleteItem shold return an error in case of unknown statusCode delete response", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+
+    const deleteMock = vi.fn((_) => ({
+      delete: vi.fn().mockRejectedValue({
+        etag: anEtag,
+        code: 500,
+        message: "unknown error",
       }),
     }));
     const containerMock = {
