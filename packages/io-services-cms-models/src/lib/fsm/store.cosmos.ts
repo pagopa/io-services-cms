@@ -4,11 +4,10 @@ import {
   ReadOperationInput,
 } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { FSMStore, WithState } from "./types";
 
@@ -133,30 +132,13 @@ export const createCosmosStore = <
   // - 404: The documenti was not found.
   const deleteItem = (id: string): TE.TaskEither<Error, void> =>
     pipe(
-      TE.tryCatch(
-        () => container.item(id, id).delete(),
-        (err) =>
-          new Error(
-            `Failed to delete item id#${id} from database, ${
-              E.toError(err).message
-            }`
-          )
-      ),
-      TE.chain((rr) =>
-        pipe(
-          rr.statusCode === 204 || rr.statusCode === 404,
-          B.fold(
-            () =>
-              TE.left(
-                new Error(
-                  `Error response received from cosmosDB while deleting item id#${id}, status code: ${rr.statusCode}, container: ${container.url}`
-                )
-              ),
-            () => TE.right(void 0)
-          )
-        )
-      ),
-      TE.map(() => void 0)
+      TE.tryCatch(() => container.item(id, id).delete(), identity),
+      TE.map(() => void 0),
+      TE.orElse((err) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const code = (err as any).code; // Extract code property
+        return code === 404 ? TE.right(void 0) : TE.left(E.toError(err));
+      })
     );
 
   return { fetch, bulkFetch, save, delete: deleteItem };
