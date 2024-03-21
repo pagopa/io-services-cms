@@ -242,7 +242,7 @@ describe("store cosmos tests", () => {
     }
   });
 
-  it("shold delete the element", async () => {
+  it("should delete the element", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
 
@@ -267,7 +267,7 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
   });
 
-  it("deleteItem shold not return an error when cosmos response is 404", async () => {
+  it("deleteItem should not return an error when cosmos response is 404", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
 
@@ -293,7 +293,7 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
   });
 
-  it("deleteItem shold return an error in case of unknown statusCode delete response", async () => {
+  it("deleteItem should return an error in case of unknown statusCode delete response", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
 
