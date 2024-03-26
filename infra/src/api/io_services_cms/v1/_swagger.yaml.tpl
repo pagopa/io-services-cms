@@ -470,11 +470,14 @@ components:
               type: integer
             last_update:
               $ref: '#/components/schemas/Timestamp'
+            metadata:
+              $ref: '#/components/schemas/ServiceMetadata'
+          required:
+            - id
+            - status
+            - last_update
+            - metadata
         - $ref: '#/components/schemas/ServiceData'
-      required:
-        - id
-        - status
-        - last_update
     ServicePublication:
       description: Service Publication model data
       allOf:
@@ -488,14 +491,23 @@ components:
               type: integer
             last_update:
               $ref: '#/components/schemas/Timestamp'
+            metadata:
+              $ref: '#/components/schemas/ServiceMetadata'
+          required:
+            - id
+            - status
+            - last_update
+            - metadata
         - $ref: '#/components/schemas/ServiceData'
-      required:
-        - id
-        - status
-        - last_update
     ServicePayload:
       description: A payload used to create or update a service.
       allOf:
+        - type: object
+          properties:
+            metadata:
+              $ref: '#/components/schemas/ServicePayloadMetadata'
+          required:
+            - metadata
         - $ref: '#/components/schemas/ServiceData'
     ServiceData:
       type: object
@@ -515,22 +527,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FiscalCode'
+        authorized_cidrs:
+          description: >-
+            Allowed source IPs or CIDRs for this service.
+            When empty, every IP address it's authorized to call the IO API on
+            behalf of the service.
+          type: array
+          items:
+            $ref: '#/components/schemas/Cidr'
         max_allowed_payment_amount:
           type: integer
           format: int32
           minimum: 0
           maximum: 9999999999
           default: 0
-        metadata:
-          $ref: '#/components/schemas/ServiceMetadata'
       required:
         - name
         - description
         - organization
-        - metadata
-    ServiceMetadata:
+    ServiceBaseMetadata:
       type: object
-      description: A set of service metadata properties
+      description: A set of common service metadata properties
       properties:
         web_url:
           type: string
@@ -568,11 +585,37 @@ components:
         support_url:
           type: string
           minLength: 1
+        category:
+          type: string
+          enum: [SPECIAL, STANDARD]
+        custom_special_flow:
+          type: string
+          minLength: 1
         scope:
           type: string
           enum: [NATIONAL, LOCAL]
       required:
         - scope
+    ServiceMetadata:
+      description: A set of service metadata properties
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            topic:
+              $ref: '#/components/schemas/ServiceTopic'
+    ServicePayloadMetadata:
+      description: A set of service metadata properties on request payload
+      allOf:
+        - $ref: '#/components/schemas/ServiceBaseMetadata'
+        - type: object
+          properties:
+            topic_id:
+              type: number
+              description: The topic id
+              example: 3
+          required:
+            - topic_id
     ServiceLifecycleStatus:
       type: object
       properties:
@@ -741,6 +784,10 @@ components:
       oneOf:
         - $ref: '#/components/schemas/ServiceLifecycleStatus'
         - $ref: '#/components/schemas/ServicePublicationStatusType'
+  Cidr:
+    type: string
+    description: Describes a single IP or a range of IPs.
+    pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
   securitySchemes:
     apiKeyHeader:
       type: apiKey

@@ -16,22 +16,20 @@ export const validateServiceTopicRequest =
   (
     topicId: ServicePayload["metadata"]["topic_id"]
   ): TE.TaskEither<IResponseErrorInternal | IResponseErrorValidation, void> =>
-    topicId !== undefined && topicId !== null
-      ? pipe(
-          getServiceTopicDao(dbConfig),
-          (dao) => dao.existsById(topicId),
-          TE.bimap(
-            (error) => ResponseErrorInternal(error.message),
-            O.fromPredicate(identity)
-          ),
-          TE.chainW(
-            TE.fromOption(() =>
-              ResponseErrorValidation(
-                "Bad Request",
-                "Provided topic_id does not exists"
-              )
-            )
-          ),
-          TE.map(() => void 0)
+    pipe(
+      getServiceTopicDao(dbConfig),
+      (dao) => dao.existsById(topicId),
+      TE.bimap(
+        (error) => ResponseErrorInternal(error.message),
+        O.fromPredicate(identity)
+      ),
+      TE.chainW(
+        TE.fromOption(() =>
+          ResponseErrorValidation(
+            "Bad Request",
+            "Provided topic_id does not exists"
+          )
         )
-      : TE.right(void 0);
+      ),
+      TE.map(() => void 0)
+    );
