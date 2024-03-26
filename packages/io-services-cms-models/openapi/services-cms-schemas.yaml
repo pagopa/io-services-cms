@@ -191,6 +191,8 @@ ServicePayloadMetadata:
           type: number
           description: The topic id
           example: 3
+      required:
+        - topic_id
 ServiceLifecycleStatus:
   type: object
   properties:
