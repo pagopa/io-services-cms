@@ -156,6 +156,28 @@ export const getMockServicePublication = (serviceId?: string) => ({
   status: faker.helpers.arrayElement(["published", "unpublished"])
 });
 
+export const getMockServiceHistoryItem = (serviceId?: string) => {
+  const kind = faker.helpers.arrayElement(["lifecycle", "publication"]);
+  const fsmState =
+    kind === "publication"
+      ? faker.helpers.arrayElement(["published", "unpublished"])
+      : faker.helpers.arrayElement([
+          "draft",
+          "submitted",
+          "approved",
+          "rejected",
+          "deleted"
+        ]);
+  return {
+    ...getMockServiceLifecycle(serviceId),
+    status: {
+      kind: kind,
+      value: fsmState,
+      reason: fsmState === "rejected" ? faker.lorem.sentence() : undefined
+    }
+  };
+};
+
 export const aMockServicePublication = {
   ...getMockServiceLifecycle(),
   status: faker.helpers.arrayElement(["published", "unpublished"])
@@ -256,12 +278,7 @@ export const getMockServiceHistory = (
 
   return {
     items: total
-      .map(_ =>
-        faker.helpers.arrayElement([
-          getMockServiceLifecycle(serviceId),
-          getMockServicePublication(serviceId)
-        ])
-      )
+      .map(_ => getMockServiceHistoryItem(serviceId))
       .sort((a, b) =>
         order
           ? order === "DESC"
