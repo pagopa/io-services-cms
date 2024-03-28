@@ -31,9 +31,17 @@ ServiceHistoryItem:
         - metadata
     - $ref: '#/ServiceData'
 ServiceHistoryItemStatus:
-  oneOf:
-    - $ref: '#/ServiceLifecycleStatus'
-    - $ref: '#/ServicePublicationStatusType'
+  type: object
+  properties:
+    kind:
+      $ref: '#/ServiceHistoryStatusKind'
+    value:
+      $ref: '#/ServiceHistoryStatusType'
+    reason:
+      description: Reason for status value
+      type: string
+  required:
+    - value
 ServiceLifecycle:
   description: Service Lifecycle model data
   allOf:
@@ -201,6 +209,18 @@ ServiceLifecycleStatus:
       type: string
   required:
     - value
+ServiceHistoryStatusKind:
+  description: |
+    Status kind for Service History<br>
+    - publication: Indicates the status is related to a service-publication event
+    - lifecycle: Indicates the status is related to a service-lifecycle event
+  type: string
+  enum: [publication, lifecycle]
+ServiceHistoryStatusType:
+  description: |
+    A Service History record contains either publication or lifecycle items, so can have a combination of Service lifecycle status and publication status<br>
+  type: string
+  enum: [draft, submitted, approved, rejected, deleted, published, unpublished]
 ServiceLifecycleStatusType:
   description: |
     Service lifecycle status<br>
