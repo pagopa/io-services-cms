@@ -1,7 +1,7 @@
 import { ServiceHistory } from "@/generated/api/ServiceHistory";
+import { ServiceHistoryStatusTypeEnum } from "@/generated/api/ServiceHistoryStatusType";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
-import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServicePublicationStatusTypeEnum } from "@/generated/api/ServicePublicationStatusType";
 import {
   ArrowForward,
@@ -35,6 +35,8 @@ import {
   DrawerBaseContent,
   useDrawer
 } from "../drawer-provider";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import { ServiceHistoryItem } from "@/generated/services-cms/ServiceHistoryItem";
 
 export type ServiceHistoryComponentProps = {
   historyData?: ServiceHistory;
@@ -79,30 +81,26 @@ export const ServiceHistoryComponent = ({
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  /**
-   * Get string value for service status
-   * @param status Service Lifecycle/Publication status
-   */
-  const getServiceStatusValue = (
-    status: ServiceLifecycleStatus | ServicePublicationStatusTypeEnum
-  ) => (typeof status === "string" ? status : status.value);
+  function getLifecycleStatusOrNull(
+    value: string
+  ): ServiceLifecycleStatusTypeEnum | null {
+    return Object.values(ServiceLifecycleStatusTypeEnum).includes(
+      value as ServiceLifecycleStatusTypeEnum
+    )
+      ? (value as ServiceLifecycleStatusTypeEnum)
+      : null;
+  }
 
-  const isLifecycleStatus = (
-    status: ServiceLifecycleStatus | ServicePublicationStatusTypeEnum
-  ) => typeof status === "object";
-
-  const getServiceStatusIcon = (
-    status: ServiceLifecycleStatusTypeEnum | ServicePublicationStatusTypeEnum
-  ) => {
+  const getServiceStatusIcon = (status: ServiceHistoryStatusTypeEnum) => {
     switch (status) {
-      case ServicePublicationStatusTypeEnum.published:
+      case ServiceHistoryStatusTypeEnum.published:
         return (
           <Check
             fontSize="inherit"
             sx={{ color: "text.disabled", marginY: 1 }}
           />
         );
-      case ServicePublicationStatusTypeEnum.unpublished:
+      case ServiceHistoryStatusTypeEnum.unpublished:
         return (
           <Close
             fontSize="inherit"
@@ -138,6 +136,20 @@ export const ServiceHistoryComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHistory]);
 
+  const renderServiceStatus = (
+    item: ServiceHistoryItem
+  ): JSX.Element | null => {
+    const status = getLifecycleStatusOrNull(item.status.value);
+    return status ? (
+      <ServiceStatus
+        status={{
+          value: status,
+          reason: item.status.reason
+        }}
+      />
+    ) : null;
+  };
+
   const renderHistoryContent = () => (
     <DrawerBaseContent
       width="25vw"
@@ -165,7 +177,7 @@ export const ServiceHistoryComponent = ({
             </TimelineNotificationOppositeContent>
             <TimelineNotificationSeparator>
               <TimelineConnector />
-              {getServiceStatusIcon(getServiceStatusValue(item.status))}
+              {getServiceStatusIcon(item.status.value)}
               <TimelineConnector />
             </TimelineNotificationSeparator>
             <TimelineNotificationContent>
@@ -177,41 +189,40 @@ export const ServiceHistoryComponent = ({
                 {getTime(item.last_update)}
               </Typography>
 
-              {typeof item.status === "object" ? (
-                <ServiceStatus status={item.status} />
-              ) : null}
+              {renderServiceStatus(item)}
 
               <Typography
                 color="text.primary"
                 variant="caption"
                 component="div"
               >
-                {t(
-                  `service.history.status.${getServiceStatusValue(item.status)}`
-                )}
+                {t(`service.history.status.${item.status.value}`)}
               </Typography>
-
-              {getServiceStatusValue(item.status) === "rejected" ? (
+              {item.status.value === "rejected" ? (
                 <ButtonNaked
                   variant="naked"
                   color="primary"
                   startIcon={<Feedback />}
                   onClick={() =>
-                    openRejectionReasonDrawer(
-                      (item.status as ServiceLifecycleStatus).reason ?? ""
-                    )
+                    openRejectionReasonDrawer(item.status.reason ?? "")
                   }
                 >
                   {t("service.history.readRejectReason")}
                 </ButtonNaked>
               ) : null}
-              {getServiceStatusValue(item.status) === "draft" ? (
+              {item.status.value === "draft" ? (
                 <ButtonNaked
                   variant="naked"
                   color="primary"
                   endIcon={<ArrowForward />}
                   onClick={() =>
-                    openHistoryItemDetailsDrawer(item as ServiceLifecycle)
+                    openHistoryItemDetailsDrawer({
+                      ...item,
+                      status: {
+                        value: ServiceLifecycleStatusTypeEnum.draft,
+                        reason: item.status.reason
+                      }
+                    } as ServiceLifecycle)
                   }
                 >
                   {t("routes.service.viewDetails")}
