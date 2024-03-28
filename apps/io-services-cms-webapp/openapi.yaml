@@ -668,41 +668,45 @@ components:
           type: string
           description: the application name
     ServiceHistory:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistory'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistory'
     ServiceHistoryItem:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItem'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItem'
     ServiceHistoryItemStatus:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItemStatus'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItemStatus'
+    ServiceHistoryStatusKind:
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusKind'
+    ServiceHistoryStatusType:
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusType'
     ServiceLifecycle:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
     ServicePublication:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
     ServicePayload:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayload'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayload'
     ServiceData:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
     ServiceBaseMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
     ServiceMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
     ServicePayloadMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
     ServiceLifecycleStatus:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
     ServiceLifecycleStatusType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatusType'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatusType'
     ServicePublicationStatusType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
     ServicePagination:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePagination'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePagination'
     ServiceTopicList:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
     ServiceTopic:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization'
     OrganizationFiscalCode:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
     FiscalCode:
@@ -710,16 +714,16 @@ components:
     Logo:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Logo'
     SubscriptionKeys:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeys'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeys'
     SubscriptionKeyType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType'
     Cidr:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
     ResponseError:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/ResponseError'
     Comment:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Comment'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Comment'
     ReviewRequest:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
+      $ref: '/Users/gianmaria.scorza/Develop/io/io-services-cms/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
