@@ -1,8 +1,8 @@
 import { ServiceHistory } from "@/generated/api/ServiceHistory";
+import { ServiceHistoryItem } from "@/generated/api/ServiceHistoryItem";
 import { ServiceHistoryStatusTypeEnum } from "@/generated/api/ServiceHistoryStatusType";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
-import { ServiceHistoryItem } from "@/generated/services-cms/ServiceHistoryItem";
 import {
   ArrowForward,
   Check,
