@@ -32,6 +32,10 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
       .max(1000, { message: t("forms.errors.field.max", { max: 1000 }) }),
     metadata: z.object({
       scope: z.string(),
+      topic_id: z.union([
+        z.string().min(1, { message: t("forms.errors.field.required") }),
+        z.number().min(0, { message: t("forms.errors.field.required") })
+      ]),
       address: z
         .string()
         .max(100, { message: t("forms.errors.field.max", { max: 100 }) })
