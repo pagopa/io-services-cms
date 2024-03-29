@@ -1,8 +1,8 @@
 import { ServiceHistory } from "@/generated/api/ServiceHistory";
 import { ServiceHistoryStatusTypeEnum } from "@/generated/api/ServiceHistoryStatusType";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
-import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
-import { ServicePublicationStatusTypeEnum } from "@/generated/api/ServicePublicationStatusType";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import { ServiceHistoryItem } from "@/generated/services-cms/ServiceHistoryItem";
 import {
   ArrowForward,
   Check,
@@ -35,8 +35,6 @@ import {
   DrawerBaseContent,
   useDrawer
 } from "../drawer-provider";
-import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
-import { ServiceHistoryItem } from "@/generated/services-cms/ServiceHistoryItem";
 
 export type ServiceHistoryComponentProps = {
   historyData?: ServiceHistory;
@@ -222,7 +220,7 @@ export const ServiceHistoryComponent = ({
                         value: ServiceLifecycleStatusTypeEnum.draft,
                         reason: item.status.reason
                       }
-                    } as ServiceLifecycle)
+                    })
                   }
                 >
                   {t("routes.service.viewDetails")}
