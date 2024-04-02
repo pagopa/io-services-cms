@@ -5,12 +5,10 @@ import { pipe } from "fp-ts/lib/function";
 import { TopicPostgreSqlConfig } from "../../config";
 import { ServiceHistoryItem as ServiceResponsePayload } from "../../generated/api/ServiceHistoryItem";
 import { ServiceHistoryItemStatus } from "../../generated/api/ServiceHistoryItemStatus";
+import { ServiceHistoryStatusKindEnum } from "../../generated/api/ServiceHistoryStatusKind";
+import { ServiceHistoryStatusTypeEnum } from "../../generated/api/ServiceHistoryStatusType";
 import { getDao as getServiceTopicDao } from "../service-topic-dao";
-import {
-  toScopeType,
-  toServiceStatus as toServiceLifecycleStatus,
-} from "./service-lifecycle-converters";
-import { toServiceStatusType as toServicePublicationStatusType } from "./service-publication-converters";
+import { toScopeType } from "./service-lifecycle-converters";
 
 export const itemsToResponse =
   (dbConfig: TopicPostgreSqlConfig) =>
@@ -69,7 +67,26 @@ const toServiceTopic =
 
 export const buildStatus = (
   fsm: ServiceHistoryCosmosItem["fsm"]
-): ServiceHistoryItemStatus =>
-  fsm.state === "published" || fsm.state === "unpublished"
-    ? toServicePublicationStatusType(fsm.state)
-    : toServiceLifecycleStatus(fsm);
+): ServiceHistoryItemStatus => {
+  switch (fsm.state) {
+    case "approved":
+    case "deleted":
+    case "draft":
+    case "submitted":
+      return {
+        kind: ServiceHistoryStatusKindEnum.lifecycle,
+        value: ServiceHistoryStatusTypeEnum[fsm.state],
+      };
+    case "rejected":
+      return {
+        kind: ServiceHistoryStatusKindEnum.lifecycle,
+        value: ServiceHistoryStatusTypeEnum[fsm.state],
+        reason: (fsm.reason as string) ?? undefined, // FIXME
+      };
+    default:
+      return {
+        kind: ServiceHistoryStatusKindEnum.publication,
+        value: ServiceHistoryStatusTypeEnum[fsm.state],
+      };
+  }
+};

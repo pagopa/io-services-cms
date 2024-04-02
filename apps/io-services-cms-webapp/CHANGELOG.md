@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.29.1
+
+### Patch Changes
+
+- 1801d69: Unify History payload status field
+- Updated dependencies [2c575f5]
+  - @io-services-cms/models@1.19.1
+
 ## 1.29.0
 
 ### Minor Changes

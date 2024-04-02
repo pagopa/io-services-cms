@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.1
+
+### Patch Changes
+
+- 2c575f5: Unify status for serviceHistoryItem component in openApi
+
 ## 1.19.0
 
 ### Minor Changes
