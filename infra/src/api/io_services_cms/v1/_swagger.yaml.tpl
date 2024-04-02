@@ -781,13 +781,33 @@ components:
             - metadata
         - $ref: '#/components/schemas/ServiceData'
     ServiceHistoryItemStatus:
-      oneOf:
-        - $ref: '#/components/schemas/ServiceLifecycleStatus'
-        - $ref: '#/components/schemas/ServicePublicationStatusType'
-  Cidr:
-    type: string
-    description: Describes a single IP or a range of IPs.
-    pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ServiceHistoryStatusKind'
+        value:
+          $ref: '#/components/schemas/ServiceHistoryStatusType'
+        reason:
+          description: Reason for status value
+          type: string
+      required:
+        - value
+    ServiceHistoryStatusKind:
+      description: |
+        Status kind for Service History<br>
+        - publication: Indicates the status is related to a service-publication event
+        - lifecycle: Indicates the status is related to a service-lifecycle event
+      type: string
+      enum: [publication, lifecycle]
+    ServiceHistoryStatusType:
+      description: |
+        A Service History record contains either publication or lifecycle items, so can have a combination of Service lifecycle status and publication status<br>
+      type: string
+      enum: [draft, submitted, approved, rejected, deleted, published, unpublished]
+    Cidr:
+      type: string
+      description: Describes a single IP or a range of IPs.
+      pattern: ^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$
   securitySchemes:
     apiKeyHeader:
       type: apiKey
