@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.30.0
+
+### Minor Changes
+
+- 5360f8d: Topic is now required on Service Creation/Edit
+
 ## 1.29.1
 
 ### Patch Changes

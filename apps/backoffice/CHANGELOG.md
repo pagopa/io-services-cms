@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.0
+
+### Minor Changes
+
+- da23e9f: Topic is now required on Service Creation/Edit
+
 ## 1.9.4
 
 ### Patch Changes
