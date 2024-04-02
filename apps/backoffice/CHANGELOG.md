@@ -1,5 +1,19 @@
 # io-services-cms-backoffice
 
+## 1.9.4
+
+### Patch Changes
+
+- 7b0a029: Service history drawer: update status type management
+
+## 1.9.3
+
+### Patch Changes
+
+- 1801d69: Unify History payload status field
+- Updated dependencies [2c575f5]
+  - @io-services-cms/models@1.19.1
+
 ## 1.9.2
 
 ### Patch Changes
