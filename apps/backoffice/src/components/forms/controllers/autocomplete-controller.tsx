@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, get, useFormContext } from "react-hook-form";
 
 export type AutocompleteControllerProps = {
   name: string;
@@ -31,7 +31,8 @@ export function AutocompleteController({
   helperText
 }: AutocompleteControllerProps) {
   const { t } = useTranslation();
-  const { register, control } = useFormContext();
+  const { register, control, formState } = useFormContext();
+  const error = get(formState.errors, name);
 
   if (items.length === 0) return; // avoid mui out-of-range error
   return (
@@ -60,10 +61,17 @@ export function AutocompleteController({
               typeof v === "number" ? o.id === v : false
             }
             renderInput={params => (
-              <TextField {...params} label={label} placeholder={placeholder} />
+              <TextField
+                {...params}
+                label={label}
+                placeholder={placeholder}
+                error={!!error}
+              />
             )}
           />
-          <FormHelperText>{helperText}</FormHelperText>
+          <FormHelperText error={!!error}>
+            {error ? error.message : helperText ?? null}
+          </FormHelperText>
         </FormControl>
       )}
     />
