@@ -23,6 +23,26 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+const { validateServiceTopicRequest } = vi.hoisted(() => ({
+  validateServiceTopicRequest: vi.fn(),
+}));
+
+vi.mock("../../../utils/service-topic-validator", () => ({
+  validateServiceTopicRequest: validateServiceTopicRequest,
+}));
+
+const { getServiceTopicDao } = vi.hoisted(() => ({
+  getServiceTopicDao: vi.fn(() => ({
+    findById: vi.fn((id: number) =>
+      TE.right(O.some({ id, name: "topic name" }))
+    ),
+  })),
+}));
+
+vi.mock("../../../utils/service-topic-dao", () => ({
+  getDao: getServiceTopicDao,
+}));
+
 vi.mock("../../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
 
@@ -119,10 +139,11 @@ const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
 } as any;
 
+afterEach(() => {
+  vi.clearAllMocks();
+});
 describe("createService", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+  validateServiceTopicRequest.mockReturnValue(() => TE.right(void 0));
 
   const app = createWebServer({
     basePath: "api",
@@ -147,6 +168,7 @@ describe("createService", () => {
     },
     metadata: {
       scope: "LOCAL",
+      topic_id: 1,
     },
     authorized_recipients: ["BBBBBB99C88D555I"],
   };

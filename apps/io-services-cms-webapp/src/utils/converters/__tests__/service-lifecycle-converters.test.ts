@@ -48,6 +48,7 @@ describe("test service-lifecycle-converters", () => {
       },
       metadata: {
         scope: "LOCAL",
+        topic_id: 1,
       },
       authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
@@ -73,6 +74,7 @@ describe("test service-lifecycle-converters", () => {
       },
       metadata: {
         scope: "LOCAL",
+        topic_id: 1,
       },
       authorized_recipients: [aSandboxFiscalCode],
     } as unknown as ServicePayload;
@@ -97,6 +99,7 @@ describe("test service-lifecycle-converters", () => {
       },
       metadata: {
         scope: "LOCAL",
+        topic_id: 1,
       },
       authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
@@ -123,6 +126,7 @@ describe("test service-lifecycle-converters", () => {
       metadata: {
         scope: "LOCAL",
         custom_special_flow: aCustomSpecialFlow,
+        topic_id: 1,
       },
       authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
