@@ -3037,6 +3037,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^18.13.0":
+  version: 18.19.29
+  resolution: "@types/node@npm:18.19.29"
+  dependencies:
+    undici-types: ~5.26.4
+  checksum: a04066eaca328fbf1bac6fc86e5565af1c0db3481f1f863da8b7ed1455688afa68772827382943c63b336b456bab9935a85572ac4eb7bff14886e6f5b0bdf7d6
+  languageName: node
+  linkType: hard
+
 "@types/normalize-package-data@npm:^2.4.0":
   version: 2.4.1
   resolution: "@types/normalize-package-data@npm:2.4.1"
@@ -8402,15 +8411,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"io-services-backend@workspace:apps/io-services-backend":
+"io-services-app-backend@workspace:apps/io-services-app-backend":
   version: 0.0.0-use.local
-  resolution: "io-services-backend@workspace:apps/io-services-backend"
+  resolution: "io-services-app-backend@workspace:apps/io-services-app-backend"
   dependencies:
     "@azure/cosmos": ^4.0.0
     "@azure/functions": ^4.4.0
     "@azure/identity": ^4.0.1
     "@pagopa/eslint-config": ^3.0.0
     "@rushstack/eslint-patch": ^1.10.1
+    "@types/node": ^18.13.0
     "@vitest/coverage-v8": ^1.4.0
     azure-functions-core-tools: 4
     dotenv-cli: ^7.4.1
@@ -14405,6 +14415,13 @@ __metadata:
   version: 1.13.6
   resolution: "underscore@npm:1.13.6"
   checksum: d5cedd14a9d0d91dd38c1ce6169e4455bb931f0aaf354108e47bd46d3f2da7464d49b2171a5cf786d61963204a42d01ea1332a903b7342ad428deaafaf70ec36
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~5.26.4":
+  version: 5.26.5
+  resolution: "undici-types@npm:5.26.5"
+  checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
   languageName: node
   linkType: hard
 
