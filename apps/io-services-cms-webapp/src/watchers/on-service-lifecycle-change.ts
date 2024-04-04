@@ -36,12 +36,12 @@ type RequestHistoricizationAction = Action<
 >;
 
 const onAnyChangesHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycle.ItemType & { _ts: number }
 ): RequestHistoricizationAction => ({
   requestHistoricization: {
     ...item,
-    last_update:
-      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
+    // eslint-disable-next-line no-underscore-dangle
+    last_update: new Date(item._ts * 1000).toISOString() as NonEmptyString, // last_update fallback (value is always set by persistence layer) TODO add log
   },
 });
 
@@ -102,7 +102,7 @@ export const handler =
   (
     config: IConfig
   ): RE.ReaderEither<
-    { item: ServiceLifecycle.ItemType },
+    { item: ServiceLifecycle.ItemType & { _ts: number } },
     Error,
     | RequestHistoricizationAction
     | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &
