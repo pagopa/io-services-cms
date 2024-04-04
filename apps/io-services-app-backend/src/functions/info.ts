@@ -8,7 +8,7 @@ import packageJson from "../../package.json";
 
 export async function info(
   request: HttpRequest,
-  context: InvocationContext,
+  context: InvocationContext
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
   return {
