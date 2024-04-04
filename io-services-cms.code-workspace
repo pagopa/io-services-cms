@@ -11,7 +11,7 @@
       "path": "apps/io-services-cms-webapp"
     },
     {
-      "path": "apps/io-services-backend"
+      "path": "apps/io-services-app-backend"
     },
     {
       "path": "packages/io-services-cms-models",

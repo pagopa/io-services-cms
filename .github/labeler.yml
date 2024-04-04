@@ -1,6 +1,7 @@
 internal: packages/**/*
 backoffice: apps/backoffice/**/*
 webapp: apps/io-services-cms-webapp/**/*
+app-backend: apps/io-services-app-backend/**/*
 docs: docs/**/*
 ci: .github/workflows/**/*
 infra: infra/**/*
