@@ -8,7 +8,10 @@
       "name": "io-services-cms-backoffice"
     },
     {
-      "path": "apps/io-services-cms-webapp",
+      "path": "apps/io-services-cms-webapp"
+    },
+    {
+      "path": "apps/io-services-backend"
     },
     {
       "path": "packages/io-services-cms-models",
