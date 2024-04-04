@@ -1,0 +1,45 @@
+{
+  "name": "io-services-backend",
+  "version": "0.0.0",
+  "packageManager": "yarn@3.3.0",
+  "bundledDependencies": true,
+  "files": [
+    "dist",
+    "host.json",
+    "package.json"
+  ],
+  "main": "dist/functions/*.js",
+  "scripts": {
+    "build": "rm -rf ./dist & tsc",
+    "build:package": "npm-pack-zip --add-version",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**\"",
+    "lint:fix": "eslint --fix \"src/**\"",
+    "start": "dotenv -e .env func start -- --javascript --verbose"
+  },
+  "devDependencies": {
+    "@pagopa/eslint-config": "^3.0.0",
+    "@rushstack/eslint-patch": "^1.10.1",
+    "@types/node": "^18.13.0",
+    "@vitest/coverage-v8": "^1.4.0",
+    "azure-functions-core-tools": "4",
+    "eslint": "^8.57.0",
+    "npm-pack-zip": "^1.3.0",
+    "prettier": "^3.2.5",
+    "supertest": "^6.3.4",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.0.0",
+    "@azure/functions": "^4.4.0",
+    "@azure/identity": "^4.0.1",
+    "dotenv-cli": "^7.4.1"
+  },
+  "imports": {
+    "#package.json": "./package.json"
+  }
+}
