@@ -4,7 +4,6 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-
 import packageJson from "../../package.json";
 
 export async function info(
@@ -12,7 +11,6 @@ export async function info(
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
-
   return {
     jsonBody: {
       name: packageJson.name,

@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "start": "dotenv -e .env func start -- --javascript --verbose"
+    "start": "dotenv -e .env func start -- --javascript"
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^3.0.0",
