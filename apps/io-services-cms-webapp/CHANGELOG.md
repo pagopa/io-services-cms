@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.30.1
+
+### Patch Changes
+
+- f041f6c: ADD GET /internal/services/duplicates API, to check for pure service duplicate
+
 ## 1.30.0
 
 ### Minor Changes
