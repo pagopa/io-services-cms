@@ -129,13 +129,9 @@ const getNotDeletedDuplicatesOnServiceLifecycle =
   (serviceIds: ReadonlyArray<NonEmptyString>) =>
     serviceLifecycleCosmosHelper.fetchSingleItem(
       {
-        query: `SELECT VALUE c.id FROM c WHERE c.id IN (@serviceIds) AND c.fsm.state != 'deleted'`,
-        parameters: [
-          {
-            name: "@serviceIds",
-            value: serviceIds.join(","),
-          },
-        ],
+        query: `SELECT VALUE c.id FROM c WHERE c.id IN ('${serviceIds.join(
+          "', '"
+        )}') AND c.fsm.state != 'deleted'`,
       },
       NonEmptyString
     );

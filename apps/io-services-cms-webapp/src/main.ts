@@ -142,6 +142,8 @@ export const httpEntryPoint = pipe(
     blobService,
     serviceTopicDao: getServiceTopicDao(config),
     serviceHistoryPagedHelper,
+    servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   },
   createWebServer,
   expressToAzureFunction
