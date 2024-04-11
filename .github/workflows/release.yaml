@@ -112,6 +112,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: true
-          files: apps/${{ matrix.package.name == 'io-services-cms-backoffice' && 'backoffice' || matrix.package.name }}/${{ matrix.package.name }}-${{ matrix.package.version }}.zip
+          files: apps/${{ matrix.package.name == 'io-services-cms-backoffice' && 'backoffice' || matrix.package.name == 'io-services-app-backend' && 'app-backend' || matrix.package.name }}/${{ matrix.package.name }}-${{ matrix.package.version }}.zip
           tag_name: ${{ matrix.package.name }}@${{ matrix.package.version }}
           generate_release_notes: true

@@ -8305,9 +8305,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"io-services-app-backend@workspace:apps/io-services-app-backend":
+"io-services-app-backend@workspace:apps/app-backend":
   version: 0.0.0-use.local
-  resolution: "io-services-app-backend@workspace:apps/io-services-app-backend"
+  resolution: "io-services-app-backend@workspace:apps/app-backend"
   dependencies:
     "@azure/cosmos": ^4.0.0
     "@azure/functions": ^4.4.0
