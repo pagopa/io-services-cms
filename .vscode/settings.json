@@ -3,5 +3,5 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "azureFunctions.projectSubpath": "apps/io-services-app-backend"
+  "azureFunctions.projectSubpath": "apps/app-backend"
 }
