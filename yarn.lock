@@ -8313,6 +8313,7 @@ __metadata:
     "@azure/functions": ^4.4.0
     "@azure/identity": ^4.0.1
     "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/openapi-codegen-ts": ^13.1.0
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.4.0
     azure-functions-core-tools: 4
