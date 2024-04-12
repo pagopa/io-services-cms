@@ -18,10 +18,15 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "start": "dotenv -e .env func start -- --javascript"
+    "start": "dotenv -e .env func start -- --javascript",
+    "api-definitions:clean": "rm -rf ./src/generated/api",
+    "api-definitions:generate": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders",
+    "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:generate",
+    "generate": "yarn api-definitions:all"
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^3.0.0",
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
     "@rushstack/eslint-patch": "^1.2.0",
     "@vitest/coverage-v8": "^1.4.0",
     "azure-functions-core-tools": "4",
