@@ -192,11 +192,11 @@ components:
         id:
           type: string
           description: Institution ID
-          example: [100000]
+          example: 12345678901
         name:
           type: string
           description: Institution Name
-          example: [Comune di Roma]
+          example: Comune di Roma
         fiscal_code:
           $ref: "#/components/schemas/OrganizationFiscalCode"
     InstitutionServicesResource:
@@ -220,11 +220,11 @@ components:
         name:
           type: string
           description: Service Name
-          example: [Tari]
+          example: Tari
         version:
           type: integer
           description: Service Version (_ts)_
-          example: [1687776265]
+          example: 1687776265
     ServiceDetails:
       type: object
       properties:
