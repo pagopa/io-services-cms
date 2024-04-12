@@ -7,7 +7,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 0.5.0
+  version: 0.6.0
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -255,12 +255,10 @@ components:
           items:
             $ref: "#/components/schemas/FeaturedItem"
     FeaturedItem:
-      type: object
-      properties:
-        service:
-          $ref: "#/components/schemas/ServiceMinified"
-        intitution:
-          $ref: "#/components/schemas/Institution"
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/ServiceMinified'
+        - $ref: '#/components/schemas/Institution'
     ServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
     Organization:
