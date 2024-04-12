@@ -7,7 +7,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 0.4.0
+  version: 0.5.0
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -16,7 +16,7 @@ tags:
   - name: details
     description: Retrieve resources details
   - name: featured
-    description: Retrieve featured Lists
+    description: Retrieve featured items
 paths:
   /institutions:
     get:
@@ -152,19 +152,19 @@ paths:
           description: Not found
         "500":
           description: Internal Server Error
-  /services/featured:
+  /featured:
     get:
       tags:
         - featured
-      summary: Retrieve featured services
-      operationId: getFeaturedServices
+      summary: Retrieve featured intitutions and/or services
+      operationId: getFeaturedItems
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FeaturedServices"
+                $ref: "#/components/schemas/FeaturedItems"
         "401":
           description: Unauthorized
         "403":
@@ -192,11 +192,9 @@ components:
         id:
           type: string
           description: Institution ID
-          example: 12345678901
         name:
           type: string
           description: Institution Name
-          example: Comune di Roma
         fiscal_code:
           $ref: "#/components/schemas/OrganizationFiscalCode"
     InstitutionServicesResource:
@@ -223,8 +221,7 @@ components:
           example: Tari
         version:
           type: integer
-          description: Service Version (_ts)_
-          example: 1687776265
+          description: Service Version
     ServiceDetails:
       type: object
       properties:
@@ -250,20 +247,20 @@ components:
         - id
         - name
         - version
-    FeaturedServices:
+    FeaturedItems:
       type: object
       properties:
-        services:
+        items:
           type: array
           items:
-            $ref: "#/components/schemas/FeaturedService"
-    FeaturedService:
+            $ref: "#/components/schemas/FeaturedItem"
+    FeaturedItem:
       type: object
       properties:
-        organization_fiscal_code:
-          $ref: "#/components/schemas/OrganizationFiscalCode"
-      allOf:
-        - $ref: "#/components/schemas/ServiceMinified"
+        service:
+          $ref: "#/components/schemas/ServiceMinified"
+        intitution:
+          $ref: "#/components/schemas/Institution"
     ServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
     Organization:
