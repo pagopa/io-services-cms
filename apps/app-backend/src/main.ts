@@ -7,23 +7,27 @@ import { GetFeaturedServicesIntitutionsFn } from "./functions/GetFeaturedService
 import { InfoFn } from "./functions/Info";
 
 const config = pipe(
-    getConfigOrError(),
-    E.getOrElseW((error) => {
-      throw error;
-    })
-  );
+  getConfigOrError(),
+  E.getOrElseW((error) => {
+    throw error;
+  })
+);
 // Handlers Depedencies
-const blobService = createBlobService(config.FEATURED_ITEMS_BLOB_CONNECTION_STRING);
+const blobService = createBlobService(
+  config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
+);
 
 const Info = InfoFn({});
 app.http("Info", {
   authLevel: "anonymous",
   handler: Info,
   methods: ["GET"],
-  route: "info"
+  route: "info",
 });
 
-const GetFeaturedServicesIntitutions = GetFeaturedServicesIntitutionsFn(config)({blobService});
+const GetFeaturedServicesIntitutions = GetFeaturedServicesIntitutionsFn(config)(
+  { blobService }
+);
 app.http("GetFeaturedServicesIntitutions", {
   methods: ["GET"],
   route: "featured",

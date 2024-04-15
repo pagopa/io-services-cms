@@ -50,7 +50,7 @@ export const makeFeaturedServicesIntitutionsHandler: (
   | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
   BlobServiceDependency
 > = (featuredItemsConfig: FeaturedItemsConfig) =>
-  H.of((request: H.HttpRequest) =>
+  H.of((_: H.HttpRequest) =>
     pipe(
       // Retrieve the featured Items from blobStorage
       retrieveFeaturedItems(featuredItemsConfig),
