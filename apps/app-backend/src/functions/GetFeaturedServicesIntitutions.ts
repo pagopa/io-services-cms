@@ -1,20 +1,19 @@
 import * as H from "@pagopa/handler-kit";
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
+import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
 import * as L from "@pagopa/logger";
 import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { FeaturedItemsConfig } from "../config";
 import { FeaturedItems } from "../generated/definitions/internal/FeaturedItems";
 import { BlobServiceDependency } from "../utils/blob-storage/dependency";
-import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
 
-export const retrieveFeaturedItems: () => RTE.ReaderTaskEither<
-  BlobServiceDependency,
-  H.HttpError,
-  FeaturedItems
-> =
-  () =>
+export const retrieveFeaturedItems: (
+  featuredItemsConfig: FeaturedItemsConfig
+) => RTE.ReaderTaskEither<BlobServiceDependency, H.HttpError, FeaturedItems> =
+  (featuredItemsConfig: FeaturedItemsConfig) =>
   ({ blobService }) =>
     pipe(
       TE.tryCatch(
@@ -22,8 +21,8 @@ export const retrieveFeaturedItems: () => RTE.ReaderTaskEither<
           getBlobAsObject(
             FeaturedItems,
             blobService,
-            "FEATURED_ITEMS_CONTAINER_NAME",
-            "FEATURED_ITEMS_FILE_NAME"
+            featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
+            featuredItemsConfig.FEATURED_ITEMS_FILE_NAME
           ),
         (err) =>
           new H.HttpError(`Unexpected error: [${E.toError(err).message}]`)
@@ -37,27 +36,44 @@ export const retrieveFeaturedItems: () => RTE.ReaderTaskEither<
         )
       ),
       TE.chain(
-        TE.fromOption(() => new H.HttpError("The audit log was not saved"))
+        TE.fromOption(
+          () => new H.HttpError("No featuredItems file found on blobService")
+        )
       )
     );
 
-export const makeFeaturedServicesIntitutionsHandler: H.Handler<
+export const makeFeaturedServicesIntitutionsHandler: (
+  featuredItemsConfig: FeaturedItemsConfig
+) => H.Handler<
   H.HttpRequest,
-  H.HttpResponse<FeaturedItems, 200>,
+  | H.HttpResponse<FeaturedItems, 200>
+  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
   BlobServiceDependency
-> = H.of((request: H.HttpRequest) =>
-  pipe(
-    // Retrieve the featured Items from blobStorage
-    retrieveFeaturedItems(),
-    RTE.map(H.successJson),
-    RTE.chainFirstW((response) =>
-      L.infoRTE(`Http function processed request for url "${request.url}"`, {
-        response,
-      })
+> = (featuredItemsConfig: FeaturedItemsConfig) =>
+  H.of((request: H.HttpRequest) =>
+    pipe(
+      // Retrieve the featured Items from blobStorage
+      retrieveFeaturedItems(featuredItemsConfig),
+      RTE.map(H.successJson),
+      RTE.orElseW((error) =>
+        pipe(
+          RTE.right(
+            H.problemJson({ status: error.status, title: error.message })
+          ),
+          RTE.chainFirstW((errorResponse) =>
+            L.errorRTE(
+              `Error executing GetFeaturedServicesIntitutionsFn`,
+              errorResponse
+            )
+          )
+        )
+      )
     )
-  )
-);
+  );
 
-export const GetFeaturedServicesIntitutionsFn = httpAzureFunction(
-  makeFeaturedServicesIntitutionsHandler
-);
+export const GetFeaturedServicesIntitutionsFn = (
+  featuredItemsConfig: FeaturedItemsConfig
+) =>
+  httpAzureFunction(
+    makeFeaturedServicesIntitutionsHandler(featuredItemsConfig)
+  );

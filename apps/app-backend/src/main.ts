@@ -23,7 +23,7 @@ app.http("Info", {
   route: "info"
 });
 
-const GetFeaturedServicesIntitutions = GetFeaturedServicesIntitutionsFn({blobService});
+const GetFeaturedServicesIntitutions = GetFeaturedServicesIntitutionsFn(config)({blobService});
 app.http("GetFeaturedServicesIntitutions", {
   methods: ["GET"],
   route: "featured",
