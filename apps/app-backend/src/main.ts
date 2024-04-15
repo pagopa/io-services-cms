@@ -3,7 +3,7 @@ import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { InfoFn } from "./functions/info";
-import { GetFeaturedServicesIntitutionsFn } from "./functions/getFeaturedServicesIntitutions";
+import { GetFeaturedServicesIntitutionsFn } from "./functions/featured-services-intitutions";
 import { getConfigOrError } from "./config";
 const config = pipe(
   getConfigOrError(),
