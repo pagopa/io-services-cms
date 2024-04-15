@@ -18,6 +18,18 @@ tags:
   - name: featured
     description: Retrieve featured items
 paths:
+  /info:
+    get:
+      operationId: info
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationInfo'
+        '500':
+          description: Internal Server error
   /institutions:
     get:
       tags:
@@ -175,6 +187,16 @@ paths:
           description: Internal Server Error
 components:
   schemas:
+    ApplicationInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+      required:
+        - name
+        - version
     InstitutionsResource:
       allOf:
         - $ref: "#/components/schemas/Institutions"

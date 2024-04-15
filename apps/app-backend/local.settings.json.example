@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "AzureWebJobsStorage": "<local-web-storage>",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "<your-applicationInsights-key>"
+  }
+}
