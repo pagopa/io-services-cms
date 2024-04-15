@@ -197,6 +197,10 @@ components:
           description: Institution Name
         fiscal_code:
           $ref: "#/components/schemas/OrganizationFiscalCode"
+      required:
+        - id
+        - name
+        - fiscal_code
     InstitutionServicesResource:
       allOf:
         - $ref: "#/components/schemas/Services"
