@@ -7,7 +7,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 0.5.0
+  version: 0.6.0
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -186,6 +186,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Institution"
+      required:
+        - institutions
     Institution:
       type: object
       properties:
@@ -197,6 +199,10 @@ components:
           description: Institution Name
         fiscal_code:
           $ref: "#/components/schemas/OrganizationFiscalCode"
+      required:
+        - id
+        - name
+        - fiscal_code
     InstitutionServicesResource:
       allOf:
         - $ref: "#/components/schemas/Services"
@@ -208,6 +214,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ServiceMinified"
+      required:
+        - services
     ServiceMinified:
       type: object
       description: Service data (minified)
@@ -222,6 +230,10 @@ components:
         version:
           type: integer
           description: Service Version
+      required:
+        - id
+        - name
+        - version
     ServiceDetails:
       type: object
       properties:
@@ -254,13 +266,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/FeaturedItem"
+      required:
+        - items
     FeaturedItem:
-      type: object
-      properties:
-        service:
-          $ref: "#/components/schemas/ServiceMinified"
-        intitution:
-          $ref: "#/components/schemas/Institution"
+      x-one-of: true
+      allOf:
+        - $ref: "#/components/schemas/ServiceMinified"
+        - $ref: "#/components/schemas/Institution"
     ServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
     Organization:
