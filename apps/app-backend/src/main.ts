@@ -2,10 +2,9 @@ import { app } from "@azure/functions";
 import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { getConfigOrError } from "./config";
-import { GetFeaturedServicesIntitutionsFn } from "./functions/getFeaturedServicesIntitutions";
 import { InfoFn } from "./functions/info";
-
+import { GetFeaturedServicesIntitutionsFn } from "./functions/getFeaturedServicesIntitutions";
+import { getConfigOrError } from "./config";
 const config = pipe(
   getConfigOrError(),
   E.getOrElseW((error) => {
