@@ -186,6 +186,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Institution"
+      required:
+        - institutions
     Institution:
       type: object
       properties:
@@ -212,6 +214,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ServiceMinified"
+      required:
+        - services
     ServiceMinified:
       type: object
       description: Service data (minified)
@@ -262,6 +266,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/FeaturedItem"
+      required:
+        - items
     FeaturedItem:
       x-one-of: true
       allOf:
