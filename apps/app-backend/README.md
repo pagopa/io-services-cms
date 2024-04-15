@@ -49,10 +49,13 @@ Contains middlewares for local business logic, that in not usefull to share with
 
 The following table contains the required ENV variables that the applicative require
 
-| Variable name                      | Description                                  | type    |
-|------------------------------------|----------------------------------------------|---------|
-| APPINSIGHTS_INSTRUMENTATIONKEY     | The Application Insights instrumentation key | string  |
-| FETCH_TIMEOUT_MS                   | (optional) Fetch Timeout for AbortableFetch  | number  |
+| Variable name                         | Description                                                              | type    |
+|---------------------------------------|--------------------------------------------------------------------------|---------|
+| APPINSIGHTS_INSTRUMENTATIONKEY        | The Application Insights instrumentation key                             | string  |
+| FETCH_TIMEOUT_MS                      | (optional) Fetch Timeout for AbortableFetch                              | number  |
+| FEATURED_ITEMS_BLOB_CONNECTION_STRING | The Azure StorageAccount connectionString to retrieve FeaturedItems blob | string  |
+| FEATURED_ITEMS_CONTAINER_NAME         | The blob storage container to retrieve FeaturedItems blob                | string  |
+| FEATURED_ITEMS_FILE_NAME              | The FeaturedItems Filename in blobStorage container                      | string  |
 
 ## Local Execution
 
