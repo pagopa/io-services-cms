@@ -15,8 +15,7 @@ azure-functions-api
 |   |-- middlewares
 |   |-- models
 |   |-- utils
-|   |   |-- cosmos
-|   |   |-- redis
+|   |   |-- blob-storage
 |   |-- config.ts
 |   |-- main.ts
 |-- package.json
