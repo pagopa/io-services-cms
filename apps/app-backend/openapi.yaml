@@ -39,8 +39,8 @@ paths:
           schema:
             type: string
             enum:
-              - "NATIONAL"
-              - "LOCAL"
+              - 'NATIONAL'
+              - 'LOCAL'
         - name: limit
           in: query
           description: The number of search results to retrieve. This can be used in conjunction with skip to implement client-side paging of search results (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
@@ -60,21 +60,21 @@ paths:
             maximum: 100000
             default: 0
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InstitutionsResource"
-        "400":
+                $ref: '#/components/schemas/InstitutionsResource'
+        '400':
           description: Bad Request
-        "401":
+        '401':
           description: Unauthorized
-        "403":
+        '403':
           description: Forbidden
-        "404":
+        '404':
           description: Not found
-        "500":
+        '500':
           description: Internal Server Error
   /institutions/{institutionId}/services:
     get:
@@ -109,19 +109,19 @@ paths:
             maximum: 100000
             default: 0
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/InstitutionServicesResource"
-        "401":
+                $ref: '#/components/schemas/InstitutionServicesResource'
+        '401':
           description: Unauthorized
-        "403":
+        '403':
           description: Forbidden
-        "404":
+        '404':
           description: Not found
-        "500":
+        '500':
           description: Internal Server Error
   /services/{serviceId}:
     get:
@@ -138,19 +138,19 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ServiceDetails"
-        "401":
+                $ref: '#/components/schemas/ServiceDetails'
+        '401':
           description: Unauthorized
-        "403":
+        '403':
           description: Forbidden
-        "404":
+        '404':
           description: Not found
-        "500":
+        '500':
           description: Internal Server Error
   /featured:
     get:
@@ -159,33 +159,33 @@ paths:
       summary: Retrieve featured intitutions and/or services
       operationId: getFeaturedItems
       responses:
-        "200":
+        '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FeaturedItems"
-        "401":
+                $ref: '#/components/schemas/FeaturedItems'
+        '401':
           description: Unauthorized
-        "403":
+        '403':
           description: Forbidden
-        "404":
+        '404':
           description: Not found
-        "500":
+        '500':
           description: Internal Server Error
 components:
   schemas:
     InstitutionsResource:
       allOf:
-        - $ref: "#/components/schemas/Institutions"
-        - $ref: "#/components/schemas/PaginationResultSet"
+        - $ref: '#/components/schemas/Institutions'
+        - $ref: '#/components/schemas/PaginationResultSet'
     Institutions:
       type: object
       properties:
         institutions:
           type: array
           items:
-            $ref: "#/components/schemas/Institution"
+            $ref: '#/components/schemas/Institution'
     Institution:
       type: object
       properties:
@@ -196,22 +196,22 @@ components:
           type: string
           description: Institution Name
         fiscal_code:
-          $ref: "#/components/schemas/OrganizationFiscalCode"
+          $ref: '#/components/schemas/OrganizationFiscalCode'
       required:
         - id
         - name
         - fiscal_code
     InstitutionServicesResource:
       allOf:
-        - $ref: "#/components/schemas/Services"
-        - $ref: "#/components/schemas/PaginationResultSet"
+        - $ref: '#/components/schemas/Services'
+        - $ref: '#/components/schemas/PaginationResultSet'
     Services:
       type: object
       properties:
         services:
           type: array
           items:
-            $ref: "#/components/schemas/ServiceMinified"
+            $ref: '#/components/schemas/ServiceMinified'
     ServiceMinified:
       type: object
       description: Service data (minified)
@@ -226,6 +226,10 @@ components:
         version:
           type: integer
           description: Service Version
+      required:
+        - id
+        - name
+        - version
     ServiceDetails:
       type: object
       properties:
@@ -239,11 +243,11 @@ components:
           type: string
           description: Service description
         organization:
-          $ref: "#/components/schemas/Organization"
+          $ref: '#/components/schemas/Organization'
         available_notification_channels:
-          $ref: "#/components/schemas/AvailableNotificationChannels"
+          $ref: '#/components/schemas/AvailableNotificationChannels'
         metadata:
-          $ref: "#/components/schemas/ServiceMetadata"
+          $ref: '#/components/schemas/ServiceMetadata'
         version:
           type: integer
           description: Service version
@@ -257,25 +261,25 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/FeaturedItem"
+            $ref: '#/components/schemas/FeaturedItem'
     FeaturedItem:
       x-one-of: true
       allOf:
         - $ref: '#/components/schemas/ServiceMinified'
         - $ref: '#/components/schemas/Institution'
     ServiceMetadata:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
     Organization:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization'
     OrganizationFiscalCode:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
     PaginationResultSet:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     AvailableNotificationChannels:
       description: All the notification channels available for a service
       type: array
       items:
-        $ref: "#/components/schemas/NotificationChannel"
+        $ref: '#/components/schemas/NotificationChannel'
     NotificationChannel:
       type: string
       description: All notification channels
