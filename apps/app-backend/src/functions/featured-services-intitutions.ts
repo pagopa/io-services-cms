@@ -3,6 +3,7 @@ import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
 import * as L from "@pagopa/logger";
 import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -35,11 +36,8 @@ export const retrieveFeaturedItems: (
             )
         )
       ),
-      TE.chain(
-        TE.fromOption(
-          () => new H.HttpError("No featuredItems file found on blobService")
-        )
-      )
+      // FIXME: it is corect in case of not found return emptyList, or in this case should be an error due to the lack of file on blob service?
+      TE.map(O.getOrElse(() => ({ items: [] } as FeaturedItems)))
     );
 
 export const makeFeaturedServicesIntitutionsHandler: (
