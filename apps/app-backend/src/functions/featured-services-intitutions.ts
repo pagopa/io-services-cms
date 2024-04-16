@@ -36,8 +36,7 @@ export const retrieveFeaturedItems: (
             )
         )
       ),
-      // FIXME: it is corect in case of not found return emptyList, or in this case should be an error due to the lack of file on blob service?
-      TE.map(O.getOrElse(() => ({ items: [] } as FeaturedItems)))
+      TE.map(O.getOrElse(() => ({ items: [] } as FeaturedItems))) // Return an empty list if the file is not found
     );
 
 export const makeFeaturedServicesIntitutionsHandler: (
