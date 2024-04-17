@@ -3,7 +3,7 @@ import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { InfoFn } from "./functions/info";
-import { GetFeaturedServicesIntitutionsFn } from "./functions/featured-services-intitutions";
+import { GetFeaturedItemsFn } from "./functions/featured-items";
 import { getConfigOrError } from "./config";
 const config = pipe(
   getConfigOrError(),
@@ -24,12 +24,12 @@ app.http("Info", {
   route: "info",
 });
 
-const GetFeaturedServicesIntitutions = GetFeaturedServicesIntitutionsFn(config)(
-  { blobService }
-);
-app.http("GetFeaturedServicesIntitutions", {
+const GetFeaturedItems = GetFeaturedItemsFn(config)({
+  blobService,
+});
+app.http("GetFeaturedItems", {
   methods: ["GET"],
   route: "featured",
   authLevel: "anonymous",
-  handler: GetFeaturedServicesIntitutions,
+  handler: GetFeaturedItems,
 });

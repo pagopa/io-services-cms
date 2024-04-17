@@ -11,6 +11,11 @@ import { FeaturedItemsConfig } from "../config";
 import { FeaturedItems } from "../generated/definitions/internal/FeaturedItems";
 import { BlobServiceDependency } from "../utils/blob-storage/dependency";
 
+/**
+ * GET /featured AZF HttpTrigger
+ * Retrieve the featured items(Services and Institutions) from the blob storage
+ */
+
 export const retrieveFeaturedItems: (
   featuredItemsConfig: FeaturedItemsConfig
 ) => RTE.ReaderTaskEither<BlobServiceDependency, H.HttpError, FeaturedItems> =
@@ -39,7 +44,7 @@ export const retrieveFeaturedItems: (
       TE.map(O.getOrElse(() => ({ items: [] } as FeaturedItems))) // Return an empty list if the file is not found
     );
 
-export const makeFeaturedServicesIntitutionsHandler: (
+export const makeFeaturedItemsHandler: (
   featuredItemsConfig: FeaturedItemsConfig
 ) => H.Handler<
   H.HttpRequest,
@@ -58,19 +63,12 @@ export const makeFeaturedServicesIntitutionsHandler: (
             H.problemJson({ status: error.status, title: error.message })
           ),
           RTE.chainFirstW((errorResponse) =>
-            L.errorRTE(
-              `Error executing GetFeaturedServicesIntitutionsFn`,
-              errorResponse
-            )
+            L.errorRTE(`Error executing GetFeaturedItemsFn`, errorResponse)
           )
         )
       )
     )
   );
 
-export const GetFeaturedServicesIntitutionsFn = (
-  featuredItemsConfig: FeaturedItemsConfig
-) =>
-  httpAzureFunction(
-    makeFeaturedServicesIntitutionsHandler(featuredItemsConfig)
-  );
+export const GetFeaturedItemsFn = (featuredItemsConfig: FeaturedItemsConfig) =>
+  httpAzureFunction(makeFeaturedItemsHandler(featuredItemsConfig));

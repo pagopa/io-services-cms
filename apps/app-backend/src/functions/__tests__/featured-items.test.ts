@@ -5,15 +5,15 @@ import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { FeaturedItems } from "../../generated/definitions/internal/FeaturedItems";
-import { mockFeaturedServicesIntitutions } from "../__mocks__/featured-services-intitutions";
+import { mockFeaturedItems } from "../__mocks__/featured-items";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
-import { makeFeaturedServicesIntitutionsHandler } from "../featured-services-intitutions";
+import { makeFeaturedItemsHandler } from "../featured-items";
 
 // blobService Base Mock
 const mockBlobService = {} as unknown as BlobService;
 const mockUpsertBlobFromObject = vi
   .spyOn(azureStorage, "getBlobAsObject")
-  .mockResolvedValue(E.right(O.some(mockFeaturedServicesIntitutions)));
+  .mockResolvedValue(E.right(O.some(mockFeaturedItems)));
 
 const mockedConfiguration = {
   FEATURED_ITEMS_CONTAINER_NAME: "container",
@@ -22,9 +22,7 @@ const mockedConfiguration = {
 
 describe("Get Featured Services And Institutions", () => {
   it("should return featured items", async () => {
-    const result = await makeFeaturedServicesIntitutionsHandler(
-      mockedConfiguration
-    )({
+    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
@@ -39,7 +37,7 @@ describe("Get Featured Services And Institutions", () => {
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
-          body: mockFeaturedServicesIntitutions,
+          body: mockFeaturedItems,
           statusCode: 200,
         })
       )
@@ -52,9 +50,7 @@ describe("Get Featured Services And Institutions", () => {
       E.left(new Error(errorMessage))
     );
 
-    const result = await makeFeaturedServicesIntitutionsHandler(
-      mockedConfiguration
-    )({
+    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
@@ -82,9 +78,7 @@ describe("Get Featured Services And Institutions", () => {
   it("should return an empty list when file is not found", async () => {
     mockUpsertBlobFromObject.mockResolvedValueOnce(E.right(O.none));
 
-    const result = await makeFeaturedServicesIntitutionsHandler(
-      mockedConfiguration
-    )({
+    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
