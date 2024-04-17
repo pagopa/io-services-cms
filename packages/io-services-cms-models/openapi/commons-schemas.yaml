@@ -34,7 +34,7 @@ PaginationResultSet:
     count:
       type: number
       description: total record count
-  reuqired:
+  required:
     - offset
     - limit
     - count
