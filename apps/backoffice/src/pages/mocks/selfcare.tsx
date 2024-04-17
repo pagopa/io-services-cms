@@ -10,6 +10,7 @@ import {
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
 import { aMockedIdentiyToken } from "../../../mocks/data/selfcare-data";
+import { getConfiguration } from "@/config";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
@@ -39,7 +40,9 @@ export default function Selfcare() {
             </Typography>
             <Box marginTop={3}>
               <NextLink
-                href={`/auth/login#token=${aMockedIdentiyToken}`}
+                href={`${
+                  getConfiguration().BACK_OFFICE_LOGIN_PATH
+                }#token=${aMockedIdentiyToken}`}
                 passHref
               >
                 <Button variant="outlined" endIcon={<ArrowForward />}>
