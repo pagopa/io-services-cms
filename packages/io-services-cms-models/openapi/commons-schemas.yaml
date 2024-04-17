@@ -5,7 +5,7 @@ Cidr:
 FiscalCode:
   type: string
   description: User's fiscal code.
-  pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+  pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$'
   example: AAAAAA00A00A000A
 Logo:
   description: A base64 string representation of the logo PNG image.
@@ -20,7 +20,7 @@ Logo:
 OrganizationFiscalCode:
   type: string
   description: Organization's fiscal code.
-  pattern: "^[0-9]{11}$"
+  pattern: '^[0-9]{11}$'
   example: 012345678901
 PaginationResultSet:
   type: object
@@ -34,6 +34,10 @@ PaginationResultSet:
     count:
       type: number
       description: total record count
+  reuqired:
+    - offset
+    - limit
+    - count
 ResponseError:
   type: object
   properties:
@@ -75,4 +79,4 @@ ResponseError:
 Timestamp:
   type: string
   description: A date-time field in ISO-8601 format and UTC timezone.
-  example: "2023-01-22T00:00:00.000Z"
+  example: '2023-01-22T00:00:00.000Z'

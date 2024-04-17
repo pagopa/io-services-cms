@@ -1,6 +1,6 @@
 import { FeaturedItems } from "../../generated/definitions/internal/FeaturedItems";
 
-export const mockFeaturedServicesIntitutions = {
+export const mockFeaturedItems = {
   items: [
     {
       id: "aServiceId",
