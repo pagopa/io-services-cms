@@ -14,8 +14,8 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { Institution } from "../generated/definitions/internal/Institution";
-import { Institutions } from "../generated/definitions/internal/Institutions";
 import { InstitutionsResource } from "../generated/definitions/internal/InstitutionsResource";
+import { ScopeType } from "../generated/definitions/internal/ScopeType";
 import {
   OptionalQueryParamMiddleware,
   RequiredQueryParamMiddleware,
@@ -28,34 +28,40 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 
 const search: (
   search: NonEmptyString,
-  scope: O.Option<NonEmptyString>,
+  scope: O.Option<ScopeType>,
   limit: O.Option<number>,
   offset: O.Option<number>
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<Institution>,
   H.HttpError,
-  Institutions
+  InstitutionsResource
 > =
   (
     search: NonEmptyString,
-    scope: O.Option<NonEmptyString>, // TODO: calcolare il filtro
+    scope: O.Option<ScopeType>, // TODO: calcolare il filtro
     limit: O.Option<number>,
     offset: O.Option<number>
   ) =>
   ({ searchClient }) =>
     pipe(
-      searchClient.fullTextSearch({
-        searchText: search,
-        searchParams: ["name"],
-        skip: calculateSkip(offset),
-        top: calculateTop(limit),
-        filter: calculateScopeFilter(scope),
+      sequenceS(TE.ApplyPar)({
+        skip: TE.right(calculateSkip(offset)),
+        top: TE.right(calculateTop(limit)),
       }),
-      TE.map((results) => ({
+      TE.bindTo("paginationProperties"),
+      TE.bind("results", ({ paginationProperties }) =>
+        searchClient.fullTextSearch({
+          ...paginationProperties,
+          searchText: search,
+          searchParams: ["name"],
+          filter: calculateScopeFilter(scope),
+        })
+      ),
+      TE.map(({ paginationProperties, results }) => ({
         institutions: results.resources,
         count: results.count,
-        limit,
-        offset,
+        limit: paginationProperties.top,
+        offset: paginationProperties.skip ?? 0,
       })),
       TE.mapLeft((error) => new H.HttpError(error.message))
     );
@@ -69,27 +75,21 @@ export const makeSearchInstitutionsHandler: H.Handler<
     request,
     sequenceS(RTE.ApplyPar)({
       // The exact decode is required to remove additional headers with security information like auth token
-      search: RequiredQueryParamMiddleware(
-        NonEmptyString,
-        "search" as NonEmptyString
-      ),
-      scope: OptionalQueryParamMiddleware(
-        NonEmptyString, // TODO: fix scope decoder
-        "scope" as NonEmptyString
-      ),
+      search: RequiredQueryParamMiddleware("search", NonEmptyString),
+      scope: OptionalQueryParamMiddleware("scope", ScopeType),
       limit: OptionalQueryParamMiddleware(
+        "limit",
         IntegerFromString.pipe(
           WithinRangeInteger<
             1,
             NonNegativeInteger,
             IWithinRangeIntegerTag<1, NonNegativeInteger>
-          >(1, 100 as NonNegativeInteger) // Get from config
-        ),
-        "limit" as NonEmptyString
+          >(1, 100 as NonNegativeInteger) // TODO: Get from config
+        )
       ),
       offset: OptionalQueryParamMiddleware(
-        IntegerFromString.pipe(NonNegativeInteger),
-        "limit" as NonEmptyString
+        "offset",
+        IntegerFromString.pipe(NonNegativeInteger)
       ),
     }),
     RTE.fromTaskEither,
@@ -118,9 +118,7 @@ const calculateTop = (limit: O.Option<number>): number =>
     limit,
     O.getOrElse(() => 20) // TODO: get from config
   );
-const calculateScopeFilter = (
-  scope: O.Option<NonEmptyString>
-): string | undefined =>
+const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
   pipe(
     scope,
     O.map((s) => `scope eq '${s}'`),

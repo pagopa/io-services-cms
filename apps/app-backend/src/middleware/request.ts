@@ -1,5 +1,4 @@
 import * as H from "@pagopa/handler-kit";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import { flow } from "fp-ts/lib/function";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -9,11 +8,11 @@ import * as TE from "fp-ts/TaskEither";
 import { Decoder } from "io-ts";
 
 export const RequiredQueryParamMiddleware: <T>(
-  schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString
+  queryParam: string,
+  schema: Decoder<unknown, T>
 ) => RTE.ReaderTaskEither<H.HttpRequest, H.HttpBadRequestError, T> = <T>(
-  schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString
+  queryParam: string,
+  schema: Decoder<unknown, T>
 ) =>
   flow(
     (req) => req.query,
@@ -31,12 +30,12 @@ export const RequiredQueryParamMiddleware: <T>(
   );
 
 export const RequiredWithDefaultQueryParamMiddleware: <T>(
+  queryParam: string,
   schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString,
   defaultValue: T
 ) => RTE.ReaderTaskEither<H.HttpRequest, H.HttpBadRequestError, T> = <T>(
+  queryParam: string,
   schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString,
   defaultValue: T
 ) =>
   flow(
@@ -54,13 +53,13 @@ export const RequiredWithDefaultQueryParamMiddleware: <T>(
   );
 
 export const OptionalQueryParamMiddleware: <T>(
-  schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString
+  queryParam: string,
+  schema: Decoder<unknown, T>
 ) => RTE.ReaderTaskEither<H.HttpRequest, H.HttpBadRequestError, O.Option<T>> = <
   T
 >(
-  schema: Decoder<unknown, T>,
-  queryParam: NonEmptyString
+  queryParam: string,
+  schema: Decoder<unknown, T>
 ) =>
   flow(
     (req) => req.query,
