@@ -6,13 +6,14 @@ import { pipe } from "fp-ts/lib/function";
 
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import {
-  IntegerFromString,
   IWithinRangeIntegerTag,
+  IntegerFromString,
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
+import { PaginationConfig } from "../config";
 import { Institution } from "../generated/definitions/internal/Institution";
 import { InstitutionsResource } from "../generated/definitions/internal/InstitutionsResource";
 import { ScopeType } from "../generated/definitions/internal/ScopeType";
@@ -25,20 +26,12 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * GET /intitutions AZF HttpTrigger
  * Search for institutions on Azure Search Index
  */
-type RequestQueryParams = {
+type SearchInstitutionsRequestQueryParams = {
   search: NonEmptyString;
   scope: O.Option<ScopeType>;
-  limit: O.Option<number>;
+  limit: number;
   offset: O.Option<number>;
 };
-const calculateSkip = (offset: O.Option<number>): number | undefined =>
-  pipe(offset, O.toUndefined);
-
-const calculateTop = (limit: O.Option<number>): number =>
-  pipe(
-    limit,
-    O.getOrElse(() => 20) // TODO: get from config
-  );
 
 const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
   pipe(
@@ -48,18 +41,18 @@ const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
   );
 
 const executeSearch: (
-  requestQueryParams: RequestQueryParams
+  requestQueryParams: SearchInstitutionsRequestQueryParams
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<Institution>,
   H.HttpError,
   InstitutionsResource
 > =
-  (requestQueryParams: RequestQueryParams) =>
+  (requestQueryParams: SearchInstitutionsRequestQueryParams) =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
-        skip: TE.right(calculateSkip(requestQueryParams.offset)),
-        top: TE.right(calculateTop(requestQueryParams.limit)),
+        skip: TE.right(pipe(requestQueryParams.offset, O.toUndefined)),
+        top: TE.right(requestQueryParams.limit),
       }),
       TE.bindTo("paginationProperties"),
       TE.bind("results", ({ paginationProperties }) =>
@@ -79,45 +72,53 @@ const executeSearch: (
       TE.mapLeft((error) => new H.HttpError(error.message))
     );
 
-const extractQueryParams: RTE.ReaderTaskEither<
+const extractQueryParams: (
+  paginationConfig: PaginationConfig
+) => RTE.ReaderTaskEither<
   H.HttpRequest,
   H.HttpBadRequestError,
-  RequestQueryParams
-> = pipe(
-  sequenceS(RTE.ApplyPar)({
-    search: RequiredQueryParamMiddleware("search", NonEmptyString),
-    scope: OptionalQueryParamMiddleware("scope", ScopeType),
-    limit: OptionalQueryParamMiddleware(
-      "limit",
-      IntegerFromString.pipe(
-        WithinRangeInteger<
-          1,
-          NonNegativeInteger,
-          IWithinRangeIntegerTag<1, NonNegativeInteger>
-        >(1, 100 as NonNegativeInteger) // TODO: Get from config
-      )
-    ),
-    offset: OptionalQueryParamMiddleware(
-      "offset",
-      IntegerFromString.pipe(NonNegativeInteger)
-    ),
-  })
-);
+  SearchInstitutionsRequestQueryParams
+> = (paginationConfig: PaginationConfig) =>
+  pipe(
+    sequenceS(RTE.ApplyPar)({
+      search: RequiredQueryParamMiddleware("search", NonEmptyString),
+      scope: OptionalQueryParamMiddleware("scope", ScopeType),
+      limit: pipe(
+        OptionalQueryParamMiddleware(
+          "limit",
+          IntegerFromString.pipe(
+            WithinRangeInteger<
+              1,
+              NonNegativeInteger,
+              IWithinRangeIntegerTag<1, NonNegativeInteger>
+            >(1, paginationConfig.PAGINATION_MAX_LIMIT)
+          )
+        ),
+        RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT))
+      ),
+      offset: OptionalQueryParamMiddleware(
+        "offset",
+        IntegerFromString.pipe(NonNegativeInteger)
+      ),
+    })
+  );
 
-export const makeSearchInstitutionsHandler: H.Handler<
+export const makeSearchInstitutionsHandler: (
+  paginationConfig: PaginationConfig
+) => H.Handler<
   H.HttpRequest,
   H.HttpResponse<InstitutionsResource, 200>,
   AzureSearchClientDependency<Institution>
-> = H.of((request: H.HttpRequest) =>
-  pipe(
-    request,
-    extractQueryParams,
-    RTE.fromTaskEither,
-    RTE.chain(executeSearch),
-    RTE.map(H.successJson)
-  )
-);
+> = (paginationConfig: PaginationConfig) =>
+  H.of((request: H.HttpRequest) =>
+    pipe(
+      request,
+      extractQueryParams(paginationConfig),
+      RTE.fromTaskEither,
+      RTE.chain(executeSearch),
+      RTE.map(H.successJson)
+    )
+  );
 
-export const SearchInstitutionsFn = httpAzureFunction(
-  makeSearchInstitutionsHandler
-);
+export const SearchInstitutionsFn = (paginationConfig: PaginationConfig) =>
+  httpAzureFunction(makeSearchInstitutionsHandler(paginationConfig));

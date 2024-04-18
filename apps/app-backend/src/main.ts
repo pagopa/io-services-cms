@@ -44,7 +44,7 @@ app.http("GetFeaturedItems", {
   handler: GetFeaturedItems,
 });
 
-const SearchInstitutions = SearchInstitutionsFn({
+const SearchInstitutions = SearchInstitutionsFn(config)({
   searchClient: institutionsSearchClient,
 });
 app.http("SearchInstitutions", {

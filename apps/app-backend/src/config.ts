@@ -10,7 +10,11 @@ import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeInteger,
+  NumberFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import * as reporters from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
@@ -26,7 +30,6 @@ export const FeaturedItemsConfig = t.type({
 export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;
 export const AzureSearchConfig = t.intersection([
   t.type({
-    // TODO: Capire se metterlo direttamente nello storageAccount della function in tal caso recuperarlo come QueueStorageConnection nella sezione globale
     AZURE_SEARCH_ENDPOINT: NonEmptyString,
     AZURE_SEARCH_INSTITUTIONS_INDEX_NAME: NonEmptyString,
     AZURE_SEARCH_SERVICES_INDEX_NAME: NonEmptyString,
@@ -35,6 +38,19 @@ export const AzureSearchConfig = t.intersection([
     AZURE_SEARCH_API_KEY: NonEmptyString, // If not provided AzureSearch will authenticate with managed identity
   }),
 ]);
+
+// Services pagination configuration
+export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
+export const PaginationConfig = t.type({
+  PAGINATION_DEFAULT_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "20" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "100" as unknown as NonNegativeInteger
+  ),
+});
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
@@ -49,6 +65,7 @@ export const IConfig = t.intersection([
   }),
   FeaturedItemsConfig,
   AzureSearchConfig,
+  PaginationConfig,
 ]);
 
 export const envConfig = {
