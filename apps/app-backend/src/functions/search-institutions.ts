@@ -25,6 +25,27 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * GET /intitutions AZF HttpTrigger
  * Search for institutions on Azure Search Index
  */
+type RequestQueryParams = {
+  search: NonEmptyString;
+  scope: O.Option<ScopeType>;
+  limit: O.Option<number>;
+  offset: O.Option<number>;
+};
+const calculateSkip = (offset: O.Option<number>): number | undefined =>
+  pipe(offset, O.toUndefined);
+
+const calculateTop = (limit: O.Option<number>): number =>
+  pipe(
+    limit,
+    O.getOrElse(() => 20) // TODO: get from config
+  );
+
+const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
+  pipe(
+    scope,
+    O.map((s) => `scope eq '${s}'`),
+    O.toUndefined
+  );
 
 const executeSearch: (
   search: NonEmptyString,
@@ -66,6 +87,31 @@ const executeSearch: (
       TE.mapLeft((error) => new H.HttpError(error.message))
     );
 
+const extractQueryParams: RTE.ReaderTaskEither<
+  H.HttpRequest,
+  H.HttpBadRequestError,
+  RequestQueryParams
+> = pipe(
+  sequenceS(RTE.ApplyPar)({
+    search: RequiredQueryParamMiddleware("search", NonEmptyString),
+    scope: OptionalQueryParamMiddleware("scope", ScopeType),
+    limit: OptionalQueryParamMiddleware(
+      "limit",
+      IntegerFromString.pipe(
+        WithinRangeInteger<
+          1,
+          NonNegativeInteger,
+          IWithinRangeIntegerTag<1, NonNegativeInteger>
+        >(1, 100 as NonNegativeInteger) // TODO: Get from config
+      )
+    ),
+    offset: OptionalQueryParamMiddleware(
+      "offset",
+      IntegerFromString.pipe(NonNegativeInteger)
+    ),
+  })
+);
+
 export const makeSearchInstitutionsHandler: H.Handler<
   H.HttpRequest,
   H.HttpResponse<InstitutionsResource, 200>,
@@ -73,25 +119,7 @@ export const makeSearchInstitutionsHandler: H.Handler<
 > = H.of((request: H.HttpRequest) =>
   pipe(
     request,
-    sequenceS(RTE.ApplyPar)({
-      // The exact decode is required to remove additional headers with security information like auth token
-      search: RequiredQueryParamMiddleware("search", NonEmptyString),
-      scope: OptionalQueryParamMiddleware("scope", ScopeType),
-      limit: OptionalQueryParamMiddleware(
-        "limit",
-        IntegerFromString.pipe(
-          WithinRangeInteger<
-            1,
-            NonNegativeInteger,
-            IWithinRangeIntegerTag<1, NonNegativeInteger>
-          >(1, 100 as NonNegativeInteger) // TODO: Get from config
-        )
-      ),
-      offset: OptionalQueryParamMiddleware(
-        "offset",
-        IntegerFromString.pipe(NonNegativeInteger)
-      ),
-    }),
+    extractQueryParams,
     RTE.fromTaskEither,
     RTE.chain(({ search, scope, offset, limit }) =>
       executeSearch(search, scope, limit, offset)
@@ -103,18 +131,3 @@ export const makeSearchInstitutionsHandler: H.Handler<
 export const SearchInstitutionsFn = httpAzureFunction(
   makeSearchInstitutionsHandler
 );
-
-const calculateSkip = (offset: O.Option<number>): number | undefined =>
-  pipe(offset, O.toUndefined);
-
-const calculateTop = (limit: O.Option<number>): number =>
-  pipe(
-    limit,
-    O.getOrElse(() => 20) // TODO: get from config
-  );
-const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
-  pipe(
-    scope,
-    O.map((s) => `scope eq '${s}'`),
-    O.toUndefined
-  );
