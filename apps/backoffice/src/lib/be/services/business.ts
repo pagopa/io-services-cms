@@ -137,7 +137,7 @@ export const retrieveServiceList = async (
             )
           )
         ],
-        pagination: { offset, limit, count: apimServices.count }
+        pagination: { offset, limit, count: apimServices.count ?? 0 }
       })
     ),
     TE.getOrElse(error => {
