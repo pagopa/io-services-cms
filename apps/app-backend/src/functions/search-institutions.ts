@@ -48,34 +48,26 @@ const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
   );
 
 const executeSearch: (
-  search: NonEmptyString,
-  scope: O.Option<ScopeType>,
-  limit: O.Option<number>,
-  offset: O.Option<number>
+  requestQueryParams: RequestQueryParams
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<Institution>,
   H.HttpError,
   InstitutionsResource
 > =
-  (
-    search: NonEmptyString,
-    scope: O.Option<ScopeType>,
-    limit: O.Option<number>,
-    offset: O.Option<number>
-  ) =>
+  (requestQueryParams: RequestQueryParams) =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
-        skip: TE.right(calculateSkip(offset)),
-        top: TE.right(calculateTop(limit)),
+        skip: TE.right(calculateSkip(requestQueryParams.offset)),
+        top: TE.right(calculateTop(requestQueryParams.limit)),
       }),
       TE.bindTo("paginationProperties"),
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          searchText: search,
+          searchText: requestQueryParams.search,
           searchParams: ["name"],
-          filter: calculateScopeFilter(scope),
+          filter: calculateScopeFilter(requestQueryParams.scope),
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -121,9 +113,7 @@ export const makeSearchInstitutionsHandler: H.Handler<
     request,
     extractQueryParams,
     RTE.fromTaskEither,
-    RTE.chain(({ search, scope, offset, limit }) =>
-      executeSearch(search, scope, limit, offset)
-    ),
+    RTE.chain(executeSearch),
     RTE.map(H.successJson)
   )
 );
