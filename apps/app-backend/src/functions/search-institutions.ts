@@ -37,7 +37,7 @@ const search: (
 > =
   (
     search: NonEmptyString,
-    scope: O.Option<NonEmptyString>,
+    scope: O.Option<NonEmptyString>, // TODO: calcolare il filtro
     limit: O.Option<number>,
     offset: O.Option<number>
   ) =>
@@ -46,8 +46,8 @@ const search: (
       searchClient.fullTextSearch({
         searchText: search,
         searchParams: ["name"],
-        skip: calculateSkip(limit, offset),
-        top: calculateTop(limit, offset),
+        skip: calculateSkip(offset),
+        top: calculateTop(limit),
       }),
       TE.map((results) => ({
         institutions: results.resources,
@@ -81,7 +81,7 @@ export const makeSearchInstitutionsHandler: H.Handler<
             1,
             NonNegativeInteger,
             IWithinRangeIntegerTag<1, NonNegativeInteger>
-          >(1, 100 as NonNegativeInteger)
+          >(1, 100 as NonNegativeInteger) // Get from config
         ),
         "limit" as NonEmptyString
       ),
@@ -108,19 +108,11 @@ export const SearchInstitutionsFn = httpAzureFunction(
   makeSearchInstitutionsHandler
 );
 
-// TODO: implement the following functions
-const calculateSkip = (
-  _limit: O.Option<number>,
-  _offset: O.Option<number>
-  // eslint-disable-next-line arrow-body-style
-): number | undefined => {
-  return 0;
-};
+const calculateSkip = (offset: O.Option<number>): number | undefined =>
+  O.isNone(offset) ? undefined : offset.value;
 
-const calculateTop = (
-  _limit: O.Option<number>,
-  _offset: O.Option<number>
-  // eslint-disable-next-line arrow-body-style
-): number | undefined => {
-  return 0;
-};
+const calculateTop = (limit: O.Option<number>): number =>
+  pipe(
+    limit,
+    O.getOrElse(() => 20) // TODO: get from config
+  );
