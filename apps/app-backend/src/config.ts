@@ -11,7 +11,6 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import * as reporters from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
