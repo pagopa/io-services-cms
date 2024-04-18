@@ -26,7 +26,7 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * Search for institutions on Azure Search Index
  */
 
-const search: (
+const executeSearch: (
   search: NonEmptyString,
   scope: O.Option<ScopeType>,
   limit: O.Option<number>,
@@ -38,7 +38,7 @@ const search: (
 > =
   (
     search: NonEmptyString,
-    scope: O.Option<ScopeType>, // TODO: calcolare il filtro
+    scope: O.Option<ScopeType>,
     limit: O.Option<number>,
     offset: O.Option<number>
   ) =>
@@ -93,14 +93,8 @@ export const makeSearchInstitutionsHandler: H.Handler<
       ),
     }),
     RTE.fromTaskEither,
-    RTE.bindTo("queryParams"),
-    RTE.chainW(({ queryParams }) =>
-      search(
-        queryParams.search,
-        queryParams.scope,
-        queryParams.limit,
-        queryParams.offset
-      )
+    RTE.chain(({ search, scope, offset, limit }) =>
+      executeSearch(search, scope, limit, offset)
     ),
     RTE.map(H.successJson)
   )
