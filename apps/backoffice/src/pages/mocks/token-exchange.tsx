@@ -4,6 +4,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { aMockedChangeInstitutionIdentiyToken } from "../../../mocks/data/selfcare-data";
+import { getConfiguration } from "@/config";
 
 /**
  * Selfcare change institution page.
@@ -24,7 +25,11 @@ export default function TokenExchange() {
       )
     ) {
       console.log("token-exchange");
-      router.push(`/auth/login#token=${aMockedChangeInstitutionIdentiyToken}`);
+      router.push(
+        `${
+          getConfiguration().BACK_OFFICE_LOGIN_PATH
+        }#token=${aMockedChangeInstitutionIdentiyToken}`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [institutionId, productId]);
