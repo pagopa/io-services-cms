@@ -11,6 +11,7 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import * as reporters from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
@@ -22,6 +23,19 @@ export const FeaturedItemsConfig = t.type({
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_ITEMS_FILE_NAME: NonEmptyString,
 });
+
+export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;
+export const AzureSearchConfig = t.intersection([
+  t.type({
+    // TODO: Capire se metterlo direttamente nello storageAccount della function in tal caso recuperarlo come QueueStorageConnection nella sezione globale
+    AZURE_SEARCH_ENDPOINT: NonEmptyString,
+    AZURE_SEARCH_INSTITUTIONS_INDEX_NAME: NonEmptyString,
+    AZURE_SEARCH_SERVICES_INDEX_NAME: NonEmptyString,
+  }),
+  t.partial({
+    AZURE_SEARCH_API_KEY: NonEmptyString, // If not provided AzureSearch will authenticate with managed identity
+  }),
+]);
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
@@ -35,6 +49,7 @@ export const IConfig = t.intersection([
     isProduction: t.boolean,
   }),
   FeaturedItemsConfig,
+  AzureSearchConfig,
 ]);
 
 export const envConfig = {
