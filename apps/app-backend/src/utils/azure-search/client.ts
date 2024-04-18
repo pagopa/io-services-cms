@@ -3,6 +3,7 @@ import {
   SearchClient,
   SearchIterator,
 } from "@azure/search-documents";
+import { DefaultAzureCredential } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -16,42 +17,55 @@ export type SearchMappedResult<T> = {
 };
 
 export type FullTextSearchParam = {
-  readonly text: string;
-  readonly params: string[];
+  readonly searchText: string;
+  readonly searchParams: string[];
+  readonly skip?: number;
+  readonly top?: number;
+  readonly filter?: string;
 };
 
 export type AzureSearchClient<T> = {
-  fullTextSearch: (
-    fullTextSearchParam: FullTextSearchParam,
-    filter?: string,
-    skip?: number,
-    top?: number
-  ) => TE.TaskEither<Error, SearchMappedResult<T>>;
+  fullTextSearch: ({
+    searchText,
+    searchParams,
+    skip,
+    top,
+    filter,
+  }: FullTextSearchParam) => TE.TaskEither<Error, SearchMappedResult<T>>;
 };
 
+/**
+ * Create an Azure Search client
+ * @param codec io-ts codec, used to decode the search results
+ * @param endpoint Azure Search endpoint
+ * @param indexName Azure Search index name
+ * @param apiKey! Azure Search API key, if not provided the DefaultAzureCredential will be used(managed identity)
+ * @returns
+ */
 export const makeAzureSearchClient = <T>(
   codec: t.Type<T>,
   endpoint: string,
   indexName: string,
-  apiKey: string
+  apiKey?: string
 ): AzureSearchClient<T> => {
   const searchClient = new SearchClient(
     endpoint,
     indexName,
-    new AzureKeyCredential(apiKey)
+    apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential()
   );
 
-  const fullTextSearch = (
-    fullTextSearchParam: FullTextSearchParam,
-    filter?: string,
-    skip?: number,
-    top?: number
-  ): TE.TaskEither<Error, SearchMappedResult<T>> =>
+  const fullTextSearch = ({
+    searchText,
+    searchParams,
+    skip,
+    top,
+    filter,
+  }: FullTextSearchParam): TE.TaskEither<Error, SearchMappedResult<T>> =>
     pipe(
       TE.tryCatch(
         () =>
-          searchClient.search(fullTextSearchParam.text, {
-            searchFields: fullTextSearchParam.params,
+          searchClient.search(`${searchText}*`, {
+            searchFields: searchParams,
             filter,
             includeTotalCount: true,
             skip,
