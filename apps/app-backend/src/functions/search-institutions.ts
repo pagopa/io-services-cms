@@ -20,7 +20,7 @@ import { ScopeType } from "../generated/definitions/internal/ScopeType";
 import {
   OptionalQueryParamMiddleware,
   RequiredQueryParamMiddleware,
-} from "../middleware/request";
+} from "../middleware/query-params-middlewares";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 /**
  * GET /intitutions AZF HttpTrigger
