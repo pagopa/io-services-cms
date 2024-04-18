@@ -25,6 +25,7 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * GET /intitutions AZF HttpTrigger
  * Search for institutions on Azure Search Index
  */
+
 const search: (
   search: NonEmptyString,
   scope: O.Option<NonEmptyString>,
@@ -48,6 +49,7 @@ const search: (
         searchParams: ["name"],
         skip: calculateSkip(offset),
         top: calculateTop(limit),
+        filter: calculateScopeFilter(scope),
       }),
       TE.map((results) => ({
         institutions: results.resources,
@@ -72,7 +74,7 @@ export const makeSearchInstitutionsHandler: H.Handler<
         "search" as NonEmptyString
       ),
       scope: OptionalQueryParamMiddleware(
-        NonEmptyString,
+        NonEmptyString, // TODO: fix scope decoder
         "scope" as NonEmptyString
       ),
       limit: OptionalQueryParamMiddleware(
@@ -109,10 +111,18 @@ export const SearchInstitutionsFn = httpAzureFunction(
 );
 
 const calculateSkip = (offset: O.Option<number>): number | undefined =>
-  O.isNone(offset) ? undefined : offset.value;
+  pipe(offset, O.toUndefined);
 
 const calculateTop = (limit: O.Option<number>): number =>
   pipe(
     limit,
     O.getOrElse(() => 20) // TODO: get from config
+  );
+const calculateScopeFilter = (
+  scope: O.Option<NonEmptyString>
+): string | undefined =>
+  pipe(
+    scope,
+    O.map((s) => `scope eq '${s}'`),
+    O.toUndefined
   );
