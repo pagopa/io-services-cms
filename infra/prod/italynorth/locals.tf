@@ -8,12 +8,12 @@ locals {
   srch_snet_cidrs      = ["10.20.135.0/26"]
 
   tags = {
-    CreatedBy   = "Terraform"
-    Environment = "Prod"
-    Owner       = "IO"
+    CreatedBy      = "Terraform"
+    Environment    = "Prod"
+    Owner          = "IO"
     ManagementTeam = "IO Enti & Servizi"
-    Source      = "https://github.com/pagopa/io-services-cms"
-    CostCenter  = "TS310 - PAGAMENTI & SERVIZI"
+    Source         = "https://github.com/pagopa/io-services-cms"
+    CostCenter     = "TS310 - PAGAMENTI & SERVIZI"
   }
 }
 
