@@ -1,4 +1,5 @@
 import * as H from "@pagopa/handler-kit";
+import * as L from "@pagopa/logger";
 import * as O from "fp-ts/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -107,7 +108,8 @@ export const makeSearchInstitutionsHandler: (
   paginationConfig: PaginationConfig
 ) => H.Handler<
   H.HttpRequest,
-  H.HttpResponse<InstitutionsResource, 200>,
+  | H.HttpResponse<InstitutionsResource, 200>
+  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
   AzureSearchClientDependency<Institution>
 > = (paginationConfig: PaginationConfig) =>
   H.of((request: H.HttpRequest) =>
@@ -116,7 +118,17 @@ export const makeSearchInstitutionsHandler: (
       extractQueryParams(paginationConfig),
       RTE.fromTaskEither,
       RTE.chain(executeSearch),
-      RTE.map(H.successJson)
+      RTE.map(H.successJson),
+      RTE.orElseW((error) =>
+        pipe(
+          RTE.right(
+            H.problemJson({ status: error.status, title: error.message })
+          ),
+          RTE.chainFirstW((errorResponse) =>
+            L.errorRTE(`Error executing SearchInstitutionsFn`, errorResponse)
+          )
+        )
+      )
     )
   );
 
