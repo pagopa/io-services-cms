@@ -1,19 +1,17 @@
-import * as E from "fp-ts/lib/Either";
 import * as H from "@pagopa/handler-kit";
+import {
+  IntegerFromString,
+  NonNegativeInteger,
+} from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it } from "vitest";
 import {
+  OptionalQueryParamMiddleware,
   RequiredQueryParamMiddleware,
   RequiredWithDefaultQueryParamMiddleware,
-  OptionalQueryParamMiddleware
 } from "../query-params-middlewares";
-import {
-  IWithinRangeIntegerTag,
-  IntegerFromString,
-  NonNegativeInteger,
-  WithinRangeInteger,
-} from "@pagopa/ts-commons/lib/numbers";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 describe("Query Params Middleware Tests", () => {
   describe("RequiredQueryParamMiddleware", () => {
@@ -158,8 +156,8 @@ describe("Query Params Middleware Tests", () => {
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
         expect(O.isSome(result.right)).toBeTruthy();
-        if(O.isSome(result.right)){
-            expect(result.right.value).toBe("value");
+        if (O.isSome(result.right)) {
+          expect(result.right.value).toBe("value");
         }
       }
     });
@@ -174,7 +172,7 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await OptionalQueryParamMiddleware(
         "param",
-        IntegerFromString.pipe(NonNegativeInteger),
+        IntegerFromString.pipe(NonNegativeInteger)
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
