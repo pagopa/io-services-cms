@@ -8,6 +8,8 @@ resource "azurerm_resource_group" "rg" {
 module "networking" {
   source = "../../_modules/networking"
 
+  prefix               = local.prefix
+  env_short            = local.env_short
   project              = local.project
   location             = local.location
   application_basename = local.application_basename
@@ -21,12 +23,13 @@ module "networking" {
 
 module "ai_search" {
   source               = "../../_modules/ai_search"
+  prefix               = local.prefix
+  env_short            = local.env_short
   project              = local.project
   location             = local.location
   application_basename = local.application_basename
   resource_group_name  = azurerm_resource_group.rg.name
 
-  sku             = "basic"
   replica_count   = 1
   partition_count = 1
 

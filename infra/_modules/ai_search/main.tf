@@ -9,7 +9,7 @@ resource "azurerm_search_service" "srch" {
   public_network_access_enabled = var.public_network_access_enabled
   local_authentication_enabled  = false
 
-  sku             = var.sku
+  sku             = "basic"
   replica_count   = var.replica_count
   partition_count = var.partition_count
 
@@ -28,16 +28,29 @@ resource "azurerm_private_endpoint" "srch" {
   subnet_id           = var.snet_id
 
   private_service_connection {
-    name                           = "${var.project}-${var.application_basename}-srch-001"
+    name                           = azurerm_search_service.srch.name
     private_connection_resource_id = azurerm_search_service.srch.id
     is_manual_connection           = false
-    subresource_names              = ["link"]
   }
 
   private_dns_zone_group {
-    name                 = "private-dns-zone-group"
+    name                 = "${var.project}-${var.application_basename}-dns-zone-group-001"
     private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_srch.id]
   }
 
   tags = var.tags
+}
+
+resource "azurerm_role_assignment" "search_to_cosmos_account_reader" {
+  scope                = data.azurerm_cosmosdb_account.cosmos.id
+  role_definition_name = "Cosmos DB Account Reader Role"
+  principal_id         = azurerm_search_service.srch.identity[0].principal_id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader" {
+  resource_group_name = var.resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.cosmos.name
+  role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
+  principal_id        = azurerm_search_service.srch.identity[0].principal_id
+  scope               = data.azurerm_cosmosdb_account.cosmos.id
 }
