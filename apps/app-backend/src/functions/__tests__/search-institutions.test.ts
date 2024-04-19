@@ -23,7 +23,6 @@ describe("Search Institutions Tests", () => {
   it("Should Return found institutions using default parameter for non specified ones", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
-      query: { search: "Mila" },
     };
 
     const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
@@ -34,7 +33,6 @@ describe("Search Institutions Tests", () => {
 
     expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        searchText: "Mila",
         top: 20,
       })
     );
@@ -142,7 +140,7 @@ describe("Search Institutions Tests", () => {
     );
   });
 
-  it("Should Return Bad Request on bad/lacking query parameters", async () => {
+  it("Should Return Bad Request on bad query parameters", async () => {
     const errorMessage = "An Error occured while searching";
 
     const req: H.HttpRequest = {
@@ -150,7 +148,6 @@ describe("Search Institutions Tests", () => {
       query: {
         scope: "NATIONAL",
         limit: "notValid",
-        offset: "0",
       },
     };
 
@@ -165,7 +162,7 @@ describe("Search Institutions Tests", () => {
         expect.objectContaining({
           body: {
             status: 400,
-            title: 'Missing "search" in request query',
+            title: 'Invalid "limit" supplied in request query',
           },
           statusCode: 400,
         })

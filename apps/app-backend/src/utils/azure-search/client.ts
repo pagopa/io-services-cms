@@ -17,8 +17,8 @@ export type SearchMappedResult<T> = {
 };
 
 export type FullTextSearchParam = {
-  readonly searchText: string;
-  readonly searchParams: string[];
+  readonly searchText?: string;
+  readonly searchParams?: string[];
   readonly skip?: number;
   readonly top?: number;
   readonly filter?: string;
@@ -64,7 +64,7 @@ export const makeAzureSearchClient = <T>(
     pipe(
       TE.tryCatch(
         () =>
-          searchClient.search(`${searchText}*`, {
+          searchClient.search(searchText, {
             searchFields: searchParams,
             filter,
             includeTotalCount: true,

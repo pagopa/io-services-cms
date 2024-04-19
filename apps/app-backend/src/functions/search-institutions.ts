@@ -18,17 +18,14 @@ import { PaginationConfig } from "../config";
 import { Institution } from "../generated/definitions/internal/Institution";
 import { InstitutionsResource } from "../generated/definitions/internal/InstitutionsResource";
 import { ScopeType } from "../generated/definitions/internal/ScopeType";
-import {
-  OptionalQueryParamMiddleware,
-  RequiredQueryParamMiddleware,
-} from "../middleware/query-params-middlewares";
+import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlewares";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 /**
  * GET /intitutions AZF HttpTrigger
  * Search for institutions on Azure Search Index
  */
 type SearchInstitutionsRequestQueryParams = {
-  search: NonEmptyString;
+  search: O.Option<NonEmptyString>;
   scope: O.Option<ScopeType>;
   limit: number;
   offset: O.Option<number>;
@@ -59,8 +56,12 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          searchText: requestQueryParams.search,
-          searchParams: ["name"],
+          searchText: pipe(requestQueryParams.search, O.toUndefined),
+          searchParams: pipe(
+            requestQueryParams.search,
+            O.map((_) => ["name"]),
+            O.toUndefined
+          ),
           filter: calculateScopeFilter(requestQueryParams.scope),
         })
       ),
@@ -82,7 +83,7 @@ const extractQueryParams: (
 > = (paginationConfig: PaginationConfig) =>
   pipe(
     sequenceS(RTE.ApplyPar)({
-      search: RequiredQueryParamMiddleware("search", NonEmptyString),
+      search: OptionalQueryParamMiddleware("search", NonEmptyString),
       scope: OptionalQueryParamMiddleware("scope", ScopeType),
       limit: pipe(
         OptionalQueryParamMiddleware(
