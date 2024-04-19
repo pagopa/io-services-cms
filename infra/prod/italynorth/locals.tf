@@ -5,7 +5,7 @@ locals {
   location             = "italynorth"
   project              = "${local.prefix}-${local.env_short}-${local.location_short}"
   is_prod              = local.env_short == "p" ? true : false
-  application_basename = "services-cms"
+  application_basename = "services"
   srch_snet_cidrs      = ["10.20.135.0/26"]
 
   tags = {
