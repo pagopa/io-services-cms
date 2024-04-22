@@ -10,7 +10,8 @@ import {
   Delete,
   Edit,
   History,
-  MoreVert
+  MoreVert,
+  Visibility
 } from "@mui/icons-material";
 import {
   Button,
@@ -43,6 +44,7 @@ export type ServiceContextMenuProps = {
   onUnpublishClick: () => void;
   onSubmitReviewClick: () => void;
   onHistoryClick: () => void;
+  onPreviewClick: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
 };
@@ -56,6 +58,7 @@ export const ServiceContextMenu = ({
   onUnpublishClick,
   onSubmitReviewClick,
   onHistoryClick,
+  onPreviewClick,
   onEditClick,
   onDeleteClick
 }: ServiceContextMenuProps) => {
@@ -210,6 +213,20 @@ export const ServiceContextMenu = ({
     </Tooltip>
   );
 
+  /** Show App Preview action button */
+  const renderAppPreviewAction = () => (
+    <Tooltip title={t("service.actions.preview")} placement="top" arrow>
+      <Button
+        size="medium"
+        variant="text"
+        sx={{ bgcolor: "background.paper", padding: 0 }}
+        onClick={() => onPreviewClick()}
+      >
+        <Visibility />
+      </Button>
+    </Tooltip>
+  );
+
   /** Show Edit Menu _(edit/delete actions)_ */
   const renderEditActions = () => {
     if (isEditable()) {
@@ -268,6 +285,7 @@ export const ServiceContextMenu = ({
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
       {renderHistoryAction()}
+      {/* {renderAppPreviewAction()} */}
       {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>
