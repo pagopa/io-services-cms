@@ -8,6 +8,7 @@ import { AzureSearchClient } from "../../utils/azure-search/client";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { mockSearchInstitutionsResult } from "../__mocks__/search-institutions-mock";
 import { makeSearchInstitutionsHandler } from "../search-institutions";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
@@ -85,6 +86,89 @@ describe("Search Institutions Tests", () => {
             institutions: mockSearchInstitutionsResult.resources,
             count: mockSearchInstitutionsResult.count,
             limit: 10,
+            offset: 0,
+          },
+          statusCode: 200,
+        })
+      )
+    );
+  });
+
+  it("Should Use ScoringProfile when configured", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        search: "Age",
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler({
+      ...mockedConfiguration,
+      AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE:
+        "aScoringProfile" as NonEmptyString,
+      AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETER:
+        "aTag-aValue" as NonEmptyString,
+    })({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        searchText: "Age",
+        scoringProfile: "aScoringProfile",
+        scoringParameters: ["aTag-aValue"],
+      })
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count: mockSearchInstitutionsResult.count,
+            limit: 20,
+            offset: 0,
+          },
+          statusCode: 200,
+        })
+      )
+    );
+  });
+
+  it("Should Not Use ScoringProfile when not properly configured", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        search: "Age",
+      },
+    };
+    // BTW Only AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE is configured
+    // Lack of parameter AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETER
+    const result = await makeSearchInstitutionsHandler({
+      ...mockedConfiguration,
+      AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE:
+        "aScoringProfile" as NonEmptyString,
+    })({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        searchText: "Age",
+      })
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count: mockSearchInstitutionsResult.count,
+            limit: 20,
             offset: 0,
           },
           statusCode: 200,
