@@ -50,7 +50,11 @@ export const PaginationConfig = t.type({
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100" as unknown as NonNegativeInteger
+    "101" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_OFFSET: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "101" as unknown as NonNegativeInteger
   ),
 });
 

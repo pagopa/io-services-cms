@@ -135,7 +135,13 @@ const extractQueryParams: (
       ),
       offset: OptionalQueryParamMiddleware(
         "offset",
-        IntegerFromString.pipe(NonNegativeInteger)
+        IntegerFromString.pipe(
+          WithinRangeInteger<
+            1,
+            NonNegativeInteger,
+            IWithinRangeIntegerTag<1, NonNegativeInteger>
+          >(1, paginationConfig.PAGINATION_MAX_OFFSET)
+        )
       ),
     })
   );

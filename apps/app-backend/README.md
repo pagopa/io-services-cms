@@ -62,6 +62,9 @@ The following table contains the required ENV variables that the applicative req
 | AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE(**\*1**)    | The Azure AI Search Institutions Scope Scoring Profile Name (eg BoostScope)       | string | N        |
 | AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS(**\*1**) | The Azure AI Search Institutions Scope Scoring Parameters(eg boostScope-NATIONAL) | string | N        |
 | AZURE_SEARCH_API_KEY                                        | The Azure AI Search ApiKey(when not provided use ManagedIdentities)               | string | N        |
+| PAGINATION_DEFAULT_LIMIT                                    | The Pagination Default limit in Paginated API(default=20)                         | string | D        |
+| PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=101)                           | string | N        |
+| PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=101)                          | string | N        |
 
 (**\*1**) To Enable Boosting in institutions search both variable **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE_** and **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS_** must be configured
 
