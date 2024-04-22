@@ -12,7 +12,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
-  PAGINATION_MAX_LIMIT: 100,
+  PAGINATION_MAX_LIMIT: 101,
+  PAGINATION_MAX_OFFSET: 101,
 } as unknown as IConfig;
 const mockSearchInstitutions = {
   fullTextSearch: vi

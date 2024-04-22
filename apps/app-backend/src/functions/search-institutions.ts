@@ -137,10 +137,10 @@ const extractQueryParams: (
         "offset",
         IntegerFromString.pipe(
           WithinRangeInteger<
-            1,
+            0,
             NonNegativeInteger,
-            IWithinRangeIntegerTag<1, NonNegativeInteger>
-          >(1, paginationConfig.PAGINATION_MAX_OFFSET)
+            IWithinRangeIntegerTag<0, NonNegativeInteger>
+          >(0, paginationConfig.PAGINATION_MAX_OFFSET)
         )
       ),
     })
