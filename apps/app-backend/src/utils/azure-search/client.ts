@@ -22,6 +22,8 @@ export type FullTextSearchParam = {
   readonly skip?: number;
   readonly top?: number;
   readonly filter?: string;
+  readonly scoringProfile?: string;
+  readonly scoringParameters?: string[];
 };
 
 export type AzureSearchClient<T> = {
@@ -60,6 +62,8 @@ export const makeAzureSearchClient = <T>(
     skip,
     top,
     filter,
+    scoringProfile,
+    scoringParameters,
   }: FullTextSearchParam): TE.TaskEither<Error, SearchMappedResult<T>> =>
     pipe(
       TE.tryCatch(
@@ -68,6 +72,8 @@ export const makeAzureSearchClient = <T>(
             searchFields: searchParams,
             filter,
             includeTotalCount: true,
+            scoringParameters,
+            scoringProfile,
             skip,
             top,
           }),

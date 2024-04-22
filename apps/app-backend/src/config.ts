@@ -36,6 +36,8 @@ export const AzureSearchConfig = t.intersection([
   }),
   t.partial({
     AZURE_SEARCH_API_KEY: NonEmptyString, // If not provided AzureSearch will authenticate with managed identity
+    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE: NonEmptyString,
+    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETER: NonEmptyString,
   }),
 ]);
 

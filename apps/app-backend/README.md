@@ -49,13 +49,21 @@ Contains middlewares for local business logic, that in not usefull to share with
 
 The following table contains the required ENV variables that the applicative require
 
-| Variable name                         | Description                                                              | type    |
-|---------------------------------------|--------------------------------------------------------------------------|---------|
-| APPINSIGHTS_INSTRUMENTATIONKEY        | The Application Insights instrumentation key                             | string  |
-| FETCH_TIMEOUT_MS                      | (optional) Fetch Timeout for AbortableFetch                              | number  |
-| FEATURED_ITEMS_BLOB_CONNECTION_STRING | The Azure StorageAccount connectionString to retrieve FeaturedItems blob | string  |
-| FEATURED_ITEMS_CONTAINER_NAME         | The blob storage container to retrieve FeaturedItems blob                | string  |
-| FEATURED_ITEMS_FILE_NAME              | The FeaturedItems Filename in blobStorage container                      | string  |
+| Variable name                                               | Description                                                                       | type   | required |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ | -------- |
+| APPINSIGHTS_INSTRUMENTATIONKEY                              | The Application Insights instrumentation key                                      | string | Y        |
+| FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                       | number | Y        |
+| FEATURED_ITEMS_BLOB_CONNECTION_STRING                       | The Azure StorageAccount connectionString to retrieve FeaturedItems blob          | string | Y        |
+| FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                         | string | Y        |
+| FEATURED_ITEMS_FILE_NAME                                    | The FeaturedItems Filename in blobStorage container                               | string | Y        |
+| AZURE_SEARCH_ENDPOINT                                       | The Azure AI Search Endpoint                                                      | string | Y        |
+| AZURE_SEARCH_INSTITUTIONS_INDEX_NAME                        | The Azure AI Search Institutions Index Name                                       | string | Y        |
+| AZURE_SEARCH_SERVICES_INDEX_NAME                            | The Azure AI Search Services Index Name                                           | string | Y        |
+| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE(**\*1**)    | The Azure AI Search Institutions Scope Scoring Profile Name (eg BoostScope)       | string | N        |
+| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS(**\*1**) | The Azure AI Search Institutions Scope Scoring Parameters(eg boostScope-NATIONAL) | string | N        |
+| AZURE_SEARCH_API_KEY                                        | The Azure AI Search ApiKey(when not provided use ManagedIdentities)               | string | N        |
+
+(**\*1**) To Enable Boosting in institutions search both variable **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE_** and **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS_** must be configured
 
 ## Local Execution
 
@@ -68,6 +76,7 @@ cp local.settings.json.example local.settings.json
 Then Fill the `local.settings.json` file.
 
 Then you can start the function using the following command:
+
 ```bash
 yarn start
 ```
