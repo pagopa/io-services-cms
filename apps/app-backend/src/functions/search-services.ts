@@ -22,8 +22,8 @@ import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlew
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 
 /**
- * GET /Services AZF HttpTrigger
- * Search for Services on Azure Search Index
+ * GET /institutions/{institutionId}/services AZF HttpTrigger
+ * Search for Istitution's Services on Azure Search Index
  */
 type SearchServicesRequestParams = {
   institutionId: OrganizationFiscalCode;
