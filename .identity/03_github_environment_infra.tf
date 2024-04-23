@@ -1,10 +1,10 @@
 resource "github_repository_environment" "github_repository_environment_infra_ci" {
-  environment = "infra-${var.env}-ci"
+  environment = "${var.env}-ci"
   repository  = var.github.repository
 }
 
 resource "github_repository_environment" "github_repository_environment_infra_cd" {
-  environment = "infra-${var.env}-cd"
+  environment = "${var.env}-cd"
   repository  = var.github.repository
   deployment_branch_policy {
     protected_branches     = true

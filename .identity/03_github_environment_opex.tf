@@ -41,11 +41,3 @@ resource "github_actions_environment_secret" "opex_env_cd_secrets" {
   secret_name     = each.key
   plaintext_value = each.value
 }
-
-# TODO: delete
-resource "github_actions_environment_secret" "azure_opex_client_id" {
-  repository      = var.github.repository
-  environment     = "${var.env}-opex"
-  secret_name     = "AZURE_CLIENT_ID"
-  plaintext_value = azuread_service_principal.environment_opex.application_id
-}

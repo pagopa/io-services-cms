@@ -1,5 +1,5 @@
 resource "github_repository_environment" "github_repository_environment_cd" {
-  environment = "${var.env}-cd"
+  environment = "app-${var.env}-cd"
   repository  = var.github.repository
   # filter teams reviewers from github_organization_teams
   # if reviewers_teams is null no reviewers will be configured for environment
@@ -27,10 +27,3 @@ resource "github_actions_environment_secret" "env_cd_secrets" {
   plaintext_value = each.value
 }
 
-# TODO: Delete
-resource "github_actions_environment_secret" "azure_cd_client_id" {
-  repository      = var.github.repository
-  environment     = "${var.env}-cd"
-  secret_name     = "AZURE_CLIENT_ID"
-  plaintext_value = azuread_service_principal.environment_cd.application_id
-}
