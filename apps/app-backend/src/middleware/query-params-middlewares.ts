@@ -19,11 +19,11 @@ export const RequiredQueryParamMiddleware: <T>(
     lookup(queryParam),
     TE.fromOption(
       () =>
-        new H.HttpBadRequestError(`Missing "${queryParam}" in request query`)
+        new H.HttpBadRequestError(`Missing '${queryParam}' in request query`)
     ),
     TE.chainEitherK(
       flow(
-        H.parse(schema, `Invalid "${queryParam}" supplied in request query`),
+        H.parse(schema, `Invalid '${queryParam}' supplied in request query`),
         E.mapLeft((err) => new H.HttpBadRequestError(err.message))
       )
     )
@@ -45,7 +45,7 @@ export const RequiredWithDefaultQueryParamMiddleware: <T>(
       () => E.right(defaultValue),
       (value) =>
         flow(
-          H.parse(schema, `Invalid "${queryParam}" supplied in request query`),
+          H.parse(schema, `Invalid '${queryParam}' supplied in request query`),
           E.mapLeft((err) => new H.HttpBadRequestError(err.message))
         )(value)
     ),
@@ -68,7 +68,7 @@ export const OptionalQueryParamMiddleware: <T>(
       () => E.right(O.none),
       (value) =>
         flow(
-          H.parse(schema, `Invalid "${queryParam}" supplied in request query`),
+          H.parse(schema, `Invalid '${queryParam}' supplied in request query`),
           E.map(O.some),
           E.mapLeft((err) => new H.HttpBadRequestError(err.message))
         )(value)

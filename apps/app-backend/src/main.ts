@@ -8,6 +8,9 @@ import { getConfigOrError } from "./config";
 import { Institution } from "./generated/definitions/internal/Institution";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
+import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
+import { SearchServicesFn } from "./functions/search-services";
+
 const config = pipe(
   getConfigOrError(),
   E.getOrElseW((error) => {
@@ -23,6 +26,13 @@ const institutionsSearchClient = makeAzureSearchClient(
   Institution,
   config.AZURE_SEARCH_ENDPOINT,
   config.AZURE_SEARCH_INSTITUTIONS_INDEX_NAME,
+  config.AZURE_SEARCH_API_KEY
+);
+
+const servicesSearchClient = makeAzureSearchClient(
+  ServiceMinified,
+  config.AZURE_SEARCH_ENDPOINT,
+  config.AZURE_SEARCH_SERVICES_INDEX_NAME,
   config.AZURE_SEARCH_API_KEY
 );
 
@@ -52,4 +62,14 @@ app.http("SearchInstitutions", {
   handler: SearchInstitutions,
   methods: ["GET"],
   route: "institutions",
+});
+
+const SearchServices = SearchServicesFn(config)({
+  searchClient: servicesSearchClient,
+});
+app.http("SearchServices", {
+  authLevel: "anonymous",
+  handler: SearchServices,
+  methods: ["GET"],
+  route: "institutions/{institutionId}/services",
 });
