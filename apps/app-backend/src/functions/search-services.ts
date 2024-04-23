@@ -26,7 +26,7 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * Search for Services on Azure Search Index
  */
 type SearchServicesRequestParams = {
-  instituitionId: OrganizationFiscalCode;
+  institutionId: OrganizationFiscalCode;
   limit: number;
   offset: O.Option<number>;
 };
@@ -62,7 +62,7 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          filter: `instituitionId eq '${requestQueryParams.instituitionId}'`,
+          filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -83,8 +83,8 @@ const extractParams: (
 > = (paginationConfig: PaginationConfig) =>
   pipe(
     sequenceS(RTE.ApplyPar)({
-      instituitionId: PathParamValidatorMiddleware(
-        "instituitionId",
+      institutionId: PathParamValidatorMiddleware(
+        "institutionId",
         OrganizationFiscalCode
       ),
       limit: pipe(
