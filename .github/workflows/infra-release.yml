@@ -7,14 +7,16 @@ on:
       - master
     paths:
       - "infra/prod/italynorth/**"
+      - ".github/workflows/infra-review.yml"
+      - ".github/workflows/infra-release.yml"
 
 jobs:
   infra_release_prod_itn:
     uses: pagopa/dx/.github/workflows/infra_apply.yaml@2a6b15a40418406315ae881d3c5c5c1988630ae1
-    name: Release Infrastructure
+    name: Release Infrastructure Prod Italy North
     secrets: inherit
     with:
       environment: prod
       region: italynorth
-      base_path: infra/prod/italynorth
+      base_path: infra
       use_private_agent: true
