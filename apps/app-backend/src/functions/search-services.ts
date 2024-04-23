@@ -12,43 +12,46 @@ import {
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { PaginationConfig } from "../config";
+import { InstitutionServicesResource } from "../generated/definitions/internal/InstitutionServicesResource";
+import { OrganizationFiscalCode } from "../generated/definitions/internal/OrganizationFiscalCode";
+import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
+import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlewares";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
-import { InstitutionServicesResource } from "../generated/definitions/internal/InstitutionServicesResource";
-import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
-import { OrganizationFiscalCode } from "../generated/definitions/internal/OrganizationFiscalCode";
 
 /**
  * GET /Services AZF HttpTrigger
  * Search for Services on Azure Search Index
  */
-type SearchServicesRequestQueryParams = {
-  search: O.Option<NonEmptyString>;
-  instituitionId: O.Option<OrganizationFiscalCode>;
+type SearchServicesRequestParams = {
+  instituitionId: OrganizationFiscalCode;
   limit: number;
   offset: O.Option<number>;
 };
 
-const calculateInstitutionIdFilter = (
-  instituitionId: O.Option<OrganizationFiscalCode>
-): string | undefined =>
-  pipe(
-    instituitionId,
-    O.map((s) => `instituitionId eq '${s}'`),
-    O.toUndefined
-  );
+// type SearchServicesRequestParams = {
+//   instituitionId: O.Option<OrganizationFiscalCode>;
+// };
+
+// const calculateInstitutionIdFilter = (
+//   instituitionId: O.Option<OrganizationFiscalCode>
+// ): string | undefined =>
+//   pipe(
+//     instituitionId,
+//     O.map((s) => `instituitionId eq '${s}'`),
+//     O.toUndefined
+//   );
 
 const executeSearch: (
-  requestQueryParams: SearchServicesRequestQueryParams
+  requestQueryParams: SearchServicesRequestParams
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<ServiceMinified>,
   H.HttpError,
   InstitutionServicesResource
 > =
-  (requestQueryParams: SearchServicesRequestQueryParams) =>
+  (requestQueryParams: SearchServicesRequestParams) =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
@@ -59,15 +62,7 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          searchText: pipe(requestQueryParams.search, O.toUndefined),
-          searchParams: pipe(
-            requestQueryParams.search,
-            O.map((_) => ["name"]),
-            O.toUndefined
-          ),
-          filter: calculateInstitutionIdFilter(
-            requestQueryParams.instituitionId
-          ),
+          filter: `instituitionId eq '${requestQueryParams.instituitionId}'`,
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -79,17 +74,16 @@ const executeSearch: (
       TE.mapLeft((error) => new H.HttpError(error.message))
     );
 
-const extractQueryParams: (
+const extractParams: (
   paginationConfig: PaginationConfig
 ) => RTE.ReaderTaskEither<
   H.HttpRequest,
   H.HttpBadRequestError,
-  SearchServicesRequestQueryParams
+  SearchServicesRequestParams
 > = (paginationConfig: PaginationConfig) =>
   pipe(
     sequenceS(RTE.ApplyPar)({
-      search: OptionalQueryParamMiddleware("search", NonEmptyString),
-      instituitionId: OptionalQueryParamMiddleware(
+      instituitionId: PathParamValidatorMiddleware(
         "instituitionId",
         OrganizationFiscalCode
       ),
@@ -130,7 +124,7 @@ export const makeSearchServicesHandler: (
   H.of((request: H.HttpRequest) =>
     pipe(
       request,
-      extractQueryParams(paginationConfig),
+      extractParams(paginationConfig),
       RTE.fromTaskEither,
       RTE.chain(executeSearch),
       RTE.map(H.successJson),
