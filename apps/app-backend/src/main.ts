@@ -10,6 +10,7 @@ import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { SearchServicesFn } from "./functions/search-services";
+
 const config = pipe(
   getConfigOrError(),
   E.getOrElseW((error) => {
@@ -27,6 +28,7 @@ const institutionsSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_INSTITUTIONS_INDEX_NAME,
   config.AZURE_SEARCH_API_KEY
 );
+
 
 const servicesSearchClient = makeAzureSearchClient(
   ServiceMinified,
@@ -72,3 +74,4 @@ app.http("SearchServices", {
   methods: ["GET"],
   route: "services",
 });
+
