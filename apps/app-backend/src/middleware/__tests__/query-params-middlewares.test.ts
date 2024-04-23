@@ -50,7 +50,7 @@ describe("Query Params Middleware Tests", () => {
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          'Invalid "param" supplied in request query'
+          "Invalid 'param' supplied in request query"
         );
       }
     });
@@ -70,7 +70,7 @@ describe("Query Params Middleware Tests", () => {
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
-        expect(result.left.message).toEqual('Missing "param" in request query');
+        expect(result.left.message).toEqual("Missing 'param' in request query");
       }
     });
   });
@@ -113,7 +113,7 @@ describe("Query Params Middleware Tests", () => {
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          'Invalid "param" supplied in request query'
+          "Invalid 'param' supplied in request query"
         );
       }
     });
@@ -178,7 +178,7 @@ describe("Query Params Middleware Tests", () => {
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          'Invalid "param" supplied in request query'
+          "Invalid 'param' supplied in request query"
         );
       }
     });

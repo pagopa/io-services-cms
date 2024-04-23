@@ -54,7 +54,7 @@ describe("Search Institutions Tests", () => {
     );
   });
 
-  it("Should Return found institutions the provided params", async () => {
+  it("Should Return found institutions for the provided params", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {
@@ -247,7 +247,7 @@ describe("Search Institutions Tests", () => {
         expect.objectContaining({
           body: {
             status: 400,
-            title: 'Invalid "limit" supplied in request query',
+            title: "Invalid 'limit' supplied in request query",
           },
           statusCode: 400,
         })
