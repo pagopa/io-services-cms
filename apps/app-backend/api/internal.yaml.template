@@ -49,10 +49,7 @@ paths:
           description: Institution scope
           required: false
           schema:
-            type: string
-            enum:
-              - "NATIONAL"
-              - "LOCAL"
+            $ref: '#/components/schemas/ScopeType'
         - name: limit
           in: query
           description: The number of search results to retrieve. This can be used in conjunction with skip to implement client-side paging of search results (https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part2-url-conventions.html#sec_SystemQueryOptionstopandskip).
@@ -69,7 +66,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 100000
+            maximum: 100
             default: 0
       responses:
         "200":
@@ -118,7 +115,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 100000
+            maximum: 100
             default: 0
       responses:
         "200":
@@ -315,3 +312,9 @@ components:
         - EMAIL
         - WEBHOOK
       example: [EMAIL]
+    ScopeType:
+      type: string
+      description: Institutions/Services Scopes
+      enum:
+        - NATIONAL
+        - LOCAL

@@ -10,7 +10,11 @@ import * as t from "io-ts";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeInteger,
+  NumberFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import * as reporters from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
@@ -21,6 +25,37 @@ export const FeaturedItemsConfig = t.type({
   FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_ITEMS_FILE_NAME: NonEmptyString,
+});
+
+export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;
+export const AzureSearchConfig = t.intersection([
+  t.type({
+    AZURE_SEARCH_ENDPOINT: NonEmptyString,
+    AZURE_SEARCH_INSTITUTIONS_INDEX_NAME: NonEmptyString,
+    AZURE_SEARCH_SERVICES_INDEX_NAME: NonEmptyString,
+  }),
+  t.partial({
+    AZURE_SEARCH_API_KEY: NonEmptyString, // If not provided AzureSearch will authenticate with managed identity
+    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE: NonEmptyString,
+    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETER: NonEmptyString,
+  }),
+]);
+
+// Services pagination configuration
+export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
+export const PaginationConfig = t.type({
+  PAGINATION_DEFAULT_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "20" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_LIMIT: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "101" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_OFFSET: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "101" as unknown as NonNegativeInteger
+  ),
 });
 
 // global app configuration
@@ -35,6 +70,8 @@ export const IConfig = t.intersection([
     isProduction: t.boolean,
   }),
   FeaturedItemsConfig,
+  AzureSearchConfig,
+  PaginationConfig,
 ]);
 
 export const envConfig = {

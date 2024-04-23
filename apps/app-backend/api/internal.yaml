@@ -47,10 +47,7 @@ paths:
           description: Institution scope
           required: false
           schema:
-            type: string
-            enum:
-              - NATIONAL
-              - LOCAL
+            $ref: '#/components/schemas/ScopeType'
         - name: limit
           in: query
           description: >-
@@ -74,7 +71,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 100000
+            maximum: 100
             default: 0
       responses:
         '200':
@@ -130,7 +127,7 @@ paths:
           schema:
             type: integer
             minimum: 0
-            maximum: 100000
+            maximum: 100
             default: 0
       responses:
         '200':
@@ -428,3 +425,9 @@ components:
         - WEBHOOK
       example:
         - EMAIL
+    ScopeType:
+      type: string
+      description: Institutions/Services Scopes
+      enum:
+        - NATIONAL
+        - LOCAL
