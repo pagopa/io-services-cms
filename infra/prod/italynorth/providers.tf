@@ -12,6 +12,11 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "<= 3.99.0"
     }
+
+    restapi = {
+      source = "Mastercard/restapi"
+      version = "<= 1.19.1"
+    }
   }
 }
 
