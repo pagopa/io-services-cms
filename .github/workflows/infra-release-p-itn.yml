@@ -7,8 +7,7 @@ on:
       - master
     paths:
       - "infra/prod/italynorth/**"
-      - ".github/workflows/infra-review.yml"
-      - ".github/workflows/infra-release.yml"
+      - ".github/workflows/infra-review-p-itn.yml"
 
 jobs:
   infra_release_prod_itn:
