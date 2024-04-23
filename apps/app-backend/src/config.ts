@@ -41,6 +41,15 @@ export const AzureSearchConfig = t.intersection([
   }),
 ]);
 
+// CosmosDB configuration
+export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
+export const CosmosConfig = t.type({
+  COSMOSDB_URI: NonEmptyString,
+  COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_KEY: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICE_DETAILS: NonEmptyString,
+});
+
 // Services pagination configuration
 export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
 export const PaginationConfig = t.type({
@@ -72,6 +81,7 @@ export const IConfig = t.intersection([
   FeaturedItemsConfig,
   AzureSearchConfig,
   PaginationConfig,
+  CosmosConfig,
 ]);
 
 export const envConfig = {
