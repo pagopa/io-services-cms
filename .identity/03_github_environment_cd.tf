@@ -1,6 +1,6 @@
 resource "github_repository_environment" "github_repository_environment_cd" {
   environment = "app-${var.env}-cd"
-  repository  = var.github.repository
+  repository  = github_repository.this.name
   # filter teams reviewers from github_organization_teams
   # if reviewers_teams is null no reviewers will be configured for environment
   dynamic "reviewers" {
@@ -20,8 +20,8 @@ resource "github_repository_environment" "github_repository_environment_cd" {
 }
 
 resource "github_actions_environment_secret" "env_cd_secrets" {
-  for_each        = local.env_cd_secrets
-  repository      = var.github.repository
+  for_each        = local.app_env_cd_secrets
+  repository      = github_repository.this.name
   environment     = github_repository_environment.github_repository_environment_cd.environment
   secret_name     = each.key
   plaintext_value = each.value

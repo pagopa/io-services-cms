@@ -82,10 +82,10 @@ jobs:
   terraform_apply_job:
     name: Terraform Apply
     runs-on: [self-hosted]
-    environment: infra-prod-cd
+    environment: prod-cd
     needs: [terraform_plan_job]
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       AZURE_ENVIRONMENT: prod
 
     steps:

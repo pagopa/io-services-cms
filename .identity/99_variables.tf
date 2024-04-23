@@ -63,18 +63,6 @@ variable "infra_environment_cd_roles" {
   description = "Continous Delivery roles for infra managed identity"
 }
 
-variable "github" {
-  type = object({
-    org        = string
-    repository = string
-  })
-  description = "GitHub Organization and repository name"
-  default = {
-    org        = "pagopa"
-    repository = "io-services-cms"
-  }
-}
-
 variable "environment_ci_roles" {
   type = object({
     subscription    = list(string)
