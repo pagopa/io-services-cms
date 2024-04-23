@@ -45,7 +45,7 @@ resource "azurerm_cosmosdb_sql_database" "db_cms" {
 }
 
 resource "azurerm_cosmosdb_sql_database" "db_app_be" {
-  name                = "db-services-app-be"
+  name                = "app-backend"
   resource_group_name = azurerm_resource_group.rg.name
   account_name        = module.cosmosdb_account.name
 }
