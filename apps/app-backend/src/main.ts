@@ -29,7 +29,6 @@ const institutionsSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_API_KEY
 );
 
-
 const servicesSearchClient = makeAzureSearchClient(
   ServiceMinified,
   config.AZURE_SEARCH_ENDPOINT,
@@ -72,6 +71,5 @@ app.http("SearchServices", {
   authLevel: "anonymous",
   handler: SearchServices,
   methods: ["GET"],
-  route: "services",
+  route: "institutions/{institutionId}/services",
 });
-
