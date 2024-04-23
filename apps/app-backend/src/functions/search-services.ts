@@ -15,55 +15,31 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
 import { PaginationConfig } from "../config";
-import { ScopeType } from "../generated/definitions/internal/ScopeType";
 import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlewares";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 import { InstitutionServicesResource } from "../generated/definitions/internal/InstitutionServicesResource";
 import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
+import { OrganizationFiscalCode } from "../generated/definitions/internal/OrganizationFiscalCode";
+
 /**
  * GET /Services AZF HttpTrigger
  * Search for Services on Azure Search Index
  */
 type SearchServicesRequestQueryParams = {
   search: O.Option<NonEmptyString>;
-  scope: O.Option<ScopeType>;
+  instituitionId: O.Option<OrganizationFiscalCode>;
   limit: number;
   offset: O.Option<number>;
 };
 
-const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
+const calculateInstitutionIdFilter = (
+  instituitionId: O.Option<OrganizationFiscalCode>
+): string | undefined =>
   pipe(
-    scope,
-    O.map((s) => `scope eq '${s}'`),
+    instituitionId,
+    O.map((s) => `instituitionId eq '${s}'`),
     O.toUndefined
   );
-
-// const executeSearch: (
-//   requestQueryParams: SearchServicesRequestQueryParams
-// ) => RTE.ReaderTaskEither<
-//   AzureSearchClientDependency<Services>,
-//   H.HttpError,
-//   InstitutionServicesResource // ci sarà la paginazione per i servizi ?
-// > =
-//   (requestQueryParams: SearchServicesRequestQueryParams) =>
-//   ({ searchClient }) =>
-//     pipe(
-//       searchClient.fullTextSearch({
-//         searchText: pipe(requestQueryParams.search, O.toUndefined),
-//         searchParams: pipe(
-//           requestQueryParams.search,
-//           O.map((_) => ["name"]),
-//           O.toUndefined
-//         ),
-//         filter: calculateScopeFilter(requestQueryParams.scope),
-//       }),
-//       (x) => x,
-//       TE.map((_) => ({
-//         services: _.resources,
-//       })),
-//       (x) => x,
-//       TE.mapLeft((error) => new H.HttpError(error.message))
-//     );
 
 const executeSearch: (
   requestQueryParams: SearchServicesRequestQueryParams
@@ -89,7 +65,9 @@ const executeSearch: (
             O.map((_) => ["name"]),
             O.toUndefined
           ),
-          filter: calculateScopeFilter(requestQueryParams.scope),
+          filter: calculateInstitutionIdFilter(
+            requestQueryParams.instituitionId
+          ),
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -111,7 +89,10 @@ const extractQueryParams: (
   pipe(
     sequenceS(RTE.ApplyPar)({
       search: OptionalQueryParamMiddleware("search", NonEmptyString),
-      scope: OptionalQueryParamMiddleware("scope", ScopeType),
+      instituitionId: OptionalQueryParamMiddleware(
+        "instituitionId",
+        OrganizationFiscalCode
+      ),
       limit: pipe(
         OptionalQueryParamMiddleware(
           "limit",

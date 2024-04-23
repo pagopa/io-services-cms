@@ -57,7 +57,7 @@ describe("Search Services Tests", () => {
       ...H.request("127.0.0.1"),
       query: {
         search: "Pagam",
-        scope: "NATIONAL",
+        instituitionId: "01234567891",
         limit: "10",
         offset: "0",
       },
@@ -72,7 +72,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         searchText: "Pagam",
-        filter: "scope eq 'NATIONAL'",
+        instituitionId: "instituitionId eq '01234567891'",
         top: 10,
         skip: 0,
       })
@@ -106,7 +106,7 @@ describe("Search Services Tests", () => {
       ...H.request("127.0.0.1"),
       query: {
         search: "Pagam",
-        scope: "NATIONAL",
+        instituitionId: "01234567891",
         limit: "10",
         offset: "0",
       },
@@ -121,7 +121,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServicesFail.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         searchText: "Pagam",
-        filter: "scope eq 'NATIONAL'",
+        instituitionId: "instituitionId eq '01234567891'",
         top: 10,
         skip: 0,
       })
@@ -146,7 +146,7 @@ describe("Search Services Tests", () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {
-        scope: "NATIONAL",
+        instituitionId: "01234567891",
         limit: "notValid",
       },
     };
