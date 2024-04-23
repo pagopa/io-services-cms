@@ -1,4 +1,4 @@
-name: Infra Continuous Integration
+name: Infra Continuous Integration Prod
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Release Infrastructure
+name: Release Infrastructure Prod Italy North
 
 on:
   workflow_dispatch:
@@ -13,10 +13,10 @@ on:
 jobs:
   infra_release_prod_itn:
     uses: pagopa/dx/.github/workflows/infra_apply.yaml@2a6b15a40418406315ae881d3c5c5c1988630ae1
-    name: Release Infrastructure Prod Italy North
+    name: Prod Italy North
     secrets: inherit
     with:
-      environment: prod
+      environment: infra-prod-cd
       region: italynorth
       base_path: infra
       use_private_agent: true

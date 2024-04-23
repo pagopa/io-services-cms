@@ -1,4 +1,4 @@
-name: PR Infrastructure Plan
+name: PR Infrastructure Prod Italy North
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
     name: PR Prod Italy North
     secrets: inherit
     with:
-      environment: "prod"
+      environment: infra-prod-ci
       region: italynorth
       base_path: "infra"
       use_private_agent: true
