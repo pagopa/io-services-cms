@@ -11,7 +11,8 @@ import { ServiceMinified } from "../../generated/definitions/internal/ServiceMin
 
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
-  PAGINATION_MAX_LIMIT: 100,
+  PAGINATION_MAX_LIMIT: 101,
+  PAGINATION_MAX_OFFSET: 101,
 } as unknown as IConfig;
 const mockSearchServices = {
   fullTextSearch: vi
@@ -23,6 +24,9 @@ describe("Search Services Tests", () => {
   it("Should Return found services using default parameter for non specified ones", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      path: {
+        institutionId: "01234567891",
+      },
     };
 
     const result = await makeSearchServicesHandler(mockedConfiguration)({
@@ -52,14 +56,15 @@ describe("Search Services Tests", () => {
     );
   });
 
-  it("Should Return found services the provided params", async () => {
+  it("Should Return found services for the provided params", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {
-        search: "Pagam",
-        instituitionId: "01234567891",
         limit: "10",
         offset: "0",
+      },
+      path: {
+        institutionId: "01234567891",
       },
     };
 
@@ -71,8 +76,7 @@ describe("Search Services Tests", () => {
 
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        searchText: "Pagam",
-        instituitionId: "instituitionId eq '01234567891'",
+        filter: "orgFiscalCode eq '01234567891'",
         top: 10,
         skip: 0,
       })
@@ -105,10 +109,11 @@ describe("Search Services Tests", () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {
-        search: "Pagam",
-        instituitionId: "01234567891",
         limit: "10",
         offset: "0",
+      },
+      path: {
+        institutionId: "01234567891",
       },
     };
 
@@ -120,8 +125,7 @@ describe("Search Services Tests", () => {
 
     expect(mockSearchServicesFail.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        searchText: "Pagam",
-        instituitionId: "instituitionId eq '01234567891'",
+        filter: "orgFiscalCode eq '01234567891'",
         top: 10,
         skip: 0,
       })
@@ -146,8 +150,10 @@ describe("Search Services Tests", () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {
-        instituitionId: "01234567891",
         limit: "notValid",
+      },
+      path: {
+        institutionId: "01234567891",
       },
     };
 
@@ -162,7 +168,7 @@ describe("Search Services Tests", () => {
         expect.objectContaining({
           body: {
             status: 400,
-            title: 'Invalid "limit" supplied in request query',
+            title: "Invalid 'limit' supplied in request query",
           },
           statusCode: 400,
         })
