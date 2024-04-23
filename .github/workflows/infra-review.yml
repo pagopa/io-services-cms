@@ -1,0 +1,23 @@
+name: PR Infrastructure Plan
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - "infra/prod/italynorth/**"
+
+jobs:
+  infra_review_prod_itn:
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@2a6b15a40418406315ae881d3c5c5c1988630ae1
+    name: PR Prod Italy North
+    secrets: inherit
+    with:
+      environment: "prod"
+      region: italynorth
+      base_path: "infra/prod/italynorth"
+      use_private_agent: true

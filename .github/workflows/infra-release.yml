@@ -1,0 +1,20 @@
+name: Release Infrastructure
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "infra/prod/italynorth/**"
+
+jobs:
+  infra_release_prod_itn:
+    uses: pagopa/dx/.github/workflows/infra_apply.yaml@2a6b15a40418406315ae881d3c5c5c1988630ae1
+    name: Release Infrastructure
+    secrets: inherit
+    with:
+      environment: prod
+      region: italynorth
+      base_path: infra/prod/italynorth
+      use_private_agent: true
