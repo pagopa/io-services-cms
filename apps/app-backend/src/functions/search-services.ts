@@ -31,19 +31,6 @@ type SearchServicesRequestParams = {
   offset: O.Option<number>;
 };
 
-// type SearchServicesRequestParams = {
-//   instituitionId: O.Option<OrganizationFiscalCode>;
-// };
-
-// const calculateInstitutionIdFilter = (
-//   instituitionId: O.Option<OrganizationFiscalCode>
-// ): string | undefined =>
-//   pipe(
-//     instituitionId,
-//     O.map((s) => `instituitionId eq '${s}'`),
-//     O.toUndefined
-//   );
-
 const executeSearch: (
   requestQueryParams: SearchServicesRequestParams
 ) => RTE.ReaderTaskEither<
