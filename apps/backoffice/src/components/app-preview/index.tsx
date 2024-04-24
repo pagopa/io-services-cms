@@ -43,13 +43,10 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
   return (
     <>
       <Dialog open={isPreviewOpen} onClose={handleClose} disableScrollLock>
-        {/* TODO Struttura stack col con 3 box come row */}
         <Stack
           flexDirection={"column"}
-          paddingX={3}
-          paddingY={3}
           sx={{ minWidth: 600, minHeight: 640 }}
-          padding={"32px"}
+          padding={4}
           rowGap={"24px"}
         >
           <Stack direction={"row"} gap={1}>
