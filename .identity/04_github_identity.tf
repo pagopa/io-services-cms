@@ -1,5 +1,5 @@
 module "opex_identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -24,7 +24,7 @@ module "opex_identity_ci" {
 }
 
 module "opex_identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
@@ -49,12 +49,11 @@ module "opex_identity_cd" {
 }
 
 module "infra_identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
   domain    = var.domain
-  app_name  = "infra"
 
   identity_role = "ci"
 
@@ -74,12 +73,11 @@ module "infra_identity_ci" {
 }
 
 module "infra_identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
   domain    = var.domain
-  app_name  = "infra"
 
   identity_role = "cd"
 
@@ -99,11 +97,12 @@ module "infra_identity_cd" {
 }
 
 module "identity_ci" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
   domain    = var.domain
+  app_name  = "app"
 
   identity_role = "ci"
 
@@ -123,11 +122,12 @@ module "identity_ci" {
 }
 
 module "identity_cd" {
-  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v7.39.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//github_federated_identity?ref=v8.4.0"
 
   prefix    = var.prefix
   env_short = var.env_short
   domain    = var.domain
+  app_name  = "app"
 
   identity_role = "cd"
 

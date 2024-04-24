@@ -62,23 +62,12 @@ resource "azurerm_key_vault_access_policy" "adgroup_services_cms" {
   certificate_permissions = ["Get", "List", "Update", "Create", "Import", "Delete", "Restore", "Purge", "Recover", ]
 }
 
-resource "azurerm_key_vault_access_policy" "github_action_ci" {
+resource "azurerm_key_vault_access_policy" "github_action" {
   key_vault_id = module.key_vault_domain.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azuread_service_principal.github_action_iac_ci.object_id
+  object_id    = data.azuread_group.github_action_iac.object_id
 
   secret_permissions      = ["Get", "List", ]
-  storage_permissions     = []
-  certificate_permissions = []
-  key_permissions         = []
-}
-
-resource "azurerm_key_vault_access_policy" "github_action_cd" {
-  key_vault_id = module.key_vault_domain.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azuread_service_principal.github_action_iac_cd.object_id
-
-  secret_permissions      = ["Get", "List", "Set", ]
   storage_permissions     = []
   certificate_permissions = []
   key_permissions         = []
@@ -126,36 +115,4 @@ data "azurerm_key_vault_secret" "selfcare_api_key" {
 data "azurerm_key_vault_secret" "subscription_migration_api_key" {
   name         = "SUBSCRIPTION-MIGRATION-API-KEY"
   key_vault_id = module.key_vault_domain.id
-}
-
-#
-# MANAGED IDENTITIES
-#
-
-data "azurerm_user_assigned_identity" "managed_identity_services_cms_infra_ci" {
-  name                = "${local.project}-${local.application_basename}-infra-github-ci-identity"
-  resource_group_name = "${local.project}-identity-rg"
-}
-
-data "azurerm_user_assigned_identity" "managed_identity_services_cms_infra_cd" {
-  name                = "${local.project}-${local.application_basename}-infra-github-cd-identity"
-  resource_group_name = "${local.project}-identity-rg"
-}
-
-resource "azurerm_key_vault_access_policy" "access_policy_services_cms_infra_ci" {
-  key_vault_id = module.key_vault_domain.id
-
-  tenant_id = data.azurerm_client_config.current.tenant_id
-  object_id = data.azurerm_user_assigned_identity.managed_identity_services_cms_infra_ci.principal_id
-
-  secret_permissions = ["Get", "List"]
-}
-
-resource "azurerm_key_vault_access_policy" "access_policy_services_cms_infra_cd" {
-  key_vault_id = module.key_vault_domain.id
-
-  tenant_id = data.azurerm_client_config.current.tenant_id
-  object_id = data.azurerm_user_assigned_identity.managed_identity_services_cms_infra_cd.principal_id
-
-  secret_permissions = ["Get", "List", "Set"]
 }
