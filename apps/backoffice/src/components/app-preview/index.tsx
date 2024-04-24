@@ -61,7 +61,13 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
               <InfoOutlined color="disabled" />
             </Tooltip>
           </Stack>
-          <Box sx={{ with: 536, height: 467, backgroundImage: "url('/img/app_preview_bg.png')", backgroundSize: "cover" }}></Box>
+          <Box
+            flexGrow={1}
+            sx={{
+              backgroundImage: "url('/img/app_preview_bg.png')",
+              backgroundSize: "cover"
+            }}
+          ></Box>
           <Box textAlign={"center"}>
             <Button
               size="medium"
