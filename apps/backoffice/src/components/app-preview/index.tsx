@@ -20,6 +20,7 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import React, { useEffect, useState } from "react";
 
 type AppPreviewProps = {
@@ -28,6 +29,7 @@ type AppPreviewProps = {
 };
 
 export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
+  const { t } = useTranslation();
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(showPreview);
 
   /** Handle close `App Preview` dialog */
@@ -51,10 +53,10 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
         >
           <Stack direction={"row"} gap={1}>
             <Typography fontWeight={700} variant="h6">
-              Anteprima In App IO
+              {t("service.inAppPreview.title")}
             </Typography>
             <Tooltip
-              title={"Versione App xy di App IO"}
+              title={t("service.inAppPreview.titleTooltip")}
               placement="right"
               arrow
             >
@@ -77,7 +79,7 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
               onClick={handleClose}
               style={{ backgroundColor: "transparent" }}
             >
-              Chiudi Anteprima
+              {t("service.inAppPreview.closeButton")}
             </Button>
           </Box>
         </Stack>

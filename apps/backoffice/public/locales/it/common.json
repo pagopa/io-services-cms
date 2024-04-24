@@ -287,6 +287,7 @@
         "visibility": "Visibilità in IO"
       }
     },
+
     "service": {
       "address": "Indirizzo",
       "appAndroid": "App Android",
@@ -461,6 +462,11 @@
         "unpublished": "Il servizio è stato nascosto in App IO"
       },
       "readRejectReason": "Leggi i motivi del rifiuto"
+    },
+    "inAppPreview": {
+      "title": "Anteprima In App IO",
+      "titleTooltip": "Versione App xy di App IO",
+      "closeButton": "Chiudi Anteprima"
     }
   },
   "table": {

@@ -460,6 +460,11 @@
         "unpublished": "The service has been hidden in App IO"
       },
       "readRejectReason": "Read the reasons for refusal"
+    },
+    "inAppPreview": {
+      "title": "IO App Preview",
+      "titleTooltip": "IO App Version xy",
+      "closeButton": "Close Preview"
     }
   },
   "table": {
