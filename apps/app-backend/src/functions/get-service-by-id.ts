@@ -30,7 +30,7 @@ const executeGetServiceById: (
   ({ serviceDetailsContainer }) =>
     pipe(
       TE.tryCatch(
-        () => serviceDetailsContainer.item(serviceId).read(),
+        () => serviceDetailsContainer.item(serviceId, serviceId).read(),
         (err) =>
           new H.HttpError(
             `An error has occurred while fetching service having ID ${serviceId} [${
@@ -41,6 +41,11 @@ const executeGetServiceById: (
       TE.chain((rr) =>
         pipe(
           rr,
+          (rr) => {
+            // eslint-disable-next-line no-console
+            console.log("OTTENUTO", rr);
+            return rr;
+          },
           O.fromPredicate(() => rr.statusCode === 200),
           O.fold(
             () =>
