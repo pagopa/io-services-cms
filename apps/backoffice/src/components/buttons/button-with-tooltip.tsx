@@ -28,7 +28,7 @@ const ButtonWithTooltip = ({
           size={size}
           variant={variant}
           sx={{ bgcolor: "background.paper", padding: 0 }}
-          onClick={() => handleOnClick()}
+          onClick={handleOnClick}
         >
           {icon}
         </Button>
