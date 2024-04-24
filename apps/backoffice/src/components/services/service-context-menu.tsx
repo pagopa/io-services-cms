@@ -25,6 +25,8 @@ import {
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import { useDialog } from "../dialog-provider";
+import ButtonWithTooltip from "../buttons/button-with-tooltip";
+import { getConfiguration } from "@/config";
 
 export enum ServiceContextMenuActions {
   publish = "publish",
@@ -199,34 +201,6 @@ export const ServiceContextMenu = ({
     }
   };
 
-  /** Show History action button */
-  const renderHistoryAction = () => (
-    <Tooltip title={t("service.actions.history")} placement="top" arrow>
-      <Button
-        size="medium"
-        variant="text"
-        sx={{ bgcolor: "background.paper", padding: 0 }}
-        onClick={() => onHistoryClick()}
-      >
-        <History />
-      </Button>
-    </Tooltip>
-  );
-
-  /** Show App Preview action button */
-  const renderAppPreviewAction = () => (
-    <Tooltip title={t("service.actions.preview")} placement="top" arrow>
-      <Button
-        size="medium"
-        variant="text"
-        sx={{ bgcolor: "background.paper", padding: 0 }}
-        onClick={() => onPreviewClick()}
-      >
-        <PhoneAndroid />
-      </Button>
-    </Tooltip>
-  );
-
   /** Show Edit Menu _(edit/delete actions)_ */
   const renderEditActions = () => {
     if (isEditable()) {
@@ -284,8 +258,24 @@ export const ServiceContextMenu = ({
   return (
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
-      {renderHistoryAction()}
-      {/* {renderAppPreviewAction()} */}
+      <ButtonWithTooltip
+        isVisible={true}
+        tooltipTitle="service.actions.history"
+        handleOnClick={onHistoryClick}
+        icon={<History />}
+        size="medium"
+        variant="text"
+      />
+      <ButtonWithTooltip
+        isVisible={
+          getConfiguration().BACK_OFFICE_IS_IN_APP_PREVIEW_BUTTON_VISIBLE
+        }
+        tooltipTitle="service.actions.preview"
+        handleOnClick={onPreviewClick}
+        icon={<PhoneAndroid />}
+        size="medium"
+        variant="text"
+      />
       {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>

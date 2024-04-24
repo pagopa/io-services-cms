@@ -23,6 +23,7 @@ export type Configuration = {
   BACK_OFFICE_PERS_DATA_PROTECTION_URL: string;
   BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
   BACK_OFFICE_LOGIN_PATH: string;
+  BACK_OFFICE_IS_IN_APP_PREVIEW_BUTTON_VISIBLE: boolean;
 
   // Selfcare
   SELFCARE_ID: string;
@@ -96,6 +97,9 @@ export function getConfiguration(): Configuration {
       .NEXT_PUBLIC_BACK_OFFICE_OPERATIVE_MANUAL_URL as string,
     BACK_OFFICE_LOGIN_PATH: process.env
       .NEXT_PUBLIC_BACK_OFFICE_LOGIN_PATH as string,
+    BACK_OFFICE_IS_IN_APP_PREVIEW_BUTTON_VISIBLE:
+      process.env.NEXT_PUBLIC_BACK_OFFICE_IS_IN_APP_PREVIEW_BUTTON_VISIBLE ===
+      "true",
 
     // Selfcare
     SELFCARE_ID: process.env.NEXT_PUBLIC_SELFCARE_ID as string,
