@@ -11,7 +11,7 @@ import {
   Edit,
   History,
   MoreVert,
-  Visibility
+  PhoneAndroid
 } from "@mui/icons-material";
 import {
   Button,
@@ -222,7 +222,7 @@ export const ServiceContextMenu = ({
         sx={{ bgcolor: "background.paper", padding: 0 }}
         onClick={() => onPreviewClick()}
       >
-        <Visibility />
+        <PhoneAndroid />
       </Button>
     </Tooltip>
   );
