@@ -47,7 +47,7 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
           flexDirection={"column"}
           sx={{ minWidth: 600, minHeight: 640 }}
           padding={4}
-          rowGap={"24px"}
+          rowGap={3}
         >
           <Stack direction={"row"} gap={1}>
             <Typography fontWeight={700} variant="h6">
