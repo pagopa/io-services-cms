@@ -41,15 +41,12 @@ const executeGetServiceById: (
       TE.chain((rr) =>
         pipe(
           rr,
-          (rr) => {
-            // eslint-disable-next-line no-console
-            console.log("OTTENUTO", rr);
-            return rr;
-          },
           O.fromPredicate(() => rr.statusCode === 200),
           O.fold(
             () =>
-              E.left(new H.HttpNotFoundError(`Service ${serviceId} not found`)),
+              E.left(
+                new H.HttpNotFoundError(`Service '${serviceId}' not found`)
+              ),
             ({ resource }) =>
               pipe(
                 resource,
