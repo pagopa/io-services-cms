@@ -30,15 +30,9 @@ type AppPreviewProps = {
 
 export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
   const { t } = useTranslation();
-  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(showPreview);
-
-  useEffect(() => {
-    setIsPreviewOpen(showPreview);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPreview]);
 
   return (
-    <Dialog open={isPreviewOpen} onClose={onClose} disableScrollLock>
+    <Dialog open={showPreview} onClose={onClose} disableScrollLock>
       <Stack
         flexDirection={"column"}
         sx={{ minWidth: 600, minHeight: 640 }}
