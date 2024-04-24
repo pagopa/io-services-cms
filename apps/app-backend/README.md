@@ -65,6 +65,10 @@ The following table contains the required ENV variables that the applicative req
 | PAGINATION_DEFAULT_LIMIT                                    | The Pagination Default limit in Paginated API(default=20)                         | string | D        |
 | PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=101)                           | string | N        |
 | PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=101)                          | string | N        |
+| COSMOSDB_URI                                                | The CosmosDb Uri                                                                  | string | Y        |
+| COSMOSDB_NAME                                               | The CosmosDb Name                                                                 | string | Y        |
+| COSMOSDB_CONTAINER_SERVICE_DETAILS                          | The CosmosDb Container Name which contains service details                        | string | Y        |
+| COSMOSDB_KEY                                                | The CosmosDb key(when not provided use ManagedIdentities)                         | string | N        |
 
 (**\*1**) To Enable Boosting in institutions search both variable **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE_** and **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS_** must be configured
 

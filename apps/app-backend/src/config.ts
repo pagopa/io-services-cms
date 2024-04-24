@@ -43,12 +43,16 @@ export const AzureSearchConfig = t.intersection([
 
 // CosmosDB configuration
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
-export const CosmosConfig = t.type({
-  COSMOSDB_URI: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
-  COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICE_DETAILS: NonEmptyString,
-});
+export const CosmosConfig = t.intersection([
+  t.type({
+    COSMOSDB_URI: NonEmptyString,
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_CONTAINER_SERVICE_DETAILS: NonEmptyString,
+  }),
+  t.partial({
+    COSMOSDB_KEY: NonEmptyString,
+  }),
+]);
 
 // Services pagination configuration
 export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
