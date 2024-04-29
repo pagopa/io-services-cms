@@ -62,22 +62,22 @@ resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader" {
   resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.cosmos.name
   role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
-  principal_id       = azurerm_search_service.srch.identity[0].principal_id
-  scope              = data.azurerm_cosmosdb_account.cosmos.id
+  principal_id        = azurerm_search_service.srch.identity[0].principal_id
+  scope               = data.azurerm_cosmosdb_account.cosmos.id
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader_db" {
   resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.cosmos.name
   role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
-  principal_id       = azurerm_search_service.srch.identity[0].principal_id
-  scope              = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}"
+  principal_id        = azurerm_search_service.srch.identity[0].principal_id
+  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}"
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader_db_colls" {
   resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.cosmos.name
   role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
-  principal_id       = azurerm_search_service.srch.identity[0].principal_id
-  scope              = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}/colls/services-publication"
+  principal_id        = azurerm_search_service.srch.identity[0].principal_id
+  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}/colls/services-publication"
 }
