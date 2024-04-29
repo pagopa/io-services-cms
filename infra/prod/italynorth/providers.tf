@@ -13,7 +13,7 @@ terraform {
       version = "<= 3.101.0"
     }
 
-    restapi = {
+    restapi = { # Approved as temporary solution due to lack of support from azurerm provider
       source  = "Mastercard/restapi"
       version = "<= 1.19.1"
     }
