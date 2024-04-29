@@ -10,7 +10,12 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "<= 3.99.0"
+      version = "<= 3.101.0"
+    }
+
+    restapi = { # Approved as temporary solution due to lack of support from azurerm provider
+      source  = "Mastercard/restapi"
+      version = "<= 1.19.1"
     }
   }
 }

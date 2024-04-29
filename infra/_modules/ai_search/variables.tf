@@ -80,3 +80,18 @@ variable "snet_id" {
   type        = string
   description = "Subnet ID where to locate the ai search private endpoint"
 }
+
+variable "cosmos_database_name" {
+  type        = string
+  description = "Name of the cosmos database"
+  default     = "db-services-cms"
+}
+
+variable "index_aliases" {
+  type        = map(string)
+  description = "The aliases to create on each index"
+  default = {
+    organizations = "organizations"
+    services      = "services"
+  }
+}
