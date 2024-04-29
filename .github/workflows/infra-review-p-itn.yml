@@ -15,11 +15,11 @@ on:
 
 jobs:
   infra_review:
-    uses: pagopa/dx/.github/workflows/infra_plan.yaml@2a6b15a40418406315ae881d3c5c5c1988630ae1
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@eb49ec55761941cef1e6fbcc38681732a171c5b4
     name: PR Prod Italy North
     secrets: inherit
     with:
-      environment: infra-prod-ci
+      environment: prod
       region: italynorth
       base_path: "infra"
       use_private_agent: true
