@@ -3,38 +3,25 @@ resource "restapi_object" "organizations_datasource" {
   query_string = "api-version=2023-11-01"
   data = jsonencode(
     {
-      name        = "services-cms-org",
+      name        = "ds-organization-01",
       description = "${data.azurerm_cosmosdb_account.cosmos.name} datasource for ${azurerm_search_service.srch.name} AI Search Service",
       type        = "cosmosdb",
-      credentials = { connectionString = "ResourceId=/subscriptions/${data.azurerm_subscription.current.id}/resourceGroups/${data.azurerm_cosmosdb_account.cosmos.resource_group_name}/providers/Microsoft.DocumentDB/databaseAccounts/${data.azurerm_cosmosdb_account.cosmos.name}/(IdentityAuthType=[AccessToken])" },
+      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-publication"
-        query = "SELECT c.data.organization.fiscal_code, c.data.organization.name, c.data.metadata.scope, c.fsm.state, c._ts FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
+        query = "SELECT c.data.organization.fiscal_code, c.data.organization.name, c.data.metadata.scope, c.fsm.state, c._ts FROM c WHERE c.fsm.state = \"published\" and c._ts >= @HighWaterMark ORDER BY c._ts"
       },
-      dataChangeDetectionPolicy = {
-        "@odata.type"           = "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
-        highWaterMarkColumnName = "_ts"
-      },
-      dataDeletionDetectionPolicy = {
-        "@odata.type" : "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy",
-        softDeleteColumnName  = "fsm.state",
-        softDeleteMarkerValue = "unpublished"
-      },
-      #     encryptionKey = {
-      #       keyVaultKeyName    = "Name of the Azure Key Vault key used for encryption", # TO SET
-      #       keyVaultKeyVersion = "Version of the Azure Key Vault key",
-      #       keyVaultUri        = "URI of Azure Key Vault, also referred to as DNS name, that provides the key. An example URI might be https://my-keyvault-name.vault.azure.net",
-      #   } 
   })
+  force_new    = ["name"]
   id_attribute = "name" # The ID field on the response
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader]
 }
 
-resource "restapi_object" "organizations_index" {
+resource "restapi_object" "organizations_index_01" {
   path         = "/indexes"
   query_string = "api-version=2023-11-01"
   data = jsonencode({
-    name                  = "organizations-full-index"
+    name                  = "idx-organization-01"
     defaultScoringProfile = null
     fields = [
       {
@@ -43,14 +30,11 @@ resource "restapi_object" "organizations_index" {
         searchable          = false
         filterable          = true
         retrievable         = true
-        stored              = true
         sortable            = false
         facetable           = false
         key                 = true
         indexAnalyzer       = null
         searchAnalyzer      = null
-        analyzer            = null
-        normalizer          = null
         dimensions          = null
         vectorSearchProfile = null
         synonymMaps         = []
@@ -61,14 +45,10 @@ resource "restapi_object" "organizations_index" {
         searchable          = true
         filterable          = false
         retrievable         = true
-        stored              = true
         sortable            = false
         facetable           = false
         key                 = false
-        indexAnalyzer       = null
-        searchAnalyzer      = null
-        analyzer            = "my_analyzer"
-        normalizer          = null
+        analyzer            = "organizationCustomAnalyzer"
         dimensions          = null
         vectorSearchProfile = null
         synonymMaps         = []
@@ -78,15 +58,10 @@ resource "restapi_object" "organizations_index" {
         type                = "Edm.String"
         searchable          = false
         filterable          = true
-        retrievable         = true
-        stored              = true
+        retrievable         = false
         sortable            = false
         facetable           = false
         key                 = false
-        indexAnalyzer       = null
-        searchAnalyzer      = null
-        analyzer            = null
-        normalizer          = null
         dimensions          = null
         vectorSearchProfile = null
         synonymMaps         = []
@@ -97,14 +72,9 @@ resource "restapi_object" "organizations_index" {
         searchable          = false
         filterable          = false
         retrievable         = true
-        stored              = true
         sortable            = false
         facetable           = false
         key                 = false
-        indexAnalyzer       = null
-        searchAnalyzer      = null
-        analyzer            = null
-        normalizer          = null
         dimensions          = null
         vectorSearchProfile = null
         synonymMaps         = []
@@ -136,23 +106,22 @@ resource "restapi_object" "organizations_index" {
     analyzers = [
       {
         "@odata.type" = "#Microsoft.Azure.Search.CustomAnalyzer"
-        name          = "my_analyzer"
-        tokenizer     = "myTokenizer"
+        name          = "organizationCustomAnalyzer"
+        tokenizer     = "customNGramTokenizer"
         tokenFilters = [
           "italianStopWord",
           "asciifolding",
           "lowercase"
         ]
         charFilters = [
-          "remove_whitespace"
+          "removeWhitespace"
         ]
       }
     ]
-    normalizers = []
     tokenizers = [
       {
         "@odata.type" = "#Microsoft.Azure.Search.NGramTokenizer"
-        name          = "myTokenizer"
+        name          = "customNGramTokenizer"
         minGram       = 3
         maxGram       = 5
         tokenChars    = []
@@ -171,7 +140,7 @@ resource "restapi_object" "organizations_index" {
     charFilters = [
       {
         "@odata.type" = "#Microsoft.Azure.Search.MappingCharFilter"
-        name          = "remove_whitespace"
+        name          = "removeWhitespace"
         mappings = [
           "\\u0020=>"
         ]
@@ -195,9 +164,9 @@ resource "restapi_object" "organizations_indexer" {
   query_string = "api-version=2023-11-01"
   data = jsonencode(
     {
-      name            = "organizations-full-indexer"
+      name            = "idxr-organization-01"
       dataSourceName  = restapi_object.organizations_datasource.id
-      targetIndexName = restapi_object.organizations_index.id
+      targetIndexName = restapi_object.organizations_index_01.id
       description     = null
       skillsetName    = null
       disabled        = null
@@ -222,11 +191,22 @@ resource "restapi_object" "organizations_indexer" {
         }
       ]
       outputFieldMappings = []
-      cache               = null
       encryptionKey       = null
   })
   id_attribute = "name" # The ID field on the response
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader, restapi_object.organizations_datasource]
 }
 
-
+resource "restapi_object" "organizations_alias" {
+  path         = "/aliases"
+  query_string = "api-version=2024-03-01-Preview"
+  data = jsonencode(
+    {
+      name    = var.index_aliases.organizations
+      indexes = [restapi_object.organizations_index_01.id]
+    }
+  )
+  force_new    = ["indexes"]
+  id_attribute = "name" # The ID field on the response
+  depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader, restapi_object.organizations_datasource]
+}

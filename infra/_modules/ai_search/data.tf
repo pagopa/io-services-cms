@@ -11,7 +11,7 @@ data "azurerm_cosmosdb_account" "cosmos" {
 }
 
 data "azurerm_subnet" "pep_snet" {
-  name                 = "${var.project}-pep-snet-001"
-  virtual_network_name = "${var.project}-common-vnet-001"
-  resource_group_name  = "${var.project}-common-rg-001"
+  name                 = "${var.project}-pep-snet-01"
+  virtual_network_name = "${var.project}-common-vnet-01"
+  resource_group_name  = "${var.project}-common-rg-01"
 }
