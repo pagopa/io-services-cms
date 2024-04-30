@@ -1,4 +1,4 @@
-name: Release Infrastructure Prod Italy North
+name: Run terraform apply on prod italynorth infrastructure
 
 on:
   workflow_dispatch:
