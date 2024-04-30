@@ -1,4 +1,4 @@
-name: Infra Continuous Integration Prod
+name: Run terraform plan on prod westeurope infrastructure
 
 on:
   workflow_dispatch:
