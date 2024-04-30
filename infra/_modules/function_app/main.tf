@@ -4,7 +4,7 @@
 
 module "app_be_fn" {
   source              = "github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v8.5.0"
-  name                = "${local.project}-${local.application_basename}-app-be-fn-01"
+  name                = "${var.project}-${var.application_basename}-app-be-fn-01"
   resource_group_name = var.resource_group_name
   location            = var.location
   health_check_path   = "/api/v1/info"
@@ -19,6 +19,8 @@ module "app_be_fn" {
     worker_count                 = var.fn_worker_count
     maximum_elastic_worker_count = 0
   }
+
+  storage_account_name = "iopitnsrvcsappbefn01st"
 
   node_version    = 18
   runtime_version = "~4"
@@ -47,20 +49,20 @@ module "app_be_fn_staging_slot" {
   location            = var.location
   health_check_path   = "/api/v1/info"
 
-  function_app_id = module.webapp_functions_app.id
+  function_app_id = module.app_be_fn.id
 
   node_version    = 18
   runtime_version = "~4"
 
   always_on = "true"
 
-  storage_account_name       = module.webapp_functions_app.storage_account.name
-  storage_account_access_key = module.webapp_functions_app.storage_account.primary_access_key
+  storage_account_name       = module.app_be_fn.storage_account.name
+  storage_account_access_key = module.app_be_fn.storage_account.primary_access_key
 
   subnet_id = var.app_be_snet_id
 
   allowed_subnets = [
-    local.is_prod ? data.azurerm_subnet.github_runner_subnet[0].id : null
+    data.azurerm_subnet.github_runner_subnet.id
   ]
 
   application_insights_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key #FIXME: is it required?!

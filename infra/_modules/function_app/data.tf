@@ -25,3 +25,9 @@ data "azurerm_subnet" "appbackendli_snet" {
   virtual_network_name = "${var.prefix}-${var.env_short}-vnet-common"
   resource_group_name  = "${var.prefix}-${var.env_short}-rg-common"
 }
+
+data "azurerm_subnet" "github_runner_subnet" {
+  name                 = "${var.prefix}-${var.env_short}-github-runner-snet"
+  virtual_network_name = "${var.prefix}-${var.env_short}-vnet-common"
+  resource_group_name  = "${var.prefix}-${var.env_short}-rg-common"
+}
