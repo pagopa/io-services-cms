@@ -44,6 +44,7 @@ resource "azurerm_private_endpoint" "srch" {
   tags = var.tags
 }
 
+# Must be approved manually in cosmosdb networking page
 resource "azurerm_search_shared_private_link_service" "srch_to_cosmos" {
   name               = "${var.project}-${var.application_basename}-spl-01"
   search_service_id  = azurerm_search_service.srch.id
