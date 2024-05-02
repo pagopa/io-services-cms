@@ -1,4 +1,5 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import * as B from "fp-ts/boolean";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -28,16 +29,12 @@ export const handler: RTE.ReaderTaskEither<
   { item: ServiceLifecycle.ItemType },
   Error,
   NoAction | OnDetailLifecycleActions
-> = ({ item }) => {
-  switch (item.fsm.state) {
-    case "draft":
-      return pipe(item, onDetailLifecycleHandler, TE.right);
-    case "approved":
-    case "deleted":
-    case "rejected":
-    case "submitted":
-      return TE.right(noAction);
-    default:
-      return TE.right(noAction);
-  }
-};
+> = ({ item }) =>
+  pipe(
+    item.fsm.state === "draft",
+    B.fold(
+      () => noAction,
+      () => pipe(item, onDetailLifecycleHandler)
+    ),
+    TE.right
+  );
