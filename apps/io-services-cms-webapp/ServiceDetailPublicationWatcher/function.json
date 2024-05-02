@@ -8,7 +8,7 @@
         "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
         "databaseName": "%COSMOSDB_NAME%",
         "collectionName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
-        "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-lease",
+        "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-details-lease",
         "createLeaseCollectionIfNotExists": true,
         "startFromBeginning": true,
         "maxItemsPerInvocation": 30
