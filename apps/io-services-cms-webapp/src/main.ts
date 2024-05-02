@@ -29,7 +29,10 @@ import {
   expressToAzureFunction,
   toAzureFunctionHandler,
 } from "./lib/azure/adapters";
-import { getAppBackendDatabase, getDatabase } from "./lib/azure/cosmos";
+import {
+  getAppBackendCosmosDatabase,
+  getCmsCosmosDatabase,
+} from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
@@ -78,38 +81,40 @@ const apimService = ApimUtils.getApimService(
   config.AZURE_APIM
 );
 
-// client to interact with cms db
-const cosmos = getDatabase(config);
-const appBackendCosmos = getAppBackendDatabase(config);
+// client to interact with cms cosmos db
+const cmsCosmosDatabase = getCmsCosmosDatabase(config);
+
+// client to interact with app backend cosmos db
+const appBackendCosmosDatabase = getAppBackendCosmosDatabase(config);
 
 // create a store for the ServiceLifecycle finite state machine
 const serviceLifecycleStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
   ServiceLifecycle.ItemType
 );
 
 // create a store for the ServicePublication finite state machine
 const servicePublicationStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
   ServicePublication.ItemType
 );
 
 const serviceHistoryPagedHelper = makeCosmosPagedHelper(
   ServiceHistory,
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
   config.DEFAULT_PAGED_FETCH_LIMIT
 );
 
 const servicePublicationCosmosHelper = makeCosmosHelper(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
 );
 
 const serviceLifecycleCosmosHelper = makeCosmosHelper(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
 );
 
 const serviceDetailCosmosHelper = makeCosmosHelper(
-  appBackendCosmos.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
+  appBackendCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
