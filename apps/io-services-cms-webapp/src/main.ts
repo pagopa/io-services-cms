@@ -338,7 +338,7 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   onServiceDetailLifecycleChangeHandler,
   processBatchOf(ServiceLifecycle.ItemType),
   setBindings((results) => ({
-    requestDetailPublication: pipe(
+    requestDetailLifecycle: pipe(
       results,
       RA.map(RR.lookup("requestDetailLifecycle")),
       RA.filter(O.isSome),
