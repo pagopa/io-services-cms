@@ -53,8 +53,11 @@ import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-se
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
+import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { createWebServer } from "./webservice";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
+import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -102,6 +105,10 @@ const servicePublicationCosmosHelper = makeCosmosHelper(
 
 const serviceLifecycleCosmosHelper = makeCosmosHelper(
   cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
+);
+
+const serviceDetailCosmosHelper = makeCosmosHelper(
+  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
@@ -198,6 +205,10 @@ export const onRequestSyncLegacyEntryPoint =
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
+
+export const createRequestDetailEntryPoint = createRequestDetailHandler(
+  serviceDetailCosmosHelper
+);
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getServiceReviewDao(config),
@@ -296,6 +307,34 @@ export const onServiceHistoryChangeEntryPoint = pipe(
     requestSyncLegacy: pipe(
       results,
       RA.map(RR.lookup("requestSyncLegacy")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceDetailPublicationChangeEntryPoint = pipe(
+  onServiceDetailPublicationChangeHandler,
+  processBatchOf(ServicePublication.ItemType),
+  setBindings((results) => ({
+    requestDetailPublication: pipe(
+      results,
+      RA.map(RR.lookup("requestDetailPublication")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceDetailLifecycleChangeEntryPoint = pipe(
+  onServiceDetailLifecycleChangeHandler,
+  processBatchOf(ServiceLifecycle.ItemType),
+  setBindings((results) => ({
+    requestDetailPublication: pipe(
+      results,
+      RA.map(RR.lookup("requestDetailLifecycle")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),
