@@ -3,7 +3,7 @@
 ##################
 
 module "app_be_fn" {
-  source              = "github.com/pagopa/terraform-azurerm-v3.git//function_app?ref=v8.5.0"
+  source              = "github.com/pagopa/terraform-azurerm-v3//function_app?ref=v8.9.0"
   name                = "${var.project}-${var.application_basename}-app-be-fn-01"
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -16,8 +16,18 @@ module "app_be_fn" {
     sku_tier                     = var.fn_sku_tier
     sku_size                     = var.fn_sku_size
     zone_balancing_enabled       = var.fn_zone_balancing_enabled
-    worker_count                 = var.fn_worker_count
-    maximum_elastic_worker_count = 0
+    worker_count                 = null
+    maximum_elastic_worker_count = null
+  }
+
+  storage_account_info = {
+    account_kind                      = "StorageV2"
+    account_tier                      = "Standard"
+    account_replication_type          = "ZRS"
+    access_tier                       = "Hot"
+    advanced_threat_protection_enable = false
+    use_legacy_defender_version       = false
+    public_network_access_enabled     = false
   }
 
   node_version    = 18

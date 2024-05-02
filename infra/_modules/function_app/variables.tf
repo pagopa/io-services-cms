@@ -92,12 +92,6 @@ variable "fn_sku_size" {
   default     = "P1v3"
 }
 
-variable "fn_worker_count" {
-  type        = number
-  description = "The number of Workers (instances) to be allocated"
-  default     = 2
-}
-
 variable "fn_zone_balancing_enabled" {
   type        = bool
   description = "Should the Service Plan balance across Availability Zones in the region. Changing this forces a new resource to be created"
