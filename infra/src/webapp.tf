@@ -153,6 +153,8 @@ module "webapp_functions_app" {
       "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "0"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "0"
       "AzureWebJobs.OnRequestValidation.Disabled"        = "0"
+      "AzureWebJobs.OnRequestDeletion.Disabled"          = "0"
+      "AzureWebJobs.OnRequestDetail.Disabled"            = "0"
     }
   )
 
@@ -169,7 +171,9 @@ module "webapp_functions_app" {
     "AzureWebJobs.OnRequestSyncLegacy.Disabled",
     "AzureWebJobs.OnRequestReviewLegacy.Disabled",
     "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
-    "AzureWebJobs.OnRequestValidation.Disabled"
+    "AzureWebJobs.OnRequestValidation.Disabled",
+    "AzureWebJobs.OnRequestDeletion.Disabled",
+    "AzureWebJobs.OnRequestDetail.Disabled"
   ]
 
   subnet_id = module.app_snet.id
@@ -217,6 +221,8 @@ module "webapp_functions_app_staging_slot" {
       "AzureWebJobs.OnRequestReviewLegacy.Disabled"      = "1"
       "AzureWebJobs.ServiceReviewLegacyChecker.Disabled" = "1"
       "AzureWebJobs.OnRequestValidation.Disabled"        = "1"
+      "AzureWebJobs.OnRequestDeletion.Disabled"          = "1"
+      "AzureWebJobs.OnRequestDetail.Disabled"            = "1"
     }
   )
 
