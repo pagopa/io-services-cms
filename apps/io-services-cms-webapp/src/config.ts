@@ -112,6 +112,7 @@ export const CosmosConfig = t.type({
   COSMOSDB_CONNECTIONSTRING: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_APP_BE_NAME: NonEmptyString,
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,

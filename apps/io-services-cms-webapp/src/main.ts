@@ -29,7 +29,7 @@ import {
   expressToAzureFunction,
   toAzureFunctionHandler,
 } from "./lib/azure/adapters";
-import { getDatabase } from "./lib/azure/cosmos";
+import { getAppBackendDatabase, getDatabase } from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
@@ -80,6 +80,7 @@ const apimService = ApimUtils.getApimService(
 
 // client to interact with cms db
 const cosmos = getDatabase(config);
+const appBackendCosmos = getAppBackendDatabase(config);
 
 // create a store for the ServiceLifecycle finite state machine
 const serviceLifecycleStore = stores.createCosmosStore(
@@ -108,7 +109,7 @@ const serviceLifecycleCosmosHelper = makeCosmosHelper(
 );
 
 const serviceDetailCosmosHelper = makeCosmosHelper(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
+  appBackendCosmos.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
