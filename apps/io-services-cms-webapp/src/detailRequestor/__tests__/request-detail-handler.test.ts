@@ -124,6 +124,25 @@ describe("Service Detail Handler", () => {
     );
   });
 
+  it("[handleQueueItem] should not upsert the service on service lifecycle queue item and publication entry on db", async () => {
+    const context = createContext();
+
+    const serviceDetailCosmosHelperMockPubFound = {
+      fetchSingleItem: vi.fn(() => TE.right(O.some("aServiceId"))),
+      fetchItems: vi.fn(() => TE.right(O.none)),
+    } as unknown as CosmosHelper;
+
+    await handleQueueItem(
+      context,
+      serviceDetailCosmosHelperMockPubFound,
+      aGenericLifecycleItemType
+    )();
+
+    expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
+
+    expect(context.bindings.serviceDetailDocument).toBeUndefined();
+  });
+
   it("[buildDocument] should build document starting from a service", async () => {
     const result = toServiceDetail(aGenericPublicationItemType);
     const res = ServiceDetail.decode(result);
