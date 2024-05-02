@@ -49,18 +49,13 @@ const executeGetServiceById: (
                 rr.statusCode === 404,
                 B.fold(
                   () =>
-                    E.left(
-                      new H.HttpError(
-                        `An error has occurred while fetching service '${serviceId}', reason: ${rr.statusCode}`
-                      )
+                    new H.HttpError(
+                      `An error has occurred while fetching service '${serviceId}', reason: ${rr.statusCode}`
                     ),
                   () =>
-                    E.left(
-                      new H.HttpNotFoundError(
-                        `Service '${serviceId}' not found`
-                      )
-                    )
-                )
+                    new H.HttpNotFoundError(`Service '${serviceId}' not found`)
+                ),
+                E.left
               ),
             ({ resource }) =>
               pipe(
