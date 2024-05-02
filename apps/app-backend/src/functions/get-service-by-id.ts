@@ -1,5 +1,6 @@
 import * as H from "@pagopa/handler-kit";
 import * as L from "@pagopa/logger";
+import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -44,8 +45,22 @@ const executeGetServiceById: (
           O.fromPredicate(() => rr.statusCode === 200),
           O.fold(
             () =>
-              E.left(
-                new H.HttpNotFoundError(`Service '${serviceId}' not found`)
+              pipe(
+                rr.statusCode === 404,
+                B.fold(
+                  () =>
+                    E.left(
+                      new H.HttpError(
+                        `An error has occurred while fetching service '${serviceId}', reason: ${rr.statusCode}`
+                      )
+                    ),
+                  () =>
+                    E.left(
+                      new H.HttpNotFoundError(
+                        `Service '${serviceId}' not found`
+                      )
+                    )
+                )
               ),
             ({ resource }) =>
               pipe(
