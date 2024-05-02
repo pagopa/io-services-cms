@@ -57,8 +57,8 @@ module "function_app" {
   }
 
   app_be_fn_settings = {
-    FEATURED_ITEMS_CONTAINER_NAME = "" # TODO
-    FEATURED_ITEMS_FILE_NAME      = "" # TODO
+    FEATURED_ITEMS_CONTAINER_NAME = "static-content"
+    FEATURED_ITEMS_FILE_NAME      = "featured-items.json"
   }
 
   tags = local.tags
