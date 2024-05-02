@@ -76,6 +76,7 @@ export const IConfig = t.intersection([
 
 export const envConfig = {
   ...process.env,
+  FEATURED_ITEMS_BLOB_CONNECTION_STRING: process.env.AzureWebJobsStorage,
   isProduction: process.env.NODE_ENV === "production",
 };
 

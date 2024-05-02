@@ -1,7 +1,6 @@
-output "snet_id" {
-  value = module.snet.id
+output "srch_snet_id" {
+  value = module.srch_snet.id
 }
-
-output "snet_name" {
-  value = module.snet.name
+output "app_be_snet_id" {
+  value = module.app_be_snet.id
 }
