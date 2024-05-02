@@ -17,6 +17,14 @@ export const RequestReviewItem = t.intersection([
   }),
 ]);
 
+export type RequestDetailItem = t.TypeOf<typeof RequestDetailItem>;
+export const RequestDetailItem = t.intersection([
+  Service,
+  t.type({
+    kind: t.union([t.literal("publication"), t.literal("lifecycle")]),
+  }),
+]);
+
 export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
 export const RequestReviewItemStrict = t.intersection([
   ServiceStrict,
