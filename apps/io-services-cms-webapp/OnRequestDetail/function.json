@@ -10,7 +10,7 @@
       {
         "name": "serviceDetailDocument",
         "type": "cosmosDB",
-        "databaseName": "%COSMOSDB_NAME%",
+        "databaseName": "%COSMOSDB_APP_BE_NAME%",
         "collectionName": "%COSMOSDB_CONTAINER_SERVICES_DETAILS%",
         "createIfNotExists": false,
         "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",

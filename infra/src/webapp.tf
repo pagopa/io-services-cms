@@ -19,6 +19,7 @@ locals {
     # Source data
     COSMOSDB_CONNECTIONSTRING               = format("AccountEndpoint=%s;AccountKey=%s;", module.cosmosdb_account.endpoint, module.cosmosdb_account.primary_key)
     COSMOSDB_NAME                           = azurerm_cosmosdb_sql_database.db_cms.name
+    COSMOSDB_APP_BE_NAME                    = azurerm_cosmosdb_sql_database.db_app_be.name
     COSMOSDB_URI                            = module.cosmosdb_account.endpoint
     COSMOSDB_KEY                            = module.cosmosdb_account.primary_key
     COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = local.cosmos_containers.services_lifecycle
