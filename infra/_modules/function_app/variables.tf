@@ -57,15 +57,26 @@ variable "app_be_snet_id" {
   description = "Subnet ID where to locate the App BE Fn App"
 }
 
-variable "ai_search_id" {
-  type        = string
-  description = "ID of the AI Search"
+variable "ai_search" {
+  type = object({
+    id                     = string
+    url                    = string
+    institution_index_name = string
+    services_index_name    = string
+  })
+  description = "AI Search input parameters"
 }
 
 variable "cosmos_database_name" {
   type        = string
-  description = "Name of the cosmos database"
-  default     = "db-services-cms"
+  description = "Name of the cosmos database read by Services App Backend"
+  default     = "app-backend"
+}
+
+variable "cosmos_container_name" {
+  type        = string
+  description = "Name of the cosmos container read by Services App Backend"
+  default     = "services"
 }
 
 
@@ -84,11 +95,19 @@ variable "fn_sku_size" {
 variable "fn_worker_count" {
   type        = number
   description = "The number of Workers (instances) to be allocated"
-  default     = 1
+  default     = 2
 }
 
 variable "fn_zone_balancing_enabled" {
   type        = bool
   description = "Should the Service Plan balance across Availability Zones in the region. Changing this forces a new resource to be created"
   default     = true
+}
+
+variable "app_be_fn_settings" {
+  type = object({
+    FEATURED_ITEMS_CONTAINER_NAME = string
+    FEATURED_ITEMS_FILE_NAME      = string
+  })
+  description = "Continous Integration roles for opex managed identity"
 }

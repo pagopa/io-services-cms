@@ -49,7 +49,17 @@ module "function_app" {
   resource_group_name  = azurerm_resource_group.rg.name
 
   app_be_snet_id = module.networking.app_be_snet_id
-  ai_search_id   = module.ai_search.srch_id
+  ai_search = {
+    id                     = module.ai_search.search_service_id
+    url                    = module.ai_search.search_service_url
+    institution_index_name = module.ai_search.search_service_index_aliases.organizations
+    services_index_name    = module.ai_search.search_service_index_aliases.services
+  }
+
+  app_be_fn_settings = {
+    FEATURED_ITEMS_CONTAINER_NAME = "" # TODO
+    FEATURED_ITEMS_FILE_NAME      = "" # TODO
+  }
 
   tags = local.tags
 }

@@ -20,12 +20,26 @@ module "app_be_fn" {
     maximum_elastic_worker_count = 0
   }
 
-  storage_account_name = "iopitnsrvcsappbefn01st"
-
   node_version    = 18
   runtime_version = "~4"
 
   always_on = "true"
+
+  app_settings = merge(
+    var.app_be_fn_settings,
+    {
+      AZURE_SEARCH_ENDPOINT                = var.ai_search.url
+      AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
+      AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
+      COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
+      COSMOSDB_NAME                        = var.cosmos_database_name
+      COSMOSDB_CONTAINER_SERVICE_DETAILS   = var.cosmos_container_name
+    }
+  )
+
+  sticky_app_setting_names = [
+    "APPINSIGHTS_INSTRUMENTATIONKEY"
+  ]
 
   subnet_id = var.app_be_snet_id
 
@@ -55,6 +69,18 @@ module "app_be_fn_staging_slot" {
   runtime_version = "~4"
 
   always_on = "true"
+
+  app_settings = merge(
+    var.app_be_fn_settings,
+    {
+      AZURE_SEARCH_ENDPOINT                = var.ai_search.url
+      AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
+      AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
+      COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
+      COSMOSDB_NAME                        = var.cosmos_database_name
+      COSMOSDB_CONTAINER_SERVICE_DETAILS   = var.cosmos_container_name
+    }
+  )
 
   storage_account_name       = module.app_be_fn.storage_account.name
   storage_account_access_key = module.app_be_fn.storage_account.primary_access_key
@@ -101,13 +127,13 @@ resource "azurerm_cosmosdb_sql_role_assignment" "app_be_fn_staging_slot_to_cosmo
 }
 
 resource "azurerm_role_assignment" "app_be_fn_to_ai_search_reader" {
-  scope                = var.ai_search_id
+  scope                = var.ai_search.id
   role_definition_name = "Search Index Data Reader"
   principal_id         = module.app_be_fn.system_identity_principal
 }
 
 resource "azurerm_role_assignment" "app_be_fn_staging_slot_to_ai_search_reader" {
-  scope                = var.ai_search_id
+  scope                = var.ai_search.id
   role_definition_name = "Search Index Data Reader"
   principal_id         = module.app_be_fn_staging_slot.system_identity_principal
 }
