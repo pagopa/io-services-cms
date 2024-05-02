@@ -24,6 +24,7 @@ locals {
     COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = local.cosmos_containers.services_lifecycle
     COSMOSDB_CONTAINER_SERVICES_PUBLICATION = local.cosmos_containers.services_publication
     COSMOSDB_CONTAINER_SERVICES_HISTORY     = local.cosmos_containers.services_history
+    COSMOSDB_CONTAINER_SERVICES_DETAILS     = local.cosmos_containers.services_details
 
     INTERNAL_STORAGE_CONNECTION_STRING = module.storage_account.primary_connection_string
 
@@ -81,6 +82,7 @@ locals {
     REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
     REQUEST_VALIDATION_QUEUE      = azurerm_storage_queue.request-validation.name
     REQUEST_DELETION_QUEUE        = azurerm_storage_queue.request-deletion.name
+    REQUEST_DETAIL_QUEUE          = azurerm_storage_queue.request-detail.name
 
 
     # List of service ids for which quality control will be bypassed
