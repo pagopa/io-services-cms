@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.31.0
+
+### Minor Changes
+
+- cc8383d: Create Service Details Read Model
+
+### Patch Changes
+
+- 407ef0d: Set on PaginationResultSet openApi schema all required fields
+- Updated dependencies [cc8383d]
+  - @io-services-cms/models@1.19.2
+
 ## 1.30.1
 
 ### Patch Changes
