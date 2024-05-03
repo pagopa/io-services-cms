@@ -85,7 +85,7 @@ const executeGetServiceById: (
       TE.map(toApiResponseServiceDetails)
     );
 
-const toApiResponseServiceDetails = (
+export const toApiResponseServiceDetails = (
   cosmosDbServiceDetail: CosmosDbServiceDetails
 ): ApiResponseServiceDetails => ({
   id: cosmosDbServiceDetail.id,
