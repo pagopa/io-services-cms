@@ -287,6 +287,7 @@
         "visibility": "Visibilità in IO"
       }
     },
+
     "service": {
       "address": "Indirizzo",
       "appAndroid": "App Android",
@@ -346,6 +347,7 @@
       "delete": "Elimina",
       "edit": "Modifica",
       "history": "Vedi storia del servizio",
+      "preview": "Vedi preview in app del servizio",
       "publish": "Pubblica in App IO",
       "submitReview": "Invia in revisione",
       "unpublish": "Nascondi dall'App IO"
@@ -460,6 +462,11 @@
         "unpublished": "Il servizio è stato nascosto in App IO"
       },
       "readRejectReason": "Leggi i motivi del rifiuto"
+    },
+    "inAppPreview": {
+      "title": "Anteprima In App IO",
+      "titleTooltip": "Versione App xy di App IO",
+      "closeButton": "Chiudi Anteprima"
     }
   },
   "table": {

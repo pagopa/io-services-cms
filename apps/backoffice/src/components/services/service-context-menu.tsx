@@ -10,7 +10,8 @@ import {
   Delete,
   Edit,
   History,
-  MoreVert
+  MoreVert,
+  PhoneAndroid
 } from "@mui/icons-material";
 import {
   Button,
@@ -24,6 +25,8 @@ import {
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import { useDialog } from "../dialog-provider";
+import ButtonWithTooltip from "../buttons/button-with-tooltip";
+import { getConfiguration } from "@/config";
 
 export enum ServiceContextMenuActions {
   publish = "publish",
@@ -43,6 +46,7 @@ export type ServiceContextMenuProps = {
   onUnpublishClick: () => void;
   onSubmitReviewClick: () => void;
   onHistoryClick: () => void;
+  onPreviewClick: () => void;
   onEditClick: () => void;
   onDeleteClick: () => void;
 };
@@ -56,6 +60,7 @@ export const ServiceContextMenu = ({
   onUnpublishClick,
   onSubmitReviewClick,
   onHistoryClick,
+  onPreviewClick,
   onEditClick,
   onDeleteClick
 }: ServiceContextMenuProps) => {
@@ -196,20 +201,6 @@ export const ServiceContextMenu = ({
     }
   };
 
-  /** Show History action button */
-  const renderHistoryAction = () => (
-    <Tooltip title={t("service.actions.history")} placement="top" arrow>
-      <Button
-        size="medium"
-        variant="text"
-        sx={{ bgcolor: "background.paper", padding: 0 }}
-        onClick={() => onHistoryClick()}
-      >
-        <History />
-      </Button>
-    </Tooltip>
-  );
-
   /** Show Edit Menu _(edit/delete actions)_ */
   const renderEditActions = () => {
     if (isEditable()) {
@@ -267,7 +258,24 @@ export const ServiceContextMenu = ({
   return (
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
-      {renderHistoryAction()}
+      <ButtonWithTooltip
+        isVisible={true}
+        tooltipTitle="service.actions.history"
+        onClick={onHistoryClick}
+        icon={<History />}
+        size="medium"
+        variant="text"
+      />
+      <ButtonWithTooltip
+        isVisible={
+          getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED
+        }
+        tooltipTitle="service.actions.preview"
+        onClick={onPreviewClick}
+        icon={<PhoneAndroid />}
+        size="medium"
+        variant="text"
+      />
       {!releaseMode ? renderSubmitReviewAction() : null}
       {renderPublicationAction()}
     </Stack>
