@@ -16,16 +16,18 @@ type OnDetailPublicationActions = RequestDetailPublicationAction;
 const noAction = {};
 
 const onDetailPublicationHandler = (
-  item: ServicePublication.ItemType
+  item: ServicePublication.ItemTypeWithTimestamp
 ): RequestDetailPublicationAction => ({
   requestDetailPublication: {
     ...item,
+    // eslint-disable-next-line no-underscore-dangle
+    cms_last_update_ts: item._ts,
     kind: "publication",
   },
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServicePublication.ItemType },
+  { item: ServicePublication.ItemTypeWithTimestamp },
   Error,
   NoAction | OnDetailPublicationActions
 > = ({ item }) => {

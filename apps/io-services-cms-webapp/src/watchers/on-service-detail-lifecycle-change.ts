@@ -17,16 +17,18 @@ type OnDetailLifecycleActions = RequestDetailLifecycleAction;
 const noAction = {};
 
 const onDetailLifecycleHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycle.ItemTypeWithTimestamp
 ): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
+    // eslint-disable-next-line no-underscore-dangle
+    cms_last_update_ts: item._ts,
     kind: "lifecycle",
   },
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServiceLifecycle.ItemType },
+  { item: ServiceLifecycle.ItemTypeWithTimestamp },
   Error,
   NoAction | OnDetailLifecycleActions
 > = ({ item }) =>
