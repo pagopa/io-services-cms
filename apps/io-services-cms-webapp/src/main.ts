@@ -29,7 +29,10 @@ import {
   expressToAzureFunction,
   toAzureFunctionHandler,
 } from "./lib/azure/adapters";
-import { getDatabase } from "./lib/azure/cosmos";
+import {
+  getAppBackendCosmosDatabase,
+  getCmsCosmosDatabase,
+} from "./lib/azure/cosmos";
 import { processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
@@ -53,8 +56,11 @@ import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-se
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
+import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { createWebServer } from "./webservice";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
+import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -75,33 +81,40 @@ const apimService = ApimUtils.getApimService(
   config.AZURE_APIM
 );
 
-// client to interact with cms db
-const cosmos = getDatabase(config);
+// client to interact with cms cosmos db
+const cmsCosmosDatabase = getCmsCosmosDatabase(config);
+
+// client to interact with app backend cosmos db
+const appBackendCosmosDatabase = getAppBackendCosmosDatabase(config);
 
 // create a store for the ServiceLifecycle finite state machine
 const serviceLifecycleStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
   ServiceLifecycle.ItemType
 );
 
 // create a store for the ServicePublication finite state machine
 const servicePublicationStore = stores.createCosmosStore(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
   ServicePublication.ItemType
 );
 
 const serviceHistoryPagedHelper = makeCosmosPagedHelper(
   ServiceHistory,
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
   config.DEFAULT_PAGED_FETCH_LIMIT
 );
 
 const servicePublicationCosmosHelper = makeCosmosHelper(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
 );
 
 const serviceLifecycleCosmosHelper = makeCosmosHelper(
-  cosmos.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
+);
+
+const serviceDetailCosmosHelper = makeCosmosHelper(
+  appBackendCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
@@ -198,6 +211,10 @@ export const onRequestSyncLegacyEntryPoint =
 
 export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
+
+export const createRequestDetailEntryPoint = createRequestDetailHandler(
+  serviceDetailCosmosHelper
+);
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getServiceReviewDao(config),
@@ -296,6 +313,34 @@ export const onServiceHistoryChangeEntryPoint = pipe(
     requestSyncLegacy: pipe(
       results,
       RA.map(RR.lookup("requestSyncLegacy")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceDetailPublicationChangeEntryPoint = pipe(
+  onServiceDetailPublicationChangeHandler,
+  processBatchOf(ServicePublication.ItemType),
+  setBindings((results) => ({
+    requestDetailPublication: pipe(
+      results,
+      RA.map(RR.lookup("requestDetailPublication")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+  })),
+  toAzureFunctionHandler
+);
+
+export const onServiceDetailLifecycleChangeEntryPoint = pipe(
+  onServiceDetailLifecycleChangeHandler,
+  processBatchOf(ServiceLifecycle.ItemType),
+  setBindings((results) => ({
+    requestDetailLifecycle: pipe(
+      results,
+      RA.map(RR.lookup("requestDetailLifecycle")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify))
     ),

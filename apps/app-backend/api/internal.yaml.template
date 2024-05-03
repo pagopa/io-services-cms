@@ -290,8 +290,16 @@ components:
     FeaturedItem:
       x-one-of: true
       allOf:
-        - $ref: "#/components/schemas/ServiceMinified"
+        - $ref: "#/components/schemas/FeaturedService"
         - $ref: "#/components/schemas/Institution"
+    FeaturedService:
+      allOf:
+        - $ref: '#/components/schemas/ServiceMinified'
+        - type: object
+          properties:
+            organization_name:
+              type: string
+              description: Organization Name
     ServiceMetadata:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
     Organization:

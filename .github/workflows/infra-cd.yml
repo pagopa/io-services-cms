@@ -18,17 +18,17 @@ env:
   ARM_USE_OIDC: true
   ARM_USE_AZUREAD: true
   ARM_STORAGE_USE_AZUREAD: true
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
 jobs:
 
   terraform_plan_job:
     name: Terraform Plan
     runs-on: self-hosted
-    environment: infra-prod-ci
+    environment: prod-ci
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       AZURE_ENVIRONMENT: prod
 
     steps:
@@ -45,9 +45,9 @@ jobs:
         id: az_login
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
       - name: Set Terraform Version
         id: env_tf_version
@@ -82,10 +82,10 @@ jobs:
   terraform_apply_job:
     name: Terraform Apply
     runs-on: [self-hosted]
-    environment: infra-prod-cd
+    environment: prod-cd
     needs: [terraform_plan_job]
     env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CD }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       AZURE_ENVIRONMENT: prod
 
     steps:
@@ -108,9 +108,9 @@ jobs:
         id: az_login
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
       - uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36
         id: terraform_setup

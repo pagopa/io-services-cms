@@ -9,3 +9,9 @@ data "azurerm_cosmosdb_account" "cosmos" {
   name                = "${var.prefix}-${var.env_short}-cosmos-services-cms"
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
 }
+
+data "azurerm_subnet" "pep_snet" {
+  name                 = "${var.project}-pep-snet-01"
+  virtual_network_name = "${var.project}-common-vnet-01"
+  resource_group_name  = "${var.project}-common-rg-01"
+}

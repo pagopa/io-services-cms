@@ -7,9 +7,9 @@ import { pipe } from "fp-ts/lib/function";
 
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import { HealthProblem } from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
-import packageJson from "../../package.json";
 import { ApplicationInfo } from "../generated/definitions/internal/ApplicationInfo";
 import { DummyProblemSource, dummyHelthCheck } from "../utils/health-check";
+import { APPLICATION_NAME, APPLICATION_VERSION } from "../generated/version";
 
 type ProblemSource = DummyProblemSource;
 const applicativeValidation = RTE.getApplicativeReaderTaskValidation(
@@ -21,16 +21,16 @@ export const makeInfoHandler: H.Handler<
   H.HttpRequest,
   H.HttpResponse<ApplicationInfo, 200>,
   undefined
-> = H.of((request: H.HttpRequest) =>
+> = H.of((_: H.HttpRequest) =>
   pipe(
     // TODO: Add all the function health checks
     [dummyHelthCheck],
     RA.sequence(applicativeValidation),
     RTE.map(() =>
-      H.successJson({ name: packageJson.name, version: packageJson.version })
+      H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
     ),
     RTE.chainFirstW((response) =>
-      L.infoRTE(`Http function processed request for url "${request.url}"`, {
+      L.infoRTE(`Info called for version: ${APPLICATION_VERSION}`, {
         response,
       })
     ),

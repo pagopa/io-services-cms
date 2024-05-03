@@ -52,7 +52,7 @@ The following table contains the required ENV variables that the applicative req
 | Variable name                                               | Description                                                                       | type   | required |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ | -------- |
 | APPINSIGHTS_INSTRUMENTATIONKEY                              | The Application Insights instrumentation key                                      | string | Y        |
-| FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                       | number | Y        |
+| FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                       | number | D        |
 | FEATURED_ITEMS_BLOB_CONNECTION_STRING                       | The Azure StorageAccount connectionString to retrieve FeaturedItems blob          | string | Y        |
 | FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                         | string | Y        |
 | FEATURED_ITEMS_FILE_NAME                                    | The FeaturedItems Filename in blobStorage container                               | string | Y        |
@@ -63,8 +63,8 @@ The following table contains the required ENV variables that the applicative req
 | AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS(**\*1**) | The Azure AI Search Institutions Scope Scoring Parameters(eg boostScope-NATIONAL) | string | N        |
 | AZURE_SEARCH_API_KEY                                        | The Azure AI Search ApiKey(when not provided use ManagedIdentities)               | string | N        |
 | PAGINATION_DEFAULT_LIMIT                                    | The Pagination Default limit in Paginated API(default=20)                         | string | D        |
-| PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=101)                           | string | N        |
-| PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=101)                          | string | N        |
+| PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=101)                           | string | D        |
+| PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=101)                          | string | D        |
 | COSMOSDB_URI                                                | The CosmosDb Uri                                                                  | string | Y        |
 | COSMOSDB_NAME                                               | The CosmosDb Name                                                                 | string | Y        |
 | COSMOSDB_CONTAINER_SERVICE_DETAILS                          | The CosmosDb Container Name which contains service details                        | string | Y        |

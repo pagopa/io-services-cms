@@ -12,18 +12,20 @@ permissions:
   contents: read
 
 env:
+  RESOURCE_GROUP_CMS: io-p-services-cms-rg
+  RESOURCE_GROUP: io-p-itn-svc-rg-01
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
   AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
-  RESOURCE_GROUP: io-p-services-cms-rg
+  AZURE_APP_BE_NAME: io-p-itn-svc-app-be-fn-01
   WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
   BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
+  APP_BE_HEALTHCHECK_PATH: 'api/v1/info'
 
 jobs:
-
   deployments:
     name: App Deployments
     runs-on: [self-hosted]
-    environment: prod-cd
+    environment: app-prod-cd
 
     steps:
       - name: Download artifact
@@ -42,10 +44,11 @@ jobs:
         # from https://github.com/Azure/login/commits/master
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
+      # webapp
       - name: Deploy to staging
         if: contains(github.event.inputs.package_url, 'webapp')
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
@@ -65,8 +68,9 @@ jobs:
       - name: 'Swap staging to production'
         if: contains(github.event.inputs.package_url, 'webapp')
         id: swap_to_production
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_CMS }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
 
+      # backoffice
       - name: Deploy Backoffice to staging
         if: contains(github.event.inputs.package_url, 'backoffice')
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
@@ -86,4 +90,26 @@ jobs:
       - name: 'Swap Backoffice staging to production'
         if: contains(github.event.inputs.package_url, 'backoffice')
         id: swap_to_production_backoffice
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_CMS }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
+
+      # app-backend
+      - name: Deploy App Backend to staging
+        if: contains(github.event.inputs.package_url, 'app-backend')
+        uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
+        with:
+          app-name: ${{ env.AZURE_APP_BE_NAME }}
+          package: artifact.zip
+          slot-name: staging
+          clean: true
+
+      - name: 'App Backend Healthcheck'
+        if: contains(github.event.inputs.package_url, 'app-backend')
+        id: healthcheck_appbackend
+        run: |
+          sleep 30
+          curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_APP_BE_NAME }}-staging.azurewebsites.net/${{ env.APP_BE_HEALTHCHECK_PATH }}'
+
+      - name: 'Swap App Backend staging to production'
+        if: contains(github.event.inputs.package_url, 'app-backend')
+        id: swap_to_production_appbackend
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production

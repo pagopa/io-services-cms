@@ -56,7 +56,12 @@ variable "vnet_name" {
   description = "Name of the vnet where to deploy the networking"
 }
 
-variable "snet_cidrs" {
+variable "srch_snet_cidrs" {
   type        = list(string)
   description = "The CIDR address prefixes of the subnet where to deploy the ai search service"
+}
+
+variable "app_be_snet_cidrs" {
+  type        = list(string)
+  description = "The CIDR address prefixes of the subnet where to deploy the app be"
 }

@@ -12,5 +12,11 @@ export const mockFeaturedItems = {
       name: "anInstitutionName",
       fiscal_code: "12345678901",
     },
+    {
+      id: "anotherServiceId",
+      name: "aServiceName",
+      version: 1,
+      organization_name: "anOrganizationName",
+    },
   ],
 } as unknown as FeaturedItems;
