@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.2
+
+### Patch Changes
+
+- b462fe2: Fix query on request detail
+
 ## 1.31.1
 
 ### Patch Changes
