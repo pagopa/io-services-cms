@@ -33,6 +33,7 @@ export const toServiceDetail = (
   require_secure_channel: service.data.require_secure_channel,
   organization: service.data.organization,
   metadata: service.data.metadata,
+  cms_last_update_ts: service.cms_last_update_ts,
   kind: service.kind,
 });
 

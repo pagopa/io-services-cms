@@ -2,14 +2,16 @@ import { app } from "@azure/functions";
 import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { InfoFn } from "./functions/info";
-import { GetFeaturedItemsFn } from "./functions/featured-items";
 import { getConfigOrError } from "./config";
-import { Institution } from "./generated/definitions/internal/Institution";
-import { makeAzureSearchClient } from "./utils/azure-search/client";
+import { GetFeaturedItemsFn } from "./functions/featured-items";
+import { GetServiceByIdFn } from "./functions/get-service-by-id";
+import { InfoFn } from "./functions/info";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
-import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { SearchServicesFn } from "./functions/search-services";
+import { Institution } from "./generated/definitions/internal/Institution";
+import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
+import { makeAzureSearchClient } from "./utils/azure-search/client";
+import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
 
 const config = pipe(
   getConfigOrError(),
@@ -21,6 +23,10 @@ const config = pipe(
 const blobService = createBlobService(
   config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
 );
+
+// Service Details Container Dependency
+const serviceDetailsContainerDependency =
+  buildServiceDetailsContainerDependency(config);
 
 const institutionsSearchClient = makeAzureSearchClient(
   Institution,
@@ -72,4 +78,12 @@ app.http("SearchServices", {
   handler: SearchServices,
   methods: ["GET"],
   route: "institutions/{institutionId}/services",
+});
+
+const GetServiceById = GetServiceByIdFn(serviceDetailsContainerDependency);
+app.http("GetServiceById", {
+  authLevel: "anonymous",
+  handler: GetServiceById,
+  methods: ["GET"],
+  route: "services/{serviceId}",
 });

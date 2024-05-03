@@ -22,16 +22,16 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as ServiceLifecycle.ItemType;
+} as unknown as ServiceLifecycle.ItemTypeWithTimestamp;
 
 describe("On Service Detail Lifecycle Change Handler", () => {
   it.each`
-    scenario                      | item                                            | expected
-    ${"no-action-approved"}       | ${{ ...aService, fsm: { state: "approved" } }}  | ${{}}
-    ${"no-action-deleted"}        | ${{ ...aService, fsm: { state: "deleted" } }}   | ${{}}
-    ${"no-action-rejected"}       | ${{ ...aService, fsm: { state: "rejected" } }}  | ${{}}
-    ${"no-action-submitted"}      | ${{ ...aService, fsm: { state: "submitted" } }} | ${{}}
-    ${"request-detail-lifecycle"} | ${{ ...aService, fsm: { state: "draft" } }}     | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle" } }}
+    scenario                      | item                                                             | expected
+    ${"no-action-approved"}       | ${{ ...aService, fsm: { state: "approved" }, _ts: 1234567890 }}  | ${{}}
+    ${"no-action-deleted"}        | ${{ ...aService, fsm: { state: "deleted" }, _ts: 1234567890 }}   | ${{}}
+    ${"no-action-rejected"}       | ${{ ...aService, fsm: { state: "rejected" }, _ts: 1234567890 }}  | ${{}}
+    ${"no-action-submitted"}      | ${{ ...aService, fsm: { state: "submitted" }, _ts: 1234567890 }} | ${{}}
+    ${"request-detail-lifecycle"} | ${{ ...aService, fsm: { state: "draft" }, _ts: 1234567890 }}     | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle", cms_last_update_ts: 1234567890 } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

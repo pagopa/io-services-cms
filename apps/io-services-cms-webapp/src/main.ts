@@ -322,7 +322,7 @@ export const onServiceHistoryChangeEntryPoint = pipe(
 
 export const onServiceDetailPublicationChangeEntryPoint = pipe(
   onServiceDetailPublicationChangeHandler,
-  processBatchOf(ServicePublication.ItemType),
+  processBatchOf(ServicePublication.ItemTypeWithTimestamp),
   setBindings((results) => ({
     requestDetailPublication: pipe(
       results,
@@ -336,7 +336,7 @@ export const onServiceDetailPublicationChangeEntryPoint = pipe(
 
 export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   onServiceDetailLifecycleChangeHandler,
-  processBatchOf(ServiceLifecycle.ItemType),
+  processBatchOf(ServiceLifecycle.ItemTypeWithTimestamp),
   setBindings((results) => ({
     requestDetailLifecycle: pipe(
       results,
