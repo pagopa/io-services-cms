@@ -41,7 +41,17 @@ const getServiceIdOnDetailContainer =
   (serviceDetailCosmosHelper: CosmosHelper) => (serviceId: NonEmptyString) =>
     serviceDetailCosmosHelper.fetchSingleItem(
       {
-        query: `SELECT VALUE c.id FROM c WHERE c.id IN ('${serviceId}') AND c.kind == ${PUBLICATION_KIND}`,
+        query: `SELECT VALUE c.id FROM c WHERE c.id = @serviceId AND c.kind = @pubKind`,
+        parameters: [
+          {
+            name: "@serviceId",
+            value: serviceId,
+          },
+          {
+            name: "@pubKind",
+            value: PUBLICATION_KIND,
+          },
+        ],
       },
       NonEmptyString
     );
