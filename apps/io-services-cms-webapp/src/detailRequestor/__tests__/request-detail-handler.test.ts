@@ -45,6 +45,7 @@ const aGenericPublicationItemType = {
     state: "published",
   },
   kind: "publication",
+  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const aGenericLifecycleItemType = {
@@ -71,6 +72,7 @@ const aGenericLifecycleItemType = {
     state: "draft",
   },
   kind: "lifecycle",
+  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;

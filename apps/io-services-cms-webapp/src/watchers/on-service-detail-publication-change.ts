@@ -15,13 +15,14 @@ type OnDetailPublicationActions = RequestDetailPublicationAction;
 
 const noAction = {};
 
-const onDetailPublicationHandler = (
-  item: ServicePublication.ItemTypeWithTimestamp
-): RequestDetailPublicationAction => ({
+const onDetailPublicationHandler = ({
+  _ts,
+  ...item
+}: ServicePublication.ItemTypeWithTimestamp): RequestDetailPublicationAction => ({
   requestDetailPublication: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_last_update_ts: item._ts,
+    cms_last_update_ts: _ts,
     kind: "publication",
   },
 });

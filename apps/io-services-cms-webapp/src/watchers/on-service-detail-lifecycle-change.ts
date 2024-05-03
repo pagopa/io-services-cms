@@ -16,13 +16,14 @@ type OnDetailLifecycleActions = RequestDetailLifecycleAction;
 
 const noAction = {};
 
-const onDetailLifecycleHandler = (
-  item: ServiceLifecycle.ItemTypeWithTimestamp
-): RequestDetailLifecycleAction => ({
+const onDetailLifecycleHandler = ({
+  _ts,
+  ...item
+}: ServiceLifecycle.ItemTypeWithTimestamp): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_last_update_ts: item._ts,
+    cms_last_update_ts: _ts,
     kind: "lifecycle",
   },
 });
