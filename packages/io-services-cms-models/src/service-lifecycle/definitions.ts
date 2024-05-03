@@ -29,7 +29,7 @@ export const Cidr = PatternString(
 export type HttpOrHttpsUrlString = t.TypeOf<typeof HttpOrHttpsUrlString>;
 export const HttpOrHttpsUrlString = PatternString("^https?:\\S+$");
 
-const OrganizationData = t.intersection([
+export const OrganizationData = t.intersection([
   t.type({
     name: NonEmptyString,
     fiscal_code: OrganizationFiscalCode,
@@ -53,7 +53,7 @@ const ServiceData = t.type({
   authorized_cidrs: withDefault(t.array(Cidr), []),
 });
 
-const ServiceMetadata = t.intersection([
+export const ServiceMetadata = t.intersection([
   t.type({
     scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
   }),

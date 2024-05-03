@@ -6,6 +6,7 @@ locals {
     services_lifecycle   = "services-lifecycle"
     services_publication = "services-publication"
     services_history     = "services-history"
+    services_details     = "services"
   }
 }
   
