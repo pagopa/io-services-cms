@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.2
+
+### Patch Changes
+
+- 99e8de6: Created the skeleton and the logic for the In APP Preview
+
 ## 1.10.1
 
 ### Patch Changes
