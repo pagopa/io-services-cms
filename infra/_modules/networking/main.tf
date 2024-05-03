@@ -20,4 +20,17 @@ module "app_be_snet" {
   address_prefixes     = var.app_be_snet_cidrs
 
   private_endpoint_network_policies_enabled = false
+
+  service_endpoints = [
+    "Microsoft.Web",
+  ]
+
+  delegation = {
+    name = "default"
+    service_delegation = {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+
 }
