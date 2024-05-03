@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.1
+
+### Patch Changes
+
+- 8b5ca44: Fix watcher bidings
+
 ## 1.31.0
 
 ### Minor Changes
