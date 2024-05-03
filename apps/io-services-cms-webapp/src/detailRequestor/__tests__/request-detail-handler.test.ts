@@ -164,6 +164,9 @@ describe("Service Detail Handler", () => {
         aGenericPublicationItemType.data.metadata
       );
       expect(res.right.kind).toBe(aGenericPublicationItemType.kind);
+      expect(res.right.cms_last_update_ts).toBe(
+        aGenericPublicationItemType.cms_last_update_ts
+      );
     } else {
       assert.fail("Expected right");
     }
