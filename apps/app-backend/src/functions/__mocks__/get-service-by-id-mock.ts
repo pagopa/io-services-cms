@@ -13,7 +13,9 @@ import {
   ScopeEnum,
 } from "../../generated/definitions/internal/ServiceMetadata";
 
-export const aValidCosmosDbServiceDetails: CosmosDbServiceDetails = {
+export const buildCosmosDbServiceDetails = (
+  require_secure_channel: boolean
+): CosmosDbServiceDetails => ({
   id: "aServiceId" as NonEmptyString,
   name: "aServiceName" as NonEmptyString,
   cms_last_update_ts: 1,
@@ -22,7 +24,7 @@ export const aValidCosmosDbServiceDetails: CosmosDbServiceDetails = {
     name: "aServiceOrganization" as NonEmptyString,
     fiscal_code: "01234567890" as OrganizationFiscalCode,
   },
-  require_secure_channel: true,
+  require_secure_channel,
   metadata: {
     scope: ScopeEnum.LOCAL,
     web_url: "aServiceWebUrl" as NonEmptyString,
@@ -41,9 +43,11 @@ export const aValidCosmosDbServiceDetails: CosmosDbServiceDetails = {
     topic_id: 1,
   },
   kind: "publication",
-};
+});
 
-export const aValidApiResponseServiceDetails: ApiResponseServiceDetails = {
+export const buildApiResponseServiceDetails = (
+  available_notification_channels?: NotificationChannelEnum[]
+): ApiResponseServiceDetails => ({
   id: "aServiceId",
   name: "aServiceName",
   version: 1,
@@ -52,7 +56,7 @@ export const aValidApiResponseServiceDetails: ApiResponseServiceDetails = {
     name: "aServiceOrganization" as NonEmptyString,
     fiscal_code: "01234567890" as OrganizationFiscalCode,
   },
-  available_notification_channels: [NotificationChannelEnum.EMAIL],
+  available_notification_channels,
   metadata: {
     scope: ScopeEnum.LOCAL,
     web_url: "aServiceWebUrl" as NonEmptyString,
@@ -69,7 +73,7 @@ export const aValidApiResponseServiceDetails: ApiResponseServiceDetails = {
     support_url: "aServiceSupportUrl" as NonEmptyString,
     category: CategoryEnum.STANDARD,
   },
-};
+});
 
 export const mockServiceDetailsContainer = (
   statusCode: number,

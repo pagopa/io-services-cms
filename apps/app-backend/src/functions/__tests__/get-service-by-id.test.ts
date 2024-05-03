@@ -3,12 +3,13 @@ import * as E from "fp-ts/Either";
 import { describe, expect, it } from "vitest";
 import { IConfig } from "../../config";
 import {
-  aValidCosmosDbServiceDetails,
-  aValidApiResponseServiceDetails,
+  buildCosmosDbServiceDetails,
+  buildApiResponseServiceDetails,
   mockServiceDetailsContainer,
 } from "../__mocks__/get-service-by-id-mock";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { makeGetServiceByIdHandler } from "../get-service-by-id";
+import { NotificationChannelEnum } from "../../generated/definitions/internal/NotificationChannel";
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 101,
@@ -25,7 +26,7 @@ describe("Get Service By Id Tests", () => {
     };
     const serviceDetailsContainer = mockServiceDetailsContainer(
       200,
-      aValidCosmosDbServiceDetails
+      buildCosmosDbServiceDetails(false)
     );
 
     const result = await makeGetServiceByIdHandler({
@@ -43,7 +44,10 @@ describe("Get Service By Id Tests", () => {
       E.right(
         expect.objectContaining({
           body: {
-            ...aValidApiResponseServiceDetails,
+            ...buildApiResponseServiceDetails([
+              NotificationChannelEnum.EMAIL,
+              NotificationChannelEnum.WEBHOOK,
+            ]),
           },
           statusCode: 200,
         })
