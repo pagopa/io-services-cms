@@ -4,7 +4,7 @@ import { useTranslation } from "next-i18next";
 
 type ButtonWithTooltipProps = {
   tooltipTitle: string;
-  handleOnClick: () => void;
+  onClick: () => void;
   icon: ReactNode;
   size: "small" | "medium" | "large";
   variant: "text" | "outlined" | "contained";
@@ -13,7 +13,7 @@ type ButtonWithTooltipProps = {
 
 const ButtonWithTooltip = ({
   tooltipTitle,
-  handleOnClick,
+  onClick,
   icon,
   size,
   variant,
@@ -28,7 +28,7 @@ const ButtonWithTooltip = ({
           size={size}
           variant={variant}
           sx={{ bgcolor: "background.paper", padding: 0 }}
-          onClick={handleOnClick}
+          onClick={onClick}
         >
           {icon}
         </Button>

@@ -261,17 +261,17 @@ export const ServiceContextMenu = ({
       <ButtonWithTooltip
         isVisible={true}
         tooltipTitle="service.actions.history"
-        handleOnClick={onHistoryClick}
+        onClick={onHistoryClick}
         icon={<History />}
         size="medium"
         variant="text"
       />
       <ButtonWithTooltip
         isVisible={
-          getConfiguration().BACK_OFFICE_IS_IN_APP_PREVIEW_BUTTON_VISIBLE
+          getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED
         }
         tooltipTitle="service.actions.preview"
-        handleOnClick={onPreviewClick}
+        onClick={onPreviewClick}
         icon={<PhoneAndroid />}
         size="medium"
         variant="text"
