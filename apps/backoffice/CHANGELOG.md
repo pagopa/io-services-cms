@@ -1,5 +1,14 @@
 # io-services-cms-backoffice
 
+## 1.10.1
+
+### Patch Changes
+
+- 407ef0d: Set on PaginationResultSet openApi schema all required fields
+- e115c5c: Added a enviroment variable to manage the login path redirect
+- Updated dependencies [cc8383d]
+  - @io-services-cms/models@1.19.2
+
 ## 1.10.0
 
 ### Minor Changes
