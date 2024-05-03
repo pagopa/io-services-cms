@@ -28,7 +28,7 @@
     "api-definitions:internal": "gen-api-models --api-spec ./api/internal.yaml --out-dir ./src/generated/definitions/internal --request-types --response-decoders",
     "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:bundle && yarn api-definitions:internal",
     "generate:version": "sh generate-version.sh -o ./src/generated/ -v $npm_package_version -n io-services-app-backend",
-    "generate": "yarn lint:api && yarn api-definitions:all"
+    "generate": "yarn lint:api && yarn api-definitions:all && yarn generate:version"
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^3.0.0",
