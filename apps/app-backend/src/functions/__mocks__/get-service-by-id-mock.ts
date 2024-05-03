@@ -1,18 +1,49 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { Container } from "@azure/cosmos";
+import { ServiceDetail as CosmosDbServiceDetails } from "@io-services-cms/models";
 import {
   NonEmptyString,
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 import { vi } from "vitest";
 import { NotificationChannelEnum } from "../../generated/definitions/internal/NotificationChannel";
-import { ServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
+import { ServiceDetails as ApiResponseServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
 import {
   CategoryEnum,
   ScopeEnum,
 } from "../../generated/definitions/internal/ServiceMetadata";
 
-export const aValidServiceDetails: ServiceDetails = {
+export const aValidCosmosDbServiceDetails: CosmosDbServiceDetails = {
+  id: "aServiceId" as NonEmptyString,
+  name: "aServiceName" as NonEmptyString,
+  cms_last_update_ts: 1,
+  description: "aServiceDescription" as NonEmptyString,
+  organization: {
+    name: "aServiceOrganization" as NonEmptyString,
+    fiscal_code: "01234567890" as OrganizationFiscalCode,
+  },
+  require_secure_channel: true,
+  metadata: {
+    scope: ScopeEnum.LOCAL,
+    web_url: "aServiceWebUrl" as NonEmptyString,
+    app_ios: "aServiceAppIos" as NonEmptyString,
+    app_android: "aServiceAppAndroid" as NonEmptyString,
+    tos_url: "aServiceTosUrl" as NonEmptyString,
+    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
+    address: "aServiceAddress" as NonEmptyString,
+    phone: "aServicePhone" as NonEmptyString,
+    email: "aServiceEmail" as NonEmptyString,
+    pec: "aServicePec" as NonEmptyString,
+    cta: "aServiceCta" as NonEmptyString,
+    token_name: "aServiceTokenName" as NonEmptyString,
+    support_url: "aServiceSupportUrl" as NonEmptyString,
+    category: CategoryEnum.STANDARD,
+    topic_id: 1,
+  },
+  kind: "publication",
+};
+
+export const aValidApiResponseServiceDetails: ApiResponseServiceDetails = {
   id: "aServiceId",
   name: "aServiceName",
   version: 1,
@@ -37,10 +68,6 @@ export const aValidServiceDetails: ServiceDetails = {
     token_name: "aServiceTokenName" as NonEmptyString,
     support_url: "aServiceSupportUrl" as NonEmptyString,
     category: CategoryEnum.STANDARD,
-    topic: {
-      id: 1,
-      name: "aTopicName",
-    },
   },
 };
 

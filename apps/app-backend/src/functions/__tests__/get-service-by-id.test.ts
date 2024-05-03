@@ -3,7 +3,8 @@ import * as E from "fp-ts/Either";
 import { describe, expect, it } from "vitest";
 import { IConfig } from "../../config";
 import {
-  aValidServiceDetails,
+  aValidCosmosDbServiceDetails,
+  aValidApiResponseServiceDetails,
   mockServiceDetailsContainer,
 } from "../__mocks__/get-service-by-id-mock";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
@@ -24,7 +25,7 @@ describe("Get Service By Id Tests", () => {
     };
     const serviceDetailsContainer = mockServiceDetailsContainer(
       200,
-      aValidServiceDetails
+      aValidCosmosDbServiceDetails
     );
 
     const result = await makeGetServiceByIdHandler({
@@ -42,7 +43,7 @@ describe("Get Service By Id Tests", () => {
       E.right(
         expect.objectContaining({
           body: {
-            ...aValidServiceDetails,
+            ...aValidApiResponseServiceDetails,
           },
           statusCode: 200,
         })

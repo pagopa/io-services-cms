@@ -8,10 +8,17 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import { flow, pipe } from "fp-ts/lib/function";
 
+import { ServiceDetail as CosmosDbServiceDetails } from "@io-services-cms/models";
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ServiceDetails } from "../generated/definitions/internal/ServiceDetails";
+import { AvailableNotificationChannels } from "../generated/definitions/internal/AvailableNotificationChannels";
+import { NotificationChannelEnum } from "../generated/definitions/internal/NotificationChannel";
+import { ServiceDetails as ApiResponseServiceDetails } from "../generated/definitions/internal/ServiceDetails";
+import {
+  CategoryEnum,
+  ScopeEnum,
+} from "../generated/definitions/internal/ServiceMetadata";
 import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency";
 
@@ -25,7 +32,7 @@ const executeGetServiceById: (
 ) => RTE.ReaderTaskEither<
   ServiceDetailsContainerDependency,
   H.HttpError,
-  ServiceDetails
+  ApiResponseServiceDetails
 > =
   (serviceId: NonEmptyString) =>
   ({ serviceDetailsContainer }) =>
@@ -60,7 +67,7 @@ const executeGetServiceById: (
             ({ resource }) =>
               pipe(
                 resource,
-                ServiceDetails.decode,
+                CosmosDbServiceDetails.decode,
                 E.mapLeft(
                   flow(
                     readableReport,
@@ -74,12 +81,71 @@ const executeGetServiceById: (
           ),
           TE.fromEither
         )
-      )
+      ),
+      TE.map(toApiResponseServiceDetails)
     );
+
+const toApiResponseServiceDetails = (
+  cosmosDbServiceDetail: CosmosDbServiceDetails
+): ApiResponseServiceDetails => ({
+  id: cosmosDbServiceDetail.id,
+  name: cosmosDbServiceDetail.name,
+  version: cosmosDbServiceDetail.cms_last_update_ts,
+  description: cosmosDbServiceDetail.description,
+  organization: cosmosDbServiceDetail.organization,
+  metadata: toApiResponseServiceMetadata(cosmosDbServiceDetail.metadata),
+  available_notification_channels: calculateAvailableNotificationChannels(
+    cosmosDbServiceDetail
+  ),
+});
+
+// TODO: in MVP0 we are not mapping the topic conversion
+const toApiResponseServiceMetadata = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  topic_id,
+  ...metadata
+}: CosmosDbServiceDetails["metadata"]): ApiResponseServiceDetails["metadata"] => ({
+  ...metadata,
+  scope: mapScope(metadata.scope),
+  category: mapCategory(metadata.category),
+});
+
+const calculateAvailableNotificationChannels = ({
+  require_secure_channel,
+}: CosmosDbServiceDetails): AvailableNotificationChannels =>
+  pipe(
+    require_secure_channel,
+    B.fold(
+      () => [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK],
+      () => [NotificationChannelEnum.WEBHOOK]
+    )
+  );
+
+const mapScope = (
+  scope: CosmosDbServiceDetails["metadata"]["scope"]
+): ScopeEnum =>
+  pipe(
+    scope === ScopeEnum.NATIONAL,
+    B.fold(
+      () => ScopeEnum.LOCAL,
+      () => ScopeEnum.NATIONAL
+    )
+  );
+
+const mapCategory = (
+  category: CosmosDbServiceDetails["metadata"]["category"]
+): CategoryEnum =>
+  pipe(
+    category === CategoryEnum.SPECIAL,
+    B.fold(
+      () => CategoryEnum.STANDARD,
+      () => CategoryEnum.SPECIAL
+    )
+  );
 
 export const makeGetServiceByIdHandler: H.Handler<
   H.HttpRequest,
-  | H.HttpResponse<ServiceDetails, 200>
+  | H.HttpResponse<ApiResponseServiceDetails, 200>
   | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
   ServiceDetailsContainerDependency
 > = H.of((request: H.HttpRequest) =>
