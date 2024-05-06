@@ -35,6 +35,7 @@ describe("Azure Search Client Tests", () => {
       const client = makeAzureSearchClient<ATestType>(
         ATestType,
         "anEndpoint",
+        "aServiceVersion",
         "anIndexName",
         "anApiKey"
       );
@@ -42,7 +43,10 @@ describe("Azure Search Client Tests", () => {
       expect(mockAzureSearchClientContructor).toBeCalledWith(
         "anEndpoint",
         "anIndexName",
-        new searchSDK.AzureKeyCredential("anApiKey")
+        new searchSDK.AzureKeyCredential("anApiKey"),
+        {
+          serviceVersion: "aServiceVersion",
+        }
       );
 
       expect(client).toBeDefined();
@@ -52,13 +56,17 @@ describe("Azure Search Client Tests", () => {
       const client = makeAzureSearchClient<ATestType>(
         ATestType,
         "anEndpoint",
+        "aServiceVersion",
         "anIndexName"
       );
 
       expect(mockAzureSearchClientContructor).toBeCalledWith(
         "anEndpoint",
         "anIndexName",
-        new DefaultAzureCredential()
+        new DefaultAzureCredential(),
+        {
+          serviceVersion: "aServiceVersion",
+        }
       );
 
       expect(client).toBeDefined();
