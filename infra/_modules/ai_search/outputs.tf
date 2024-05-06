@@ -3,7 +3,7 @@ output "search_service_id" {
 }
 
 output "search_service_url" {
-  value = azurerm_private_endpoint.srch.private_dns_zone_configs[0].record_sets[0].fqdn
+  value = "${azurerm_private_endpoint.name}.search.windows.net"
 }
 
 output "search_service_index_aliases" {
