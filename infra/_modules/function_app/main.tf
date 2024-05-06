@@ -39,6 +39,7 @@ module "app_be_fn" {
     var.app_be_fn_settings,
     {
       AZURE_SEARCH_ENDPOINT                = var.ai_search.url
+      AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
       AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
       AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint

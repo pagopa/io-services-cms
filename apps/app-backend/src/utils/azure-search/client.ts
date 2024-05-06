@@ -47,13 +47,17 @@ export type AzureSearchClient<T> = {
 export const makeAzureSearchClient = <T>(
   codec: t.Type<T>,
   endpoint: string,
+  serviceVersion: string,
   indexName: string,
   apiKey?: string
 ): AzureSearchClient<T> => {
   const searchClient = new SearchClient(
     endpoint,
     indexName,
-    apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential()
+    apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential(),
+    {
+      serviceVersion,
+    }
   );
 
   const fullTextSearch = ({
