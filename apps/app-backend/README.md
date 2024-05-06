@@ -57,6 +57,7 @@ The following table contains the required ENV variables that the applicative req
 | FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                         | string | Y        |
 | FEATURED_ITEMS_FILE_NAME                                    | The FeaturedItems Filename in blobStorage container                               | string | Y        |
 | AZURE_SEARCH_ENDPOINT                                       | The Azure AI Search Endpoint                                                      | string | Y        |
+| AZURE_SEARCH_SERVICE_VERSION                                | The Azure AI Search Service Version                                               | string | Y        |
 | AZURE_SEARCH_INSTITUTIONS_INDEX_NAME                        | The Azure AI Search Institutions Index Name                                       | string | Y        |
 | AZURE_SEARCH_SERVICES_INDEX_NAME                            | The Azure AI Search Services Index Name                                           | string | Y        |
 | AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE(**\*1**)    | The Azure AI Search Institutions Scope Scoring Profile Name (eg BoostScope)       | string | N        |
