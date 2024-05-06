@@ -1,4 +1,4 @@
-name: Run terraform plan on prod westeurope infrastructure
+name: Terraform plan on prod weu infra
 
 on:
   workflow_dispatch:

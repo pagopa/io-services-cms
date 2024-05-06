@@ -1,4 +1,4 @@
-name: Run terraform apply on prod westeurope infrastructure
+name: Terraform apply on prod weu infra
 
 on:
   workflow_dispatch:
