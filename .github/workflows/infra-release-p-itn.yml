@@ -1,4 +1,4 @@
-name: Terraform apply on prod itn infra
+name: Terraform apply itn
 
 on:
   workflow_dispatch:

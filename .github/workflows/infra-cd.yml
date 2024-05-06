@@ -1,4 +1,4 @@
-name: Terraform apply on prod weu infra
+name: Terraform apply weu
 
 on:
   workflow_dispatch:

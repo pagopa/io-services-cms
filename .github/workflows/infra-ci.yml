@@ -1,4 +1,4 @@
-name: Terraform plan on prod weu infra
+name: Terraform plan weu
 
 on:
   workflow_dispatch:

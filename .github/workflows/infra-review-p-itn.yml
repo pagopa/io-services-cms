@@ -1,4 +1,4 @@
-name: Terraform plan on prod itn infra
+name: Terraform plan itn
 
 on:
   workflow_dispatch:
