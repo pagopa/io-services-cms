@@ -52,6 +52,7 @@ module "function_app" {
   ai_search = {
     id                     = module.ai_search.search_service_id
     url                    = module.ai_search.search_service_url
+    service_version        = "2024-03-01-Preview"
     institution_index_name = module.ai_search.search_service_index_aliases.organizations
     services_index_name    = module.ai_search.search_service_index_aliases.services
   }

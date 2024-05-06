@@ -31,6 +31,7 @@ const serviceDetailsContainerDependency =
 const institutionsSearchClient = makeAzureSearchClient(
   Institution,
   config.AZURE_SEARCH_ENDPOINT,
+  config.AZURE_SEARCH_SERVICE_VERSION,
   config.AZURE_SEARCH_INSTITUTIONS_INDEX_NAME,
   config.AZURE_SEARCH_API_KEY
 );
@@ -38,6 +39,7 @@ const institutionsSearchClient = makeAzureSearchClient(
 const servicesSearchClient = makeAzureSearchClient(
   ServiceMinified,
   config.AZURE_SEARCH_ENDPOINT,
+  config.AZURE_SEARCH_SERVICE_VERSION,
   config.AZURE_SEARCH_SERVICES_INDEX_NAME,
   config.AZURE_SEARCH_API_KEY
 );

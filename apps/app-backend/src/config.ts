@@ -31,6 +31,7 @@ export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;
 export const AzureSearchConfig = t.intersection([
   t.type({
     AZURE_SEARCH_ENDPOINT: NonEmptyString,
+    AZURE_SEARCH_SERVICE_VERSION: NonEmptyString,
     AZURE_SEARCH_INSTITUTIONS_INDEX_NAME: NonEmptyString,
     AZURE_SEARCH_SERVICES_INDEX_NAME: NonEmptyString,
   }),

@@ -47,6 +47,7 @@ export type AzureSearchClient<T> = {
 export const makeAzureSearchClient = <T>(
   codec: t.Type<T>,
   endpoint: string,
+  serviceVersion: string,
   indexName: string,
   apiKey?: string
 ): AzureSearchClient<T> => {
@@ -55,7 +56,7 @@ export const makeAzureSearchClient = <T>(
     indexName,
     apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential(),
     {
-      serviceVersion: "2024-03-01-Preview",
+      serviceVersion,
     }
   );
 
