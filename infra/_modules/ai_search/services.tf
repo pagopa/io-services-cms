@@ -94,6 +94,19 @@ resource "restapi_object" "services_index_01" {
         synonymMaps         = []
       },
       {
+        name                = "orgFiscalCode"
+        type                = "Edm.String"
+        searchable          = false
+        filterable          = true
+        retrievable         = false
+        sortable            = false
+        facetable           = false
+        key                 = false
+        dimensions          = null
+        vectorSearchProfile = null
+        synonymMaps         = []
+      },
+      {
         name                = "version"
         type                = "Edm.Int32"
         searchable          = false
