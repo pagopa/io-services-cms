@@ -53,7 +53,10 @@ export const makeAzureSearchClient = <T>(
   const searchClient = new SearchClient(
     endpoint,
     indexName,
-    apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential()
+    apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential(),
+    {
+      serviceVersion: "2024-03-01-Preview",
+    }
   );
 
   const fullTextSearch = ({
