@@ -109,8 +109,8 @@ github_repository_environment_ci = {
 }
 
 github_repository_environment_cd = {
-  protected_branches     = true
-  custom_branch_policies = false
+  protected_branches     = false
+  custom_branch_policies = true
   reviewers_teams        = ["io-platform-green-unit"]
 }
 
