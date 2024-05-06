@@ -47,9 +47,7 @@ infra_environment_ci_roles = {
     io-p-services-cms-rg = [
       "Contributor"
     ],
-    io-p-itn-services-rg-01 = [
-      "Storage Blob Data Contributor",
-      "Reader and Data Access",
+    io-p-itn-svc-rg-01 = [
       "Search Service Contributor"
     ]
   }
@@ -61,6 +59,9 @@ infra_environment_cd_roles = {
     terraform-state-rg = [
       "Storage Blob Data Contributor",
       "Reader and Data Access"
+    ],
+    io-p-itn-svc-rg-01 = [
+      "Search Service Contributor"
     ]
   }
 }
