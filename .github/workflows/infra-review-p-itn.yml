@@ -1,0 +1,25 @@
+name: Terraform plan itn
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - "infra/prod/italynorth/**"
+      - ".github/workflows/infra-review-p-itn.yml"
+      - ".github/workflows/infra-release-p-itn.yml"
+
+jobs:
+  infra_review:
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@eb49ec55761941cef1e6fbcc38681732a171c5b4
+    name: PR Prod Italy North
+    secrets: inherit
+    with:
+      environment: prod
+      region: italynorth
+      base_path: "infra"
+      use_private_agent: true

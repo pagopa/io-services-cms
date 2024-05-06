@@ -46,6 +46,11 @@ infra_environment_ci_roles = {
     ],
     io-p-services-cms-rg = [
       "Contributor"
+    ],
+    io-p-itn-services-rg-01 = [
+      "Storage Blob Data Contributor",
+      "Reader and Data Access",
+      "Search Service Contributor"
     ]
   }
 }

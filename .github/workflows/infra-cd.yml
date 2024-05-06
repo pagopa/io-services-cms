@@ -1,4 +1,4 @@
-name: Infra Continuous Delivery
+name: Terraform apply weu
 
 on:
   workflow_dispatch:
