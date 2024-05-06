@@ -2,4 +2,4 @@
 "io-services-app-backend": patch
 ---
 
-Test force Ai Search version
+Set Specific Azure Search Service Version
