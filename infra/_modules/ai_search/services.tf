@@ -9,7 +9,7 @@ resource "restapi_object" "services_publication_datasource" {
       credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-publication"
-        query = "SELECT c.id, c.data.name, c.data.organization.name as orgName, c.data.organization.fiscal_code as orgFiscalCode, c._ts, STRINGEQUALS(c.fsm.state, \"unpublished\") ? \"deleted\" : c.fsm.state as state FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
+        query = "SELECT c.id, c.data.name, c.data.organization.fiscal_code as orgFiscalCode, c._ts, STRINGEQUALS(c.fsm.state, \"unpublished\") ? \"deleted\" : c.fsm.state as state FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
       },
       dataChangeDetectionPolicy = {
         "@odata.type"           = "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
