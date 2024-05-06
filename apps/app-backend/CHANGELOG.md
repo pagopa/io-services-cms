@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.3
+
+### Patch Changes
+
+- 9d0bc45: Set Specific Azure Search Service Version
+
 ## 0.0.2
 
 ### Patch Changes
