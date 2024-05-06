@@ -48,6 +48,7 @@ infra_environment_ci_roles = {
       "Contributor"
     ],
     io-p-itn-svc-rg-01 = [
+      "Contributor",
       "Search Service Contributor"
     ]
   }
