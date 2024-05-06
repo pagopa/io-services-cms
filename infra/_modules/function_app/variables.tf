@@ -61,6 +61,7 @@ variable "ai_search" {
   type = object({
     id                     = string
     url                    = string
+    service_version        = string
     institution_index_name = string
     services_index_name    = string
   })
