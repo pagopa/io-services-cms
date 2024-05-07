@@ -15,3 +15,7 @@ data "azurerm_subnet" "pep_snet" {
   virtual_network_name = "${var.project}-common-vnet-01"
   resource_group_name  = "${var.project}-common-rg-01"
 }
+
+data "azuread_group" "adgroup_services_cms" {
+  display_name = "${var.prefix}-${var.env_short}-adgroup-services-cms"
+}
