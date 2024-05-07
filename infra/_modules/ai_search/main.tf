@@ -84,7 +84,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader_db
 }
 
 resource "azurerm_role_assignment" "developers_group_to_ai_search_reader" {
-  scope                = var.ai_search.id
+  scope                = azurerm_search_service.srch.id
   role_definition_name = "Search Index Data Reader"
   principal_id         = data.azuread_group.adgroup_services_cms.object_id
 }

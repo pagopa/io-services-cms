@@ -17,6 +17,11 @@ terraform {
       source  = "Mastercard/restapi"
       version = "<= 1.19.1"
     }
+
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "2.48.0"
+    }
   }
 }
 
