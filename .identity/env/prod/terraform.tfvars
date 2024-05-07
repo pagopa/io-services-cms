@@ -62,7 +62,8 @@ infra_environment_cd_roles = {
       "Reader and Data Access"
     ],
     io-p-itn-svc-rg-01 = [
-      "Search Service Contributor"
+      "Search Service Contributor",
+      "Role Based Access Control Administrator"
     ]
   }
 }
