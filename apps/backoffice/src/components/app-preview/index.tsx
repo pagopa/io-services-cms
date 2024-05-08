@@ -1,14 +1,8 @@
-import { Close, Info, InfoOutlined, Title } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  Stack,
-  Tooltip,
-  Typography
-} from "@mui/material";
+import { Close, InfoOutlined } from "@mui/icons-material";
+import { Box, Button, Dialog, Stack, Tooltip, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import React, { useEffect, useState } from "react";
+
+import styles from "./app-preview.module.css";
 
 type AppPreviewProps = {
   showPreview: boolean;
@@ -40,11 +34,68 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
         </Stack>
         <Box
           flexGrow={1}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
           sx={{
             backgroundImage: "url('/img/app_preview_bg.png')",
             backgroundSize: "cover"
           }}
-        ></Box>
+        >
+          <Box
+            display="flex"
+            padding={1}
+            borderRadius={3}
+            sx={{
+              width: 202,
+              height: 364,
+              backgroundColor: "rgba(255, 255, 255, 0.35)"
+            }}
+          >
+            <Box
+              borderRadius={2}
+              flexGrow={1}
+              sx={{
+                backgroundColor: "white",
+                overflowY: "scroll"
+              }}
+              className={styles.scrollbar}
+            >
+              <Box
+                sx={{
+                  width: "100%",
+                  height: 100,
+                  backgroundColor: "red",
+                  marginBottom: 2
+                }}
+              ></Box>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: 100,
+                  backgroundColor: "blue",
+                  marginBottom: 2
+                }}
+              ></Box>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: 100,
+                  backgroundColor: "yellow",
+                  marginBottom: 2
+                }}
+              ></Box>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: 100,
+                  backgroundColor: "purple",
+                  marginBottom: 2
+                }}
+              ></Box>
+            </Box>
+          </Box>
+        </Box>
         <Box textAlign={"center"}>
           <Button
             size="medium"
