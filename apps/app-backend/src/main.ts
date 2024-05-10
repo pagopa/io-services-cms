@@ -3,7 +3,6 @@ import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { getConfigOrError } from "./config";
-import { GetFeaturedItemsFn } from "./functions/featured-items";
 import { GetServiceByIdFn } from "./functions/get-service-by-id";
 import { InfoFn } from "./functions/info";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
@@ -12,6 +11,8 @@ import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
+import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
+import { GetFeaturedServicesFn } from "./functions/featured-services";
 
 const config = pipe(
   getConfigOrError(),
@@ -52,14 +53,24 @@ app.http("Info", {
   route: "info",
 });
 
-const GetFeaturedItems = GetFeaturedItemsFn(config)({
+const GetFeaturedServices = GetFeaturedServicesFn(config)({
   blobService,
 });
-app.http("GetFeaturedItems", {
+app.http("GetFeaturedServices", {
   methods: ["GET"],
-  route: "featured",
+  route: "services/featured",
   authLevel: "anonymous",
-  handler: GetFeaturedItems,
+  handler: GetFeaturedServices,
+});
+
+const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
+  blobService,
+});
+app.http("GetFeaturedInstitutions", {
+  methods: ["GET"],
+  route: "institutions/featured",
+  authLevel: "anonymous",
+  handler: GetFeaturedInstitutions,
 });
 
 const SearchInstitutions = SearchInstitutionsFn(config)({
