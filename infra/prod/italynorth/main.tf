@@ -58,9 +58,9 @@ module "function_app" {
   }
 
   app_be_fn_settings = {
-    FEATURED_ITEMS_CONTAINER_NAME         = "static-content"
-    FEATURED_SERVICES_ITEMS_FILE_NAME     = "featured-services-items.json"
-    FEATURED_INSTITUTIONS_ITEMS_FILE_NAME = "featured-institutions-items.json"
+    FEATURED_ITEMS_CONTAINER_NAME   = "static-content"
+    FEATURED_SERVICES_FILE_NAME     = "featured-services.json"
+    FEATURED_INSTITUTIONS_FILE_NAME = "featured-institutions.json"
   }
 
   tags = local.tags

@@ -17,7 +17,7 @@ const mockUpsertBlobFromObject = vi
 
 const mockedConfiguration = {
   FEATURED_ITEMS_CONTAINER_NAME: "container",
-  FEATURED_INSTITUTIONS_ITEMS_FILE_NAME: "file",
+  FEATURED_INSTITUTIONS_FILE_NAME: "file",
 } as unknown as IConfig;
 
 describe("Get Featured Institutions", () => {
@@ -32,7 +32,7 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
     );
     expect(result).toEqual(
       E.right(
@@ -60,7 +60,7 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
     );
     expect(result).toEqual(
       E.right(
@@ -88,7 +88,7 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
     );
     expect(result).toEqual(
       E.right(

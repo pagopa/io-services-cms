@@ -101,9 +101,9 @@ variable "fn_zone_balancing_enabled" {
 
 variable "app_be_fn_settings" {
   type = object({
-    FEATURED_ITEMS_CONTAINER_NAME         = string
-    FEATURED_SERVICES_ITEMS_FILE_NAME     = string
-    FEATURED_INSTITUTIONS_ITEMS_FILE_NAME = string
+    FEATURED_ITEMS_CONTAINER_NAME   = string
+    FEATURED_SERVICES_FILE_NAME     = string
+    FEATURED_INSTITUTIONS_FILE_NAME = string
   })
   description = "Continous Integration roles for opex managed identity"
 }

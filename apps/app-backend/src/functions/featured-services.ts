@@ -32,7 +32,7 @@ export const retrieveFeaturedServices: (
             FeaturedServices,
             blobService,
             featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
-            featuredItemsConfig.FEATURED_SERVICES_ITEMS_FILE_NAME
+            featuredItemsConfig.FEATURED_SERVICES_FILE_NAME
           ),
         (err) =>
           new H.HttpError(`Unexpected error: [${E.toError(err).message}]`)

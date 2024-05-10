@@ -28,7 +28,7 @@ export const retrieveInstitutionsItems: (
             Institutions,
             blobService,
             featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
-            featuredItemsConfig.FEATURED_INSTITUTIONS_ITEMS_FILE_NAME
+            featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME
           ),
         (err) =>
           new H.HttpError(`Unexpected error: [${E.toError(err).message}]`)
