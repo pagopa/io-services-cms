@@ -4,40 +4,40 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
-import { FeaturedItems } from "../../generated/definitions/internal/FeaturedItems";
-import { mockFeaturedItems } from "../__mocks__/featured-items";
+import { mockFeaturedServices } from "../__mocks__/featured-services";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
-import { makeFeaturedItemsHandler } from "../featured-items";
+import { makeFeaturedServicesHandler } from "../featured-services";
+import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
 
 // blobService Base Mock
 const mockBlobService = {} as unknown as BlobService;
 const mockUpsertBlobFromObject = vi
   .spyOn(azureStorage, "getBlobAsObject")
-  .mockResolvedValue(E.right(O.some(mockFeaturedItems)));
+  .mockResolvedValue(E.right(O.some(mockFeaturedServices)));
 
 const mockedConfiguration = {
   FEATURED_ITEMS_CONTAINER_NAME: "container",
-  FEATURED_ITEMS_FILE_NAME: "file",
+  FEATURED_SERVICES_FILE_NAME: "file",
 } as unknown as IConfig;
 
-describe("Get Featured Services And Institutions", () => {
-  it("should return featured items", async () => {
-    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
+describe("Get Featured Services", () => {
+  it("should return featured services", async () => {
+    const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
-      FeaturedItems,
+      FeaturedServices,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
-          body: mockFeaturedItems,
+          body: mockFeaturedServices,
           statusCode: 200,
         })
       )
@@ -50,24 +50,24 @@ describe("Get Featured Services And Institutions", () => {
       E.left(new Error(errorMessage))
     );
 
-    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
+    const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
-      FeaturedItems,
+      FeaturedServices,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
           body: {
             status: 500,
-            title: `An error occurred retrieving featuredItems file from blobService: [${errorMessage}]`,
+            title: `An error occurred retrieving featuredServices file from blobService: [${errorMessage}]`,
           },
           statusCode: 500,
         })
@@ -78,23 +78,23 @@ describe("Get Featured Services And Institutions", () => {
   it("should return an empty list when file is not found", async () => {
     mockUpsertBlobFromObject.mockResolvedValueOnce(E.right(O.none));
 
-    const result = await makeFeaturedItemsHandler(mockedConfiguration)({
+    const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
       blobService: mockBlobService,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
-      FeaturedItems,
+      FeaturedServices,
       mockBlobService,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_ITEMS_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
           body: {
-            items: [],
+            services: [],
           },
           statusCode: 200,
         })

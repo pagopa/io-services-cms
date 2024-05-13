@@ -8,27 +8,31 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { FeaturedItemsConfig } from "../config";
-import { FeaturedItems } from "../generated/definitions/internal/FeaturedItems";
 import { BlobServiceDependency } from "../utils/blob-storage/dependency";
+import { FeaturedServices } from "../generated/definitions/internal/FeaturedServices";
 
 /**
- * GET /featured AZF HttpTrigger
- * Retrieve the featured items(Services and Institutions) from the blob storage
+ * GET /services/featured AZF HttpTrigger
+ * Retrieve the featured items Services from the blob storage
  */
 
-export const retrieveFeaturedItems: (
+export const retrieveFeaturedServices: (
   featuredItemsConfig: FeaturedItemsConfig
-) => RTE.ReaderTaskEither<BlobServiceDependency, H.HttpError, FeaturedItems> =
+) => RTE.ReaderTaskEither<
+  BlobServiceDependency,
+  H.HttpError,
+  FeaturedServices
+> =
   (featuredItemsConfig: FeaturedItemsConfig) =>
   ({ blobService }) =>
     pipe(
       TE.tryCatch(
         () =>
           getBlobAsObject(
-            FeaturedItems,
+            FeaturedServices,
             blobService,
             featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
-            featuredItemsConfig.FEATURED_ITEMS_FILE_NAME
+            featuredItemsConfig.FEATURED_SERVICES_FILE_NAME
           ),
         (err) =>
           new H.HttpError(`Unexpected error: [${E.toError(err).message}]`)
@@ -37,25 +41,25 @@ export const retrieveFeaturedItems: (
         E.mapLeft(
           (err) =>
             new H.HttpError(
-              `An error occurred retrieving featuredItems file from blobService: [${err.message}]`
+              `An error occurred retrieving featuredServices file from blobService: [${err.message}]`
             )
         )
       ),
-      TE.map(O.getOrElse(() => ({ items: [] } as FeaturedItems))) // Return an empty list if the file is not found
+      TE.map(O.getOrElse(() => ({ services: [] } as FeaturedServices))) // Return an empty list if the file is not found
     );
 
-export const makeFeaturedItemsHandler: (
+export const makeFeaturedServicesHandler: (
   featuredItemsConfig: FeaturedItemsConfig
 ) => H.Handler<
   H.HttpRequest,
-  | H.HttpResponse<FeaturedItems, 200>
+  | H.HttpResponse<FeaturedServices, 200>
   | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
   BlobServiceDependency
 > = (featuredItemsConfig: FeaturedItemsConfig) =>
   H.of((_: H.HttpRequest) =>
     pipe(
-      // Retrieve the featured Items from blobStorage
-      retrieveFeaturedItems(featuredItemsConfig),
+      // Retrieve the featured Services from blobStorage
+      retrieveFeaturedServices(featuredItemsConfig),
       RTE.map(H.successJson),
       RTE.orElseW((error) =>
         pipe(
@@ -63,12 +67,13 @@ export const makeFeaturedItemsHandler: (
             H.problemJson({ status: error.status, title: error.message })
           ),
           RTE.chainFirstW((errorResponse) =>
-            L.errorRTE(`Error executing GetFeaturedItemsFn`, errorResponse)
+            L.errorRTE(`Error executing GetFeaturedServicesFn`, errorResponse)
           )
         )
       )
     )
   );
 
-export const GetFeaturedItemsFn = (featuredItemsConfig: FeaturedItemsConfig) =>
-  httpAzureFunction(makeFeaturedItemsHandler(featuredItemsConfig));
+export const GetFeaturedServicesFn = (
+  featuredItemsConfig: FeaturedItemsConfig
+) => httpAzureFunction(makeFeaturedServicesHandler(featuredItemsConfig));

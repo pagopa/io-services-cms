@@ -24,7 +24,8 @@ export const FeaturedItemsConfig = t.type({
   // TODO: Capire se metterlo direttamente nello storageAccount della function in tal caso recuperarlo come QueueStorageConnection nella sezione globale
   FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
-  FEATURED_ITEMS_FILE_NAME: NonEmptyString,
+  FEATURED_SERVICES_FILE_NAME: NonEmptyString,
+  FEATURED_INSTITUTIONS_FILE_NAME: NonEmptyString,
 });
 
 export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;

@@ -5,7 +5,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 0.0.2
+  version: 0.0.3
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -90,6 +90,31 @@ paths:
           description: Not found
         '500':
           description: Internal Server Error
+  /institutions/featured:
+    get:
+      tags:
+        - featured
+      summary: Retrieve featured intitutions
+      operationId: getFeaturedInstitutions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institutions'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
   /institutions/{institutionId}/services:
     get:
       tags:
@@ -173,19 +198,19 @@ paths:
           description: Not found
         '500':
           description: Internal Server Error
-  /featured:
+  /services/featured:
     get:
       tags:
         - featured
-      summary: Retrieve featured intitutions and/or services
-      operationId: getFeaturedItems
+      summary: Retrieve featured services
+      operationId: getFeaturedServices
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeaturedItems'
+                $ref: '#/components/schemas/FeaturedServices'
         '401':
           description: Unauthorized
         '403':
@@ -194,6 +219,10 @@ paths:
           description: Not found
         '500':
           description: Internal Server Error
+        '502':
+          description: Bad gateway
+        '504':
+          description: Gateway timeout
 components:
   schemas:
     ApplicationInfo:
@@ -306,6 +335,15 @@ components:
       allOf:
         - $ref: '#/components/schemas/FeaturedService'
         - $ref: '#/components/schemas/Institution'
+    FeaturedServices:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeaturedService'
+      required:
+        - services
     FeaturedService:
       allOf:
         - $ref: '#/components/schemas/ServiceMinified'
