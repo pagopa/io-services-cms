@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.4
+
+### Patch Changes
+
+- 7b60e67: add GetFeaturedServices and GetFeaturedInstitutions api
+
 ## 0.0.3
 
 ### Patch Changes
