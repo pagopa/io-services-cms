@@ -2,8 +2,8 @@ import { Close, InfoOutlined } from "@mui/icons-material";
 import MouseIcon from "@mui/icons-material/Mouse";
 import { Box, Button, Dialog, Stack, Tooltip, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
-
 import { useState } from "react";
+
 import styles from "./app-preview.module.css";
 
 type AppPreviewProps = {
