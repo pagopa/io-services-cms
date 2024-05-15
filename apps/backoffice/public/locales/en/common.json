@@ -465,7 +465,7 @@
       "title": "IO App Preview",
       "titleTooltip": "IO App Version xy",
       "closeButton": "Close Preview",
-      "scrollInfo": "Scorri con il cursore per visualizzare l’anteprima completa"
+      "scrollInfo": "Scroll with cursor to view full preview"
     }
   },
   "table": {
