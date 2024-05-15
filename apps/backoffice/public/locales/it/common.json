@@ -466,7 +466,8 @@
     "inAppPreview": {
       "title": "Anteprima In App IO",
       "titleTooltip": "Versione App xy di App IO",
-      "closeButton": "Chiudi Anteprima"
+      "closeButton": "Chiudi Anteprima",
+      "scrollInfo": "Scorri con il cursore per visualizzare l’anteprima completa"
     }
   },
   "table": {
