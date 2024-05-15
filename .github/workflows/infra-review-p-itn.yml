@@ -10,6 +10,7 @@ on:
       - ready_for_review
     paths:
       - "infra/prod/italynorth/**"
+      - "infra/_modules/**"
       - ".github/workflows/infra-review-p-itn.yml"
       - ".github/workflows/infra-release-p-itn.yml"
 
