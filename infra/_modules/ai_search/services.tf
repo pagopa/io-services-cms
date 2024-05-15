@@ -155,7 +155,7 @@ resource "restapi_object" "services_publication_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = null
+      schedule        = { interval = var.indexers_scheduling_interval.services_publication }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
@@ -188,7 +188,7 @@ resource "restapi_object" "services_lifecycle_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = null
+      schedule        = { interval = var.indexers_scheduling_interval.services_lifecycle }
       parameters = {
         batchSize              = null
         maxFailedItems         = null

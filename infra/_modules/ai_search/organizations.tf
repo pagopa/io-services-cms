@@ -11,6 +11,10 @@ resource "restapi_object" "organizations_datasource" {
         name  = "services-publication"
         query = "SELECT c.data.organization.fiscal_code, c.data.organization.name, c.data.metadata.scope, c.fsm.state, c._ts FROM c WHERE c.fsm.state = \"published\" and c._ts >= @HighWaterMark ORDER BY c._ts"
       },
+      dataChangeDetectionPolicy = {
+        "@odata.type"           = "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+        highWaterMarkColumnName = "_ts"
+      }
   })
   force_new    = ["name"]
   id_attribute = "name" # The ID field on the response
@@ -170,7 +174,7 @@ resource "restapi_object" "organizations_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = null
+      schedule        = { interval = var.indexers_scheduling_interval.organizations }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
