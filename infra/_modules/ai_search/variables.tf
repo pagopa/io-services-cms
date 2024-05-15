@@ -101,8 +101,8 @@ variable "indexers_scheduling_interval" {
   description = "The indexers scheduling intervals"
 
   default = {
-    organizations      = "PT1H"
-    services_lifecycle = "PT1H"
-    organizations      = "PT1H"
+    organizations        = "PT1H"
+    services_lifecycle   = "PT1H"
+    services_publication = "PT1H"
   }
 }
