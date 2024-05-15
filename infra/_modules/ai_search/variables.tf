@@ -97,12 +97,12 @@ variable "index_aliases" {
 }
 
 variable "indexers_scheduling_interval" {
-  type = map(string)
+  type        = map(string)
   description = "The indexers scheduling intervals"
 
   default = {
-    organizations = "PT1H"
+    organizations      = "PT1H"
     services_lifecycle = "PT1H"
-    organizations = "PT1H"
+    organizations      = "PT1H"
   }
 }
