@@ -3,6 +3,7 @@ import MouseIcon from "@mui/icons-material/Mouse";
 import { Box, Button, Dialog, Stack, Tooltip, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
+import ServicePreview from "./service-preview";
 
 import styles from "./app-preview.module.css";
 
@@ -11,9 +12,7 @@ type AppPreviewProps = {
   onClose: () => void;
 };
 
-const ScrollInfoBox = (toggleInfobBox: () => void) => {
-  const { t } = useTranslation();
-
+const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
   return (
     <Stack
       width={140}
@@ -51,7 +50,7 @@ const ScrollInfoBox = (toggleInfobBox: () => void) => {
       >
         <MouseIcon color="action" />
         <Typography fontSize="10px" textAlign="center" fontWeight="600">
-          {t("service.inAppPreview.scrollInfo")}
+          {infoboxText}
         </Typography>
       </Box>
     </Stack>
@@ -96,7 +95,8 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
             backgroundSize: "cover"
           }}
         >
-          {isInfoOpen && ScrollInfoBox(toggleInfoBox)}
+          {isInfoOpen &&
+            ScrollInfoBox(toggleInfoBox, t("service.inAppPreview.scrollInfo"))}
           <Box
             display="flex"
             padding={1}
@@ -116,38 +116,7 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
               }}
               className={styles.scrollbar}
             >
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "red",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "blue",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "yellow",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "purple",
-                  marginBottom: 2
-                }}
-              ></Box>
+              <ServicePreview />
             </Box>
           </Box>
         </Box>
