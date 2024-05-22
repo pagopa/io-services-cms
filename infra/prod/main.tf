@@ -31,7 +31,7 @@ module "ai_search" {
   application_basename = local.application_basename
   resource_group_name  = azurerm_resource_group.rg.name
 
-  replica_count   = 1
+  replica_count   = 3
   partition_count = 1
 
   snet_id = module.networking.srch_snet_id
