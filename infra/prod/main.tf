@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 module "networking" {
-  source = "../../_modules/networking"
+  source = "../_modules/networking"
 
   prefix               = local.prefix
   env_short            = local.env_short
@@ -23,7 +23,7 @@ module "networking" {
 }
 
 module "ai_search" {
-  source               = "../../_modules/ai_search"
+  source               = "../_modules/ai_search"
   prefix               = local.prefix
   env_short            = local.env_short
   project              = local.project
@@ -40,7 +40,7 @@ module "ai_search" {
 }
 
 module "function_app" {
-  source               = "../../_modules/function_app"
+  source               = "../_modules/function_app"
   prefix               = local.prefix
   env_short            = local.env_short
   project              = local.project
