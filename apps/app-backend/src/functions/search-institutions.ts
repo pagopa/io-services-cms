@@ -66,17 +66,14 @@ const calculateScoringProfile = (
   );
 
 const executeSearch: (
-  azureSearchConfig: AzureSearchConfig,
+  config: IConfig,
   requestQueryParams: SearchInstitutionsRequestQueryParams
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<Institution>,
   H.HttpError,
   InstitutionsResource
 > =
-  (
-    azureSearchConfig: AzureSearchConfig,
-    requestQueryParams: SearchInstitutionsRequestQueryParams
-  ) =>
+  (config: IConfig, requestQueryParams: SearchInstitutionsRequestQueryParams) =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
@@ -87,10 +84,7 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          ...calculateScoringProfile(
-            azureSearchConfig,
-            requestQueryParams.scope
-          ),
+          ...calculateScoringProfile(config, requestQueryParams.scope),
           searchText: pipe(requestQueryParams.search, O.toUndefined),
           searchParams: pipe(
             requestQueryParams.search,
@@ -102,7 +96,11 @@ const executeSearch: (
       ),
       TE.map(({ paginationProperties, results }) => ({
         institutions: results.resources,
-        count: results.count,
+        count: calculateSearchResultCount(
+          config,
+          results.count,
+          paginationProperties.top
+        ),
         limit: paginationProperties.top,
         offset: paginationProperties.skip ?? 0,
       })),
@@ -173,6 +171,23 @@ export const makeSearchInstitutionsHandler: (
           )
         )
       )
+    )
+  );
+
+// This will return:
+// - In case Azure Search response count value exceed MAX_PAGINATION_OFFSET => MAX_PAGINATION_OFFSET + request.top queryparam value
+// - In Other case the actual Azure Search response count value
+
+const calculateSearchResultCount = (
+  paginationConfig: PaginationConfig,
+  actualSearchResultCount: number,
+  requestLimit: number
+) =>
+  pipe(
+    actualSearchResultCount > paginationConfig.PAGINATION_MAX_OFFSET,
+    B.fold(
+      () => actualSearchResultCount,
+      () => paginationConfig.PAGINATION_MAX_OFFSET + requestLimit
     )
   );
 

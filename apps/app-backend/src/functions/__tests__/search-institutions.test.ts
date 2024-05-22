@@ -54,6 +54,52 @@ describe("Search Institutions Tests", () => {
     );
   });
 
+  it("Should Return PAGINATION_MAX_OFFSET + request limit as count when exceed PAGINATION_MAX_OFFSET", async () => {
+    const mockSearchInstitutionsExceedCount = {
+      fullTextSearch: vi.fn().mockImplementation(() =>
+        TE.right({
+          ...mockSearchInstitutionsResult,
+          count:
+            mockedConfiguration.PAGINATION_MAX_OFFSET +
+            mockedConfiguration.PAGINATION_DEFAULT_LIMIT +
+            20,
+        })
+      ),
+    } as AzureSearchClient<Institution>;
+
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutionsExceedCount,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        top: 20,
+      })
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count:
+              mockedConfiguration.PAGINATION_MAX_OFFSET +
+              mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            offset: 0,
+          },
+          statusCode: 200,
+        })
+      )
+    );
+  });
+
   it("Should Return found institutions for the provided params", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
