@@ -1,0 +1,25 @@
+name: Terraform plan multiregion
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - "infra/prod/**"
+      - "infra/_modules/**"
+      - ".github/workflows/infra-review-p.yml"
+      - ".github/workflows/infra-release-p.yml"
+
+jobs:
+  infra_review:
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@37c4becb6e2bee1459c53184a503868619cf1a57
+    name: Terraform plan
+    secrets: inherit
+    with:
+      environment: prod
+      base_path: "infra"
+      use_private_agent: true
