@@ -1,5 +1,12 @@
 # io-services-app-backend
 
+## 0.0.5
+
+### Patch Changes
+
+- afb8aea: Fix Count field on Search Institutions Response
+- 2face64: Refactor pagination config
+
 ## 0.0.4
 
 ### Patch Changes
