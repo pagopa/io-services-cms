@@ -134,6 +134,14 @@ type ApimErrorAdapter = {
   details?: unknown;
 };
 
+// Remove extra fields from the error object
+export const minifyApimError = (fullError: ApimErrorAdapter) => ({
+  name: fullError.name,
+  code: fullError.code,
+  statusCode: fullError.statusCode,
+  details: fullError.details
+});
+
 export const apimErrorToManagedInternalError = (
   message: string,
   err: ApimErrorAdapter
