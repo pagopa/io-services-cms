@@ -55,8 +55,8 @@ The following table contains the required ENV variables that the applicative req
 | FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                       | number | D        |
 | FEATURED_ITEMS_BLOB_CONNECTION_STRING                       | The Azure StorageAccount connectionString to retrieve FeaturedItems blob          | string | Y        |
 | FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                         | string | Y        |
-| FEATURED_SERVICES_FILE_NAME                                 | The FeaturedItems Filename in blobStorage container                               | string | Y        |
-| FEATURED_INSTITUTIONS_FILE_NAME                             | The FeaturedItems Filename in blobStorage container                               | string | Y        |
+| FEATURED_SERVICES_FILE_NAME                                 | The Featured Services Filename in blobStorage container                           | string | Y        |
+| FEATURED_INSTITUTIONS_FILE_NAME                             | The Featured Institutions Filename in blobStorage container                       | string | Y        |
 | AZURE_SEARCH_ENDPOINT                                       | The Azure AI Search Endpoint                                                      | string | Y        |
 | AZURE_SEARCH_SERVICE_VERSION                                | The Azure AI Search Service Version                                               | string | Y        |
 | AZURE_SEARCH_INSTITUTIONS_INDEX_NAME                        | The Azure AI Search Institutions Index Name                                       | string | Y        |
