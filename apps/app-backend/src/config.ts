@@ -21,7 +21,6 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 export type FeaturedItemsConfig = t.TypeOf<typeof FeaturedItemsConfig>;
 export const FeaturedItemsConfig = t.type({
-  // TODO: Capire se metterlo direttamente nello storageAccount della function in tal caso recuperarlo come QueueStorageConnection nella sezione globale
   FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_SERVICES_FILE_NAME: NonEmptyString,
@@ -65,11 +64,11 @@ export const PaginationConfig = t.type({
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "101" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger
   ),
   PAGINATION_MAX_OFFSET: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "101" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger
   ),
 });
 
