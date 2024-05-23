@@ -1,7 +1,8 @@
-import { HealthCheck } from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
-import * as TE from "fp-ts/lib/TaskEither";
+import {
+  HealthCheck,
+  ProblemSource,
+} from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
-export type DummyProblemSource = "Dummy";
-
-export const dummyHelthCheck = (): HealthCheck<DummyProblemSource> =>
-  TE.of(true);
+export type HealthCheckBuilder = <T, S extends ProblemSource<unknown>>(
+  dependency: T
+) => HealthCheck<S>;

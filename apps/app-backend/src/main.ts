@@ -45,7 +45,10 @@ const servicesSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_API_KEY
 );
 
-const Info = InfoFn({});
+const Info = InfoFn(config)({
+  ...serviceDetailsContainerDependency,
+  searchClient: institutionsSearchClient,
+});
 app.http("Info", {
   authLevel: "anonymous",
   handler: Info,
