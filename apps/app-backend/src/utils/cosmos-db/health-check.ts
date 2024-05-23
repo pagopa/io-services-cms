@@ -8,15 +8,15 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import { ServiceDetailsContainerDependency } from "./dependency";
 
-export type ServiceDetailsContainerProblemSource = "ServiceDetailsContainer";
+export type AzureCosmosProblemSource = "AzureCosmosDB";
 
-export const makeServiceDetailsContainerDependencyHealthCheck = ({
+export const makeCosmosDBHealthCheck = ({
   serviceDetailsContainer,
-}: ServiceDetailsContainerDependency): HealthCheck<ServiceDetailsContainerProblemSource> =>
+}: ServiceDetailsContainerDependency): HealthCheck<AzureCosmosProblemSource> =>
   pipe(
     TE.tryCatch(
       () => serviceDetailsContainer.database.client.getDatabaseAccount(),
-      toHealthProblems("ServiceDetailsContainer" as const)
+      toHealthProblems("AzureCosmosDB" as const)
     ),
     TE.map(() => true)
   );
