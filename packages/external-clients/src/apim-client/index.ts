@@ -42,9 +42,16 @@ import {
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
-export const ApimRestError = t.type({
-  statusCode: t.number,
-});
+export const ApimRestError = t.intersection([
+  t.type({
+    statusCode: t.number,
+  }),
+  t.partial({
+    name: t.string,
+    code: t.string,
+    details: t.string,
+  }),
+]);
 export type ApimRestError = t.TypeOf<typeof ApimRestError>;
 
 export const mapApimRestError =
