@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.10.4
+
+### Patch Changes
+
+- f8ac915: Better Apim Error Logs
+- Updated dependencies [f8ac915]
+  - @io-services-cms/external-clients@1.1.2
+
 ## 1.10.3
 
 ### Patch Changes
