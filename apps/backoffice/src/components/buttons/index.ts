@@ -7,6 +7,8 @@ export * from "./button-exit";
 export * from "./button-next";
 export * from "./button-show-more";
 export * from "./button-with-loader";
+export * from "./button-with-tooltip";
+export * from "./icon-button-close";
 
 export type ButtonBaseProps = {
   /** The system prop that allows defining system overrides as well as additional CSS styles. */

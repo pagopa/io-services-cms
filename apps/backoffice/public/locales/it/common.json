@@ -466,8 +466,32 @@
     "inAppPreview": {
       "title": "Anteprima In App IO",
       "titleTooltip": "Versione App xy di App IO",
-      "closeButton": "Chiudi Anteprima",
-      "scrollInfo": "Scorri con il cursore per visualizzare l’anteprima completa"
+      "scrollInfo": "Scorri con il cursore per visualizzare l’anteprima completa",
+      "sections": {
+        "tos": {
+          "title": "Termini e Privacy",
+          "tosLabel": "Termini e condizioni d’uso",
+          "privacyLabel": "Informativa sulla Privacy"
+        },
+        "notifications": {
+          "title": "Questo servizio può",
+          "generalLabel": "Contattarti in app",
+          "pushLabel": "Inviarti notifiche push",
+          "confirmLabel": "Ricevere conferme di lettura"
+        },
+        "info": {
+          "title": "Contatti e informazioni",
+          "websiteLabel": "Visita il sito",
+          "appStoreLabel": "Scarica l’app",
+          "customerCareLabel": "Richiedi assistenza",
+          "phoneLabel": "Contatta l’ente",
+          "emailLabel": "Invia un'email",
+          "pecLabel": "Invia una PEC",
+          "fiscalCodeLabel": "Codice fiscale ente",
+          "addressLabel": "Indirizzo",
+          "serviceIDLabel": "ID servizio"
+        }
+      }
     }
   },
   "table": {

@@ -1,13 +1,23 @@
 import { Close, InfoOutlined } from "@mui/icons-material";
 import MouseIcon from "@mui/icons-material/Mouse";
-import { Box, Button, Dialog, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  Grid,
+  Stack,
+  Tooltip,
+  Typography
+} from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import ServicePreview from "./service-preview";
-
-import styles from "./app-preview.module.css";
+import PhoneFrame from "./phone-frame";
+import { Service } from "@/types/service";
+import { IconButtonClose } from "../buttons";
 
 type AppPreviewProps = {
+  itemToPreview?: Service;
   showPreview: boolean;
   onClose: () => void;
 };
@@ -57,7 +67,13 @@ const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
   );
 };
 
-export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
+//service.inAppPreview.closeButton
+
+export const AppPreview = ({
+  itemToPreview,
+  showPreview,
+  onClose
+}: AppPreviewProps) => {
   const { t } = useTranslation();
   const [isInfoOpen, setisInfoOpen] = useState(true);
 
@@ -71,22 +87,30 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
         flexDirection={"column"}
         sx={{ minWidth: 600, minHeight: 640 }}
         padding={4}
-        rowGap={3}
+        gap={2}
       >
-        <Stack direction={"row"} gap={1}>
-          <Typography fontWeight={700} variant="h6">
-            {t("service.inAppPreview.title")}
-          </Typography>
-          <Tooltip
-            title={t("service.inAppPreview.titleTooltip")}
-            placement="right"
-            arrow
-          >
-            <InfoOutlined color="disabled" />
-          </Tooltip>
-        </Stack>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={8}>
+            <Stack direction={"row"} gap={1}>
+              <Typography fontWeight={700} variant="h6">
+                {t("service.inAppPreview.title")}
+              </Typography>
+              <Tooltip
+                title={t("service.inAppPreview.titleTooltip")}
+                placement="right"
+                arrow
+              >
+                <InfoOutlined color="disabled" />
+              </Tooltip>
+            </Stack>
+          </Grid>
+          <Grid item xs={4} textAlign="right">
+            <IconButtonClose onClick={onClose} />
+          </Grid>
+        </Grid>
         <Box
           flexGrow={1}
+          paddingY={2}
           display="flex"
           justifyContent="center"
           alignItems="center"
@@ -97,40 +121,9 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
         >
           {isInfoOpen &&
             ScrollInfoBox(toggleInfoBox, t("service.inAppPreview.scrollInfo"))}
-          <Box
-            display="flex"
-            padding={1}
-            borderRadius={3}
-            sx={{
-              width: 202,
-              height: 364,
-              backgroundColor: "rgba(255, 255, 255, 0.35)"
-            }}
-          >
-            <Box
-              borderRadius={2}
-              flexGrow={1}
-              sx={{
-                backgroundColor: "white",
-                overflowY: "scroll"
-              }}
-              className={styles.scrollbar}
-            >
-              <ServicePreview />
-            </Box>
-          </Box>
-        </Box>
-        <Box textAlign="center">
-          <Button
-            size="medium"
-            startIcon={<Close />}
-            id="s-preview-close-button"
-            variant="text"
-            onClick={onClose}
-            style={{ backgroundColor: "transparent" }}
-          >
-            {t("service.inAppPreview.closeButton")}
-          </Button>
+          <PhoneFrame>
+            <ServicePreview service={itemToPreview} />
+          </PhoneFrame>
         </Box>
       </Stack>
     </Dialog>

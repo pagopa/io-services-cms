@@ -464,8 +464,32 @@
     "inAppPreview": {
       "title": "IO App Preview",
       "titleTooltip": "IO App Version xy",
-      "closeButton": "Close Preview",
-      "scrollInfo": "Scroll with cursor to view full preview"
+      "scrollInfo": "Scroll with cursor to view full preview",
+      "sections": {
+        "tos": {
+          "title": "Terms and Privacy",
+          "tosLabel": "Terms and Conditions of Use",
+          "privacyLabel": "Privacy Notice"
+        },
+        "notifications": {
+          "title": "This service may",
+          "generalLabel": "Contact you in-app",
+          "pushLabel": "Send you push notifications",
+          "confirmLabel": "Receive read confirmation"
+        },
+        "info": {
+          "title": "Contacts and Information",
+          "websiteLabel": "Visit the website",
+          "appStoreLabel": "Download the app",
+          "cutomerCareLabel": "Request assistance",
+          "phoneLabel": "Contact the organization",
+          "emailLabel": "Send an email",
+          "pecLabel": "Send a PEC",
+          "fiscalCodeLabel": "Fiscal code of the organization",
+          "addressLabel": "Address",
+          "serviceIDLabel": "Service ID"
+        }
+      }
     }
   },
   "table": {

@@ -11,7 +11,7 @@ type ButtonWithTooltipProps = {
   isVisible: boolean;
 };
 
-const ButtonWithTooltip = ({
+export const ButtonWithTooltip = ({
   tooltipTitle,
   onClick,
   icon,
@@ -36,5 +36,3 @@ const ButtonWithTooltip = ({
     )
   );
 };
-
-export default ButtonWithTooltip;

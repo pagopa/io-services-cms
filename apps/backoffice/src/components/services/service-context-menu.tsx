@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import {
@@ -19,14 +20,12 @@ import {
   Menu,
   MenuItem,
   Stack,
-  Tooltip,
   Typography
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
+import { ButtonWithTooltip } from "../buttons";
 import { useDialog } from "../dialog-provider";
-import ButtonWithTooltip from "../buttons/button-with-tooltip";
-import { getConfiguration } from "@/config";
 
 export enum ServiceContextMenuActions {
   publish = "publish",
@@ -267,9 +266,7 @@ export const ServiceContextMenu = ({
         variant="text"
       />
       <ButtonWithTooltip
-        isVisible={
-          getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED
-        }
+        isVisible={getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED}
         tooltipTitle="service.actions.preview"
         onClick={onPreviewClick}
         icon={<PhoneAndroid />}
