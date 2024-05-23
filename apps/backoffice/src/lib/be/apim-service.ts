@@ -3,7 +3,7 @@ import {
   HTTP_STATUS_UNAUTHORIZED
 } from "@/config/constants";
 import { getAzureAccessToken } from "@/lib/be/azure-access-token";
-import { HealthChecksError } from "@/lib/be/errors";
+import { HealthChecksError, minifyApimError } from "@/lib/be/errors";
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
@@ -179,9 +179,7 @@ export const getApimHealth: () => Promise<void> = async () => {
     const apimService = getApimService();
     const res = await apimService.getProductByName(AZURE_APIM_PRODUCT_NAME)();
     if (E.isLeft(res)) {
-      throw new Error(
-        `error getting apim product, ${JSON.stringify(res.left)}`
-      );
+      throw new HealthChecksError("apim", minifyApimError(res.left));
     }
   } catch (e) {
     throw new HealthChecksError("apim", e);
