@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.3
+
+### Patch Changes
+
+- 4052dea: Developed the phon frame for the preview
+
 ## 1.10.2
 
 ### Patch Changes
