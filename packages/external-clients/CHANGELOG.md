@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.2
+
+### Patch Changes
+
+- f8ac915: Better Apim Error Logs
+
 ## 1.1.1
 
 ### Patch Changes
