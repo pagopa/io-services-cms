@@ -37,9 +37,10 @@ export const makeInfoHandler: (
       [
         makeCosmosDBHealthCheck,
         makeAzureSearchHealthCheck,
-        healthcheck.checkAzureStorageHealth(
-          config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
-        ),
+        () =>
+          healthcheck.checkAzureStorageHealth(
+            config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
+          ),
       ] as ReadonlyArray<HealthCheckBuilder>,
       RA.sequence(applicativeValidation),
       RTE.map(() =>
