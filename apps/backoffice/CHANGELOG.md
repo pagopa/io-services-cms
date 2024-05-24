@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.10.5
+
+### Patch Changes
+
+- 1403107: Fix Apim Error io-ts decoder
+- Updated dependencies [1403107]
+  - @io-services-cms/external-clients@1.1.3
+
 ## 1.10.4
 
 ### Patch Changes

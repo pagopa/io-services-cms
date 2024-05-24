@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.31.4
+
+### Patch Changes
+
+- Updated dependencies [1403107]
+  - @io-services-cms/external-clients@1.1.3
+
 ## 1.31.3
 
 ### Patch Changes
