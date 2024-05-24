@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.3
+
+### Patch Changes
+
+- 1403107: Fix Apim Error io-ts decoder
+
 ## 1.1.2
 
 ### Patch Changes
