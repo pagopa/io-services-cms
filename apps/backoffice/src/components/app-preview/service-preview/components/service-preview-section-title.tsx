@@ -1,17 +1,21 @@
-import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import { MobileTypography } from "../../components";
 
 type SectionTitleProps = {
-  titleText: string;
+  text: string;
 };
 
-const ServicePreviewSectionTitle = ({ titleText }: SectionTitleProps) => {
+const ServicePreviewSectionTitle = ({ text }: SectionTitleProps) => {
   return (
-    <Box paddingBottom={1}>
-      <Typography fontSize="16px" lineHeight="24px" color="#555C70">
-        {titleText}
-      </Typography>
+    <Box paddingX={3} paddingY={1.5}>
+      <MobileTypography
+        color="#555C70"
+        fontSize={16}
+        fontWeight={400}
+        lineHeight="24px"
+      >
+        {text}
+      </MobileTypography>
     </Box>
   );
 };

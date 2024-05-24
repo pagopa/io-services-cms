@@ -1,8 +1,8 @@
 import { ArrowBack, QuestionMark } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";
-type Props = {};
 
-const ServicePreviewTopbar = ({}: Props) => {
+/** Display App IO top navigation bar */
+const ServicePreviewTopbar = () => {
   return (
     <Box
       height={56}
@@ -10,7 +10,8 @@ const ServicePreviewTopbar = ({}: Props) => {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      marginBottom="10px"
+      paddingY={2}
+      paddingX={3}
     >
       <Button
         variant="text"

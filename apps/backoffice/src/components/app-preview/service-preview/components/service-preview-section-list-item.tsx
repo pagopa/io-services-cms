@@ -1,12 +1,12 @@
-import {
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ListItemIcon,
-  IconButton
-} from "@mui/material";
-import { Stack, Box } from "@mui/system";
+import { Box, ListItem, ListItemButton, Stack } from "@mui/material";
 import { ReactNode } from "react";
+import {
+  MOBILE_COLOR_BLUE_IO_500,
+  MOBILE_COLOR_GREY_300,
+  MOBILE_COLOR_GREY_700,
+  MOBILE_COLOR_GREY_850,
+  MobileTypography
+} from "../../components";
 
 type ServicePreviewSectionListItemProps = {
   variant: "link" | "info";
@@ -33,22 +33,58 @@ const ServicePreviewSectionListItem = ({
         <ListItemButton
           component="a"
           href={url}
-          sx={{ paddingX: "0px" }}
           target="_blank"
+          sx={{ paddingX: 3, paddingY: 1.5 }}
+          divider
         >
-          <ListItemIcon>{startIcon}</ListItemIcon>
-          <ListItemText style={{ fontSize: "12px" }} primary={text} />
+          <Stack gap={1.5} flexDirection="row">
+            <Box
+              display="flex"
+              justifyContent="start"
+              alignItems="center"
+              width={24}
+              fontSize="24px"
+              color={MOBILE_COLOR_BLUE_IO_500}
+            >
+              {startIcon}
+            </Box>
+            <Box display="flex" justifyContent="center" flexDirection="column">
+              <MobileTypography fontSize={16} color={MOBILE_COLOR_BLUE_IO_500}>
+                {text}
+              </MobileTypography>
+            </Box>
+          </Stack>
         </ListItemButton>
       )}
       {variant === "info" && (
-        <ListItem sx={{ paddingX: "0px" }}>
-          <ListItemIcon>{startIcon}</ListItemIcon>
+        <ListItem sx={{ paddingX: 3, paddingY: 1.5 }} divider>
+          <Stack gap={1.5} flexDirection="row">
+            <Box
+              display="flex"
+              justifyContent="start"
+              alignItems="center"
+              width={24}
+              fontSize="24px"
+              color={MOBILE_COLOR_GREY_300}
+            >
+              {startIcon}
+            </Box>
+            <Box display="flex" justifyContent="center" flexDirection="column">
+              <MobileTypography fontSize={14} color={MOBILE_COLOR_GREY_700}>
+                {text}
+              </MobileTypography>
+              <MobileTypography fontSize={16} color={MOBILE_COLOR_GREY_850}>
+                {label}
+              </MobileTypography>
+            </Box>
+          </Stack>
+          {/* <ListItemIcon>{startIcon}</ListItemIcon>
           <ListItemText
             style={{ fontSize: "12px" }}
             primary={text}
             secondary={label}
           />
-          {endIcon && <IconButton edge="end">{endIcon}</IconButton>}
+          {endIcon && <IconButton edge="end">{endIcon}</IconButton>} */}
         </ListItem>
       )}
     </>

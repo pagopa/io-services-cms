@@ -1,37 +1,60 @@
-import React from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
+import { MobileTypography } from "../../components";
 
 type ServicePreviewHeaderProps = {
   serviceName: string;
   institutionName: string;
-  serviceID: string;
+  serviceId: string;
 };
 
 const ServicePreviewHeader = ({
   serviceName,
   institutionName,
-  serviceID
+  serviceId
 }: ServicePreviewHeaderProps) => {
   return (
-    <Stack gap={2} flexDirection="row" marginBottom={3}>
+    <Stack gap={2} flexDirection="row" marginBottom={2} paddingX={3}>
       <Box display="flex" justifyContent="start" alignItems="center" width={74}>
-        <Box
-          width={66}
-          height={66}
-          sx={{ backgroundColor: "red", borderRadius: "5px" }}
-        ></Box>
+        <Avatar serviceId={serviceId} organizationFiscalCode="12345678901" />
       </Box>
       <Box display="flex" justifyContent="center" flexDirection="column">
-        <Typography
-          sx={{ fontSize: "22px", fontWeight: 400, lineHeight: "33px" }}
+        <MobileTypography
+          color="#0E0F13"
+          fontSize={22}
+          fontWeight={400}
+          lineHeight="33px"
         >
           {serviceName}
-        </Typography>
-        <Typography sx={{ fontSize: "14px", lineHeight: "21px" }}>
+        </MobileTypography>
+        <MobileTypography
+          color="#555C70"
+          fontSize={14}
+          fontWeight={400}
+          lineHeight="21px"
+        >
           {institutionName}
-        </Typography>
+        </MobileTypography>
       </Box>
     </Stack>
+  );
+};
+
+type AvatarProps = {
+  serviceId: string;
+  organizationFiscalCode: string;
+};
+
+const Avatar = (props: AvatarProps) => {
+  return (
+    <Box
+      width={66}
+      height={66}
+      padding={1}
+      borderRadius={1}
+      border="1px solid #E7E7E7"
+    >
+      <Box width={48} height={48} bgcolor="blue" />
+    </Box>
   );
 };
 

@@ -1,9 +1,7 @@
+import { List } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { ReactNode } from "react";
-import { ServicePreviewSectionTitle, ServicePreviewSectionListItem } from "./";
-import { MenuBook, GppGoodOutlined } from "@mui/icons-material";
-import { Divider, List } from "@mui/material";
 import { useTranslation } from "next-i18next";
+import { ServicePreviewSectionTitle } from "./";
 
 type ServicePreviewNotificationsSectionProps = {};
 
@@ -12,9 +10,9 @@ const ServicePreviewNotificationsSection = ({}: ServicePreviewNotificationsSecti
   return (
     <Stack>
       <ServicePreviewSectionTitle
-        titleText={t("service.inAppPreview.sections.notifications.title")}
+        text={t("service.inAppPreview.sections.notifications.title")}
       />
-      <List></List>
+      <List sx={{ padding: 0 }}></List>
     </Stack>
   );
 };

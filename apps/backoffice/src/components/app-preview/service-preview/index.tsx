@@ -1,13 +1,13 @@
-import { Stack, Box } from "@mui/material";
+import { Service } from "@/types/service";
+import { Box, Stack } from "@mui/material";
 import {
   ServicePreviewDescriptionCard,
   ServicePreviewHeader,
   ServicePreviewInfoSection,
   ServicePreviewNotificationsSection,
-  ServicePreviewTopbar,
-  ServicePreviewTOSSection
+  ServicePreviewTOSSection,
+  ServicePreviewTopbar
 } from "./components/";
-import { Service } from "@/types/service";
 
 import styles from "../app-preview.module.css";
 
@@ -22,42 +22,25 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
     fiscalCode: "11223344556"
   };
   return (
-    <>
-      {/* <Box
-        height={200}
-        width={186}
-        sx={{
-          backgroundColor: "#f7f7f7",
-          position: "absolute",
-          borderRadius: "8px 8px 0 0"
-        }}
-      /> */}
-
-      <Stack
-        flexGrow={1}
-        padding={2}
+    <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
+      <ServicePreviewTopbar />
+      <Box
+        display="flex"
         flexDirection="column"
-        sx={{ position: "relative" }}
-        width={360}
-        height={650}
+        sx={{
+          overflowY: "scroll"
+        }}
+        className={styles.scrollbar}
       >
-        <ServicePreviewTopbar />
-        <Box
-          display="flex"
-          flexDirection="column"
-          sx={{
-            overflowY: "scroll"
-          }}
-          className={styles.scrollbar}
-        >
-          {service && (
-            <>
-              <ServicePreviewHeader
-                serviceName={service.name}
-                institutionName={organizationData.institutionName}
-                serviceID={service.id}
-              />
+        {service && (
+          <>
+            <ServicePreviewHeader
+              serviceName={service.name}
+              institutionName={organizationData.institutionName}
+              serviceId={service.id}
+            />
 
+            <Stack gap={5}>
               <ServicePreviewDescriptionCard
                 descriptionText={service.description}
               />
@@ -80,11 +63,11 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
                 address={service.metadata.address}
                 serviceID={service.id}
               />
-            </>
-          )}
-        </Box>
-      </Stack>
-    </>
+            </Stack>
+          </>
+        )}
+      </Box>
+    </Stack>
   );
 };
 

@@ -1,22 +1,22 @@
-import React from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 import Markdown from "react-markdown";
 
-type ServicePreviewDescriptionCardiProps = {
+type ServicePreviewDescriptionCardProps = {
   descriptionText: string;
 };
 
 const ServicePreviewDescriptionCard = ({
   descriptionText
-}: ServicePreviewDescriptionCardiProps) => {
+}: ServicePreviewDescriptionCardProps) => {
   return (
     <Stack
-      borderRadius={2}
-      padding={2}
-      marginBottom={3}
-      sx={{ backgroundColor: "white", border: "2px solid #f7f7f7" }}
+      paddingX={2}
+      marginX={3}
+      bgcolor="background.paper"
+      borderRadius="8px"
+      border="2px solid #E8EBF1"
     >
-      <span style={{ fontSize: "16px", lineHeight: "24px" }}>
+      <span style={{ color: "#0E0F13", fontSize: "16px", lineHeight: "24px" }}>
         <Markdown>{descriptionText}</Markdown>
       </span>
     </Stack>

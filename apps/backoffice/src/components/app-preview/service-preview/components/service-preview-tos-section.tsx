@@ -1,9 +1,8 @@
+import { GppGoodOutlined, MenuBook } from "@mui/icons-material";
+import { List } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { ReactNode } from "react";
-import { ServicePreviewSectionTitle, ServicePreviewSectionListItem } from "./";
-import { MenuBook, GppGoodOutlined } from "@mui/icons-material";
-import { Divider, List } from "@mui/material";
 import { useTranslation } from "next-i18next";
+import { ServicePreviewSectionListItem, ServicePreviewSectionTitle } from "./";
 
 type ServicePreviewTOSSectionProps = {
   tosLink?: string;
@@ -19,19 +18,19 @@ const ServicePreviewTOSSection = ({
   return (
     <Stack>
       <ServicePreviewSectionTitle
-        titleText={t("service.inAppPreview.sections.tos.title")}
+        text={t("service.inAppPreview.sections.tos.title")}
       />
-      <List>
+      <List sx={{ padding: 0 }}>
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<MenuBook />}
+          startIcon={<MenuBook fontSize="inherit" color="inherit" />}
           url={tosLink}
           text={t("service.inAppPreview.sections.tos.tosLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<GppGoodOutlined />}
+          startIcon={<GppGoodOutlined fontSize="inherit" color="inherit" />}
           url={privacyLink}
           text={t("service.inAppPreview.sections.tos.privacyLabel")}
           copiable={false}
