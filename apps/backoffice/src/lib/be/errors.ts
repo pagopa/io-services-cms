@@ -146,9 +146,5 @@ export const apimErrorToManagedInternalError = (
   message: string,
   err: ApimErrorAdapter
 ): ManagedInternalError => {
-  return new ManagedInternalError(message, {
-    name: err.name,
-    code: err.code,
-    details: err.details
-  });
+  return new ManagedInternalError(message, minifyApimError(err));
 };

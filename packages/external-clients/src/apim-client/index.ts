@@ -49,7 +49,7 @@ export const ApimRestError = t.intersection([
   t.partial({
     name: t.string,
     code: t.string,
-    details: t.string,
+    details: t.unknown,
   }),
 ]);
 export type ApimRestError = t.TypeOf<typeof ApimRestError>;

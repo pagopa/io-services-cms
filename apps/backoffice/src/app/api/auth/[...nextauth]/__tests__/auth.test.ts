@@ -513,12 +513,16 @@ describe("Authorize", () => {
     });
     getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
     const statusCode = 500;
-    getSubscription.mockReturnValueOnce(TE.left({ statusCode }));
+    const apimErrorName = "APIM Failure";
+    const apimErrorCode = 500;
+    getSubscription.mockReturnValueOnce(
+      TE.left({ statusCode, name: apimErrorName, code: apimErrorCode })
+    );
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {})
     ).rejects.toThrowError(
-      `Failed to fetch user subscription manage, code: ${statusCode}`
+      `Failed to fetch user subscription manage (MANAGE-${aValidApimUser.name}), apimStatuscode: ${statusCode}, apimErrorName: ${apimErrorName}, apimErrorCode: ${apimErrorCode}`
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();

@@ -306,7 +306,11 @@ const getUserSubscriptionManage = (
             ? E.right(O.none)
             : E.left(
                 apimErrorToManagedInternalError(
-                  `Failed to fetch user subscription manage, code: ${err.statusCode}`,
+                  `Failed to fetch user subscription manage (${ApimUtils
+                    .definitions.MANAGE_APIKEY_PREFIX +
+                    apimUser.name}), apimStatuscode: ${
+                    err.statusCode
+                  }, apimErrorName: ${err.name}, apimErrorCode: ${err.code}`,
                   err
                 )
               ),
