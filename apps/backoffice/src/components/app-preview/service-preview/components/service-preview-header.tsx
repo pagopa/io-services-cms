@@ -1,5 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import { MobileTypography } from "../../components";
+import { AvatarLogo } from "../../components/avatar-logo";
 
 type ServicePreviewHeaderProps = {
   serviceName: string;
@@ -15,7 +16,10 @@ const ServicePreviewHeader = ({
   return (
     <Stack gap={2} flexDirection="row" marginBottom={2} paddingX={3}>
       <Box display="flex" justifyContent="start" alignItems="center" width={74}>
-        <Avatar serviceId={serviceId} organizationFiscalCode="12345678901" />
+        <AvatarLogo
+          serviceId={serviceId}
+          organizationFiscalCode="12345678901"
+        />
       </Box>
       <Box display="flex" justifyContent="center" flexDirection="column">
         <MobileTypography
@@ -36,25 +40,6 @@ const ServicePreviewHeader = ({
         </MobileTypography>
       </Box>
     </Stack>
-  );
-};
-
-type AvatarProps = {
-  serviceId: string;
-  organizationFiscalCode: string;
-};
-
-const Avatar = (props: AvatarProps) => {
-  return (
-    <Box
-      width={66}
-      height={66}
-      padding={1}
-      borderRadius={1}
-      border="1px solid #E7E7E7"
-    >
-      <Box width={48} height={48} bgcolor="blue" />
-    </Box>
   );
 };
 
