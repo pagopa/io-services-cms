@@ -1,10 +1,20 @@
+resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
+  name                       = "${local.project}-${local.application_basename}-st-queue-ds"
+  target_resource_id         = "${module.storage_account.id}/queue"
+  log_analytics_workspace_id = data.azurerm_application_insights.application_insights.workspace_id
+
+  enabled_log {
+    category = "StorageWrite"
+  }
+}
+
 resource "azurerm_monitor_scheduled_query_rules_alert" "poison-queue-alert" {
   name                = "[iopservicescmsst] Messages In Poison Queue"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   severity            = 0
   action {
-    action_group = [data.azurerm_monitor_action_group.iopquarantineerror-action-group.id]
+    action_group = [data.azurerm_monitor_action_group.iopquarantineerror_action_group.id]
   }
 
   data_source_id = module.storage_account.id
