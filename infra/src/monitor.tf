@@ -25,7 +25,8 @@ resource "azurerm_monitor_scheduled_query_rules_alert" "poison-queue-alert" {
     StorageQueueLogs  
     | where OperationName contains "PutMessage" 
     | where Uri contains "-poison"
-    | count
+    | distinct Uri
+    | project QueueName = split(Uri, "/", 3)
   QUERY
 
   frequency   = "5" // minutes
