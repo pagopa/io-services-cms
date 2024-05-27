@@ -1,6 +1,7 @@
+import { AvatarLogo } from "./avatar-logo";
 import { MobileTypography } from "./mobile-typography";
 
-export { MobileTypography };
+export { AvatarLogo, MobileTypography };
 
 export const MOBILE_COLOR_BLUE_IO_500: string = "#0B3EE3";
 export const MOBILE_COLOR_GREY_850: string = "#0E0F13";

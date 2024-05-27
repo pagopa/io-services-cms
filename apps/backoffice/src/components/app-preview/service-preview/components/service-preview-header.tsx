@@ -1,6 +1,5 @@
 import { Box, Stack } from "@mui/material";
-import { MobileTypography } from "../../components";
-import { AvatarLogo } from "../../components/avatar-logo";
+import { AvatarLogo, MobileTypography } from "../../components";
 
 type ServicePreviewHeaderProps = {
   serviceName: string;

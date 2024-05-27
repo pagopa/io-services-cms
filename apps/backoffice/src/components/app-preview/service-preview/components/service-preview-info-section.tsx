@@ -24,7 +24,7 @@ type ServicePreviewInfoSectionProps = {
   pec?: string;
   fiscalCode?: string;
   address?: string;
-  serviceID?: string;
+  serviceId?: string;
 };
 
 const ServicePreviewInfoSection = ({
@@ -36,7 +36,7 @@ const ServicePreviewInfoSection = ({
   pec,
   fiscalCode,
   address,
-  serviceID
+  serviceId
 }: ServicePreviewInfoSectionProps) => {
   const { t } = useTranslation();
   return (
@@ -47,49 +47,51 @@ const ServicePreviewInfoSection = ({
       <List>
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<LanguageRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<LanguageRounded fontSize="inherit" color="inherit" />}
           url={websiteLink}
           text={t("service.inAppPreview.sections.info.websiteLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<PhoneIphoneRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<PhoneIphoneRounded fontSize="inherit" color="inherit" />}
           url={appStoreLink}
           text={t("service.inAppPreview.sections.info.appStoreLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<ForumRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<ForumRounded fontSize="inherit" color="inherit" />}
           url={customerCareLink}
           text={t("service.inAppPreview.sections.info.customerCareLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<PhoneInTalkRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<PhoneInTalkRounded fontSize="inherit" color="inherit" />}
           url={phoneNumber}
           text={t("service.inAppPreview.sections.info.phoneLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<EmailRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<EmailRounded fontSize="inherit" color="inherit" />}
           url={email}
           text={t("service.inAppPreview.sections.info.emailLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<MarkEmailReadRounded fontSize="inherit" color="inherit"/>}
+          startIcon={
+            <MarkEmailReadRounded fontSize="inherit" color="inherit" />
+          }
           url={pec}
           text={t("service.inAppPreview.sections.info.pecLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="info"
-          startIcon={<MenuBook fontSize="inherit" color="inherit"/>}
+          startIcon={<MenuBook fontSize="inherit" color="inherit" />}
           endIcon={<ContentCopy />}
           text={t("service.inAppPreview.sections.info.fiscalCodeLabel")}
           label={fiscalCode}
@@ -97,16 +99,16 @@ const ServicePreviewInfoSection = ({
         />
         <ServicePreviewSectionListItem
           variant="info"
-          startIcon={<PlaceRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<PlaceRounded fontSize="inherit" color="inherit" />}
           text={t("service.inAppPreview.sections.info.addressLabel")}
           label={address}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="info"
-          startIcon={<PushPinRounded fontSize="inherit" color="inherit"/>}
+          startIcon={<PushPinRounded fontSize="inherit" color="inherit" />}
           text={t("service.inAppPreview.sections.info.serviceIDLabel")}
-          label={serviceID}
+          label={serviceId}
           copiable={false}
         />
       </List>

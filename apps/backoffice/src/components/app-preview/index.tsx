@@ -1,3 +1,4 @@
+import { Service } from "@/types/service";
 import { Close, InfoOutlined } from "@mui/icons-material";
 import MouseIcon from "@mui/icons-material/Mouse";
 import {
@@ -11,10 +12,9 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
-import ServicePreview from "./service-preview";
-import PhoneFrame from "./phone-frame";
-import { Service } from "@/types/service";
 import { IconButtonClose } from "../buttons";
+import PhoneFrame from "./phone-frame";
+import ServicePreview from "./service-preview";
 
 type AppPreviewProps = {
   itemToPreview?: Service;
@@ -25,17 +25,15 @@ type AppPreviewProps = {
 const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
   return (
     <Stack
-      width={140}
-      height={122}
+      width={180}
+      height={150}
       padding={1}
       borderRadius={2}
-      sx={{
-        zIndex: 99,
-        position: "absolute",
-        right: 100,
-        backgroundColor: "white",
-        boxShadow: "-5px 5px 30px gray"
-      }}
+      bgcolor="background.paper"
+      zIndex={99}
+      position="absolute"
+      right={50}
+      boxShadow="-5px 5px 30px gray"
     >
       <Box display="flex" justifyContent="flex-end">
         <Button
@@ -59,7 +57,7 @@ const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
         paddingBottom={1}
       >
         <MouseIcon color="action" />
-        <Typography fontSize="10px" textAlign="center" fontWeight="600">
+        <Typography fontSize={14} textAlign="center" fontWeight="600">
           {infoboxText}
         </Typography>
       </Box>

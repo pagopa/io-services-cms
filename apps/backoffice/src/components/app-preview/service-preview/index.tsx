@@ -61,7 +61,7 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
                 pec={service.metadata.pec}
                 fiscalCode={organizationData.fiscalCode}
                 address={service.metadata.address}
-                serviceID={service.id}
+                serviceId={service.id}
               />
             </Stack>
           </>

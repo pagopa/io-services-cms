@@ -1,4 +1,10 @@
-import { Box, ListItem, ListItemButton, Stack } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  ListItem,
+  ListItemButton,
+  Stack
+} from "@mui/material";
 import { ReactNode } from "react";
 import {
   MOBILE_COLOR_BLUE_IO_500,
@@ -58,7 +64,7 @@ const ServicePreviewSectionListItem = ({
       )}
       {variant === "info" && (
         <ListItem sx={{ paddingX: 3, paddingY: 1.5 }} divider>
-          <Stack gap={1.5} flexDirection="row">
+          <Stack gap={1.5} flexDirection="row" width="100%">
             <Box
               display="flex"
               justifyContent="start"
@@ -77,14 +83,19 @@ const ServicePreviewSectionListItem = ({
                 {label}
               </MobileTypography>
             </Box>
+            <Box
+              display="flex"
+              flexGrow={1}
+              justifyContent="flex-end"
+              color={MOBILE_COLOR_BLUE_IO_500}
+            >
+              {endIcon && (
+                <IconButton edge="end" color="inherit">
+                  {endIcon}
+                </IconButton>
+              )}
+            </Box>
           </Stack>
-          {/* <ListItemIcon>{startIcon}</ListItemIcon>
-          <ListItemText
-            style={{ fontSize: "12px" }}
-            primary={text}
-            secondary={label}
-          />
-          {endIcon && <IconButton edge="end">{endIcon}</IconButton>} */}
         </ListItem>
       )}
     </>
