@@ -8,7 +8,7 @@ resource "azurerm_search_service" "srch" {
   location                      = var.location
   public_network_access_enabled = var.public_network_access_enabled
 
-  sku             = "basic"
+  sku             = var.sku
   replica_count   = var.replica_count
   partition_count = var.partition_count
 
