@@ -2,7 +2,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert" "poison-queue-alert" {
   name                = "[iopservicescmsst] Messages In Poison Queue"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  severity            = 1
+  severity            = 0
   action {
     action_group = [data.azurerm_monitor_action_group.iopquarantineerror-action-group.id]
   }
