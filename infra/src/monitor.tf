@@ -1,6 +1,6 @@
 resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
   name                       = "${local.project}-${local.application_basename}-st-queue-ds"
-  target_resource_id         = "${module.storage_account.id}/queue"
+  target_resource_id         = "${module.storage_account.id}/queueServices/default"
   log_analytics_workspace_id = data.azurerm_application_insights.application_insights.workspace_id
 
   enabled_log {
@@ -9,7 +9,7 @@ resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
 }
 
 resource "azurerm_monitor_scheduled_query_rules_alert" "poison-queue-alert" {
-  name                = "[iopservicescmsst] Messages In Poison Queue"
+  name                = "[${upper(local.application_basename)}] Messages In Poison Queue"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   severity            = 0
@@ -19,7 +19,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert" "poison-queue-alert" {
 
   data_source_id = module.storage_account.id
 
-  description = "Storage Account [iopservicescmsst] poison queue contains messages, this happen on multiple failures in message process by the QueueTrigger Azure Functions"
+  description = "Storage Account [${module.storage_account.name}] poison queue contains messages, this happen on multiple failures in message process by the QueueTrigger Azure Functions"
 
   query = <<-QUERY
     StorageQueueLogs  
