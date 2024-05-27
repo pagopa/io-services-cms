@@ -475,7 +475,7 @@
         },
         "notifications": {
           "title": "Questo servizio può",
-          "generalLabel": "Contattarti in app",
+          "notifyLabel": "Contattarti in app",
           "pushLabel": "Inviarti notifiche push",
           "confirmLabel": "Ricevere conferme di lettura"
         },

@@ -473,7 +473,7 @@
         },
         "notifications": {
           "title": "This service may",
-          "generalLabel": "Contact you in-app",
+          "notifyLabel": "Contact you in-app",
           "pushLabel": "Send you push notifications",
           "confirmLabel": "Receive read confirmation"
         },

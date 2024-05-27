@@ -1,5 +1,6 @@
-import { ArrowBack, QuestionMark } from "@mui/icons-material";
-import { Box, Button } from "@mui/material";
+import { ArrowBackRounded, QuestionMarkRounded } from "@mui/icons-material";
+import { Box } from "@mui/material";
+import { MOBILE_COLOR_GREY_850 } from "../../components";
 
 /** Display App IO top navigation bar */
 const ServicePreviewTopbar = () => {
@@ -13,28 +14,10 @@ const ServicePreviewTopbar = () => {
       paddingY={2}
       paddingX={3}
     >
-      <Button
-        variant="text"
-        style={{
-          height: 32,
-          minWidth: 32,
-          padding: 0,
-          backgroundColor: "transparent"
-        }}
-      >
-        <ArrowBack sx={{ fontSize: 32 }} />
-      </Button>
-      <Button
-        variant="text"
-        style={{
-          height: 32,
-          minWidth: 32,
-          padding: 0,
-          backgroundColor: "transparent"
-        }}
-      >
-        <QuestionMark sx={{ fontSize: 32 }} />
-      </Button>
+      <ArrowBackRounded sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }} />
+      <QuestionMarkRounded
+        sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }}
+      />
     </Box>
   );
 };
