@@ -1,5 +1,6 @@
 import { Stack } from "@mui/material";
 import Markdown from "react-markdown";
+import { MOBILE_COLOR_GREY_100, MOBILE_COLOR_GREY_850 } from "../../components";
 
 type ServicePreviewDescriptionCardProps = {
   descriptionText: string;
@@ -14,9 +15,16 @@ const ServicePreviewDescriptionCard = ({
       marginX={3}
       bgcolor="background.paper"
       borderRadius="8px"
-      border="2px solid #E8EBF1"
+      border={`2px solid ${MOBILE_COLOR_GREY_100}`}
+      marginTop="-70px"
     >
-      <span style={{ color: "#0E0F13", fontSize: "16px", lineHeight: "24px" }}>
+      <span
+        style={{
+          color: MOBILE_COLOR_GREY_850,
+          fontSize: "16px",
+          lineHeight: "24px"
+        }}
+      >
         <Markdown>{descriptionText}</Markdown>
       </span>
     </Stack>

@@ -1,6 +1,6 @@
 import { ArrowBackRounded, QuestionMarkRounded } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
-import { MOBILE_COLOR_GREY_850 } from "../../components";
+import { Box } from "@mui/material";
+import { MOBILE_COLOR_GREY_850, MobileTypography } from "../../components";
 
 type ServicePreviewTopbarProps = {
   serviceName?: string;
@@ -21,20 +21,21 @@ const ServicePreviewTopbar = ({
       alignItems="center"
       paddingY={2}
       paddingX={3}
+      sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
     >
       <ArrowBackRounded sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }} />
-      <Typography
+      <MobileTypography
         noWrap
+        fontSize={14}
+        fontWeight={400}
+        lineHeight="33px"
+        textOverflow="ellipsis"
         sx={{
-          fontSize: "22px",
-          fontWeight: 400,
-          lineHeight: "33px",
-          opacity: opacity,
-          textOverflow: "ellipsis"
+          opacity: opacity
         }}
       >
         {serviceName}
-      </Typography>
+      </MobileTypography>
       <QuestionMarkRounded
         sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }}
       />

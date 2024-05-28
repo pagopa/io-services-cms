@@ -24,34 +24,45 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
   };
 
   const [scrollY, setScrollY] = useState(0);
-  const boxRef = useRef<HTMLDivElement>();
+  const scrollBoxRef = useRef<HTMLDivElement>();
+  const scrollBoxOpacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
 
-  // Effect that runs on mount and unmount
   useEffect(() => {
     const handleScroll = () => {
-      if (boxRef && boxRef.current) {
-        setScrollY(boxRef.current.scrollTop); // Update scroll position
+      if (scrollBoxRef && scrollBoxRef.current) {
+        setScrollY(scrollBoxRef.current.scrollTop); // Update scroll position
       }
     };
 
-    boxRef.current?.addEventListener("scroll", handleScroll);
+    scrollBoxRef.current?.addEventListener("scroll", handleScroll);
   }, []);
-
-  const opacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
 
   return (
     <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
-      <ServicePreviewTopbar />
-      <Box
-        display="flex"
-        flexDirection="column"
-        sx={{
-          overflowY: "scroll"
-        }}
-        className={styles.scrollbar}
-      >
-        {service && (
-          <>
+      {service && (
+        <>
+          <ServicePreviewTopbar
+            serviceName={service.name}
+            opacity={scrollBoxOpacity}
+          />
+          <Box
+            zIndex={-10}
+            height={200}
+            width={186}
+            sx={{
+              backgroundColor: `rgb(244,245,248,${1 - scrollBoxOpacity})`,
+              position: "absolute"
+            }}
+          />
+          <Box
+            display="flex"
+            flexDirection="column"
+            sx={{
+              overflowY: "scroll"
+            }}
+            ref={scrollBoxRef}
+            className={styles.scrollbar}
+          >
             <ServicePreviewHeader
               serviceName={service.name}
               institutionName={organizationData.institutionName}
@@ -82,9 +93,9 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
                 serviceId={service.id}
               />
             </Stack>
-          </>
-        )}
-      </Box>
+          </Box>
+        </>
+      )}
     </Stack>
   );
 };
