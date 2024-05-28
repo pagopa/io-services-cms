@@ -10,6 +10,7 @@ import {
 } from "./components/";
 
 import styles from "../app-preview.module.css";
+import { useEffect, useRef, useState } from "react";
 
 type ServicePreviewProps = {
   service?: Service;
@@ -21,6 +22,23 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
       "PCM - Dipartimento per le Politiche Giovanili ei il Servizio Civile Universale",
     fiscalCode: "11223344556"
   };
+
+  const [scrollY, setScrollY] = useState(0);
+  const boxRef = useRef<HTMLDivElement>();
+
+  // Effect that runs on mount and unmount
+  useEffect(() => {
+    const handleScroll = () => {
+      if (boxRef && boxRef.current) {
+        setScrollY(boxRef.current.scrollTop); // Update scroll position
+      }
+    };
+
+    boxRef.current?.addEventListener("scroll", handleScroll);
+  }, []);
+
+  const opacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
+
   return (
     <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
       <ServicePreviewTopbar />
