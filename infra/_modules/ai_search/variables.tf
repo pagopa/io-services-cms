@@ -106,3 +106,14 @@ variable "indexers_scheduling_interval" {
     services_publication = "PT1H"
   }
 }
+
+variable "sku" {
+  type        = string
+  description = "The SKU of the Search Service"
+  default     = "standard"
+
+  validation {
+    condition     = contains(["basic", "free", "standard", "standard2", "standard3", "storage_optimized_l1", "storage_optimized_l2"], var.sku)
+    error_message = "The SKU must be one of: basic, free, standard, standard2, standard3, storage_optimized_l1, or storage_optimized_l2."
+  }
+}
