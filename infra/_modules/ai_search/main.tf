@@ -24,7 +24,7 @@ resource "azurerm_search_service" "srch" {
 
 resource "azurerm_private_endpoint" "srch" {
   depends_on          = [azurerm_search_service.srch]
-  name                = "${var.project}-${var.application_basename}-pep-01"
+  name                = "${var.project}-${var.application_basename}-srch-pep-01"
   resource_group_name = var.resource_group_name
   location            = var.location
   subnet_id           = data.azurerm_subnet.pep_snet.id
