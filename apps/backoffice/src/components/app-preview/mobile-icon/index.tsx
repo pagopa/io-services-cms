@@ -1,6 +1,5 @@
 import { Box } from "@mui/material";
 import * as SVGIcon from "../../../../public/mobile/icons";
-import { MOBILE_COLOR_BLUE_IO_500 } from "../components";
 
 type MobileIconProps = {
   icon:

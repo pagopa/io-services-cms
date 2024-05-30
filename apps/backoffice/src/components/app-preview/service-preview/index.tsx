@@ -9,8 +9,8 @@ import {
   ServicePreviewTopbar
 } from "./components/";
 
-import styles from "../app-preview.module.css";
 import { useEffect, useRef, useState } from "react";
+import styles from "../app-preview.module.css";
 
 type ServicePreviewProps = {
   service?: Service;

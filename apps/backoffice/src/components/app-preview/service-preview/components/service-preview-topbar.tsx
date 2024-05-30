@@ -1,4 +1,3 @@
-import { ArrowBackRounded, QuestionMarkRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { MOBILE_COLOR_GREY_850, MobileTypography } from "../../components";
 import MobileIcon from "../../mobile-icon";
