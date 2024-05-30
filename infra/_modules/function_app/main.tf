@@ -3,7 +3,7 @@
 ##################
 
 module "app_be_fn" {
-  source = "github.com/pagopa/dx//infra/modules/azure_function_app?ref=fix-st-validation"
+  source = "github.com/pagopa/dx//infra/modules/azure_function_app?ref=main"
 
   environment = {
     prefix          = var.prefix
