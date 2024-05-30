@@ -1,13 +1,13 @@
 import { Typography, TypographyProps } from "@mui/material";
+import { styled } from "@mui/system";
 
-type MobileTypographyProps = TypographyProps;
+interface MobileTypographyProps extends TypographyProps {}
 
-/**
- * TODO
- * Render IO App mobile font **Readex Pro**
- * @param props
- * @returns
- */
+const MobileTypographyRoot = styled(Typography)(({ theme }) => ({
+  fontFamily: "'Readex Pro', sans-serif"
+}));
+
+/** Render IO App font **Readex Pro** */
 export const MobileTypography = (props: MobileTypographyProps) => {
-  return <Typography {...props}>{props.children}</Typography>;
+  return <MobileTypographyRoot {...props} />;
 };
