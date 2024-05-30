@@ -34,7 +34,7 @@ module "ai_search" {
   replica_count   = 3
   partition_count = 1
 
-  snet_id = module.networking.srch_snet_id
+  peps_snet_id = data.azurerm_subnet.private_endpoints_subnet.id
 
   tags = local.tags
 }
@@ -49,6 +49,9 @@ module "function_app" {
   resource_group_name  = azurerm_resource_group.rg.name
 
   app_be_snet_id = module.networking.app_be_snet_id
+  vnet_name      = data.azurerm_virtual_network.itn_common.name
+  peps_snet_id   = data.azurerm_subnet.private_endpoints_subnet.id
+
   ai_search = {
     id                     = module.ai_search.search_service_id
     url                    = format("https://%s", module.ai_search.search_service_url)

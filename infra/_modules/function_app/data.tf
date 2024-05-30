@@ -31,3 +31,8 @@ data "azurerm_subnet" "github_runner_subnet" {
   virtual_network_name = "${var.prefix}-${var.env_short}-vnet-common"
   resource_group_name  = "${var.prefix}-${var.env_short}-rg-common"
 }
+
+data "azurerm_private_dns_zone" "privatelink_websites" {
+  name                = "privatelink.azurewebsites.net"
+  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
+}

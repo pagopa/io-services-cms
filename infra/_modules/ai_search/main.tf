@@ -27,7 +27,7 @@ resource "azurerm_private_endpoint" "srch" {
   name                = "${var.project}-${var.application_basename}-srch-pep-01"
   resource_group_name = var.resource_group_name
   location            = var.location
-  subnet_id           = data.azurerm_subnet.pep_snet.id
+  subnet_id           = var.peps_snet_id
 
   private_service_connection {
     name                           = azurerm_search_service.srch.name

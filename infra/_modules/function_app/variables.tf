@@ -107,3 +107,16 @@ variable "app_be_fn_settings" {
   })
   description = "Continous Integration roles for opex managed identity"
 }
+
+################
+#  Networking  #
+################
+variable "vnet_name" {
+  type        = string
+  description = "Name of the vnet where to deploy the networking"
+}
+
+variable "peps_snet_id" {
+  type        = string
+  description = "Subnet ID where to locate all private endpoints"
+}

@@ -54,12 +54,6 @@ module "app_be_fn" {
 
   subnet_id = var.app_be_snet_id
 
-  allowed_subnets = [
-    data.azurerm_subnet.appbackendl1_snet.id,
-    data.azurerm_subnet.appbackendl2_snet.id,
-    data.azurerm_subnet.appbackendli_snet.id
-  ]
-
   application_insights_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
 
   system_identity_enabled = true
@@ -98,10 +92,6 @@ module "app_be_fn_staging_slot" {
   storage_account_access_key = module.app_be_fn.storage_account.primary_access_key
 
   subnet_id = var.app_be_snet_id
-
-  allowed_subnets = [
-    data.azurerm_subnet.github_runner_subnet.id
-  ]
 
   application_insights_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key #FIXME: is it required?!
 
@@ -148,4 +138,48 @@ resource "azurerm_role_assignment" "app_be_fn_staging_slot_to_ai_search_reader" 
   scope                = var.ai_search.id
   role_definition_name = "Search Index Data Reader"
   principal_id         = module.app_be_fn_staging_slot.system_identity_principal
+}
+
+resource "azurerm_private_endpoint" "app_be_fn" {
+  depends_on          = [module.app_be_fn]
+  name                = "${module.app_be_fn.name}-pep"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subnet_id           = var.peps_snet_id
+
+  private_service_connection {
+    name                           = "${module.app_be_fn.name}-sc"
+    private_connection_resource_id = module.app_be_fn.id
+    is_manual_connection           = false
+    subresource_names              = ["sites"]
+  }
+
+  private_dns_zone_group {
+    name                 = "${var.project}-${var.application_basename}-dns-zone-group-01"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_websites.id]
+  }
+
+  tags = var.tags
+}
+
+resource "azurerm_private_endpoint" "app_be_fn_staging_slot" {
+  depends_on          = [module.app_be_fn_staging_slot]
+  name                = "${module.app_be_fn.name}-${module.app_be_fn_staging_slot.name}-pep"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  subnet_id           = var.peps_snet_id
+
+  private_service_connection {
+    name                           = "${module.app_be_fn.name}-${module.app_be_fn_staging_slot.name}-sc"
+    private_connection_resource_id = module.app_be_fn_staging_slot.id
+    is_manual_connection           = false
+    subresource_names              = ["sites-${module.app_be_fn_staging_slot.name}"]
+  }
+
+  private_dns_zone_group {
+    name                 = "${var.project}-${var.application_basename}-dns-zone-group-01"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_websites.id]
+  }
+
+  tags = var.tags
 }
