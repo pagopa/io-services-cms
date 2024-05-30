@@ -1,7 +1,7 @@
-import { GppGoodOutlined, MenuBook } from "@mui/icons-material";
 import { List } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "next-i18next";
+import MobileIcon from "../../mobile-icon";
 import { ServicePreviewSectionListItem, ServicePreviewSectionTitle } from "./";
 
 type ServicePreviewTOSSectionProps = {
@@ -23,14 +23,18 @@ const ServicePreviewTOSSection = ({
       <List sx={{ padding: 0 }}>
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<MenuBook fontSize="inherit" color="inherit" />}
+          startIcon={
+            <MobileIcon icon="MobileIconMenu" width={24} height={22} />
+          }
           url={tosLink}
           text={t("service.inAppPreview.sections.tos.tosLabel")}
           copiable={false}
         />
         <ServicePreviewSectionListItem
           variant="link"
-          startIcon={<GppGoodOutlined fontSize="inherit" color="inherit" />}
+          startIcon={
+            <MobileIcon icon="MobileIconSecurity" width={20} height={24} />
+          }
           url={privacyLink}
           text={t("service.inAppPreview.sections.tos.privacyLabel")}
           copiable={false}

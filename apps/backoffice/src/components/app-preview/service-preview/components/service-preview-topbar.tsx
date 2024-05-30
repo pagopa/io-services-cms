@@ -1,6 +1,7 @@
 import { ArrowBackRounded, QuestionMarkRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { MOBILE_COLOR_GREY_850, MobileTypography } from "../../components";
+import MobileIcon from "../../mobile-icon";
 
 type ServicePreviewTopbarProps = {
   serviceName?: string;
@@ -23,7 +24,13 @@ const ServicePreviewTopbar = ({
       paddingX={3}
       sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
     >
-      <ArrowBackRounded sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }} />
+      <MobileIcon
+        icon="MobileIconArrowBack"
+        width={24}
+        height={24}
+        color={MOBILE_COLOR_GREY_850}
+      />
+
       <MobileTypography
         noWrap
         fontSize={14}
@@ -36,8 +43,11 @@ const ServicePreviewTopbar = ({
       >
         {serviceName}
       </MobileTypography>
-      <QuestionMarkRounded
-        sx={{ fontSize: 36, color: MOBILE_COLOR_GREY_850 }}
+      <MobileIcon
+        icon="MobileIconQMark"
+        width={16}
+        height={24}
+        color={MOBILE_COLOR_GREY_850}
       />
     </Box>
   );

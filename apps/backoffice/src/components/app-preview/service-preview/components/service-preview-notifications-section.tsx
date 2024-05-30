@@ -13,6 +13,7 @@ import {
   MobileTypography
 } from "../../components";
 import { ServicePreviewSectionTitle } from "./";
+import MobileIcon from "../../mobile-icon";
 
 type NotificationType = {
   isVisible: boolean;
@@ -27,19 +28,21 @@ const ServicePreviewNotificationsSection = () => {
   const [notifications, setNotifications] = useState<NotificationType[]>([
     {
       isVisible: true,
-      startIcon: <ChatRounded />,
+      startIcon: <MobileIcon icon="MobileIconMessage" width={24} height={24} />,
       text: "service.inAppPreview.sections.notifications.notifyLabel",
       checked: true
     },
     {
       isVisible: true,
-      startIcon: <NotificationsActiveRounded />,
+      startIcon: (
+        <MobileIcon icon="MobileIconNotification" width={24} height={24} />
+      ),
       text: "service.inAppPreview.sections.notifications.pushLabel",
       checked: true
     },
     {
       isVisible: true,
-      startIcon: <DoneAllRounded />,
+      startIcon: <MobileIcon icon="MobileIconChecks" width={24} height={14} />,
       text: "service.inAppPreview.sections.notifications.confirmLabel",
       checked: true
     }
@@ -81,7 +84,7 @@ const ServicePreviewNotificationsSection = () => {
                 <Stack gap={1.5} width="100%" flexDirection="row">
                   <Box
                     display="flex"
-                    justifyContent="start"
+                    justifyContent="center"
                     alignItems="center"
                     fontSize="24px"
                     color={MOBILE_COLOR_GREY_650}

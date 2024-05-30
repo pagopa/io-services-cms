@@ -46,7 +46,7 @@ const ServicePreviewSectionListItem = ({
           <Stack gap={1.5} flexDirection="row">
             <Box
               display="flex"
-              justifyContent="start"
+              justifyContent="center"
               alignItems="center"
               width={24}
               fontSize="24px"
@@ -67,7 +67,7 @@ const ServicePreviewSectionListItem = ({
           <Stack gap={1.5} flexDirection="row" width="100%">
             <Box
               display="flex"
-              justifyContent="start"
+              justifyContent="center"
               alignItems="center"
               width={24}
               fontSize="24px"
