@@ -6,7 +6,7 @@ resource "restapi_object" "services_publication_datasource" {
       name        = "ds-services-publication-01",
       description = "${data.azurerm_cosmosdb_account.cosmos.name} datasource for ${azurerm_search_service.srch.name} AI Search Service",
       type        = "cosmosdb",
-      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
+      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${local.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-publication"
         query = "SELECT c.id, c.data.name, c.data.organization.fiscal_code as orgFiscalCode, c._ts, STRINGEQUALS(c.fsm.state, \"unpublished\") ? \"deleted\" : c.fsm.state as state FROM c WHERE c._ts >= @HighWaterMark ORDER BY c._ts"
@@ -34,7 +34,7 @@ resource "restapi_object" "services_lifecycle_datasource" {
       name        = "ds-services-lifecycle-01",
       description = "${data.azurerm_cosmosdb_account.cosmos.name} datasource for ${azurerm_search_service.srch.name} AI Search Service",
       type        = "cosmosdb",
-      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
+      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${local.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-lifecycle"
         query = "SELECT c.id, c._ts, c.fsm.state FROM c WHERE c._ts >= @HighWaterMark and c.fsm.state = \"deleted\" ORDER BY c._ts"
@@ -155,7 +155,7 @@ resource "restapi_object" "services_publication_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = { interval = var.indexers_scheduling_interval.services_publication }
+      schedule        = { interval = local.indexers_scheduling_interval.services_publication }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
@@ -188,7 +188,7 @@ resource "restapi_object" "services_lifecycle_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = { interval = var.indexers_scheduling_interval.services_lifecycle }
+      schedule        = { interval = local.indexers_scheduling_interval.services_lifecycle }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
@@ -209,7 +209,7 @@ resource "restapi_object" "services_alias" {
   query_string = "api-version=2024-03-01-Preview"
   data = jsonencode(
     {
-      name    = var.index_aliases.services
+      name    = local.index_aliases.services
       indexes = [restapi_object.services_index_01.id]
     }
   )

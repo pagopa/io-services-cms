@@ -3,99 +3,35 @@
 ##################
 
 module "app_be_fn" {
-  source              = "github.com/pagopa/terraform-azurerm-v3//function_app?ref=v8.9.0"
-  name                = "${var.project}-${var.application_basename}-app-be-fn-01"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  health_check_path   = "/api/v1/info"
+  source = "github.com/pagopa/dx//infra/modules/azure_function_app?ref=fix-st-validation"
 
-  export_keys = true # needed
-
-  app_service_plan_info = {
-    kind                         = "Linux"
-    sku_tier                     = var.fn_sku_tier
-    sku_size                     = var.fn_sku_size
-    zone_balancing_enabled       = var.fn_zone_balancing_enabled
-    worker_count                 = null
-    maximum_elastic_worker_count = null
+  environment = {
+    prefix          = var.prefix
+    env_short       = var.env_short
+    location        = var.location
+    domain          = var.domain
+    app_name        = "app-be"
+    instance_number = "01"
   }
 
-  storage_account_info = {
-    account_kind                      = "StorageV2"
-    account_tier                      = "Standard"
-    account_replication_type          = "ZRS"
-    access_tier                       = "Hot"
-    advanced_threat_protection_enable = false
-    use_legacy_defender_version       = false
-    public_network_access_enabled     = false
+  resource_group_name = var.resource_group_name
+  health_check_path   = "/api/v1/info"
+  node_version        = 18
+
+  subnet_cidr                          = local.app_be.snet_cidr
+  subnet_pep_id                        = var.peps_snet_id
+  private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
+  virtual_network = {
+    name                = var.virtual_network.name
+    resource_group_name = var.virtual_network.resource_group_name
   }
 
-  node_version    = 18
-  runtime_version = "~4"
+  app_settings      = local.app_be.app_settings
+  slot_app_settings = local.app_be.app_settings
 
-  always_on = "true"
+  tier = "premium"
 
-  app_settings = merge(
-    var.app_be_fn_settings,
-    {
-      AZURE_SEARCH_ENDPOINT                = var.ai_search.url
-      AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
-      AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
-      AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
-      COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
-      COSMOSDB_NAME                        = var.cosmos_database_name
-      COSMOSDB_CONTAINER_SERVICE_DETAILS   = var.cosmos_container_name
-    }
-  )
-
-  sticky_app_setting_names = [
-    "APPINSIGHTS_INSTRUMENTATIONKEY"
-  ]
-
-  subnet_id = var.app_be_snet_id
-
-  application_insights_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
-
-  system_identity_enabled = true
-
-  tags = var.tags
-}
-
-module "app_be_fn_staging_slot" {
-  source              = "github.com/pagopa/terraform-azurerm-v3.git//function_app_slot?ref=v8.5.0"
-  name                = "staging"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  health_check_path   = "/api/v1/info"
-
-  function_app_id = module.app_be_fn.id
-
-  node_version    = 18
-  runtime_version = "~4"
-
-  always_on = "true"
-
-  app_settings = merge(
-    var.app_be_fn_settings,
-    {
-      AZURE_SEARCH_ENDPOINT                = var.ai_search.url
-      AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
-      AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
-      AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
-      COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
-      COSMOSDB_NAME                        = var.cosmos_database_name
-      COSMOSDB_CONTAINER_SERVICE_DETAILS   = var.cosmos_container_name
-    }
-  )
-
-  storage_account_name       = module.app_be_fn.storage_account.name
-  storage_account_access_key = module.app_be_fn.storage_account.primary_access_key
-
-  subnet_id = var.app_be_snet_id
-
-  application_insights_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key #FIXME: is it required?!
-
-  system_identity_enabled = true
+  application_insights_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
   tags = var.tags
 }
@@ -103,83 +39,39 @@ module "app_be_fn_staging_slot" {
 resource "azurerm_role_assignment" "app_be_fn_to_cosmos_account_reader" {
   scope                = data.azurerm_cosmosdb_account.cosmos.id
   role_definition_name = "Cosmos DB Account Reader Role"
-  principal_id         = module.app_be_fn.system_identity_principal
+  principal_id         = module.app_be_fn.function_app.function_app.principal_id
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "app_be_fn_to_cosmos_data_reader_db" {
   resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.cosmos.name
   role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
-  principal_id        = module.app_be_fn.system_identity_principal
-  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}"
+  principal_id        = module.app_be_fn.function_app.function_app.principal_id
+  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${local.app_be.cosmosdb_name}"
 }
 
 resource "azurerm_role_assignment" "app_be_fn_staging_slot_to_cosmos_account_reader" {
   scope                = data.azurerm_cosmosdb_account.cosmos.id
   role_definition_name = "Cosmos DB Account Reader Role"
-  principal_id         = module.app_be_fn_staging_slot.system_identity_principal
+  principal_id         = module.app_be_fn.function_app.function_app.slot.principal_id
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "app_be_fn_staging_slot_to_cosmos_data_reader_db" {
   resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.cosmos.name
   role_definition_id  = "${data.azurerm_cosmosdb_account.cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001"
-  principal_id        = module.app_be_fn_staging_slot.system_identity_principal
-  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${var.cosmos_database_name}"
+  principal_id        = module.app_be_fn.function_app.function_app.slot.principal_id
+  scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${local.app_be.cosmosdb_name}"
 }
 
 resource "azurerm_role_assignment" "app_be_fn_to_ai_search_reader" {
   scope                = var.ai_search.id
   role_definition_name = "Search Index Data Reader"
-  principal_id         = module.app_be_fn.system_identity_principal
+  principal_id         = module.app_be_fn.function_app.function_app.principal_id
 }
 
 resource "azurerm_role_assignment" "app_be_fn_staging_slot_to_ai_search_reader" {
   scope                = var.ai_search.id
   role_definition_name = "Search Index Data Reader"
-  principal_id         = module.app_be_fn_staging_slot.system_identity_principal
-}
-
-resource "azurerm_private_endpoint" "app_be_fn" {
-  depends_on          = [module.app_be_fn]
-  name                = "${module.app_be_fn.name}-pep"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  subnet_id           = var.peps_snet_id
-
-  private_service_connection {
-    name                           = "${module.app_be_fn.name}-sc"
-    private_connection_resource_id = module.app_be_fn.id
-    is_manual_connection           = false
-    subresource_names              = ["sites"]
-  }
-
-  private_dns_zone_group {
-    name                 = "${var.project}-${var.application_basename}-dns-zone-group-01"
-    private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_websites.id]
-  }
-
-  tags = var.tags
-}
-
-resource "azurerm_private_endpoint" "app_be_fn_staging_slot" {
-  depends_on          = [module.app_be_fn_staging_slot]
-  name                = "${module.app_be_fn.name}-${module.app_be_fn_staging_slot.name}-pep"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  subnet_id           = var.peps_snet_id
-
-  private_service_connection {
-    name                           = "${module.app_be_fn.name}-${module.app_be_fn_staging_slot.name}-sc"
-    private_connection_resource_id = module.app_be_fn_staging_slot.id
-    is_manual_connection           = false
-    subresource_names              = ["sites-${module.app_be_fn_staging_slot.name}"]
-  }
-
-  private_dns_zone_group {
-    name                 = "${var.project}-${var.application_basename}-dns-zone-group-01"
-    private_dns_zone_ids = [data.azurerm_private_dns_zone.privatelink_websites.id]
-  }
-
-  tags = var.tags
+  principal_id         = module.app_be_fn.function_app.function_app.slot.principal_id
 }

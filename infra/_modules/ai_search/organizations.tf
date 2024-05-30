@@ -6,7 +6,7 @@ resource "restapi_object" "organizations_datasource" {
       name        = "ds-organization-01",
       description = "${data.azurerm_cosmosdb_account.cosmos.name} datasource for ${azurerm_search_service.srch.name} AI Search Service",
       type        = "cosmosdb",
-      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
+      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${local.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-publication"
         query = "SELECT c.data.organization.fiscal_code, c.data.organization.name, c.data.metadata.scope, c.fsm.state, c._ts FROM c WHERE c.fsm.state = \"published\" and c._ts >= @HighWaterMark ORDER BY c._ts"
@@ -174,7 +174,7 @@ resource "restapi_object" "organizations_indexer" {
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = { interval = var.indexers_scheduling_interval.organizations }
+      schedule        = { interval = local.indexers_scheduling_interval.organizations }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
@@ -206,7 +206,7 @@ resource "restapi_object" "organizations_alias" {
   query_string = "api-version=2024-03-01-Preview"
   data = jsonencode(
     {
-      name    = var.index_aliases.organizations
+      name    = local.index_aliases.organizations
       indexes = [restapi_object.organizations_index_01.id]
     }
   )
