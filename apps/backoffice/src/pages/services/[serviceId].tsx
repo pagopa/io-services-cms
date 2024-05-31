@@ -104,6 +104,11 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
+
+    console.log(
+      "Service History continuation token on handleHistory: ",
+      continuationToken
+    );
     shFetchData(
       "getServiceHistory",
       { serviceId, continuationToken },
@@ -160,7 +165,7 @@ export default function ServiceDetails() {
             onPublishClick={handlePublish}
             onUnpublishClick={handleUnpublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
-            onHistoryClick={handleHistory}
+            onHistoryClick={() => handleHistory()}
             onPreviewClick={handlePreview}
             onEditClick={() =>
               router.push(`/services/${serviceId}/edit-service`)
