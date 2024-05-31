@@ -16,10 +16,10 @@ on:
 
 jobs:
   infra_review:
-    uses: pagopa/dx/.github/workflows/infra_plan.yaml@37c4becb6e2bee1459c53184a503868619cf1a57
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@main
     name: Terraform plan
     secrets: inherit
     with:
       environment: prod
-      base_path: "infra"
+      base_path: infra
       use_private_agent: true
