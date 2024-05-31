@@ -76,8 +76,6 @@ export const PaginationConfig = t.type({
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.type({
-    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
-
     // Default is 10 sec timeout
     FETCH_TIMEOUT_MS: withDefault(t.string, "10000").pipe(NumberFromString),
 
