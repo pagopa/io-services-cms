@@ -104,11 +104,6 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
-
-    console.log(
-      "Service History continuation token on handleHistory: ",
-      continuationToken
-    );
     shFetchData(
       "getServiceHistory",
       { serviceId, continuationToken },
