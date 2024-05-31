@@ -26,7 +26,7 @@ const ServicePreviewHeader = ({
       minHeight={180}
       alignItems="start"
     >
-      <Box gap={2} display="flex" alignItems="center">
+      <Box gap={2} display="flex" alignItems="center" id="preview-header-box">
         <Box
           display="flex"
           justifyContent="start"
