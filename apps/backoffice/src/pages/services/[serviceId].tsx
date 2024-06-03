@@ -160,7 +160,7 @@ export default function ServiceDetails() {
             onPublishClick={handlePublish}
             onUnpublishClick={handleUnpublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
-            onHistoryClick={handleHistory}
+            onHistoryClick={() => handleHistory()}
             onPreviewClick={handlePreview}
             onEditClick={() =>
               router.push(`/services/${serviceId}/edit-service`)
