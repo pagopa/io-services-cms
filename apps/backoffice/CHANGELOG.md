@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.6
+
+### Patch Changes
+
+- 383fc39: Fix ServiceHistory unwanted continuationToken on first call
+
 ## 1.10.5
 
 ### Patch Changes

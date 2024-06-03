@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.7
+
+### Patch Changes
+
+- 6d2d0aa: remove useless APPINSIGHTS_INSTRUMENTATIONKEY config reference
+
 ## 0.0.6
 
 ### Patch Changes
