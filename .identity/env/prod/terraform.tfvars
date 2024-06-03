@@ -64,6 +64,9 @@ infra_environment_cd_roles = {
     io-p-itn-svc-rg-01 = [
       "Search Service Contributor",
       "Role Based Access Control Administrator"
+    ],
+    io-p-services-cms-rg = [
+      "Role Based Access Control Administrator"
     ]
   }
 }
