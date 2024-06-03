@@ -12,7 +12,7 @@ on:
 
 jobs:
   infra_release_prod_itn:
-    uses: pagopa/dx/.github/workflows/infra_apply.yaml@37c4becb6e2bee1459c53184a503868619cf1a57
+    uses: pagopa/dx/.github/workflows/infra_apply.yaml@7b317fb26f0c0a921f3bbddacbef3af2e693f87b
     name: Terraform apply
     secrets: inherit
     with:
