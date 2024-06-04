@@ -98,9 +98,9 @@ jobs:
         if: contains(github.event.inputs.package_url, 'app-backend')
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
-          app-name: ${{ env.AZURE_APP_BE_SLOT_NAME }}
+          app-name: ${{ env.AZURE_APP_BE_NAME }}
           package: artifact.zip
-          slot-name: staging
+          slot-name: ${{ env.AZURE_APP_BE_SLOT_NAME }}
           clean: true
 
       - name: 'App Backend Healthcheck'
