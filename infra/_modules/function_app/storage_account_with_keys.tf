@@ -7,6 +7,7 @@ resource "azurerm_storage_account" "static_content" {
   account_tier             = "Standard"
   account_kind             = "StorageV2"
   account_replication_type = "ZRS"
+  min_tls_version          = "TLS1_2"
 
   public_network_access_enabled   = false
   shared_access_key_enabled       = true
