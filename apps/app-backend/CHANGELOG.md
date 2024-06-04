@@ -4,6 +4,12 @@
 
 ### Patch Changes
 
+- 9d4af9e: Use new azure storage blob sdk
+
+## 0.0.8
+
+### Patch Changes
+
 - 932df0f: Fix FEATURED_ITEMS_BLOB_CONNECTION_STRING
 
 ## 0.0.7
