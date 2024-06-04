@@ -22,16 +22,8 @@ const config = pipe(
   })
 );
 // Handlers Depedencies
-
-// Access to the AzureFunction Storage Account
 const blobServiceClient = new BlobServiceClient(
   `https://${config.FEATURED_ITEMS_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
-  new DefaultAzureCredential()
-);
-
-// Access to the new ad-hoc Storage Account
-const blobServiceClientInternal = new BlobServiceClient(
-  `https://iopitnsvcappbest01.blob.core.windows.net`,
   new DefaultAzureCredential()
 );
 
@@ -67,7 +59,7 @@ app.http("Info", {
 });
 
 const GetFeaturedServices = GetFeaturedServicesFn(config)({
-  blobServiceClient: blobServiceClientInternal,
+  blobServiceClient,
 });
 app.http("GetFeaturedServices", {
   methods: ["GET"],
