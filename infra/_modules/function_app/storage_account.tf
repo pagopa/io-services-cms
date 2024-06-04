@@ -10,7 +10,7 @@ resource "azurerm_storage_blob" "featured_services" {
   storage_account_name   = azurerm_storage_container.static_content.storage_account_name
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
-  source                 = "featured-services.json"
+  source                 = "${path.module}/featured-services.json"
 }
 
 resource "azurerm_storage_blob" "featured_institutions" {
@@ -18,5 +18,5 @@ resource "azurerm_storage_blob" "featured_institutions" {
   storage_account_name   = azurerm_storage_container.static_content.storage_account_name
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
-  source                 = "featured-institutions.json"
+  source                 = "${path.module}/featured-institutions.json"
 }
