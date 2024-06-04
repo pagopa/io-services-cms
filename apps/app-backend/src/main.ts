@@ -1,11 +1,14 @@
 import { app } from "@azure/functions";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
+import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { getConfigOrError } from "./config";
 import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
+import { GetFeaturedInstitutionsNewFn } from "./functions/featured-institutions-new";
 import { GetFeaturedServicesFn } from "./functions/featured-services";
+import { GetFeaturedServicesNewFn } from "./functions/featured-services-new";
 import { GetServiceByIdFn } from "./functions/get-service-by-id";
 import { InfoFn } from "./functions/info";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
@@ -14,9 +17,6 @@ import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
-import { createBlobService } from "azure-storage";
-import { GetFeaturedInstitutionsNewFn } from "./functions/featured-institutions-new";
-import { GetFeaturedServicesNewFn } from "./functions/featured-services-new";
 
 const config = pipe(
   getConfigOrError(),
@@ -25,9 +25,15 @@ const config = pipe(
   })
 );
 // Handlers Depedencies
-//newOne
+
+// Test with the new Storage Account
 const blobServiceClient = new BlobServiceClient(
   `https://iopitnsvcappbest01.blob.core.windows.net`,
+  new DefaultAzureCredential()
+);
+
+const blobServiceClientInternal = new BlobServiceClient(
+  `https://${config.FEATURED_ITEMS_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
   new DefaultAzureCredential()
 );
 
@@ -77,7 +83,7 @@ app.http("GetFeaturedServices", {
 });
 
 const GetFeaturedServicesNew = GetFeaturedServicesNewFn(config)({
-  blobServiceClient,
+  blobServiceClient: blobServiceClientInternal,
 });
 app.http("GetFeaturedServicesNew", {
   methods: ["GET"],
