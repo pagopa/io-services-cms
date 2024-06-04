@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.10
+
+### Patch Changes
+
+- 31f5c06: Use Internal Storage Account
+
 ## 0.0.9
 
 ### Patch Changes
