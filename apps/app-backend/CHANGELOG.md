@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.9
+
+### Patch Changes
+
+- 40e0b6e: Use New Azure Storage account SDK
+
 ## 0.0.8
 
 ### Patch Changes
