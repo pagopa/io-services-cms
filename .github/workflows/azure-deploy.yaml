@@ -91,7 +91,7 @@ jobs:
 
       # app-backend
       - name: Deploy App Backend to staging
-        if: contains(github.event.inputs.package_url, 'app-backend')
+        if: contains(github.event.release.assets[0].name, 'app-backend')
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
           app-name: ${{ env.AZURE_APP_BE_NAME }}
@@ -109,4 +109,4 @@ jobs:
       - name: 'Swap App Backend staging to production'
         if: contains(github.event.release.assets[0].name, 'app-backend')
         id: swap_to_production_appbackend
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot ${{ env.AZURE_APP_BE_SLOT_NAME }} --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production
