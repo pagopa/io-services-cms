@@ -88,3 +88,24 @@ resource "azurerm_private_endpoint" "st_queue" {
 
   tags = var.tags
 }
+
+resource "azurerm_private_endpoint" "st_table" {
+  name                = "${local.project}-${var.domain}-${local.app_name}-static-content-table-pep-01"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.peps_snet_id
+
+  private_service_connection {
+    name                           = "${local.project}-${var.domain}-${local.app_name}-static-content-table-pep-01"
+    private_connection_resource_id = azurerm_storage_account.static_content.id
+    is_manual_connection           = false
+    subresource_names              = ["table"]
+  }
+
+  private_dns_zone_group {
+    name                 = "private-dns-zone-group"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.storage_account_table.id]
+  }
+
+  tags = var.tags
+}
