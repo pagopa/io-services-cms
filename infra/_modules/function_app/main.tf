@@ -10,7 +10,7 @@ module "app_be_fn" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "app-be"
+    app_name        = local.app_name
     instance_number = "01"
   }
 

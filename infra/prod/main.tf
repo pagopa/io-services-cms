@@ -29,6 +29,7 @@ module "function_app" {
   prefix              = local.prefix
   env_short           = local.env_short
   location            = local.location
+  location_short      = local.location_short
   domain              = local.domain
   resource_group_name = azurerm_resource_group.rg.name
 
@@ -48,4 +49,10 @@ module "function_app" {
   }
 
   tags = local.tags
+}
+
+## Temporary storage account - to be removed after migration to managed identity accessed storage account
+import {
+  to = module.function_app.azurerm_storage_account.static_content
+  id = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/iopitnsvcappbest01"
 }

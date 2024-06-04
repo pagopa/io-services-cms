@@ -28,6 +28,11 @@ variable "location" {
   description = "Azure region"
 }
 
+variable "location_short" {
+  type        = string
+  description = "Azure region short name"
+}
+
 variable "domain" {
   type        = string
   description = "Domain name of the application"

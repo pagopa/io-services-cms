@@ -1,3 +1,5 @@
+data "azurerm_subscription" "current" {}
+
 data "azurerm_resource_group" "weu-common" {
   name = "${local.prefix}-${local.env_short}-rg-common"
 }

@@ -5,11 +5,12 @@ locals {
     app_settings = {
       NODE_ENV = "production"
 
-      FEATURED_ITEMS_CONTAINER_NAME      = "static-content"
-      FEATURED_SERVICES_FILE_NAME        = "featured-services.json"
-      FEATURED_INSTITUTIONS_FILE_NAME    = "featured-institutions.json"
-      COSMOSDB_NAME                      = "app-backend"
-      COSMOSDB_CONTAINER_SERVICE_DETAILS = "services"
+      FEATURED_ITEMS_CONTAINER_NAME         = "static-content"
+      FEATURED_SERVICES_FILE_NAME           = "featured-services.json"
+      FEATURED_INSTITUTIONS_FILE_NAME       = "featured-institutions.json"
+      COSMOSDB_NAME                         = "app-backend"
+      COSMOSDB_CONTAINER_SERVICE_DETAILS    = "services"
+      FEATURED_ITEMS_BLOB_CONNECTION_STRING = azurerm_storage_account.static_content.primary_connection_string
 
       AZURE_SEARCH_ENDPOINT                = var.ai_search.url
       AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
@@ -18,5 +19,8 @@ locals {
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
     }
   }
+
+  project  = "${var.prefix}-${var.env_short}-${var.location_short}"
+  app_name = "app-be"
 }
 
