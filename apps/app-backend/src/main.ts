@@ -1,8 +1,11 @@
 import { app } from "@azure/functions";
-import { createBlobService } from "azure-storage";
+import { DefaultAzureCredential } from "@azure/identity";
+import { BlobServiceClient } from "@azure/storage-blob";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { getConfigOrError } from "./config";
+import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
+import { GetFeaturedServicesFn } from "./functions/featured-services";
 import { GetServiceByIdFn } from "./functions/get-service-by-id";
 import { InfoFn } from "./functions/info";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
@@ -11,8 +14,6 @@ import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
-import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
-import { GetFeaturedServicesFn } from "./functions/featured-services";
 
 const config = pipe(
   getConfigOrError(),
@@ -21,8 +22,17 @@ const config = pipe(
   })
 );
 // Handlers Depedencies
-const blobService = createBlobService(
-  config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
+
+// Access to the AzureFunction Storage Account
+const blobServiceClient = new BlobServiceClient(
+  `https://${config.FEATURED_ITEMS_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+  new DefaultAzureCredential()
+);
+
+// Access to the new ad-hoc Storage Account
+const blobServiceClientInternal = new BlobServiceClient(
+  `https://iopitnsvcappbest01.blob.core.windows.net`,
+  new DefaultAzureCredential()
 );
 
 // Service Details Container Dependency
@@ -57,7 +67,7 @@ app.http("Info", {
 });
 
 const GetFeaturedServices = GetFeaturedServicesFn(config)({
-  blobService,
+  blobServiceClient: blobServiceClientInternal,
 });
 app.http("GetFeaturedServices", {
   methods: ["GET"],
@@ -67,7 +77,7 @@ app.http("GetFeaturedServices", {
 });
 
 const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
-  blobService,
+  blobServiceClient,
 });
 app.http("GetFeaturedInstitutions", {
   methods: ["GET"],

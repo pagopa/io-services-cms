@@ -167,7 +167,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-client@npm:^1.0.0, @azure/core-client@npm:^1.3.0":
+"@azure/core-client@npm:^1.0.0, @azure/core-client@npm:^1.3.0, @azure/core-client@npm:^1.6.2":
   version: 1.9.2
   resolution: "@azure/core-client@npm:1.9.2"
   dependencies:
@@ -212,7 +212,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-http-compat@npm:^2.0.1":
+"@azure/core-http-compat@npm:^2.0.0, @azure/core-http-compat@npm:^2.0.1":
   version: 2.1.2
   resolution: "@azure/core-http-compat@npm:2.1.2"
   dependencies:
@@ -288,6 +288,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-rest-pipeline@npm:^1.10.1":
+  version: 1.16.0
+  resolution: "@azure/core-rest-pipeline@npm:1.16.0"
+  dependencies:
+    "@azure/abort-controller": ^2.0.0
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-tracing": ^1.0.1
+    "@azure/core-util": ^1.9.0
+    "@azure/logger": ^1.0.0
+    http-proxy-agent: ^7.0.0
+    https-proxy-agent: ^7.0.0
+    tslib: ^2.6.2
+  checksum: ebb4597d18c0d75a6bf699e90c40247d8e1117498462c6e00bd83694cf65efaab16d3324e28d9e01b187242aa3788ba24ab2729632933731e991eaf6f70343d7
+  languageName: node
+  linkType: hard
+
 "@azure/core-rest-pipeline@npm:^1.3.0":
   version: 1.15.2
   resolution: "@azure/core-rest-pipeline@npm:1.15.2"
@@ -360,7 +376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-util@npm:^1.6.1":
+"@azure/core-util@npm:^1.6.1, @azure/core-util@npm:^1.9.0":
   version: 1.9.0
   resolution: "@azure/core-util@npm:1.9.0"
   dependencies:
@@ -370,7 +386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-xml@npm:^1.0.0":
+"@azure/core-xml@npm:^1.0.0, @azure/core-xml@npm:^1.3.2":
   version: 1.4.2
   resolution: "@azure/core-xml@npm:1.4.2"
   dependencies:
@@ -605,6 +621,27 @@ __metadata:
     events: ^3.0.0
     tslib: ^2.2.0
   checksum: b42c54b8e128196ed0740d6b4539307d989baaeecd4614ec28fbb7dc2fa175b35db9049968698851502abb4f26b2d2c8ca0c44ddb56089fd9f4bca5cef437002
+  languageName: node
+  linkType: hard
+
+"@azure/storage-blob@npm:^12.23.0":
+  version: 12.23.0
+  resolution: "@azure/storage-blob@npm:12.23.0"
+  dependencies:
+    "@azure/abort-controller": ^1.0.0
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-client": ^1.6.2
+    "@azure/core-http-compat": ^2.0.0
+    "@azure/core-lro": ^2.2.0
+    "@azure/core-paging": ^1.1.1
+    "@azure/core-rest-pipeline": ^1.10.1
+    "@azure/core-tracing": ^1.0.0
+    "@azure/core-util": ^1.6.1
+    "@azure/core-xml": ^1.3.2
+    "@azure/logger": ^1.0.0
+    events: ^3.0.0
+    tslib: ^2.2.0
+  checksum: 7f09b4bfae0d73f7cf8f383038edeaf8bc8610960bc24a9b8c140f4084bb3afd62971fb56e2ff5e013168165dcfff7b9a545f6cc837fe2669618184e4b77c107
   languageName: node
   linkType: hard
 
@@ -4830,7 +4867,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"azure-storage@npm:^2.10.5, azure-storage@npm:^2.10.7":
+"azure-storage@npm:^2.10.5":
   version: 2.10.7
   resolution: "azure-storage@npm:2.10.7"
   dependencies:
@@ -9202,6 +9239,7 @@ __metadata:
     "@azure/functions": ^4.4.0
     "@azure/identity": ^4.0.1
     "@azure/search-documents": ^12.0.0
+    "@azure/storage-blob": ^12.23.0
     "@io-services-cms/models": "workspace:^"
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/handler-kit": ^1.1.0
@@ -9215,7 +9253,6 @@ __metadata:
     "@types/node": ~20.10.0
     "@vitest/coverage-v8": ^1.4.0
     azure-functions-core-tools: 4
-    azure-storage: ^2.10.7
     dependency-check: ^4.1.0
     eslint: ^8.38.0
     eslint-plugin-prettier: ^5.1.3
