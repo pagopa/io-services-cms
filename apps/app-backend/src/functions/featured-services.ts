@@ -37,7 +37,6 @@ export const retrieveFeaturedServices: (
             `An error occurred retrieving featuredServices file from blobService: [${err.message}]`
           )
       ),
-      (x) => x,
       TE.map(O.getOrElse(() => ({ services: [] } as FeaturedServices))) // Return an empty list if the file is not found
     );
 
