@@ -17,6 +17,7 @@ env:
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
   AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
   AZURE_APP_BE_NAME: io-p-itn-svc-app-be-func-01
+  AZURE_APP_BE_SLOT_NAME: io-p-itn-svc-app-be-staging-func-01
   WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
   BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
   APP_BE_HEALTHCHECK_PATH: 'api/v1/info'
@@ -97,7 +98,7 @@ jobs:
         if: contains(github.event.inputs.package_url, 'app-backend')
         uses: azure/webapps-deploy@145a0687697df1d8a28909569f6e5d86213041f9 #v3.0.0
         with:
-          app-name: ${{ env.AZURE_APP_BE_NAME }}
+          app-name: ${{ env.AZURE_APP_BE_SLOT_NAME }}
           package: artifact.zip
           slot-name: staging
           clean: true
@@ -107,9 +108,9 @@ jobs:
         id: healthcheck_appbackend
         run: |
           sleep 30
-          curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://${{ env.AZURE_APP_BE_NAME }}-staging.azurewebsites.net/${{ env.APP_BE_HEALTHCHECK_PATH }}'
+          curl --retry 5 --retry-max-time 120 --retry-all-errors --fail-with-body 'https://io-p-itn-svc-app-be-func-01-io-p-itn-svc-app-be-staging-fun.azurewebsites.net/${{ env.APP_BE_HEALTHCHECK_PATH }}'
 
       - name: 'Swap App Backend staging to production'
         if: contains(github.event.inputs.package_url, 'app-backend')
         id: swap_to_production_appbackend
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot ${{ env.AZURE_APP_BE_SLOT_NAME }} --target-slot production
