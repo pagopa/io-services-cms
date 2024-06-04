@@ -45,7 +45,7 @@ infra_environment_ci_roles = {
       "Reader and Data Access"
     ],
     io-p-services-cms-rg = [
-      "Contributor"
+      "Contributor",
     ],
     io-p-itn-svc-rg-01 = [
       "Contributor",
