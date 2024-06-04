@@ -1,3 +1,4 @@
+import * as AzureIdentity from "@azure/identity";
 import * as E from "fp-ts/Either";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -5,12 +6,10 @@ import {
   aValidMockedElement,
   anInvalidMockedElement,
 } from "../../utils/__mocks__/azure-search-mocks";
-import * as AzureIdentity from "@azure/identity";
 import { makeAzureSearchClient } from "../../utils/azure-search/client";
 
-import * as searchSDK from "@azure/search-documents";
-import { AzureKeyCredential } from "@azure/search-documents";
 import { DefaultAzureCredential } from "@azure/identity";
+import * as searchSDK from "@azure/search-documents";
 
 const mockSearchMethod = vi.fn().mockResolvedValue({
   results: [Promise.resolve(aValidMockedElement)],
