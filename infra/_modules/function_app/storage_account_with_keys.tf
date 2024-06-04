@@ -14,6 +14,10 @@ resource "azurerm_storage_account" "static_content" {
   default_to_oauth_authentication = false
   allow_nested_items_to_be_public = false
 
+  identity {
+      type = "SystemAssigned"
+  }
+  
   tags = var.tags
 }
 
