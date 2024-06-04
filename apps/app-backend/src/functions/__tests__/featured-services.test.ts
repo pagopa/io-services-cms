@@ -1,19 +1,20 @@
-import * as azureStorage from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
-import { BlobService } from "azure-storage";
+import { BlobServiceClient } from "@azure/storage-blob";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
+import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
+import * as blobStorageClientHelper from "../../utils/blob-storage/helper";
 import { mockFeaturedServices } from "../__mocks__/featured-services";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { makeFeaturedServicesHandler } from "../featured-services";
-import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
 
 // blobService Base Mock
-const mockBlobService = {} as unknown as BlobService;
+const mockBlobServiceClient = {} as unknown as BlobServiceClient;
 const mockUpsertBlobFromObject = vi
-  .spyOn(azureStorage, "getBlobAsObject")
-  .mockResolvedValue(E.right(O.some(mockFeaturedServices)));
+  .spyOn(blobStorageClientHelper, "getBlobAsObject")
+  .mockReturnValue(TE.right(O.some(mockFeaturedServices)));
 
 const mockedConfiguration = {
   FEATURED_ITEMS_CONTAINER_NAME: "container",
@@ -24,13 +25,13 @@ describe("Get Featured Services", () => {
   it("should return featured services", async () => {
     const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
-      blobService: mockBlobService,
+      blobServiceClient: mockBlobServiceClient,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
       FeaturedServices,
-      mockBlobService,
+      mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
       mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );
@@ -46,19 +47,19 @@ describe("Get Featured Services", () => {
 
   it("should return internal error", async () => {
     const errorMessage = "Error blobService";
-    mockUpsertBlobFromObject.mockResolvedValueOnce(
-      E.left(new Error(errorMessage))
+    mockUpsertBlobFromObject.mockReturnValueOnce(
+      TE.left(new Error(errorMessage))
     );
 
     const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
-      blobService: mockBlobService,
+      blobServiceClient: mockBlobServiceClient,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
       FeaturedServices,
-      mockBlobService,
+      mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
       mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );
@@ -76,17 +77,17 @@ describe("Get Featured Services", () => {
   });
 
   it("should return an empty list when file is not found", async () => {
-    mockUpsertBlobFromObject.mockResolvedValueOnce(E.right(O.none));
+    mockUpsertBlobFromObject.mockReturnValueOnce(TE.right(O.none));
 
     const result = await makeFeaturedServicesHandler(mockedConfiguration)({
       ...httpHandlerInputMocks,
-      blobService: mockBlobService,
+      blobServiceClient: mockBlobServiceClient,
     })();
 
     expect(mockUpsertBlobFromObject).toBeCalled();
     expect(mockUpsertBlobFromObject).toBeCalledWith(
       FeaturedServices,
-      mockBlobService,
+      mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
       mockedConfiguration.FEATURED_SERVICES_FILE_NAME
     );

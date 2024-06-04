@@ -3,7 +3,7 @@ import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as B from "fp-ts/boolean";
-import { identity, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 /**
@@ -18,7 +18,7 @@ export const getBlobAsObject = <A, O, I>(
   blobServiceClient: BlobServiceClient,
   containerName: string,
   blobName: string
-): TE.TaskEither<Error, O.Option<A>> =>
+): TE.TaskEither<RestError | Error, O.Option<A>> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -26,7 +26,14 @@ export const getBlobAsObject = <A, O, I>(
           .getContainerClient(containerName)
           .getBlockBlobClient(blobName)
           .downloadToBuffer(),
-      identity
+      (error) =>
+        pipe(
+          error instanceof RestError,
+          B.fold(
+            () => error as RestError,
+            () => E.toError(error)
+          )
+        )
     ),
     TE.chainW((buffer) =>
       pipe(

@@ -1,14 +1,11 @@
 import { app } from "@azure/functions";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
-import { createBlobService } from "azure-storage";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
 import { getConfigOrError } from "./config";
 import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
-import { GetFeaturedInstitutionsNewFn } from "./functions/featured-institutions-new";
 import { GetFeaturedServicesFn } from "./functions/featured-services";
-import { GetFeaturedServicesNewFn } from "./functions/featured-services-new";
 import { GetServiceByIdFn } from "./functions/get-service-by-id";
 import { InfoFn } from "./functions/info";
 import { SearchInstitutionsFn } from "./functions/search-institutions";
@@ -26,19 +23,16 @@ const config = pipe(
 );
 // Handlers Depedencies
 
-// Test with the new Storage Account
+// Access to the AzureFunction Storage Account
 const blobServiceClient = new BlobServiceClient(
-  `https://iopitnsvcappbest01.blob.core.windows.net`,
-  new DefaultAzureCredential()
-);
-
-const blobServiceClientInternal = new BlobServiceClient(
   `https://${config.FEATURED_ITEMS_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
   new DefaultAzureCredential()
 );
 
-const blobService = createBlobService(
-  config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
+// Access to the new ad-hoc Storage Account
+const blobServiceClientInternal = new BlobServiceClient(
+  `https://iopitnsvcappbest01.blob.core.windows.net`,
+  new DefaultAzureCredential()
 );
 
 // Service Details Container Dependency
@@ -73,7 +67,7 @@ app.http("Info", {
 });
 
 const GetFeaturedServices = GetFeaturedServicesFn(config)({
-  blobService,
+  blobServiceClient: blobServiceClientInternal,
 });
 app.http("GetFeaturedServices", {
   methods: ["GET"],
@@ -82,34 +76,14 @@ app.http("GetFeaturedServices", {
   handler: GetFeaturedServices,
 });
 
-const GetFeaturedServicesNew = GetFeaturedServicesNewFn(config)({
-  blobServiceClient: blobServiceClientInternal,
-});
-app.http("GetFeaturedServicesNew", {
-  methods: ["GET"],
-  route: "services/featurednew",
-  authLevel: "anonymous",
-  handler: GetFeaturedServicesNew,
-});
-
 const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
-  blobService,
+  blobServiceClient,
 });
 app.http("GetFeaturedInstitutions", {
   methods: ["GET"],
   route: "institutions/featured",
   authLevel: "anonymous",
   handler: GetFeaturedInstitutions,
-});
-
-const GetFeaturedInstitutionsNew = GetFeaturedInstitutionsNewFn(config)({
-  blobServiceClient,
-});
-app.http("GetFeaturedInstitutionsNew", {
-  methods: ["GET"],
-  route: "institutions/featurednew",
-  authLevel: "anonymous",
-  handler: GetFeaturedInstitutionsNew,
 });
 
 const SearchInstitutions = SearchInstitutionsFn(config)({
