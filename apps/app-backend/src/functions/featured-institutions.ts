@@ -1,15 +1,14 @@
 import * as H from "@pagopa/handler-kit";
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
-import { getBlobAsObject } from "@pagopa/io-functions-commons/dist/src/utils/azure_storage";
 import * as L from "@pagopa/logger";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { FeaturedItemsConfig } from "../config";
-import { BlobServiceDependency } from "../utils/blob-storage/dependency";
 import { Institutions } from "../generated/definitions/internal/Institutions";
+import { BlobServiceClientDependency } from "../utils/blob-storage/dependency";
+import { getBlobAsObject } from "../utils/blob-storage/helper";
 
 /**
  * GET /institutions/featured AZF HttpTrigger
@@ -18,28 +17,25 @@ import { Institutions } from "../generated/definitions/internal/Institutions";
 
 export const retrieveInstitutionsItems: (
   featuredItemsConfig: FeaturedItemsConfig
-) => RTE.ReaderTaskEither<BlobServiceDependency, H.HttpError, Institutions> =
+) => RTE.ReaderTaskEither<
+  BlobServiceClientDependency,
+  H.HttpError,
+  Institutions
+> =
   (featuredItemsConfig: FeaturedItemsConfig) =>
-  ({ blobService }) =>
+  ({ blobServiceClient }) =>
     pipe(
-      TE.tryCatch(
-        () =>
-          getBlobAsObject(
-            Institutions,
-            blobService,
-            featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
-            featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME
-          ),
-        (err) =>
-          new H.HttpError(`Unexpected error: [${E.toError(err).message}]`)
+      getBlobAsObject(
+        Institutions,
+        blobServiceClient,
+        featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
+        featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME
       ),
-      TE.chainEitherK(
-        E.mapLeft(
-          (err) =>
-            new H.HttpError(
-              `An error occurred retrieving featuredInstitutions file from blobService: [${err.message}]`
-            )
-        )
+      TE.mapLeft(
+        (err) =>
+          new H.HttpError(
+            `An error occurred retrieving featuredInstitutions file from blobService: [${err.message}]`
+          )
       ),
       TE.map(O.getOrElse(() => ({ institutions: [] } as Institutions))) // Return an empty list if the file is not found
     );
@@ -50,7 +46,7 @@ export const makeFeaturedInstitutionsHandler: (
   H.HttpRequest,
   | H.HttpResponse<Institutions, 200>
   | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
-  BlobServiceDependency
+  BlobServiceClientDependency
 > = (featuredItemsConfig: FeaturedItemsConfig) =>
   H.of((_: H.HttpRequest) =>
     pipe(

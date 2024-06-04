@@ -22,6 +22,7 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 export type FeaturedItemsConfig = t.TypeOf<typeof FeaturedItemsConfig>;
 export const FeaturedItemsConfig = t.type({
   FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
+  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_SERVICES_FILE_NAME: NonEmptyString,
   FEATURED_INSTITUTIONS_FILE_NAME: NonEmptyString,
@@ -89,6 +90,8 @@ export const IConfig = t.intersection([
 
 export const envConfig = {
   ...process.env,
+  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME:
+    process.env.AzureWebJobsStorage__accountName,
   isProduction: process.env.NODE_ENV === "production",
 };
 
