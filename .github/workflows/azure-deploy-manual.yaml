@@ -112,4 +112,4 @@ jobs:
       - name: 'Swap App Backend staging to production'
         if: contains(github.event.inputs.package_url, 'app-backend')
         id: swap_to_production_appbackend
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot ${{ env.AZURE_APP_BE_SLOT_NAME }} --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production
