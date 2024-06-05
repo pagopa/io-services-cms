@@ -6,7 +6,6 @@ import { pipe } from "fp-ts/lib/function";
 
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
-import * as L from "@pagopa/logger";
 import { IConfig } from "../config";
 import { ApplicationInfo } from "../generated/definitions/internal/ApplicationInfo";
 import { Institution } from "../generated/definitions/internal/Institution";
