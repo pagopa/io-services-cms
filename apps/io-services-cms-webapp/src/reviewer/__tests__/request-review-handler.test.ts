@@ -207,6 +207,7 @@ const mainMockApimService = {
 
 const mockConfig = {
   USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [],
+  SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [],
 } as unknown as IConfig;
 
 const mockFsmLifecycleClient = {
@@ -383,6 +384,37 @@ describe("Service Review Handler", () => {
   it("should approve the service when the user is in inclusionList", async () => {
     const mockConfig = {
       USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [anUserId],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: [],
+    } as unknown as IConfig;
+
+    const handler = createRequestReviewHandler(
+      mainMockServiceReviewDao,
+      mainMockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).not.toHaveBeenCalled();
+    expect(mainMockApimService.getDelegateFromServiceId).not.toHaveBeenCalled();
+    expect(mainMockJiraProxy.createJiraIssue).not.toHaveBeenCalled();
+    expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
+
+    expect(mockFsmLifecycleClient.approve).toBeCalledWith(aService.id, {
+      approvalDate: expect.any(String),
+    });
+  });
+
+  it("should approve the service when the serviceId is in inclusionList", async () => {
+    const mockConfig = {
+      USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: [],
+      SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aServiceId"],
     } as unknown as IConfig;
 
     const handler = createRequestReviewHandler(

@@ -15,7 +15,10 @@ import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
-import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
+import {
+  isServiceAllowedForAutomaticApproval,
+  isUserAllowedForAutomaticApproval,
+} from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 
@@ -178,6 +181,13 @@ const isFirstServicePublication =
       )
     );
 
+const skipOrNot =
+  (config: IConfig, apimService: ApimUtils.ApimService) =>
+  (service: Queue.RequestReviewItem) =>
+    isServiceAllowedForAutomaticApproval(config, service.id)
+      ? TE.right(true)
+      : isUserAllowedForAutomaticApproval(config, apimService, service.id);
+
 export const createRequestReviewHandler = (
   dao: ServiceReviewDao,
   jiraProxy: JiraProxy,
@@ -193,7 +203,7 @@ export const createRequestReviewHandler = (
       TE.fromEither,
       TE.chain((service) =>
         pipe(
-          isUserAllowedForAutomaticApproval(config, apimService, service.id),
+          skipOrNot(config, apimService)(service),
           TE.chain(
             B.fold(
               () =>
