@@ -6,11 +6,15 @@ import { pipe } from "fp-ts/lib/function";
 
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
+import * as L from "@pagopa/logger";
+import { IConfig } from "../config";
 import { ApplicationInfo } from "../generated/definitions/internal/ApplicationInfo";
 import { Institution } from "../generated/definitions/internal/Institution";
 import { APPLICATION_NAME, APPLICATION_VERSION } from "../generated/version";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 import { makeAzureSearchHealthCheck } from "../utils/azure-search/health-check";
+import { BlobServiceClientDependency } from "../utils/blob-storage/dependency";
+import { makeAzureBlobStorageHealthCheck } from "../utils/blob-storage/health-check";
 import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency";
 import {
   AzureCosmosProblemSource,
@@ -24,22 +28,29 @@ const applicativeValidation = RTE.getApplicativeReaderTaskValidation(
   RA.getSemigroup<healthcheck.HealthProblem<ProblemSource>>()
 );
 
-export const makeInfoHandler: H.Handler<
+export const makeInfoHandler: (
+  config: IConfig
+) => H.Handler<
   H.HttpRequest,
   H.HttpResponse<ApplicationInfo, 200>,
-  ServiceDetailsContainerDependency & AzureSearchClientDependency<Institution>
-> = H.of((_: H.HttpRequest) =>
-  pipe(
-    [
-      makeCosmosDBHealthCheck,
-      makeAzureSearchHealthCheck,
-    ] as ReadonlyArray<HealthCheckBuilder>,
-    RA.sequence(applicativeValidation),
-    RTE.map(() =>
-      H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
-    ),
-    RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n")))
-  )
-);
+  ServiceDetailsContainerDependency &
+    AzureSearchClientDependency<Institution> &
+    BlobServiceClientDependency
+> = (config: IConfig) =>
+  H.of((_: H.HttpRequest) =>
+    pipe(
+      [
+        makeCosmosDBHealthCheck,
+        makeAzureSearchHealthCheck,
+        makeAzureBlobStorageHealthCheck(config),
+      ] as ReadonlyArray<HealthCheckBuilder>,
+      RA.sequence(applicativeValidation),
+      RTE.map(() =>
+        H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
+      ),
+      RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n")))
+    )
+  );
 
-export const InfoFn = httpAzureFunction(makeInfoHandler);
+export const InfoFn = (config: IConfig) =>
+  httpAzureFunction(makeInfoHandler(config));
