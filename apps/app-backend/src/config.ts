@@ -21,7 +21,6 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 export type FeaturedItemsConfig = t.TypeOf<typeof FeaturedItemsConfig>;
 export const FeaturedItemsConfig = t.type({
-  FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
   FEATURED_ITEMS_STORAGE_ACCOUNT_NAME: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_SERVICES_FILE_NAME: NonEmptyString,
