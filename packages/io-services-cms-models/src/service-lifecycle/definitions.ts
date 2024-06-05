@@ -80,6 +80,7 @@ export const ServiceMetadata = t.intersection([
 const ServiceMetadataStrict = t.intersection([
   t.type({
     scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
+    privacy_url: HttpOrHttpsUrlString,
   }),
   t.partial({
     address: NonEmptyString,
@@ -90,7 +91,6 @@ const ServiceMetadataStrict = t.intersection([
     email: EmailString,
     pec: EmailString,
     phone: NonEmptyString,
-    privacy_url: HttpOrHttpsUrlString,
     support_url: HttpOrHttpsUrlString,
     token_name: NonEmptyString,
     tos_url: HttpOrHttpsUrlString,

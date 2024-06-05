@@ -54,9 +54,31 @@ const aValidRequestValidationItem = {
     authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
+      privacy_url: "https://url.com",
       address: "via tal dei tali 123",
       email: "service@email.it",
       pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+    authorized_cidrs: [],
+  },
+  version: "aVersion",
+} as unknown as Queue.RequestReviewItem;
+
+const aNonValidRequestValidationItem = {
+  id: "aServiceId",
+  data: {
+    name: "aServiceName" as NonEmptyString,
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      email: "service@email.it",
       scope: "LOCAL",
     },
     organization: {
@@ -182,6 +204,11 @@ describe("Service Validation Handler", () => {
         },
       },
       expected: /support_url\] is not a valid/,
+    },
+    {
+      scenario: "incoming item fails if privacy_url is undefined",
+      item: aNonValidRequestValidationItem,
+      expected: /privacy_url\] is not a valid/,
     },
   ])("should reject review when $scenario", async ({ item, expected }) => {
     fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
