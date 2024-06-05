@@ -49,27 +49,27 @@ Contains middlewares for local business logic, that in not usefull to share with
 
 The following table contains the required ENV variables that the applicative require
 
-| Variable name                                               | Description                                                                       | type   | required |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ | -------- |
-| FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                       | number | D        |
-| FEATURED_ITEMS_BLOB_CONNECTION_STRING                       | The Azure StorageAccount connectionString to retrieve FeaturedItems blob          | string | Y        |
-| FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                         | string | Y        |
-| FEATURED_SERVICES_FILE_NAME                                 | The Featured Services Filename in blobStorage container                           | string | Y        |
-| FEATURED_INSTITUTIONS_FILE_NAME                             | The Featured Institutions Filename in blobStorage container                       | string | Y        |
-| AZURE_SEARCH_ENDPOINT                                       | The Azure AI Search Endpoint                                                      | string | Y        |
-| AZURE_SEARCH_SERVICE_VERSION                                | The Azure AI Search Service Version                                               | string | Y        |
-| AZURE_SEARCH_INSTITUTIONS_INDEX_NAME                        | The Azure AI Search Institutions Index Name                                       | string | Y        |
-| AZURE_SEARCH_SERVICES_INDEX_NAME                            | The Azure AI Search Services Index Name                                           | string | Y        |
-| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE(**\*1**)    | The Azure AI Search Institutions Scope Scoring Profile Name (eg BoostScope)       | string | N        |
-| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS(**\*1**) | The Azure AI Search Institutions Scope Scoring Parameters(eg boostScope-NATIONAL) | string | N        |
-| AZURE_SEARCH_API_KEY                                        | The Azure AI Search ApiKey(when not provided use ManagedIdentities)               | string | N        |
-| PAGINATION_DEFAULT_LIMIT                                    | The Pagination Default limit in Paginated API(default=20)                         | string | D        |
-| PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=100)                           | string | D        |
-| PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=100)                          | string | D        |
-| COSMOSDB_URI                                                | The CosmosDb Uri                                                                  | string | Y        |
-| COSMOSDB_NAME                                               | The CosmosDb Name                                                                 | string | Y        |
-| COSMOSDB_CONTAINER_SERVICE_DETAILS                          | The CosmosDb Container Name which contains service details                        | string | Y        |
-| COSMOSDB_KEY                                                | The CosmosDb key(when not provided use ManagedIdentities)                         | string | N        |
+| Variable name                                               | Description                                                                                      | type   | required |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ | -------- |
+| FETCH_TIMEOUT_MS                                            | (optional) Fetch Timeout for AbortableFetch                                                      | number | D        |
+| FEATURED_ITEMS_STORAGE_ACCOUNT_NAME                         | The name of the Azure StorageAccount, where the FeaturedItems blobs to be retrieved are located. | string | Y        |
+| FEATURED_ITEMS_CONTAINER_NAME                               | The blob storage container to retrieve FeaturedItems blob                                        | string | Y        |
+| FEATURED_SERVICES_FILE_NAME                                 | The Featured Services Filename in blobStorage container                                          | string | Y        |
+| FEATURED_INSTITUTIONS_FILE_NAME                             | The Featured Institutions Filename in blobStorage container                                      | string | Y        |
+| AZURE_SEARCH_ENDPOINT                                       | The Azure AI Search Endpoint                                                                     | string | Y        |
+| AZURE_SEARCH_SERVICE_VERSION                                | The Azure AI Search Service Version                                                              | string | Y        |
+| AZURE_SEARCH_INSTITUTIONS_INDEX_NAME                        | The Azure AI Search Institutions Index Name                                                      | string | Y        |
+| AZURE_SEARCH_SERVICES_INDEX_NAME                            | The Azure AI Search Services Index Name                                                          | string | Y        |
+| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE(**\*1**)    | The Azure AI Search Institutions Scope Scoring Profile Name (eg BoostScope)                      | string | N        |
+| AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS(**\*1**) | The Azure AI Search Institutions Scope Scoring Parameters(eg boostScope-NATIONAL)                | string | N        |
+| AZURE_SEARCH_API_KEY                                        | The Azure AI Search ApiKey(when not provided use ManagedIdentities)                              | string | N        |
+| PAGINATION_DEFAULT_LIMIT                                    | The Pagination Default limit in Paginated API(default=20)                                        | string | D        |
+| PAGINATION_MAX_LIMIT                                        | The Pagination MAX limit in Paginated API (default=100)                                          | string | D        |
+| PAGINATION_MAX_OFFSET                                       | The Pagination MAX offset in Paginated API (default=100)                                         | string | D        |
+| COSMOSDB_URI                                                | The CosmosDb Uri                                                                                 | string | Y        |
+| COSMOSDB_NAME                                               | The CosmosDb Name                                                                                | string | Y        |
+| COSMOSDB_CONTAINER_SERVICE_DETAILS                          | The CosmosDb Container Name which contains service details                                       | string | Y        |
+| COSMOSDB_KEY                                                | The CosmosDb key(when not provided use ManagedIdentities)                                        | string | N        |
 
 (**\*1**) To Enable Boosting in institutions search both variable **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE_** and **_AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETERS_** must be configured
 

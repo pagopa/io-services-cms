@@ -12,6 +12,8 @@ import { Institution } from "../generated/definitions/internal/Institution";
 import { APPLICATION_NAME, APPLICATION_VERSION } from "../generated/version";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 import { makeAzureSearchHealthCheck } from "../utils/azure-search/health-check";
+import { BlobServiceClientDependency } from "../utils/blob-storage/dependency";
+import { makeAzureBlobStorageHealthCheck } from "../utils/blob-storage/health-check";
 import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency";
 import {
   AzureCosmosProblemSource,
@@ -30,17 +32,16 @@ export const makeInfoHandler: (
 ) => H.Handler<
   H.HttpRequest,
   H.HttpResponse<ApplicationInfo, 200>,
-  ServiceDetailsContainerDependency & AzureSearchClientDependency<Institution>
+  ServiceDetailsContainerDependency &
+    AzureSearchClientDependency<Institution> &
+    BlobServiceClientDependency
 > = (config: IConfig) =>
   H.of((_: H.HttpRequest) =>
     pipe(
       [
         makeCosmosDBHealthCheck,
         makeAzureSearchHealthCheck,
-        () =>
-          healthcheck.checkAzureStorageHealth(
-            config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
-          ),
+        makeAzureBlobStorageHealthCheck(config),
       ] as ReadonlyArray<HealthCheckBuilder>,
       RA.sequence(applicativeValidation),
       RTE.map(() =>

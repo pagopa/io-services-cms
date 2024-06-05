@@ -50,6 +50,7 @@ const servicesSearchClient = makeAzureSearchClient(
 const Info = InfoFn(config)({
   ...serviceDetailsContainerDependency,
   searchClient: institutionsSearchClient,
+  blobServiceClient,
 });
 app.http("Info", {
   authLevel: "anonymous",
