@@ -6,7 +6,6 @@ import { pipe } from "fp-ts/lib/function";
 
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
-import { IConfig } from "../config";
 import { ApplicationInfo } from "../generated/definitions/internal/ApplicationInfo";
 import { Institution } from "../generated/definitions/internal/Institution";
 import { APPLICATION_NAME, APPLICATION_VERSION } from "../generated/version";
@@ -25,30 +24,22 @@ const applicativeValidation = RTE.getApplicativeReaderTaskValidation(
   RA.getSemigroup<healthcheck.HealthProblem<ProblemSource>>()
 );
 
-export const makeInfoHandler: (
-  config: IConfig
-) => H.Handler<
+export const makeInfoHandler: H.Handler<
   H.HttpRequest,
   H.HttpResponse<ApplicationInfo, 200>,
   ServiceDetailsContainerDependency & AzureSearchClientDependency<Institution>
-> = (config: IConfig) =>
-  H.of((_: H.HttpRequest) =>
-    pipe(
-      [
-        makeCosmosDBHealthCheck,
-        makeAzureSearchHealthCheck,
-        () =>
-          healthcheck.checkAzureStorageHealth(
-            config.FEATURED_ITEMS_BLOB_CONNECTION_STRING
-          ),
-      ] as ReadonlyArray<HealthCheckBuilder>,
-      RA.sequence(applicativeValidation),
-      RTE.map(() =>
-        H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
-      ),
-      RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n")))
-    )
-  );
+> = H.of((_: H.HttpRequest) =>
+  pipe(
+    [
+      makeCosmosDBHealthCheck,
+      makeAzureSearchHealthCheck,
+    ] as ReadonlyArray<HealthCheckBuilder>,
+    RA.sequence(applicativeValidation),
+    RTE.map(() =>
+      H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
+    ),
+    RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n")))
+  )
+);
 
-export const InfoFn = (config: IConfig) =>
-  httpAzureFunction(makeInfoHandler(config));
+export const InfoFn = httpAzureFunction(makeInfoHandler);

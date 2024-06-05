@@ -47,7 +47,7 @@ const servicesSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_API_KEY
 );
 
-const Info = InfoFn(config)({
+const Info = InfoFn({
   ...serviceDetailsContainerDependency,
   searchClient: institutionsSearchClient,
 });
