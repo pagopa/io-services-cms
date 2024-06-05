@@ -88,10 +88,6 @@ const ServiceMetadataStrict = t.intersection([
     app_ios: HttpOrHttpsUrlString,
     cta: NonEmptyString,
     description: NonEmptyString,
-    email: EmailString,
-    pec: EmailString,
-    phone: NonEmptyString,
-    support_url: HttpOrHttpsUrlString,
     token_name: NonEmptyString,
     tos_url: HttpOrHttpsUrlString,
     web_url: HttpOrHttpsUrlString,
@@ -99,6 +95,56 @@ const ServiceMetadataStrict = t.intersection([
     custom_special_flow: NonEmptyString,
     topic_id: t.number,
   }),
+  t.union([
+    t.intersection([
+      t.type({
+        email: EmailString,
+      }),
+      t.partial({
+        pec: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        pec: EmailString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        phone: NonEmptyString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        support_url: HttpOrHttpsUrlString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        phone: NonEmptyString,
+      }),
+    ]),
+  ]),
 ]);
 
 export type ServiceId = t.TypeOf<typeof ServiceId>;
