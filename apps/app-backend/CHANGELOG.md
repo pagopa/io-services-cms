@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.11
+
+### Patch Changes
+
+- d8d39a4: Clean App Backend config and old healthchecks
+
 ## 0.0.10
 
 ### Patch Changes
