@@ -1,5 +1,6 @@
-import { pipe } from "fp-ts/lib/function";
+import { identity, pipe } from "fp-ts/lib/function";
 
+import * as B from "fp-ts/boolean";
 import * as TE from "fp-ts/lib/TaskEither";
 
 import {
@@ -12,7 +13,6 @@ import { BlobServiceClientDependency } from "./dependency";
 
 export type AzureBlobStorageProblemSource = "AzureBlobStorage";
 
-// : HealthCheck<AzureBlobStorageProblemSource>
 export const makeAzureBlobStorageHealthCheck =
   (featuredItemsConfig: FeaturedItemsConfig) =>
   ({
@@ -29,14 +29,19 @@ export const makeAzureBlobStorageHealthCheck =
           // eslint-disable-next-line functional/immutable-data
           blobNames.push(blob.name);
         }
-        if (
-          !blobNames.includes(
+        return blobNames;
+      }, identity),
+      TE.chainW((blobNames) =>
+        pipe(
+          blobNames.includes(
             featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME
-          ) ||
-          !blobNames.includes(featuredItemsConfig.FEATURED_SERVICES_FILE_NAME)
-        ) {
-          throw new Error("Required blob files are missing");
-        }
-      }, toHealthProblems("AzureBlobStorage" as const)),
-      TE.map(() => true)
+          ) &&
+            blobNames.includes(featuredItemsConfig.FEATURED_SERVICES_FILE_NAME),
+          B.fold(
+            () => TE.left(new Error("Required blob files are missing")),
+            () => TE.right(true as const)
+          )
+        )
+      ),
+      TE.mapLeft(toHealthProblems("AzureBlobStorage" as const))
     );
