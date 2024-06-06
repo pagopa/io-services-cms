@@ -7,7 +7,10 @@ import { Institution } from "../../generated/definitions/internal/Institution";
 import { AzureSearchClient } from "../../utils/azure-search/client";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { mockSearchInstitutionsResult } from "../__mocks__/search-institutions-mock";
-import { makeSearchInstitutionsHandler } from "../search-institutions";
+import {
+  DEFAULT_ORDER_BY,
+  makeSearchInstitutionsHandler,
+} from "../search-institutions";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 const mockedConfiguration = {
@@ -35,6 +38,7 @@ describe("Search Institutions Tests", () => {
 
     expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
+        orderBy: [DEFAULT_ORDER_BY],
         top: 20,
       })
     );
@@ -79,6 +83,7 @@ describe("Search Institutions Tests", () => {
 
     expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
+        orderBy: [DEFAULT_ORDER_BY],
         top: 20,
       })
     );
@@ -105,7 +110,7 @@ describe("Search Institutions Tests", () => {
       ...H.request("127.0.0.1"),
       query: {
         search: "Mila",
-        scope: "NATIONAL",
+        scope: "LOCAL",
         limit: "10",
         offset: "0",
       },
@@ -120,9 +125,50 @@ describe("Search Institutions Tests", () => {
     expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         searchText: "Mila",
+        filter: "scope eq 'LOCAL'",
+        top: 10,
+        skip: 0,
+        orderBy: undefined,
+      })
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count: mockSearchInstitutionsResult.count,
+            limit: 10,
+            offset: 0,
+          },
+          statusCode: 200,
+        })
+      )
+    );
+  });
+
+  it("Should Use the default orderBy When request params not contains search", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        scope: "NATIONAL",
+        limit: "10",
+        offset: "0",
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
         filter: "scope eq 'NATIONAL'",
         top: 10,
         skip: 0,
+        orderBy: [DEFAULT_ORDER_BY],
       })
     );
 
@@ -166,6 +212,7 @@ describe("Search Institutions Tests", () => {
         searchText: "Age",
         scoringProfile: "aScoringProfile",
         scoringParameters: ["aTag-aValue"],
+        orderBy: undefined,
       })
     );
 
@@ -206,6 +253,7 @@ describe("Search Institutions Tests", () => {
     expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         searchText: "Age",
+        orderBy: undefined,
       })
     );
 
@@ -255,6 +303,7 @@ describe("Search Institutions Tests", () => {
         filter: "scope eq 'NATIONAL'",
         top: 10,
         skip: 0,
+        orderBy: undefined,
       })
     );
 
@@ -272,8 +321,6 @@ describe("Search Institutions Tests", () => {
   });
 
   it("Should Return Bad Request on bad query parameters", async () => {
-    const errorMessage = "An Error occured while searching";
-
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
       query: {

@@ -24,6 +24,7 @@ export type FullTextSearchParam = {
   readonly filter?: string;
   readonly scoringProfile?: string;
   readonly scoringParameters?: string[];
+  readonly orderBy?: string[];
 };
 
 export type AzureSearchClient<T> = {
@@ -33,6 +34,9 @@ export type AzureSearchClient<T> = {
     skip,
     top,
     filter,
+    scoringProfile,
+    scoringParameters,
+    orderBy,
   }: FullTextSearchParam) => TE.TaskEither<Error, SearchMappedResult<T>>;
 };
 
@@ -68,6 +72,7 @@ export const makeAzureSearchClient = <T>(
     filter,
     scoringProfile,
     scoringParameters,
+    orderBy,
   }: FullTextSearchParam): TE.TaskEither<Error, SearchMappedResult<T>> =>
     pipe(
       TE.tryCatch(
@@ -80,6 +85,7 @@ export const makeAzureSearchClient = <T>(
             scoringProfile,
             skip,
             top,
+            orderBy,
           }),
         E.toError
       ),
@@ -87,7 +93,7 @@ export const makeAzureSearchClient = <T>(
         pipe(
           response,
           O.fromPredicate((r) => r.count !== undefined && r.count > 0),
-          O.fold(
+          O.foldW(
             () => TE.right({ count: 0, resources: [] }),
             (r) =>
               pipe(

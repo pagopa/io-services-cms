@@ -31,6 +31,7 @@ type SearchInstitutionsRequestQueryParams = {
   limit: number;
   offset: O.Option<number>;
 };
+export const DEFAULT_ORDER_BY = "name asc";
 
 const calculateScopeFilter = (scope: O.Option<ScopeType>): string | undefined =>
   pipe(
@@ -92,6 +93,14 @@ const executeSearch: (
             O.toUndefined
           ),
           filter: calculateScopeFilter(requestQueryParams.scope),
+          orderBy: pipe(
+            requestQueryParams.search,
+            O.isNone,
+            B.fold(
+              () => undefined, // when search text is provided, result will be ordered by relevance(search rank)
+              () => [DEFAULT_ORDER_BY] // when no search text is provided, result will be ordered by name asc
+            )
+          ),
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
