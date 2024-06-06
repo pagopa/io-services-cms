@@ -24,7 +24,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
 
         capacity = {
           default = local.app_be.autoscale_settings.default + 1
-          minimum = local.app_be.autoscale_settings.min + 1
+          minimum = local.app_be.autoscale_settings.min
           maximum = local.app_be.autoscale_settings.max
         }
       },
@@ -38,7 +38,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
 
         capacity = {
           default = local.app_be.autoscale_settings.default + 1
-          minimum = local.app_be.autoscale_settings.min + 1
+          minimum = local.app_be.autoscale_settings.min
           maximum = local.app_be.autoscale_settings.max
         }
       },
@@ -52,7 +52,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
 
         capacity = {
           default = local.app_be.autoscale_settings.default + 2
-          minimum = local.app_be.autoscale_settings.min + 2
+          minimum = local.app_be.autoscale_settings.min
           maximum = local.app_be.autoscale_settings.max
         }
       },

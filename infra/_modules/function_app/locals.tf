@@ -18,7 +18,7 @@ locals {
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
     }
     autoscale_settings = {
-      min     = 1
+      min     = 3
       max     = 30
       default = 3
     }
