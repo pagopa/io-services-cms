@@ -322,8 +322,8 @@ export const createServiceValidationHandler: ServiceValidationHandler =
       parseIncomingMessage,
       E.map((x) =>
         isServiceAllowedForQualitySkip(config, x.id)
-          ? E.chainW(validate)
-          : E.chainW(validateForExclusionList)
+          ? validateForExclusionList
+          : validate
       ),
       TE.fromEither,
       (x) => x,
