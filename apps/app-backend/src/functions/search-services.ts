@@ -31,6 +31,8 @@ type SearchServicesRequestParams = {
   offset: O.Option<number>;
 };
 
+export const DEFAULT_ORDER_BY = "name asc";
+
 const executeSearch: (
   requestQueryParams: SearchServicesRequestParams
 ) => RTE.ReaderTaskEither<
@@ -50,6 +52,7 @@ const executeSearch: (
         searchClient.fullTextSearch({
           ...paginationProperties,
           filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
+          orderBy: [DEFAULT_ORDER_BY],
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
