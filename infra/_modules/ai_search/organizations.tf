@@ -387,7 +387,7 @@ resource "restapi_object" "organizations_alias" {
   data = jsonencode(
     {
       name    = local.index_aliases.organizations
-      indexes = [restapi_object.organizations_index_01.id]
+      indexes = [restapi_object.organizations_index_02.id]
     }
   )
   force_new    = ["indexes"]
