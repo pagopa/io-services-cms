@@ -1,8 +1,3 @@
-import {
-  ChatRounded,
-  DoneAllRounded,
-  NotificationsActiveRounded
-} from "@mui/icons-material";
 import { Box, List, ListItem, Switch } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "next-i18next";
@@ -12,8 +7,8 @@ import {
   MOBILE_COLOR_GREY_850,
   MobileTypography
 } from "../../components";
-import { ServicePreviewSectionTitle } from "./";
 import MobileIcon from "../../mobile-icon";
+import { ServicePreviewSectionTitle } from "./";
 
 type NotificationType = {
   isVisible: boolean;
@@ -104,7 +99,12 @@ const ServicePreviewNotificationsSection = () => {
                       {t(value.text)}
                     </MobileTypography>
                   </Box>
-                  <Box display="flex" flexGrow={1} justifyContent="flex-end">
+                  <Box
+                    display="flex"
+                    flexGrow={1}
+                    justifyContent="flex-end"
+                    marginRight={-1}
+                  >
                     <Switch
                       checked={value.checked}
                       onChange={(_, checked) => handleChange(index, checked)}

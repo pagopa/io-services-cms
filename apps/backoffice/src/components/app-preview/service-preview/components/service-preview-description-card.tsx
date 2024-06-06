@@ -32,8 +32,7 @@ const ServicePreviewDescriptionCard = ({
       <span
         style={{
           color: MOBILE_COLOR_GREY_850,
-          fontFamily: "'Readex Pro', sans-serif",
-          fontSize: "14px",
+          fontSize: "16px",
           lineHeight: "24px"
         }}
       >

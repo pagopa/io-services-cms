@@ -1,5 +1,9 @@
 import { Box } from "@mui/material";
-import { MOBILE_COLOR_GREY_850, MobileTypography } from "../../components";
+import {
+  MOBILE_COLOR_GREY_850,
+  MOBILE_COLOR_GREY_TOPBAR,
+  MobileTypography
+} from "../../components";
 import MobileIcon from "../../mobile-icon";
 
 type ServicePreviewTopbarProps = {
@@ -21,6 +25,7 @@ const ServicePreviewTopbar = ({
       alignItems="center"
       paddingY={2}
       paddingX={3}
+      borderBottom={`1px solid ${MOBILE_COLOR_GREY_TOPBAR}`}
       sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
     >
       <MobileIcon
@@ -36,8 +41,9 @@ const ServicePreviewTopbar = ({
         fontWeight={400}
         lineHeight="33px"
         textOverflow="ellipsis"
+        paddingX={2}
         sx={{
-          opacity: opacity
+          opacity
         }}
       >
         {serviceName}
