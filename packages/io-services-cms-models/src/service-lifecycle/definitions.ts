@@ -147,6 +147,30 @@ const ServiceMetadataStrict = t.intersection([
   ]),
 ]);
 
+const ServiceMetadataExclusionListType = t.intersection([
+  t.type({
+    scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
+  }),
+  t.partial({
+    address: NonEmptyString,
+    app_android: HttpOrHttpsUrlString,
+    app_ios: HttpOrHttpsUrlString,
+    cta: NonEmptyString,
+    description: NonEmptyString,
+    email: EmailString,
+    pec: EmailString,
+    phone: NonEmptyString,
+    privacy_url: HttpOrHttpsUrlString,
+    support_url: HttpOrHttpsUrlString,
+    token_name: NonEmptyString,
+    tos_url: HttpOrHttpsUrlString,
+    web_url: HttpOrHttpsUrlString,
+    category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
+    custom_special_flow: NonEmptyString,
+    topic_id: t.number,
+  }),
+]);
+
 export type ServiceId = t.TypeOf<typeof ServiceId>;
 export const ServiceId = NonEmptyString;
 
@@ -174,6 +198,26 @@ export const ServiceStrict = t.intersection([
       t.type({
         organization: OrganizationData,
         metadata: ServiceMetadataStrict,
+      }),
+    ]),
+  }),
+  t.partial({
+    version: NonEmptyString,
+    last_update: NonEmptyString,
+  }),
+]);
+
+export type ServiceQualityExclusionListType = t.TypeOf<
+  typeof ServiceQualityExclusionListType
+>;
+export const ServiceQualityExclusionListType = t.intersection([
+  t.type({
+    id: ServiceId,
+    data: t.intersection([
+      ServiceData,
+      t.type({
+        organization: OrganizationData,
+        metadata: ServiceMetadataExclusionListType,
       }),
     ]),
   }),

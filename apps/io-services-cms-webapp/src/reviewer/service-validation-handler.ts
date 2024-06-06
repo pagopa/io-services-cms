@@ -14,9 +14,11 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
 import lodash from "lodash";
+import { HttpOrHttpsUrlString } from "@io-services-cms/models/service-lifecycle/definitions";
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper } from "../utils/cosmos-helper";
+import { isServiceAllowedForQualitySkip } from "../utils/feature-flag-handler";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -55,9 +57,9 @@ const ValidSecureChannelTrueConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        tos_url:
-          Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-            .props.metadata.types[1].props.tos_url,
+        tos_url: HttpOrHttpsUrlString,
+        // Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
+        //   .props.metadata.types[1].props.tos_url,
       }),
     }),
   ]),
@@ -92,7 +94,8 @@ const validate = (
   pipe(
     item,
     ValidSecureChannelService.decode,
-    E.chain(flow(Queue.RequestReviewItemStrict.decode)),
+    E.chain(flow(Queue.RequestReviewItemStrict2.decode)),
+    (x) => x,
     E.mapLeft(
       flow(readableReport, (errorMessage) => ({
         serviceId: item.id,
@@ -100,6 +103,44 @@ const validate = (
       }))
     )
   );
+
+const validateForExclusionList = (
+  item: Queue.RequestReviewItem
+): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
+  pipe(
+    item,
+    ValidSecureChannelService.decode,
+    E.chain(flow(Queue.RequestReviewItemExclusionListType.decode)),
+    (x) => x,
+    E.mapLeft(
+      flow(readableReport, (errorMessage) => ({
+        serviceId: item.id,
+        reason: errorMessage,
+      }))
+    )
+  );
+
+// const testcode = (
+//   item: Queue.RequestReviewItem,
+//   config: IConfig
+// ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
+//   pipe(
+//     item,
+//     ValidSecureChannelService.decode,
+//     /* if (item.newQualityCkeckType.decode && isServiceInQualityCheckExclusionList) => return Queue.RequestReviewItemStrict
+//        else quello dopo */
+//     isServiceAllowedForQualitySkip(config, item.id)
+//       ? E.chain(flow(Queue.RequestReviewItemExclusionListType.decode))
+//       : E.chain(flow(Queue.RequestReviewItemStrict.decode)),
+
+//     (x) => x,
+//     E.mapLeft(
+//       flow(readableReport, (errorMessage) => ({
+//         serviceId: item.id,
+//         reason: errorMessage,
+//       }))
+//     )
+//   );
 
 const getDuplicatesOnServicePublication =
   (servicePublicationCosmosHelper: CosmosHelper) =>
@@ -279,8 +320,13 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     pipe(
       item,
       parseIncomingMessage,
-      E.chainW(validate),
+      E.map((x) =>
+        isServiceAllowedForQualitySkip(config, x.id)
+          ? E.chainW(validate)
+          : E.chainW(validateForExclusionList)
+      ),
       TE.fromEither,
+      (x) => x,
       TE.chainW(
         validateDuplicates(
           servicePublicationCosmosHelper,
