@@ -1,5 +1,12 @@
 # io-services-app-backend
 
+## 0.0.12
+
+### Patch Changes
+
+- 2b0a54f: Default order on SearchInstitutions on no searchText provided
+- d98b3e1: Search Institution Services now will order by service name
+
 ## 0.0.11
 
 ### Patch Changes
