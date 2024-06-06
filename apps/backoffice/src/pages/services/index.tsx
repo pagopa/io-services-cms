@@ -99,7 +99,10 @@ export default function Services() {
               <CallSplit fontSize="small" color="primary" />
             ) : null
           }
-          sx={{ fontWeight: 700, textAlign: "left" }}
+          sx={{
+            textAlign: "left",
+            width: "100%"
+          }}
           disabled={isServiceStatusValueDeleted(service.status.value)}
           onClick={() =>
             hasTwoDifferentVersions(service)
@@ -107,7 +110,20 @@ export default function Services() {
               : router.push(`/services/${service.id}`)
           }
         >
-          {service.name}
+          <Typography
+            fontWeight={700}
+            color="primary.main"
+            noWrap
+            style={{
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              display: "block",
+              width: "100%"
+            }}
+          >
+            {service.name}
+          </Typography>
         </Button>
       )
     },

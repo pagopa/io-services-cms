@@ -127,6 +127,7 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
                       <TableCell
                         key={`tb-row-${tbRowIndex}-col-${tbColIndex}`}
                         align={col.alignment}
+                        sx={{ maxWidth: "300px" }}
                       >
                         <LoaderSkeleton
                           loading={props.loading ?? false}
