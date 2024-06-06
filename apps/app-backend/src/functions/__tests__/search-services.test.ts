@@ -6,7 +6,10 @@ import { IConfig } from "../../config";
 import { AzureSearchClient } from "../../utils/azure-search/client";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { mockSearchServicesResult } from "../__mocks__/search-services-mock";
-import { makeSearchServicesHandler } from "../search-services";
+import {
+  DEFAULT_ORDER_BY,
+  makeSearchServicesHandler,
+} from "../search-services";
 import { ServiceMinified } from "../../generated/definitions/internal/ServiceMinified";
 
 const mockedConfiguration = {
@@ -38,6 +41,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         top: 20,
+        orderBy: [DEFAULT_ORDER_BY],
       })
     );
 
@@ -77,6 +81,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         filter: "orgFiscalCode eq '01234567891'",
+        orderBy: [DEFAULT_ORDER_BY],
         top: 10,
         skip: 0,
       })
@@ -128,6 +133,7 @@ describe("Search Services Tests", () => {
         filter: "orgFiscalCode eq '01234567891'",
         top: 10,
         skip: 0,
+        orderBy: [DEFAULT_ORDER_BY],
       })
     );
 
