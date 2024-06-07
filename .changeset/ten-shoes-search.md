@@ -2,4 +2,4 @@
 "io-services-app-backend": patch
 ---
 
-Increase Default Max Pagination Offset on app-backend
+Increase Default Max Pagination Offset and fix search services pagination validation on app-backend
