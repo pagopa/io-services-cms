@@ -5,7 +5,7 @@ import { ItemType as LifecycleItemType } from "../service-lifecycle";
 import {
   Service,
   ServiceId,
-  ServiceQualityExclusionListType,
+  ServiceQualityStrict,
   ServiceStrict,
 } from "../service-lifecycle/definitions";
 import { ItemType as PublicationItemType } from "../service-publication";
@@ -27,40 +27,22 @@ export const RequestDetailItem = t.intersection([
   }),
 ]);
 
-export type RequestReviewItemStrict2 = t.TypeOf<
-  typeof RequestReviewItemStrict2
->;
-export const RequestReviewItemStrict2 = t.intersection([
+export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
+export const RequestReviewItemStrict = t.intersection([
   ServiceStrict,
   t.type({
     version: NonEmptyString, // version required
   }),
 ]);
 
-export type RequestReviewItemExclusionListType = t.TypeOf<
-  typeof RequestReviewItemExclusionListType
+export type RequestReviewItemQualityStrict = t.TypeOf<
+  typeof RequestReviewItemQualityStrict
 >;
-export const RequestReviewItemExclusionListType = t.intersection([
-  ServiceQualityExclusionListType,
+export const RequestReviewItemQualityStrict = t.intersection([
+  ServiceQualityStrict,
   t.type({
     version: NonEmptyString, // version required
   }),
-]);
-
-export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
-export const RequestReviewItemStrict = t.union([
-  t.intersection([
-    ServiceStrict,
-    t.type({
-      version: NonEmptyString, // version required
-    }),
-  ]),
-  t.intersection([
-    ServiceQualityExclusionListType,
-    t.type({
-      version: NonEmptyString, // version required
-    }),
-  ]),
 ]);
 
 export type RequestPublicationItem = t.TypeOf<typeof RequestPublicationItem>;
