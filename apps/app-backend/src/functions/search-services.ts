@@ -85,7 +85,10 @@ const extractParams: (
               1,
               NonNegativeInteger,
               IWithinRangeIntegerTag<1, NonNegativeInteger>
-            >(1, paginationConfig.PAGINATION_MAX_LIMIT)
+            >(
+              1,
+              (paginationConfig.PAGINATION_MAX_LIMIT + 1) as NonNegativeInteger
+            )
           )
         ),
         RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT))
@@ -97,7 +100,10 @@ const extractParams: (
             0,
             NonNegativeInteger,
             IWithinRangeIntegerTag<0, NonNegativeInteger>
-          >(0, paginationConfig.PAGINATION_MAX_OFFSET)
+          >(
+            0,
+            (paginationConfig.PAGINATION_MAX_OFFSET + 1) as NonNegativeInteger
+          )
         )
       ),
     })
