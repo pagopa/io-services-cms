@@ -68,7 +68,7 @@ export const PaginationConfig = t.type({
   ),
   PAGINATION_MAX_OFFSET: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100" as unknown as NonNegativeInteger
+    "500" as unknown as NonNegativeInteger
   ),
 });
 
