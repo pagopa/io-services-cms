@@ -10,11 +10,11 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
 import lodash from "lodash";
-import { HttpOrHttpsUrlString } from "@io-services-cms/models/service-lifecycle/definitions";
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper } from "../utils/cosmos-helper";
@@ -57,9 +57,9 @@ const ValidSecureChannelTrueConfig = t.type({
     }),
     t.type({
       metadata: t.type({
-        tos_url: HttpOrHttpsUrlString,
-        // Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-        //   .props.metadata.types[1].props.tos_url,
+        tos_url:
+          Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
+            .props.metadata.types[1].props.tos_url,
       }),
     }),
   ]),
@@ -88,13 +88,39 @@ const parseIncomingMessage = (
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
-const validate = (
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const validate =
+  (item: Queue.RequestReviewItem) =>
+  (
+    qualitySkip: boolean
+  ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
+    pipe(
+      item,
+      ValidSecureChannelService.decode,
+      E.chain((s) =>
+        pipe(
+          qualitySkip,
+          B.fold(
+            () => Queue.RequestReviewItemQualityStrict.decode(s),
+            () => Queue.RequestReviewItemStrict.decode(s)
+          )
+        )
+      ),
+      E.mapLeft(
+        flow(readableReport, (errorMessage) => ({
+          serviceId: item.id,
+          reason: errorMessage,
+        }))
+      )
+    );
+
+const validateServiceInExclusionList = (
   item: Queue.RequestReviewItem
 ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
   pipe(
     item,
     ValidSecureChannelService.decode,
-    E.chain(flow(Queue.RequestReviewItemStrict2.decode)),
+    E.chain(flow(Queue.RequestReviewItemStrict.decode)),
     (x) => x,
     E.mapLeft(
       flow(readableReport, (errorMessage) => ({
@@ -104,13 +130,13 @@ const validate = (
     )
   );
 
-const validateForExclusionList = (
+const validateServiceNotInExclusionList = (
   item: Queue.RequestReviewItem
 ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
   pipe(
     item,
     ValidSecureChannelService.decode,
-    E.chain(flow(Queue.RequestReviewItemExclusionListType.decode)),
+    E.chain(flow(Queue.RequestReviewItemQualityStrict.decode)),
     (x) => x,
     E.mapLeft(
       flow(readableReport, (errorMessage) => ({
@@ -119,28 +145,6 @@ const validateForExclusionList = (
       }))
     )
   );
-
-// const testcode = (
-//   item: Queue.RequestReviewItem,
-//   config: IConfig
-// ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
-//   pipe(
-//     item,
-//     ValidSecureChannelService.decode,
-//     /* if (item.newQualityCkeckType.decode && isServiceInQualityCheckExclusionList) => return Queue.RequestReviewItemStrict
-//        else quello dopo */
-//     isServiceAllowedForQualitySkip(config, item.id)
-//       ? E.chain(flow(Queue.RequestReviewItemExclusionListType.decode))
-//       : E.chain(flow(Queue.RequestReviewItemStrict.decode)),
-
-//     (x) => x,
-//     E.mapLeft(
-//       flow(readableReport, (errorMessage) => ({
-//         serviceId: item.id,
-//         reason: errorMessage,
-//       }))
-//     )
-//   );
 
 const getDuplicatesOnServicePublication =
   (servicePublicationCosmosHelper: CosmosHelper) =>
@@ -320,10 +324,16 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     pipe(
       item,
       parseIncomingMessage,
-      E.map((x) =>
-        isServiceAllowedForQualitySkip(config, x.id)
-          ? validateForExclusionList
-          : validate
+      // E.chainW((parsed) =>
+      //   pipe(
+      //     isServiceAllowedForQualitySkip(config, parsed.id),
+      //     validate(parsed)
+      //   )
+      // ),
+      E.chainW((parsed) =>
+        isServiceAllowedForQualitySkip(config, parsed.id)
+          ? validateServiceInExclusionList(parsed)
+          : validateServiceNotInExclusionList(parsed)
       ),
       TE.fromEither,
       (x) => x,
