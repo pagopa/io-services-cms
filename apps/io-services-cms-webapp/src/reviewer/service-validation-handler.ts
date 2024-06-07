@@ -121,7 +121,6 @@ const validateServiceInExclusionList = (
     item,
     ValidSecureChannelService.decode,
     E.chain(flow(Queue.RequestReviewItemStrict.decode)),
-    (x) => x,
     E.mapLeft(
       flow(readableReport, (errorMessage) => ({
         serviceId: item.id,
@@ -137,7 +136,6 @@ const validateServiceNotInExclusionList = (
     item,
     ValidSecureChannelService.decode,
     E.chain(flow(Queue.RequestReviewItemQualityStrict.decode)),
-    (x) => x,
     E.mapLeft(
       flow(readableReport, (errorMessage) => ({
         serviceId: item.id,
@@ -336,7 +334,6 @@ export const createServiceValidationHandler: ServiceValidationHandler =
           : validateServiceNotInExclusionList(parsed)
       ),
       TE.fromEither,
-      (x) => x,
       TE.chainW(
         validateDuplicates(
           servicePublicationCosmosHelper,
