@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-Sixed multiline service name and status chips
+Fixed multiline service name and status chips
