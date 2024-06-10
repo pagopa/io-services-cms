@@ -10,7 +10,6 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
@@ -87,32 +86,6 @@ const parseIncomingMessage = (
     Queue.RequestReviewItem.decode,
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const validate =
-  (item: Queue.RequestReviewItem) =>
-  (
-    qualitySkip: boolean
-  ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
-    pipe(
-      item,
-      ValidSecureChannelService.decode,
-      E.chain((s) =>
-        pipe(
-          qualitySkip,
-          B.fold(
-            () => Queue.RequestReviewItemQualityStrict.decode(s),
-            () => Queue.RequestReviewItemStrict.decode(s)
-          )
-        )
-      ),
-      E.mapLeft(
-        flow(readableReport, (errorMessage) => ({
-          serviceId: item.id,
-          reason: errorMessage,
-        }))
-      )
-    );
 
 const validateServiceInExclusionList = (
   item: Queue.RequestReviewItem
@@ -322,12 +295,6 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     pipe(
       item,
       parseIncomingMessage,
-      // E.chainW((parsed) =>
-      //   pipe(
-      //     isServiceAllowedForQualitySkip(config, parsed.id),
-      //     validate(parsed)
-      //   )
-      // ),
       E.chainW((parsed) =>
         isServiceAllowedForQualitySkip(config, parsed.id)
           ? validateServiceInExclusionList(parsed)
