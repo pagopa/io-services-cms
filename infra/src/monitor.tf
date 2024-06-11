@@ -15,7 +15,7 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "poison-queue-alert" {
   location            = azurerm_resource_group.rg.location
   scopes              = [module.storage_account.id]
   description         = "Storage Account [${module.storage_account.name}] poison queue contains messages, this happen on multiple failures in message process by the QueueTrigger Azure Functions"
-  severity            = 0
+  severity            = 1
 
   window_duration      = "PT15M" # Select the interval that's used to group the data points by using the aggregation type function. Choose an Aggregation granularity (period) that's greater than the Frequency of evaluation to reduce the likelihood of missing the first evaluation period of an added time series.
   evaluation_frequency = "PT15M" # Select how often the alert rule is to be run. Select a frequency that's smaller than the aggregation granularity to generate a sliding window for the evaluation.
