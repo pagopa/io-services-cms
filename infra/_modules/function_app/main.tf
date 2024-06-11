@@ -29,7 +29,7 @@ module "app_be_fn" {
   app_settings      = local.app_be.app_settings
   slot_app_settings = local.app_be.app_settings
 
-  tier = "premium"
+  tier = local.app_be.tier
 
   application_insights_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
