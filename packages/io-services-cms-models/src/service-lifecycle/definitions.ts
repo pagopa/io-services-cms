@@ -77,6 +77,76 @@ export const ServiceMetadata = t.intersection([
   }),
 ]);
 
+const ServiceMetadataQualityStrict = t.intersection([
+  t.type({
+    scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
+    privacy_url: HttpOrHttpsUrlString,
+  }),
+  t.partial({
+    address: NonEmptyString,
+    app_android: HttpOrHttpsUrlString,
+    app_ios: HttpOrHttpsUrlString,
+    cta: NonEmptyString,
+    description: NonEmptyString,
+    token_name: NonEmptyString,
+    tos_url: HttpOrHttpsUrlString,
+    web_url: HttpOrHttpsUrlString,
+    category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
+    custom_special_flow: NonEmptyString,
+    topic_id: t.number,
+  }),
+  t.union([
+    t.intersection([
+      t.type({
+        email: EmailString,
+      }),
+      t.partial({
+        pec: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        pec: EmailString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        phone: NonEmptyString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        support_url: HttpOrHttpsUrlString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        phone: NonEmptyString,
+      }),
+    ]),
+  ]),
+]);
+
 const ServiceMetadataStrict = t.intersection([
   t.type({
     scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
@@ -134,5 +204,19 @@ export const ServiceStrict = t.intersection([
   t.partial({
     version: NonEmptyString,
     last_update: NonEmptyString,
+  }),
+]);
+
+export type ServiceQualityStrict = t.TypeOf<typeof ServiceQualityStrict>;
+export const ServiceQualityStrict = t.intersection([
+  ServiceStrict,
+  t.type({
+    data: t.intersection([
+      ServiceData,
+      t.type({
+        organization: OrganizationData,
+        metadata: ServiceMetadataQualityStrict,
+      }),
+    ]),
   }),
 ]);
