@@ -93,6 +93,9 @@ export function TextFieldArrayController({
   const showErrorMessage = (message: any) =>
     showGenericErrorMessage ? t("forms.errors.field.invalid") : message;
 
+  // managing the disable state when not in edit mode
+  const [isInEditMode, setIsInEditMode] = useState(false);
+
   useEffect(() => {
     setRenderedFields(initializeFieldsStatus());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,6 +122,13 @@ export function TextFieldArrayController({
                     {...register(getFieldName(index))}
                     {...props}
                     margin="normal"
+                    sx={
+                      !isInEditMode
+                        ? {
+                            pointerEvents: "none"
+                          }
+                        : {}
+                    }
                     size={props.size}
                     value={value}
                     label={itemLabel ? `${t(itemLabel)} - ${index + 1}` : null}
@@ -154,6 +164,7 @@ export function TextFieldArrayController({
                         renderedFields[index].readOnly = false;
                         renderedFields[index].editable = true;
                         setRenderedFields({ ...renderedFields });
+                        setIsInEditMode(true);
                       }}
                     >
                       <Edit fontSize="small" />
@@ -182,12 +193,24 @@ export function TextFieldArrayController({
           marginBottom={2}
         >
           {addSaveButton ? (
-            <Button variant="contained" onClick={onSaveClick}>
+            <Button
+              variant="contained"
+              onClick={() => {
+                onSaveClick && onSaveClick();
+                setIsInEditMode(false);
+              }}
+            >
               {t("buttons.save")}
             </Button>
           ) : null}
           {addCancelButton ? (
-            <Button variant="outlined" onClick={onCancelClick}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                onCancelClick && onCancelClick();
+                setIsInEditMode(false);
+              }}
+            >
               {t("buttons.cancel")}
             </Button>
           ) : null}
