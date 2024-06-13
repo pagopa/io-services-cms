@@ -1,4 +1,4 @@
-import { AvatarLogo } from "./avatar-logo";
+import AvatarLogo from "./avatar-logo";
 import { MobileTypography } from "./mobile-typography";
 
 export { AvatarLogo, MobileTypography };

@@ -1,104 +1,141 @@
-import {
-  Box,
-  IconButton,
-  ListItem,
-  ListItemButton,
-  Stack
-} from "@mui/material";
+import { Box, ListItem, ListItemButton, Stack } from "@mui/material";
 import { ReactNode } from "react";
 import {
   MOBILE_COLOR_BLUE_IO_500,
+  MOBILE_COLOR_GREY_100,
   MOBILE_COLOR_GREY_300,
   MOBILE_COLOR_GREY_700,
   MOBILE_COLOR_GREY_850,
   MobileTypography
 } from "../../components";
 
-type ServicePreviewSectionListItemProps = {
+export type ServicePreviewSectionListItemProps = {
   variant: "link" | "info";
   startIcon: ReactNode;
   endIcon?: ReactNode;
-  text: string;
-  url?: string;
+  value?: string;
   label?: string;
-  copiable: boolean;
+  isUrl?: boolean;
+  isEmail?: boolean;
+  hideDivider?: boolean;
 };
 
-const ServicePreviewSectionListItem = ({
-  variant,
-  startIcon,
-  endIcon,
-  text,
-  url,
-  label,
-  copiable
-}: ServicePreviewSectionListItemProps) => {
+const ServicePreviewSectionListItem = (
+  props: ServicePreviewSectionListItemProps
+) => {
+  if (!props.value) {
+    return <></>;
+  }
+
   return (
     <>
-      {variant === "link" && (
-        <ListItemButton
-          component="a"
-          href={url}
-          target="_blank"
-          sx={{ paddingX: 3, paddingY: 1.5 }}
-          divider
-        >
-          <Stack gap={1.5} flexDirection="row">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              width={24}
-              fontSize="24px"
-              color={MOBILE_COLOR_BLUE_IO_500}
-            >
-              {startIcon}
-            </Box>
-            <Box display="flex" justifyContent="center" flexDirection="column">
-              <MobileTypography fontSize={16} color={MOBILE_COLOR_BLUE_IO_500}>
-                {text}
-              </MobileTypography>
-            </Box>
-          </Stack>
-        </ListItemButton>
+      {props.variant === "link" && (
+        <ServicePreviewSectionListItemLink {...props} />
       )}
-      {variant === "info" && (
-        <ListItem sx={{ paddingX: 3, paddingY: 1.5 }} divider>
-          <Stack gap={1.5} flexDirection="row" width="100%">
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              width={24}
-              fontSize="24px"
-              color={MOBILE_COLOR_GREY_300}
-            >
-              {startIcon}
-            </Box>
-            <Box display="flex" justifyContent="center" flexDirection="column">
-              <MobileTypography fontSize={14} color={MOBILE_COLOR_GREY_700}>
-                {text}
-              </MobileTypography>
-              <MobileTypography fontSize={16} color={MOBILE_COLOR_GREY_850}>
-                {label}
-              </MobileTypography>
-            </Box>
+      {props.variant === "info" && (
+        <ServicePreviewSectionListItemInfo {...props} />
+      )}
+    </>
+  );
+};
+
+const manageDivider = (hideDivider?: boolean) =>
+  hideDivider ? "" : `1px solid ${MOBILE_COLOR_GREY_100}`;
+
+const ServicePreviewSectionListItemLink = ({
+  startIcon,
+  value,
+  label,
+  isUrl,
+  isEmail,
+  hideDivider
+}: ServicePreviewSectionListItemProps) => {
+  const manageLinkFormat = () =>
+    isUrl ? value : isEmail ? `mailto:${value}` : undefined;
+
+  return (
+    <ListItemButton
+      component="a"
+      href={manageLinkFormat()}
+      target="_blank"
+      sx={{ paddingX: 3, paddingY: 0 }}
+    >
+      <Box
+        display="flex"
+        flex={1}
+        paddingY={1.5}
+        borderBottom={manageDivider(hideDivider)}
+      >
+        <Stack gap={1.5} flexDirection="row">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            width={24}
+            fontSize="24px"
+            color={MOBILE_COLOR_BLUE_IO_500}
+          >
+            {startIcon}
+          </Box>
+          <Box display="flex" justifyContent="center" flexDirection="column">
+            <MobileTypography fontSize={16} color={MOBILE_COLOR_BLUE_IO_500}>
+              {label}
+            </MobileTypography>
+          </Box>
+        </Stack>
+      </Box>
+    </ListItemButton>
+  );
+};
+
+const ServicePreviewSectionListItemInfo = ({
+  startIcon,
+  endIcon,
+  value,
+  label,
+  hideDivider
+}: ServicePreviewSectionListItemProps) => {
+  return (
+    <ListItem sx={{ paddingX: 3, paddingY: 0 }}>
+      <Box
+        display="flex"
+        flex={1}
+        paddingY={1.5}
+        borderBottom={manageDivider(hideDivider)}
+      >
+        <Stack gap={1.5} flexDirection="row" width="100%">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            width={24}
+            fontSize="24px"
+            color={MOBILE_COLOR_GREY_300}
+          >
+            {startIcon}
+          </Box>
+          <Box display="flex" justifyContent="center" flexDirection="column">
+            <MobileTypography fontSize={14} color={MOBILE_COLOR_GREY_700}>
+              {label}
+            </MobileTypography>
+            <MobileTypography fontSize={16} color={MOBILE_COLOR_GREY_850}>
+              {value}
+            </MobileTypography>
+          </Box>
+          {endIcon && (
             <Box
               display="flex"
               flexGrow={1}
               justifyContent="flex-end"
+              alignItems="center"
               color={MOBILE_COLOR_BLUE_IO_500}
             >
-              {endIcon && (
-                <IconButton edge="end" color="inherit">
-                  {endIcon}
-                </IconButton>
-              )}
+              {endIcon}
             </Box>
-          </Stack>
-        </ListItem>
-      )}
-    </>
+          )}
+        </Stack>
+      </Box>
+    </ListItem>
   );
 };
 

@@ -1,5 +1,7 @@
 import { Service } from "@/types/service";
 import { Box, Stack } from "@mui/material";
+import { useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
 import {
   ServicePreviewDescriptionCard,
   ServicePreviewHeader,
@@ -9,7 +11,6 @@ import {
   ServicePreviewTopbar
 } from "./components/";
 
-import { useEffect, useRef, useState } from "react";
 import styles from "../app-preview.module.css";
 
 type ServicePreviewProps = {
@@ -17,12 +18,7 @@ type ServicePreviewProps = {
 };
 
 const ServicePreview = ({ service }: ServicePreviewProps) => {
-  const organizationData = {
-    institutionName:
-      "PCM - Dipartimento per le Politiche Giovanili ei il Servizio Civile Universale",
-    fiscalCode: "11223344556"
-  };
-
+  const { data: session } = useSession();
   const [scrollY, setScrollY] = useState(0);
   const scrollBoxRef = useRef<HTMLDivElement>();
   const scrollBoxOpacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
@@ -65,7 +61,7 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
           >
             <ServicePreviewHeader
               serviceName={service.name}
-              institutionName={organizationData.institutionName}
+              institutionName={session?.user?.institution.name ?? ""}
               serviceId={service.id}
             />
 
@@ -88,7 +84,7 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
                 phoneNumber={service.metadata.phone}
                 email={service.metadata.email}
                 pec={service.metadata.pec}
-                fiscalCode={organizationData.fiscalCode}
+                fiscalCode={session?.user?.institution.fiscalCode}
                 address={service.metadata.address}
                 serviceId={service.id}
               />

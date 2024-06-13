@@ -2,7 +2,7 @@ import { getConfiguration } from "@/config";
 import { AccountBalanceRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import Image from "next/image";
-import { useState } from "react";
+import React, { useState } from "react";
 import { MOBILE_COLOR_GREY_300 } from ".";
 
 const LOGO_SIZE = 48;
@@ -13,10 +13,7 @@ export type AvatarLogoProps = {
 };
 
 /** Render rounded box with service/institution logo */
-export const AvatarLogo = ({
-  organizationFiscalCode,
-  serviceId
-}: AvatarLogoProps) => {
+const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
   const configuration = getConfiguration();
 
   const logoFullPath = () =>
@@ -63,3 +60,5 @@ export const AvatarLogo = ({
     </Box>
   );
 };
+
+export default React.memo(AvatarLogo);

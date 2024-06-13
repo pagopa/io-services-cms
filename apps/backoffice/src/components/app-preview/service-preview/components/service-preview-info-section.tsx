@@ -1,9 +1,7 @@
-import { List } from "@mui/material";
-import { Stack } from "@mui/system";
 import { useTranslation } from "next-i18next";
 import MobileIcon from "../../mobile-icon";
-import { ServicePreviewSectionListItem, ServicePreviewSectionTitle } from "./";
-import { MOBILE_COLOR_GREY_650 } from "../../components";
+import ServicePreviewSectionList from "./service-preview-section-list";
+import { ServicePreviewSectionListItemProps } from "./service-preview-section-list-item";
 
 type ServicePreviewInfoSectionProps = {
   websiteLink?: string;
@@ -29,92 +27,82 @@ const ServicePreviewInfoSection = ({
   serviceId
 }: ServicePreviewInfoSectionProps) => {
   const { t } = useTranslation();
+  const serviceInfo: ServicePreviewSectionListItemProps[] = [
+    {
+      variant: "link",
+      startIcon: <MobileIcon icon="MobileIconWebsite" width={24} height={24} />,
+      value: websiteLink,
+      label: t("service.inAppPreview.sections.info.websiteLabel"),
+      isUrl: true
+    },
+    {
+      variant: "link",
+      startIcon: (
+        <MobileIcon icon="MobileIconPhoneApp" width={16} height={24} />
+      ),
+      value: appStoreLink,
+      label: t("service.inAppPreview.sections.info.appStoreLabel"),
+      isUrl: true
+    },
+    {
+      variant: "link",
+      startIcon: (
+        <MobileIcon icon="MobileIconCustomerCare" width={24} height={24} />
+      ),
+      value: customerCareLink,
+      label: t("service.inAppPreview.sections.info.customerCareLabel"),
+      isUrl: true
+    },
+    {
+      variant: "link",
+      startIcon: (
+        <MobileIcon icon="MobileIconPhoneCall" width={24} height={24} />
+      ),
+      value: phoneNumber,
+      label: t("service.inAppPreview.sections.info.phoneLabel")
+    },
+    {
+      variant: "link",
+      startIcon: <MobileIcon icon="MobileIconEmail" width={24} height={20} />,
+      value: email,
+      label: t("service.inAppPreview.sections.info.emailLabel"),
+      isEmail: true
+    },
+    {
+      variant: "link",
+      startIcon: <MobileIcon icon="MobileIconPec" width={24} height={22} />,
+      value: pec,
+      label: t("service.inAppPreview.sections.info.pecLabel"),
+      isEmail: true
+    },
+    {
+      variant: "info",
+      startIcon: (
+        <MobileIcon icon="MobileIconFiscalCode" width={24} height={21} />
+      ),
+      endIcon: <MobileIcon icon="MobileIconCopy" width={24} height={25} />,
+      value: fiscalCode,
+      label: t("service.inAppPreview.sections.info.fiscalCodeLabel")
+    },
+    {
+      variant: "info",
+      startIcon: <MobileIcon icon="MobileIconAddress" width={20} height={24} />,
+      value: address,
+      label: t("service.inAppPreview.sections.info.addressLabel")
+    },
+    {
+      variant: "info",
+      startIcon: <MobileIcon icon="MobileIconId" width={24} height={25} />,
+      value: serviceId,
+      label: t("service.inAppPreview.sections.info.serviceIDLabel")
+    }
+  ];
+
   return (
-    <Stack>
-      <ServicePreviewSectionTitle
-        text={t("service.inAppPreview.sections.info.title")}
-      />
-      <List>
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={
-            <MobileIcon icon="MobileIconWebsite" width={24} height={24} />
-          }
-          url={websiteLink}
-          text={t("service.inAppPreview.sections.info.websiteLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={
-            <MobileIcon icon="MobileIconPhoneApp" width={16} height={24} />
-          }
-          url={appStoreLink}
-          text={t("service.inAppPreview.sections.info.appStoreLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={
-            <MobileIcon icon="MobileIconCustomerCare" width={24} height={24} />
-          }
-          url={customerCareLink}
-          text={t("service.inAppPreview.sections.info.customerCareLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={
-            <MobileIcon icon="MobileIconPhoneCall" width={24} height={24} />
-          }
-          url={phoneNumber}
-          text={t("service.inAppPreview.sections.info.phoneLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={
-            <MobileIcon icon="MobileIconEmail" width={24} height={20} />
-          }
-          url={email}
-          text={t("service.inAppPreview.sections.info.emailLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="link"
-          startIcon={<MobileIcon icon="MobileIconPec" width={24} height={22} />}
-          url={pec}
-          text={t("service.inAppPreview.sections.info.pecLabel")}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="info"
-          startIcon={
-            <MobileIcon icon="MobileIconFiscalCode" width={24} height={21} />
-          }
-          endIcon={<MobileIcon icon="MobileIconCopy" width={24} height={25} />}
-          text={t("service.inAppPreview.sections.info.fiscalCodeLabel")}
-          label={fiscalCode}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="info"
-          startIcon={
-            <MobileIcon icon="MobileIconAddress" width={20} height={24} />
-          }
-          text={t("service.inAppPreview.sections.info.addressLabel")}
-          label={address}
-          copiable={false}
-        />
-        <ServicePreviewSectionListItem
-          variant="info"
-          startIcon={<MobileIcon icon="MobileIconId" width={24} height={25} />}
-          text={t("service.inAppPreview.sections.info.serviceIDLabel")}
-          label={serviceId}
-          copiable={false}
-        />
-      </List>
-    </Stack>
+    <ServicePreviewSectionList
+      title="service.inAppPreview.sections.info.title"
+      items={serviceInfo}
+    />
   );
 };
 

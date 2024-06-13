@@ -3,6 +3,7 @@ import { Stack } from "@mui/system";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
 import {
+  MOBILE_COLOR_GREY_100,
   MOBILE_COLOR_GREY_650,
   MOBILE_COLOR_GREY_850,
   MobileTypography
@@ -15,6 +16,7 @@ type NotificationType = {
   startIcon: ReactNode;
   text: string;
   checked: boolean;
+  hideDivider?: boolean;
   onChange?: () => void;
 };
 
@@ -39,7 +41,8 @@ const ServicePreviewNotificationsSection = () => {
       isVisible: true,
       startIcon: <MobileIcon icon="MobileIconChecks" width={24} height={14} />,
       text: "service.inAppPreview.sections.notifications.confirmLabel",
-      checked: true
+      checked: true,
+      hideDivider: true
     }
   ]);
 
@@ -51,9 +54,11 @@ const ServicePreviewNotificationsSection = () => {
       if (checked) {
         updatedNotifications[1].isVisible = true;
         updatedNotifications[2].isVisible = true;
+        updatedNotifications[0].hideDivider = false;
       } else {
         updatedNotifications[1].isVisible = false;
         updatedNotifications[2].isVisible = false;
+        updatedNotifications[0].hideDivider = true;
       }
     } else {
       updatedNotifications[index].checked = checked;
@@ -73,44 +78,54 @@ const ServicePreviewNotificationsSection = () => {
             value.isVisible && (
               <ListItem
                 key={`notification-${index}`}
-                sx={{ paddingX: 3, paddingY: 1.5 }}
-                divider
+                sx={{ paddingX: 3, paddingY: 0 }}
               >
-                <Stack gap={1.5} width="100%" flexDirection="row">
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    fontSize="24px"
-                    color={MOBILE_COLOR_GREY_650}
-                    sx={{ opacity: "50%" }}
-                  >
-                    {value.startIcon}
-                  </Box>
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    flexDirection="column"
-                  >
-                    <MobileTypography
-                      fontSize={16}
-                      color={MOBILE_COLOR_GREY_850}
+                <Box
+                  display="flex"
+                  flex={1}
+                  paddingY={1}
+                  borderBottom={
+                    value.hideDivider
+                      ? ""
+                      : `1px solid ${MOBILE_COLOR_GREY_100}`
+                  }
+                >
+                  <Stack gap={1.5} width="100%" flexDirection="row">
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      fontSize="24px"
+                      color={MOBILE_COLOR_GREY_650}
+                      sx={{ opacity: "50%" }}
                     >
-                      {t(value.text)}
-                    </MobileTypography>
-                  </Box>
-                  <Box
-                    display="flex"
-                    flexGrow={1}
-                    justifyContent="flex-end"
-                    marginRight={-1}
-                  >
-                    <Switch
-                      checked={value.checked}
-                      onChange={(_, checked) => handleChange(index, checked)}
-                    />
-                  </Box>
-                </Stack>
+                      {value.startIcon}
+                    </Box>
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      flexDirection="column"
+                    >
+                      <MobileTypography
+                        fontSize={16}
+                        color={MOBILE_COLOR_GREY_850}
+                      >
+                        {t(value.text)}
+                      </MobileTypography>
+                    </Box>
+                    <Box
+                      display="flex"
+                      flexGrow={1}
+                      justifyContent="flex-end"
+                      marginRight={-1}
+                    >
+                      <Switch
+                        checked={value.checked}
+                        onChange={(_, checked) => handleChange(index, checked)}
+                      />
+                    </Box>
+                  </Stack>
+                </Box>
               </ListItem>
             )
         )}
