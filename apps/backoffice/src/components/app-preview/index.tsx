@@ -84,7 +84,7 @@ export const AppPreview = ({
       <Stack
         flexDirection={"column"}
         sx={{ minWidth: 600, minHeight: 640 }}
-        padding={4}
+        padding={3}
         gap={2}
       >
         <Grid container spacing={2} alignItems="center">

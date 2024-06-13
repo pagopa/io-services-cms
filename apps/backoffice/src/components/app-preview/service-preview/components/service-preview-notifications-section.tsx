@@ -90,7 +90,7 @@ const ServicePreviewNotificationsSection = () => {
                       : `1px solid ${MOBILE_COLOR_GREY_100}`
                   }
                 >
-                  <Stack gap={1.5} width="100%" flexDirection="row">
+                  <Stack width="100%" flexDirection="row">
                     <Box
                       display="flex"
                       justifyContent="center"
@@ -105,6 +105,7 @@ const ServicePreviewNotificationsSection = () => {
                       display="flex"
                       justifyContent="center"
                       flexDirection="column"
+                      marginLeft={1.5}
                     >
                       <MobileTypography
                         fontSize={16}
