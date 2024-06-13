@@ -49,40 +49,38 @@ jobs:
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'App Backend'
-          json-summary-path: './apps/app-backend/coverage/coverage-summary.json'
-          json-final-path: './apps/app-backend/coverage/coverage-final.json'
+          working-directory: './apps/app-backend'
 
       - name: 'Report Backoffice Frontend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'Backoffice Frontend'
-          json-summary-path: './apps/backoffice/coverage/frontend/coverage-summary.json'
-          json-final-path: './apps/backoffice/coverage/frontend/coverage-final.json'
+          working-directory: './apps/backoffice'
+          json-summary-path: '${working-directory}/coverage/frontend/coverage-summary.json'
+          json-final-path: '${working-directory}/coverage/frontend/coverage-final.json'
 
       - name: 'Report Backoffice Backend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'Backoffice Backend'
-          json-summary-path: './apps/backoffice/coverage/backend/coverage-summary.json'
-          json-final-path: './apps/backoffice/coverage/backend/coverage-final.json'
+          working-directory: './apps/backoffice'
+          json-summary-path: '${working-directory}/coverage/backend/coverage-summary.json'
+          json-final-path: '${working-directory}/coverage/backend/coverage-final.json'
 
       - name: 'Report Webapp Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'Webapp'
-          json-summary-path: './apps/io-services-cms-webapp/coverage/coverage-summary.json'
-          json-final-path: './apps/io-services-cms-webapp/coverage/coverage-final.json'
+          working-directory: './apps/io-services-cms-webapp'
 
       - name: 'Report External Clients Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'External Clients'
-          json-summary-path: './packages/external-clients/coverage/coverage-summary.json'
-          json-final-path: './packages/external-clients/coverage/coverage-final.json'
+          working-directory: './packages/external-clients'
 
       - name: 'Report Models Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'Models'
-          json-summary-path: './packages/io-services-cms-models/coverage/coverage-summary.json'
-          json-final-path: './packages/io-services-cms-models/coverage/coverage-final.json'
+          working-directory: './packages/io-services-cms-models'

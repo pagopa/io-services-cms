@@ -1,13 +1,11 @@
-import { defaultExclude, defineConfig } from "vitest/config";
+import { defaultExclude, defineConfig, mergeConfig } from "vitest/config";
+import configShared from "../../vitest.shared.js";
 
-export default defineConfig({
-  test: {
-    exclude: [...defaultExclude, "__integrations__"],
-    typecheck: {
-      ignoreSourceErrors: true,
+export default mergeConfig(
+  configShared,
+  defineConfig({
+    test: {
+      exclude: [...defaultExclude, "__integrations__"],
     },
-    coverage: {
-      reporter: ["text", "json-summary", "json"],
-    },
-  },
-});
+  })
+);
