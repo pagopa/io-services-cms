@@ -68,7 +68,9 @@
         "src/**/*.spec.ts",
         "src/**/*.test.ts"
       ],
-      "outputs": [],
+      "outputs": [
+        "coverage/*"
+      ],
       "outputMode": "errors-only",
       "dependsOn": [
         "generate",

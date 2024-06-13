@@ -56,18 +56,18 @@ jobs:
         with:
           name: 'Backoffice Frontend'
           working-directory: './apps/backoffice'
-          vite-config-path: '${working-directory}/vitest.config.react.ts'
-          json-summary-path: '${working-directory}/coverage/frontend/coverage-summary.json'
-          json-final-path: '${working-directory}/coverage/frontend/coverage-final.json'
+          vite-config-path: 'vitest.config.react.ts'
+          json-summary-path: 'coverage/frontend/coverage-summary.json'
+          json-final-path: 'coverage/frontend/coverage-final.json'
 
       - name: 'Report Backoffice Backend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
         with:
           name: 'Backoffice Backend'
           working-directory: './apps/backoffice'
-          vite-config-path: '${working-directory}/vitest.config.node.ts'
-          json-summary-path: '${working-directory}/coverage/backend/coverage-summary.json'
-          json-final-path: '${working-directory}/coverage/backend/coverage-final.json'
+          vite-config-path: 'vitest.config.node.ts'
+          json-summary-path: 'coverage/backend/coverage-summary.json'
+          json-final-path: 'coverage/backend/coverage-final.json'
 
       - name: 'Report Webapp Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
