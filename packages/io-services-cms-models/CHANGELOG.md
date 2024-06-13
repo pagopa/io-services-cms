@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.3
+
+### Patch Changes
+
+- e38c96d: add privacy_url and contacts automatic controls
+
 ## 1.19.2
 
 ### Patch Changes
