@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.10.7
+
+### Patch Changes
+
+- 3dc229d: Upgrade ApplicationInsight to the one based on OpenTelemetry
+- Updated dependencies [e38c96d]
+  - @io-services-cms/models@1.19.3
+
 ## 1.10.6
 
 ### Patch Changes
