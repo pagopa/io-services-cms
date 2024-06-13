@@ -56,6 +56,7 @@ jobs:
         with:
           name: 'Backoffice Frontend'
           working-directory: './apps/backoffice'
+          vite-config-path: '${working-directory}/vitest.config.react.ts'
           json-summary-path: '${working-directory}/coverage/frontend/coverage-summary.json'
           json-final-path: '${working-directory}/coverage/frontend/coverage-final.json'
 
@@ -64,6 +65,7 @@ jobs:
         with:
           name: 'Backoffice Backend'
           working-directory: './apps/backoffice'
+          vite-config-path: '${working-directory}/vitest.config.node.ts'
           json-summary-path: '${working-directory}/coverage/backend/coverage-summary.json'
           json-final-path: '${working-directory}/coverage/backend/coverage-final.json'
 
