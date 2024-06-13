@@ -44,3 +44,45 @@ jobs:
 
       - name: 'Code review'
         run: yarn run code-review
+
+      - name: 'Report App Backend Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'App Backend'
+          working-directory: './apps/app-backend'
+
+      - name: 'Report Backoffice Frontend Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'Backoffice Frontend'
+          working-directory: './apps/backoffice'
+          vite-config-path: 'vitest.config.react.ts'
+          json-summary-path: 'coverage/frontend/coverage-summary.json'
+          json-final-path: 'coverage/frontend/coverage-final.json'
+
+      - name: 'Report Backoffice Backend Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'Backoffice Backend'
+          working-directory: './apps/backoffice'
+          vite-config-path: 'vitest.config.node.ts'
+          json-summary-path: 'coverage/backend/coverage-summary.json'
+          json-final-path: 'coverage/backend/coverage-final.json'
+
+      - name: 'Report Webapp Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'Webapp'
+          working-directory: './apps/io-services-cms-webapp'
+
+      - name: 'Report External Clients Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'External Clients'
+          working-directory: './packages/external-clients'
+
+      - name: 'Report Models Coverage'
+        uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        with:
+          name: 'Models'
+          working-directory: './packages/io-services-cms-models'
