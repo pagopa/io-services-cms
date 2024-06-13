@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 /// <reference types="vite/client" />
 
-import { defineConfig } from "vitest/config";
-import * as path from "node:path";
 import react from "@vitejs/plugin-react";
+import * as path from "node:path";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
@@ -16,8 +16,31 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["./src/**/__tests__/*.tsx"],
-    exclude: ["./src/components/__tests__/setup.ts"],
+    exclude: [...configDefaults.exclude, "./src/components/__tests__/setup.ts"],
     css: true,
-    setupFiles: "./src/components/__tests__/setup.ts"
+    setupFiles: "./src/components/__tests__/setup.ts",
+    coverage: {
+      reporter: ["text", "json-summary", "json"],
+      reportsDirectory: `${configDefaults.coverage.reportsDirectory}/frontend`,
+      exclude: [
+        ...(configDefaults.coverage.exclude
+          ? configDefaults.coverage.exclude
+          : []),
+        ".next/*",
+        "mocks/*",
+        "public/*",
+        "*.config.js",
+        "src/generated/**",
+        "src/config/*",
+        "src/types/*",
+        "src/main.ts",
+        "src/config.ts",
+        "src/instrumentation.ts",
+        "**/__mocks__/**",
+        // BE
+        "src/app/*",
+        "src/lib/be/*"
+      ]
+    }
   }
 });
