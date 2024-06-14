@@ -70,6 +70,10 @@ export const PaginationConfig = t.type({
     IntegerFromString.pipe(NonNegativeInteger),
     "500" as unknown as NonNegativeInteger
   ),
+  PAGINATION_MAX_OFFSET_AI_SEARCH: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "100000" as unknown as NonNegativeInteger
+  ),
 });
 
 // global app configuration

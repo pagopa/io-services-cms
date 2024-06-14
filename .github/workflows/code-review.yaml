@@ -47,12 +47,14 @@ jobs:
 
       - name: 'Report App Backend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/app-backend/coverage/*.json') != '' }}
         with:
           name: 'App Backend'
           working-directory: './apps/app-backend'
 
       - name: 'Report Backoffice Frontend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/backoffice/frontend/coverage/*.json') != '' }}
         with:
           name: 'Backoffice Frontend'
           working-directory: './apps/backoffice'
@@ -62,6 +64,7 @@ jobs:
 
       - name: 'Report Backoffice Backend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/backoffice/backend/coverage/*.json') != '' }}
         with:
           name: 'Backoffice Backend'
           working-directory: './apps/backoffice'
@@ -71,18 +74,21 @@ jobs:
 
       - name: 'Report Webapp Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/io-services-cms-webapp/coverage/*.json') != '' }}
         with:
           name: 'Webapp'
           working-directory: './apps/io-services-cms-webapp'
 
       - name: 'Report External Clients Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/external-clients/coverage/*.json') != '' }}
         with:
           name: 'External Clients'
           working-directory: './packages/external-clients'
 
       - name: 'Report Models Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
+        if: ${{ hashFiles('./apps/io-services-cms-models/coverage/*.json') != '' }}
         with:
           name: 'Models'
           working-directory: './packages/io-services-cms-models'

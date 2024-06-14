@@ -106,7 +106,9 @@ const executeSearch: (
       TE.map(({ paginationProperties, results }) => ({
         institutions: results.resources,
         count: calculateSearchResultCount(
-          config,
+          O.isSome(requestQueryParams.search)
+            ? config.PAGINATION_MAX_OFFSET
+            : (config.PAGINATION_MAX_OFFSET_AI_SEARCH as NonNegativeInteger),
           results.count,
           paginationProperties.top
         ),
@@ -143,20 +145,28 @@ const extractQueryParams: (
         ),
         RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT))
       ),
-      offset: OptionalQueryParamMiddleware(
-        "offset",
-        IntegerFromString.pipe(
-          WithinRangeInteger<
-            0,
-            NonNegativeInteger,
-            IWithinRangeIntegerTag<0, NonNegativeInteger>
-          >(
-            0,
-            (paginationConfig.PAGINATION_MAX_OFFSET + 1) as NonNegativeInteger
+    }),
+    RTE.chain((queryParams) =>
+      pipe(
+        OptionalQueryParamMiddleware(
+          "offset",
+          IntegerFromString.pipe(
+            WithinRangeInteger<
+              0,
+              NonNegativeInteger,
+              IWithinRangeIntegerTag<0, NonNegativeInteger>
+            >(
+              0,
+              (O.isSome(queryParams.search)
+                ? paginationConfig.PAGINATION_MAX_OFFSET + 1
+                : paginationConfig.PAGINATION_MAX_OFFSET_AI_SEARCH +
+                  1) as NonNegativeInteger
+            )
           )
-        )
-      ),
-    })
+        ),
+        RTE.map((offset) => ({ ...queryParams, offset }))
+      )
+    )
   );
 
 export const makeSearchInstitutionsHandler: (
@@ -194,15 +204,15 @@ export const makeSearchInstitutionsHandler: (
 // - In Other case the actual Azure Search response count value
 
 const calculateSearchResultCount = (
-  paginationConfig: PaginationConfig,
+  paginationMaxOffset: NonNegativeInteger,
   actualSearchResultCount: number,
   requestLimit: number
 ) =>
   pipe(
-    actualSearchResultCount > paginationConfig.PAGINATION_MAX_OFFSET,
+    actualSearchResultCount > paginationMaxOffset,
     B.fold(
       () => actualSearchResultCount,
-      () => paginationConfig.PAGINATION_MAX_OFFSET + requestLimit
+      () => paginationMaxOffset + requestLimit
     )
   );
 
