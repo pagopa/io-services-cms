@@ -17,6 +17,7 @@ const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 100,
   PAGINATION_MAX_OFFSET: 100,
+  PAGINATION_MAX_OFFSET_AI_SEARCH: 100000,
 } as unknown as IConfig;
 const mockSearchInstitutions = {
   fullTextSearch: vi
@@ -58,13 +59,63 @@ describe("Search Institutions Tests", () => {
     );
   });
 
-  it("Should Return PAGINATION_MAX_OFFSET + request limit as count when exceed PAGINATION_MAX_OFFSET", async () => {
+  it("Should Return PAGINATION_MAX_OFFSET + request limit as count when exceed PAGINATION_MAX_OFFSET with a full text query", async () => {
     const mockSearchInstitutionsExceedCount = {
       fullTextSearch: vi.fn().mockImplementation(() =>
         TE.right({
           ...mockSearchInstitutionsResult,
           count:
             mockedConfiguration.PAGINATION_MAX_OFFSET +
+            mockedConfiguration.PAGINATION_DEFAULT_LIMIT +
+            20,
+        })
+      ),
+    } as AzureSearchClient<Institution>;
+
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        search: "Mila",
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutionsExceedCount,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        orderBy: [DEFAULT_ORDER_BY],
+        top: 20,
+      })
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count:
+              mockedConfiguration.PAGINATION_MAX_OFFSET +
+              mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            offset: 0,
+          },
+          statusCode: 200,
+        })
+      )
+    );
+  });
+
+  it("Should Return PAGINATION_MAX_OFFSET_AI_SEARCH + request limit as count when exceed PAGINATION_MAX_OFFSET_AI_SEARCH without a full text query", async () => {
+    const mockSearchInstitutionsExceedCount = {
+      fullTextSearch: vi.fn().mockImplementation(() =>
+        TE.right({
+          ...mockSearchInstitutionsResult,
+          count:
+            mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH +
             mockedConfiguration.PAGINATION_DEFAULT_LIMIT +
             20,
         })
@@ -94,7 +145,7 @@ describe("Search Institutions Tests", () => {
           body: {
             institutions: mockSearchInstitutionsResult.resources,
             count:
-              mockedConfiguration.PAGINATION_MAX_OFFSET +
+              mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH +
               mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
             limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
             offset: 0,
@@ -341,6 +392,64 @@ describe("Search Institutions Tests", () => {
           body: {
             status: 400,
             title: "Invalid 'limit' supplied in request query",
+          },
+          statusCode: 400,
+        })
+      )
+    );
+  });
+
+  it("Should Return Bad Request when offset is greater than max allowed with a full text query", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        search: "Mila",
+        limit: "10",
+        offset: `${mockedConfiguration.PAGINATION_MAX_OFFSET + 1}`,
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            status: 400,
+            title: "Invalid 'offset' supplied in request query",
+          },
+          statusCode: 400,
+        })
+      )
+    );
+  });
+
+  it("Should Return Bad Request when offset is greater than max allowed without a full text query", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        scope: "NATIONAL",
+        limit: "10",
+        offset: `${mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH + 1}`,
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            status: 400,
+            title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
         })
