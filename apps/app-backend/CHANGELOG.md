@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.15
+
+### Patch Changes
+
+- d4e867c: use custom offset limit only when requested a full text search
+
 ## 0.0.14
 
 ### Patch Changes
