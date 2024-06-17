@@ -23,6 +23,8 @@ applicationInsightInit();
 const config = pipe(
   getConfigOrError(),
   E.getOrElseW((error) => {
+    // eslint-disable-next-line no-console
+    console.error("Error while loading configuration", error);
     throw error;
   })
 );
