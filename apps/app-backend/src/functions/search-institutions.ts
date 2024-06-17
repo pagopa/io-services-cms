@@ -109,8 +109,7 @@ const executeSearch: (
           O.isSome(requestQueryParams.search)
             ? config.PAGINATION_MAX_OFFSET
             : (config.PAGINATION_MAX_OFFSET_AI_SEARCH as NonNegativeInteger),
-          results.count,
-          paginationProperties.top
+          results.count
         ),
         limit: paginationProperties.top,
         offset: paginationProperties.skip ?? 0,
