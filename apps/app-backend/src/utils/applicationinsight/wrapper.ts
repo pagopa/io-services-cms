@@ -20,10 +20,7 @@ import {
 } from "@opentelemetry/semantic-conventions";
 export default function createAppInsightsWrapper(func: HttpHandler) {
   return async (req: HttpRequest, invocationContext: InvocationContext) => {
-    if (
-      !process.env.AI_SDK_CONNECTION_STRING ||
-      process.env.DISABLE_FUNCTION_WRAPPER
-    ) {
+    if (!process.env.AI_SDK_CONNECTION_STRING) {
       console.log(
         `skipping wrapper for function ${invocationContext.functionName}`
       );

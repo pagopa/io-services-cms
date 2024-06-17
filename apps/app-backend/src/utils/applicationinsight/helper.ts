@@ -6,10 +6,10 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { metrics, trace } from "@opentelemetry/api";
 import { IJsonConfig } from "applicationinsights/out/src/shim/types";
 
-const DEFAULT_SAMPLING_PERCENTAGE = 30;
-const DEFAULT_APP_NAME = "io-p-services-app-backend";
+export const DEFAULT_SAMPLING_PERCENTAGE = 30;
+export const DEFAULT_APP_NAME = "io-p-services-app-backend";
 
-const getDefaultAppNameForEnv = () => {
+export const getDefaultAppNameForEnv = () => {
   if (process.env.WEBSITE_SITE_NAME) {
     return process.env.WEBSITE_SITE_NAME;
   }
@@ -17,7 +17,7 @@ const getDefaultAppNameForEnv = () => {
   return DEFAULT_APP_NAME;
 };
 
-const applicationInsightConfigurationContent = () => {
+export const applicationInsightConfigurationContent = () => {
   if (process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT) {
     return process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT;
   }
