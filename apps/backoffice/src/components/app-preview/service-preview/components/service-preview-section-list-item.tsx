@@ -14,6 +14,7 @@ export type ServicePreviewSectionListItemProps = {
   startIcon: ReactNode;
   endIcon?: ReactNode;
   value?: string;
+  isPrimaryValue?: boolean;
   label?: string;
   isUrl?: boolean;
   isEmail?: boolean;
@@ -92,6 +93,7 @@ const ServicePreviewSectionListItemInfo = ({
   startIcon,
   endIcon,
   value,
+  isPrimaryValue,
   label,
   hideDivider
 }: ServicePreviewSectionListItemProps) => {
@@ -118,7 +120,14 @@ const ServicePreviewSectionListItemInfo = ({
             <MobileTypography fontSize={14} color={MOBILE_COLOR_GREY_700}>
               {label}
             </MobileTypography>
-            <MobileTypography fontSize={16} color={MOBILE_COLOR_GREY_850}>
+            <MobileTypography
+              fontSize={16}
+              color={
+                isPrimaryValue
+                  ? MOBILE_COLOR_BLUE_IO_500
+                  : MOBILE_COLOR_GREY_850
+              }
+            >
               {value}
             </MobileTypography>
           </Box>

@@ -23,7 +23,7 @@ const ServicePreviewHeader = ({
       marginBottom={2}
       paddingX={3}
       bgcolor={MOBILE_COLOR_GREY_TOPBAR}
-      minHeight={180}
+      minHeight={120} //! Necessaria altezza dinamica
       alignItems="start"
     >
       <Box gap={2} display="flex" alignItems="center" id="preview-header-box">

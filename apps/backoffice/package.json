@@ -44,6 +44,7 @@
     "eslint": "8.50.0",
     "eslint-config-next": "^13.5.6",
     "fp-ts": "^2.13.1",
+    "front-matter": "^4.0.2",
     "i18next": "^23.5.1",
     "io-ts": "^2.2.20",
     "jose": "^4.15.5",

@@ -3,6 +3,7 @@ import { Box, Stack } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import {
+  ServicePreviewCTAs,
   ServicePreviewDescriptionCard,
   ServicePreviewHeader,
   ServicePreviewInfoSection,
@@ -90,6 +91,7 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
               />
             </Stack>
           </Box>
+          <ServicePreviewCTAs cta={service.metadata.cta} />
         </>
       )}
     </Stack>

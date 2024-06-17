@@ -1,3 +1,4 @@
+import ServicePreviewCTAs from "./service-preview-ctas";
 import ServicePreviewDescriptionCard from "./service-preview-description-card";
 import ServicePreviewHeader from "./service-preview-header";
 import ServicePreviewInfoSection from "./service-preview-info-section";
@@ -8,6 +9,7 @@ import ServicePreviewTopbar from "./service-preview-topbar";
 import ServicePreviewTOSSection from "./service-preview-tos-section";
 
 export {
+  ServicePreviewCTAs,
   ServicePreviewDescriptionCard,
   ServicePreviewHeader,
   ServicePreviewInfoSection,

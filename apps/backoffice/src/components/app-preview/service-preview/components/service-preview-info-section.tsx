@@ -82,6 +82,7 @@ const ServicePreviewInfoSection = ({
       ),
       endIcon: <MobileIcon icon="MobileIconCopy" width={24} height={25} />,
       value: fiscalCode,
+      isPrimaryValue: true,
       label: t("service.inAppPreview.sections.info.fiscalCodeLabel")
     },
     {
