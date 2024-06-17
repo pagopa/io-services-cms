@@ -59,7 +59,7 @@ describe("Search Institutions Tests", () => {
     );
   });
 
-  it("Should Return PAGINATION_MAX_OFFSET + request limit as count when exceed PAGINATION_MAX_OFFSET with a full text query", async () => {
+  it("Should Return PAGINATION_MAX_OFFSET as count when exceed PAGINATION_MAX_OFFSET with a full text query", async () => {
     const mockSearchInstitutionsExceedCount = {
       fullTextSearch: vi.fn().mockImplementation(() =>
         TE.right({
@@ -97,9 +97,7 @@ describe("Search Institutions Tests", () => {
         expect.objectContaining({
           body: {
             institutions: mockSearchInstitutionsResult.resources,
-            count:
-              mockedConfiguration.PAGINATION_MAX_OFFSET +
-              mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            count: mockedConfiguration.PAGINATION_MAX_OFFSET,
             limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
             offset: 0,
           },
@@ -109,7 +107,7 @@ describe("Search Institutions Tests", () => {
     );
   });
 
-  it("Should Return PAGINATION_MAX_OFFSET_AI_SEARCH + request limit as count when exceed PAGINATION_MAX_OFFSET_AI_SEARCH without a full text query", async () => {
+  it("Should Return PAGINATION_MAX_OFFSET_AI_SEARCH as count when exceed PAGINATION_MAX_OFFSET_AI_SEARCH without a full text query", async () => {
     const mockSearchInstitutionsExceedCount = {
       fullTextSearch: vi.fn().mockImplementation(() =>
         TE.right({
@@ -144,9 +142,7 @@ describe("Search Institutions Tests", () => {
         expect.objectContaining({
           body: {
             institutions: mockSearchInstitutionsResult.resources,
-            count:
-              mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH +
-              mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            count: mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH,
             limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
             offset: 0,
           },
