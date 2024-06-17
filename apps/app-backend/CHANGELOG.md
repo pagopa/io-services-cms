@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.16
+
+### Patch Changes
+
+- 8f36707: fix return count value and decrease max offset value
+
 ## 0.0.15
 
 ### Patch Changes
