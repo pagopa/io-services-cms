@@ -134,7 +134,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           time_window              = "PT5M"
           time_aggregation         = "Average"
           operator                 = "GreaterThan"
-          threshold                = 45
+          threshold                = 60
           divide_by_instance_count = false
         }
 
@@ -153,7 +153,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           metric_namespace         = "microsoft.web/sites"
           time_grain               = "PT1M"
           statistic                = "Average"
-          time_window              = "PT15M"
+          time_window              = "PT7M"
           time_aggregation         = "Average"
           operator                 = "LessThan"
           threshold                = 2000
@@ -164,7 +164,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           direction = "Decrease"
           type      = "ChangeCount"
           value     = "1"
-          cooldown  = "PT10M"
+          cooldown  = "PT5M"
         }
       }
 
@@ -175,10 +175,10 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           metric_namespace         = "microsoft.web/serverfarms"
           time_grain               = "PT1M"
           statistic                = "Average"
-          time_window              = "PT15M"
+          time_window              = "PT7M"
           time_aggregation         = "Average"
           operator                 = "LessThan"
-          threshold                = 30
+          threshold                = 50
           divide_by_instance_count = false
         }
 
@@ -186,7 +186,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           direction = "Decrease"
           type      = "ChangeCount"
           value     = "1"
-          cooldown  = "PT10M"
+          cooldown  = "PT5M"
         }
       }
     }
