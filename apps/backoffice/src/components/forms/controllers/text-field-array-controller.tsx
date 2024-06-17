@@ -68,7 +68,7 @@ export function TextFieldArrayController({
   const errors = get(formState.errors, name);
 
   // general form initialization status
-  const [isReadOnly] = useState(readOnly);
+  const [isReadOnly, setIsReadOnly] = useState(readOnly);
   const [isEditable] = useState(editable);
 
   /** get name of a single field by array position `index` */
@@ -92,9 +92,6 @@ export function TextFieldArrayController({
   /** shows generic or detailed error message based on `showGenericErrorMessage` prop */
   const showErrorMessage = (message: any) =>
     showGenericErrorMessage ? t("forms.errors.field.invalid") : message;
-
-  // managing the disable state when not in edit mode
-  const [isInEditMode, setIsInEditMode] = useState(false);
 
   useEffect(() => {
     setRenderedFields(initializeFieldsStatus());
@@ -123,7 +120,7 @@ export function TextFieldArrayController({
                     {...props}
                     margin="normal"
                     sx={
-                      !isInEditMode
+                      isReadOnly
                         ? {
                             pointerEvents: "none"
                           }
@@ -164,7 +161,7 @@ export function TextFieldArrayController({
                         renderedFields[index].readOnly = false;
                         renderedFields[index].editable = true;
                         setRenderedFields({ ...renderedFields });
-                        setIsInEditMode(true);
+                        setIsReadOnly(false);
                       }}
                     >
                       <Edit fontSize="small" />
@@ -197,7 +194,7 @@ export function TextFieldArrayController({
               variant="contained"
               onClick={() => {
                 onSaveClick && onSaveClick();
-                setIsInEditMode(false);
+                setIsReadOnly(true);
               }}
             >
               {t("buttons.save")}
@@ -208,7 +205,7 @@ export function TextFieldArrayController({
               variant="outlined"
               onClick={() => {
                 onCancelClick && onCancelClick();
-                setIsInEditMode(false);
+                setIsReadOnly(true);
               }}
             >
               {t("buttons.cancel")}
