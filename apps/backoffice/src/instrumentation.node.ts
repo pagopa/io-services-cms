@@ -12,6 +12,7 @@ const getDefaultAppNameForEnv = () => {
     if (process.env.WEBSITE_SITE_NAME) {
         return process.env.WEBSITE_SITE_NAME;
     }
+    console.info("WEBSITE_SITE_NAME not found, using default app name");
     return DEFAULT_APP_NAME;
 }
 

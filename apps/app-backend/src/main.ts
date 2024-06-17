@@ -3,6 +3,8 @@ import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
+import { applicationInsightInit } from "./utils/applicationinsight/helper";
+
 import { getConfigOrError } from "./config";
 import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
 import { GetFeaturedServicesFn } from "./functions/featured-services";
@@ -14,10 +16,16 @@ import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
+import createAppInsightsWrapper from "./utils/applicationinsight/wrapper";
+
+// Application Insights SDK bootstrapping
+applicationInsightInit();
 
 const config = pipe(
   getConfigOrError(),
   E.getOrElseW((error) => {
+    // eslint-disable-next-line no-console
+    console.error("Error while loading configuration", error);
     throw error;
   })
 );
@@ -47,11 +55,13 @@ const servicesSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_API_KEY
 );
 
-const Info = InfoFn(config)({
-  ...serviceDetailsContainerDependency,
-  searchClient: institutionsSearchClient,
-  blobServiceClient,
-});
+const Info = createAppInsightsWrapper(
+  InfoFn(config)({
+    ...serviceDetailsContainerDependency,
+    searchClient: institutionsSearchClient,
+    blobServiceClient,
+  })
+);
 app.http("Info", {
   authLevel: "anonymous",
   handler: Info,
@@ -59,9 +69,11 @@ app.http("Info", {
   route: "info",
 });
 
-const GetFeaturedServices = GetFeaturedServicesFn(config)({
-  blobServiceClient,
-});
+const GetFeaturedServices = createAppInsightsWrapper(
+  GetFeaturedServicesFn(config)({
+    blobServiceClient,
+  })
+);
 app.http("GetFeaturedServices", {
   methods: ["GET"],
   route: "services/featured",
@@ -69,9 +81,11 @@ app.http("GetFeaturedServices", {
   handler: GetFeaturedServices,
 });
 
-const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
-  blobServiceClient,
-});
+const GetFeaturedInstitutions = createAppInsightsWrapper(
+  GetFeaturedInstitutionsFn(config)({
+    blobServiceClient,
+  })
+);
 app.http("GetFeaturedInstitutions", {
   methods: ["GET"],
   route: "institutions/featured",
@@ -79,9 +93,11 @@ app.http("GetFeaturedInstitutions", {
   handler: GetFeaturedInstitutions,
 });
 
-const SearchInstitutions = SearchInstitutionsFn(config)({
-  searchClient: institutionsSearchClient,
-});
+const SearchInstitutions = createAppInsightsWrapper(
+  SearchInstitutionsFn(config)({
+    searchClient: institutionsSearchClient,
+  })
+);
 app.http("SearchInstitutions", {
   authLevel: "anonymous",
   handler: SearchInstitutions,
@@ -89,9 +105,11 @@ app.http("SearchInstitutions", {
   route: "institutions",
 });
 
-const SearchServices = SearchServicesFn(config)({
-  searchClient: servicesSearchClient,
-});
+const SearchServices = createAppInsightsWrapper(
+  SearchServicesFn(config)({
+    searchClient: servicesSearchClient,
+  })
+);
 app.http("SearchServices", {
   authLevel: "anonymous",
   handler: SearchServices,
@@ -99,7 +117,9 @@ app.http("SearchServices", {
   route: "institutions/{institutionId}/services",
 });
 
-const GetServiceById = GetServiceByIdFn(serviceDetailsContainerDependency);
+const GetServiceById = createAppInsightsWrapper(
+  GetServiceByIdFn(serviceDetailsContainerDependency)
+);
 app.http("GetServiceById", {
   authLevel: "anonymous",
   handler: GetServiceById,
