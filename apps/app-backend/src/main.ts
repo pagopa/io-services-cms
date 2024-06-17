@@ -3,6 +3,8 @@ import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
+import { applicationInsightInit } from "./utils/applicationinsight/helper";
+
 import { getConfigOrError } from "./config";
 import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
 import { GetFeaturedServicesFn } from "./functions/featured-services";
@@ -14,6 +16,9 @@ import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
+
+// Application Insights SDK bootstrapping
+applicationInsightInit();
 
 const config = pipe(
   getConfigOrError(),
