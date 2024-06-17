@@ -205,14 +205,13 @@ export const makeSearchInstitutionsHandler: (
 
 const calculateSearchResultCount = (
   paginationMaxOffset: NonNegativeInteger,
-  actualSearchResultCount: number,
-  requestLimit: number
+  actualSearchResultCount: number
 ) =>
   pipe(
     actualSearchResultCount > paginationMaxOffset,
     B.fold(
       () => actualSearchResultCount,
-      () => paginationMaxOffset + requestLimit
+      () => paginationMaxOffset
     )
   );
 
