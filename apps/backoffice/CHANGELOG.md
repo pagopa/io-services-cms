@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.8
+
+### Patch Changes
+
+- 7a7fc56: Inject through SDK ApplicationInsight on app backend, this bring to the app all the new OpenTelemetry features
+
 ## 1.10.7
 
 ### Patch Changes
