@@ -150,6 +150,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
         metric_trigger {
           metric_name        = "MemoryPercentage"
           metric_resource_id = module.app_be_fn.function_app.plan.id
+          metric_namespace   = "microsoft.web/serverfarms"
           time_grain         = "PT1M"
           statistic          = "Average"
           time_window        = "PT5M"
@@ -213,6 +214,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
         metric_trigger {
           metric_name        = "MemoryPercentage"
           metric_resource_id = module.app_be_fn.function_app.plan.id
+          metric_namespace   = "microsoft.web/serverfarms"
           time_grain         = "PT1M"
           statistic          = "Average"
           time_window        = "PT7M"
