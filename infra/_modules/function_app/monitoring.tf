@@ -149,7 +149,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
       rule {
         metric_trigger {
           metric_name        = "MemoryPercentage"
-          metric_resource_id = azurerm_virtual_machine_scale_set.example.id
+          metric_resource_id = module.app_be_fn.function_app.plan.id
           time_grain         = "PT1M"
           statistic          = "Average"
           time_window        = "PT5M"
@@ -212,7 +212,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
       rule {
         metric_trigger {
           metric_name        = "MemoryPercentage"
-          metric_resource_id = azurerm_virtual_machine_scale_set.example.id
+          metric_resource_id = module.app_be_fn.function_app.plan.id
           time_grain         = "PT1M"
           statistic          = "Average"
           time_window        = "PT7M"
