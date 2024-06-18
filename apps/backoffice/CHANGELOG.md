@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.9
+
+### Patch Changes
+
+- 550a571: Made the ip/cidr inputs unclickable outside the edit mode
+
 ## 1.10.8
 
 ### Patch Changes
