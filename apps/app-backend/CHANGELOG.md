@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 0.0.18
+
+### Patch Changes
+
+- dc84e5e: Fix Application Insight Sampling calculation
+
 ## 0.0.17
 
 ### Patch Changes
