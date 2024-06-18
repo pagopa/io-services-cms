@@ -3553,13 +3553,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/io-functions-commons@npm:^28.21.0":
-  version: 28.22.0
-  resolution: "@pagopa/io-functions-commons@npm:28.22.0"
+"@pagopa/io-functions-commons@npm:^29.0.0":
+  version: 29.1.2
+  resolution: "@pagopa/io-functions-commons@npm:29.1.2"
   dependencies:
-    "@azure/cosmos": ^3.17.1
+    "@azure/cosmos": ^4.0.0
     "@azure/data-tables": ^13.2.2
-    "@pagopa/ts-commons": ^12.6.0
+    "@pagopa/ts-commons": ^13.1.1
     applicationinsights: ^2.9.5
     azure-storage: ^2.10.5
     cidr-matcher: ^2.1.1
@@ -3582,7 +3582,7 @@ __metadata:
     express: ^4.15.3
     fp-ts: ^2.16.5
     io-ts: ^2.2.21
-  checksum: 4ae18b3121ecb17807308fb14c0f7fdc234594be96c017958b90e56b703ec7fdfe03c72133a488a7924f4f95cabfa4776580ee527955f1ed55d98e96e0f2833a
+  checksum: 08b03c239e11f686f5c492d9507d9fee8c216b37625231f3778d57924c13124130a162b13371eefdc9134b0110be64a0a022c1ad8cce5caff33db42f2c5c0b0c
   languageName: node
   linkType: hard
 
@@ -3668,13 +3668,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/ts-commons@npm:^12.6.0":
-  version: 12.6.0
-  resolution: "@pagopa/ts-commons@npm:12.6.0"
+"@pagopa/ts-commons@npm:^13.0.0, @pagopa/ts-commons@npm:^13.1.1":
+  version: 13.1.1
+  resolution: "@pagopa/ts-commons@npm:13.1.1"
   dependencies:
     abort-controller: ^3.0.0
     agentkeepalive: ^4.1.4
-    applicationinsights: ^1.8.10
+    applicationinsights: ^2.9.5
     jose: ^4.15.5
     json-set-map: ^1.1.2
     jsonwebtoken: ^9.0.1
@@ -3685,7 +3685,7 @@ __metadata:
   peerDependencies:
     fp-ts: ^2.16.5
     io-ts: ^2.2.21
-  checksum: 2811817d5f61218013241f9de7d3592fb9f875fc88c7c672a6df168d8d1bccbd915bd8def899af67e678a21ff5b6a6645f955d1028b67aa5c63713b62992efa5
+  checksum: 2eb2e8afdc6154145143ada8562ba5c281d4a8b84608ad8dc624afee82fe25c90e9e377e3d8540e861d95bf4ca10c3bdae737fa892c251db9bf7d4926b521399
   languageName: node
   linkType: hard
 
@@ -10088,15 +10088,15 @@ __metadata:
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/handler-kit": ^1.1.0
     "@pagopa/handler-kit-azure-func": ^2.0.1
-    "@pagopa/io-functions-commons": ^28.21.0
+    "@pagopa/io-functions-commons": ^29.0.0
     "@pagopa/logger": ^1.0.1
     "@pagopa/openapi-codegen-ts": ^13.1.0
-    "@pagopa/ts-commons": ^12.6.0
+    "@pagopa/ts-commons": ^13.0.0
     "@rushstack/eslint-patch": ^1.2.0
     "@types/express": ^4.17.12
     "@types/node": ~20.10.0
     "@vitest/coverage-v8": ^1.4.0
-    applicationinsights: ^3.1.0
+    applicationinsights: ^2.9.5
     azure-functions-core-tools: 4
     dependency-check: ^4.1.0
     eslint: ^8.38.0
