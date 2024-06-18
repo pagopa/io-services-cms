@@ -1,66 +1,35 @@
-/* eslint-disable no-console */
 import * as ai from "applicationinsights";
 
-import { UndiciInstrumentation } from "@opentelemetry/instrumentation-undici";
-import { registerInstrumentations } from "@opentelemetry/instrumentation";
-import { metrics, trace } from "@opentelemetry/api";
-import { IJsonConfig } from "applicationinsights/out/src/shim/types";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
-export const DEFAULT_SAMPLING_PERCENTAGE = 30;
-export const DEFAULT_APP_NAME = "io-p-services-app-backend";
+import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-export const getDefaultAppNameForEnv = () => {
-  if (process.env.WEBSITE_SITE_NAME) {
-    return process.env.WEBSITE_SITE_NAME;
-  }
-  console.info("WEBSITE_SITE_NAME not found, using default app name");
-  return DEFAULT_APP_NAME;
-};
+// the internal function runtime has MaxTelemetryItem per second set to 20 by default
+// @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
+const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
-export const applicationInsightConfigurationContent = () => {
-  if (process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT) {
-    return process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT;
-  }
-
-  const samplingPercentage = Number(
-    process.env.APPLICATIONINSIGHTS_SAMPLING_PERCENTAGE
-  );
-
-  return JSON.stringify({
-    samplingPercentage: !isNaN(samplingPercentage)
-      ? samplingPercentage
-      : DEFAULT_SAMPLING_PERCENTAGE,
-  } satisfies Partial<IJsonConfig>);
-};
-
-export const applicationInsightInit = () => {
-  if (process.env.AI_SDK_CONNECTION_STRING) {
-    // setup sampling percentage from environment, see
-    // https://github.com/microsoft/ApplicationInsights-node.js?tab=readme-ov-file#configuration
-    // for other options. environment variable is in JSON format and takes
-    // precedence over applicationinsights.json
-    // eslint-disable-next-line functional/immutable-data
-    process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT =
-      applicationInsightConfigurationContent();
-
-    // setup cloudRoleName
-    // eslint-disable-next-line functional/immutable-data
-    process.env.OTEL_SERVICE_NAME = getDefaultAppNameForEnv();
-
-    // instrument native node fetch
-    registerInstrumentations({
-      tracerProvider: trace.getTracerProvider(),
-      meterProvider: metrics.getMeterProvider(),
-      instrumentations: [new UndiciInstrumentation()],
-    });
-
-    ai.setup(process.env.AI_SDK_CONNECTION_STRING)
-      .setAutoCollectConsole(true, true)
-      .setDistributedTracingMode(ai.DistributedTracingModes.AI_AND_W3C)
-      .start();
-
-    console.info("ApplicationInsight using opetelemetry loaded");
-  } else {
-    console.error("ApplicationInsight is not configured");
-  }
-};
+// Avoid to initialize Application Insights more than once
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const initTelemetryClient = (
+  env = process.env
+): ai.TelemetryClient | undefined =>
+  ai.defaultClient
+    ? ai.defaultClient
+    : pipe(
+        env.APPLICATIONINSIGHTS_CONNECTION_STRING,
+        NonEmptyString.decode,
+        E.map((k) =>
+          initAppInsights(k, {
+            disableAppInsights: env.APPINSIGHTS_DISABLE === "true",
+            samplingPercentage: pipe(
+              env.APPINSIGHTS_SAMPLING_PERCENTAGE,
+              IntegerFromString.decode,
+              E.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
+            ),
+          })
+        ),
+        E.getOrElseW((_) => undefined)
+      );
