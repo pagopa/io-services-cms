@@ -194,7 +194,8 @@ export function TextFieldArrayController({
               variant="contained"
               onClick={() => {
                 onSaveClick && onSaveClick();
-                setIsReadOnly(true);
+                setRenderedFields({ ...renderedFields });
+                readOnly && setIsReadOnly(true);
               }}
             >
               {t("buttons.save")}
@@ -205,7 +206,7 @@ export function TextFieldArrayController({
               variant="outlined"
               onClick={() => {
                 onCancelClick && onCancelClick();
-                setIsReadOnly(true);
+                readOnly && setIsReadOnly(true);
               }}
             >
               {t("buttons.cancel")}
