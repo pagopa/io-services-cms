@@ -10084,7 +10084,6 @@ __metadata:
     "@azure/search-documents": ^12.0.0
     "@azure/storage-blob": ^12.23.0
     "@io-services-cms/models": "workspace:^"
-    "@opentelemetry/instrumentation-undici": ^0.3.0
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/handler-kit": ^1.1.0
     "@pagopa/handler-kit-azure-func": ^2.0.1
