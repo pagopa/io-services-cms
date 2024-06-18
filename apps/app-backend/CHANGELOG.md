@@ -1,5 +1,35 @@
 # io-services-app-backend
 
+## 1.0.0
+
+### Major Changes
+
+- f047e89: Bring Back pre-OTEL applicationsInsight
+
+## 0.0.18
+
+### Patch Changes
+
+- dc84e5e: Fix Application Insight Sampling calculation
+
+## 0.0.17
+
+### Patch Changes
+
+- 7a7fc56: Inject through SDK ApplicationInsight on app backend, this bring to the app all the new OpenTelemetry features
+
+## 0.0.16
+
+### Patch Changes
+
+- 8f36707: fix return count value and decrease max offset value
+
+## 0.0.15
+
+### Patch Changes
+
+- d4e867c: use custom offset limit only when requested a full text search
+
 ## 0.0.14
 
 ### Patch Changes

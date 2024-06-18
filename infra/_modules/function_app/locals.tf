@@ -17,6 +17,7 @@ locals {
       AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
       AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
+
     }
     autoscale_settings = {
       min     = 3
