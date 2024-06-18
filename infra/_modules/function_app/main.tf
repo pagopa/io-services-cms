@@ -31,5 +31,7 @@ module "app_be_fn" {
 
   tier = local.app_be.tier
 
+  application_insights_connection_string = data.azurerm_application_insights.ai_common.connection_string
+
   tags = var.tags
 }
