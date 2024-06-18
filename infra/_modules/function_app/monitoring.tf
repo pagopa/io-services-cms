@@ -148,6 +148,25 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
 
       rule {
         metric_trigger {
+          metric_name        = "MemoryPercentage"
+          metric_resource_id = azurerm_virtual_machine_scale_set.example.id
+          time_grain         = "PT1M"
+          statistic          = "Average"
+          time_window        = "PT5M"
+          time_aggregation   = "Average"
+          operator           = "GreaterThan"
+          threshold          = 80
+        }
+        scale_action {
+          direction = "Increase"
+          type      = "ChangeCount"
+          value     = "1"
+          cooldown  = "PT5M"
+        }
+      }
+
+      rule {
+        metric_trigger {
           metric_name              = "Requests"
           metric_resource_id       = module.app_be_fn.function_app.function_app.id
           metric_namespace         = "microsoft.web/sites"
@@ -184,25 +203,6 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
 
         scale_action {
           direction = "Decrease"
-          type      = "ChangeCount"
-          value     = "1"
-          cooldown  = "PT5M"
-        }
-      }
-
-      rule {
-        metric_trigger {
-          metric_name        = "MemoryPercentage"
-          metric_resource_id = azurerm_virtual_machine_scale_set.example.id
-          time_grain         = "PT1M"
-          statistic          = "Average"
-          time_window        = "PT5M"
-          time_aggregation   = "Average"
-          operator           = "GreaterThan"
-          threshold          = 80
-        }
-        scale_action {
-          direction = "Increase"
           type      = "ChangeCount"
           value     = "1"
           cooldown  = "PT5M"
