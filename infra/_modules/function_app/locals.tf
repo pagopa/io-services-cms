@@ -19,7 +19,8 @@ locals {
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
 
       # Application Insight
-      AI_SDK_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string
+      AI_SDK_CONNECTION_STRING                = data.azurerm_application_insights.ai_common.connection_string
+      APPLICATIONINSIGHTS_SAMPLING_PERCENTAGE = 5
     }
     autoscale_settings = {
       min     = 3

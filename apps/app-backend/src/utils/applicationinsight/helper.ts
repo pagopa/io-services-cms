@@ -22,11 +22,14 @@ export const applicationInsightConfigurationContent = () => {
     return process.env.APPLICATIONINSIGHTS_CONFIGURATION_CONTENT;
   }
 
-  const samplingPercentage = process.env
-    .APPLICATIONINSIGHTS_SAMPLING_PERCENTAGE as number | undefined;
+  const samplingPercentage = Number(
+    process.env.APPLICATIONINSIGHTS_SAMPLING_PERCENTAGE
+  );
 
   return JSON.stringify({
-    samplingPercentage: samplingPercentage ?? DEFAULT_SAMPLING_PERCENTAGE,
+    samplingPercentage: !isNaN(samplingPercentage)
+      ? samplingPercentage
+      : DEFAULT_SAMPLING_PERCENTAGE,
   } satisfies Partial<IJsonConfig>);
 };
 
