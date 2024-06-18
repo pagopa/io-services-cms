@@ -6,6 +6,15 @@ resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
   enabled_log {
     category = "StorageWrite"
   }
+
+  metric {
+    category = "Capacity"
+    enabled  = false
+  }
+  metric {
+    category = "Transaction"
+    enabled  = false
+  }
 }
 
 resource "azurerm_monitor_scheduled_query_rules_alert_v2" "poison-queue-alert" {
