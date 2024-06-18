@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.0.0
+
+### Major Changes
+
+- f047e89: Bring Back pre-OTEL applicationsInsight
+
 ## 0.0.18
 
 ### Patch Changes
