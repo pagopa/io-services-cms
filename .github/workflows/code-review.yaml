@@ -54,7 +54,7 @@ jobs:
 
       - name: 'Report Backoffice Frontend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
-        if: ${{ hashFiles('./apps/backoffice/frontend/coverage/*.json') != '' }}
+        if: ${{ hashFiles('./apps/backoffice/coverage/frontend/*.json') != '' }}
         with:
           name: 'Backoffice Frontend'
           working-directory: './apps/backoffice'
@@ -64,7 +64,7 @@ jobs:
 
       - name: 'Report Backoffice Backend Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
-        if: ${{ hashFiles('./apps/backoffice/backend/coverage/*.json') != '' }}
+        if: ${{ hashFiles('./apps/backoffice/coverage/backend/*.json') != '' }}
         with:
           name: 'Backoffice Backend'
           working-directory: './apps/backoffice'
@@ -81,14 +81,14 @@ jobs:
 
       - name: 'Report External Clients Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
-        if: ${{ hashFiles('./apps/external-clients/coverage/*.json') != '' }}
+        if: ${{ hashFiles('./packages/external-clients/coverage/*.json') != '' }}
         with:
           name: 'External Clients'
           working-directory: './packages/external-clients'
 
       - name: 'Report Models Coverage'
         uses: davelosert/vitest-coverage-report-action@9fd25c0d0394bfd0ffa632777316402c2e5fb81f # v2.0.4
-        if: ${{ hashFiles('./apps/io-services-cms-models/coverage/*.json') != '' }}
+        if: ${{ hashFiles('./packages/io-services-cms-models/coverage/*.json') != '' }}
         with:
           name: 'Models'
           working-directory: './packages/io-services-cms-models'
