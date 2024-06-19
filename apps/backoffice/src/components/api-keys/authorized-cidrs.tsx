@@ -5,12 +5,14 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 import { TextFieldArrayController } from "../forms/controllers";
-import { LoaderSkeleton } from "../loaders";
 import { arrayOfIPv4CidrSchema } from "../forms/schemas";
+import { LoaderSkeleton } from "../loaders";
 
 export type AuthorizedCidrsProps = {
   /** List of IPs in CIDR format */
   cidrs?: string[];
+  /** Description text */
+  description: string;
   /** Indentify if fields are editable */
   editable?: boolean;
   /** Event triggered when user click on **Save** button */
@@ -25,6 +27,7 @@ const schema = z.object({
 /** Show and Edit an IP List in CIDR format */
 export const AuthorizedCidrs = ({
   cidrs,
+  description,
   editable,
   onSaveClick
 }: AuthorizedCidrsProps) => {
@@ -67,7 +70,7 @@ export const AuthorizedCidrs = ({
         marginTop={1}
         marginBottom={3}
       >
-        {t("authorizedCidrs.description")}
+        {t(description)}
       </Typography>
       <LoaderSkeleton loading={cidrs === undefined} style={{ width: "50%" }}>
         <FormProvider {...formMethods}>
