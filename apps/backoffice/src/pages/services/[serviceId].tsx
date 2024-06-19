@@ -205,6 +205,7 @@ export default function ServiceDetails() {
         <Grid item xs={12}>
           <AuthorizedCidrs
             cidrs={(slData?.authorized_cidrs as unknown) as string[]}
+            description="routes.service.authorizedCidrs.description"
             editable={false}
             onSaveClick={e => console.log(e)}
           />
