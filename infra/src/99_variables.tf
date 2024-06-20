@@ -137,7 +137,7 @@ variable "functions_sku_size" {
 variable "functions_autoscale_minimum" {
   type        = number
   description = "The minimum number of instances for this resource."
-  default     = 1
+  default     = 3
 }
 
 variable "functions_autoscale_maximum" {
@@ -149,7 +149,7 @@ variable "functions_autoscale_maximum" {
 variable "functions_autoscale_default" {
   type        = number
   description = "The number of instances that are available for scaling if metrics are not available for evaluation."
-  default     = 1
+  default     = 3
 }
 
 variable "jira_namespace_url" {
