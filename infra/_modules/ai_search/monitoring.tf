@@ -10,7 +10,7 @@ resource "azurerm_monitor_metric_alert" "srch_high_latency" {
   severity            = 1
   window_size         = "PT5M"
   frequency           = "PT5M"
-  auto_mitigate       = false
+  auto_mitigate       = true
 
   criteria {
     metric_namespace = "Microsoft.Search/searchServices"
@@ -35,7 +35,7 @@ resource "azurerm_monitor_metric_alert" "srch_throttled_queries" {
   severity            = 1
   window_size         = "PT5M"
   frequency           = "PT5M"
-  auto_mitigate       = false
+  auto_mitigate       = true
 
   criteria {
     metric_namespace = "Microsoft.Search/searchServices"
