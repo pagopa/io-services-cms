@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.0.1
+
+### Patch Changes
+
+- 4cd3347: fix offset limit on search services
+
 ## 1.0.0
 
 ### Major Changes
