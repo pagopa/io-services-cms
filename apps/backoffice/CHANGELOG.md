@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.10.10
+
+### Patch Changes
+
+- d3b322c: Update copy in service create/update step 3 description and Authorized CIDRs descripion in both ApiKeys and ServiceDetails pages
+
 ## 1.10.9
 
 ### Patch Changes
