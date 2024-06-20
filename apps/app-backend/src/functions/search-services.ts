@@ -102,7 +102,8 @@ const extractParams: (
             IWithinRangeIntegerTag<0, NonNegativeInteger>
           >(
             0,
-            (paginationConfig.PAGINATION_MAX_OFFSET + 1) as NonNegativeInteger
+            (paginationConfig.PAGINATION_MAX_OFFSET_AI_SEARCH +
+              1) as NonNegativeInteger
           )
         )
       ),

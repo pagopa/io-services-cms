@@ -15,7 +15,7 @@ import { ServiceMinified } from "../../generated/definitions/internal/ServiceMin
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 101,
-  PAGINATION_MAX_OFFSET: 101,
+  PAGINATION_MAX_OFFSET_AI_SEARCH: 101,
 } as unknown as IConfig;
 const mockSearchServices = {
   fullTextSearch: vi
@@ -175,6 +175,38 @@ describe("Search Services Tests", () => {
           body: {
             status: 400,
             title: "Invalid 'limit' supplied in request query",
+          },
+          statusCode: 400,
+        })
+      )
+    );
+  });
+
+  it("Should Return Bad Request when offset is greater than max allowed", async () => {
+    const errorMessage = "An Error occured while searching";
+
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        offset: `${mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH + 1}`,
+      },
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            status: 400,
+            title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
         })
