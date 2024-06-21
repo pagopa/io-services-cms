@@ -85,7 +85,7 @@ manual_review_properties = "data.name,data.description,data.organization.name,da
 # Backoffice Configurations
 backoffice_host = "selfcare.io.pagopa.it"
 backoffice_app = {
-  sku_name                                  = "P1v3"
+  sku_name                                  = "P0v3"
   apim_user_groups                          = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
   azure_credentials_scope_url               = "https://management.azure.com/.default"
   azure_apim_subscriptions_api_base_url     = "https://management.azure.com/subscriptions/"
@@ -93,6 +93,9 @@ backoffice_app = {
   selfcare_jwks_path                        = "/.well-known/jwks.json"
   subscription_migration_api_url            = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
   api_services_cms_topics_cache_ttl_minutes = "60"
+  autoscale_minimum                         = 3
+  autoscale_maximum                         = 30
+  autoscale_default                         = 3
 }
 
 # Container App Job
