@@ -59,26 +59,6 @@ resource "azurerm_monitor_autoscale_setting" "webapp_functions_app_autoscale" {
 
     rule {
       metric_trigger {
-        metric_name        = "MemoryPercentage"
-        metric_resource_id = module.webapp_functions_app.app_service_plan_id
-        metric_namespace   = "microsoft.web/serverfarms"
-        time_grain         = "PT1M"
-        statistic          = "Average"
-        time_window        = "PT5M"
-        time_aggregation   = "Average"
-        operator           = "GreaterThan"
-        threshold          = 80
-      }
-      scale_action {
-        direction = "Increase"
-        type      = "ChangeCount"
-        value     = "2"
-        cooldown  = "PT5M"
-      }
-    }
-
-    rule {
-      metric_trigger {
         metric_name              = "Requests"
         metric_resource_id       = module.webapp_functions_app.id
         metric_namespace         = "microsoft.web/sites"
@@ -118,26 +98,6 @@ resource "azurerm_monitor_autoscale_setting" "webapp_functions_app_autoscale" {
         type      = "ChangeCount"
         value     = "1"
         cooldown  = "PT20M"
-      }
-    }
-
-    rule {
-      metric_trigger {
-        metric_name        = "MemoryPercentage"
-        metric_resource_id = module.webapp_functions_app.app_service_plan_id
-        metric_namespace   = "microsoft.web/serverfarms"
-        time_grain         = "PT1M"
-        statistic          = "Average"
-        time_window        = "PT7M"
-        time_aggregation   = "Average"
-        operator           = "LessThan"
-        threshold          = 30
-      }
-      scale_action {
-        direction = "Decrease"
-        type      = "ChangeCount"
-        value     = "1"
-        cooldown  = "PT5M"
       }
     }
   }
