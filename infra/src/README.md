@@ -132,9 +132,9 @@
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
-| <a name="input_functions_autoscale_default"></a> [functions\_autoscale\_default](#input\_functions\_autoscale\_default) | The number of instances that are available for scaling if metrics are not available for evaluation. | `number` | `3` | no |
+| <a name="input_functions_autoscale_default"></a> [functions\_autoscale\_default](#input\_functions\_autoscale\_default) | The number of instances that are available for scaling if metrics are not available for evaluation. | `number` | `1` | no |
 | <a name="input_functions_autoscale_maximum"></a> [functions\_autoscale\_maximum](#input\_functions\_autoscale\_maximum) | The maximum number of instances for this resource. | `number` | `30` | no |
-| <a name="input_functions_autoscale_minimum"></a> [functions\_autoscale\_minimum](#input\_functions\_autoscale\_minimum) | The minimum number of instances for this resource. | `number` | `3` | no |
+| <a name="input_functions_autoscale_minimum"></a> [functions\_autoscale\_minimum](#input\_functions\_autoscale\_minimum) | The minimum number of instances for this resource. | `number` | `1` | no |
 | <a name="input_functions_kind"></a> [functions\_kind](#input\_functions\_kind) | App service plan kind | `string` | `null` | no |
 | <a name="input_functions_sku_size"></a> [functions\_sku\_size](#input\_functions\_sku\_size) | App service plan sku size | `string` | `null` | no |
 | <a name="input_functions_sku_tier"></a> [functions\_sku\_tier](#input\_functions\_sku\_tier) | App service plan sku tier | `string` | `null` | no |

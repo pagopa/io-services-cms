@@ -130,7 +130,7 @@ module "webapp_functions_app" {
     kind                         = var.functions_kind
     sku_tier                     = var.functions_sku_tier
     sku_size                     = var.functions_sku_size
-    zone_balancing_enabled       = true
+    zone_balancing_enabled       = false
     worker_count                 = 1
     maximum_elastic_worker_count = 0
   }
