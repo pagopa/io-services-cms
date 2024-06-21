@@ -74,8 +74,9 @@ module "backoffice_app" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-  plan_name = format("%s-%s-backoffice-plan", local.project, local.application_basename)
-  sku_name  = var.backoffice_app.sku_name
+  plan_name              = format("%s-%s-backoffice-plan", local.project, local.application_basename)
+  sku_name               = var.backoffice_app.sku_name
+  zone_balancing_enabled = true
 
   node_version = local.backoffice_node_version
 
