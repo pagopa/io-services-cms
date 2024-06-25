@@ -32,7 +32,7 @@ locals {
       COSMOSDB_CONTAINER_SERVICES_DETAILS     = "services"
 
       // TODO: temporary replace after first creation with the internal storage account
-      INTERNAL_STORAGE_CONNECTION_STRING = data.azurerm_storage_account.cms_storage_account.primary_connection_string
+      INTERNAL_STORAGE_CONNECTION_STRING = module.cms_storage_account.primary_connection_string
 
       # JIRA integration for Service review workflow
       JIRA_NAMESPACE_URL                  = "https://pagopa.atlassian.net"
