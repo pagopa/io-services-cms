@@ -11,8 +11,8 @@ data "azurerm_cosmosdb_account" "cosmos" {
 }
 
 data "azurerm_cosmosdb_account" "cosmos_legacy" {
-  name                = var.legacy_cosmosdb_resource_name
-  resource_group_name = var.legacy_cosmosdb_resource_group
+  name                = "${var.prefix}-${var.env_short}-cosmos-api"
+  resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
 }
 
 data "azurerm_monitor_action_group" "error_action_group" {
@@ -62,10 +62,5 @@ data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
 
 data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
-}
-
-data "azurerm_key_vault_secret" "function_apim_key" {
-  name         = "${local.project}-services-cms-webapp-fn-apim-key"
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
