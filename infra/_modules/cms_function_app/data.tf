@@ -41,7 +41,7 @@ data "azurerm_subnet" "backoffice_app_snet" {
 # KeyVault Secrets #
 ####################
 
-data "azure_key_vault" "cms_key_vault" {
+data "azurerm_key_vault" "cms_key_vault" {
   name                = "${var.prefix}-${var.env_short}-services-cms-kv"
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
 }
