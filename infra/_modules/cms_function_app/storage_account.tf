@@ -1,5 +1,5 @@
 module "cms_storage_account" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//storage_account?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//storage_account?ref=v8.22.0"
 
   name                          = "${module.cms_storage_account.name}queue"
   account_kind                  = "StorageV2"
