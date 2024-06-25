@@ -64,3 +64,19 @@ data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
+
+
+data "azurerm_key_vault_secret" "legacy_cosmosdb_connectionstring" {
+  name         = "legacy-cosmosdb-connectionstring"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
+
+data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
+  name         = "legacy-cosmosdb-key"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
+
+data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
+  name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
