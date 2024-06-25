@@ -1,7 +1,7 @@
 module "cms_storage_account" {
   source = "github.com/pagopa/terraform-azurerm-v3.git//storage_account?ref=v8.22.0"
 
-  name                          = "${var.prefix}${var.env_short}${var.location}${var.domain}cmsqueuest"
+  name                          = "${var.prefix}${var.env_short}${var.location_short}${var.domain}cmsqueuest"
   account_kind                  = "StorageV2"
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"
