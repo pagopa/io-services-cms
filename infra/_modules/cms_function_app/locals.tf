@@ -62,7 +62,7 @@ locals {
       REVIEWER_DB_HOST     = data.azurerm_postgresql_flexible_server.cms_private_pgflex.fqdn
       REVIEWER_DB_NAME     = "reviewer"
       REVIEWER_DB_PASSWORD = data.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
-      REVIEWER_DB_PORT     = data.azurerm_postgresql_flexible_server.cms_private_pgflex.connection_port
+      REVIEWER_DB_PORT     = 6432
       REVIEWER_DB_SCHEMA   = "reviewer"
       REVIEWER_DB_TABLE    = "service_review"
       REVIEWER_DB_USER     = "reviewerusr"
