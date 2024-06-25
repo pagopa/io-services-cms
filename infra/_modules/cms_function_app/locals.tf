@@ -5,7 +5,6 @@ locals {
     snet_cidr     = "10.20.8.0/24" # Picked as the first available non-allocated CIDR from the io-p-itn-common-vnet-01
     cosmosdb_name = "db-services-cms"
     app_settings = {
-      FUNCTIONS_WORKER_RUNTIME       = "node"
       FUNCTIONS_WORKER_PROCESS_COUNT = "4"
       NODE_ENV                       = "production"
 
