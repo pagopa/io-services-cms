@@ -49,6 +49,7 @@ module "cms_fn" {
       "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled" = "1"
     }
   )
+
   slot_app_settings = merge(
     local.cms.app_settings,
     {
@@ -71,6 +72,26 @@ module "cms_fn" {
       "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled" = "1"
     }
   )
+
+  sticky_app_setting_names = [
+    "AzureWebJobs.LegacyServiceWatcher.Disabled",
+    "AzureWebJobs.ServiceLifecycleWatcher.Disabled",
+    "AzureWebJobs.ServicePublicationWatcher.Disabled",
+    "AzureWebJobs.ServiceReviewChecker.Disabled",
+    "AzureWebJobs.ServiceHistoryWatcher.Disabled",
+    "AzureWebJobs.OnRequestHistoricization.Disabled",
+    "AzureWebJobs.OnRequestPublication.Disabled",
+    "AzureWebJobs.OnRequestReview.Disabled",
+    "AzureWebJobs.OnRequestSyncCms.Disabled",
+    "AzureWebJobs.OnRequestSyncLegacy.Disabled",
+    "AzureWebJobs.OnRequestReviewLegacy.Disabled",
+    "AzureWebJobs.ServiceReviewLegacyChecker.Disabled",
+    "AzureWebJobs.OnRequestValidation.Disabled",
+    "AzureWebJobs.OnRequestDeletion.Disabled",
+    "AzureWebJobs.OnRequestDetail.Disabled",
+    "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled",
+    "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"
+  ]
 
   tier = local.cms.tier
 

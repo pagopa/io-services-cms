@@ -20,12 +20,6 @@ data "azurerm_monitor_action_group" "error_action_group" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
 }
 
-// TODO: To be replaced with the internal one after first apply
-data "azurerm_storage_account" "cms_storage_account" {
-  name                = "${var.prefix}${var.env_short}servicescmsst"
-  resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
-}
-
 data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
   name                = "${var.prefix}-${var.env_short}-services-cms-private-pgflex"
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
