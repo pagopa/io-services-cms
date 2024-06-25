@@ -63,18 +63,3 @@ variable "private_dns_zone_resource_group_name" {
   type        = string
   description = "Resource group name of the private DNS zone to use for private endpoints"
 }
-
-
-##################
-#  Function App  #
-##################
-variable "ai_search" {
-  type = object({
-    id                     = string
-    url                    = string
-    service_version        = string
-    institution_index_name = string
-    services_index_name    = string
-  })
-  description = "AI Search input parameters"
-}
