@@ -31,7 +31,6 @@ locals {
       COSMOSDB_CONTAINER_SERVICES_HISTORY     = "services-history"
       COSMOSDB_CONTAINER_SERVICES_DETAILS     = "services"
 
-      // TODO: temporary replace after first creation with the internal storage account
       INTERNAL_STORAGE_CONNECTION_STRING = module.cms_storage_account.primary_connection_string
 
       # JIRA integration for Service review workflow
