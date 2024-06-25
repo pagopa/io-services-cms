@@ -49,3 +49,22 @@ module "function_app" {
 
   tags = local.tags
 }
+
+
+module "cms_function_app" {
+  source              = "../_modules/cms_function_app"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location            = local.location
+  domain              = local.domain
+  resource_group_name = azurerm_resource_group.rg.name
+
+  virtual_network = {
+    name                = data.azurerm_virtual_network.itn_common.name
+    resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
+  }
+  peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
+  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+
+  tags = local.tags
+}
