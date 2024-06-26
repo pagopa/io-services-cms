@@ -12,9 +12,9 @@ resource "azurerm_monitor_autoscale_setting" "cms_fn" {
     name = "default"
 
     capacity {
-      default = profile_info.value.capacity.default
-      minimum = profile_info.value.capacity.minimum
-      maximum = profile_info.value.capacity.maximum
+      default = local.cms.autoscale_settings.default
+      minimum = local.cms.autoscale_settings.min
+      maximum = local.cms.autoscale_settings.max
     }
 
     rule {
