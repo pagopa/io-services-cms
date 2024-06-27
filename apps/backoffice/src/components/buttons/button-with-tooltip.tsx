@@ -11,7 +11,7 @@ type ButtonWithTooltipProps = {
   isVisible: boolean;
 };
 
-const ButtonWithTooltip = ({
+export const ButtonWithTooltip = ({
   tooltipTitle,
   onClick,
   icon,
@@ -23,8 +23,14 @@ const ButtonWithTooltip = ({
 
   return (
     isVisible && (
-      <Tooltip title={t(tooltipTitle)} placement="top" arrow>
+      <Tooltip
+        data-testid="bo-test-id-button-with-tooltip-tooltip"
+        title={t(tooltipTitle)}
+        placement="top"
+        arrow
+      >
         <Button
+          data-testid="bo-test-id-button-with-tooltip"
           size={size}
           variant={variant}
           sx={{ bgcolor: "background.paper", padding: 0 }}
@@ -36,5 +42,3 @@ const ButtonWithTooltip = ({
     )
   );
 };
-
-export default ButtonWithTooltip;
