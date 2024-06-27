@@ -25,7 +25,7 @@ import {
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 import { useDialog } from "../dialog-provider";
-import ButtonWithTooltip from "../buttons/button-with-tooltip";
+import { ButtonWithTooltip } from "../buttons/";
 import { getConfiguration } from "@/config";
 
 export enum ServiceContextMenuActions {
@@ -267,9 +267,7 @@ export const ServiceContextMenu = ({
         variant="text"
       />
       <ButtonWithTooltip
-        isVisible={
-          getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED
-        }
+        isVisible={getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED}
         tooltipTitle="service.actions.preview"
         onClick={onPreviewClick}
         icon={<PhoneAndroid />}
