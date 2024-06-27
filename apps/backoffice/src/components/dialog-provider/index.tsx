@@ -75,12 +75,20 @@ const DialogProvider: React.FC<{
           ></Typography>
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button variant="outlined" onClick={handleCancel}>
+          <Button
+            data-testid="bo-test-id-dialog-provider-cancel-button"
+            variant="outlined"
+            onClick={handleCancel}
+          >
             {options.cancelButtonLabel
               ? t(options.cancelButtonLabel)
               : t("buttons.cancel")}
           </Button>
-          <Button variant="contained" onClick={handleConfirm}>
+          <Button
+            data-testid="bo-test-id-dialog-provider-confirm-button"
+            variant="contained"
+            onClick={handleConfirm}
+          >
             {options.confirmButtonLabel
               ? t(options.confirmButtonLabel)
               : t("buttons.confirm")}
