@@ -30,7 +30,7 @@ export const ButtonExit = ({ onClick }: ButtonExitProps) => {
 
   return (
     <ButtonNaked
-      data-testid="bo-test-id-button-exit"
+      data-testid="bo-io-button-exit"
       color="primary"
       startIcon={<ArrowBack />}
       size="medium"

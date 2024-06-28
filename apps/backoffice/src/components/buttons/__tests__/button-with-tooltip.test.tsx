@@ -17,7 +17,7 @@ describe("[ButtonWithTooltip] Component", () => {
       <ButtonWithTooltip isVisible onClick={() => vi.fn()}></ButtonWithTooltip>
     );
 
-    const button = screen.getByTestId("bo-test-id-button-with-tooltip");
+    const button = screen.getByTestId("bo-io-button-with-tooltip");
 
     expect(button).toBeDefined();
   });
@@ -26,23 +26,9 @@ describe("[ButtonWithTooltip] Component", () => {
     const onClick = vi.fn();
     render(<ButtonWithTooltip isVisible onClick={onClick}></ButtonWithTooltip>);
 
-    const button = screen.getByTestId("bo-test-id-button-with-tooltip");
+    const button = screen.getByTestId("bo-io-button-with-tooltip");
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
   });
-
-  // it("should appear the tooltip ", () => {
-  //   const onClick = vi.fn();
-  //   render(<ButtonWithTooltip isVisible onClick={onClick}></ButtonWithTooltip>);
-
-  //   const button = screen.getByTestId("bo-test-id-button-with-tooltip");
-  //   fireEvent.mouseEnter(button);
-
-  //   const tooltip = screen.getByTestId(
-  //     "bo-test-id-button-with-tooltip-tooltip"
-  //   );
-
-  //   expect(tooltip).toBeDefined();
-  // });
 });

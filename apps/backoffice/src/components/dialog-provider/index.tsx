@@ -76,7 +76,7 @@ const DialogProvider: React.FC<{
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
           <Button
-            data-testid="bo-test-id-dialog-provider-cancel-button"
+            data-testid="bo-io-dialog-provider-cancel-button"
             variant="outlined"
             onClick={handleCancel}
           >
@@ -85,7 +85,7 @@ const DialogProvider: React.FC<{
               : t("buttons.cancel")}
           </Button>
           <Button
-            data-testid="bo-test-id-dialog-provider-confirm-button"
+            data-testid="bo-io-dialog-provider-confirm-button"
             variant="contained"
             onClick={handleConfirm}
           >

@@ -42,7 +42,7 @@ describe("[ButtonWithLoader] Component", () => {
   it("should be rendered", () => {
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-with-loader");
+    const button = screen.getByTestId("bo-io-button-with-loader");
 
     expect(button).toBeDefined();
   });
@@ -50,7 +50,7 @@ describe("[ButtonWithLoader] Component", () => {
   it("should be clicked", () => {
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-with-loader");
+    const button = screen.getByTestId("bo-io-button-with-loader");
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe("[ButtonWithLoader] Component", () => {
     isDisabled = true;
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-with-loader");
+    const button = screen.getByTestId("bo-io-button-with-loader");
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe("[ButtonWithLoader] Component", () => {
     isLoading = true;
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-with-loader");
+    const button = screen.getByTestId("bo-io-button-with-loader");
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
@@ -79,7 +79,9 @@ describe("[ButtonWithLoader] Component", () => {
   it("should show the loader ", () => {
     isLoading = true;
     render(getButtonWithLoaderComponent());
-    const loader = screen.getByTestId("bo-test-id-button-with-loader-loader");
+    const loader = screen.getByTestId(
+      "bo-io-button-with-loader-circular-progress"
+    );
 
     expect(loader).toBeDefined();
   });

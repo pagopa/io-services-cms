@@ -23,14 +23,14 @@ describe("[ButtonBack] Component", () => {
   it("should be rendered", () => {
     render(getButtonBackComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-back");
+    const button = screen.getByTestId("bo-io-button-back");
 
     expect(button).toBeDefined();
   });
 
   it("should be clicked", () => {
     render(getButtonBackComponent());
-    const button = screen.getByTestId("bo-test-id-button-back");
+    const button = screen.getByTestId("bo-io-button-back");
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -39,7 +39,7 @@ describe("[ButtonBack] Component", () => {
   it("should not be clicked", () => {
     isDisabled = true;
     render(getButtonBackComponent());
-    const button = screen.getByTestId("bo-test-id-button-back");
+    const button = screen.getByTestId("bo-io-button-back");
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();

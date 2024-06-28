@@ -23,7 +23,7 @@ describe("[ButtonShowMore] Component", () => {
   it("should be rendered", () => {
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-show-more");
+    const button = screen.getByTestId("bo-io-button-show-more");
 
     expect(button).toBeDefined();
   });
@@ -31,7 +31,7 @@ describe("[ButtonShowMore] Component", () => {
   it("should be clicked", () => {
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-show-more");
+    const button = screen.getByTestId("bo-io-button-show-more");
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe("[ButtonShowMore] Component", () => {
     isDisabled = true;
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-show-more");
+    const button = screen.getByTestId("bo-io-button-show-more");
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();

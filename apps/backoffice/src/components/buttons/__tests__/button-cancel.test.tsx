@@ -23,7 +23,7 @@ describe("[ButtonCancel] Component", () => {
   it("should be rendered", () => {
     render(getButtonCancelComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-cancel");
+    const button = screen.getByTestId("bo-io-button-cancel");
 
     expect(button).toBeDefined();
   });
@@ -31,7 +31,7 @@ describe("[ButtonCancel] Component", () => {
   it("should be clicked", () => {
     render(getButtonCancelComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-cancel");
+    const button = screen.getByTestId("bo-io-button-cancel");
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe("[ButtonCancel] Component", () => {
     isDisabled = true;
     render(getButtonCancelComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-cancel");
+    const button = screen.getByTestId("bo-io-button-cancel");
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();

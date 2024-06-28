@@ -15,7 +15,7 @@ export const ButtonNext = ({
 
   return (
     <Button
-      data-testid="bo-test-id-button-next"
+      data-testid="bo-io-button-next"
       type="submit"
       size="medium"
       variant="contained"

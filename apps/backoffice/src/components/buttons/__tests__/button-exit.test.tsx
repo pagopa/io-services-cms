@@ -24,7 +24,7 @@ describe("[ButtonExit] Component", () => {
   it("should be rendered", () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-exit");
+    const button = screen.getByTestId("bo-io-button-exit");
 
     expect(button).toBeDefined();
   });
@@ -32,10 +32,10 @@ describe("[ButtonExit] Component", () => {
   it("should be clicked with confirm", async () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-exit");
+    const button = screen.getByTestId("bo-io-button-exit");
     fireEvent.click(button);
     await fireEvent.click(
-      screen.getByTestId("bo-test-id-dialog-provider-confirm-button")
+      screen.getByTestId("bo-io-dialog-provider-confirm-button")
     );
 
     expect(onClick).toHaveBeenCalled();
@@ -44,10 +44,10 @@ describe("[ButtonExit] Component", () => {
   it("should be clicked with cancel", async () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-test-id-button-exit");
+    const button = screen.getByTestId("bo-io-button-exit");
     fireEvent.click(button);
     await fireEvent.click(
-      screen.getByTestId("bo-test-id-dialog-provider-cancel-button")
+      screen.getByTestId("bo-io-dialog-provider-cancel-button")
     );
 
     expect(onClick).not.toHaveBeenCalled();

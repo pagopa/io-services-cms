@@ -23,14 +23,9 @@ export const ButtonWithTooltip = ({
 
   return (
     isVisible && (
-      <Tooltip
-        data-testid="bo-test-id-button-with-tooltip-tooltip"
-        title={t(tooltipTitle)}
-        placement="top"
-        arrow
-      >
+      <Tooltip title={t(tooltipTitle)} placement="top" arrow>
         <Button
-          data-testid="bo-test-id-button-with-tooltip"
+          data-testid="bo-io-button-with-tooltip"
           size={size}
           variant={variant}
           sx={{ bgcolor: "background.paper", padding: 0 }}
