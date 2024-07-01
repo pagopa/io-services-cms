@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DialogProvider from "../../dialog-provider";
 import { ButtonExit } from "../index";
@@ -6,6 +7,7 @@ import { ButtonExit } from "../index";
 const BO_IO_BUTTON_EXIT = "bo-io-button-exit";
 
 let onClick = vi.fn();
+
 const getButtonExitComponent = () => (
   <DialogProvider>
     <ButtonExit onClick={onClick}></ButtonExit>

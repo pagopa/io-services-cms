@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonWithLoader } from "../index";
 
@@ -23,9 +24,7 @@ const getButtonWithLoaderComponent = () => (
 const resetProps = () => {
   isDisabled = false;
   onClick = vi.fn();
-  label = "test";
   isLoading = false;
-  fullWidth = false;
 };
 
 // needed to clean document (react dom)

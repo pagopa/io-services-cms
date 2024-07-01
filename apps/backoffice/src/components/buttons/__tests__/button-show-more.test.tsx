@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonShowMore } from "../index";
 
@@ -6,6 +7,7 @@ const BO_IO_BUTTON_SHOW_MORE = "bo-io-button-show-more";
 
 let isDisabled = false;
 let onClick = vi.fn();
+
 const getButtonShowMoreComponent = () => (
   <ButtonShowMore disabled={isDisabled} onClick={onClick}></ButtonShowMore>
 );

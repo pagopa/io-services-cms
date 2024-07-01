@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonNext } from "../index";
 
@@ -6,6 +7,7 @@ const BO_IO_BUTTON_NEXT = "bo-io-button-next";
 
 let isDisabled = false;
 let onClick = vi.fn();
+
 const getButtonNextComponent = () => (
   <ButtonNext disabled={isDisabled} onClick={onClick}></ButtonNext>
 );
