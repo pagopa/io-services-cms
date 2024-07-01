@@ -68,14 +68,15 @@ locals {
 
 
 module "backoffice_app" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//app_service?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//app_service?ref=v8.22.0"
 
   name                = format("%s-%s-backoffice-app", local.project, local.application_basename)
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
-  plan_name = format("%s-%s-backoffice-plan", local.project, local.application_basename)
-  sku_name  = var.backoffice_app.sku_name
+  plan_name              = format("%s-%s-backoffice-plan", local.project, local.application_basename)
+  sku_name               = var.backoffice_app.sku_name
+  zone_balancing_enabled = true
 
   node_version = local.backoffice_node_version
 
@@ -105,7 +106,7 @@ module "backoffice_app" {
 }
 
 module "backoffice_app_staging" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//app_service_slot?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//app_service_slot?ref=v8.22.0"
 
   name                = "staging"
   location            = azurerm_resource_group.rg.location

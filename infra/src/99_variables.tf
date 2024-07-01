@@ -348,6 +348,10 @@ variable "backoffice_app" {
     selfcare_jwks_path                        = string
     subscription_migration_api_url            = string
     api_services_cms_topics_cache_ttl_minutes = string
+    autoscale_minimum                         = number
+    autoscale_maximum                         = number
+    autoscale_default                         = number
+
   })
   description = "Configuration of the io-services-cms-backoffice service"
 }
