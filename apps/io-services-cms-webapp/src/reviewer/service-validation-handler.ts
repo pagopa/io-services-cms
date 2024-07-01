@@ -10,6 +10,7 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
@@ -17,6 +18,7 @@ import lodash from "lodash";
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper } from "../utils/cosmos-helper";
+import { isServiceAllowedForQualitySkip } from "../utils/feature-flag-handler";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -86,20 +88,30 @@ const parseIncomingMessage = (
     E.mapLeft(flow(readableReport, (_) => new Error(_)))
   );
 
-const validate = (
-  item: Queue.RequestReviewItem
-): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
-  pipe(
-    item,
-    ValidSecureChannelService.decode,
-    E.chain(flow(Queue.RequestReviewItemStrict.decode)),
-    E.mapLeft(
-      flow(readableReport, (errorMessage) => ({
-        serviceId: item.id,
-        reason: errorMessage,
-      }))
-    )
-  );
+const validate =
+  (config: IConfig) =>
+  (
+    item: Queue.RequestReviewItem
+  ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
+    pipe(
+      item,
+      ValidSecureChannelService.decode,
+      E.chain((s) =>
+        pipe(
+          isServiceAllowedForQualitySkip(config, item.id),
+          B.fold(
+            () => Queue.RequestReviewItemQualityStrict.decode(s),
+            () => Queue.RequestReviewItemStrict.decode(s)
+          )
+        )
+      ),
+      E.mapLeft(
+        flow(readableReport, (errorMessage) => ({
+          serviceId: item.id,
+          reason: errorMessage,
+        }))
+      )
+    );
 
 const getDuplicatesOnServicePublication =
   (servicePublicationCosmosHelper: CosmosHelper) =>
@@ -129,13 +141,9 @@ const getNotDeletedDuplicatesOnServiceLifecycle =
   (serviceIds: ReadonlyArray<NonEmptyString>) =>
     serviceLifecycleCosmosHelper.fetchSingleItem(
       {
-        query: `SELECT VALUE c.id FROM c WHERE c.id IN (@serviceIds) AND c.fsm.state != 'deleted'`,
-        parameters: [
-          {
-            name: "@serviceIds",
-            value: serviceIds.join(","),
-          },
-        ],
+        query: `SELECT VALUE c.id FROM c WHERE c.id IN ('${serviceIds.join(
+          "', '"
+        )}') AND c.fsm.state != 'deleted'`,
       },
       NonEmptyString
     );
@@ -283,7 +291,7 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     pipe(
       item,
       parseIncomingMessage,
-      E.chainW(validate),
+      E.chainW(flow(validate(config))),
       TE.fromEither,
       TE.chainW(
         validateDuplicates(

@@ -12,6 +12,11 @@ module "storage_account" {
   advanced_threat_protection    = false
   public_network_access_enabled = true
 
+  action = [{
+    action_group_id    = data.azurerm_monitor_action_group.error_action_group.id
+    webhook_properties = null
+  }]
+
   tags = var.tags
 }
 
@@ -92,5 +97,15 @@ resource "azurerm_storage_queue" "request-deletion" {
 
 resource "azurerm_storage_queue" "request-deletion-poison" {
   name                 = "request-deletion-poison"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-detail" {
+  name                 = "request-detail"
+  storage_account_name = module.storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-detail-poison" {
+  name                 = "request-detail-poison"
   storage_account_name = module.storage_account.name
 }

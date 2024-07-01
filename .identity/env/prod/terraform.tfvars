@@ -46,6 +46,11 @@ infra_environment_ci_roles = {
     ],
     io-p-services-cms-rg = [
       "Contributor"
+    ],
+    io-p-itn-svc-rg-01 = [
+      "Contributor",
+      "Search Service Contributor",
+      "Storage Blob Data Reader"
     ]
   }
 }
@@ -56,6 +61,14 @@ infra_environment_cd_roles = {
     terraform-state-rg = [
       "Storage Blob Data Contributor",
       "Reader and Data Access"
+    ],
+    io-p-itn-svc-rg-01 = [
+      "Search Service Contributor",
+      "Role Based Access Control Administrator",
+      "Storage Blob Data Contributor"
+    ],
+    io-p-services-cms-rg = [
+      "Role Based Access Control Administrator"
     ]
   }
 }
@@ -103,8 +116,8 @@ github_repository_environment_ci = {
 }
 
 github_repository_environment_cd = {
-  protected_branches     = true
-  custom_branch_policies = false
+  protected_branches     = false
+  custom_branch_policies = true
   reviewers_teams        = ["io-platform-green-unit"]
 }
 

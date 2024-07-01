@@ -1,5 +1,17 @@
 # io-services-cms-models
 
+## 1.19.3
+
+### Patch Changes
+
+- e38c96d: add privacy_url and contacts automatic controls
+
+## 1.19.2
+
+### Patch Changes
+
+- cc8383d: Create Service Details Read Model
+
 ## 1.19.1
 
 ### Patch Changes

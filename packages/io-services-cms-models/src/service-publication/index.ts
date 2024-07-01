@@ -498,4 +498,11 @@ type FsmClient = ReturnType<typeof getFsmClient>;
 
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
-export { FSM, FsmClient, ItemType, getFsmClient };
+
+type ItemTypeWithTimestamp = t.TypeOf<typeof ItemTypeWithTimestamp>;
+const ItemTypeWithTimestamp = t.intersection([
+  ItemType,
+  t.type({ _ts: t.Integer }),
+]);
+
+export { FSM, FsmClient, ItemType, ItemTypeWithTimestamp, getFsmClient };

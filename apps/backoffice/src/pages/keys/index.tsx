@@ -60,6 +60,7 @@ export default function Keys() {
         <Grid item xs={12}>
           <AuthorizedCidrs
             cidrs={(acData?.cidrs as unknown) as string[]}
+            description="routes.keys.authorizedCidrs.description"
             editable={true}
             onSaveClick={handleUpdateCidrs}
           />

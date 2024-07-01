@@ -112,10 +112,12 @@ export const CosmosConfig = t.type({
   COSMOSDB_CONNECTIONSTRING: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_APP_BE_NAME: NonEmptyString,
   COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_DETAILS: NonEmptyString,
 });
 
 export type CosmosLegacyConfig = t.TypeOf<typeof CosmosLegacyConfig>;
@@ -147,6 +149,7 @@ export const QueueConfig = t.type({
   REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
   REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
   REQUEST_VALIDATION_QUEUE: NonEmptyString,
+  REQUEST_DETAIL_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 

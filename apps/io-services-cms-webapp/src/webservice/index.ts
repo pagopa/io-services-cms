@@ -14,7 +14,7 @@ import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/mo
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
-import { CosmosPagedHelper } from "../utils/cosmos-helper";
+import { CosmosHelper, CosmosPagedHelper } from "../utils/cosmos-helper";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
@@ -45,6 +45,11 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
+
+import {
+  applyRequestMiddelwares as applyCheckServiceDuplicationInternalRequestMiddelwares,
+  makeCheckServiceDuplicationInternalHandler,
+} from "./controllers/check-service-duplication-internal";
 
 import {
   applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
@@ -100,6 +105,8 @@ export type WebServerDependencies = {
   blobService: BlobService;
   serviceTopicDao: ServiceTopicDao;
   serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
+  servicePublicationCosmosHelper: CosmosHelper;
+  serviceLifecycleCosmosHelper: CosmosHelper;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -114,6 +121,8 @@ export const createWebServer = ({
   blobService,
   serviceTopicDao,
   serviceHistoryPagedHelper,
+  servicePublicationCosmosHelper,
+  serviceLifecycleCosmosHelper,
 }: WebServerDependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -154,6 +163,19 @@ export const createWebServer = ({
         serviceTopicDao,
       }),
       applyGetServiceTopicsRequestMiddelwares
+    )
+  );
+
+  // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
+  router.get(
+    `/internal/services/duplicates`,
+    pipe(
+      makeCheckServiceDuplicationInternalHandler({
+        servicePublicationCosmosHelper,
+        serviceLifecycleCosmosHelper,
+        telemetryClient,
+      }),
+      applyCheckServiceDuplicationInternalRequestMiddelwares
     )
   );
 

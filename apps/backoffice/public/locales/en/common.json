@@ -15,8 +15,7 @@
   },
   "authorizedCidrs": {
     "add": "Add IP address",
-    "description": "Authorized IP addresses, in CIDR format. Edit the service to update IP addresses.",
-    "title": "IP address"
+    "title": "Authorized IP addresses"
   },
   "buttons": {
     "back": "Back",
@@ -194,7 +193,7 @@
         },
         "step3": {
           "label": "Extra configuration",
-          "description": "These features allow you to enrich the service with many additional parameters. Be careful, some of these require the signing of an ad hoc contract."
+          "description": "These features allow you to enrich the service with many additional parameters."
         }
       }
     }
@@ -291,6 +290,9 @@
       "address": "Address",
       "appAndroid": "Android app",
       "appIos": "iOS app",
+      "authorizedCidrs": {
+        "description": "Authorized IP addresses, in CIDR format. Edit the service to update IP addresses."
+      },
       "description": "Description",
       "email": "Email",
       "information": "Information",
@@ -329,6 +331,9 @@
         "title": "API Key Manage",
         "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
         "shortcut": "Manage API keys"
+      },
+      "authorizedCidrs": {
+        "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys."
       }
     },
     "users": {
@@ -460,6 +465,12 @@
         "unpublished": "The service has been hidden in App IO"
       },
       "readRejectReason": "Read the reasons for refusal"
+    },
+    "inAppPreview": {
+      "title": "IO App Preview",
+      "titleTooltip": "IO App Version xy",
+      "closeButton": "Close Preview",
+      "scrollInfo": "Scroll with cursor to view full preview"
     }
   },
   "table": {

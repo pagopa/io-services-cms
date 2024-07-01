@@ -8,7 +8,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "<= 3.85.0"
+      version = "<= 3.106.0"
     }
     github = {
       source  = "integrations/github"
@@ -24,7 +24,7 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.github.org
+  owner = "pagopa"
 }
 
 data "azurerm_subscription" "current" {}

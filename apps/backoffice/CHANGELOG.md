@@ -1,5 +1,74 @@
 # io-services-cms-backoffice
 
+## 1.10.10
+
+### Patch Changes
+
+- d3b322c: Update copy in service create/update step 3 description and Authorized CIDRs descripion in both ApiKeys and ServiceDetails pages
+
+## 1.10.9
+
+### Patch Changes
+
+- 550a571: Made the ip/cidr inputs unclickable outside the edit mode
+
+## 1.10.8
+
+### Patch Changes
+
+- 7a7fc56: Inject through SDK ApplicationInsight on app backend, this bring to the app all the new OpenTelemetry features
+
+## 1.10.7
+
+### Patch Changes
+
+- 3dc229d: Upgrade ApplicationInsight to the one based on OpenTelemetry
+- Updated dependencies [e38c96d]
+  - @io-services-cms/models@1.19.3
+
+## 1.10.6
+
+### Patch Changes
+
+- 383fc39: Fix ServiceHistory unwanted continuationToken on first call
+
+## 1.10.5
+
+### Patch Changes
+
+- 1403107: Fix Apim Error io-ts decoder
+- Updated dependencies [1403107]
+  - @io-services-cms/external-clients@1.1.3
+
+## 1.10.4
+
+### Patch Changes
+
+- f8ac915: Better Apim Error Logs
+- Updated dependencies [f8ac915]
+  - @io-services-cms/external-clients@1.1.2
+
+## 1.10.3
+
+### Patch Changes
+
+- 4052dea: Developed the phon frame for the preview
+
+## 1.10.2
+
+### Patch Changes
+
+- 99e8de6: Created the skeleton and the logic for the In APP Preview
+
+## 1.10.1
+
+### Patch Changes
+
+- 407ef0d: Set on PaginationResultSet openApi schema all required fields
+- e115c5c: Added a enviroment variable to manage the login path redirect
+- Updated dependencies [cc8383d]
+  - @io-services-cms/models@1.19.2
+
 ## 1.10.0
 
 ### Minor Changes

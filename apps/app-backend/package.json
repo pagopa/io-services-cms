@@ -1,0 +1,72 @@
+{
+  "name": "io-services-app-backend",
+  "version": "1.0.1",
+  "packageManager": "yarn@3.3.0",
+  "bundledDependencies": true,
+  "files": [
+    "dist",
+    "host.json",
+    "package.json"
+  ],
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "shx rm -rf dist && tsc",
+    "build:watch": "yarn build -w",
+    "build:package": "npm-pack-zip --add-version",
+    "extensions:install": "func extensions install",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage",
+    "typecheck": "yarn build --noemit",
+    "lint": "yarn lint:check --fix",
+    "lint:check": "eslint \"src/**\"",
+    "lint:api": "sh api-lint.sh",
+    "lint:fix": "eslint --fix \"src/**\"",
+    "start": "func start -- --javascript",
+    "api-definitions:clean": "shx rm -rf ./src/generated",
+    "api-definitions:bundle": "bundle-api-spec -i ./api/internal.yaml.template -o ./api/internal.yaml -V $npm_package_version",
+    "api-definitions:internal": "gen-api-models --api-spec ./api/internal.yaml --out-dir ./src/generated/definitions/internal --request-types --response-decoders",
+    "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:bundle && yarn api-definitions:internal",
+    "generate:version": "sh generate-version.sh -o ./src/generated/ -v $npm_package_version -n io-services-app-backend",
+    "generate": "yarn lint:api && yarn api-definitions:all && yarn generate:version"
+  },
+  "devDependencies": {
+    "@pagopa/eslint-config": "^3.0.0",
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
+    "@rushstack/eslint-patch": "^1.2.0",
+    "@types/express": "^4.17.12",
+    "@types/node": "~20.10.0",
+    "@vitest/coverage-v8": "^1.4.0",
+    "azure-functions-core-tools": "4",
+    "dependency-check": "^4.1.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "npm-pack-zip": "^1.3.0",
+    "prettier": "^2.8.7",
+    "shx": "^0.3.2",
+    "supertest": "^6.3.4",
+    "swagger-cli": "^4.0.4",
+    "typescript": "^5.0.4",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.0.0",
+    "@azure/functions": "^4.4.0",
+    "@azure/identity": "^4.0.1",
+    "@azure/search-documents": "^12.0.0",
+    "@azure/storage-blob": "^12.23.0",
+    "@io-services-cms/models": "workspace:^",
+    "@pagopa/handler-kit": "^1.1.0",
+    "@pagopa/handler-kit-azure-func": "^2.0.1",
+    "@pagopa/io-functions-commons": "^29.0.0",
+    "@pagopa/logger": "^1.0.1",
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
+    "@pagopa/ts-commons": "^13.0.0",
+    "applicationinsights": "^2.9.5",
+    "fp-ts": "^2.16.5",
+    "io-ts": "^2.2.21"
+  },
+  "imports": {
+    "#package.json": "./package.json"
+  }
+}

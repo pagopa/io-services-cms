@@ -13,7 +13,7 @@ const authOptions: NextAuthOptions = {
     })
   ],
   pages: {
-    signIn: "/auth/login",
+    signIn: getConfiguration().BACK_OFFICE_LOGIN_PATH,
     signOut: "/auth/logout",
     error: "/auth/error"
   },

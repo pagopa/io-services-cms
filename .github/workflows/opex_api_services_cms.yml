@@ -33,13 +33,13 @@ jobs:
           fetch-depth: 0
 
       # from https://github.com/pagopa/opex-dashboard-azure-action/
-      - uses: pagopa/opex-dashboard-azure-action@v1.1.2
+      - uses: pagopa/opex-dashboard-azure-action@ece3bc2b133be74cabb50aec14cdb9b8051b886f # v1.1.2
         with:
           environment: prod
           api-name: ${{ env.API_NAME }}
           config: .opex/${{ env.API_NAME }}/env/prod/config.yaml
-          client-id: ${{ secrets.AZURE_CLIENT_ID_CD }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
           docker-version: sha256:e4245954566cd3470e1b5527d33bb58ca132ce7493eac01be9e808fd25a11c8d

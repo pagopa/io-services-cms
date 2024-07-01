@@ -1,5 +1,57 @@
 # io-services-cms-webapp
 
+## 1.31.5
+
+### Patch Changes
+
+- e38c96d: add privacy_url and contacts automatic controls
+- Updated dependencies [e38c96d]
+  - @io-services-cms/models@1.19.3
+
+## 1.31.4
+
+### Patch Changes
+
+- Updated dependencies [1403107]
+  - @io-services-cms/external-clients@1.1.3
+
+## 1.31.3
+
+### Patch Changes
+
+- Updated dependencies [f8ac915]
+  - @io-services-cms/external-clients@1.1.2
+
+## 1.31.2
+
+### Patch Changes
+
+- b462fe2: Fix query on request detail
+
+## 1.31.1
+
+### Patch Changes
+
+- 8b5ca44: Fix watcher bidings
+
+## 1.31.0
+
+### Minor Changes
+
+- cc8383d: Create Service Details Read Model
+
+### Patch Changes
+
+- 407ef0d: Set on PaginationResultSet openApi schema all required fields
+- Updated dependencies [cc8383d]
+  - @io-services-cms/models@1.19.2
+
+## 1.30.1
+
+### Patch Changes
+
+- f041f6c: ADD GET /internal/services/duplicates API, to check for pure service duplicate
+
 ## 1.30.0
 
 ### Minor Changes

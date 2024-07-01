@@ -1,0 +1,32 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "direction": "in",
+      "name": "documents",
+      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "collectionName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
+      "leaseCollectionName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-details-lease",
+      "createLeaseCollectionIfNotExists": true,
+      "startFromBeginning": true,
+      "maxItemsPerInvocation": 30
+    },
+    {
+      "queueName": "%REQUEST_DETAIL_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestDetailPublication",
+      "type": "queue",
+      "direction": "out"
+    }
+  ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 10,
+    "minimumInterval": "00:00:05",
+    "maximumInterval": "00:01:00"
+  },
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onServiceDetailPublicationChangeEntryPoint"
+}

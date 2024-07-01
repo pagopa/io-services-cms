@@ -29,7 +29,7 @@ export const Cidr = PatternString(
 export type HttpOrHttpsUrlString = t.TypeOf<typeof HttpOrHttpsUrlString>;
 export const HttpOrHttpsUrlString = PatternString("^https?:\\S+$");
 
-const OrganizationData = t.intersection([
+export const OrganizationData = t.intersection([
   t.type({
     name: NonEmptyString,
     fiscal_code: OrganizationFiscalCode,
@@ -53,7 +53,7 @@ const ServiceData = t.type({
   authorized_cidrs: withDefault(t.array(Cidr), []),
 });
 
-const ServiceMetadata = t.intersection([
+export const ServiceMetadata = t.intersection([
   t.type({
     scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
   }),
@@ -75,6 +75,76 @@ const ServiceMetadata = t.intersection([
     custom_special_flow: NonEmptyString,
     topic_id: t.number,
   }),
+]);
+
+const ServiceMetadataQualityStrict = t.intersection([
+  t.type({
+    scope: t.union([t.literal("NATIONAL"), t.literal("LOCAL")]),
+    privacy_url: HttpOrHttpsUrlString,
+  }),
+  t.partial({
+    address: NonEmptyString,
+    app_android: HttpOrHttpsUrlString,
+    app_ios: HttpOrHttpsUrlString,
+    cta: NonEmptyString,
+    description: NonEmptyString,
+    token_name: NonEmptyString,
+    tos_url: HttpOrHttpsUrlString,
+    web_url: HttpOrHttpsUrlString,
+    category: t.union([t.literal("STANDARD"), t.literal("SPECIAL")]),
+    custom_special_flow: NonEmptyString,
+    topic_id: t.number,
+  }),
+  t.union([
+    t.intersection([
+      t.type({
+        email: EmailString,
+      }),
+      t.partial({
+        pec: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        pec: EmailString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        phone: NonEmptyString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        phone: NonEmptyString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        support_url: HttpOrHttpsUrlString,
+      }),
+    ]),
+    t.intersection([
+      t.type({
+        support_url: HttpOrHttpsUrlString,
+      }),
+      t.partial({
+        email: EmailString,
+
+        pec: EmailString,
+
+        phone: NonEmptyString,
+      }),
+    ]),
+  ]),
 ]);
 
 const ServiceMetadataStrict = t.intersection([
@@ -134,5 +204,19 @@ export const ServiceStrict = t.intersection([
   t.partial({
     version: NonEmptyString,
     last_update: NonEmptyString,
+  }),
+]);
+
+export type ServiceQualityStrict = t.TypeOf<typeof ServiceQualityStrict>;
+export const ServiceQualityStrict = t.intersection([
+  ServiceStrict,
+  t.type({
+    data: t.intersection([
+      ServiceData,
+      t.type({
+        organization: OrganizationData,
+        metadata: ServiceMetadataQualityStrict,
+      }),
+    ]),
   }),
 ]);

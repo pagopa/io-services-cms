@@ -5,6 +5,7 @@ import { ItemType as LifecycleItemType } from "../service-lifecycle";
 import {
   Service,
   ServiceId,
+  ServiceQualityStrict,
   ServiceStrict,
 } from "../service-lifecycle/definitions";
 import { ItemType as PublicationItemType } from "../service-publication";
@@ -17,9 +18,28 @@ export const RequestReviewItem = t.intersection([
   }),
 ]);
 
+export type RequestDetailItem = t.TypeOf<typeof RequestDetailItem>;
+export const RequestDetailItem = t.intersection([
+  Service,
+  t.type({
+    cms_last_update_ts: t.Integer, // this will be used to value the version field on the serviceDetails(pp-backend api)
+    kind: t.union([t.literal("publication"), t.literal("lifecycle")]),
+  }),
+]);
+
 export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
 export const RequestReviewItemStrict = t.intersection([
   ServiceStrict,
+  t.type({
+    version: NonEmptyString, // version required
+  }),
+]);
+
+export type RequestReviewItemQualityStrict = t.TypeOf<
+  typeof RequestReviewItemQualityStrict
+>;
+export const RequestReviewItemQualityStrict = t.intersection([
+  ServiceQualityStrict,
   t.type({
     version: NonEmptyString, // version required
   }),

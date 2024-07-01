@@ -19,6 +19,7 @@ afterEach(() => {
 
 const configMock = {
   MANUAL_REVIEW_PROPERTIES: ["data.name", "data.description"],
+  SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: ["aSpecificServiceId"],
 } as unknown as IConfig;
 
 const fsmLifecycleClientMock = {
@@ -54,9 +55,71 @@ const aValidRequestValidationItem = {
     authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
+      privacy_url: "https://url.com",
       address: "via tal dei tali 123",
       email: "service@email.it",
-      pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+    authorized_cidrs: [],
+  },
+  version: "aVersion",
+} as unknown as Queue.RequestReviewItem;
+
+const aNonValidRequestValidationItem = {
+  id: "aServiceId",
+  data: {
+    name: "aServiceName" as NonEmptyString,
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      email: "service@email.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+    authorized_cidrs: [],
+  },
+  version: "aVersion",
+} as unknown as Queue.RequestReviewItem;
+
+const aNoContactRequestValidationItem = {
+  id: "aServiceId",
+  data: {
+    name: "aServiceName" as NonEmptyString,
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      privacy_url: "https://url.com",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+    authorized_cidrs: [],
+  },
+  version: "aVersion",
+} as unknown as Queue.RequestReviewItem;
+
+const aSpecificService = {
+  id: "aSpecificServiceId",
+  data: {
+    name: "aServiceName" as NonEmptyString,
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
       scope: "LOCAL",
     },
     organization: {
@@ -182,6 +245,16 @@ describe("Service Validation Handler", () => {
         },
       },
       expected: /support_url\] is not a valid/,
+    },
+    {
+      scenario: "incoming item fails if privacy_url is undefined",
+      item: aNonValidRequestValidationItem,
+      expected: /privacy_url\] is not a valid/,
+    },
+    {
+      scenario: "incoming item fails if all contact field are undefined",
+      item: aNoContactRequestValidationItem,
+      expected: /email\] is not a valid/,
     },
   ])("should reject review when $scenario", async ({ item, expected }) => {
     fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
@@ -435,4 +508,37 @@ describe("Service Validation Handler", () => {
     });
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
+
+    it("should approve review when service is in inclusion list even if it doesn't have privacy_url or contact", async () => {
+    fsmPublicationClientMock
+      .getStore()
+      .fetch.mockReturnValue(TE.right(O.some(aSpecificService)));
+    fsmLifecycleClientMock.approve.mockReturnValue(TE.right(void 0));
+
+    const res = await createServiceValidationHandler(dependenciesMock)({
+      item: aSpecificService,
+    })();
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toStrictEqual({});
+    }
+
+    expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
+    expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
+      aSpecificService.id
+    );
+    expect(fsmLifecycleClientMock.approve).toHaveBeenCalledOnce();
+    expect(fsmLifecycleClientMock.approve).toHaveBeenCalledWith(
+      aSpecificService.id,
+      expect.objectContaining({ approvalDate: expect.any(String) })
+    );
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
+    expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
+      name: "services-cms.review.auto-approve",
+      properties: { serviceId: aSpecificService.id },
+    });
+    expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
+  });
 });
+
+

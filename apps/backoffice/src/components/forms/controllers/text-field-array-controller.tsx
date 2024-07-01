@@ -42,6 +42,13 @@ export type TextFieldArrayControllerProps = {
   showGenericErrorMessage?: boolean;
 } & TextFieldProps;
 
+type RenderedFieldType = {
+  id: string;
+  value: unknown;
+  readOnly: boolean;
+  editable: boolean;
+};
+
 /** Controller for Array of TextFields */
 export function TextFieldArrayController({
   name,
@@ -74,9 +81,9 @@ export function TextFieldArrayController({
   /** get name of a single field by array position `index` */
   const getFieldName = (index: number) => `${name}[${index}]`;
 
-  const initializeFieldsStatus = () =>
+  const initializeFieldsStatus = (): RenderedFieldType[] =>
     Array.from({ length: fields.length }, (_, index) => ({
-      id: index.toString() as any,
+      id: index.toString(),
       value: getValues(getFieldName(index)),
       readOnly: isReadOnly
         ? getValues(getFieldName(index)) !== addDefaultValue
@@ -85,9 +92,14 @@ export function TextFieldArrayController({
     }));
 
   // individual field initialization status
-  const [renderedFields, setRenderedFields] = useState(
+  const [renderedFields, setRenderedFields] = useState<RenderedFieldType[]>(
     initializeFieldsStatus()
   );
+
+  const handleCancelClick = () => {
+    onCancelClick && onCancelClick();
+    setRenderedFields(initializeFieldsStatus());
+  };
 
   /** shows generic or detailed error message based on `showGenericErrorMessage` prop */
   const showErrorMessage = (message: any) =>
@@ -100,7 +112,7 @@ export function TextFieldArrayController({
 
   return (
     <>
-      {fields.map((item, index, items) => {
+      {fields.map((item, index) => {
         return (
           <Box key={item.id} paddingY={1}>
             <Stack
@@ -119,6 +131,13 @@ export function TextFieldArrayController({
                     {...register(getFieldName(index))}
                     {...props}
                     margin="normal"
+                    sx={
+                      renderedFields[index]?.readOnly
+                        ? {
+                            pointerEvents: "none"
+                          }
+                        : {}
+                    }
                     size={props.size}
                     value={value}
                     label={itemLabel ? `${t(itemLabel)} - ${index + 1}` : null}
@@ -187,7 +206,7 @@ export function TextFieldArrayController({
             </Button>
           ) : null}
           {addCancelButton ? (
-            <Button variant="outlined" onClick={onCancelClick}>
+            <Button variant="outlined" onClick={handleCancelClick}>
               {t("buttons.cancel")}
             </Button>
           ) : null}

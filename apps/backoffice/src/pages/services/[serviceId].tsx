@@ -1,5 +1,6 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
 import { PageHeader } from "@/components/headers";
+import { AppPreview } from "@/components/app-preview";
 import {
   ServiceAlerts,
   ServiceContextMenu,
@@ -37,6 +38,7 @@ export default function ServiceDetails() {
   const release = router.query.release === "true";
   const [currentService, setCurrentService] = useState<Service>();
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
 
   const { data: shData, loading: shLoading, fetchData: shFetchData } = useFetch<
     ServiceHistory
@@ -112,6 +114,10 @@ export default function ServiceDetails() {
     );
   };
 
+  const handlePreview = () => {
+    setShowPreview(true);
+  };
+
   const navigateToServiceLifecycle = () =>
     router.replace(router.asPath.replace(RELEASE_QUERY_PARAM, ""));
 
@@ -154,7 +160,8 @@ export default function ServiceDetails() {
             onPublishClick={handlePublish}
             onUnpublishClick={handleUnpublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
-            onHistoryClick={handleHistory}
+            onHistoryClick={() => handleHistory()}
+            onPreviewClick={handlePreview}
             onEditClick={() =>
               router.push(`/services/${serviceId}/edit-service`)
             }
@@ -176,6 +183,10 @@ export default function ServiceDetails() {
         onLoadMoreClick={handleHistory}
         onClose={() => setShowHistory(false)}
       />
+      <AppPreview
+        showPreview={showPreview}
+        onClose={() => setShowPreview(false)}
+      />
       <Grid container spacing={2}>
         <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
           <ServiceInfo data={currentService} />
@@ -194,6 +205,7 @@ export default function ServiceDetails() {
         <Grid item xs={12}>
           <AuthorizedCidrs
             cidrs={(slData?.authorized_cidrs as unknown) as string[]}
+            description="routes.service.authorizedCidrs.description"
             editable={false}
             onSaveClick={e => console.log(e)}
           />
