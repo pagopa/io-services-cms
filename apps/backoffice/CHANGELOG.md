@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.10.11
+
+### Patch Changes
+
+- 34a6583: Fixed lint error for jest method
+- a361970: Tests for button components
+
 ## 1.10.10
 
 ### Patch Changes
