@@ -54,7 +54,10 @@ import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
-import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
+import {
+  handler as onServiceLifecycleChangeHandler,
+  ServiceLifecycleCosmosResource,
+} from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
@@ -248,7 +251,7 @@ export const serviceReviewLegacyCheckerEntryPoint =
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
   RTE.fromReaderEither,
-  processBatchOf(ServiceLifecycle.ItemType),
+  processBatchOf(ServiceLifecycleCosmosResource),
   setBindings((results) => ({
     requestDeletion: pipe(
       results,

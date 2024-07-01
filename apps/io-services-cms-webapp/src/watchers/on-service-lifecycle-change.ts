@@ -1,4 +1,6 @@
+import { Resource } from "@azure/cosmos";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import { AzureCosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
@@ -6,8 +8,17 @@ import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 import { IConfig } from "../config";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
+
+export type ServiceLifecycleCosmosResource = ServiceLifecycle.ItemType &
+  Resource;
+
+export const ServiceLifecycleCosmosResource = t.intersection([
+  ServiceLifecycle.ItemType,
+  AzureCosmosResource,
+]);
 
 type Actions =
   | "requestReview"
@@ -36,12 +47,14 @@ type RequestHistoricizationAction = Action<
 >;
 
 const onAnyChangesHandler = (
-  item: ServiceLifecycle.ItemType & { _ts: number }
+  item: ServiceLifecycleCosmosResource
 ): RequestHistoricizationAction => ({
   requestHistoricization: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    last_update: new Date(item._ts * 1000).toISOString() as NonEmptyString, // last_update fallback (value is always set by persistence layer) TODO add log
+    last_update: new Date(item._ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle record
+    // eslint-disable-next-line no-underscore-dangle
+    version: item._etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle record
   },
 });
 
@@ -102,7 +115,7 @@ export const handler =
   (
     config: IConfig
   ): RE.ReaderEither<
-    { item: ServiceLifecycle.ItemType & { _ts: number } },
+    { item: ServiceLifecycleCosmosResource },
     Error,
     | RequestHistoricizationAction
     | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &
