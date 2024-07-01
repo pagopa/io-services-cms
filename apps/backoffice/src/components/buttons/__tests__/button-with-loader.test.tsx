@@ -1,12 +1,8 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonWithLoader } from "../index";
+
+const BO_IO_BUTTON_WITH_LOADER = "bo-io-button-with-loader";
 
 let isDisabled = false;
 let onClick = vi.fn();
@@ -42,7 +38,7 @@ describe("[ButtonWithLoader] Component", () => {
   it("should be rendered", () => {
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-io-button-with-loader");
+    const button = screen.getByTestId(BO_IO_BUTTON_WITH_LOADER);
 
     expect(button).toBeDefined();
   });
@@ -50,7 +46,7 @@ describe("[ButtonWithLoader] Component", () => {
   it("should be clicked", () => {
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-io-button-with-loader");
+    const button = screen.getByTestId(BO_IO_BUTTON_WITH_LOADER);
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -60,7 +56,7 @@ describe("[ButtonWithLoader] Component", () => {
     isDisabled = true;
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-io-button-with-loader");
+    const button = screen.getByTestId(BO_IO_BUTTON_WITH_LOADER);
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
@@ -70,7 +66,7 @@ describe("[ButtonWithLoader] Component", () => {
     isLoading = true;
     render(getButtonWithLoaderComponent());
 
-    const button = screen.getByTestId("bo-io-button-with-loader");
+    const button = screen.getByTestId(BO_IO_BUTTON_WITH_LOADER);
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();

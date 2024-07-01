@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import DialogProvider from "../../dialog-provider";
 import { ButtonExit } from "../index";
 
+const BO_IO_BUTTON_EXIT = "bo-io-button-exit";
+
 let onClick = vi.fn();
 const getButtonExitComponent = () => (
   <DialogProvider>
@@ -24,7 +26,7 @@ describe("[ButtonExit] Component", () => {
   it("should be rendered", () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-io-button-exit");
+    const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
 
     expect(button).toBeDefined();
   });
@@ -32,7 +34,7 @@ describe("[ButtonExit] Component", () => {
   it("should be clicked with confirm", async () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-io-button-exit");
+    const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
     await fireEvent.click(
       screen.getByTestId("bo-io-dialog-provider-confirm-button")
@@ -44,7 +46,7 @@ describe("[ButtonExit] Component", () => {
   it("should be clicked with cancel", async () => {
     render(getButtonExitComponent());
 
-    const button = screen.getByTestId("bo-io-button-exit");
+    const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
     await fireEvent.click(
       screen.getByTestId("bo-io-dialog-provider-cancel-button")

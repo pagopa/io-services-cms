@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonShowMore } from "../index";
 
+const BO_IO_BUTTON_SHOW_MORE = "bo-io-button-show-more";
+
 let isDisabled = false;
 let onClick = vi.fn();
 const getButtonShowMoreComponent = () => (
@@ -23,7 +25,7 @@ describe("[ButtonShowMore] Component", () => {
   it("should be rendered", () => {
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-io-button-show-more");
+    const button = screen.getByTestId(BO_IO_BUTTON_SHOW_MORE);
 
     expect(button).toBeDefined();
   });
@@ -31,7 +33,7 @@ describe("[ButtonShowMore] Component", () => {
   it("should be clicked", () => {
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-io-button-show-more");
+    const button = screen.getByTestId(BO_IO_BUTTON_SHOW_MORE);
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -41,7 +43,7 @@ describe("[ButtonShowMore] Component", () => {
     isDisabled = true;
     render(getButtonShowMoreComponent());
 
-    const button = screen.getByTestId("bo-io-button-show-more");
+    const button = screen.getByTestId(BO_IO_BUTTON_SHOW_MORE);
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();

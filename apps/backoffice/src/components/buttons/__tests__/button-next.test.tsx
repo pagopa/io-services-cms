@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ButtonNext } from "../index";
 
+const BO_IO_BUTTON_NEXT = "bo-io-button-next";
+
 let isDisabled = false;
 let onClick = vi.fn();
 const getButtonNextComponent = () => (
@@ -23,7 +25,7 @@ describe("[ButtonNext] Component", () => {
   it("should be rendered", () => {
     render(getButtonNextComponent());
 
-    const button = screen.getByTestId("bo-io-button-next");
+    const button = screen.getByTestId(BO_IO_BUTTON_NEXT);
 
     expect(button).toBeDefined();
   });
@@ -31,7 +33,7 @@ describe("[ButtonNext] Component", () => {
   it("should be clicked", () => {
     render(getButtonNextComponent());
 
-    const button = screen.getByTestId("bo-io-button-next");
+    const button = screen.getByTestId(BO_IO_BUTTON_NEXT);
     fireEvent.click(button);
 
     expect(onClick).toHaveBeenCalled();
@@ -41,7 +43,7 @@ describe("[ButtonNext] Component", () => {
     isDisabled = true;
     render(getButtonNextComponent());
 
-    const button = screen.getByTestId("bo-io-button-next");
+    const button = screen.getByTestId(BO_IO_BUTTON_NEXT);
     fireEvent.click(button);
 
     expect(onClick).not.toHaveBeenCalled();
