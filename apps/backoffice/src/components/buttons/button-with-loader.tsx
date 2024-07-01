@@ -34,6 +34,7 @@ export const ButtonWithLoader = ({
   return (
     <span style={{ position: "relative", width: fullWidth ? "100%" : "" }}>
       <Button
+        data-testid="bo-io-button-with-loader"
         type="submit"
         size="medium"
         variant="contained"
@@ -48,6 +49,7 @@ export const ButtonWithLoader = ({
       </Button>
       {loading && (
         <CircularProgress
+          data-testid="bo-io-button-with-loader-circular-progress"
           size={32}
           color="primary"
           sx={{
