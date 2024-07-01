@@ -49,7 +49,8 @@ infra_environment_ci_roles = {
     ],
     io-p-itn-svc-rg-01 = [
       "Contributor",
-      "Search Service Contributor"
+      "Search Service Contributor",
+      "Storage Blob Data Reader"
     ]
   }
 }
@@ -63,6 +64,10 @@ infra_environment_cd_roles = {
     ],
     io-p-itn-svc-rg-01 = [
       "Search Service Contributor",
+      "Role Based Access Control Administrator",
+      "Storage Blob Data Contributor"
+    ],
+    io-p-services-cms-rg = [
       "Role Based Access Control Administrator"
     ]
   }

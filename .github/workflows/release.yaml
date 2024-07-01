@@ -19,7 +19,7 @@ jobs:
       publishedPackages: ${{ steps.release.outputs.publishedPackages }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_TOKEN }}
@@ -34,7 +34,7 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
         with:
           node-version-file: '.node-version'
           cache: 'yarn'
@@ -86,10 +86,10 @@ jobs:
           exit 1
 
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
         with:
           node-version-file: '.node-version'
           cache: 'yarn'
@@ -109,7 +109,7 @@ jobs:
         run: yarn workspace ${{ matrix.package.name }} run build:package
 
       - name: Create draft release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           draft: true
           files: apps/${{ matrix.package.name == 'io-services-cms-backoffice' && 'backoffice' || matrix.package.name == 'io-services-app-backend' && 'app-backend' || matrix.package.name }}/${{ matrix.package.name }}-${{ matrix.package.version }}.zip

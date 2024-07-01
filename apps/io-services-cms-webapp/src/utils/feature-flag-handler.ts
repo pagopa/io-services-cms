@@ -106,6 +106,22 @@ export const isUserAllowedForAutomaticApproval = (
  * @param serviceId
  * @returns
  */
+export const isServiceAllowedForQualitySkip = (
+  config: IConfig,
+  serviceId: NonEmptyString
+  // eslint-disable-next-line sonarjs/no-identical-functions
+): boolean =>
+  pipe(
+    serviceId,
+    isElementAllowedOnList(config.SERVICEID_QUALITY_CHECK_EXCLUSION_LIST)
+  );
+
+/**
+ *
+ * @param config
+ * @param serviceId
+ * @returns
+ */
 export const isUserEnabledForRequestReviewLegacy = (
   config: IConfig,
   apimUserId: NonEmptyString

@@ -5,6 +5,7 @@ import { ItemType as LifecycleItemType } from "../service-lifecycle";
 import {
   Service,
   ServiceId,
+  ServiceQualityStrict,
   ServiceStrict,
 } from "../service-lifecycle/definitions";
 import { ItemType as PublicationItemType } from "../service-publication";
@@ -29,6 +30,16 @@ export const RequestDetailItem = t.intersection([
 export type RequestReviewItemStrict = t.TypeOf<typeof RequestReviewItemStrict>;
 export const RequestReviewItemStrict = t.intersection([
   ServiceStrict,
+  t.type({
+    version: NonEmptyString, // version required
+  }),
+]);
+
+export type RequestReviewItemQualityStrict = t.TypeOf<
+  typeof RequestReviewItemQualityStrict
+>;
+export const RequestReviewItemQualityStrict = t.intersection([
+  ServiceQualityStrict,
   t.type({
     version: NonEmptyString, // version required
   }),

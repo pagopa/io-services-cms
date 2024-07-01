@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "restapi" {
-  uri                  = "https://${azurerm_search_service.srch.name}.privatelink.search.windows.net"
+  uri                  = "https://${azurerm_search_service.srch.name}.search.windows.net"
   write_returns_object = true
   debug                = true
   insecure             = true # Avoid certificate checking since it's a vnet internal resource

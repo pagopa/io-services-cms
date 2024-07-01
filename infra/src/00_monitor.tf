@@ -13,6 +13,11 @@ data "azurerm_monitor_action_group" "email" {
   name                = var.io_common.action_group_email_name
 }
 
+data "azurerm_monitor_action_group" "iopquarantineerror_action_group" {
+  resource_group_name = var.io_common.resource_group_name
+  name                = "iopquarantineerror"
+}
+
 data "azurerm_monitor_action_group" "error_action_group" {
   resource_group_name = var.io_common.resource_group_name
   name                = "${var.prefix}${var.env_short}error"

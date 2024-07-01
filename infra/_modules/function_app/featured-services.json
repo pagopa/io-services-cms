@@ -1,0 +1,22 @@
+{
+  "services": [
+    {
+      "id": "01G7C0JPG1BSSVCR12PF6FMHZ6",
+      "name": "Dove Siamo Nel Mondo",
+      "organization_name": "Ministero degli Affari Esteri e della Cooperazione Internazionale",
+      "version": 1712834214
+    },
+    {
+      "id": "01G40DWQGKY5GRWSNM4303VNRP",
+      "name": "SEND - Notifiche digitali",
+      "organization_name": "IO - L'app dei servizi pubblici",
+      "version": 1712834219
+    },
+    {
+      "id": "01F0V4627SXZMVDSPD69GMXE53",
+      "name": "Carta Giovani Nazionale",
+      "organization_name": "PCM - Dipartimento per le Politiche Giovanili e il Servizio Civile Universale",
+      "version": 1712833183
+    }
+  ]
+}

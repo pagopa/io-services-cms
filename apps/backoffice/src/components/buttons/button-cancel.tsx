@@ -9,6 +9,7 @@ export const ButtonCancel = ({ disabled, onClick }: ButtonCancelProps) => {
 
   return (
     <Button
+      data-testid="bo-io-button-cancel"
       size="medium"
       variant="outlined"
       disabled={disabled}

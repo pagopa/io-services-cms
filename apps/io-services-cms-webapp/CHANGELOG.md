@@ -1,5 +1,27 @@
 # io-services-cms-webapp
 
+## 1.31.5
+
+### Patch Changes
+
+- e38c96d: add privacy_url and contacts automatic controls
+- Updated dependencies [e38c96d]
+  - @io-services-cms/models@1.19.3
+
+## 1.31.4
+
+### Patch Changes
+
+- Updated dependencies [1403107]
+  - @io-services-cms/external-clients@1.1.3
+
+## 1.31.3
+
+### Patch Changes
+
+- Updated dependencies [f8ac915]
+  - @io-services-cms/external-clients@1.1.2
+
 ## 1.31.2
 
 ### Patch Changes

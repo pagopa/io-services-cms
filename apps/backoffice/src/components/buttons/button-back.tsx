@@ -9,6 +9,7 @@ export const ButtonBack = ({ disabled, onClick }: ButtonBackProps) => {
 
   return (
     <Button
+      data-testid="bo-io-button-back"
       size="medium"
       variant="outlined"
       disabled={disabled}

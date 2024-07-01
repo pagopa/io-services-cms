@@ -6,13 +6,16 @@ import { IConfig } from "../../config";
 import { AzureSearchClient } from "../../utils/azure-search/client";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { mockSearchServicesResult } from "../__mocks__/search-services-mock";
-import { makeSearchServicesHandler } from "../search-services";
+import {
+  DEFAULT_ORDER_BY,
+  makeSearchServicesHandler,
+} from "../search-services";
 import { ServiceMinified } from "../../generated/definitions/internal/ServiceMinified";
 
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 101,
-  PAGINATION_MAX_OFFSET: 101,
+  PAGINATION_MAX_OFFSET_AI_SEARCH: 101,
 } as unknown as IConfig;
 const mockSearchServices = {
   fullTextSearch: vi
@@ -38,6 +41,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         top: 20,
+        orderBy: [DEFAULT_ORDER_BY],
       })
     );
 
@@ -77,6 +81,7 @@ describe("Search Services Tests", () => {
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
         filter: "orgFiscalCode eq '01234567891'",
+        orderBy: [DEFAULT_ORDER_BY],
         top: 10,
         skip: 0,
       })
@@ -128,6 +133,7 @@ describe("Search Services Tests", () => {
         filter: "orgFiscalCode eq '01234567891'",
         top: 10,
         skip: 0,
+        orderBy: [DEFAULT_ORDER_BY],
       })
     );
 
@@ -169,6 +175,38 @@ describe("Search Services Tests", () => {
           body: {
             status: 400,
             title: "Invalid 'limit' supplied in request query",
+          },
+          statusCode: 400,
+        })
+      )
+    );
+  });
+
+  it("Should Return Bad Request when offset is greater than max allowed", async () => {
+    const errorMessage = "An Error occured while searching";
+
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        offset: `${mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH + 1}`,
+      },
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            status: 400,
+            title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
         })

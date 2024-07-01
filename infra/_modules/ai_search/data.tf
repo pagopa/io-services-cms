@@ -2,7 +2,7 @@ data "azurerm_subscription" "current" {}
 
 data "azurerm_private_dns_zone" "privatelink_srch" {
   name                = "privatelink.search.windows.net"
-  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
+  resource_group_name = var.private_dns_zone_resource_group_name
 }
 
 data "azurerm_cosmosdb_account" "cosmos" {
@@ -10,12 +10,11 @@ data "azurerm_cosmosdb_account" "cosmos" {
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
 }
 
-data "azurerm_subnet" "pep_snet" {
-  name                 = "${var.project}-pep-snet-01"
-  virtual_network_name = "${var.project}-common-vnet-01"
-  resource_group_name  = "${var.project}-common-rg-01"
-}
-
 data "azuread_group" "adgroup_services_cms" {
   display_name = "${var.prefix}-${var.env_short}-adgroup-services-cms"
+}
+
+data "azurerm_monitor_action_group" "error_action_group" {
+  name                = "${var.prefix}${var.env_short}error"
+  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
 }

@@ -16,7 +16,7 @@ env:
   RESOURCE_GROUP: io-p-itn-svc-rg-01
   AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
   AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
-  AZURE_APP_BE_NAME: io-p-itn-svc-app-be-fn-01
+  AZURE_APP_BE_NAME: io-p-itn-svc-app-be-func-01
   WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
   BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
   APP_BE_HEALTHCHECK_PATH: 'api/v1/info'

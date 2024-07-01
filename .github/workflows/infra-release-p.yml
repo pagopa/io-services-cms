@@ -1,0 +1,21 @@
+name: Terraform apply multiregion
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "infra/prod/**"
+      - "infra/_modules/**"
+      - ".github/workflows/infra-review-p-itn.yml"
+
+jobs:
+  infra_release_prod_itn:
+    uses: pagopa/dx/.github/workflows/infra_apply.yaml@7b317fb26f0c0a921f3bbddacbef3af2e693f87b
+    name: Terraform apply
+    secrets: inherit
+    with:
+      environment: prod
+      base_path: infra
+      use_private_agent: true

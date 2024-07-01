@@ -31,6 +31,8 @@ type SearchServicesRequestParams = {
   offset: O.Option<number>;
 };
 
+export const DEFAULT_ORDER_BY = "name asc";
+
 const executeSearch: (
   requestQueryParams: SearchServicesRequestParams
 ) => RTE.ReaderTaskEither<
@@ -50,6 +52,7 @@ const executeSearch: (
         searchClient.fullTextSearch({
           ...paginationProperties,
           filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
+          orderBy: [DEFAULT_ORDER_BY],
         })
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -82,7 +85,10 @@ const extractParams: (
               1,
               NonNegativeInteger,
               IWithinRangeIntegerTag<1, NonNegativeInteger>
-            >(1, paginationConfig.PAGINATION_MAX_LIMIT)
+            >(
+              1,
+              (paginationConfig.PAGINATION_MAX_LIMIT + 1) as NonNegativeInteger
+            )
           )
         ),
         RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT))
@@ -94,7 +100,11 @@ const extractParams: (
             0,
             NonNegativeInteger,
             IWithinRangeIntegerTag<0, NonNegativeInteger>
-          >(0, paginationConfig.PAGINATION_MAX_OFFSET)
+          >(
+            0,
+            (paginationConfig.PAGINATION_MAX_OFFSET_AI_SEARCH +
+              1) as NonNegativeInteger
+          )
         )
       ),
     })

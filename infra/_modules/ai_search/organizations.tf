@@ -6,22 +6,26 @@ resource "restapi_object" "organizations_datasource" {
       name        = "ds-organization-01",
       description = "${data.azurerm_cosmosdb_account.cosmos.name} datasource for ${azurerm_search_service.srch.name} AI Search Service",
       type        = "cosmosdb",
-      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${var.cosmos_database_name};IdentityAuthType=AccessToken;" },
+      credentials = { connectionString = "ResourceId=${data.azurerm_cosmosdb_account.cosmos.id};Database=${local.cosmos_database_name};IdentityAuthType=AccessToken;" },
       container = {
         name  = "services-publication"
         query = "SELECT c.data.organization.fiscal_code, c.data.organization.name, c.data.metadata.scope, c.fsm.state, c._ts FROM c WHERE c.fsm.state = \"published\" and c._ts >= @HighWaterMark ORDER BY c._ts"
       },
+      dataChangeDetectionPolicy = {
+        "@odata.type"           = "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+        highWaterMarkColumnName = "_ts"
+      }
   })
   force_new    = ["name"]
   id_attribute = "name" # The ID field on the response
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader]
 }
 
-resource "restapi_object" "organizations_index_01" {
+resource "restapi_object" "organizations_index_02" {
   path         = "/indexes"
   query_string = "api-version=2023-11-01"
   data = jsonencode({
-    name                  = "idx-organization-01"
+    name                  = "idx-organization-02"
     defaultScoringProfile = null
     fields = [
       {
@@ -45,7 +49,7 @@ resource "restapi_object" "organizations_index_01" {
         searchable          = true
         filterable          = false
         retrievable         = true
-        sortable            = false
+        sortable            = true
         facetable           = false
         key                 = false
         analyzer            = "organizationCustomAnalyzer"
@@ -159,18 +163,18 @@ resource "restapi_object" "organizations_index_01" {
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader]
 }
 
-resource "restapi_object" "organizations_indexer" {
+resource "restapi_object" "organizations_indexer_02" {
   path         = "/indexers"
   query_string = "api-version=2023-11-01"
   data = jsonencode(
     {
-      name            = "idxr-organization-01"
+      name            = "idxr-organization-02"
       dataSourceName  = restapi_object.organizations_datasource.id
-      targetIndexName = restapi_object.organizations_index_01.id
+      targetIndexName = restapi_object.organizations_index_02.id
       description     = null
       skillsetName    = null
       disabled        = null
-      schedule        = null
+      schedule        = { interval = local.indexers_scheduling_interval.organizations }
       parameters = {
         batchSize              = null
         maxFailedItems         = null
@@ -202,8 +206,8 @@ resource "restapi_object" "organizations_alias" {
   query_string = "api-version=2024-03-01-Preview"
   data = jsonencode(
     {
-      name    = var.index_aliases.organizations
-      indexes = [restapi_object.organizations_index_01.id]
+      name    = local.index_aliases.organizations
+      indexes = [restapi_object.organizations_index_02.id]
     }
   )
   force_new    = ["indexes"]

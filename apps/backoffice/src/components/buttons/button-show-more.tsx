@@ -9,6 +9,7 @@ export const ButtonShowMore = ({ disabled, onClick }: ButtonShowMoreProps) => {
 
   return (
     <Button
+      data-testid="bo-io-button-show-more"
       size="small"
       variant="text"
       disabled={disabled}

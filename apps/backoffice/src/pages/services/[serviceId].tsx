@@ -160,7 +160,7 @@ export default function ServiceDetails() {
             onPublishClick={handlePublish}
             onUnpublishClick={handleUnpublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
-            onHistoryClick={handleHistory}
+            onHistoryClick={() => handleHistory()}
             onPreviewClick={handlePreview}
             onEditClick={() =>
               router.push(`/services/${serviceId}/edit-service`)
@@ -206,6 +206,7 @@ export default function ServiceDetails() {
         <Grid item xs={12}>
           <AuthorizedCidrs
             cidrs={(slData?.authorized_cidrs as unknown) as string[]}
+            description="routes.service.authorizedCidrs.description"
             editable={false}
             onSaveClick={e => console.log(e)}
           />

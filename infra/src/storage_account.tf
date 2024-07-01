@@ -12,6 +12,11 @@ module "storage_account" {
   advanced_threat_protection    = false
   public_network_access_enabled = true
 
+  action = [{
+    action_group_id    = data.azurerm_monitor_action_group.error_action_group.id
+    webhook_properties = null
+  }]
+
   tags = var.tags
 }
 

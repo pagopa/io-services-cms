@@ -120,7 +120,9 @@ module "webapp_functions_app" {
   resource_group_name = azurerm_resource_group.rg.name
   name                = "${local.project}-${local.application_basename}-webapp-fn"
   location            = azurerm_resource_group.rg.location
-  health_check_path   = "/api/v1/info"
+
+  health_check_path            = "/api/v1/info"
+  health_check_maxpingfailures = 5
 
   export_keys = true
 
@@ -192,6 +194,11 @@ module "webapp_functions_app" {
 
   application_insights_instrumentation_key = data.azurerm_application_insights.application_insights.instrumentation_key
 
+  action = [{
+    action_group_id    = data.azurerm_monitor_action_group.error_action_group.id
+    webhook_properties = null
+  }]
+
   tags = var.tags
 }
 
@@ -201,7 +208,9 @@ module "webapp_functions_app_staging_slot" {
   resource_group_name = azurerm_resource_group.rg.name
   name                = "staging"
   location            = azurerm_resource_group.rg.location
-  health_check_path   = "/api/v1/info"
+
+  health_check_path            = "/api/v1/info"
+  health_check_maxpingfailures = 5
 
   function_app_id = module.webapp_functions_app.id
 

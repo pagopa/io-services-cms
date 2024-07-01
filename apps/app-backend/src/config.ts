@@ -21,8 +21,7 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 
 export type FeaturedItemsConfig = t.TypeOf<typeof FeaturedItemsConfig>;
 export const FeaturedItemsConfig = t.type({
-  // TODO: Capire se metterlo direttamente nello storageAccount della function in tal caso recuperarlo come QueueStorageConnection nella sezione globale
-  FEATURED_ITEMS_BLOB_CONNECTION_STRING: NonEmptyString,
+  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME: NonEmptyString,
   FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
   FEATURED_SERVICES_FILE_NAME: NonEmptyString,
   FEATURED_INSTITUTIONS_FILE_NAME: NonEmptyString,
@@ -65,11 +64,15 @@ export const PaginationConfig = t.type({
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "101" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger
   ),
   PAGINATION_MAX_OFFSET: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "101" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger
+  ),
+  PAGINATION_MAX_OFFSET_AI_SEARCH: withDefault(
+    IntegerFromString.pipe(NonNegativeInteger),
+    "100000" as unknown as NonNegativeInteger
   ),
 });
 
@@ -77,8 +80,6 @@ export const PaginationConfig = t.type({
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.type({
-    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
-
     // Default is 10 sec timeout
     FETCH_TIMEOUT_MS: withDefault(t.string, "10000").pipe(NumberFromString),
 
@@ -92,7 +93,8 @@ export const IConfig = t.intersection([
 
 export const envConfig = {
   ...process.env,
-  FEATURED_ITEMS_BLOB_CONNECTION_STRING: process.env.AzureWebJobsStorage,
+  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME:
+    process.env.AzureWebJobsStorage__accountName,
   isProduction: process.env.NODE_ENV === "production",
 };
 
