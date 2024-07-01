@@ -1,4 +1,4 @@
-import { Stack, styled } from "@mui/material";
+import { Stack } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
@@ -18,11 +18,7 @@ const ServicePreviewCTAs = ({ cta }: ServicePreviewCTAsProps) => {
   }
 
   return (
-    <Stack
-      paddingX={3}
-      paddingY={2}
-      direction="column"
-    >
+    <Stack paddingX={3} paddingY={2} direction="column">
       <MobileButton text={maybeCTAs.value.cta_1.text} isPrimary />
       {maybeCTAs.value.cta_2 && (
         <MobileButton text={maybeCTAs.value.cta_2.text} />

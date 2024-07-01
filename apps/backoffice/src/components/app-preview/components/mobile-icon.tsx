@@ -25,7 +25,7 @@ type MobileIconProps = {
   height: number;
 };
 
-const MobileIcon = ({
+export const MobileIcon = ({
   icon,
   color = "currentColor",
   width,
@@ -49,4 +49,3 @@ const MobileIcon = ({
     </Box>
   );
 };
-export default MobileIcon;

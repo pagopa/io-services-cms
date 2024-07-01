@@ -1,7 +1,7 @@
 import { Service } from "@/types/service";
 import { Box, Stack } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   ServicePreviewCTAs,
   ServicePreviewDescriptionCard,
@@ -24,15 +24,13 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
   const scrollBoxRef = useRef<HTMLDivElement>();
   const scrollBoxOpacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollBoxRef && scrollBoxRef.current) {
-        setScrollY(scrollBoxRef.current.scrollTop); // Update scroll position
-      }
-    };
+  const handleScroll = () => {
+    if (scrollBoxRef && scrollBoxRef.current) {
+      setScrollY(scrollBoxRef.current.scrollTop); // Update scroll position
+    }
+  };
 
-    scrollBoxRef.current?.addEventListener("scroll", handleScroll);
-  }, []);
+  scrollBoxRef.current?.addEventListener("scroll", handleScroll);
 
   return (
     <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
@@ -80,7 +78,13 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
 
               <ServicePreviewInfoSection
                 websiteLink={service.metadata.web_url}
-                appStoreLink={service.metadata.app_android}
+                appStoreLink={
+                  service.metadata.app_android
+                    ? service.metadata.app_android
+                    : service.metadata.app_ios
+                    ? service.metadata.app_ios
+                    : undefined
+                }
                 customerCareLink={service.metadata.support_url}
                 phoneNumber={service.metadata.phone}
                 email={service.metadata.email}

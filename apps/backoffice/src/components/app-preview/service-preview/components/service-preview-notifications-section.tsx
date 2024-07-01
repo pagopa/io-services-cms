@@ -6,9 +6,9 @@ import {
   MOBILE_COLOR_GREY_100,
   MOBILE_COLOR_GREY_650,
   MOBILE_COLOR_GREY_850,
+  MobileIcon,
   MobileTypography
 } from "../../components";
-import MobileIcon from "../../mobile-icon";
 import { ServicePreviewSectionTitle } from "./";
 
 type NotificationType = {
@@ -109,6 +109,8 @@ const ServicePreviewNotificationsSection = () => {
                     >
                       <MobileTypography
                         fontSize={16}
+                        fontWeight={600}
+                        lineHeight="24px"
                         color={MOBILE_COLOR_GREY_850}
                       >
                         {t(value.text)}

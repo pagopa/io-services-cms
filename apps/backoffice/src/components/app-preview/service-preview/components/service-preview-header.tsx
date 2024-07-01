@@ -42,7 +42,7 @@ const ServicePreviewHeader = ({
           <MobileTypography
             color={MOBILE_COLOR_GREY_850}
             fontSize={22}
-            fontWeight={400}
+            fontWeight={600}
             lineHeight="33px"
           >
             {serviceName}
@@ -50,7 +50,7 @@ const ServicePreviewHeader = ({
           <MobileTypography
             color={MOBILE_COLOR_GREY_700}
             fontSize={14}
-            fontWeight={400}
+            fontWeight={600}
             lineHeight="21px"
           >
             {institutionName}

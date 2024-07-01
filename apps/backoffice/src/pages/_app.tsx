@@ -12,7 +12,7 @@ import { ReactElement, ReactNode } from "react";
 /**
  * Import custom fonts stylesheet
  * Required for "in app preview"
- * (in order to use the IO App "Readex Pro" font)
+ * (in order to use the IO App font)
  */
 import "../styles/fonts.css";
 

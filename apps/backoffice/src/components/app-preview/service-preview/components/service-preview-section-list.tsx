@@ -19,7 +19,7 @@ const ServicePreviewSectionList = ({
   return (
     <Stack>
       <ServicePreviewSectionTitle text={t(title)} />
-      <List>
+      <List sx={{ padding: 0 }}>
         {items.map((item, index) => (
           <ServicePreviewSectionListItem
             key={`service-info-${index}`}

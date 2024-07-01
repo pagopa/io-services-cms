@@ -33,6 +33,7 @@ export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
     >
       <MobileTypography
         fontSize="16px"
+        fontWeight={600}
         color={isPrimary ? COLOR_WHITE : MOBILE_COLOR_BLUE_IO_500}
       >
         {text}

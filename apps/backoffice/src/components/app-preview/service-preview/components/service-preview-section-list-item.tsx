@@ -79,7 +79,12 @@ const ServicePreviewSectionListItemLink = ({
             {startIcon}
           </Box>
           <Box display="flex" justifyContent="center" flexDirection="column">
-            <MobileTypography fontSize={16} color={MOBILE_COLOR_BLUE_IO_500}>
+            <MobileTypography
+              fontSize={16}
+              fontWeight={600}
+              lineHeight="20px"
+              color={MOBILE_COLOR_BLUE_IO_500}
+            >
               {label}
             </MobileTypography>
           </Box>
@@ -122,6 +127,7 @@ const ServicePreviewSectionListItemInfo = ({
             </MobileTypography>
             <MobileTypography
               fontSize={16}
+              fontWeight={600}
               color={
                 isPrimaryValue
                   ? MOBILE_COLOR_BLUE_IO_500

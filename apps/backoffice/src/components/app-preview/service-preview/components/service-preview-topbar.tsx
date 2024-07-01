@@ -2,9 +2,9 @@ import { Box } from "@mui/material";
 import {
   MOBILE_COLOR_GREY_850,
   MOBILE_COLOR_GREY_TOPBAR,
+  MobileIcon,
   MobileTypography
 } from "../../components";
-import MobileIcon from "../../mobile-icon";
 
 type ServicePreviewTopbarProps = {
   serviceName?: string;

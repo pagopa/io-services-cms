@@ -1,5 +1,5 @@
 import { useTranslation } from "next-i18next";
-import MobileIcon from "../../mobile-icon";
+import { MobileIcon } from "../../components";
 import ServicePreviewSectionList from "./service-preview-section-list";
 import { ServicePreviewSectionListItemProps } from "./service-preview-section-list-item";
 

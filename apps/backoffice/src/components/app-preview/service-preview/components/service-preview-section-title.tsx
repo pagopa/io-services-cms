@@ -11,7 +11,7 @@ const ServicePreviewSectionTitle = ({ text }: SectionTitleProps) => {
       <MobileTypography
         color={MOBILE_COLOR_GREY_700}
         fontSize={16}
-        fontWeight={400}
+        fontWeight={600}
         lineHeight="24px"
       >
         {text}
