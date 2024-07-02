@@ -1,6 +1,6 @@
-import { Close } from "@mui/icons-material";
-import { Box, Drawer, IconButton } from "@mui/material";
+import { Box, Drawer } from "@mui/material";
 import { ReactNode } from "react";
+import { IconButtonClose } from "../buttons";
 
 export type DrawerBaseContainerProps = {
   open: boolean;
@@ -17,9 +17,7 @@ export const DrawerBaseContainer = ({
   return (
     <Drawer anchor="right" open={open} onClose={onClose} disableScrollLock>
       <Box paddingX={2} paddingY={2} textAlign="right">
-        <IconButton aria-label="close-drawer" onClick={onClose}>
-          <Close />
-        </IconButton>
+        <IconButtonClose onClick={onClose} />
       </Box>
       <Box paddingX={3}>{children}</Box>
     </Drawer>

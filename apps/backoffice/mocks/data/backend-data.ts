@@ -85,6 +85,22 @@ export const aMockServiceTopicsArray = [
   }
 ];
 
+export const aMockServiceCTASingle = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n---`;
+
+export const aMockServiceCTADouble = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
+  2
+)}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n---`;
+
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   id: serviceId ?? faker.string.alphanumeric(26).toUpperCase(),
   status: {
@@ -137,11 +153,11 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     phone: faker.phone.number(),
     email: faker.internet.email(),
     pec: faker.internet.email(),
-    cta: `"---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
-      2
-    )}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
-      2
-    )}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n---"`,
+    cta: faker.helpers.arrayElement([
+      aMockServiceCTASingle,
+      aMockServiceCTADouble,
+      undefined
+    ]),
     token_name: faker.lorem.slug(1),
     support_url: faker.internet.url(),
     category: faker.helpers.arrayElement(["SPECIAL", "STANDARD"]),

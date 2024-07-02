@@ -184,6 +184,7 @@ export default function ServiceDetails() {
         onClose={() => setShowHistory(false)}
       />
       <AppPreview
+        itemToPreview={currentService}
         showPreview={showPreview}
         onClose={() => setShowPreview(false)}
       />

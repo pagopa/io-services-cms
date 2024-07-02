@@ -9,6 +9,13 @@ import { appWithTranslation } from "next-i18next";
 import { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
+/**
+ * Import custom fonts stylesheet
+ * Required for "in app preview"
+ * (in order to use the IO App font)
+ */
+import "../styles/fonts.css";
+
 if (getConfiguration().API_BACKEND_MOCKING) {
   const { setupMocks } = require("../../mocks");
   setupMocks();
