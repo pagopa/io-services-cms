@@ -46,25 +46,28 @@ type RequestHistoricizationAction = Action<
   Queue.RequestHistoricizationItem
 >;
 
-const onAnyChangesHandler = (
-  item: ServiceLifecycleCosmosResource
-): RequestHistoricizationAction => ({
+const onAnyChangesHandler = ({
+  _ts,
+  _etag,
+  ...otherProps
+}: ServiceLifecycleCosmosResource): RequestHistoricizationAction => ({
   requestHistoricization: {
-    ...item,
+    ...otherProps,
     // eslint-disable-next-line no-underscore-dangle
-    last_update: new Date(item._ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle record
+    last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle record
     // eslint-disable-next-line no-underscore-dangle
-    version: item._etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle record
+    version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle record
   },
 });
 
 const onSubmitHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycleCosmosResource
 ): RequestReviewAction => ({
   requestReview: {
     id: item.id,
     data: item.data,
-    version: item.version ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
+    // eslint-disable-next-line no-underscore-dangle
+    version: item._etag ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
   },
 });
 

@@ -26,15 +26,17 @@ type OnReleaseActions = RequestHistoricizationAction;
 
 const noAction = {};
 
-const onReleaseHandler = (
-  item: ServicePublicationCosmosResource
-): RequestHistoricizationAction => ({
+const onReleaseHandler = ({
+  _ts,
+  _etag,
+  ...otherProps
+}: ServicePublicationCosmosResource): RequestHistoricizationAction => ({
   requestHistoricization: {
-    ...item,
+    ...otherProps,
     // eslint-disable-next-line no-underscore-dangle
-    last_update: new Date(item._ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-publication record
+    last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-publication record
     // eslint-disable-next-line no-underscore-dangle
-    version: item._etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-publication record
+    version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-publication record
   },
 });
 
