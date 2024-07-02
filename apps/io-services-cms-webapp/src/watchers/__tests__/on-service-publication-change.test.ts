@@ -1,9 +1,7 @@
+import { ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
-import {
-  handler,
-  ServicePublicationCosmosResource,
-} from "../on-service-publication-change";
+import { handler } from "../on-service-publication-change";
 
 const aServicePublicationCosmosResource = {
   id: "aServiceId",
@@ -26,7 +24,7 @@ const aServicePublicationCosmosResource = {
   },
   _ts: Math.floor(Date.now() / 1000),
   _etag: "aServiceEtag",
-} as unknown as ServicePublicationCosmosResource;
+} as unknown as ServicePublication.CosmosResource;
 
 const { _ts, _etag, ...aService } = aServicePublicationCosmosResource;
 
@@ -35,7 +33,7 @@ const expectedVersion = _etag;
 
 describe("On Service Publication Change Handler", () => {
   it.each`
-    scenario                     | item                                                       | expected
+    scenario                     | item                                                                       | expected
     ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update: expectedLastUpdate, fsm: { state: "unpublished" } } }}
     ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}   | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update: expectedLastUpdate, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {

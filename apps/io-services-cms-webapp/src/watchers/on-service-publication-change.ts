@@ -1,18 +1,8 @@
 import { Queue, ServicePublication } from "@io-services-cms/models";
-import { AzureCosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
-
-export type ServicePublicationCosmosResource = t.TypeOf<
-  typeof ServicePublicationCosmosResource
->;
-export const ServicePublicationCosmosResource = t.intersection([
-  ServicePublication.ItemType,
-  AzureCosmosResource,
-]);
 
 type Actions = "requestHistoricization";
 
@@ -30,7 +20,7 @@ const onReleaseHandler = ({
   _ts,
   _etag,
   ...otherProps
-}: ServicePublicationCosmosResource): RequestHistoricizationAction => ({
+}: ServicePublication.CosmosResource): RequestHistoricizationAction => ({
   requestHistoricization: {
     ...otherProps,
     // eslint-disable-next-line no-underscore-dangle
@@ -41,7 +31,7 @@ const onReleaseHandler = ({
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServicePublicationCosmosResource },
+  { item: ServicePublication.CosmosResource },
   Error,
   NoAction | OnReleaseActions
 > = ({ item }) => {
