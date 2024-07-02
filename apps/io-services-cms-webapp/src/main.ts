@@ -58,7 +58,10 @@ import {
   handler as onServiceLifecycleChangeHandler,
   ServiceLifecycleCosmosResource,
 } from "./watchers/on-service-lifecycle-change";
-import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
+import {
+  handler as onServicePublicationChangeHandler,
+  ServicePublicationCosmosResource,
+} from "./watchers/on-service-publication-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { createWebServer } from "./webservice";
@@ -283,7 +286,7 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
 
 export const onServicePublicationChangeEntryPoint = pipe(
   onServicePublicationChangeHandler,
-  processBatchOf(ServicePublication.ItemType),
+  processBatchOf(ServicePublicationCosmosResource),
   setBindings((results) => ({
     requestHistoricization: pipe(
       results,

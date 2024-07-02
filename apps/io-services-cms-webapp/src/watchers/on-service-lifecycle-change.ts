@@ -1,4 +1,3 @@
-import { Resource } from "@azure/cosmos";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { AzureCosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
@@ -12,8 +11,9 @@ import * as t from "io-ts";
 import { IConfig } from "../config";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
-export type ServiceLifecycleCosmosResource = ServiceLifecycle.ItemType &
-  Resource;
+export type ServiceLifecycleCosmosResource = t.TypeOf<
+  typeof ServiceLifecycleCosmosResource
+>;
 
 export const ServiceLifecycleCosmosResource = t.intersection([
   ServiceLifecycle.ItemType,
