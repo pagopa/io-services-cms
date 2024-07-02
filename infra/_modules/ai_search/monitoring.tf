@@ -7,7 +7,7 @@ resource "azurerm_monitor_metric_alert" "srch_high_latency" {
   resource_group_name = azurerm_search_service.srch.resource_group_name
   scopes              = [azurerm_search_service.srch.id]
   description         = "The maximum latency is greater than threshold. Runbook: https://pagopa.atlassian.net/wiki/spaces/IOPAE/pages/1119453217"
-  severity            = 1
+  severity            = 2
   window_size         = "PT5M"
   frequency           = "PT5M"
   auto_mitigate       = true
