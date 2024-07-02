@@ -23,7 +23,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as ServicePublication.ItemTypeWithTimestamp;
+} as unknown as ServicePublication.CosmosResource;
 
 describe("On Service Detail Publication Change Handler", () => {
   it.each`

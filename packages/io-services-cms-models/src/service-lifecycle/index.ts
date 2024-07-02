@@ -513,11 +513,11 @@ type FsmClient = ReturnType<typeof getFsmClient>;
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
 
-type ItemTypeWithTimestamp = t.TypeOf<typeof ItemTypeWithTimestamp>;
-const ItemTypeWithTimestamp = t.intersection([
+type CosmosResource = t.TypeOf<typeof CosmosResource>;
+const CosmosResource = t.intersection([
   ItemType,
-  t.type({ _ts: t.Integer }),
+  t.type({ _ts: t.Integer, _etag: NonEmptyString }),
 ]);
 
 export * as definitions from "./definitions";
-export { FSM, FsmClient, ItemType, ItemTypeWithTimestamp, getFsmClient };
+export { CosmosResource, FSM, FsmClient, ItemType, getFsmClient };

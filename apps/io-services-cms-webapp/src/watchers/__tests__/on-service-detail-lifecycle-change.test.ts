@@ -22,7 +22,7 @@ const aService = {
     },
     require_secure_channel: false,
   },
-} as unknown as ServiceLifecycle.ItemTypeWithTimestamp;
+} as unknown as ServiceLifecycle.CosmosResource;
 
 describe("On Service Detail Lifecycle Change Handler", () => {
   it.each`

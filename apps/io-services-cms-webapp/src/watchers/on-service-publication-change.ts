@@ -1,8 +1,8 @@
 import { Queue, ServicePublication } from "@io-services-cms/models";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 type Actions = "requestHistoricization";
 
@@ -16,18 +16,22 @@ type OnReleaseActions = RequestHistoricizationAction;
 
 const noAction = {};
 
-const onReleaseHandler = (
-  item: ServicePublication.ItemType
-): RequestHistoricizationAction => ({
+const onReleaseHandler = ({
+  _ts,
+  _etag,
+  ...otherProps
+}: ServicePublication.CosmosResource): RequestHistoricizationAction => ({
   requestHistoricization: {
-    ...item,
-    last_update:
-      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
+    ...otherProps,
+    // eslint-disable-next-line no-underscore-dangle
+    last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-publication record
+    // eslint-disable-next-line no-underscore-dangle
+    version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-publication record
   },
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServicePublication.ItemType },
+  { item: ServicePublication.CosmosResource },
   Error,
   NoAction | OnReleaseActions
 > = ({ item }) => {

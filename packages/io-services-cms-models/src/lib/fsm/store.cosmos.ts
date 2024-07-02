@@ -1,6 +1,8 @@
 import {
   BulkOperationType,
   Container,
+  ItemDefinition,
+  ItemResponse,
   ReadOperationInput,
 } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -107,16 +109,20 @@ export const createCosmosStore = <
 
   const save = (id: string, value: T) =>
     pipe(
-      TE.tryCatch(
-        () => container.items.upsert({ ...value, id }),
-        (err) =>
-          new Error(
-            `Failed to save item id#${id} from database, ${
-              E.toError(err).message
-            }`
-          )
-      ),
-      TE.map((itemResponse) => ({
+      value,
+      // last_update is not part of the value to save
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ({ last_update, version, ...valueToSave }) =>
+        TE.tryCatch(
+          () => container.items.upsert({ ...valueToSave, id }),
+          (err) =>
+            new Error(
+              `Failed to save item id#${id} from database, ${
+                E.toError(err).message
+              }`
+            )
+        ),
+      TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
         last_update: itemResponse.resource
           ? // eslint-disable-next-line no-underscore-dangle

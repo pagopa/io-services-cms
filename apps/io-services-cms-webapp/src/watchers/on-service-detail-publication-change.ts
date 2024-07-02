@@ -18,7 +18,7 @@ const noAction = {};
 const onDetailPublicationHandler = ({
   _ts,
   ...item
-}: ServicePublication.ItemTypeWithTimestamp): RequestDetailPublicationAction => ({
+}: ServicePublication.CosmosResource): RequestDetailPublicationAction => ({
   requestDetailPublication: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
@@ -28,7 +28,7 @@ const onDetailPublicationHandler = ({
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServicePublication.ItemTypeWithTimestamp },
+  { item: ServicePublication.CosmosResource },
   Error,
   NoAction | OnDetailPublicationActions
 > = ({ item }) => {
