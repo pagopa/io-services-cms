@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.4
+
+### Patch Changes
+
+- 9e2675b: Fix last_update and version on cosmos containers
+
 ## 1.19.3
 
 ### Patch Changes
