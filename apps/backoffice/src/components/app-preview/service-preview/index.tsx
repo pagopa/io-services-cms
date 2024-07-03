@@ -1,7 +1,7 @@
 import { Service } from "@/types/service";
 import { Box, Stack } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ServicePreviewCTAs,
   ServicePreviewDescriptionCard,
@@ -20,17 +20,19 @@ type ServicePreviewProps = {
 
 const ServicePreview = ({ service }: ServicePreviewProps) => {
   const { data: session } = useSession();
+
   const [scrollY, setScrollY] = useState(0);
   const scrollBoxRef = useRef<HTMLDivElement>();
   const scrollBoxOpacity = Math.min(1, scrollY / 50); // Calculate opacity based on scroll position
 
-  const handleScroll = () => {
-    if (scrollBoxRef && scrollBoxRef.current) {
-      setScrollY(scrollBoxRef.current.scrollTop); // Update scroll position
-    }
-  };
-
-  scrollBoxRef.current?.addEventListener("scroll", handleScroll);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollBoxRef && scrollBoxRef.current) {
+        setScrollY(scrollBoxRef.current.scrollTop); // Update scroll position
+      }
+    };
+    scrollBoxRef.current?.addEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
@@ -39,15 +41,6 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
           <ServicePreviewTopbar
             serviceName={service.name}
             opacity={scrollBoxOpacity}
-          />
-          <Box
-            zIndex={-10}
-            height={200}
-            width={186}
-            sx={{
-              backgroundColor: `rgb(244,245,248,${1 - scrollBoxOpacity})`,
-              position: "absolute"
-            }}
           />
           <Box
             display="flex"

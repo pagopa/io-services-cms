@@ -1,4 +1,5 @@
 import { Box, Stack } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
 import {
   AvatarLogo,
   MOBILE_COLOR_GREY_700,
@@ -6,6 +7,8 @@ import {
   MOBILE_COLOR_GREY_TOPBAR,
   MobileTypography
 } from "../../components";
+
+export const SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT = 120;
 
 type ServicePreviewHeaderProps = {
   serviceName: string;
@@ -18,25 +21,42 @@ const ServicePreviewHeader = ({
   institutionName,
   serviceId
 }: ServicePreviewHeaderProps) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [minHeight, setMinHeight] = useState<number>(0);
+
+  useEffect(() => {
+    const updateMinHeight = () => {
+      if (boxRef.current) {
+        setMinHeight(
+          boxRef.current.offsetHeight + SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT
+        );
+      }
+    };
+    // Initial update
+    updateMinHeight();
+    // Update on window resize
+    window.addEventListener("resize", updateMinHeight);
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener("resize", updateMinHeight);
+    };
+  }, []);
+
   return (
     <Stack
-      marginBottom={2}
       paddingX={3}
       bgcolor={MOBILE_COLOR_GREY_TOPBAR}
-      minHeight={120} //! Necessaria altezza dinamica
+      minHeight={minHeight}
       alignItems="start"
     >
-      <Box gap={2} display="flex" alignItems="center" id="preview-header-box">
+      <Box gap={2} display="flex" alignItems="center" ref={boxRef}>
         <Box
           display="flex"
           justifyContent="start"
           alignItems="center"
           width={74}
         >
-          <AvatarLogo
-            serviceId={serviceId}
-            organizationFiscalCode="12345678901"
-          />
+          <AvatarLogo serviceId={serviceId} organizationFiscalCode="" />
         </Box>
         <Box display="flex" justifyContent="center" flexDirection="column">
           <MobileTypography

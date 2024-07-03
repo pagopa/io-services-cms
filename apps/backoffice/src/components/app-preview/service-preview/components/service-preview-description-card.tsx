@@ -1,7 +1,7 @@
 import { Stack } from "@mui/material";
-import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import { MOBILE_COLOR_GREY_100, MOBILE_COLOR_GREY_850 } from "../../components";
+import { SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT } from "./service-preview-header";
 
 type ServicePreviewDescriptionCardProps = {
   descriptionText: string;
@@ -10,15 +10,7 @@ type ServicePreviewDescriptionCardProps = {
 const ServicePreviewDescriptionCard = ({
   descriptionText
 }: ServicePreviewDescriptionCardProps) => {
-  const [marginTopValue, setMarginTopValue] = useState(-70);
-
-  useEffect(() => {
-    let servicePreviewHeaderBoxHeight =
-      document.getElementById("preview-header-box")?.offsetHeight || 0;
-    if (typeof window !== "undefined") {
-      setMarginTopValue(-1 * (servicePreviewHeaderBoxHeight / 15) + 1);
-    }
-  }, []);
+  const marginTopValue = SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT - 10;
 
   return (
     <Stack
@@ -27,7 +19,7 @@ const ServicePreviewDescriptionCard = ({
       bgcolor="background.paper"
       borderRadius="8px"
       border={`2px solid ${MOBILE_COLOR_GREY_100}`}
-      marginTop={marginTopValue}
+      marginTop={`-${marginTopValue}px`}
     >
       <span
         style={{
