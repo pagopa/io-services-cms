@@ -351,6 +351,7 @@
       "delete": "Delete",
       "edit": "Edit",
       "history": "View service history",
+      "preview": "View preview in IO app",
       "publish": "Publish on IO App",
       "submitReview": "Send to revision",
       "unpublish": "Hide on IO App"
