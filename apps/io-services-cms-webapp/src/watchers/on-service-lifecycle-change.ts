@@ -1,12 +1,11 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
-import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
+import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions =
@@ -36,28 +35,25 @@ type RequestHistoricizationAction = Action<
 >;
 
 const onAnyChangesHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycle.CosmosResource
 ): RequestHistoricizationAction => ({
-  requestHistoricization: {
-    ...item,
-    last_update:
-      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
-  },
+  requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });
 
 const onSubmitHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycle.CosmosResource
 ): RequestReviewAction => ({
   requestReview: {
     id: item.id,
     data: item.data,
-    version: item.version ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
+    // eslint-disable-next-line no-underscore-dangle
+    version: item._etag,
   },
 });
 
 const onApproveHandler =
   ({ MAX_ALLOWED_PAYMENT_AMOUNT }: IConfig) =>
-  (item: ServiceLifecycle.ItemType): RequestPublicationAction => ({
+  (item: ServiceLifecycle.CosmosResource): RequestPublicationAction => ({
     requestPublication: {
       id: item.id,
       data: {
@@ -69,7 +65,7 @@ const onApproveHandler =
   });
 
 const onDeleteHandler = (
-  item: ServiceLifecycle.ItemType
+  item: ServiceLifecycle.CosmosResource
 ): RequestDeletionItem => ({
   requestDeletion: {
     id: item.id,
@@ -79,7 +75,7 @@ const onDeleteHandler = (
 const getSpecificAction =
   (config: IConfig) =>
   (
-    item: ServiceLifecycle.ItemType
+    item: ServiceLifecycle.CosmosResource
   ): O.Option<OnSubmitActions | OnApproveActions | OnDeleteActions> => {
     switch (item.fsm.state) {
       case "submitted":
@@ -102,7 +98,7 @@ export const handler =
   (
     config: IConfig
   ): RE.ReaderEither<
-    { item: ServiceLifecycle.ItemType },
+    { item: ServiceLifecycle.CosmosResource },
     Error,
     | RequestHistoricizationAction
     | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &

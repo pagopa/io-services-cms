@@ -17,13 +17,15 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
-import * as RTE from "fp-ts/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
 import { getConfigOrThrow } from "./config";
+import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
+import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import {
   expressToAzureFunction,
@@ -53,14 +55,12 @@ import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
+import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
+import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
-import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
-import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { createWebServer } from "./webservice";
-import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
-import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -248,7 +248,7 @@ export const serviceReviewLegacyCheckerEntryPoint =
 export const onServiceLifecycleChangeEntryPoint = pipe(
   onServiceLifecycleChangeHandler(config),
   RTE.fromReaderEither,
-  processBatchOf(ServiceLifecycle.ItemType),
+  processBatchOf(ServiceLifecycle.CosmosResource),
   setBindings((results) => ({
     requestDeletion: pipe(
       results,
@@ -280,7 +280,7 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
 
 export const onServicePublicationChangeEntryPoint = pipe(
   onServicePublicationChangeHandler,
-  processBatchOf(ServicePublication.ItemType),
+  processBatchOf(ServicePublication.CosmosResource),
   setBindings((results) => ({
     requestHistoricization: pipe(
       results,
@@ -322,7 +322,7 @@ export const onServiceHistoryChangeEntryPoint = pipe(
 
 export const onServiceDetailPublicationChangeEntryPoint = pipe(
   onServiceDetailPublicationChangeHandler,
-  processBatchOf(ServicePublication.ItemTypeWithTimestamp),
+  processBatchOf(ServicePublication.CosmosResource),
   setBindings((results) => ({
     requestDetailPublication: pipe(
       results,
@@ -336,7 +336,7 @@ export const onServiceDetailPublicationChangeEntryPoint = pipe(
 
 export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   onServiceDetailLifecycleChangeHandler,
-  processBatchOf(ServiceLifecycle.ItemTypeWithTimestamp),
+  processBatchOf(ServiceLifecycle.CosmosResource),
   setBindings((results) => ({
     requestDetailLifecycle: pipe(
       results,

@@ -19,7 +19,7 @@ const noAction = {};
 const onDetailLifecycleHandler = ({
   _ts,
   ...item
-}: ServiceLifecycle.ItemTypeWithTimestamp): RequestDetailLifecycleAction => ({
+}: ServiceLifecycle.CosmosResource): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
@@ -29,7 +29,7 @@ const onDetailLifecycleHandler = ({
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServiceLifecycle.ItemTypeWithTimestamp },
+  { item: ServiceLifecycle.CosmosResource },
   Error,
   NoAction | OnDetailLifecycleActions
 > = ({ item }) =>
