@@ -1,5 +1,4 @@
-import { Box, List, ListItem, Switch } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Box, List, ListItem, Stack, Switch } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
 import {

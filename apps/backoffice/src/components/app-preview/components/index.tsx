@@ -5,6 +5,7 @@ import { MobileTypography } from "./mobile-typography";
 
 export { AvatarLogo, MobileButton, MobileIcon, MobileTypography };
 
+export const MOBILE_COLOR_WHITE = "#FFFFFF";
 export const MOBILE_COLOR_BLUE_IO_500: string = "#0B3EE3";
 export const MOBILE_COLOR_BLACK: string = "#0E0F13";
 export const MOBILE_COLOR_GREY_850: string = "#2B2E38";

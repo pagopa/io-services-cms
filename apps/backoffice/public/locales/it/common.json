@@ -469,7 +469,7 @@
     },
     "inAppPreview": {
       "title": "Anteprima In App IO",
-      "titleTooltip": "Versione App xy di App IO",
+      "titleTooltip": "L’anteprima qui mostrata è relativa all’App IO versione 2.62.0.X o superiori.",
       "scrollInfo": "Scorri con il cursore per visualizzare l’anteprima completa",
       "sections": {
         "tos": {

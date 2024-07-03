@@ -1,5 +1,5 @@
 import { Service } from "@/types/service";
-import { Close, InfoOutlined } from "@mui/icons-material";
+import { Close, Edit, InfoOutlined } from "@mui/icons-material";
 import MouseIcon from "@mui/icons-material/Mouse";
 import {
   Box,
@@ -10,7 +10,9 @@ import {
   Tooltip,
   Typography
 } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { IconButtonClose } from "../buttons";
 import PhoneFrame from "./phone-frame";
@@ -19,6 +21,7 @@ import ServicePreview from "./service-preview";
 type AppPreviewProps = {
   itemToPreview?: Service;
   showPreview: boolean;
+  editUrl?: string;
   onClose: () => void;
 };
 
@@ -65,14 +68,14 @@ const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
   );
 };
 
-//service.inAppPreview.closeButton
-
 export const AppPreview = ({
   itemToPreview,
   showPreview,
+  editUrl,
   onClose
 }: AppPreviewProps) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const [isInfoOpen, setisInfoOpen] = useState(true);
 
   const toggleInfoBox = () => {
@@ -83,11 +86,11 @@ export const AppPreview = ({
     <Dialog open={showPreview} onClose={onClose} disableScrollLock>
       <Stack
         flexDirection={"column"}
-        sx={{ minWidth: 600, minHeight: 640 }}
-        padding={3}
-        gap={2}
+        sx={{ minWidth: 600 }}
+        padding={2.5}
+        gap={1.5}
       >
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={0} alignItems="center">
           <Grid item xs={8}>
             <Stack direction={"row"} gap={1}>
               <Typography fontWeight={700} variant="h6">
@@ -95,12 +98,23 @@ export const AppPreview = ({
               </Typography>
               <Tooltip
                 title={t("service.inAppPreview.titleTooltip")}
-                placement="right"
+                placement="bottom"
                 arrow
               >
                 <InfoOutlined color="disabled" />
               </Tooltip>
             </Stack>
+            {editUrl && (
+              <ButtonNaked
+                color="primary"
+                endIcon={<Edit fontSize="small" />}
+                size="medium"
+                sx={{ marginTop: 1, fontWeight: 700 }}
+                onClick={() => router.push(editUrl)}
+              >
+                {t("service.actions.edit")}
+              </ButtonNaked>
+            )}
           </Grid>
           <Grid item xs={4} textAlign="right">
             <IconButtonClose onClick={onClose} />

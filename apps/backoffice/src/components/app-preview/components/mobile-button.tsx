@@ -1,13 +1,11 @@
 import { Button } from "@mui/material";
-import { MOBILE_COLOR_BLUE_IO_500 } from ".";
+import { MOBILE_COLOR_BLUE_IO_500, MOBILE_COLOR_WHITE } from ".";
 import { MobileTypography } from "./mobile-typography";
 
 export type MobileButtonProps = {
   text: string;
   isPrimary?: boolean;
 };
-
-const COLOR_WHITE = "#FFFFFF";
 
 /** Render IO App button with **Readex Pro** font */
 export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
@@ -21,7 +19,7 @@ export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
 
   const buttonSecondaryStyles = {
     "&:hover": {
-      backgroundColor: COLOR_WHITE
+      backgroundColor: MOBILE_COLOR_WHITE
     }
   };
 
@@ -34,7 +32,7 @@ export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
       <MobileTypography
         fontSize="16px"
         fontWeight={600}
-        color={isPrimary ? COLOR_WHITE : MOBILE_COLOR_BLUE_IO_500}
+        color={isPrimary ? MOBILE_COLOR_WHITE : MOBILE_COLOR_BLUE_IO_500}
       >
         {text}
       </MobileTypography>

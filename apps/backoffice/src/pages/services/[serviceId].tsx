@@ -1,6 +1,6 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
-import { PageHeader } from "@/components/headers";
 import { AppPreview } from "@/components/app-preview";
+import { PageHeader } from "@/components/headers";
 import {
   ServiceAlerts,
   ServiceContextMenu,
@@ -186,6 +186,8 @@ export default function ServiceDetails() {
       <AppPreview
         itemToPreview={currentService}
         showPreview={showPreview}
+        // hide edit shortcut in release mode
+        editUrl={release ? undefined : `/services/${serviceId}/edit-service`}
         onClose={() => setShowPreview(false)}
       />
       <Grid container spacing={2}>

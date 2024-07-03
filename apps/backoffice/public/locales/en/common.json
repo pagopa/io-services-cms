@@ -469,7 +469,7 @@
     },
     "inAppPreview": {
       "title": "IO App Preview",
-      "titleTooltip": "IO App Version xy",
+      "titleTooltip": "The preview shown here is for App IO version 2.62.0.X or higher.",
       "scrollInfo": "Scroll with cursor to view full preview",
       "sections": {
         "tos": {
@@ -487,7 +487,7 @@
           "title": "Contacts and Information",
           "websiteLabel": "Visit the website",
           "appStoreLabel": "Download the app",
-          "cutomerCareLabel": "Request assistance",
+          "customerCareLabel": "Request assistance",
           "phoneLabel": "Contact the organization",
           "emailLabel": "Send an email",
           "pecLabel": "Send a PEC",
