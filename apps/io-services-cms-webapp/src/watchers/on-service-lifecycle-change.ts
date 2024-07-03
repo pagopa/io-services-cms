@@ -1,12 +1,11 @@
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
-import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
+import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions =
@@ -35,18 +34,10 @@ type RequestHistoricizationAction = Action<
   Queue.RequestHistoricizationItem
 >;
 
-const onAnyChangesHandler = ({
-  _ts,
-  _etag,
-  ...otherProps
-}: ServiceLifecycle.CosmosResource): RequestHistoricizationAction => ({
-  requestHistoricization: {
-    ...otherProps,
-    // eslint-disable-next-line no-underscore-dangle
-    last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle record
-    // eslint-disable-next-line no-underscore-dangle
-    version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle record
-  },
+const onAnyChangesHandler = (
+  item: ServiceLifecycle.CosmosResource
+): RequestHistoricizationAction => ({
+  requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });
 
 const onSubmitHandler = (
@@ -56,7 +47,7 @@ const onSubmitHandler = (
     id: item.id,
     data: item.data,
     // eslint-disable-next-line no-underscore-dangle
-    version: item._etag ?? (`ERR_${ulidGenerator()}` as NonEmptyString), // TODO add log
+    version: item._etag,
   },
 });
 

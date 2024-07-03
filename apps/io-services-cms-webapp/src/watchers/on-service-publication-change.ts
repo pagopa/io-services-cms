@@ -1,8 +1,8 @@
 import { Queue, ServicePublication } from "@io-services-cms/models";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 
 type Actions = "requestHistoricization";
 
@@ -16,18 +16,10 @@ type OnReleaseActions = RequestHistoricizationAction;
 
 const noAction = {};
 
-const onReleaseHandler = ({
-  _ts,
-  _etag,
-  ...otherProps
-}: ServicePublication.CosmosResource): RequestHistoricizationAction => ({
-  requestHistoricization: {
-    ...otherProps,
-    // eslint-disable-next-line no-underscore-dangle
-    last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-publication record
-    // eslint-disable-next-line no-underscore-dangle
-    version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-publication record
-  },
+const onReleaseHandler = (
+  item: ServicePublication.CosmosResource
+): RequestHistoricizationAction => ({
+  requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });
 
 export const handler: RTE.ReaderTaskEither<
