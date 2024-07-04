@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.31.6
+
+### Patch Changes
+
+- 9e2675b: Fix last_update and version on cosmos containers
+- Updated dependencies [9e2675b]
+  - @io-services-cms/models@1.19.4
+
 ## 1.31.5
 
 ### Patch Changes
