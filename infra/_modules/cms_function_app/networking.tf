@@ -5,7 +5,7 @@ resource "azurerm_private_endpoint" "st_queuest_queue" {
   subnet_id           = var.peps_snet_id
 
   private_service_connection {
-    name                           = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-queuest-queue-pep-01"
+    name                           = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-cms-st-queue-pep-01"
     private_connection_resource_id = module.cms_storage_account.id
     is_manual_connection           = false
     subresource_names              = ["queue"]
