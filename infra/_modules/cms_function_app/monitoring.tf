@@ -3,7 +3,7 @@
 ###############
 
 resource "azurerm_monitor_autoscale_setting" "cms_fn" {
-  name                = format("%s-autoscale", module.cms_fn.function_app.function_app.name)
+  name                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-cms-func-as-01"
   resource_group_name = module.cms_fn.function_app.resource_group_name
   location            = var.location
   target_resource_id  = module.cms_fn.function_app.plan.id
