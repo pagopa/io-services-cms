@@ -1,5 +1,5 @@
 resource "azurerm_private_endpoint" "st_queuest_queue" {
-  name                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-queuest-queue-pep-01"
+  name                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-cms-st-queue-pep-01"
   location            = var.location
   resource_group_name = var.resource_group_name
   subnet_id           = var.peps_snet_id
