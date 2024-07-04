@@ -1,7 +1,7 @@
 module "cms_storage_account" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//storage_account?ref=v8.22.0"
+  source = "github.com/pagopa/terraform-azurerm-v3//storage_account?ref=v8.26.3"
 
-  name                          = "${var.prefix}${var.env_short}${var.location_short}${var.domain}cmsqueuest"
+  name                          = "${var.prefix}${var.env_short}${var.location_short}${var.domain}queuest01"
   account_kind                  = "StorageV2"
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"
@@ -10,7 +10,7 @@ module "cms_storage_account" {
   resource_group_name           = var.resource_group_name
   location                      = var.location
   advanced_threat_protection    = false
-  public_network_access_enabled = true
+  public_network_access_enabled = false
 
   action = [{
     action_group_id    = data.azurerm_monitor_action_group.error_action_group.id
