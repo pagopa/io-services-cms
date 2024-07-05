@@ -185,7 +185,7 @@ resource "azurerm_monitor_metric_alert" "cms_fn_st_low_availability" {
   severity            = 0
   window_size         = "PT5M"
   frequency           = "PT5M"
-  auto_mitigate       = false
+  auto_mitigate       = true
 
   # Metric info
   # https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported#microsoftstoragestorageaccounts
