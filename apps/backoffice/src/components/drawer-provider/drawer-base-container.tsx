@@ -15,9 +15,19 @@ export const DrawerBaseContainer = ({
   onClose
 }: DrawerBaseContainerProps) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} disableScrollLock>
+    <Drawer
+      data-testid="bo-io-drawer-base-container"
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      disableScrollLock
+    >
       <Box paddingX={2} paddingY={2} textAlign="right">
-        <IconButton aria-label="close-drawer" onClick={onClose}>
+        <IconButton
+          data-testid="bo-io-drawer-base-container-close-button"
+          aria-label="close-drawer"
+          onClick={onClose}
+        >
           <Close />
         </IconButton>
       </Box>
