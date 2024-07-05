@@ -26,7 +26,13 @@ export const DrawerBaseContent = ({
   const { t } = useTranslation();
 
   return (
-    <Box width={width} minWidth={minWidth} maxWidth={maxWidth} marginBottom={5}>
+    <Box
+      data-testid="bo-io-drawer-base-content"
+      width={width}
+      minWidth={minWidth}
+      maxWidth={maxWidth}
+      marginBottom={5}
+    >
       <Stack direction="row" spacing={1}>
         {header.startIcon}
         <Typography variant="h6">{t(header.title)}</Typography>
