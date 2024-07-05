@@ -160,7 +160,7 @@ resource "azurerm_monitor_metric_alert" "cms_fn_health_check" {
   description         = "${module.cms_fn.function_app.function_app.name} health check failed"
   severity            = 1
   frequency           = "PT5M"
-  auto_mitigate       = false
+  auto_mitigate       = true
 
   criteria {
     metric_namespace = "Microsoft.Web/sites"
