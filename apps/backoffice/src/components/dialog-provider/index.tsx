@@ -65,7 +65,12 @@ const DialogProvider: React.FC<{
 
   return (
     <>
-      <Dialog open={open} onClose={handleCancel} disableScrollLock>
+      <Dialog
+        data-testid="bo-io-dialog-provider"
+        open={open}
+        onClose={handleCancel}
+        disableScrollLock
+      >
         <DialogTitle>{options.title}</DialogTitle>
         <DialogContent sx={{ minWidth: "600px" }}>
           <Typography
