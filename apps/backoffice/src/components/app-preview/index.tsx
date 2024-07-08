@@ -1,32 +1,42 @@
-import { Close, InfoOutlined } from "@mui/icons-material";
+import { Service } from "@/types/service";
+import { Close, Edit, InfoOutlined } from "@mui/icons-material";
 import MouseIcon from "@mui/icons-material/Mouse";
-import { Box, Button, Dialog, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  Grid,
+  Stack,
+  Tooltip,
+  Typography
+} from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
 import { useState } from "react";
-
-import styles from "./app-preview.module.css";
+import { IconButtonClose } from "../buttons";
+import PhoneFrame from "./phone-frame";
+import ServicePreview from "./service-preview";
 
 type AppPreviewProps = {
+  itemToPreview?: Service;
   showPreview: boolean;
+  editUrl?: string;
   onClose: () => void;
 };
 
-const ScrollInfoBox = (toggleInfobBox: () => void) => {
-  const { t } = useTranslation();
-
+const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
   return (
     <Stack
-      width={140}
-      height={122}
+      width={180}
+      height={150}
       padding={1}
       borderRadius={2}
-      sx={{
-        zIndex: 99,
-        position: "absolute",
-        right: 100,
-        backgroundColor: "white",
-        boxShadow: "-5px 5px 30px gray"
-      }}
+      bgcolor="background.paper"
+      zIndex={99}
+      position="absolute"
+      right={50}
+      boxShadow="-5px 5px 30px gray"
     >
       <Box display="flex" justifyContent="flex-end">
         <Button
@@ -50,16 +60,22 @@ const ScrollInfoBox = (toggleInfobBox: () => void) => {
         paddingBottom={1}
       >
         <MouseIcon color="action" />
-        <Typography fontSize="10px" textAlign="center" fontWeight="600">
-          {t("service.inAppPreview.scrollInfo")}
+        <Typography fontSize={14} textAlign="center" fontWeight="600">
+          {infoboxText}
         </Typography>
       </Box>
     </Stack>
   );
 };
 
-export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
+export const AppPreview = ({
+  itemToPreview,
+  showPreview,
+  editUrl,
+  onClose
+}: AppPreviewProps) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const [isInfoOpen, setisInfoOpen] = useState(true);
 
   const toggleInfoBox = () => {
@@ -70,24 +86,43 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
     <Dialog open={showPreview} onClose={onClose} disableScrollLock>
       <Stack
         flexDirection={"column"}
-        sx={{ minWidth: 600, minHeight: 640 }}
-        padding={4}
-        rowGap={3}
+        sx={{ minWidth: 600 }}
+        padding={2.5}
+        gap={1.5}
       >
-        <Stack direction={"row"} gap={1}>
-          <Typography fontWeight={700} variant="h6">
-            {t("service.inAppPreview.title")}
-          </Typography>
-          <Tooltip
-            title={t("service.inAppPreview.titleTooltip")}
-            placement="right"
-            arrow
-          >
-            <InfoOutlined color="disabled" />
-          </Tooltip>
-        </Stack>
+        <Grid container spacing={0} alignItems="center">
+          <Grid item xs={8}>
+            <Stack direction={"row"} gap={1}>
+              <Typography fontWeight={700} variant="h6">
+                {t("service.inAppPreview.title")}
+              </Typography>
+              <Tooltip
+                title={t("service.inAppPreview.titleTooltip")}
+                placement="bottom"
+                arrow
+              >
+                <InfoOutlined color="disabled" />
+              </Tooltip>
+            </Stack>
+            {editUrl && (
+              <ButtonNaked
+                color="primary"
+                endIcon={<Edit fontSize="small" />}
+                size="medium"
+                sx={{ marginTop: 1, fontWeight: 700 }}
+                onClick={() => router.push(editUrl)}
+              >
+                {t("service.actions.edit")}
+              </ButtonNaked>
+            )}
+          </Grid>
+          <Grid item xs={4} textAlign="right">
+            <IconButtonClose onClick={onClose} />
+          </Grid>
+        </Grid>
         <Box
           flexGrow={1}
+          paddingY={2}
           display="flex"
           justifyContent="center"
           alignItems="center"
@@ -96,72 +131,11 @@ export const AppPreview = ({ showPreview, onClose }: AppPreviewProps) => {
             backgroundSize: "cover"
           }}
         >
-          {isInfoOpen && ScrollInfoBox(toggleInfoBox)}
-          <Box
-            display="flex"
-            padding={1}
-            borderRadius={3}
-            sx={{
-              width: 202,
-              height: 364,
-              backgroundColor: "rgba(255, 255, 255, 0.35)"
-            }}
-          >
-            <Box
-              borderRadius={2}
-              flexGrow={1}
-              sx={{
-                backgroundColor: "white",
-                overflowY: "scroll"
-              }}
-              className={styles.scrollbar}
-            >
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "red",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "blue",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "yellow",
-                  marginBottom: 2
-                }}
-              ></Box>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 100,
-                  backgroundColor: "purple",
-                  marginBottom: 2
-                }}
-              ></Box>
-            </Box>
-          </Box>
-        </Box>
-        <Box textAlign="center">
-          <Button
-            size="medium"
-            startIcon={<Close />}
-            id="s-preview-close-button"
-            variant="text"
-            onClick={onClose}
-            style={{ backgroundColor: "transparent" }}
-          >
-            {t("service.inAppPreview.closeButton")}
-          </Button>
+          {isInfoOpen &&
+            ScrollInfoBox(toggleInfoBox, t("service.inAppPreview.scrollInfo"))}
+          <PhoneFrame>
+            <ServicePreview service={itemToPreview} />
+          </PhoneFrame>
         </Box>
       </Stack>
     </Dialog>

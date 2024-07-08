@@ -47,6 +47,7 @@
     "eslint": "8.50.0",
     "eslint-config-next": "^13.5.6",
     "fp-ts": "^2.13.1",
+    "front-matter": "^4.0.2",
     "i18next": "^23.5.1",
     "io-ts": "^2.2.20",
     "jose": "^4.15.5",
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@faker-js/faker": "^8.3.1",
     "@pagopa/openapi-codegen-ts": "^13.1.0",
+    "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^14.1.2",
     "@types/lodash": "^4.14.202",

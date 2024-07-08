@@ -1,0 +1,38 @@
+@font-face {
+  font-family: "TitilliumSansPro";
+  src: url("/fonts/TitilliumSansPro-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "TitilliumSansPro";
+  src: url("/fonts/TitilliumSansPro-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "TitilliumSansPro";
+  src: url("/fonts/TitilliumSansPro-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "TitilliumSansPro";
+  src: url("/fonts/TitilliumSansPro-Semibold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "TitilliumSansPro";
+  src: url("/fonts/TitilliumSansPro-Thin.ttf") format("truetype");
+  font-weight: 100;
+  font-style: normal;
+}
+
+.titillium-sans-pro-font {
+  font-family: "TitilliumSansPro", sans-serif;
+}

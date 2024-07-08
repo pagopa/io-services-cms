@@ -351,6 +351,7 @@
       "delete": "Delete",
       "edit": "Edit",
       "history": "View service history",
+      "preview": "View preview in IO app",
       "publish": "Publish on IO App",
       "submitReview": "Send to revision",
       "unpublish": "Hide on IO App"
@@ -468,9 +469,33 @@
     },
     "inAppPreview": {
       "title": "IO App Preview",
-      "titleTooltip": "IO App Version xy",
-      "closeButton": "Close Preview",
-      "scrollInfo": "Scroll with cursor to view full preview"
+      "titleTooltip": "The preview shown here is for App IO version 2.62.0.X or higher.",
+      "scrollInfo": "Scroll with cursor to view full preview",
+      "sections": {
+        "tos": {
+          "title": "Terms and Privacy",
+          "tosLabel": "Terms and Conditions of Use",
+          "privacyLabel": "Privacy Notice"
+        },
+        "notifications": {
+          "title": "This service may",
+          "notifyLabel": "Contact you in-app",
+          "pushLabel": "Send you push notifications",
+          "confirmLabel": "Receive read confirmation"
+        },
+        "info": {
+          "title": "Contacts and Information",
+          "websiteLabel": "Visit the website",
+          "appStoreLabel": "Download the app",
+          "customerCareLabel": "Request assistance",
+          "phoneLabel": "Contact the organization",
+          "emailLabel": "Send an email",
+          "pecLabel": "Send a PEC",
+          "fiscalCodeLabel": "Fiscal code of the organization",
+          "addressLabel": "Address",
+          "serviceIDLabel": "Service ID"
+        }
+      }
     }
   },
   "table": {
