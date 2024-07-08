@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-Tests for button components
+Made tests for DialogProvider component

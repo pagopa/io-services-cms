@@ -27,6 +27,7 @@ export const DrawerProvider: React.FC<{
 
   return (
     <DrawerContext.Provider
+      data-testid="bo-io-drawer-provider"
       value={{
         isDrawerOpen,
         openDrawer,

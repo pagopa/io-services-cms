@@ -15,7 +15,13 @@ export const DrawerBaseContainer = ({
   onClose
 }: DrawerBaseContainerProps) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} disableScrollLock>
+    <Drawer
+      data-testid="bo-io-drawer-base-container"
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      disableScrollLock
+    >
       <Box paddingX={2} paddingY={2} textAlign="right">
         <IconButtonClose onClick={onClose} />
       </Box>

@@ -2,7 +2,7 @@ import { Queue, ServicePublication } from "@io-services-cms/models";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 
 type Actions = "requestHistoricization";
 
@@ -17,17 +17,13 @@ type OnReleaseActions = RequestHistoricizationAction;
 const noAction = {};
 
 const onReleaseHandler = (
-  item: ServicePublication.ItemType
+  item: ServicePublication.CosmosResource
 ): RequestHistoricizationAction => ({
-  requestHistoricization: {
-    ...item,
-    last_update:
-      item.last_update ?? (new Date().toISOString() as NonEmptyString), // last_update fallback (value is always set by persistence layer) TODO add log
-  },
+  requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });
 
 export const handler: RTE.ReaderTaskEither<
-  { item: ServicePublication.ItemType },
+  { item: ServicePublication.CosmosResource },
   Error,
   NoAction | OnReleaseActions
 > = ({ item }) => {
