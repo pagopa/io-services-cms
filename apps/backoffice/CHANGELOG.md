@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.11.0
+
+### Minor Changes
+
+- d513734: New feature: service in App preview
+
+### Patch Changes
+
+- 0fe8ffc: Made tests for DialogProvider component
+- 9996b8b: Tests for Drawer Provider
+- e7d0ac3: Fix backoffice drawer unit tests
+
 ## 1.10.11
 
 ### Patch Changes
