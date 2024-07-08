@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import React, { ReactNode } from "react";
 import { afterEach, describe, expect, it } from "vitest";
-import { DrawerBaseContent, DrawerBaseContentHeader } from "../index";
+import { DrawerBaseContent, DrawerBaseContentHeader } from "../";
 
 const BO_IO_DRAWER_BASE_CONTENT = "bo-io-drawer-base-content";
 

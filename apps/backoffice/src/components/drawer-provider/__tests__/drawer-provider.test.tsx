@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import React, { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { DrawerProvider, useDrawer } from "../index";
+import React from "react";
+import { afterEach, describe, expect, it } from "vitest";
+import { DrawerProvider, useDrawer } from "../";
 
 const BO_IO_DRAWER_BASE_CONTAINER = "bo-io-drawer-base-container";
 const BO_IO_OPEN_DRAWER_BUTTON = "bo-io-open-drawer-button";
