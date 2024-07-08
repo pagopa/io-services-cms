@@ -158,7 +158,7 @@ resource "azurerm_monitor_metric_alert" "cms_fn_health_check" {
   resource_group_name = module.cms_fn.function_app.resource_group_name
   scopes              = [module.cms_fn.function_app.function_app.id]
   description         = "${module.cms_fn.function_app.function_app.name} health check failed"
-  severity            = 1
+  severity            = 0
   frequency           = "PT5M"
   auto_mitigate       = true
 
