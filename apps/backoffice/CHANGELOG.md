@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.11.1
+
+### Patch Changes
+
+- 0557c4c: Fix MobileTypography component interface
+
 ## 1.11.0
 
 ### Minor Changes
