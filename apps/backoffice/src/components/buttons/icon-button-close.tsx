@@ -5,7 +5,11 @@ export type IconButtonCloseProps = { onClick: () => void };
 
 export const IconButtonClose = ({ onClick }: IconButtonCloseProps) => {
   return (
-    <IconButton aria-label="close-drawer" onClick={onClick}>
+    <IconButton
+      data-testid="bo-io-icon-button-close"
+      aria-label="close-drawer"
+      onClick={onClick}
+    >
       <Close />
     </IconButton>
   );

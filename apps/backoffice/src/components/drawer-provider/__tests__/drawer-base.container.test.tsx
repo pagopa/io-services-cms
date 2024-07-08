@@ -4,8 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DrawerBaseContainer } from "../";
 
 const BO_IO_DRAWER_BASE_CONTAINER = "bo-io-drawer-base-container";
-const BO_IO_DRAWER_BASE_CONTAINER_CLOSE_BUTTON =
-  "bo-io-drawer-base-container-close-button";
+const BO_IO_ICON_BUTTON_CLOSE = "bo-io-icon-button-close";
 
 let open: boolean = true;
 let onClose = vi.fn();
@@ -49,7 +48,7 @@ describe("[DrawerBaseContentainer] Component", () => {
   it("should be clicked", () => {
     render(getDrawerContentainer());
 
-    const button = screen.getByTestId(BO_IO_DRAWER_BASE_CONTAINER_CLOSE_BUTTON);
+    const button = screen.getByTestId(BO_IO_ICON_BUTTON_CLOSE);
     fireEvent.click(button);
 
     expect(onClose).toHaveBeenCalled();
