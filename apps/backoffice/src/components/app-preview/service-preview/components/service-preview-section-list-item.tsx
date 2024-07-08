@@ -1,13 +1,6 @@
 import { Box, ListItem, ListItemButton, Stack } from "@mui/material";
 import { ReactNode } from "react";
-import {
-  MOBILE_COLOR_BLUE_IO_500,
-  MOBILE_COLOR_GREY_100,
-  MOBILE_COLOR_GREY_300,
-  MOBILE_COLOR_GREY_700,
-  MOBILE_COLOR_GREY_850,
-  MobileTypography
-} from "../../components";
+import { IOColors, MobileTypography } from "../../components";
 
 export type ServicePreviewSectionListItemProps = {
   variant: "link" | "info";
@@ -41,7 +34,7 @@ const ServicePreviewSectionListItem = (
 };
 
 const manageDivider = (hideDivider?: boolean) =>
-  hideDivider ? "" : `1px solid ${MOBILE_COLOR_GREY_100}`;
+  hideDivider ? "" : `1px solid ${IOColors["grey-100"]}`;
 
 const ServicePreviewSectionListItemLink = ({
   startIcon,
@@ -74,7 +67,7 @@ const ServicePreviewSectionListItemLink = ({
             alignItems="center"
             width={24}
             fontSize="24px"
-            color={MOBILE_COLOR_BLUE_IO_500}
+            color={IOColors["blueIO-500"]}
           >
             {startIcon}
           </Box>
@@ -83,7 +76,7 @@ const ServicePreviewSectionListItemLink = ({
               fontSize={16}
               fontWeight={600}
               lineHeight="20px"
-              color={MOBILE_COLOR_BLUE_IO_500}
+              color={IOColors["blueIO-500"]}
             >
               {label}
             </MobileTypography>
@@ -117,21 +110,19 @@ const ServicePreviewSectionListItemInfo = ({
             alignItems="center"
             width={24}
             fontSize="24px"
-            color={MOBILE_COLOR_GREY_300}
+            color={IOColors["grey-300"]}
           >
             {startIcon}
           </Box>
           <Box display="flex" justifyContent="center" flexDirection="column">
-            <MobileTypography fontSize={14} color={MOBILE_COLOR_GREY_700}>
+            <MobileTypography fontSize={14} color={IOColors["grey-700"]}>
               {label}
             </MobileTypography>
             <MobileTypography
               fontSize={16}
               fontWeight={600}
               color={
-                isPrimaryValue
-                  ? MOBILE_COLOR_BLUE_IO_500
-                  : MOBILE_COLOR_GREY_850
+                isPrimaryValue ? IOColors["blueIO-500"] : IOColors["grey-850"]
               }
             >
               {value}
@@ -143,7 +134,7 @@ const ServicePreviewSectionListItemInfo = ({
               flexGrow={1}
               justifyContent="flex-end"
               alignItems="center"
-              color={MOBILE_COLOR_BLUE_IO_500}
+              color={IOColors["blueIO-500"]}
             >
               {endIcon}
             </Box>

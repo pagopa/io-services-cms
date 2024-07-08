@@ -1,10 +1,5 @@
 import { Box } from "@mui/material";
-import {
-  MOBILE_COLOR_GREY_850,
-  MOBILE_COLOR_GREY_TOPBAR,
-  MobileIcon,
-  MobileTypography
-} from "../../components";
+import { IOColors, MobileIcon, MobileTypography } from "../../components";
 
 type ServicePreviewTopbarProps = {
   serviceName?: string;
@@ -25,14 +20,14 @@ const ServicePreviewTopbar = ({
       alignItems="center"
       paddingY={2}
       paddingX={3}
-      borderBottom={`1px solid ${MOBILE_COLOR_GREY_TOPBAR}`}
+      borderBottom={`1px solid ${IOColors["grey-50"]}`}
       sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
     >
       <MobileIcon
         icon="MobileIconArrowBack"
         width={24}
         height={24}
-        color={MOBILE_COLOR_GREY_850}
+        color={IOColors["grey-850"]}
       />
 
       <MobileTypography
@@ -52,7 +47,7 @@ const ServicePreviewTopbar = ({
         icon="MobileIconQMark"
         width={16}
         height={24}
-        color={MOBILE_COLOR_GREY_850}
+        color={IOColors["grey-850"]}
       />
     </Box>
   );

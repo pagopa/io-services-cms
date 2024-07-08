@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import Markdown from "react-markdown";
-import { MOBILE_COLOR_GREY_100, MOBILE_COLOR_GREY_850 } from "../../components";
+import { IOColors } from "../../components";
 import { SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT } from "./service-preview-header";
 
 type ServicePreviewDescriptionCardProps = {
@@ -18,12 +18,12 @@ const ServicePreviewDescriptionCard = ({
       marginX={3}
       bgcolor="background.paper"
       borderRadius="8px"
-      border={`2px solid ${MOBILE_COLOR_GREY_100}`}
+      border={`2px solid ${IOColors["grey-100"]}`}
       marginTop={`-${marginTopValue}px`}
     >
       <span
         style={{
-          color: MOBILE_COLOR_GREY_850,
+          color: IOColors["grey-850"],
           fontFamily: "TitilliumSansPro, sans-serif",
           fontSize: "16px",
           lineHeight: "24px"

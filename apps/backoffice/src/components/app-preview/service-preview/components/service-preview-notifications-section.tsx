@@ -1,13 +1,7 @@
 import { Box, List, ListItem, Stack, Switch } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
-import {
-  MOBILE_COLOR_GREY_100,
-  MOBILE_COLOR_GREY_650,
-  MOBILE_COLOR_GREY_850,
-  MobileIcon,
-  MobileTypography
-} from "../../components";
+import { IOColors, MobileIcon, MobileTypography } from "../../components";
 import { ServicePreviewSectionTitle } from "./";
 
 type NotificationType = {
@@ -84,9 +78,7 @@ const ServicePreviewNotificationsSection = () => {
                   flex={1}
                   paddingY={1}
                   borderBottom={
-                    value.hideDivider
-                      ? ""
-                      : `1px solid ${MOBILE_COLOR_GREY_100}`
+                    value.hideDivider ? "" : `1px solid ${IOColors["grey-100"]}`
                   }
                 >
                   <Stack width="100%" flexDirection="row">
@@ -95,7 +87,7 @@ const ServicePreviewNotificationsSection = () => {
                       justifyContent="center"
                       alignItems="center"
                       fontSize="24px"
-                      color={MOBILE_COLOR_GREY_650}
+                      color={IOColors["grey-650"]}
                       sx={{ opacity: "50%" }}
                     >
                       {value.startIcon}
@@ -110,7 +102,7 @@ const ServicePreviewNotificationsSection = () => {
                         fontSize={16}
                         fontWeight={600}
                         lineHeight="24px"
-                        color={MOBILE_COLOR_GREY_850}
+                        color={IOColors["grey-850"]}
                       >
                         {t(value.text)}
                       </MobileTypography>

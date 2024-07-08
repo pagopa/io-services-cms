@@ -3,7 +3,7 @@ import { AccountBalanceRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import Image from "next/image";
 import React, { useState } from "react";
-import { MOBILE_COLOR_GREY_300 } from ".";
+import { IOColors } from ".";
 
 const LOGO_SIZE = 48;
 
@@ -29,7 +29,7 @@ const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
       paddingX="9px"
       paddingTop={0.5}
       fontSize={32}
-      color={MOBILE_COLOR_GREY_300}
+      color={IOColors["grey-300"]}
     >
       <AccountBalanceRounded fontSize="inherit" />
     </Box>

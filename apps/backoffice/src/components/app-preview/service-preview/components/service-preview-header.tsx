@@ -1,12 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import {
-  AvatarLogo,
-  MOBILE_COLOR_GREY_700,
-  MOBILE_COLOR_GREY_850,
-  MOBILE_COLOR_GREY_TOPBAR,
-  MobileTypography
-} from "../../components";
+import { AvatarLogo, IOColors, MobileTypography } from "../../components";
 
 export const SERVICE_PREVIEW_HEADER_OFFSET_HEIGHT = 120;
 
@@ -45,7 +39,7 @@ const ServicePreviewHeader = ({
   return (
     <Stack
       paddingX={3}
-      bgcolor={MOBILE_COLOR_GREY_TOPBAR}
+      bgcolor={IOColors["grey-50"]}
       minHeight={minHeight}
       alignItems="start"
     >
@@ -60,7 +54,7 @@ const ServicePreviewHeader = ({
         </Box>
         <Box display="flex" justifyContent="center" flexDirection="column">
           <MobileTypography
-            color={MOBILE_COLOR_GREY_850}
+            color={IOColors["grey-850"]}
             fontSize={22}
             fontWeight={600}
             lineHeight="33px"
@@ -68,7 +62,7 @@ const ServicePreviewHeader = ({
             {serviceName}
           </MobileTypography>
           <MobileTypography
-            color={MOBILE_COLOR_GREY_700}
+            color={IOColors["grey-700"]}
             fontSize={14}
             fontWeight={600}
             lineHeight="21px"

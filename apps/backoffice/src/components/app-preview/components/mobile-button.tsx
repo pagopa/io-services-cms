@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { MOBILE_COLOR_BLUE_IO_500, MOBILE_COLOR_WHITE } from ".";
+import { IOColors } from ".";
 import { MobileTypography } from "./mobile-typography";
 
 export type MobileButtonProps = {
@@ -11,15 +11,15 @@ export type MobileButtonProps = {
 export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
   const buttonPrimaryStyles = {
     borderRadius: "8px",
-    backgroundColor: MOBILE_COLOR_BLUE_IO_500,
+    backgroundColor: IOColors["blueIO-500"],
     "&:hover": {
-      backgroundColor: MOBILE_COLOR_BLUE_IO_500
+      backgroundColor: IOColors["blueIO-500"]
     }
   };
 
   const buttonSecondaryStyles = {
     "&:hover": {
-      backgroundColor: MOBILE_COLOR_WHITE
+      backgroundColor: IOColors["white"]
     }
   };
 
@@ -32,7 +32,7 @@ export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
       <MobileTypography
         fontSize="16px"
         fontWeight={600}
-        color={isPrimary ? MOBILE_COLOR_WHITE : MOBILE_COLOR_BLUE_IO_500}
+        color={isPrimary ? IOColors["white"] : IOColors["blueIO-500"]}
       >
         {text}
       </MobileTypography>
