@@ -1,4 +1,4 @@
-import MobileIconAddress from "./mobile-icon-address.svg";
+import MobileIconAddress from "./Mobile-icon-address.svg";
 import MobileIconArrowBack from "./mobile-icon-arrow-back.svg";
 import MobileIconChecks from "./mobile-icon-checks.svg";
 import MobileIconCopy from "./mobile-icon-copy.svg";
