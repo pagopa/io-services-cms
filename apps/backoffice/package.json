@@ -15,7 +15,7 @@
     "coverage": "yarn coverage:b4f && yarn coverage:fe",
     "coverage:b4f": "vitest run --config ./vitest.config.node.ts --coverage",
     "coverage:fe": "vitest run --config ./vitest.config.react.ts --coverage",
-    "typecheck": "tsc",
+    "typecheck": "next build",
     "api-definitions:clean": "rm -rf ./src/generated/api",
     "api-definitions:generate": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
     "api-definitions:all": "yarn api-definitions:clean && yarn api-definitions:generate",
