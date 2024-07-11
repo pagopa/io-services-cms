@@ -1,4 +1,4 @@
-import MobileIconAddress from "./mobile-icon-address.svg";
+import mobileIconAddress from "./mobile-icon-address.svg";
 import MobileIconArrowBack from "./mobile-icon-arrow-back.svg";
 import MobileIconChecks from "./mobile-icon-checks.svg";
 import MobileIconCopy from "./mobile-icon-copy.svg";
@@ -16,8 +16,9 @@ import MobileIconQMark from "./mobile-icon-q-mark.svg";
 import MobileIconSecurity from "./mobile-icon-security.svg";
 import MobileIconWebsite from "./mobile-icon-website.svg";
 
+export const MobileIconAddress = mobileIconAddress;
+
 export {
-  MobileIconAddress,
   MobileIconArrowBack,
   MobileIconChecks,
   MobileIconCopy,
