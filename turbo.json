@@ -22,7 +22,8 @@
     },
     "typecheck": {
       "inputs": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx"
       ],
       "outputs": [],
       "dependsOn": [
