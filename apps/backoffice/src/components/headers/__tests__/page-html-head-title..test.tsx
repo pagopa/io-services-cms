@@ -34,4 +34,12 @@ describe("[HeadTitle] Component", () => {
 
     expect(title).toBeDefined();
   });
+
+  it("should show the defined section", async () => {
+    section = "testSection";
+    render(getHeadTitle());
+    const title = screen.getByText(`app.title | ${section}`);
+
+    expect(title).toBeDefined();
+  });
 });
