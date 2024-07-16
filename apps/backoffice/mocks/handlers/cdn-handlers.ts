@@ -11,7 +11,7 @@ faker.seed(1);
 
 export const buildHandlers = () => {
   const configuration = getConfiguration();
-  const baseURL = configuration.CDN_URLL;
+  const baseURL = configuration.CDN_URL;
 
   return [
     http.get(
