@@ -5,7 +5,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 1.0.2
+  version: 1.0.1
 servers:
   - url: https://to-be-defined.it
 tags:
