@@ -1,7 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "generate": {},
+    "generate": {
+      "outputMode": "errors-only"
+    },
     "build": {
       "inputs": [
         "src/**/*.ts"
