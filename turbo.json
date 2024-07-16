@@ -1,9 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "generate": {
-      "outputMode": "errors-only"
-    },
     "build": {
       "inputs": [
         "src/**/*.ts"
@@ -15,6 +12,9 @@
         "generate",
         "^build"
       ]
+    },
+    "generate": {
+      "outputMode": "errors-only"
     },
     "typecheck": {
       "inputs": [
