@@ -131,70 +131,6 @@ const changeName = ({ data, ...rest }: Service, name: string): Service => ({
 });
 
 describe("apply", () => {
-  // valid sequences
-  it.each([
-    {
-      title: "on empty items",
-      id: aServiceId,
-      actions: [() => fsmClient._release(aServiceId, { data: aService })],
-      expected: expect.objectContaining({
-        ...aService,
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-    {
-      title: "a sequence on the same item",
-      id: aServiceId,
-      actions: [
-        () =>
-          fsmClient._release(aServiceId, {
-            data: aService,
-          }),
-        () => fsmClient.publish(aServiceId),
-        () =>
-          fsmClient._release(aServiceId, {
-            data: changeName(aService, "new name"),
-          }),
-        () => fsmClient.unpublish(aServiceId),
-      ],
-      expected: expect.objectContaining({
-        ...changeName(aService, "new name"),
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-  ])("should apply $title", expectSuccess);
-
-  it.each([
-    {
-      title: "on empty items with autoPublish",
-      id: aServiceId,
-      actions: [() => fsmClient._release(aServiceId, { data: aService })],
-      expected: expect.objectContaining({
-        ...aService,
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-    {
-      title: "a sequence on the same item",
-      id: aServiceId,
-      actions: [
-        () =>
-          fsmClient.publish(aServiceId, {
-            data: aService,
-          }),
-        () =>
-          fsmClient._release(aServiceId, {
-            data: changeName(aService, "new name after autoPublish"),
-          }),
-        () => fsmClient.unpublish(aServiceId),
-      ],
-      expected: expect.objectContaining({
-        ...changeName(aService, "new name after autoPublish"),
-        fsm: expect.objectContaining({ state: "unpublished" }),
-      }),
-    },
-  ])("should apply $title", expectSuccess);
-
   // invalid sequences
   it.each([
     {
@@ -207,48 +143,6 @@ describe("apply", () => {
       additionalPostTestFn: undefined,
     },
   ])("should fail $title", expectFailure);
-
-  it("should fail with FsmStoreFetchError if fetch on store return an Error", async () => {
-    const mockStore = {
-      fetch: vi.fn(() => {
-        return TE.left(new Error());
-      }),
-      save: vi.fn(),
-    } as unknown as FSMStore<ItemType>;
-    const mockFsmClient = getFsmClient(mockStore);
-
-    const result = await mockFsmClient._release(aServiceId, {
-      data: aService,
-    })();
-
-    if (E.isRight(result)) {
-      throw new Error(`Expecting a failure`);
-    }
-    const { left: value } = result;
-    expect(value).toBeInstanceOf(FsmStoreFetchError);
-  });
-
-  it("should fail with FsmStoreSaveError if save on store return an Error", async () => {
-    const mockStore = {
-      fetch: vi.fn(() => {
-        return TE.of(O.none);
-      }),
-      save: vi.fn(() => {
-        return TE.left(new Error());
-      }),
-    } as unknown as FSMStore<ItemType>;
-    const mockFsmClient = getFsmClient(mockStore);
-
-    const result = await mockFsmClient._release(aServiceId, {
-      data: aService,
-    })();
-
-    if (E.isRight(result)) {
-      throw new Error(`Expecting a failure`);
-    }
-    const { left: value } = result;
-    expect(value).toBeInstanceOf(FsmStoreSaveError);
-  });
 
   it("should 'do nothing' when publishing an already published item", async () => {
     const currentItem = { ...aService, fsm: { state: "published" } };

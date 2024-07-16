@@ -485,9 +485,6 @@ const saveItem =
 
 const getFsmClient = (store: PublicationStore) => ({
   getStore: () => store,
-  /** @deprecated */
-  _release: (id: ServiceId, args: { data: Service }) =>
-    apply("release", id, args)(store),
   release: (...args: Parameters<typeof release>) => release(...args)(store),
   unpublish: (id: ServiceId) => apply("unpublish", id)(store),
   publish: (id: ServiceId, args?: { data: Service }) =>
