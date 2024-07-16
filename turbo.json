@@ -1,13 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
-    "generate": {
-      "inputs": [
-        "./openapi.yaml",
-        "src/generated/**/*"
-      ],
-      "outputMode": "errors-only"
-    },
+    "generate": {},
     "build": {
       "inputs": [
         "src/**/*.ts"
@@ -22,13 +16,11 @@
     },
     "typecheck": {
       "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx"
+        "src/**/*.ts"
       ],
       "outputs": [],
       "dependsOn": [
-        "generate",
-        "^build"
+        "build"
       ]
     },
     "format": {},
@@ -38,8 +30,7 @@
       ],
       "outputs": [],
       "dependsOn": [
-        "generate",
-        "^build"
+        "build"
       ]
     },
     "test": {
@@ -50,8 +41,7 @@
       "outputs": [],
       "outputMode": "errors-only",
       "dependsOn": [
-        "generate",
-        "^build"
+        "build"
       ]
     },
     "test:integrations": {
@@ -61,7 +51,7 @@
       "outputs": [],
       "outputMode": "errors-only",
       "dependsOn": [
-        "^build"
+        "build"
       ]
     },
     "coverage": {
@@ -74,8 +64,7 @@
       ],
       "outputMode": "errors-only",
       "dependsOn": [
-        "generate",
-        "^build"
+        "build"
       ]
     }
   }
