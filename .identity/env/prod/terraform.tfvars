@@ -50,7 +50,8 @@ infra_environment_ci_roles = {
     io-p-itn-svc-rg-01 = [
       "Contributor",
       "Search Service Contributor",
-      "Storage Blob Data Reader"
+      "Storage Blob Data Reader",
+      "Storage Queue Data Reader",
     ]
   }
 }
@@ -65,7 +66,8 @@ infra_environment_cd_roles = {
     io-p-itn-svc-rg-01 = [
       "Search Service Contributor",
       "Role Based Access Control Administrator",
-      "Storage Blob Data Contributor"
+      "Storage Blob Data Contributor",
+      "Storage Queue Data Contributor",
     ],
     io-p-services-cms-rg = [
       "Role Based Access Control Administrator"
@@ -73,7 +75,7 @@ infra_environment_cd_roles = {
   }
 }
 
-environment_ci_roles = {
+app_environment_ci_roles = {
   subscription = [
     "Reader",
     "PagoPA IaC Reader",
@@ -90,7 +92,7 @@ environment_ci_roles = {
   }
 }
 
-environment_cd_roles = {
+app_environment_cd_roles = {
   subscription = [
     "Contributor",
     "Storage Account Contributor",
@@ -118,20 +120,11 @@ github_repository_environment_ci = {
 github_repository_environment_cd = {
   protected_branches     = false
   custom_branch_policies = true
-  reviewers_teams        = ["io-platform-green-unit"]
+  reviewers_teams        = ["io-platform-green-unit", "engineering-team-cloud-eng"]
 }
 
 github_repository_environment_app_cd = {
   protected_branches     = false
   custom_branch_policies = true
   reviewers_teams        = ["io-platform-green-unit"]
-}
-
-environment_app_cd_roles = {
-  subscription = []
-  resource_groups = {
-    io-p-services-cms-rg = [
-      "Website Contributor",
-    ]
-  }
 }

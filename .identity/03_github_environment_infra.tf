@@ -10,6 +10,16 @@ resource "github_repository_environment" "github_repository_environment_infra_cd
     protected_branches     = true
     custom_branch_policies = false
   }
+  dynamic "reviewers" {
+    for_each = (var.github_repository_environment_cd.reviewers_teams == null ? [] : [1])
+    content {
+      teams = matchkeys(
+        data.github_organization_teams.all.teams[*].id,
+        data.github_organization_teams.all.teams[*].slug,
+        var.github_repository_environment_cd.reviewers_teams
+      )
+    }
+  }
 }
 
 resource "github_actions_environment_secret" "infra_env_ci_secrets" {
