@@ -34,8 +34,8 @@ resource "github_repository" "this" {
       status = "enabled"
     }
 
-    advanced_security {
-      status = "enabled"
-    }
+    # advanced_security {
+    #   status = "enabled"
+    # }
   }
 }

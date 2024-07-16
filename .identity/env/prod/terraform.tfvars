@@ -75,7 +75,7 @@ infra_environment_cd_roles = {
   }
 }
 
-environment_ci_roles = {
+app_environment_ci_roles = {
   subscription = [
     "Reader",
     "PagoPA IaC Reader",
@@ -92,7 +92,7 @@ environment_ci_roles = {
   }
 }
 
-environment_cd_roles = {
+app_environment_cd_roles = {
   subscription = [
     "Contributor",
     "Storage Account Contributor",
@@ -127,13 +127,4 @@ github_repository_environment_app_cd = {
   protected_branches     = false
   custom_branch_policies = true
   reviewers_teams        = ["io-platform-green-unit"]
-}
-
-environment_app_cd_roles = {
-  subscription = []
-  resource_groups = {
-    io-p-services-cms-rg = [
-      "Website Contributor",
-    ]
-  }
 }

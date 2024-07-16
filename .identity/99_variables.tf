@@ -63,7 +63,7 @@ variable "infra_environment_cd_roles" {
   description = "Continous Delivery roles for infra managed identity"
 }
 
-variable "environment_ci_roles" {
+variable "app_environment_ci_roles" {
   type = object({
     subscription    = list(string)
     resource_groups = map(list(string))
@@ -79,7 +79,7 @@ variable "github_repository_environment_ci" {
   description = "GitHub Continous Integration roles"
 }
 
-variable "environment_cd_roles" {
+variable "app_environment_cd_roles" {
   type = object({
     subscription    = list(string)
     resource_groups = map(list(string))
@@ -92,14 +92,6 @@ variable "github_repository_environment_cd" {
     protected_branches     = bool
     custom_branch_policies = bool
     reviewers_teams        = list(string)
-  })
-  description = "GitHub Continous Delivery roles"
-}
-
-variable "environment_app_cd_roles" {
-  type = object({
-    subscription    = list(string)
-    resource_groups = map(list(string))
   })
   description = "GitHub Continous Delivery roles"
 }
