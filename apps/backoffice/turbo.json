@@ -1,0 +1,12 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "generate": {
+      "inputs": ["openapi.yaml","selfcare-openapi.yaml","../io-services-cms-webapp/openapi.yaml"],
+      "outputs": [
+        "src/generated/**/*",
+        "src/types/selfcare/*"
+      ]
+    }
+  }
+}

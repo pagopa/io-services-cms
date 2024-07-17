@@ -2,6 +2,12 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "generate": {
+      "inputs": [
+        "./openapi.yaml"
+      ],
+      "outputs": [
+        "src/generated/**/*"
+      ],
       "outputLogs": "errors-only"
     },
     "build": {
