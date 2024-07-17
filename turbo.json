@@ -1,11 +1,8 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "generate": {
-      "outputMode": "errors-only",
-      "dependsOn": [
-        "^generate"
-      ]
+      "outputLogs": "errors-only"
     },
     "build": {
       "inputs": [
@@ -40,11 +37,11 @@
     },
     "test": {
       "inputs": [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx"
       ],
       "outputs": [],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "build"
       ]
@@ -54,20 +51,20 @@
         "__integrations__/**/*"
       ],
       "outputs": [],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "build"
       ]
     },
     "coverage": {
       "inputs": [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx"
       ],
       "outputs": [
         "coverage/*"
       ],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "build"
       ]
