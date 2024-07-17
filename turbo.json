@@ -2,6 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "generate": {
+      "inputs": [
+        "./openapi.yaml",
+        "./api/internal.yaml",
+        "src/generated/**/*"
+      ],
       "outputMode": "errors-only"
     },
     "build": {
