@@ -22,7 +22,7 @@ export const DrawerBaseContainer = ({
       onClose={onClose}
       disableScrollLock
     >
-      <Box paddingX={2} paddingY={2} textAlign="rightt">
+      <Box paddingX={2} paddingY={2} textAlign="right">
         <IconButtonClose onClick={onClose} />
       </Box>
       <Box paddingX={3}>{children}</Box>
