@@ -2,7 +2,7 @@ import { cleanup, render } from "@testing-library/react";
 import { useRouter } from "next/router";
 import React from "react";
 import { Mock, afterEach, describe, expect, it, vi } from "vitest";
-import { PageBreadcrumbs } from "../headers/page-breadcrumbs";
+import { PageBreadcrumbs } from "../page-breadcrumbs";
 
 // mock useRouter
 vi.mock("next/router", () => ({
