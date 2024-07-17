@@ -28,6 +28,7 @@
         "tsconfig.json"
       ],
       "dependsOn": [
+        "generate",
         "^build"
       ]
     },
@@ -46,7 +47,8 @@
       ],
       "outputLogs": "errors-only",
       "dependsOn": [
-        "build"
+        "generate",
+        "^build"
       ]
     },
     "test:integrations": {
@@ -55,7 +57,7 @@
       ],
       "outputLogs": "errors-only",
       "dependsOn": [
-        "build"
+        "^build"
       ]
     },
     "coverage": {
@@ -69,7 +71,8 @@
       ],
       "outputLogs": "errors-only",
       "dependsOn": [
-        "build"
+        "generate",
+        "^build"
       ]
     }
   }
