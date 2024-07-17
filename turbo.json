@@ -25,8 +25,7 @@
     "typecheck": {
       "inputs": [
         "src/**/*.ts",
-        "tsconfig.json",
-        "//tsconfig.json"
+        "tsconfig.json"
       ],
       "dependsOn": [
         "^build"
@@ -43,8 +42,7 @@
       "inputs": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "package.json",
-        "//package.json"
+        "package.json"
       ],
       "outputLogs": "errors-only",
       "dependsOn": [
@@ -64,8 +62,7 @@
       "inputs": [
         "src/**/*.ts",
         "src/**/*.tsx",
-        "package.json",
-        "//package.json"
+        "package.json"
       ],
       "outputs": [
         "coverage/*"
