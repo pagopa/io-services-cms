@@ -4,10 +4,15 @@
     "generate": {
       "inputs": [
         "./openapi.yaml",
-        "./api/internal.yaml",
+        "./api/internal.yaml"
+      ],
+      "outputs": [
         "src/generated/**/*"
       ],
-      "outputMode": "errors-only"
+      "outputMode": "errors-only",
+      "dependsOn": [
+        "^generate"
+      ]
     },
     "build": {
       "inputs": [
