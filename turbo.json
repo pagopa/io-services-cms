@@ -8,7 +8,7 @@
       "outputs": [
         "src/generated/**/*"
       ],
-      "outputLogs": "errors-only"
+      "outputLogs": "full"
     },
     "build": {
       "inputs": [
