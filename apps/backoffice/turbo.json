@@ -12,6 +12,16 @@
     "build": {
       "inputs": ["$TURBO_DEFAULT$","!src/**/__tests__/**","!.eslintrc.json","!.gitignore","!CHANGELOG.md","!openapi.yaml","!README.md","!selfcare-openapi.yaml","!vitest.config.*"],
       "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "typecheck": {
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "tsconfig.json"
+      ],
+      "dependsOn": [
+        "build"
+      ]
     }
   }
 }
