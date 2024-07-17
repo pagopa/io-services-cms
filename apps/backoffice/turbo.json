@@ -2,11 +2,16 @@
   "extends": ["//"],
   "tasks": {
     "generate": {
-      "inputs": ["openapi.yaml","selfcare-openapi.yaml","../io-services-cms-webapp/openapi.yaml"],
-      "outputs": [
-        "src/generated/**/*",
-        "src/types/selfcare/*"
-      ]
+      "inputs": [
+        "openapi.yaml",
+        "selfcare-openapi.yaml",
+        "../io-services-cms-webapp/openapi.yaml"
+      ],
+      "outputs": ["src/generated/**/*", "src/types/selfcare/*"]
+    },
+    "build": {
+      "inputs": ["!src/**/__tests__/**", "!.eslintrc.json","!.gitignore","!CHANGELOG.md","!openapi.yaml","!README.md","!selfcare-openapi.yaml","!vitest.config.*"],
+      "outputs": [".next/**", "!.next/cache/**"]
     }
   }
 }
