@@ -5,7 +5,7 @@
     "test": "turbo run test --no-daemon",
     "test:integrations": "turbo run test:integrations --no-daemon",
     "format": "turbo run format --no-daemon",
-    "lint": "turbo run lint --no-daemon --",
+    "lint": "turbo run lint --no-daemon",
     "build": "turbo run build --no-daemon",
     "generate": "turbo run generate --no-daemon",
     "code-review": "turbo run typecheck lint coverage",
