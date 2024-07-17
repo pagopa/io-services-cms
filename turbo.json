@@ -2,7 +2,10 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "generate": {
-      "outputMode": "errors-only"
+      "outputMode": "errors-only",
+      "dependsOn": [
+        "^generate"
+      ]
     },
     "build": {
       "inputs": [
