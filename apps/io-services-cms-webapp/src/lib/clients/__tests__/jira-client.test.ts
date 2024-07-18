@@ -81,7 +81,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
-      expect(issue.left).toHaveProperty("message", "Jira API returns an error");
+      expect(issue.left).toHaveProperty("message");
+      expect(issue.left.message).toContain("Jira API returns an error");
     }
   });
 
@@ -151,10 +152,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
-      expect(issue.left).toHaveProperty(
-        "message",
-        `Unknown status code 123 received`
-      );
+      expect(issue.left).toHaveProperty("message");
+      expect(issue.left.message).toContain("Unknown status code 123 received");
     }
   });
 
@@ -213,10 +212,8 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
 
     expect(E.isLeft(issues)).toBeTruthy();
     if (E.isLeft(issues)) {
-      expect(issues.left).toHaveProperty(
-        "message",
-        "Jira API returns an error"
-      );
+      expect(issues.left).toHaveProperty("message");
+      expect(issues.left.message).toContain("Jira API returns an error");
     }
   });
 
@@ -258,7 +255,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
 
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
-      expect(issue.left).toHaveProperty("message", "Jira API returns an error");
+      expect(issue.left).toHaveProperty("message");
+      expect(issue.left.message).toContain("Jira API returns an error");
     }
   });
 

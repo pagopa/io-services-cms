@@ -125,8 +125,6 @@ export const checkJiraResponse = (
   } else if (response.status === 401) {
     return TE.left(new Error("Jira secrets misconfiguration"));
   } else if (response.status >= 500) {
-    return TE.left(new Error("Jira API returns an error"));
-  } else {
     return pipe(
       TE.tryCatch(() => response.text(), E.toError),
       TE.mapLeft(
@@ -138,6 +136,10 @@ export const checkJiraResponse = (
       TE.chainW((content) =>
         TE.left(new Error(`Jira API returns an error, content => ${content}`))
       )
+    );
+  } else {
+    return TE.left(
+      new Error(`Unknown status code ${response.status} received`)
     );
   }
 };

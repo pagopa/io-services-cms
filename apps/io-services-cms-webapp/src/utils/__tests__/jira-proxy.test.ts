@@ -272,7 +272,7 @@ describe("Service Review Proxy", () => {
 
     expect(E.isLeft(serviceReview)).toBeTruthy();
     if (E.isLeft(serviceReview)) {
-      expect(serviceReview.left.message).toBe("Jira API returns an error");
+      expect(serviceReview.left.message).toContain("Jira API returns an error");
     }
   });
 });
