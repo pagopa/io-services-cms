@@ -105,21 +105,40 @@ export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
 
 export const checkJiraResponse = (
   response: Response
-): Either<Error, Response> => {
+): TE.TaskEither<Error, Response> => {
   if (
     response.status === 200 ||
     response.status === 201 ||
     response.status === 204
   ) {
-    return E.right(response);
+    return TE.right(response);
   } else if (response.status === 400) {
-    return E.left(new Error("Invalid request"));
+    return pipe(
+      TE.tryCatch(() => response.text(), E.toError),
+      TE.mapLeft(
+        (_) => new Error(`Invalid request, content => Cannot Extract Content`)
+      ),
+      TE.chainW((content) =>
+        TE.left(new Error(`Invalid request, content =>  => ${content}`))
+      )
+    );
   } else if (response.status === 401) {
-    return E.left(new Error("Jira secrets misconfiguration"));
+    return TE.left(new Error("Jira secrets misconfiguration"));
   } else if (response.status >= 500) {
-    return E.left(new Error("Jira API returns an error"));
+    return TE.left(new Error("Jira API returns an error"));
   } else {
-    return E.left(new Error(`Unknown status code ${response.status} received`));
+    return pipe(
+      TE.tryCatch(() => response.text(), E.toError),
+      TE.mapLeft(
+        (_) =>
+          new Error(
+            `Jira API returns an error, content => Cannot Extract Content`
+          )
+      ),
+      TE.chainW((content) =>
+        TE.left(new Error(`Jira API returns an error, content => ${content}`))
+      )
+    );
   }
 };
 
@@ -168,7 +187,7 @@ export const jiraClient = (
           }),
         toError
       ),
-      TE.chainEitherK(checkJiraResponse),
+      TE.chain(checkJiraResponse),
       TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
       TE.chain((responseBody) =>
         pipe(
@@ -217,7 +236,7 @@ export const jiraClient = (
           ),
         toError
       ),
-      TE.chainEitherK(checkJiraResponse),
+      TE.chain(checkJiraResponse),
       TE.map((_) => void 0)
     );
 
@@ -259,7 +278,7 @@ export const jiraClient = (
           ),
         toError
       ),
-      TE.chainEitherK(checkJiraResponse),
+      TE.chain(checkJiraResponse),
       TE.map((_) => void 0)
     );
 
@@ -276,7 +295,7 @@ export const jiraClient = (
           }),
         toError
       ),
-      TE.chainEitherK(checkJiraResponse),
+      TE.chain(checkJiraResponse),
       TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
       TE.chain((responseBody) =>
         pipe(

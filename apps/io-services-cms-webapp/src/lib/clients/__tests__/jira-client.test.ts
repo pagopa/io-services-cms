@@ -128,7 +128,8 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
-      expect(issue.left).toHaveProperty("message", "Invalid request");
+      expect(issue.left).toHaveProperty("message");
+      expect(issue.left.message).toContain("Invalid request");
     }
   });
 
@@ -306,7 +307,8 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
 
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
-      expect(issue.left).toHaveProperty("message", "Invalid request");
+      expect(issue.left).toHaveProperty("message");
+      expect(issue.left.message).toContain("Invalid request");
     }
   });
 
