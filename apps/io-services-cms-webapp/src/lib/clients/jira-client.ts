@@ -114,7 +114,7 @@ export const checkJiraResponse = (
     return TE.right(response);
   } else if (response.status === 400) {
     return pipe(
-      TE.tryCatch(() => response.text(), E.toError),
+      TE.tryCatch(() => response.json(), E.toError),
       TE.mapLeft(
         (_) => new Error(`Invalid request, content => Cannot Extract Content`)
       ),
