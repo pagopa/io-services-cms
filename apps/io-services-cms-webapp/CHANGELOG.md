@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.10
+
+### Patch Changes
+
+- b4d529d: ServiceReviewChecker fix and improvements
+
 ## 1.31.9
 
 ### Patch Changes
