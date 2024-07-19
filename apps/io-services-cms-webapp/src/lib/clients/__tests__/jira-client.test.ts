@@ -82,7 +82,9 @@ describe("[JiraAPIClient] createJiraIssue", () => {
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
       expect(issue.left).toHaveProperty("message");
-      expect(issue.left.message).toContain("Jira API returns an error");
+      expect(issue.left.message).toContain(
+        "Jira API createJiraIssue returns an error"
+      );
     }
   });
 
@@ -198,7 +200,7 @@ describe("[JiraAPIClient] createJiraIssue", () => {
 });
 
 describe("[JiraAPIClient] searchJiraIssues", () => {
-  it("should return a generic error if createJiraIssue returns a status code 500 or above", async () => {
+  it("should return a generic error if searchJiraIssues returns a status code 500 or above", async () => {
     const mockFetch = getMockFetchWithStatus(500);
     const client = jiraClient(JIRA_CONFIG, mockFetch);
 
@@ -213,7 +215,9 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
     expect(E.isLeft(issues)).toBeTruthy();
     if (E.isLeft(issues)) {
       expect(issues.left).toHaveProperty("message");
-      expect(issues.left.message).toContain("Jira API returns an error");
+      expect(issues.left.message).toContain(
+        "Jira API searchJiraIssues returns an error"
+      );
     }
   });
 
@@ -256,7 +260,9 @@ describe("[JiraAPIClient] updateJiraIssue", () => {
     expect(E.isLeft(issue)).toBeTruthy();
     if (E.isLeft(issue)) {
       expect(issue.left).toHaveProperty("message");
-      expect(issue.left.message).toContain("Jira API returns an error");
+      expect(issue.left.message).toContain(
+        "Jira API updateJiraIssue returns an error"
+      );
     }
   });
 

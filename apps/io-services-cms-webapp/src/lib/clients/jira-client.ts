@@ -12,6 +12,7 @@ import nodeFetch from "node-fetch-commonjs";
 import { JiraConfig } from "../../config";
 
 export const JIRA_REST_API_PATH = "/rest/api/2/";
+const NO_BODY_REQUEST = "no body on request";
 
 export const CreateJiraIssueResponse = t.type({
   id: NonEmptyString,
@@ -104,7 +105,9 @@ export const fromMapToObject = (map?: ReadonlyMap<string, unknown>) =>
   );
 
 export const checkJiraResponse = (
-  response: Response
+  response: Response,
+  method: string,
+  bodyString?: string
 ): TE.TaskEither<Error, Response> => {
   if (
     response.status === 200 ||
@@ -116,12 +119,19 @@ export const checkJiraResponse = (
     return pipe(
       TE.tryCatch(() => response.json(), E.toError),
       TE.mapLeft(
-        (_) => new Error(`Invalid request, content => Cannot Extract Content`)
+        (_) =>
+          new Error(
+            `Jira API ${method} returns an Invalid request, content => Cannot Extract Content, body => ${
+              bodyString ?? NO_BODY_REQUEST
+            }`
+          )
       ),
       TE.chainW((content) =>
         TE.left(
           new Error(
-            `Invalid request, content =>  => ${JSON.stringify(content)}`
+            `Jira API ${method} returns an Invalid request, content =>  => ${JSON.stringify(
+              content
+            )}, body => ${bodyString ?? NO_BODY_REQUEST}`
           )
         )
       )
@@ -134,11 +144,19 @@ export const checkJiraResponse = (
       TE.mapLeft(
         (_) =>
           new Error(
-            `Jira API returns an error, content => Cannot Extract Content`
+            `Jira API ${method} returns an error, content => Cannot Extract Content, body => ${
+              bodyString ?? NO_BODY_REQUEST
+            }`
           )
       ),
       TE.chainW((content) =>
-        TE.left(new Error(`Jira API returns an error, content => ${content}`))
+        TE.left(
+          new Error(
+            `Jira API ${method} returns an error, content => ${content}, body => ${
+              bodyString ?? NO_BODY_REQUEST
+            }`
+          )
+        )
       )
     );
   } else {
@@ -148,6 +166,7 @@ export const checkJiraResponse = (
   }
 };
 
+// eslint-disable-next-line max-lines-per-function
 export const jiraClient = (
   config: JiraConfig,
   fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
@@ -168,32 +187,39 @@ export const jiraClient = (
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, CreateJiraIssueResponse> =>
     pipe(
-      TE.tryCatch(
-        () =>
-          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue`, {
-            body: JSON.stringify({
-              fields: {
-                ...fromMapToObject(customFields),
-                description,
-                issuetype: {
-                  name: "Task",
-                },
-                labels: labels || [],
-                project: {
-                  key: config.JIRA_PROJECT_NAME,
-                },
-                summary: title,
-                priority: {
-                  id: priority,
-                },
-              },
+      JSON.stringify({
+        fields: {
+          ...fromMapToObject(customFields),
+          description,
+          issuetype: {
+            name: "Task",
+          },
+          labels: labels || [],
+          project: {
+            key: config.JIRA_PROJECT_NAME,
+          },
+          summary: title,
+          priority: {
+            id: priority,
+          },
+        },
+      }),
+      TE.right,
+      TE.bindTo("bodyStringified"),
+      TE.bind("response", ({ bodyStringified }) =>
+        TE.tryCatch(
+          () =>
+            fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue`, {
+              body: bodyStringified,
+              headers: jiraHeaders,
+              method: "POST",
             }),
-            headers: jiraHeaders,
-            method: "POST",
-          }),
-        toError
+          toError
+        )
       ),
-      TE.chain(checkJiraResponse),
+      TE.chain(({ response, bodyStringified }) =>
+        checkJiraResponse(response, "createJiraIssue", bodyStringified)
+      ),
       TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
       TE.chain((responseBody) =>
         pipe(
@@ -214,35 +240,42 @@ export const jiraClient = (
     customFields?: ReadonlyMap<string, unknown>
   ): TaskEither<Error, void> =>
     pipe(
-      TE.tryCatch(
-        () =>
-          fetchApi(
-            `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}`,
-            {
-              body: JSON.stringify({
-                fields: {
-                  ...fromMapToObject(customFields),
-                  description,
-                  issuetype: {
-                    name: "Task",
-                  },
-                  labels: labels || [],
-                  project: {
-                    key: config.JIRA_PROJECT_NAME,
-                  },
-                  summary: title,
-                  priority: {
-                    id: priority,
-                  },
-                },
-              }),
-              headers: jiraHeaders,
-              method: "PUT",
-            }
-          ),
-        toError
+      JSON.stringify({
+        fields: {
+          ...fromMapToObject(customFields),
+          description,
+          issuetype: {
+            name: "Task",
+          },
+          labels: labels || [],
+          project: {
+            key: config.JIRA_PROJECT_NAME,
+          },
+          summary: title,
+          priority: {
+            id: priority,
+          },
+        },
+      }),
+      TE.right,
+      TE.bindTo("bodyStringified"),
+      TE.bind("response", ({ bodyStringified }) =>
+        TE.tryCatch(
+          () =>
+            fetchApi(
+              `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}`,
+              {
+                body: bodyStringified,
+                headers: jiraHeaders,
+                method: "PUT",
+              }
+            ),
+          toError
+        )
       ),
-      TE.chain(checkJiraResponse),
+      TE.chain(({ response, bodyStringified }) =>
+        checkJiraResponse(response, "updateJiraIssue", bodyStringified)
+      ),
       TE.map((_) => void 0)
     );
 
@@ -252,39 +285,46 @@ export const jiraClient = (
     message?: string
   ): TaskEither<Error, void> =>
     pipe(
-      TE.tryCatch(
-        () =>
-          fetchApi(
-            `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}/transitions`,
-            {
-              body: JSON.stringify({
-                ...pipe(
-                  message,
-                  O.fromNullable,
-                  O.map((_) => ({
-                    update: {
-                      comment: [
-                        {
-                          add: {
-                            body: _,
-                          },
-                        },
-                      ],
-                    },
-                  })),
-                  O.toUndefined
-                ),
-                transition: {
-                  id: transitionId,
+      JSON.stringify({
+        ...pipe(
+          message,
+          O.fromNullable,
+          O.map((_) => ({
+            update: {
+              comment: [
+                {
+                  add: {
+                    body: _,
+                  },
                 },
-              }),
-              headers: jiraHeaders,
-              method: "POST",
-            }
-          ),
-        toError
+              ],
+            },
+          })),
+          O.toUndefined
+        ),
+        transition: {
+          id: transitionId,
+        },
+      }),
+      TE.right,
+      TE.bindTo("bodyStringified"),
+      TE.bind("response", ({ bodyStringified }) =>
+        TE.tryCatch(
+          () =>
+            fetchApi(
+              `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}issue/${ticketKey}/transitions`,
+              {
+                body: bodyStringified,
+                headers: jiraHeaders,
+                method: "POST",
+              }
+            ),
+          toError
+        )
       ),
-      TE.chain(checkJiraResponse),
+      TE.chain(({ response, bodyStringified }) =>
+        checkJiraResponse(response, "applyJiraIssueTransition", bodyStringified)
+      ),
       TE.map((_) => void 0)
     );
 
@@ -292,16 +332,26 @@ export const jiraClient = (
     bodyData: SearchJiraIssuesPayload
   ): TaskEither<Error, SearchJiraIssuesResponse> =>
     pipe(
-      TE.tryCatch(
-        () =>
-          fetchApi(`${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`, {
-            body: JSON.stringify(bodyData),
-            headers: jiraHeaders,
-            method: "POST",
-          }),
-        toError
+      JSON.stringify(bodyData),
+      TE.right,
+      TE.bindTo("bodyStringified"),
+      TE.bind("response", ({ bodyStringified }) =>
+        TE.tryCatch(
+          () =>
+            fetchApi(
+              `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`,
+              {
+                body: bodyStringified,
+                headers: jiraHeaders,
+                method: "POST",
+              }
+            ),
+          toError
+        )
       ),
-      TE.chain(checkJiraResponse),
+      TE.chain(({ response, bodyStringified }) =>
+        checkJiraResponse(response, "searchJiraIssues", bodyStringified)
+      ),
       TE.mapLeft(
         (e) =>
           new Error(
