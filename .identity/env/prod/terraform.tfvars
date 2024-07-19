@@ -71,6 +71,9 @@ infra_environment_cd_roles = {
     ],
     io-p-services-cms-rg = [
       "Role Based Access Control Administrator"
+    ],
+    io-p-services-cms-rg = [
+      "Role Based Access Control Administrator"
     ]
   }
 }
