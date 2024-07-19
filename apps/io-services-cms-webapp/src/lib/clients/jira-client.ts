@@ -119,7 +119,11 @@ export const checkJiraResponse = (
         (_) => new Error(`Invalid request, content => Cannot Extract Content`)
       ),
       TE.chainW((content) =>
-        TE.left(new Error(`Invalid request, content =>  => ${content}`))
+        TE.left(
+          new Error(
+            `Invalid request, content =>  => ${JSON.stringify(content)}`
+          )
+        )
       )
     );
   } else if (response.status === 401) {
