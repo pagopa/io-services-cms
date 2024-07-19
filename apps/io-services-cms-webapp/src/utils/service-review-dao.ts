@@ -140,7 +140,7 @@ export const executeOnPending =
                     TE.chain(fn)
                   );
                   await handler();
-                } while (length > 0);
+                } while (length === dbConfig.REVIEWER_DB_READ_MAX_ROW);
               } finally {
                 cursor.close(() => {
                   poolClient.release();
