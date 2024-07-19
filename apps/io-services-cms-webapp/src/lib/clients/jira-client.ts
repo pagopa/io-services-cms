@@ -302,6 +302,14 @@ export const jiraClient = (
         toError
       ),
       TE.chain(checkJiraResponse),
+      TE.mapLeft(
+        (e) =>
+          new Error(
+            `Error in searchJiraIssues: ${e.message}, url: ${
+              config.JIRA_NAMESPACE_URL
+            }${JIRA_REST_API_PATH}search, body: ${JSON.stringify(bodyData)}`
+          )
+      ),
       TE.chain((response) => TE.tryCatch(() => response.json(), toError)),
       TE.chain((responseBody) =>
         pipe(
