@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.8
+
+### Patch Changes
+
+- 57b9caa: Strigify json content on jira error response
+
 ## 1.31.7
 
 ### Patch Changes
