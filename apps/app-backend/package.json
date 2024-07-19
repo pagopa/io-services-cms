@@ -17,7 +17,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "typecheck": "yarn build --noemit",
+    "typecheck": "tsc --noEmit",
     "lint": "yarn lint:check --fix",
     "lint:check": "eslint \"src/**\"",
     "lint:api": "sh api-lint.sh",

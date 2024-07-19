@@ -1,12 +1,14 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "generate": {
       "inputs": [
-        "./openapi.yaml",
+        "./openapi.yaml"
+      ],
+      "outputs": [
         "src/generated/**/*"
       ],
-      "outputMode": "errors-only"
+      "outputLogs": "full"
     },
     "build": {
       "inputs": [
@@ -22,9 +24,9 @@
     },
     "typecheck": {
       "inputs": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "tsconfig.json"
       ],
-      "outputs": [],
       "dependsOn": [
         "generate",
         "^build"
@@ -33,21 +35,17 @@
     "format": {},
     "lint": {
       "inputs": [
-        "src/**/*.ts"
-      ],
-      "outputs": [],
-      "dependsOn": [
-        "generate",
-        "^build"
+        "src/**/*.ts",
+        "eslintrc.*"
       ]
     },
     "test": {
       "inputs": [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "package.json"
       ],
-      "outputs": [],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "generate",
         "^build"
@@ -57,21 +55,21 @@
       "inputs": [
         "__integrations__/**/*"
       ],
-      "outputs": [],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "^build"
       ]
     },
     "coverage": {
       "inputs": [
-        "src/**/*.spec.ts",
-        "src/**/*.test.ts"
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "package.json"
       ],
       "outputs": [
         "coverage/*"
       ],
-      "outputMode": "errors-only",
+      "outputLogs": "errors-only",
       "dependsOn": [
         "generate",
         "^build"

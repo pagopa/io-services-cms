@@ -1,0 +1,11 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "generate": {
+      "inputs": ["api/*"],
+      "outputs": [
+        "src/generated/**/*"
+      ]
+    }
+  }
+}

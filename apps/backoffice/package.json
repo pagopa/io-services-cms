@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "yarn generate && next build",
+    "build": "next build",
     "build:pre-package": "cp -r .next/static .next/standalone/apps/backoffice/.next && cp -r public .next/standalone/apps/backoffice",
     "build:package": "yarn build:pre-package && (cd .next/standalone/apps/backoffice && zip -r -q ../../../../${npm_package_name}-${npm_package_version}.zip . -x package.json)",
     "start": "./node_modules/next/dist/bin/next start",
