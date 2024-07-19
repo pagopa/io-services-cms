@@ -35,7 +35,11 @@ export const LoaderFullscreen = ({
             {t(content)}
           </Typography>
           {loading ? (
-            <Box textAlign="center" marginTop={2}>
+            <Box
+              data-testid="bo-io-fullscreen-loader"
+              textAlign="center"
+              marginTop={2}
+            >
               <CircularProgress />
             </Box>
           ) : null}

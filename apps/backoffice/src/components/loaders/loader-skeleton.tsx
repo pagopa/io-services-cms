@@ -13,6 +13,11 @@ export const LoaderSkeleton = ({
   style,
   children
 }: LoaderSkeletonProps) => {
-  if (loading) return <Skeleton {...style}>{children}</Skeleton>;
+  if (loading)
+    return (
+      <Skeleton data-testid="bo-io-loader-skeleton" {...style}>
+        {children}
+      </Skeleton>
+    );
   return children;
 };
