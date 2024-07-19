@@ -44,12 +44,12 @@ describe("[FullscreenLoader] Component", () => {
     expect(content).toBeDefined();
   });
 
-  it("should be rendered", () => {
+  it("should t be rendered", () => {
     loading = false;
     render(getLoaderFullscreenComponent());
 
     const loader = screen.queryByTestId(BO_IO_FULLSCREEN_LOADER);
 
-    expect(loader).not.toBeNull();
+    expect(loader).toBeNull();
   });
 });
