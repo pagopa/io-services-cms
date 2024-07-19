@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.11.2
+
+### Patch Changes
+
+- 70078ff: Tests for Header component
+- 8d4d9da: Footer tests
+
 ## 1.11.1
 
 ### Patch Changes

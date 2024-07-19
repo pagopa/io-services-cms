@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.7
+
+### Patch Changes
+
+- 1c8ce24: Log Jira response content in case of error response
+
 ## 1.31.6
 
 ### Patch Changes
