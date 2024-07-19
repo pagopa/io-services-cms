@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.31.9
+
+### Patch Changes
+
+- edc3f5f: Include Request in case of error response on searchJiraIssue
+
 ## 1.31.8
 
 ### Patch Changes
