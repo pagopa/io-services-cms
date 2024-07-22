@@ -101,6 +101,13 @@ resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
   expiration_date = "2028-09-27T07:41:36Z"
 }
 
+resource "azurerm_key_vault_secret" "ai_common_instrumentation_key" {
+  name            = "ai-common-instrumentation-key"
+  key_vault_id    = module.key_vault_domain.id
+  value           = data.azurerm_application_insights.ai_common.instrumentation_key
+  content_type    = "string"
+}
+
 data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
   name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
   key_vault_id = module.key_vault_domain.id
@@ -115,4 +122,9 @@ data "azurerm_key_vault_secret" "selfcare_api_key" {
 data "azurerm_key_vault_secret" "subscription_migration_api_key" {
   name         = "SUBSCRIPTION-MIGRATION-API-KEY"
   key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_application_insights" "ai_common" {
+  name                = "${var.prefix}-${var.env_short}-ai-common"
+  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
 }

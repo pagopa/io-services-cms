@@ -83,6 +83,11 @@ data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "ai_common_instrumentation_key" {
+  name         = "ai-common-instrumentation-key"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
+
 ####################
 # Private DNS Zone #
 ####################

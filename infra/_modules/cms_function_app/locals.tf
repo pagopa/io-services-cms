@@ -9,7 +9,7 @@ locals {
       NODE_ENV                       = "production"
 
       // TODO: after migration, update AI implementation and use connection string
-      APPINSIGHTS_INSTRUMENTATIONKEY = data.azurerm_application_insights.ai_common.instrumentation_key
+      APPINSIGHTS_INSTRUMENTATIONKEY = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.ai_common_instrumentation_key.versionless_id})"
 
       // Keepalive fields are all optionals
       FETCH_KEEPALIVE_ENABLED             = "true"
