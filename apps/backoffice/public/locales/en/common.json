@@ -122,7 +122,7 @@
         "placeholder": ""
       },
       "requireSecureChannel": {
-        "helperText": "Services and messages that include sensitive data must comply with the requirements of paragraph 7.3 of the IO Guidelines. <a style=\"color: #0073E6;\" href=\"https://trasparenza.agid.gov.it/moduli/downloadFile.php?file=oggetto_allegati/213121604430O__OLG+Punto+accesso+telematico+servizi+PA_3.11.2021.pdf\" target=\"_blank\">Find more</a>",
+        "helperText": "Services and messages that include sensitive data must comply with the requirements of paragraph 7.3 of the IO Guidelines. <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/i-servizi-in-io/informazioni-sensibili\" target=\"_blank\">Find more</a>",
         "label": "Sensitive service",
         "placeholder": ""
       },
