@@ -122,7 +122,7 @@
         "placeholder": ""
       },
       "requireSecureChannel": {
-        "helperText": "I servizi e i messaggi che includono dati sensibili devono rispettare le prescrizioni del paragrafo 7.3 delle Linee Guida di IO. <a style=\"color: #0073E6;\" href=\"https://trasparenza.agid.gov.it/moduli/downloadFile.php?file=oggetto_allegati/213121604430O__OLG+Punto+accesso+telematico+servizi+PA_3.11.2021.pdf\" target=\"_blank\">Scopri di più</a>",
+        "helperText": "I servizi e i messaggi che includono dati sensibili devono rispettare le prescrizioni del paragrafo 7.3 delle Linee Guida di IO. <a style=\"color: #0073E6;\" href=\"https://docs.pagopa.it/manuale-servizi/i-servizi-in-io/informazioni-sensibili\" target=\"_blank\">Scopri di più</a>",
         "label": "Servizio sensibile",
         "placeholder": ""
       },
