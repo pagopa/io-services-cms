@@ -36,7 +36,7 @@ export const LoaderFullscreen = ({
           </Typography>
           {loading ? (
             <Box
-              data-testid="bo-io-fullscreen-loader"
+              data-testid="bo-io-loader-fullscreen"
               textAlign="center"
               marginTop={2}
             >

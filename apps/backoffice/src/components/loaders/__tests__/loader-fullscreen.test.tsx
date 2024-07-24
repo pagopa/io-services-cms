@@ -3,7 +3,7 @@ import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { LoaderFullscreen } from "../loader-fullscreen";
 
-const BO_IO_FULLSCREEN_LOADER = "bo-io-fullscreen-loader";
+const BO_IO_LOADER_FULLSCREEN = "bo-io-loader-fullscreen";
 
 let title: string = "testTitle";
 let content: string = "testContent";
@@ -29,7 +29,7 @@ describe("[FullscreenLoader] Component", () => {
   it("should be rendered", () => {
     render(getLoaderFullscreenComponent());
 
-    const loader = screen.getByTestId(BO_IO_FULLSCREEN_LOADER);
+    const loader = screen.getByTestId(BO_IO_LOADER_FULLSCREEN);
 
     expect(loader).toBeDefined();
   });
@@ -48,7 +48,7 @@ describe("[FullscreenLoader] Component", () => {
     loading = false;
     render(getLoaderFullscreenComponent());
 
-    const loader = screen.queryByTestId(BO_IO_FULLSCREEN_LOADER);
+    const loader = screen.queryByTestId(BO_IO_LOADER_FULLSCREEN);
 
     expect(loader).toBeNull();
   });

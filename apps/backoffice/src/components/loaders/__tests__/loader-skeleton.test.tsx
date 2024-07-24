@@ -3,7 +3,7 @@ import React from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { LoaderSkeleton } from "../loader-skeleton";
 
-const BO_IO_SKELETON_LOADER = "bo-io-loader-skeleton";
+const BO_IO_LOADER_SKELETON = "bo-io-loader-skeleton";
 
 let loading: boolean = true;
 
@@ -27,7 +27,7 @@ describe("[SkeletonLoader] Component", () => {
   it("should be rendered", () => {
     render(getLoaderSkeletonComponent());
 
-    const loader = screen.getByTestId(BO_IO_SKELETON_LOADER);
+    const loader = screen.getByTestId(BO_IO_LOADER_SKELETON);
 
     expect(loader).toBeDefined();
   });
@@ -36,7 +36,7 @@ describe("[SkeletonLoader] Component", () => {
     loading = false;
     render(getLoaderSkeletonComponent());
 
-    const loader = screen.queryByTestId(BO_IO_SKELETON_LOADER);
+    const loader = screen.queryByTestId(BO_IO_LOADER_SKELETON);
 
     expect(loader).toBeNull();
   });

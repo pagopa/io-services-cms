@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-Tests for Loader component
+Tests for Loader components
