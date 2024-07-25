@@ -1,3 +1,8 @@
+data "azurerm_linux_function_app" "itn_webapp_functions_app" {
+  name                = "${local.project}-itn-svc-app-be-func-01"
+  resource_group_name = "${local.project}-itn-svc-rg-01"
+}
+
 module "api_services_cms_v2" {
   source = "github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v7.45.0"
 
@@ -12,7 +17,7 @@ module "api_services_cms_v2" {
   protocols   = ["http", "https"]
   product_ids = [data.azurerm_api_management_product.apim_v2_product_services.product_id]
 
-  service_url = "https://${module.webapp_functions_app.default_hostname}/api/v1"
+  service_url = "https://${data.azurerm_linux_function_app.itn_webapp_functions_app.default_hostname}/api/v1"
 
   subscription_required = true
 
@@ -57,7 +62,7 @@ resource "azurerm_api_management_named_value" "io_fn_services_cms_key_v2" {
   secret              = "true"
 
   value_from_key_vault {
-    secret_id = data.azurerm_key_vault_secret.function_apim_key.versionless_id
+    secret_id = data.azurerm_key_vault_secret.itn_cms_function_apim_key.versionless_id
   }
 }
 
