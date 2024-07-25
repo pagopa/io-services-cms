@@ -38,11 +38,6 @@ data "azurerm_key_vault_secret" "function_apim_key" {
   key_vault_id = module.key_vault_domain.id
 }
 
-data "azurerm_key_vault_secret" "itn_cms_function_apim_key" {
-  name         = "${local.project}-itn-svc-app-be-func-01-apim-key"
-  key_vault_id = module.key_vault_domain.id
-}
-
 resource "azurerm_key_vault_access_policy" "adgroup_admin" {
   key_vault_id = module.key_vault_domain.id
 
