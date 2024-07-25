@@ -1,5 +1,5 @@
 data "azurerm_linux_function_app" "itn_webapp_functions_app" {
-  name                = "${local.project}-itn-svc-app-be-func-01"
+  name                = "${local.project}-itn-svc-cms-func-01"
   resource_group_name = "${local.project}-itn-svc-rg-01"
 }
 
