@@ -32,18 +32,6 @@ subnets_cidrs = {
 cosmos_private_endpoint_enabled      = true
 cosmos_public_network_access_enabled = false
 
-
-## Jira
-jira_namespace_url                  = "https://pagopa.atlassian.net"
-jira_project_name                   = "IEST"
-jira_username                       = "io-pagopa-github-bot@pagopa.it"
-jira_contract_custom_field          = "customfield_10365"
-jira_delegate_email_custom_field    = "customfield_10383"
-jira_delegate_name_custom_field     = "customfield_10382"
-jira_organization_cf_custom_field   = "customfield_10364"
-jira_organization_name_custom_field = "customfield_10381"
-jira_transition_updated_id          = "4"
-
 ## Apim
 azure_apim_v2             = "io-p-apim-v2-api"
 azure_apim_resource_group = "io-p-rg-internal"
@@ -61,18 +49,9 @@ topic_db_table     = "topic"
 legacy_cosmosdb_resource_group = "io-p-rg-internal"
 legacy_cosmosdb_resource_name  = "io-p-cosmos-api"
 legacy_cosmosdb_name           = "db"
-legacy_jira_project_name       = "IES"
 
 legacy_service_watcher_max_items_per_invocation = 10
 
-# Feature flags Configuration
-userid_cms_to_legacy_sync_inclusion_list         = "*"
-userid_legacy_to_cms_sync_inclusion_list         = "*"
-userid_request_review_legacy_inclusion_list      = "*"
-userid_automatic_service_approval_inclusion_list = ""
-
-# Automatic service validation
-manual_review_properties = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
 
 # Backoffice Configurations
 backoffice_host = "selfcare.io.pagopa.it"

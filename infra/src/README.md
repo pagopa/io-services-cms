@@ -109,25 +109,14 @@
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
 | <a name="input_io_common"></a> [io\_common](#input\_io\_common) | Name of common resources of IO platform | <pre>object({<br>    resource_group_name = string<br>    # Network<br>    vnet_name            = string<br>    appgateway_snet_name = string<br>    # Monitor<br>    application_insights_name = string<br>    action_group_email_name   = string<br>    action_group_slack_name   = string<br>  })</pre> | n/a | yes |
-| <a name="input_jira_contract_custom_field"></a> [jira\_contract\_custom\_field](#input\_jira\_contract\_custom\_field) | n/a | `string` | `null` | no |
-| <a name="input_jira_delegate_email_custom_field"></a> [jira\_delegate\_email\_custom\_field](#input\_jira\_delegate\_email\_custom\_field) | n/a | `string` | `null` | no |
-| <a name="input_jira_delegate_name_custom_field"></a> [jira\_delegate\_name\_custom\_field](#input\_jira\_delegate\_name\_custom\_field) | n/a | `string` | `null` | no |
-| <a name="input_jira_namespace_url"></a> [jira\_namespace\_url](#input\_jira\_namespace\_url) | n/a | `string` | `null` | no |
-| <a name="input_jira_organization_cf_custom_field"></a> [jira\_organization\_cf\_custom\_field](#input\_jira\_organization\_cf\_custom\_field) | n/a | `string` | `null` | no |
-| <a name="input_jira_organization_name_custom_field"></a> [jira\_organization\_name\_custom\_field](#input\_jira\_organization\_name\_custom\_field) | n/a | `string` | `null` | no |
-| <a name="input_jira_project_name"></a> [jira\_project\_name](#input\_jira\_project\_name) | n/a | `string` | `null` | no |
-| <a name="input_jira_transition_updated_id"></a> [jira\_transition\_updated\_id](#input\_jira\_transition\_updated\_id) | id that identifies the passage of a jira ticket from rejected to new | `string` | `null` | no |
-| <a name="input_jira_username"></a> [jira\_username](#input\_jira\_username) | n/a | `string` | `null` | no |
 | <a name="input_key_vault_common"></a> [key\_vault\_common](#input\_key\_vault\_common) | n/a | <pre>object({<br>    resource_group_name = string<br>    name                = string<br>    pat_secret_name     = string<br>  })</pre> | n/a | yes |
 | <a name="input_legacy_cosmosdb_container_services"></a> [legacy\_cosmosdb\_container\_services](#input\_legacy\_cosmosdb\_container\_services) | The collection of the database where legacy data is | `string` | `"services"` | no |
 | <a name="input_legacy_cosmosdb_container_services_lease"></a> [legacy\_cosmosdb\_container\_services\_lease](#input\_legacy\_cosmosdb\_container\_services\_lease) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |
 | <a name="input_legacy_cosmosdb_name"></a> [legacy\_cosmosdb\_name](#input\_legacy\_cosmosdb\_name) | The name of the database where legacy data is | `string` | n/a | yes |
 | <a name="input_legacy_cosmosdb_resource_group"></a> [legacy\_cosmosdb\_resource\_group](#input\_legacy\_cosmosdb\_resource\_group) | The name of the resource group where legacy data is | `string` | n/a | yes |
 | <a name="input_legacy_cosmosdb_resource_name"></a> [legacy\_cosmosdb\_resource\_name](#input\_legacy\_cosmosdb\_resource\_name) | The name of the resource where legacy data is | `string` | n/a | yes |
-| <a name="input_legacy_jira_project_name"></a> [legacy\_jira\_project\_name](#input\_legacy\_jira\_project\_name) | n/a | `string` | `null` | no |
 | <a name="input_legacy_service_watcher_max_items_per_invocation"></a> [legacy\_service\_watcher\_max\_items\_per\_invocation](#input\_legacy\_service\_watcher\_max\_items\_per\_invocation) | Chunck size for the change feed | `number` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `"westeurope"` | no |
-| <a name="input_manual_review_properties"></a> [manual\_review\_properties](#input\_manual\_review\_properties) | Comma-separated list of service's properties required to trigger a manual review process | `string` | n/a | yes |
 | <a name="input_postgres_admin_credentials_rotation_id"></a> [postgres\_admin\_credentials\_rotation\_id](#input\_postgres\_admin\_credentials\_rotation\_id) | You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
 | <a name="input_postgres_readonly_usr_credentials_rotation_id"></a> [postgres\_readonly\_usr\_credentials\_rotation\_id](#input\_postgres\_readonly\_usr\_credentials\_rotation\_id) | You can renew readonly user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
 | <a name="input_postgres_reviewer_usr_credentials_rotation_id"></a> [postgres\_reviewer\_usr\_credentials\_rotation\_id](#input\_postgres\_reviewer\_usr\_credentials\_rotation\_id) | You can renew reviewer user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1682602957131"` | no |
@@ -140,10 +129,6 @@
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(any)` | <pre>{<br>  "CreatedBy": "Terraform"<br>}</pre> | no |
 | <a name="input_topic_db_schema"></a> [topic\_db\_schema](#input\_topic\_db\_schema) | n/a | `string` | `null` | no |
 | <a name="input_topic_db_table"></a> [topic\_db\_table](#input\_topic\_db\_table) | n/a | `string` | `null` | no |
-| <a name="input_userid_automatic_service_approval_inclusion_list"></a> [userid\_automatic\_service\_approval\_inclusion\_list](#input\_userid\_automatic\_service\_approval\_inclusion\_list) | User Ids allowed to automatic service approval | `string` | n/a | yes |
-| <a name="input_userid_cms_to_legacy_sync_inclusion_list"></a> [userid\_cms\_to\_legacy\_sync\_inclusion\_list](#input\_userid\_cms\_to\_legacy\_sync\_inclusion\_list) | User Ids to include in the sync from CMS to legacy | `string` | n/a | yes |
-| <a name="input_userid_legacy_to_cms_sync_inclusion_list"></a> [userid\_legacy\_to\_cms\_sync\_inclusion\_list](#input\_userid\_legacy\_to\_cms\_sync\_inclusion\_list) | User Ids to include in the sync from legacy to CMS | `string` | n/a | yes |
-| <a name="input_userid_request_review_legacy_inclusion_list"></a> [userid\_request\_review\_legacy\_inclusion\_list](#input\_userid\_request\_review\_legacy\_inclusion\_list) | User Ids to include in the request review from legacy services | `string` | n/a | yes |
 
 ## Outputs
 

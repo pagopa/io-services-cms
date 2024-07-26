@@ -116,60 +116,6 @@ variable "backoffice_host" {
   default     = null
 }
 
-variable "jira_namespace_url" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_project_name" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_username" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_contract_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_delegate_email_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_delegate_name_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_organization_cf_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_organization_name_custom_field" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "jira_transition_updated_id" {
-  type        = string
-  description = "id that identifies the passage of a jira ticket from rejected to new"
-  default     = null
-}
-
 variable "reviewer_db_name" {
   type        = string
   description = ""
@@ -205,18 +151,6 @@ variable "topic_db_table" {
   description = ""
   default     = null
 }
-
-variable "legacy_jira_project_name" {
-  type        = string
-  description = ""
-  default     = null
-}
-
-variable "manual_review_properties" {
-  type        = string
-  description = "Comma-separated list of service's properties required to trigger a manual review process"
-}
-
 
 
 #############################
@@ -274,29 +208,6 @@ variable "io_common" {
   description = "Name of common resources of IO platform"
 }
 
-###############################
-# Feature Flags Configuration #
-###############################
-
-variable "userid_cms_to_legacy_sync_inclusion_list" {
-  type        = string
-  description = "User Ids to include in the sync from CMS to legacy"
-}
-
-variable "userid_legacy_to_cms_sync_inclusion_list" {
-  type        = string
-  description = "User Ids to include in the sync from legacy to CMS"
-}
-
-variable "userid_request_review_legacy_inclusion_list" {
-  type        = string
-  description = "User Ids to include in the request review from legacy services"
-}
-
-variable "userid_automatic_service_approval_inclusion_list" {
-  type        = string
-  description = "User Ids allowed to automatic service approval"
-}
 
 ##############
 # backoffice #
