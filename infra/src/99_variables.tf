@@ -116,42 +116,6 @@ variable "backoffice_host" {
   default     = null
 }
 
-variable "functions_kind" {
-  type        = string
-  description = "App service plan kind"
-  default     = null
-}
-
-variable "functions_sku_tier" {
-  type        = string
-  description = "App service plan sku tier"
-  default     = null
-}
-
-variable "functions_sku_size" {
-  type        = string
-  description = "App service plan sku size"
-  default     = null
-}
-
-variable "functions_autoscale_minimum" {
-  type        = number
-  description = "The minimum number of instances for this resource."
-  default     = 1
-}
-
-variable "functions_autoscale_maximum" {
-  type        = number
-  description = "The maximum number of instances for this resource."
-  default     = 30
-}
-
-variable "functions_autoscale_default" {
-  type        = number
-  description = "The number of instances that are available for scaling if metrics are not available for evaluation."
-  default     = 1
-}
-
 variable "jira_namespace_url" {
   type        = string
   description = ""

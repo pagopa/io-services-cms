@@ -32,9 +32,6 @@
 | <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v3.git//key_vault | v7.45.0 |
 | <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v7.45.0 |
 | <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v7.45.0 |
-| <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account) | github.com/pagopa/terraform-azurerm-v3.git//storage_account | v7.45.0 |
-| <a name="module_webapp_functions_app"></a> [webapp\_functions\_app](#module\_webapp\_functions\_app) | github.com/pagopa/terraform-azurerm-v3.git//function_app | v7.50.0 |
-| <a name="module_webapp_functions_app_staging_slot"></a> [webapp\_functions\_app\_staging\_slot](#module\_webapp\_functions\_app\_staging\_slot) | github.com/pagopa/terraform-azurerm-v3.git//function_app_slot | v7.50.0 |
 
 ## Resources
 
@@ -54,29 +51,8 @@
 | [azurerm_key_vault_secret.pgres_flex_admin_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
-| [azurerm_monitor_autoscale_setting.webapp_functions_app_autoscale](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_autoscale_setting) | resource |
-| [azurerm_monitor_diagnostic_setting.queue_diagnostic_setting](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
-| [azurerm_monitor_scheduled_query_rules_alert_v2.poison-queue-alert](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_scheduled_query_rules_alert_v2) | resource |
 | [azurerm_postgresql_flexible_server_database.reviewer_database](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server_database) | resource |
 | [azurerm_resource_group.rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) | resource |
-| [azurerm_storage_queue.request-deletion](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-deletion-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-detail](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-detail-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-historicization](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-historicization-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-publication](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-publication-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-review](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-review-legacy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-review-legacy-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-review-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-sync-cms](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-sync-cms-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-sync-legacy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-sync-legacy-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-validation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
-| [azurerm_storage_queue.request-validation-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
 | [random_password.bo_auth_session_secret](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_admin_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [random_password.postgres_readonly_usr_password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
@@ -132,12 +108,6 @@
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
-| <a name="input_functions_autoscale_default"></a> [functions\_autoscale\_default](#input\_functions\_autoscale\_default) | The number of instances that are available for scaling if metrics are not available for evaluation. | `number` | `1` | no |
-| <a name="input_functions_autoscale_maximum"></a> [functions\_autoscale\_maximum](#input\_functions\_autoscale\_maximum) | The maximum number of instances for this resource. | `number` | `30` | no |
-| <a name="input_functions_autoscale_minimum"></a> [functions\_autoscale\_minimum](#input\_functions\_autoscale\_minimum) | The minimum number of instances for this resource. | `number` | `1` | no |
-| <a name="input_functions_kind"></a> [functions\_kind](#input\_functions\_kind) | App service plan kind | `string` | `null` | no |
-| <a name="input_functions_sku_size"></a> [functions\_sku\_size](#input\_functions\_sku\_size) | App service plan sku size | `string` | `null` | no |
-| <a name="input_functions_sku_tier"></a> [functions\_sku\_tier](#input\_functions\_sku\_tier) | App service plan sku tier | `string` | `null` | no |
 | <a name="input_io_common"></a> [io\_common](#input\_io\_common) | Name of common resources of IO platform | <pre>object({<br>    resource_group_name = string<br>    # Network<br>    vnet_name            = string<br>    appgateway_snet_name = string<br>    # Monitor<br>    application_insights_name = string<br>    action_group_email_name   = string<br>    action_group_slack_name   = string<br>  })</pre> | n/a | yes |
 | <a name="input_jira_contract_custom_field"></a> [jira\_contract\_custom\_field](#input\_jira\_contract\_custom\_field) | n/a | `string` | `null` | no |
 | <a name="input_jira_delegate_email_custom_field"></a> [jira\_delegate\_email\_custom\_field](#input\_jira\_delegate\_email\_custom\_field) | n/a | `string` | `null` | no |
