@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.5
+
+### Patch Changes
+
+- f751acd: Upgrade and align io-ts, fp-ts, ts-commons, io-functions-common dependency across all packages inside the monorepo
+
 ## 1.19.4
 
 ### Patch Changes
