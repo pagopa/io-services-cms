@@ -396,27 +396,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/cosmos@npm:^3.17.1, @azure/cosmos@npm:^3.17.3":
-  version: 3.17.3
-  resolution: "@azure/cosmos@npm:3.17.3"
-  dependencies:
-    "@azure/abort-controller": ^1.0.0
-    "@azure/core-auth": ^1.3.0
-    "@azure/core-rest-pipeline": ^1.2.0
-    "@azure/core-tracing": ^1.0.0
-    debug: ^4.1.1
-    fast-json-stable-stringify: ^2.1.0
-    jsbi: ^3.1.3
-    node-abort-controller: ^3.0.0
-    priorityqueuejs: ^1.0.0
-    semaphore: ^1.0.5
-    tslib: ^2.2.0
-    universal-user-agent: ^6.0.0
-    uuid: ^8.3.0
-  checksum: 699a18ade93aa206c1dee6cc6afa6992604006489e59b62e7b0f8ba86081b18af277ccfa87b9f8ccf24611b5c955e3ab8ebb7e972c3459aea3399e84c88ebc80
-  languageName: node
-  linkType: hard
-
 "@azure/cosmos@npm:^4.0.0":
   version: 4.0.0
   resolution: "@azure/cosmos@npm:4.0.0"
@@ -3514,14 +3493,14 @@ __metadata:
     "@azure/arm-apimanagement": 8.1.2
     "@azure/identity": ^3.1.4
     "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
-    "@pagopa/ts-commons": ^11.0.0
+    "@pagopa/ts-commons": ^13.1.1
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
     eslint: ^8.38.0
-    fp-ts: ^2.13.1
-    io-ts: ^2.2.20
+    fp-ts: ^2.16.5
+    io-ts: ^2.2.21
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
@@ -3535,15 +3514,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@io-services-cms/models@workspace:packages/io-services-cms-models"
   dependencies:
-    "@azure/cosmos": ^3.17.3
+    "@azure/cosmos": ^4.0.0
     "@pagopa/eslint-config": ^3.0.0
-    "@pagopa/io-functions-commons": ^28.2.0
-    "@pagopa/ts-commons": ^11.0.0
+    "@pagopa/io-functions-commons": ^29.1.2
+    "@pagopa/ts-commons": ^13.1.1
     "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
     eslint: ^8.38.0
-    fp-ts: ^2.13.1
-    io-ts: ^2.2.20
+    fp-ts: ^2.16.5
+    io-ts: ^2.2.21
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
@@ -4982,39 +4961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/io-functions-commons@npm:^28.2.0":
-  version: 28.2.0
-  resolution: "@pagopa/io-functions-commons@npm:28.2.0"
-  dependencies:
-    "@azure/cosmos": ^3.17.1
-    "@pagopa/ts-commons": ^11.0.0
-    applicationinsights: ^1.8.10
-    azure-storage: ^2.10.5
-    cidr-matcher: ^2.1.1
-    fp-ts: ^2.10.5
-    helmet: ^4.6.0
-    helmet-csp: ^2.5.1
-    io-ts: ^2.2.16
-    node-fetch: ^2.6.1
-    nodemailer: ^6.6.1
-    nodemailer-sendgrid: ^1.0.3
-    referrer-policy: ^1.1.0
-    rehype-stringify: ^3.0.0
-    remark-frontmatter: ^2.0.0
-    remark-parse: ^5.0.0
-    remark-rehype: ^3.0.0
-    request-ip: ^3.3.0
-    ulid: ^2.3.0
-    unified: ^9.2.2
-    winston: ^3.1.0
-  peerDependencies:
-    "@azure/functions": ^3.2.0
-    express: ^4.15.3
-  checksum: 2bb1b79ce059212259ffa7db54bdc45d66313a14b808eb5e1ebf056bd26b11e4e1956fafc2d7450b7b20ca0367379283554298e19e11307b12b047de0337b546
-  languageName: node
-  linkType: hard
-
-"@pagopa/io-functions-commons@npm:^29.0.0":
+"@pagopa/io-functions-commons@npm:^29.1.2":
   version: 29.1.2
   resolution: "@pagopa/io-functions-commons@npm:29.1.2"
   dependencies:
@@ -5111,25 +5058,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pagopa/ts-commons@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "@pagopa/ts-commons@npm:11.0.0"
-  dependencies:
-    abort-controller: ^3.0.0
-    agentkeepalive: ^4.1.4
-    applicationinsights: ^1.8.10
-    fp-ts: ^2.11.0
-    io-ts: ^2.2.16
-    jose: ^4.11.2
-    json-set-map: ^1.1.2
-    node-fetch: ^2.6.0
-    semver: ^7.3.7
-    validator: ^13.7.0
-  checksum: 0d1080fd7164f5c7cf70abcc32ad40acfe66a9596593c2e3e6ab01f5550a0f4461fb8a9aa33d7ea7cdc91f7f3f798ee643f94cb9bd3cb45f16ab73045d709c61
-  languageName: node
-  linkType: hard
-
-"@pagopa/ts-commons@npm:^13.0.0, @pagopa/ts-commons@npm:^13.1.1":
+"@pagopa/ts-commons@npm:^13.1.1":
   version: 13.1.1
   resolution: "@pagopa/ts-commons@npm:13.1.1"
   dependencies:
@@ -10773,13 +10702,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fp-ts@npm:^2.10.5":
-  version: 2.15.0
-  resolution: "fp-ts@npm:2.15.0"
-  checksum: 750e61ce9a448972b2ab7d2372f55efa831cfb967e62fb5a484c0df6356dcc8a81da4e94af442fcacd2245cce2e6a0de04f6ac3783a914bcb8ed2ab1dbf659aa
-  languageName: node
-  linkType: hard
-
 "fp-ts@npm:^2.11.0, fp-ts@npm:^2.13.1":
   version: 2.13.1
   resolution: "fp-ts@npm:2.13.1"
@@ -11938,10 +11860,10 @@ __metadata:
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/handler-kit": ^1.1.0
     "@pagopa/handler-kit-azure-func": ^2.0.1
-    "@pagopa/io-functions-commons": ^29.0.0
+    "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/logger": ^1.0.1
     "@pagopa/openapi-codegen-ts": ^13.1.0
-    "@pagopa/ts-commons": ^13.0.0
+    "@pagopa/ts-commons": ^13.1.1
     "@rushstack/eslint-patch": ^1.2.0
     "@types/express": ^4.17.12
     "@types/node": ~20.10.0
@@ -11968,7 +11890,7 @@ __metadata:
   resolution: "io-services-cms-backoffice@workspace:apps/backoffice"
   dependencies:
     "@azure/arm-apimanagement": 8.1.2
-    "@azure/cosmos": ^3.17.3
+    "@azure/cosmos": ^4.0.0
     "@azure/identity": ^3.1.4
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
@@ -11981,7 +11903,7 @@ __metadata:
     "@mui/material": ^5.14.5
     "@mui/system": ^5.14.5
     "@opentelemetry/instrumentation-undici": ^0.3.0
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/mui-italia": ^1.0.1
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@svgr/webpack": ^8.1.0
@@ -11997,10 +11919,10 @@ __metadata:
     axios: ^1.6.5
     eslint: 8.50.0
     eslint-config-next: ^13.5.6
-    fp-ts: ^2.13.1
+    fp-ts: ^2.16.5
     front-matter: ^4.0.2
     i18next: ^23.5.1
-    io-ts: ^2.2.20
+    io-ts: ^2.2.21
     jose: ^4.15.5
     jsdom: ^23.0.1
     lodash: ^4.17.21
@@ -12028,16 +11950,16 @@ __metadata:
   resolution: "io-services-cms-webapp@workspace:apps/io-services-cms-webapp"
   dependencies:
     "@azure/arm-apimanagement": 8.1.2
-    "@azure/cosmos": ^3.17.3
+    "@azure/cosmos": ^4.0.0
     "@azure/functions": ^3.5.1
     "@azure/identity": ^3.1.4
     "@io-services-cms/external-clients": "workspace:^"
     "@io-services-cms/models": "workspace:^"
     "@pagopa/eslint-config": ^3.0.0
     "@pagopa/express-azure-functions": ^4.0.1
-    "@pagopa/io-functions-commons": ^28.2.0
+    "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
-    "@pagopa/ts-commons": ^11.0.0
+    "@pagopa/ts-commons": ^13.1.1
     "@rushstack/eslint-patch": ^1.2.0
     "@types/express": ^4.17.17
     "@types/lodash": ^4.14.202
@@ -12051,8 +11973,8 @@ __metadata:
     dotenv-cli: ^7.2.1
     eslint: ^8.38.0
     express: ^4.18.2
-    fp-ts: ^2.13.1
-    io-ts: ^2.2.20
+    fp-ts: ^2.16.5
+    io-ts: ^2.2.21
     io-ts-types: ^0.5.19
     knex: ^2.4.2
     lodash: ^4.17.21
@@ -14640,13 +14562,6 @@ __metadata:
   dependencies:
     "@sendgrid/mail": ^6.2.1
   checksum: b0533688ef8d9afcdaee6e3c3c1e27663532aaca68830fa9b4f67933483f79847ed58e6ef05bd831cc23bb39221dfc5d897d587a4575e5b6a57254fda3d68e38
-  languageName: node
-  linkType: hard
-
-"nodemailer@npm:^6.6.1":
-  version: 6.9.1
-  resolution: "nodemailer@npm:6.9.1"
-  checksum: b1b9670afc170b4454665abae3fc9acd7e781adb9f579d1c2cd991bf75c647ebe345593f8a057e48d7bf9e4c9a9218869f87db8fb7171c614f557000ab654572
   languageName: node
   linkType: hard
 

@@ -58,10 +58,10 @@
     "@io-services-cms/models": "workspace:^",
     "@pagopa/handler-kit": "^1.1.0",
     "@pagopa/handler-kit-azure-func": "^2.0.1",
-    "@pagopa/io-functions-commons": "^29.0.0",
+    "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/logger": "^1.0.1",
     "@pagopa/openapi-codegen-ts": "^13.1.0",
-    "@pagopa/ts-commons": "^13.0.0",
+    "@pagopa/ts-commons": "^13.1.1",
     "applicationinsights": "^2.9.5",
     "fp-ts": "^2.16.5",
     "io-ts": "^2.2.21"
