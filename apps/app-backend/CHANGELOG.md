@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 1.0.3
+
+### Patch Changes
+
+- f751acd: Upgrade and align io-ts, fp-ts, ts-commons, io-functions-common dependency across all packages inside the monorepo
+- Updated dependencies [f751acd]
+  - @io-services-cms/models@1.19.5
+
 ## 1.0.2
 
 ### Patch Changes

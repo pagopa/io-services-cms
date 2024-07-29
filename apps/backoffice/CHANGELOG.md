@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.11.3
+
+### Patch Changes
+
+- f751acd: Upgrade and align io-ts, fp-ts, ts-commons, io-functions-common dependency across all packages inside the monorepo
+- 83b55d2: Tests for Loader components
+- 63f0d65: Create/Edit service: update sensitive service documentation link
+- Updated dependencies [f751acd]
+  - @io-services-cms/models@1.19.5
+  - @io-services-cms/external-clients@1.1.4
+
 ## 1.11.2
 
 ### Patch Changes
