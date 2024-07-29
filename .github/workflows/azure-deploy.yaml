@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 env:
-  RESOURCE_GROUP_CMS: io-p-services-cms-rg
-  RESOURCE_GROUP: io-p-itn-svc-rg-01
-  AZURE_WEBAPP_NAME: io-p-services-cms-webapp-fn
+  RESOURCE_GROUP_WEU: io-p-services-cms-rg
+  RESOURCE_GROUP_ITN: io-p-itn-svc-rg-01
+  AZURE_WEBAPP_NAME: io-p-itn-svc-cms-func-01
   AZURE_BACKOFFICE_NAME: io-p-services-cms-backoffice-app
   AZURE_APP_BE_NAME: io-p-itn-svc-app-be-func-01
   WEBAPP_HEALTHCHECK_PATH: 'api/v1/info'
@@ -65,7 +65,7 @@ jobs:
       - name: 'Swap staging to production'
         if: contains(github.event.release.assets[0].name, 'webapp')
         id: swap_to_production
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_CMS }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_ITN }} -n ${{ env.AZURE_WEBAPP_NAME }} --slot staging --target-slot production
 
       # backoffice
       - name: Deploy Backoffice to staging
@@ -87,7 +87,7 @@ jobs:
       - name: 'Swap Backoffice staging to production'
         if: contains(github.event.release.assets[0].name, 'backoffice')
         id: swap_to_production_backoffice
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_CMS }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_WEU }} -n ${{ env.AZURE_BACKOFFICE_NAME }} --slot staging --target-slot production
 
       # app-backend
       - name: Deploy App Backend to staging
@@ -109,4 +109,4 @@ jobs:
       - name: 'Swap App Backend staging to production'
         if: contains(github.event.release.assets[0].name, 'app-backend')
         id: swap_to_production_appbackend
-        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production
+        run: az webapp deployment slot swap -g ${{ env.RESOURCE_GROUP_ITN }} -n ${{ env.AZURE_APP_BE_NAME }} --slot staging --target-slot production
