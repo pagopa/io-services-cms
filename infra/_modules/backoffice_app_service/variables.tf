@@ -65,9 +65,9 @@ variable "private_dns_zone_resource_group_name" {
 }
 
 
-##################
-#  Function App  #
-##################
+######################
+#  CMS Function App  #
+######################
 variable "cms_fn_default_hostname" {
   type        = string
   description = "Service CMS Function App Default Hostname Property"
