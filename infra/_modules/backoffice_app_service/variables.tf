@@ -68,13 +68,7 @@ variable "private_dns_zone_resource_group_name" {
 ##################
 #  Function App  #
 ##################
-variable "cms_fn" {
-  type = object({
-    id                     = string
-    url                    = string
-    service_version        = string
-    institution_index_name = string
-    services_index_name    = string
-  })
-  description = "AI Search input parameters"
+variable "cms_fn_default_hostname" {
+  type        = string
+  description = "Service CMS Function App Default Hostname Property"
 }

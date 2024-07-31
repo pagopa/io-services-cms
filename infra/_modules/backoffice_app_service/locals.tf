@@ -40,7 +40,7 @@ locals {
       AZURE_CREDENTIALS_SCOPE_URL           = "https://management.azure.com/.default"
       AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL = "https://management.azure.com/subscriptions/"
 
-      API_SERVICES_CMS_URL                      = "https://${data.azurerm_linux_function_app.itn_webapp_functions_app.default_hostname}" //TODO: da injectare dal main in una var
+      API_SERVICES_CMS_URL                      = "https://${var.cms_fn_default_hostname}"
       API_SERVICES_CMS_BASE_PATH                = "/api/v1"
       API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES = "60"
 
