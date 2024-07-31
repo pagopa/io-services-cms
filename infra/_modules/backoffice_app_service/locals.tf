@@ -4,7 +4,7 @@ locals {
     tier      = "standard"
     snet_cidr = "10.20.11.0/24" # Picked as the first available non-allocated CIDR from the io-p-itn-common-vnet-01
 
-    app_settings = {
+    base_app_settings = {
       NODE_ENV                 = "production"
       WEBSITE_RUN_FROM_PACKAGE = "1"
       BACKOFFICE_HOST          = "selfcare.io.pagopa.it"
@@ -18,7 +18,7 @@ locals {
       AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
       AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_v2_product_services.product_id
       APIM_USER_GROUPS          = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
-      API_APIM_MOCKING          = true
+
       # Logs
       AI_SDK_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string
       # NextAuthJS
@@ -26,10 +26,9 @@ locals {
       NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
 
       # Legacy source data
-      LEGACY_COSMOSDB_NAME    = "db"
-      LEGACY_COSMOSDB_URI     = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
-      LEGACY_COSMOSDB_KEY     = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
-      LEGACY_COSMOSDB_MOCKING = true
+      LEGACY_COSMOSDB_NAME = "db"
+      LEGACY_COSMOSDB_URI  = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
+      LEGACY_COSMOSDB_KEY  = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
 
       # Services CMS source data
       COSMOSDB_NAME                           = "db-services-cms"
@@ -43,19 +42,16 @@ locals {
 
       API_SERVICES_CMS_URL                      = "https://${data.azurerm_linux_function_app.itn_webapp_functions_app.default_hostname}" //TODO: da injectare dal main in una var
       API_SERVICES_CMS_BASE_PATH                = "/api/v1"
-      API_SERVICES_CMS_MOCKING                  = true
       API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES = "60"
 
       # Selfcare
       SELFCARE_EXTERNAL_API_BASE_URL = "https://api.selfcare.pagopa.it/external/v2"
       SELFCARE_JWKS_PATH             = "/.well-known/jwks.json"
       SELFCARE_API_KEY               = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
-      SELFCARE_API_MOCKING           = true
 
       # Subscriptions Migration
-      SUBSCRIPTION_MIGRATION_API_URL     = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
-      SUBSCRIPTION_MIGRATION_API_KEY     = data.azurerm_key_vault_secret.subscription_migration_api_key.value
-      SUBSCRIPTION_MIGRATION_API_MOCKING = true
+      SUBSCRIPTION_MIGRATION_API_URL = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
+      SUBSCRIPTION_MIGRATION_API_KEY = data.azurerm_key_vault_secret.subscription_migration_api_key.value
 
 
       // Fetch keepalive
@@ -66,6 +62,36 @@ locals {
       FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT = "30000"
       FETCH_KEEPALIVE_TIMEOUT             = "60000"
     }
+
+    prod_app_setting = {
+      API_APIM_MOCKING                   = false
+      API_SERVICES_CMS_MOCKING           = false
+      APP_ENV                            = "production"
+      IS_MSW_ENABLED                     = false
+      LEGACY_COSMOSDB_MOCKING            = false
+      SELFCARE_API_MOCKING               = false
+      SUBSCRIPTION_MIGRATION_API_MOCKING = false
+    }
+
+    staging_app_setting = {
+      API_APIM_MOCKING                   = true
+      API_SERVICES_CMS_MOCKING           = true
+      APP_ENV                            = "staging"
+      IS_MSW_ENABLED                     = true
+      LEGACY_COSMOSDB_MOCKING            = true
+      SELFCARE_API_MOCKING               = true
+      SUBSCRIPTION_MIGRATION_API_MOCKING = true
+    }
+
+    sticky_settings = [
+      "API_APIM_MOCKING",
+      "API_SERVICES_CMS_MOCKING",
+      "APP_ENV",
+      "IS_MSW_ENABLED",
+      "LEGACY_COSMOSDB_MOCKING",
+      "SELFCARE_API_MOCKING",
+      "SUBSCRIPTION_MIGRATION_API_MOCKING"
+    ]
 
     autoscale_settings = {
       min     = 3

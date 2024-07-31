@@ -26,20 +26,11 @@ module "backoffice_app_service" {
     resource_group_name = var.virtual_network.resource_group_name
   }
 
-  app_settings = merge(local.backoffice.app_settings, {
-    IS_MSW_ENABLED = false,
-    APP_ENV        = "production"
-  })
+  app_settings = merge(local.backoffice.base_app_settings, local.backoffice.prod_app_setting)
 
-  slot_app_settings = merge(local.backoffice.app_settings, {
-    IS_MSW_ENABLED = true,
-    APP_ENV        = "staging"
-  })
+  slot_app_settings = merge(local.backoffice.base_app_settings, local.backoffice.staging_app_setting)
 
-  sticky_app_setting_names = [
-    "IS_MSW_ENABLED",
-    "APP_ENV"
-  ]
+  sticky_app_setting_names = local.backoffice.sticky_settings
 
   tier = local.backoffice.tier
 
