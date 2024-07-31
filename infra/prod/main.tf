@@ -76,7 +76,6 @@ module "backoffice_app_service" {
   prefix              = local.prefix
   env_short           = local.env_short
   location            = local.location
-  location_short      = local.location_short
   domain              = local.domain
   resource_group_name = azurerm_resource_group.rg.name
 
