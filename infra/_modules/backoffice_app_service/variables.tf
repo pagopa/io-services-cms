@@ -64,6 +64,11 @@ variable "private_dns_zone_resource_group_name" {
   description = "Resource group name of the private DNS zone to use for private endpoints"
 }
 
+variable "bo_auth_session_secret_rotation_id" {
+  type        = string
+  default     = "1695908210722"
+  description = "You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp)"
+}
 
 ######################
 #  CMS Function App  #
