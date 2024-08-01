@@ -13,7 +13,7 @@ permissions:
 
 env:
   RESOURCE_GROUP_ITN: io-p-itn-svc-rg-01
-  AZURE_BACKOFFICE_NAME: io-p-itn-svc-backoffice-app-01
+  AZURE_BACKOFFICE_NAME: io-p-itn-svc-bo-app-01
   BACKOFFICE_HEALTHCHECK_PATH: 'api/info'
 
 jobs:

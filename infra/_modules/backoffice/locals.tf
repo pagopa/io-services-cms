@@ -64,33 +64,15 @@ locals {
     }
 
     prod_app_setting = {
-      API_APIM_MOCKING                   = false
-      API_SERVICES_CMS_MOCKING           = false
-      APP_ENV                            = "production"
-      IS_MSW_ENABLED                     = false
-      LEGACY_COSMOSDB_MOCKING            = false
-      SELFCARE_API_MOCKING               = false
-      SUBSCRIPTION_MIGRATION_API_MOCKING = false
+      APP_ENV = "production"
     }
 
     staging_app_setting = {
-      API_APIM_MOCKING                   = true
-      API_SERVICES_CMS_MOCKING           = true
-      APP_ENV                            = "staging"
-      IS_MSW_ENABLED                     = true
-      LEGACY_COSMOSDB_MOCKING            = true
-      SELFCARE_API_MOCKING               = true
-      SUBSCRIPTION_MIGRATION_API_MOCKING = true
+      APP_ENV = "staging"
     }
 
     sticky_settings = [
-      "API_APIM_MOCKING",
-      "API_SERVICES_CMS_MOCKING",
-      "APP_ENV",
-      "IS_MSW_ENABLED",
-      "LEGACY_COSMOSDB_MOCKING",
-      "SELFCARE_API_MOCKING",
-      "SUBSCRIPTION_MIGRATION_API_MOCKING"
+      "APP_ENV"
     ]
 
     autoscale_settings = {
