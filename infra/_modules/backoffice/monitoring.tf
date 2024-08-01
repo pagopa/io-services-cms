@@ -3,10 +3,10 @@
 ###############
 
 resource "azurerm_monitor_autoscale_setting" "backoffice" {
-  name                = replace(module.backoffice_app_service.app_service.app_service.name, "app", "as")
-  resource_group_name = module.backoffice_app_service.app_service.resource_group_name
+  name                = replace(module.backoffice.app_service.app_service.name, "app", "as")
+  resource_group_name = module.backoffice.app_service.resource_group_name
   location            = var.location
-  target_resource_id  = module.backoffice_app_service.app_service.plan.id
+  target_resource_id  = module.backoffice.app_service.plan.id
 
   profile {
     name = "default"
@@ -20,7 +20,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name              = "Requests"
-        metric_resource_id       = module.backoffice_app_service.app_service.app_service.id
+        metric_resource_id       = module.backoffice.app_service.app_service.id
         metric_namespace         = "microsoft.web/sites"
         time_grain               = "PT1M"
         statistic                = "Average"
@@ -42,7 +42,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name              = "CpuPercentage"
-        metric_resource_id       = module.backoffice_app_service.app_service.plan.id
+        metric_resource_id       = module.backoffice.app_service.plan.id
         metric_namespace         = "microsoft.web/serverfarms"
         time_grain               = "PT1M"
         statistic                = "Average"
@@ -64,7 +64,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name        = "MemoryPercentage"
-        metric_resource_id = module.backoffice_app_service.app_service.plan.id
+        metric_resource_id = module.backoffice.app_service.plan.id
         metric_namespace   = "microsoft.web/serverfarms"
         time_grain         = "PT1M"
         statistic          = "Average"
@@ -84,7 +84,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name              = "Requests"
-        metric_resource_id       = module.backoffice_app_service.app_service.app_service.id
+        metric_resource_id       = module.backoffice.app_service.app_service.id
         metric_namespace         = "microsoft.web/sites"
         time_grain               = "PT1M"
         statistic                = "Average"
@@ -106,7 +106,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name              = "CpuPercentage"
-        metric_resource_id       = module.backoffice_app_service.app_service.plan.id
+        metric_resource_id       = module.backoffice.app_service.plan.id
         metric_namespace         = "microsoft.web/serverfarms"
         time_grain               = "PT1M"
         statistic                = "Average"
@@ -128,7 +128,7 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
     rule {
       metric_trigger {
         metric_name        = "MemoryPercentage"
-        metric_resource_id = module.backoffice_app_service.app_service.plan.id
+        metric_resource_id = module.backoffice.app_service.plan.id
         metric_namespace   = "microsoft.web/serverfarms"
         time_grain         = "PT1M"
         statistic          = "Average"
