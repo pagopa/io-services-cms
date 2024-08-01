@@ -47,7 +47,7 @@ locals {
       # Selfcare
       SELFCARE_EXTERNAL_API_BASE_URL = "https://api.selfcare.pagopa.it/external/v2"
       SELFCARE_JWKS_PATH             = "/.well-known/jwks.json"
-      SELFCARE_API_KEY               = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
+      SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
 
       # Subscriptions Migration
       SUBSCRIPTION_MIGRATION_API_URL = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
