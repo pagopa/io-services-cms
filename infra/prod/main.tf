@@ -71,8 +71,8 @@ module "cms_function_app" {
 }
 
 
-module "backoffice_app_service" {
-  source              = "../_modules/backoffice_app_service"
+module "backoffice" {
+  source              = "../_modules/backoffice"
   prefix              = local.prefix
   env_short           = local.env_short
   location            = local.location
