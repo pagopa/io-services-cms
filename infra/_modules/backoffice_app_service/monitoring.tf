@@ -3,7 +3,7 @@
 ###############
 
 resource "azurerm_monitor_autoscale_setting" "backoffice_app_service" {
-  name                = format("%s-autoscale", module.backoffice_app_service.app_service.app_service.name)
+  name                = replace(module.backoffice_app_service.app_service.app_service.name, "app", "as")
   resource_group_name = module.backoffice_app_service.app_service.resource_group_name
   location            = var.location
   target_resource_id  = module.backoffice_app_service.app_service.plan.id
