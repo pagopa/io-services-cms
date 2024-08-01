@@ -66,8 +66,3 @@ data "azurerm_key_vault_secret" "subscription_migration_api_key" {
   name         = "SUBSCRIPTION-MIGRATION-API-KEY"
   key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
 }
-
-data "azurerm_key_vault_secret" "bo_auth_session_secret" {
-  name         = "bo-auth-session-secret"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
-}
