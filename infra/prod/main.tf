@@ -100,6 +100,7 @@ module "backoffice" {
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
+  bo_auth_session_secret  = module.key_vault.secrets.bo_auth_session_secret
 
   tags = local.tags
 }
