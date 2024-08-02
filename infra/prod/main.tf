@@ -24,6 +24,18 @@ module "ai_search" {
   tags = local.tags
 }
 
+module "key_vault" {
+  source              = "../_modules/key_vault"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location_short      = local.location_short
+  domain              = local.domain
+  location            = local.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  tags = local.tags
+}
+
 module "function_app" {
   source              = "../_modules/function_app"
   prefix              = local.prefix
@@ -88,6 +100,7 @@ module "backoffice" {
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
+  bo_auth_session_secret  = module.key_vault.secrets.bo_auth_session_secret
 
   tags = local.tags
 }
