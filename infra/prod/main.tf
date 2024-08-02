@@ -24,6 +24,18 @@ module "ai_search" {
   tags = local.tags
 }
 
+module "key_vault" {
+  source              = "../_modules/key_vault"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location_short      = local.location_short
+  domain              = local.domain
+  location            = local.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  tags = local.tags
+}
+
 module "function_app" {
   source              = "../_modules/function_app"
   prefix              = local.prefix

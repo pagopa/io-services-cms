@@ -27,7 +27,7 @@ locals {
       AI_SDK_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string
       # NextAuthJS
       NEXTAUTH_URL    = "https://selfcare.io.pagopa.it/"
-      NEXTAUTH_SECRET = azurerm_key_vault_secret.bo_auth_session_secret.value
+      NEXTAUTH_SECRET = var.bo_auth_session_secret.value
 
       # Legacy source data
       LEGACY_COSMOSDB_NAME    = "db"
