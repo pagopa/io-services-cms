@@ -100,8 +100,17 @@ module "backoffice" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
+  # Cms Fn Binding
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
-  bo_auth_session_secret  = module.key_vault.secrets.bo_auth_session_secret
+
+  # KeyVault Secrets
+  key_vault_id                                  = module.key_vault.key_vault_id
+  bo_auth_session_secret_name                   = module.key_vault.secrets_name.bo_auth_session_secret
+  azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
+  azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
+  legacy_cosmosdb_key_name                      = module.key_vault.secrets_name.legacy_cosmosdb_key
+  selfcare_api_key_name                         = module.key_vault.secrets_name.selfcare_api_key
+  subscription_migration_api_key_name           = module.key_vault.secrets_name.subscription_migration_api_key
 
   tags = local.tags
 }

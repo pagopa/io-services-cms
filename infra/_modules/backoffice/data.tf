@@ -37,32 +37,32 @@ data "azurerm_api_management_product" "apim_v2_product_services" {
 # KeyVault Secrets #
 ####################
 
-data "azurerm_key_vault" "backoffice_key_vault" {
-  name                = "${var.prefix}-${var.env_short}-services-cms-kv"
-  resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
+data "azurerm_key_vault_secret" "bo_auth_session_secret" {
+  name         = var.bo_auth_session_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
+  name         = var.azure_client_secret_credential_client_id_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
+  name         = var.azure_client_secret_credential_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
-  name         = "legacy-cosmosdb-key"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
+  name         = var.legacy_cosmosdb_key_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "selfcare_api_key" {
-  name         = "SELFCARE-API-KEY"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
+  name         = var.selfcare_api_key_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "subscription_migration_api_key" {
-  name         = "SUBSCRIPTION-MIGRATION-API-KEY"
-  key_vault_id = data.azurerm_key_vault.backoffice_key_vault.id
+  name         = var.subscription_migration_api_key_name
+  key_vault_id = var.key_vault_id
 }
