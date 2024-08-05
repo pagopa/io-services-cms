@@ -15,45 +15,74 @@ resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
   expiration_date = "2028-09-27T07:41:36Z"
 }
 
+data "azurerm_key_vault_secret" "jira_token" {
+  name         = "JIRA-TOKEN"
+  key_vault_id = module.key_vault.id
+}
 
-# !!! TODO: enable in another PR when all those secrets are inserted on the new kv !!!
-#
-#data "azurerm_key_vault_secret" "jira_token" {
-#  name         = "JIRA-TOKEN"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-#  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-#  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
-#  name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "function_apim_key" {
-#  name         = "${local.project}-services-cms-webapp-fn-apim-key"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
-#  name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "selfcare_api_key" {
-#  name         = "SELFCARE-API-KEY"
-#  key_vault_id = module.key_vault.id
-#}
-#
-#data "azurerm_key_vault_secret" "subscription_migration_api_key" {
-#  name         = "SUBSCRIPTION-MIGRATION-API-KEY"
-#  key_vault_id = module.key_vault.id
-#}
+data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
+  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
+  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
+  name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "function_apim_key" {
+  name         = "${var.prefix}-${var.env_short}-services-cms-webapp-fn-apim-key"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
+  name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "selfcare_api_key" {
+  name         = "SELFCARE-API-KEY"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "subscription_migration_api_key" {
+  name         = "SUBSCRIPTION-MIGRATION-API-KEY"
+  key_vault_id = module.key_vault.id
+}
+
+data "azurerm_key_vault_secret" "legacy_cosmosdb_connectionstring" {
+  name         = "legacy-cosmosdb-connectionstring"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
+  name         = "legacy-cosmosdb-key"
+  key_vault_id = module.key_vault_domain.id
+}
+
+
+
+#######################################
+# KeyVault Secrets for Postgres       #
+# Only referenced now, to be managed  #
+# in the future with random passwords #
+# generation TODO:                    #
+#######################################
+data "azurerm_key_vault_secret" "pgres_flex_admin_pwd" {
+  name         = "pgres-flex-admin-pwd"
+  key_vault_id = module.key_vault_domain.id
+}
+
+data "azurerm_key_vault_secret" "pgres_flex_readonly_usr_pwd" {
+  name         = "pgres-flex-readonly-usr-pwd"
+  key_vault_id = module.key_vault_domain.id
+}
+data "azurerm_key_vault_secret" "pgres_flex_reviewer_usr_pwd" {
+  name         = "pgres-flex-reviewer-usr-pwd"
+  key_vault_id = module.key_vault_domain.id
+}
