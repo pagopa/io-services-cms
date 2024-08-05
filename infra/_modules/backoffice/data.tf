@@ -37,6 +37,11 @@ data "azurerm_api_management_product" "apim_v2_product_services" {
 # KeyVault Secrets #
 ####################
 
+data "azurerm_key_vault_secret" "bo_auth_session_secret" {
+  name         = var.bo_auth_session_secret_name
+  key_vault_id = var.key_vault_id
+}
+
 data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
   name         = var.azure_client_secret_credential_client_id_name
   key_vault_id = var.key_vault_id
