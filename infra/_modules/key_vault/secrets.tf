@@ -57,12 +57,12 @@ data "azurerm_key_vault_secret" "subscription_migration_api_key" {
 
 data "azurerm_key_vault_secret" "legacy_cosmosdb_connectionstring" {
   name         = "legacy-cosmosdb-connectionstring"
-  key_vault_id = module.key_vault_domain.id
+  key_vault_id = module.key_vault.id
 }
 
 data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
   name         = "legacy-cosmosdb-key"
-  key_vault_id = module.key_vault_domain.id
+  key_vault_id = module.key_vault.id
 }
 
 
@@ -75,14 +75,14 @@ data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
 #######################################
 data "azurerm_key_vault_secret" "pgres_flex_admin_pwd" {
   name         = "pgres-flex-admin-pwd"
-  key_vault_id = module.key_vault_domain.id
+  key_vault_id = module.key_vault.id
 }
 
 data "azurerm_key_vault_secret" "pgres_flex_readonly_usr_pwd" {
   name         = "pgres-flex-readonly-usr-pwd"
-  key_vault_id = module.key_vault_domain.id
+  key_vault_id = module.key_vault.id
 }
 data "azurerm_key_vault_secret" "pgres_flex_reviewer_usr_pwd" {
   name         = "pgres-flex-reviewer-usr-pwd"
-  key_vault_id = module.key_vault_domain.id
+  key_vault_id = module.key_vault.id
 }
