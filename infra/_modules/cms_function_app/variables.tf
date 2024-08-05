@@ -70,7 +70,7 @@ variable "private_dns_zone_resource_group_name" {
 }
 
 variable "ai_common_instrumentation_key" {
-  type = string
+  type        = string
   description = "Application Insights instrumentation key"
-  sensitive = true
+  sensitive   = true
 }
