@@ -103,7 +103,7 @@ module "backoffice" {
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
 
   # KeyVault Secrets
-  key_vault_id                                  = module.key_vault.id
+  key_vault_id                                  = module.key_vault.key_vault_id
   bo_auth_session_secret_name                   = module.key_vault.secrets_name.bo_auth_session_secret
   azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
   azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
