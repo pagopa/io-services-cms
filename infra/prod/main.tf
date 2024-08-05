@@ -103,12 +103,13 @@ module "backoffice" {
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
 
   # KeyVault Secrets
-  bo_auth_session_secret                   = module.key_vault.secrets.bo_auth_session_secret
-  azure_client_secret_credential_client_id = module.key_vault.secrets.azure_client_secret_credential_client_id
-  azure_client_secret_credential_secret    = module.key_vault.secrets.azure_client_secret_credential_secret
-  legacy_cosmosdb_key                      = module.key_vault.secrets.legacy_cosmosdb_key
-  selfcare_api_key                         = module.key_vault.secrets.selfcare_api_key
-  subscription_migration_api_key           = module.key_vault.secrets.subscription_migration_api_key
+  key_vault_id                                  = module.key_vault.id
+  bo_auth_session_secret_name                   = module.key_vault.secrets_name.bo_auth_session_secret
+  azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
+  azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
+  legacy_cosmosdb_key_name                      = module.key_vault.secrets_name.legacy_cosmosdb_key
+  selfcare_api_key_name                         = module.key_vault.secrets_name.selfcare_api_key
+  subscription_migration_api_key_name           = module.key_vault.secrets_name.subscription_migration_api_key
 
   tags = local.tags
 }

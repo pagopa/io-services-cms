@@ -67,34 +67,39 @@ variable "private_dns_zone_resource_group_name" {
 ###########################
 #  Azure KeyVault Secrets #
 ###########################
-variable "bo_auth_session_secret" {
+
+variable "key_vault_id" {
   type        = string
-  description = "Backoffice Auth Session Secret"
+  description = "Azure KeyVault ID"
+}
+variable "bo_auth_session_secret_name" {
+  type        = string
+  description = "Backoffice Auth Session Secret Name"
 }
 
-variable "azure_client_secret_credential_client_id" {
+variable "azure_client_secret_credential_client_id_name" {
   type        = string
-  description = "Azure Client Secret Credential Client Id"
+  description = "Azure Client Secret Credential Client Id Name"
 }
 
-variable "azure_client_secret_credential_secret" {
+variable "azure_client_secret_credential_secret_name" {
   type        = string
-  description = "Azure Client Secret Credential Secret"
+  description = "Azure Client Secret Credential Secret Name"
 }
 
-variable "legacy_cosmosdb_key" {
+variable "legacy_cosmosdb_key_name" {
   type        = string
-  description = "Legacy CosmosDB Key"
+  description = "Legacy CosmosDB Key Name"
 }
 
-variable "selfcare_api_key" {
+variable "selfcare_api_key_name" {
   type        = string
-  description = "Selfcare API Key"
+  description = "Selfcare API Key Name"
 }
 
-variable "subscription_migration_api_key" {
+variable "subscription_migration_api_key_name" {
   type        = string
-  description = "Subscription Migration API Key"
+  description = "Subscription Migration API Key Name"
 }
 
 
