@@ -28,20 +28,6 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
-    http.get(`${baseURL}/institutions`, () => {
-      const resultArray = [
-        HttpResponse.json([getMockInstitution()] as any, {
-          status: 200
-        }),
-        HttpResponse.json(getSelfCareProblemResponse(404) as any, {
-          status: 404
-        }),
-        HttpResponse.json(getSelfCareProblemResponse(500) as any, {
-          status: 500
-        })
-      ];
-      return resultArray[0];
-    }),
     http.get(`${baseURL}/users`, ({ request }) => {
       const url = new URL(request.url);
       const userId = url.searchParams.get("userId") ?? undefined;

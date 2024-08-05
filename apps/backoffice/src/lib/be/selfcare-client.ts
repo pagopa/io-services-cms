@@ -15,11 +15,10 @@ import { Institution } from "../../generated/selfcare/Institution";
 import { UserInstitutionResponse } from "../../generated/selfcare/UserInstitutionResponse";
 import { HealthChecksError } from "./errors";
 
-const UserInstitutions = t.readonlyArray(
+export const UserInstitutions = t.readonlyArray(
   UserInstitutionResponse,
   "UserInstitutions"
 );
-
 export type UserInstitutions = t.TypeOf<typeof UserInstitutions>;
 
 export type SelfcareClient = {

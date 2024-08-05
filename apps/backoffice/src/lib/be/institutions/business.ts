@@ -21,7 +21,6 @@ export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string
 ): Promise<UserAuthorizedInstitutions> => {
   const apiResult = await getUserAuthorizedInstitutions(selfCareUserId);
-  console.log("apiResult", apiResult);
   return { authorizedInstitutions: apiResult.map(toUserAuthorizedInstitution) };
 };
 

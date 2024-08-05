@@ -76,9 +76,10 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userId: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          size: 10000
         }
       });
       expect(isAxiosError).not.toHaveBeenCalled();
@@ -108,9 +109,10 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userIdForAuth: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          size: 10000
         }
       });
       expect(isAxiosError).toHaveBeenCalled();
@@ -131,9 +133,10 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userIdForAuth: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          size: 10000
         }
       });
       expect(isAxiosError).not.toHaveBeenCalled();
