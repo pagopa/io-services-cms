@@ -9,7 +9,7 @@ locals {
       NODE_ENV                       = "production"
 
       // TODO: after migration, update AI implementation and use connection string
-      APPINSIGHTS_INSTRUMENTATIONKEY = data.azurerm_application_insights.ai_common.instrumentation_key
+      APPINSIGHTS_INSTRUMENTATIONKEY = var.ai_common_instrumentation_key
 
       // Keepalive fields are all optionals
       FETCH_KEEPALIVE_ENABLED             = "true"
