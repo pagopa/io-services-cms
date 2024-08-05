@@ -12,3 +12,8 @@ data "azurerm_subnet" "private_endpoints_subnet" {
   virtual_network_name = data.azurerm_virtual_network.itn_common.name
   resource_group_name  = data.azurerm_virtual_network.itn_common.resource_group_name
 }
+
+data "azurerm_application_insights" "ai_common" {
+  name                = "${local.prefix}-${local.env_short}-ai-common"
+  resource_group_name = "${local.prefix}-${local.env_short}-rg-common"
+}

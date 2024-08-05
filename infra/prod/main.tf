@@ -78,6 +78,7 @@ module "cms_function_app" {
   }
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+  ai_common_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
 
   tags = local.tags
 }
