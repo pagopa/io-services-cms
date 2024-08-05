@@ -1,11 +1,9 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 
-import { Institution } from "../../../types/selfcare/Institution";
-import {
-  InstitutionResource,
-  InstitutionResources
-} from "../../../types/selfcare/InstitutionResource";
+import { Institution } from "../../../generated/selfcare/Institution";
+import { InstitutionResource } from "../../../types/selfcare/InstitutionResource";
+import { UserInstitutions } from "../../../lib/be/selfcare-client";
 import { InstitutionNotFoundError, ManagedInternalError } from "../errors";
 import {
   retrieveInstitution,

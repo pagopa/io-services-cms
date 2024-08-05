@@ -33,6 +33,25 @@ export const getMockUserAuthorizedInstitution = () => ({
   logo_url: ""
 });
 
+export const getMockUserInstitution = (userId?: string) => ({
+  id: faker.string.uuid(),
+  userId: userId ?? faker.string.uuid(),
+  institutionId: faker.string.uuid(),
+  institutionDescription: faker.company.name(),
+  institutionRootName: faker.company.name(),
+  userMailUuid: faker.string.uuid(),
+  products: [
+    {
+      productId: faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
+      status: "ACTIVE",
+      productRole: faker.helpers.arrayElement(["admin", "operator"]),
+      role: "SUB_DELEGATE",
+      env: "ROOT",
+      createdAt: faker.date.past().toISOString()
+    }
+  ],
+  logo: faker.image.url()
+});
 export const getMockInstitution = (institutionId?: string) => ({
   id: institutionId ?? faker.string.uuid(),
   externalId: faker.string.numeric(11),
