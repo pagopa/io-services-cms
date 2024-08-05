@@ -11,8 +11,8 @@ output "secrets" {
     subscription_migration_api_key           = data.azurerm_key_vault_secret.subscription_migration_api_key.value
     legacy_cosmosdb_connectionstring         = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
     legacy_cosmosdb_key                      = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
-    pgres_flex_admin_pwd                     = azurerm_key_vault_secret.pgres_flex_admin_pwd.value
-    pgres_flex_reviewer_usr_pwd              = azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
-    pgres_flex_readonly_usr_pwd              = azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd.value
+    pgres_flex_admin_pwd                     = data.azurerm_key_vault_secret.pgres_flex_admin_pwd.value
+    pgres_flex_reviewer_usr_pwd              = data.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
+    pgres_flex_readonly_usr_pwd              = data.azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd.value
   }
 }
