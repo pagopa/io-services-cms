@@ -72,6 +72,32 @@ variable "bo_auth_session_secret" {
   description = "Backoffice Auth Session Secret"
 }
 
+variable "azure_client_secret_credential_client_id" {
+  type        = string
+  description = "Azure Client Secret Credential Client Id"
+}
+
+variable "azure_client_secret_credential_secret" {
+  type        = string
+  description = "Azure Client Secret Credential Secret"
+}
+
+variable "legacy_cosmosdb_key" {
+  type        = string
+  description = "Legacy CosmosDB Key"
+}
+
+variable "selfcare_api_key" {
+  type        = string
+  description = "Selfcare API Key"
+}
+
+variable "subscription_migration_api_key" {
+  type        = string
+  description = "Subscription Migration API Key"
+}
+
+
 ######################
 #  CMS Function App  #
 ######################

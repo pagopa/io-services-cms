@@ -11,8 +11,8 @@ locals {
       IS_MSW_ENABLED           = false
 
       # Azure
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
+      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = var.azure_client_secret_credential_client_id
+      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = var.azure_client_secret_credential_secret
       AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
       # Apim connection
@@ -32,7 +32,7 @@ locals {
       # Legacy source data
       LEGACY_COSMOSDB_NAME    = "db"
       LEGACY_COSMOSDB_URI     = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
-      LEGACY_COSMOSDB_KEY     = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
+      LEGACY_COSMOSDB_KEY     = var.legacy_cosmosdb_key
       LEGACY_COSMOSDB_MOCKING = false
 
       # Services CMS source data
@@ -53,12 +53,12 @@ locals {
       # Selfcare
       SELFCARE_EXTERNAL_API_BASE_URL = "https://api.selfcare.pagopa.it/external/v2"
       SELFCARE_JWKS_PATH             = "/.well-known/jwks.json"
-      SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
+      SELFCARE_API_KEY               = var.selfcare_api_key
       SELFCARE_API_MOCKING           = false
 
       # Subscriptions Migration
       SUBSCRIPTION_MIGRATION_API_URL     = "https://io-p-subsmigrations-fn.azurewebsites.net/api/v1"
-      SUBSCRIPTION_MIGRATION_API_KEY     = data.azurerm_key_vault_secret.subscription_migration_api_key.value
+      SUBSCRIPTION_MIGRATION_API_KEY     = var.subscription_migration_api_key
       SUBSCRIPTION_MIGRATION_API_MOCKING = false
 
 
