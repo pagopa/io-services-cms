@@ -1,5 +1,6 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
+import { Institution } from "@/generated/selfcare/Institution";
 import { getApimService } from "@/lib/be/apim-service";
 import {
   ManagedInternalError,
@@ -8,7 +9,6 @@ import {
 } from "@/lib/be/errors";
 import { getInstitutionById } from "@/lib/be/institutions/selfcare";
 import { upsertSubscriptionAuthorizedCIDRs } from "@/lib/be/keys/cosmos";
-import { Institution } from "@/types/selfcare/Institution";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";

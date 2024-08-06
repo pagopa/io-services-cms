@@ -11,14 +11,20 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { Institution } from "../../types/selfcare/Institution";
-import { InstitutionResources } from "../../types/selfcare/InstitutionResources";
+import { Institution } from "../../generated/selfcare/Institution";
+import { UserInstitutionResponse } from "../../generated/selfcare/UserInstitutionResponse";
 import { HealthChecksError } from "./errors";
+
+export const UserInstitutions = t.readonlyArray(
+  UserInstitutionResponse,
+  "UserInstitutions"
+);
+export type UserInstitutions = t.TypeOf<typeof UserInstitutions>;
 
 export type SelfcareClient = {
   getUserAuthorizedInstitutions: (
-    userIdForAuth: string
-  ) => TE.TaskEither<Error, InstitutionResources>;
+    userId: string
+  ) => TE.TaskEither<Error, UserInstitutions>;
   getInstitutionById: (
     id: string
   ) => TE.TaskEither<Error | AxiosError, Institution>;
@@ -32,7 +38,7 @@ const Config = t.type({
 });
 
 const institutionsApi = "/institutions";
-const supportApi = "/support";
+const usersApi = "/users";
 let selfcareConfig: Config;
 let selfcareClient: SelfcareClient;
 
@@ -72,13 +78,14 @@ const getAxiosInstance = (): AxiosInstance => {
 const buildSelfcareClient = (): SelfcareClient => {
   const axiosInstance = getAxiosInstance();
 
-  const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] = userIdForAuth =>
+  const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] = userId =>
     pipe(
       TE.tryCatch(
         () =>
-          axiosInstance.get(institutionsApi, {
+          axiosInstance.get(usersApi, {
             params: {
-              userIdForAuth
+              userId,
+              size: 10000
             }
           }),
         identity
@@ -95,7 +102,7 @@ const buildSelfcareClient = (): SelfcareClient => {
       TE.chainW(response =>
         pipe(
           response.data,
-          InstitutionResources.decode,
+          UserInstitutions.decode,
           E.mapLeft(flow(readableReport, E.toError)),
           TE.fromEither
         )

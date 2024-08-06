@@ -1166,7 +1166,75 @@ components:
           type: number
           minimum: 0
     Institution:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/selfcare-schemas.yaml#/Institution'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 97c0f418-bcb3-48d4-825a-fe8b29ae68e5
+
+        externalId:
+          type: string
+          description: external institution id
+          example: c_f205
+        originId:
+          type: string
+          description: origin institution id (e.g iPA code)
+          example: c_f205
+
+        description:
+          type: string
+          example: AGENCY X
+        digitalAddress:
+          type: string
+          description: Institution's digitalAddress
+          format: email
+          example: email@pec.mail.org
+
+        address:
+          type: string
+          example: via del campo
+        zipCode:
+          type: string
+          example: '20100'
+        taxCode:
+          type: string
+          description: institution tax code
+        origin:
+          type: string
+          description: The origin form which the institution has been retrieved
+          example: IPA
+        institutionType:
+          enum:
+            - AS
+            - GSP
+            - PA
+            - PG
+            - PSP
+            - PT
+            - SA
+            - SCP
+            - REC
+            - CON
+          type: string
+        geographicTaxonomies:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeographicTaxonomy'
+      additionalProperties: false
+    GeographicTaxonomy:
+      required:
+        - code
+        - desc
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code of the geographic taxonomy
+        desc:
+          type: string
+          description: Description of the geographic taxonomy code
+      additionalProperties: false
     UserAuthorizedInstitutions:
       type: object
       properties:

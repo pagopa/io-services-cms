@@ -1,17 +1,16 @@
 import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
+import { Institution } from "@/generated/selfcare/Institution";
 import {
   InstitutionNotFoundError,
   ManagedInternalError
 } from "@/lib/be/errors";
-import { getSelfcareClient } from "@/lib/be/selfcare-client";
-import { Institution } from "@/types/selfcare/Institution";
-import { InstitutionResources } from "@/types/selfcare/InstitutionResources";
+import { getSelfcareClient, UserInstitutions } from "@/lib/be/selfcare-client";
 import { isAxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 
 export const getUserAuthorizedInstitutions = async (
   userIdForAuth: string
-): Promise<InstitutionResources> => {
+): Promise<UserInstitutions> => {
   const apiResult = await getSelfcareClient().getUserAuthorizedInstitutions(
     userIdForAuth
   )();
