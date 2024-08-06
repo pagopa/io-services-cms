@@ -1,6 +1,6 @@
 {
   "name": "io-services-app-backend",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "packageManager": "yarn@3.3.0",
   "bundledDependencies": true,
   "files": [

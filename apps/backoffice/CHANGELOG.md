@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.11.4
+
+### Patch Changes
+
+- 9172805: replace getInstitutionsUsingGET with getUserInstitutionUsingGET selfcare API
+- Updated dependencies [9172805]
+  - @io-services-cms/models@1.19.6
+
 ## 1.11.3
 
 ### Patch Changes
