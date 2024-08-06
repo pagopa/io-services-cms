@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.19.6
+
+### Patch Changes
+
+- 9172805: replace getInstitutionsUsingGET with getUserInstitutionUsingGET selfcare API
+
 ## 1.19.5
 
 ### Patch Changes
