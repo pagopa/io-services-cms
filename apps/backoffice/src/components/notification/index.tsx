@@ -23,6 +23,7 @@ export const Notification = forwardRef<HTMLDivElement, NotificationProps>(
     return (
       <SnackbarContent ref={ref}>
         <Alert
+          data-testid="bo-io-notification"
           onClose={handleDismiss}
           severity={props.severity}
           variant="outlined"
@@ -30,7 +31,11 @@ export const Notification = forwardRef<HTMLDivElement, NotificationProps>(
         >
           <Box width="400px">
             {props.title ? (
-              <Typography variant="body2" fontWeight={600}>
+              <Typography
+                data-testid="bo-io-notification-title"
+                variant="body2"
+                fontWeight={600}
+              >
                 {props.title}
               </Typography>
             ) : null}
