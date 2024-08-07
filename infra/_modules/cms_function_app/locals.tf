@@ -108,7 +108,7 @@ locals {
       ASSET_STORAGE_CONNECTIONSTRING = data.azurerm_key_vault_secret.asset_storage_connectionstring_secret.value
 
       # Backoffice Configuration
-      BACKOFFICE_INTERNAL_SUBNET_CIDRS = join(",", data.azurerm_subnet.backoffice_app_snet.address_prefixes)
+      BACKOFFICE_INTERNAL_SUBNET_CIDRS = var.bo_snet_cidr
 
       # Automatic service validation
       MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code"

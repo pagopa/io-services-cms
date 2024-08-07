@@ -80,6 +80,8 @@ module "cms_function_app" {
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
   ai_common_instrumentation_key        = data.azurerm_application_insights.ai_common.instrumentation_key
 
+  bo_snet_cidr = module.backoffice.bo_snet_cidr
+
   tags = local.tags
 }
 

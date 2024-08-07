@@ -74,3 +74,9 @@ variable "ai_common_instrumentation_key" {
   description = "Application Insights instrumentation key"
   sensitive   = true
 }
+
+
+variable "bo_snet_cidr" {
+  type        = string
+  description = "Backoffice Subnet CIDR"
+}
