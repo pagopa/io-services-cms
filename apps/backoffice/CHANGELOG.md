@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.11.5
+
+### Patch Changes
+
+- c9dc730: Tests for MarkdownView component
+- 3d79a49: Tests for Notification component
+
 ## 1.11.4
 
 ### Patch Changes
