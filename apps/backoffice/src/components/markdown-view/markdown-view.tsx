@@ -8,7 +8,7 @@ export type MarkdownViewProps = {
 /** Renders markdown syntax */
 export const MarkdownView = ({ children }: MarkdownViewProps) => {
   return (
-    <span style={{ fontSize: "16px" }}>
+    <span data-testid="bo-io-markdown-view" style={{ fontSize: "16px" }}>
       <Markdown
         unwrapDisallowed
         allowedElements={["p", "strong", "em", "ul", "ol", "li", "a"]}
