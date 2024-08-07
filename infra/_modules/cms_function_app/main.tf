@@ -18,7 +18,7 @@ module "cms_fn" {
   health_check_path   = "/api/v1/info"
   node_version        = 18
 
-  subnet_cidr                          = local.cms.snet_cidr
+  subnet_cidr                          = var.cms_snet_cidr
   subnet_pep_id                        = var.peps_snet_id
   private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
   virtual_network = {

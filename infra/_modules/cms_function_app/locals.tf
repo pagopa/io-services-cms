@@ -2,7 +2,6 @@
 locals {
   cms = {
     tier          = "standard"
-    snet_cidr     = "10.20.9.0/24" # Picked as the first available non-allocated CIDR from the io-p-itn-common-vnet-01
     cosmosdb_name = "db-services-cms"
     app_settings = {
       FUNCTIONS_WORKER_PROCESS_COUNT = "4"

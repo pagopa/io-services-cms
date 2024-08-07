@@ -1,9 +1,7 @@
 
 locals {
   backoffice = {
-    tier      = "standard"
-    snet_cidr = "10.20.11.0/24" # Picked as the first available non-allocated CIDR from the io-p-itn-common-vnet-01
-
+    tier = "standard"
     base_app_settings = {
       NODE_ENV                 = "production"
       WEBSITE_RUN_FROM_PACKAGE = "1"
