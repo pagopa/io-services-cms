@@ -50,7 +50,7 @@ module "function_app" {
   }
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
-
+  app_be_snet_cidr                     = local.app_be_snet_cidr
   ai_search = {
     id                     = module.ai_search.search_service_id
     url                    = module.ai_search.search_service_url
@@ -79,6 +79,8 @@ module "cms_function_app" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
   ai_common_instrumentation_key        = data.azurerm_application_insights.ai_common.instrumentation_key
+  cms_snet_cidr                        = local.cms_snet_cidr
+  bo_snet_cidr                         = local.bo_snet_cidr
 
   tags = local.tags
 }
@@ -99,7 +101,7 @@ module "backoffice" {
 
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
-
+  bo_snet_cidr                         = local.bo_snet_cidr
   # Cms Fn Binding
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
 

@@ -51,6 +51,11 @@ variable "resource_group_name" {
 ################
 #  Networking  #
 ################
+variable "cms_snet_cidr" {
+  type        = string
+  description = "CMS Subnet CIDR"
+}
+
 variable "virtual_network" {
   type = object({
     name                = string
@@ -73,4 +78,9 @@ variable "ai_common_instrumentation_key" {
   type        = string
   description = "Application Insights instrumentation key"
   sensitive   = true
+}
+
+variable "bo_snet_cidr" {
+  type        = string
+  description = "Backoffice Subnet CIDR"
 }

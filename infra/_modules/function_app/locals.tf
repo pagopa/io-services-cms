@@ -1,7 +1,6 @@
 locals {
   app_be = {
     tier          = "standard"
-    snet_cidr     = "10.20.5.0/24" # Picked as the first available non-allocated CIDR from the io-p-itn-common-vnet-01
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"

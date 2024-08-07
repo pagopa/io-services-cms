@@ -46,6 +46,11 @@ variable "resource_group_name" {
 ################
 #  Networking  #
 ################
+variable "bo_snet_cidr" {
+  type        = string
+  description = "Backoffice Subnet CIDR"
+}
+
 variable "virtual_network" {
   type = object({
     name                = string

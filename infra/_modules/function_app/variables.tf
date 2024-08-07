@@ -46,6 +46,10 @@ variable "resource_group_name" {
 ################
 #  Networking  #
 ################
+variable "app_be_snet_cidr" {
+  type        = string
+  description = "CMS Subnet CIDR"
+}
 variable "virtual_network" {
   type = object({
     name                = string
