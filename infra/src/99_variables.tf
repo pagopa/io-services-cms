@@ -105,17 +105,6 @@ variable "azure_apim_product_id" {
   default     = null
 }
 
-
-##########
-# Webapp #
-##########
-
-variable "backoffice_host" {
-  type        = string
-  description = "Backoffice host name"
-  default     = null
-}
-
 variable "reviewer_db_name" {
   type        = string
   description = ""
@@ -206,25 +195,6 @@ variable "io_common" {
     action_group_slack_name   = string
   })
   description = "Name of common resources of IO platform"
-}
-
-
-##############
-# backoffice #
-##############
-
-variable "backoffice_app" {
-  type = object({
-    sku_name                                  = string
-    apim_user_groups                          = string
-    azure_credentials_scope_url               = string
-    azure_apim_subscriptions_api_base_url     = string
-    selfcare_external_api_base_url            = string
-    selfcare_jwks_path                        = string
-    subscription_migration_api_url            = string
-    api_services_cms_topics_cache_ttl_minutes = string
-  })
-  description = "Configuration of the io-services-cms-backoffice service"
 }
 
 variable "bo_auth_session_secret_rotation_id" {
