@@ -1,22 +1,22 @@
 {
-    "bindings": [
-      {
-        "queueName": "%REQUEST_DETAIL_QUEUE%",
-        "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
-        "name": "requestDetailItem",
-        "type": "queueTrigger",
-        "direction": "in"
-      },
-      {
-        "name": "serviceDetailDocument",
-        "type": "cosmosDB",
-        "databaseName": "%COSMOSDB_APP_BE_NAME%",
-        "collectionName": "%COSMOSDB_CONTAINER_SERVICES_DETAILS%",
-        "createIfNotExists": false,
-        "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
-        "direction": "out"
-      }
-    ],
-    "scriptFile": "../dist/main.js",
-    "entryPoint": "createRequestDetailEntryPoint"
-  }
+  "bindings": [
+    {
+      "queueName": "%REQUEST_DETAIL_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestDetailItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    },
+    {
+      "name": "serviceDetailDocument",
+      "type": "cosmosDB",
+      "databaseName": "%COSMOSDB_APP_BE_NAME%",
+      "containerName": "%COSMOSDB_CONTAINER_SERVICES_DETAILS%",
+      "createIfNotExists": false,
+      "connection": "COSMOSDB_CONNECTIONSTRING",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestDetailEntryPoint"
+}

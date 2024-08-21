@@ -11,9 +11,9 @@
       "name": "serviceHistoryDocument",
       "type": "cosmosDB",
       "databaseName": "%COSMOSDB_NAME%",
-      "collectionName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+      "containerName": "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
       "createIfNotExists": false,
-      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING",
+      "connection": "COSMOSDB_CONNECTIONSTRING",
       "direction": "out"
     }
   ],
