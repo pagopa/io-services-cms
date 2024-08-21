@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.1
+
+### Patch Changes
+
+- a73733f: Update Extension bundle queueTrigger
+
 ## 1.32.0
 
 ### Minor Changes
