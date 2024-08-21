@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.0
+
+### Minor Changes
+
+- c1d3e91: Update ExtensionBundle and CosmosDBTrigger to v4
+
 ## 1.31.12
 
 ### Patch Changes
