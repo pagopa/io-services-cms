@@ -19,6 +19,7 @@ import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper } from "../utils/cosmos-helper";
 import { isServiceAllowedForQualitySkip } from "../utils/feature-flag-handler";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 const noAction = {};
 type NoAction = typeof noAction;
@@ -78,15 +79,6 @@ enum EventNameEnum {
   AutoReject = `${EVENT_PREFIX}.auto-reject`,
   Manual = `${EVENT_PREFIX}.manual`,
 }
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestReviewItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestReviewItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
 
 const validate =
   (config: IConfig) =>
@@ -290,7 +282,7 @@ export const createServiceValidationHandler: ServiceValidationHandler =
   ({ item }) =>
     pipe(
       item,
-      parseIncomingMessage,
+      parseIncomingMessage(Queue.RequestReviewItem),
       E.chainW(flow(validate(config))),
       TE.fromEither,
       TE.chainW(

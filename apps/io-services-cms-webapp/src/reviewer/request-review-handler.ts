@@ -4,7 +4,6 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -12,30 +11,16 @@ import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
-import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
-import { PermanentError } from "../utils/errors";
+import { QueuePermanentError } from "../utils/errors";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
+import { parseIncomingMessage } from "../utils/queue-utils";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 
 const jiraIssuesStatusRejectedId = "10986";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<PermanentError, Queue.RequestReviewItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestReviewItem.decode,
-    E.mapLeft(
-      flow(
-        readableReport,
-        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
-      )
-    )
-  );
 
 const createJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
@@ -206,7 +191,7 @@ export const createRequestReviewHandler = (
   withJsonInput((context, queueItem) =>
     pipe(
       queueItem,
-      parseIncomingMessage,
+      parseIncomingMessage(Queue.RequestReviewItem),
       TE.fromEither,
       TE.chainW((service) =>
         pipe(
@@ -226,7 +211,7 @@ export const createRequestReviewHandler = (
         )
       ),
       TE.getOrElseW((e) => {
-        if (e instanceof PermanentError) {
+        if (e instanceof QueuePermanentError) {
           context.log.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         }

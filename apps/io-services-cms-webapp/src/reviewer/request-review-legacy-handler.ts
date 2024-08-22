@@ -13,7 +13,6 @@
 
 import { Context } from "@azure/functions";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -23,24 +22,11 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
+import { QueuePermanentError } from "../utils/errors";
 import { isUserEnabledForRequestReviewLegacy } from "../utils/feature-flag-handler";
+import { parseIncomingMessage } from "../utils/queue-utils";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
-import { PermanentError } from "../utils/errors";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<PermanentError, Queue.RequestReviewLegacyItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestReviewLegacyItem.decode,
-    E.mapLeft(
-      flow(
-        readableReport,
-        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
-      )
-    )
-  );
 
 export const handleQueueItem = (
   context: Context,
@@ -51,7 +37,7 @@ export const handleQueueItem = (
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
+    parseIncomingMessage(Queue.RequestReviewLegacyItem),
     TE.fromEither,
     TE.chain((requestReviewLegacy) =>
       pipe(
@@ -64,7 +50,7 @@ export const handleQueueItem = (
       )
     ),
     TE.getOrElseW((e) => {
-      if (e instanceof PermanentError) {
+      if (e instanceof QueuePermanentError) {
         context.log.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }
