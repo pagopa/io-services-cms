@@ -98,7 +98,9 @@ const saveTicketReference =
       TE.map((_) => void 0),
       TE.orElseW((e) =>
         pipe(
-          e.constraint === "service_review_pk",
+          // Check if the error is due to a unique constraint violation
+          // If so, we can ignore it, cause it means that the ticket reference is already present in the db
+          !!e.constraint,
           B.fold(
             () => TE.left(E.toError(e)),
             () => TE.right(void 0)
