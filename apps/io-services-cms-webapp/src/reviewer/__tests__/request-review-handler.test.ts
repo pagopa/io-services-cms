@@ -15,6 +15,7 @@ import {
 import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
+import { PG_PK_UNIQUE_VIOLATION_CODE } from "../../lib/clients/pg-client";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -609,7 +610,7 @@ describe("Service Review Handler", () => {
             'duplicate key value violates unique constraint "constraint_name"',
           length: 1,
           severity: "ERROR",
-          code: "23505",
+          code: PG_PK_UNIQUE_VIOLATION_CODE,
           detail: "Key (xxx, yyy)=(xxx_val, yyy_val) already exists.",
           constraint: "constraint_name",
         } as DatabaseError;

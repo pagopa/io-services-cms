@@ -14,6 +14,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
+import { PG_PK_UNIQUE_VIOLATION_CODE } from "../lib/clients/pg-client";
 import { QueuePermanentError } from "../utils/errors";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
@@ -85,7 +86,7 @@ const saveTicketReference =
         pipe(
           // Check if the error is due to a unique constraint violation
           // If so, we can ignore it, cause it means that the ticket reference is already present in the db
-          !!e.constraint,
+          e.code === PG_PK_UNIQUE_VIOLATION_CODE,
           B.fold(
             () => TE.left(E.toError(e)),
             () => TE.right(void 0)
