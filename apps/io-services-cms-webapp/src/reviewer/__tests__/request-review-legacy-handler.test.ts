@@ -240,7 +240,7 @@ describe("Request Review Legacy Handler", () => {
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
   });
 
-  it("should fail on bad queue items", async () => {
+  it("should not throw when permanent error occours", async () => {
     const aServiceId = "s2";
 
     const aQueueMessage = {
@@ -265,9 +265,9 @@ describe("Request Review Legacy Handler", () => {
       mockConfig
     );
     const context = createContext();
-    await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage))
-    ).rejects.toThrowError();
+    await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).not.toHaveBeenCalled();
   });
 
   it("should fail on not found service", async () => {

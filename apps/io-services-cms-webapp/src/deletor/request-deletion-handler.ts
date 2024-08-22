@@ -11,11 +11,16 @@ import { PermanentError } from "../utils/errors";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestDeletionItem> =>
+): E.Either<PermanentError, Queue.RequestDeletionItem> =>
   pipe(
     queueItem,
     Queue.RequestDeletionItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 export const handleQueueItem = (
@@ -26,9 +31,6 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft(
-      (e) => new PermanentError(`Error parsing incoming message: ${e.message}`)
-    ),
     TE.fromEither,
     TE.chainW(({ id }) =>
       pipe(

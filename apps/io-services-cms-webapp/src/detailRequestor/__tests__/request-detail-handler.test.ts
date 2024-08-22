@@ -78,18 +78,18 @@ const aGenericLifecycleItemType = {
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
 
 describe("Service Detail Handler", () => {
-  it("[handleQueueItem] should return an Error if queueItem is invalid", async () => {
+  it("[handleQueueItem] should not throw when permanent error occours", async () => {
     const context = createContext();
 
-    try {
-      await handleQueueItem(
-        context,
-        serviceDetailCosmosHelperMock,
-        anInvalidQueueItem
-      )();
-    } catch (error) {
-      expect(error.message).toBeDefined();
-    }
+    await handleQueueItem(
+      context,
+      serviceDetailCosmosHelperMock,
+      anInvalidQueueItem
+    )();
+
+    expect(
+      serviceDetailCosmosHelperMock.fetchSingleItem
+    ).not.toHaveBeenCalled();
   });
 
   it("[handleQueueItem] should handle publication queue item correctly", async () => {

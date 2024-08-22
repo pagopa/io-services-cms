@@ -11,14 +11,20 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
+import { PermanentError } from "../utils/errors";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestPublicationItem> =>
+): E.Either<PermanentError, Queue.RequestPublicationItem> =>
   pipe(
     queueItem,
     Queue.RequestPublicationItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 export const handleQueueItem = (
@@ -29,7 +35,6 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((item) =>
       fsmPublicationClient.release(
@@ -48,6 +53,9 @@ export const handleQueueItem = (
             `Operation Completed no more action needed => ${e.message}`,
             e
           );
+          return T.of(void 0);
+        } else if (e instanceof PermanentError) {
+          context.log.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         } else {
           throw e;

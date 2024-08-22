@@ -8,10 +8,12 @@ import {
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
+import { PermanentError } from "../utils/errors";
 
 // Method used in on-service-lifecycle-change.ts and on-service-publication-change.ts
 // used to build the message to be sent to the request-historicization queue and processed by this handler
@@ -31,11 +33,16 @@ export const buildRequestHistoricizationQueueMessage = ({
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestHistoricizationItem> =>
+): E.Either<PermanentError, Queue.RequestHistoricizationItem> =>
   pipe(
     queueItem,
     Queue.RequestHistoricizationItem.decode,
-    E.mapLeft(flow(readableReport, E.toError))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 export const toServiceHistory = (
@@ -58,7 +65,11 @@ export const handleQueueItem = (context: Context, queueItem: Json) =>
         toServiceHistory(service)
       );
     }),
-    TE.getOrElse((e) => {
+    TE.getOrElseW((e) => {
+      if (e instanceof PermanentError) {
+        context.log.error(`Permanent error: ${e.message}`);
+        return T.of(void 0);
+      }
       throw e;
     })
   );

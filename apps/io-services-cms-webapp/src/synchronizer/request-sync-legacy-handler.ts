@@ -9,14 +9,20 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
+import { PermanentError } from "../utils/errors";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestSyncLegacyItem> =>
+): E.Either<PermanentError, Queue.RequestSyncLegacyItem> =>
   pipe(
     queueItem,
     Queue.RequestSyncLegacyItem.decode,
-    E.mapLeft(flow(readableReport, E.toError))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 export const handleQueueItem = (
@@ -26,20 +32,7 @@ export const handleQueueItem = (
 ) =>
   pipe(
     queueItem,
-    (x) => {
-      _context.log.info(`before parse: ${JSON.stringify(x)}`);
-      return x;
-    },
     parseIncomingMessage,
-    E.mapLeft((err) => {
-      _context.log.error(
-        `An Error has occurred while parsing incoming message, the reason was => ${JSON.stringify(
-          err.message
-        )}`,
-        err
-      );
-      return new Error("Error while parsing incoming message");
-    }), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((item) =>
       pipe(
@@ -86,8 +79,11 @@ export const handleQueueItem = (
         TE.map((_) => void 0)
       )
     ),
-    TE.getOrElse((e) => {
-      if (e instanceof Error) {
+    TE.getOrElseW((e) => {
+      if (e instanceof PermanentError) {
+        _context.log.error(`Permanent error: ${e.message}`);
+        return TE.right(void 0);
+      } else if (e instanceof Error) {
         _context.log.error(
           `An Error has occurred while persisting data, the reason was => ${e.message}`,
           e

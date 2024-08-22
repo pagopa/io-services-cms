@@ -17,11 +17,16 @@ const PUBLICATION_KIND = "publication";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestDetailItem> =>
+): E.Either<PermanentError, Queue.RequestDetailItem> =>
   pipe(
     queueItem,
     Queue.RequestDetailItem.decode,
-    E.mapLeft(flow(readableReport, E.toError))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 export const toServiceDetail = (
@@ -95,9 +100,6 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage,
-    E.mapLeft(
-      (e) => new PermanentError(`Error parsing incoming message: ${e.message}`)
-    ),
     TE.fromEither,
     TE.chain((service) =>
       pipe(

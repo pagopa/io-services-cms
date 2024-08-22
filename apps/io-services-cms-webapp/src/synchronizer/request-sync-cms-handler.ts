@@ -8,20 +8,27 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
+import { PermanentError } from "../utils/errors";
 
 const parseIncomingMessage = (
   queueItem: Json
-): E.Either<Error, Queue.RequestSyncCmsItems> =>
+): E.Either<PermanentError, Queue.RequestSyncCmsItems> =>
   pipe(
     queueItem,
     Queue.RequestSyncCmsItems.decode,
-    E.mapLeft(flow(readableReport, E.toError))
+    E.mapLeft(
+      flow(
+        readableReport,
+        (_) => new PermanentError(`Error parsing incoming message: ${_}`)
+      )
+    )
   );
 
 const toServiceLifecycle =
@@ -109,7 +116,7 @@ const toServicePublication =
     );
 
 export const handleQueueItem = (
-  _context: Context,
+  context: Context,
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   fsmPublicationClient: ServicePublication.FsmClient,
@@ -171,7 +178,11 @@ export const handleQueueItem = (
         )
       )
     ),
-    TE.getOrElse((e) => {
+    TE.getOrElseW((e) => {
+      if (e instanceof PermanentError) {
+        context.log.error(`Permanent error: ${e.message}`);
+        return T.of(void 0);
+      }
       throw e;
     })
   );
