@@ -15,7 +15,6 @@ import {
 import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
-import { a } from "vitest/dist/suite-9ReVEt_h";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -598,6 +597,49 @@ describe("Service Review Handler", () => {
     );
     expect(mockJiraProxy.reOpenJiraIssue).not.toBeCalled();
     expect(mainMockServiceReviewDao.insert).not.toBeCalled();
+    expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
+  });
+
+  it("should return no error if insert on db returns a Contraint violation Error", async () => {
+    const mockServiceReviewDao = {
+      ...mainMockServiceReviewDao,
+      insert: vi.fn((data: ServiceReviewRowDataTable) => {
+        const databaseError = {
+          message:
+            'duplicate key value violates unique constraint "constraint_name"',
+          length: 1,
+          severity: "ERROR",
+          code: "23505",
+          detail: "Key (xxx, yyy)=(xxx_val, yyy_val) already exists.",
+          constraint: "constraint_name",
+        } as DatabaseError;
+        return TE.left(databaseError);
+      }),
+    };
+    const handler = createRequestReviewHandler(
+      mockServiceReviewDao,
+      mainMockJiraProxy,
+      mainMockApimService,
+      mockFsmLifecycleClient,
+      mockFsmPublicationClient,
+      mockConfig
+    );
+
+    const context = createContext();
+    const result = await handler(context, JSON.stringify(aService));
+
+    expect(
+      mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId
+    ).toBeCalledWith(aService.id);
+    expect(mainMockApimService.getDelegateFromServiceId).toBeCalledWith(
+      aService.id
+    );
+    expect(mainMockJiraProxy.createJiraIssue).toBeCalledWith(
+      aService,
+      aDelegate,
+      isFirstReview
+    );
+    expect(mockServiceReviewDao.insert).toBeCalledWith(aDbInsertData);
     expect(mockFsmLifecycleClient.approve).not.toHaveBeenCalled();
   });
 
