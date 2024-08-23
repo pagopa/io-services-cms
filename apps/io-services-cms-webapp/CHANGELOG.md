@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.2
+
+### Patch Changes
+
+- 8be5cfc: Handle permanent errors in QueueTrigger Functions in order to avoid unnecessary retries
+
 ## 1.32.1
 
 ### Patch Changes
