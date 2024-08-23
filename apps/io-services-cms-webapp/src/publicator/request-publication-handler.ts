@@ -4,22 +4,13 @@ import {
   Queue,
   ServicePublication,
 } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestPublicationItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestPublicationItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
   context: Context,
@@ -28,8 +19,7 @@ export const handleQueueItem = (
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
-    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
+    parseIncomingMessage(Queue.RequestPublicationItem),
     TE.fromEither,
     TE.chainW((item) =>
       fsmPublicationClient.release(
@@ -48,6 +38,9 @@ export const handleQueueItem = (
             `Operation Completed no more action needed => ${e.message}`,
             e
           );
+          return T.of(void 0);
+        } else if (e instanceof QueuePermanentError) {
+          context.log.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         } else {
           throw e;

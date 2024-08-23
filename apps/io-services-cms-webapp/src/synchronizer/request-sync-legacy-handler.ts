@@ -1,23 +1,15 @@
 import { Context } from "@azure/functions";
 import { Queue } from "@io-services-cms/models";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestSyncLegacyItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestSyncLegacyItem.decode,
-    E.mapLeft(flow(readableReport, E.toError))
-  );
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
   _context: Context,
@@ -26,20 +18,7 @@ export const handleQueueItem = (
 ) =>
   pipe(
     queueItem,
-    (x) => {
-      _context.log.info(`before parse: ${JSON.stringify(x)}`);
-      return x;
-    },
-    parseIncomingMessage,
-    E.mapLeft((err) => {
-      _context.log.error(
-        `An Error has occurred while parsing incoming message, the reason was => ${JSON.stringify(
-          err.message
-        )}`,
-        err
-      );
-      return new Error("Error while parsing incoming message");
-    }), // TODO: map as _permanent_ error
+    parseIncomingMessage(Queue.RequestSyncLegacyItem),
     TE.fromEither,
     TE.chainW((item) =>
       pipe(
@@ -86,8 +65,11 @@ export const handleQueueItem = (
         TE.map((_) => void 0)
       )
     ),
-    TE.getOrElse((e) => {
-      if (e instanceof Error) {
+    TE.getOrElseW((e) => {
+      if (e instanceof QueuePermanentError) {
+        _context.log.error(`Permanent error: ${e.message}`);
+        return TE.right(void 0);
+      } else if (e instanceof Error) {
         _context.log.error(
           `An Error has occurred while persisting data, the reason was => ${e.message}`,
           e

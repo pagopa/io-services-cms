@@ -5,6 +5,9 @@ import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import Cursor from "pg-cursor";
 import { PostgreSqlConfig } from "../../config";
 
+// PG ERROR CODES
+export const PG_PK_UNIQUE_VIOLATION_CODE = "23505";
+
 // eslint-disable-next-line functional/no-let
 let singletonPool: Pool;
 export const getPool = (config: PostgreSqlConfig): Pool => {

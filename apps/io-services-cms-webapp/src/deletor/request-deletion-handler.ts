@@ -1,22 +1,12 @@
 import { Context } from "@azure/functions";
 import { Queue, ServicePublication } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { withJsonInput } from "../lib/azure/misc";
-import { PermanentError } from "../utils/errors";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestDeletionItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestDeletionItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
   context: Context,
@@ -25,10 +15,7 @@ export const handleQueueItem = (
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
-    E.mapLeft(
-      (e) => new PermanentError(`Error parsing incoming message: ${e.message}`)
-    ),
+    parseIncomingMessage(Queue.RequestDeletionItem),
     TE.fromEither,
     TE.chainW(({ id }) =>
       pipe(
@@ -37,7 +24,7 @@ export const handleQueueItem = (
       )
     ),
     TE.getOrElse((e) => {
-      if (e instanceof PermanentError) {
+      if (e instanceof QueuePermanentError) {
         context.log.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }

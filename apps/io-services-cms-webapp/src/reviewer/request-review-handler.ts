@@ -4,31 +4,24 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
-import { Json } from "io-ts-types";
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { CreateJiraIssueResponse, JiraIssue } from "../lib/clients/jira-client";
+import { PG_PK_UNIQUE_VIOLATION_CODE } from "../lib/clients/pg-client";
+import { QueuePermanentError } from "../utils/errors";
 import { isUserAllowedForAutomaticApproval } from "../utils/feature-flag-handler";
 import { JiraProxy } from "../utils/jira-proxy";
+import { parseIncomingMessage } from "../utils/queue-utils";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 
 const jiraIssuesStatusRejectedId = "10986";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestReviewItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestReviewItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
 
 const createJiraTicket =
   (apimService: ApimUtils.ApimService, jiraProxy: JiraProxy) =>
@@ -88,7 +81,18 @@ const saveTicketReference =
         status: "PENDING",
         extra_data: {},
       }),
-      TE.mapLeft(E.toError)
+      TE.map((_) => void 0),
+      TE.orElseW((e) =>
+        pipe(
+          // Check if the error is due to a unique constraint violation
+          // If so, we can ignore it, cause it means that the ticket reference is already present in the db
+          e.code === PG_PK_UNIQUE_VIOLATION_CODE,
+          B.fold(
+            () => TE.left(E.toError(e)),
+            () => TE.right(void 0)
+          )
+        )
+      )
     );
 
 const approveService =
@@ -158,8 +162,7 @@ const sendServiceToReview =
           )
         )
       ),
-      TE.chain(saveTicketReference(dao, service)), // save ticketReference in db
-      TE.map((_) => void 0)
+      TE.chain(saveTicketReference(dao, service)) // save ticketReference in db
     );
 
 const isFirstServicePublication =
@@ -186,12 +189,12 @@ export const createRequestReviewHandler = (
   fsmPublicationClient: ServicePublication.FsmClient,
   config: IConfig
 ): ReturnType<typeof withJsonInput> =>
-  withJsonInput((_context, queueItem) =>
+  withJsonInput((context, queueItem) =>
     pipe(
       queueItem,
-      parseIncomingMessage,
+      parseIncomingMessage(Queue.RequestReviewItem),
       TE.fromEither,
-      TE.chain((service) =>
+      TE.chainW((service) =>
         pipe(
           isUserAllowedForAutomaticApproval(config, apimService, service.id),
           TE.chain(
@@ -208,7 +211,11 @@ export const createRequestReviewHandler = (
           )
         )
       ),
-      TE.getOrElse((e) => {
+      TE.getOrElseW((e) => {
+        if (e instanceof QueuePermanentError) {
+          context.log.error(`Permanent error: ${e.message}`);
+          return T.of(void 0);
+        }
         throw e;
       })
     )()
