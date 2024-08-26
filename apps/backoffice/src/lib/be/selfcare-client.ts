@@ -85,6 +85,7 @@ const buildSelfcareClient = (): SelfcareClient => {
           axiosInstance.get(usersApi, {
             params: {
               userId,
+              states: "ACTIVE",
               size: 10000
             }
           }),

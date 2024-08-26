@@ -9,10 +9,10 @@ import { isAxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 
 export const getUserAuthorizedInstitutions = async (
-  userIdForAuth: string
+  userId: string
 ): Promise<UserInstitutions> => {
   const apiResult = await getSelfcareClient().getUserAuthorizedInstitutions(
-    userIdForAuth
+    userId
   )();
 
   // errore validazione parametri chiamata
