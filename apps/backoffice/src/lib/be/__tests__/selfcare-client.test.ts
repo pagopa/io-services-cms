@@ -79,6 +79,7 @@ describe("Selfcare Client", () => {
       expect(get).toHaveBeenCalledWith("/users", {
         params: {
           userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
           size: 10000
         }
       });
@@ -112,6 +113,7 @@ describe("Selfcare Client", () => {
       expect(get).toHaveBeenCalledWith("/users", {
         params: {
           userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
           size: 10000
         }
       });
@@ -136,6 +138,7 @@ describe("Selfcare Client", () => {
       expect(get).toHaveBeenCalledWith("/users", {
         params: {
           userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
           size: 10000
         }
       });
