@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.11.6
+
+### Patch Changes
+
+- 5ab8065: filter only ACTIVE user's institutions retrieved from selfcare API
+
 ## 1.11.5
 
 ### Patch Changes
