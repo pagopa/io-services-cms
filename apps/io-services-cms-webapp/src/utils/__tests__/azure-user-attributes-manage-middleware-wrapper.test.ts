@@ -1,7 +1,6 @@
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it, vi } from "vitest";
-
 import { BackofficeInternalSubnetCIDRs } from "../../config";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../azure-user-attributes-manage-middleware-wrapper";
 
@@ -18,8 +17,8 @@ const { AzureUserAttributesManageMiddleware } = vi.hoisted(() => ({
           authorizedCIDRs: mocks.authorizedCIDRs,
           email: "" as any,
           kind: "IAzureUserAttributesManage",
-        }),
-      ),
+        })
+      )
   ),
 }));
 
@@ -27,13 +26,13 @@ vi.mock(
   "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage",
   async () => {
     const actual = await vi.importActual(
-      "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage",
+      "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage"
     );
     return {
       ...(actual as any),
       AzureUserAttributesManageMiddleware,
     };
-  },
+  }
 );
 
 const subscriptionCIDRsModelMock = {
@@ -41,8 +40,8 @@ const subscriptionCIDRsModelMock = {
     Promise.resolve(
       E.right({
         authorizedCIDRs: new Set(),
-      }),
-    ),
+      })
+    )
   ),
 } as unknown as SubscriptionCIDRsModel;
 
@@ -56,7 +55,7 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
-      BackofficeInternalSubnetCIDRMock,
+      BackofficeInternalSubnetCIDRMock
     )(requestMock);
 
     expect(E.isRight(result)).toBeTruthy();
@@ -81,13 +80,13 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
           authorizedCIDRs: new Set(returningCIDRs),
           email: "" as any,
           kind: "IAzureUserAttributesManage",
-        }),
-      ),
+        })
+      )
     );
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
-      BackofficeInternalSubnetCIDRMock,
+      BackofficeInternalSubnetCIDRMock
     )(requestMock);
 
     expect(E.isRight(result)).toBeTruthy();

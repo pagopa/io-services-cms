@@ -1,5 +1,4 @@
 import { CosmosClient, Database } from "@azure/cosmos";
-
 import { CosmosConfig } from "../../config";
 
 export const getCmsCosmosDatabase = ({
@@ -15,8 +14,8 @@ export const getCmsCosmosDatabase = ({
 };
 
 export const getAppBackendCosmosDatabase = ({
-  COSMOSDB_APP_BE_NAME,
   COSMOSDB_KEY,
+  COSMOSDB_APP_BE_NAME,
   COSMOSDB_URI,
 }: CosmosConfig): Database => {
   const cosmosdbClient = new CosmosClient({

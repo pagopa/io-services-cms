@@ -11,7 +11,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../config";
 import {
   buildPreviousVersionId,
@@ -30,11 +29,13 @@ const aLegacyService = {
   organizationName: "anOrganizationName",
   requireSecureChannels: true,
   serviceId: "aServiceId",
+  serviceName: "aServiceName",
   serviceMetadata: {
+    category: "aCategory",
+    scope: ServiceScopeEnum.LOCAL,
     address: "anAddress",
     appAndroid: "anAppAndroidUrl",
     appIos: "anAppIosUrl",
-    category: "aCategory",
     cta: "aCta",
     customSpecialFlow: "aCustomSpecialFlow",
     description: "aDescription",
@@ -42,25 +43,25 @@ const aLegacyService = {
     pec: "aPec",
     phone: "aPhone",
     privacyUrl: "aPrivacyUrl",
-    scope: ServiceScopeEnum.LOCAL,
     supportUrl: "aSupportUrl",
     tokenName: "aTokenName",
     tosUrl: "aTosUrl",
-    version: 1,
     webUrl: "aWebUrl",
+    version: 1,
   },
-  serviceName: "aServiceName",
 } as unknown as LegacyService;
 
 const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
+  id: aLegacyService.serviceId,
   data: {
     authorized_cidrs: Array.from(aLegacyService.authorizedCIDRs.values()),
     authorized_recipients: Array.from(
-      aLegacyService.authorizedRecipients.values(),
+      aLegacyService.authorizedRecipients.values()
     ),
     description: aLegacyService.serviceMetadata?.description as NonEmptyString,
     max_allowed_payment_amount: aLegacyService.maxAllowedPaymentAmount,
     metadata: {
+      scope: aLegacyService.serviceMetadata?.scope ?? "LOCAL",
       address: aLegacyService.serviceMetadata?.address,
       app_android: aLegacyService.serviceMetadata?.appAndroid,
       app_ios: aLegacyService.serviceMetadata?.appIos,
@@ -72,7 +73,6 @@ const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
       pec: aLegacyService.serviceMetadata?.pec,
       phone: aLegacyService.serviceMetadata?.phone,
       privacy_url: aLegacyService.serviceMetadata?.privacyUrl,
-      scope: aLegacyService.serviceMetadata?.scope ?? "LOCAL",
       support_url: aLegacyService.serviceMetadata?.supportUrl,
       token_name: aLegacyService.serviceMetadata?.tokenName,
       tos_url: aLegacyService.serviceMetadata?.tosUrl,
@@ -80,16 +80,15 @@ const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
     },
     name: aLegacyService.serviceName,
     organization: {
-      department_name: aLegacyService.departmentName,
       fiscal_code: aLegacyService.organizationFiscalCode,
       name: aLegacyService.organizationName,
+      department_name: aLegacyService.departmentName,
     },
     require_secure_channel: aLegacyService.requireSecureChannels,
   },
   fsm: {
     state: "approved",
   },
-  id: aLegacyService.serviceId,
 };
 const aServicePublicationItem: ServicePublication.ItemType = {
   ...(aServiceLifecycleItem as any),
@@ -106,7 +105,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    }),
+    })
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -128,7 +127,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -166,7 +165,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -217,10 +216,10 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
-    expect(mockServiceModel.find).toHaveBeenCalledWith();
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -235,7 +234,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "LifecycleItemType",
             }),
           ]),
-        }),
+        })
       );
     }
   });
@@ -256,7 +255,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -291,10 +290,10 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
-    expect(mockServiceModel.find).toHaveBeenCalledWith();
+    expect(mockServiceModel.find).toHaveBeenCalled();
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
@@ -306,7 +305,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "LifecycleItemType",
             }),
           ]),
-        }),
+        })
       );
     }
   });
@@ -314,8 +313,8 @@ describe("On Legacy Service Change Handler", () => {
   it("should map a not visible, not deleted but previously published service to a lifecycle approved and pubblication unpublished", async () => {
     const item = {
       ...aLegacyService,
-      isVisible: false,
       version: 1,
+      isVisible: false,
     } as LegacyService;
 
     const mockConfig = {
@@ -327,10 +326,10 @@ describe("On Legacy Service Change Handler", () => {
         TE.right(
           O.some({
             ...aLegacyService,
-            isVisible: true,
             version: 0,
-          }),
-        ),
+            isVisible: true,
+          })
+        )
       ),
     } as unknown as ServiceModel;
 
@@ -339,7 +338,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     const previousVersionId = `${item.serviceId}-${(item.version - 1)
@@ -365,7 +364,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "PublicationItemType",
             }),
           ]),
-        }),
+        })
       );
     }
   });
@@ -373,8 +372,8 @@ describe("On Legacy Service Change Handler", () => {
   it("should map a not visible, not deleted but previously not consecutive published service to a lifecycle approved and pubblication unpublished", async () => {
     const item = {
       ...aLegacyService,
-      isVisible: false,
       version: 2,
+      isVisible: false,
     } as LegacyService;
 
     const mockConfig = {
@@ -389,10 +388,10 @@ describe("On Legacy Service Change Handler", () => {
           TE.right(
             O.some({
               ...aLegacyService,
-              isVisible: true,
               version: 0,
-            }),
-          ),
+              isVisible: true,
+            })
+          )
         ),
     } as unknown as ServiceModel;
 
@@ -401,7 +400,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     const versionOne = `${item.serviceId}-${(1).toString().padStart(16, "0")}`;
@@ -432,7 +431,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "PublicationItemType",
             }),
           ]),
-        }),
+        })
       );
     }
   });
@@ -454,7 +453,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel,
+      mockServiceModel
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -506,8 +505,9 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result =
-        await serviceWasPublished(mockServiceModel)(currentService)();
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -532,8 +532,9 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result =
-        await serviceWasPublished(mockServiceModel)(currentService)();
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -552,8 +553,9 @@ describe("On Legacy Service Change Handler", () => {
         find: vi.fn(() => TE.left(new Error("should not be called"))),
       } as unknown as ServiceModel;
 
-      const result =
-        await serviceWasPublished(mockServiceModel)(currentService)();
+      const result = await serviceWasPublished(mockServiceModel)(
+        currentService
+      )();
 
       expect(mockServiceModel.find).not.toHaveBeenCalled();
       expect(E.isRight(result)).toBeTruthy();

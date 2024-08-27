@@ -29,7 +29,6 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-
 import { IConfig } from "../../config";
 import {
   EventNameEnum,
@@ -43,26 +42,26 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "DeleteServiceHandler";
 
-interface Dependencies {
-  apimService: ApimUtils.ApimService;
+type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
-}
+};
 
-type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
+type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
 
 type DeleteServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId,
+  serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
 export const makeDeleteServiceHandler =
   ({
-    apimService,
     fsmLifecycleClient: fsmLifecycleClient,
+    apimService,
     telemetryClient,
   }: Dependencies): DeleteServiceHandler =>
   (context, auth, _, __, serviceId) =>
@@ -71,28 +70,28 @@ export const makeDeleteServiceHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId,
+        auth.userId
       ),
       TE.chainW(
         flow(
           fsmLifecycleClient.delete,
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft(fsmToApiError),
-        ),
+          TE.mapLeft(fsmToApiError)
+        )
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.DeleteService, {
-          serviceId,
           userSubscriptionId: auth.subscriptionId,
-        }),
+          serviceId,
+        })
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          serviceId,
           userSubscriptionId: auth.subscriptionId,
-        }),
+          serviceId,
+        })
       ),
-      TE.toUnion,
+      TE.toUnion
     )();
 
 export const applyRequestMiddelwares =
@@ -108,14 +107,15 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config,
+        config
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString),
+      RequiredParamMiddleware("serviceId", NonEmptyString)
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
-      ),
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
+      )
     );
   };

@@ -3,17 +3,16 @@ import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { DatabaseError, Pool, PoolClient, QueryResult } from "pg";
 import Cursor from "pg-cursor";
-
 import { PostgreSqlConfig } from "../../config";
 
 // PG ERROR CODES
 export const PG_PK_UNIQUE_VIOLATION_CODE = "23505";
 
+// eslint-disable-next-line functional/no-let
 let singletonPool: Pool;
 export const getPool = (config: PostgreSqlConfig): Pool => {
   if (!singletonPool) {
     singletonPool = new Pool({
-      application_name: config.REVIEWER_DB_APP_NAME,
       database: config.REVIEWER_DB_NAME,
       host: config.REVIEWER_DB_HOST,
       idleTimeoutMillis: config.REVIEWER_DB_IDLE_TIMEOUT,
@@ -22,6 +21,7 @@ export const getPool = (config: PostgreSqlConfig): Pool => {
       port: config.REVIEWER_DB_PORT,
       ssl: true,
       user: config.REVIEWER_DB_USER,
+      application_name: config.REVIEWER_DB_APP_NAME,
     });
   }
   return singletonPool;
@@ -37,7 +37,7 @@ export const queryDataTable =
   (query: string): TE.TaskEither<DatabaseError, QueryResult> =>
     TE.tryCatch(
       () => pool.query(query),
-      (error) => error as DatabaseError,
+      (error) => error as DatabaseError
     );
 
 export const healthcheck = (config: PostgreSqlConfig) =>
@@ -45,5 +45,5 @@ export const healthcheck = (config: PostgreSqlConfig) =>
     "SELECT 1",
     queryDataTable(getPool(config)),
     TE.mapLeft(toHealthProblems("PostgresDB")),
-    TE.map((_) => true as const),
+    TE.map((_) => true as const)
   );

@@ -7,7 +7,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
-
 import { AzureFunctionCall } from "./adapters";
 
 /**
@@ -19,11 +18,11 @@ import { AzureFunctionCall } from "./adapters";
  */
 export const logError =
   (context: Context, label: string) =>
-  (reason: Error | string): Error => {
+  (reason: string | Error): Error => {
     const err =
       reason instanceof Error ? reason : new Error(`${label}|${reason}`);
     context.log.error(
-      `${context.executionContext.functionName}|${err.message}|||${context.executionContext.invocationId}`,
+      `${context.executionContext.functionName}|${err.message}|||${context.executionContext.invocationId}`
     );
     return err;
   };
@@ -31,10 +30,10 @@ export const logError =
 export const log = (
   context: Context,
   message: string,
-  level: keyof Context["log"] = "info",
+  level: keyof Context["log"] = "info"
 ) => {
   context.log[level](
-    `${context.executionContext.functionName}|${message}|||${context.executionContext.invocationId}`,
+    `${context.executionContext.functionName}|${message}|||${context.executionContext.invocationId}`
   );
 };
 
@@ -50,10 +49,10 @@ export const withJsonInput =
   (
     handler: (
       context: Context,
-      ...parsedInputs: readonly Json[]
-    ) => Promise<unknown>,
+      ...parsedInputs: ReadonlyArray<Json>
+    ) => Promise<unknown>
   ) =>
-  (context: Context, ...inputs: readonly unknown[]): Promise<unknown> =>
+  (context: Context, ...inputs: ReadonlyArray<unknown>): Promise<unknown> =>
     pipe(
       inputs,
       RA.map((input) =>
@@ -61,23 +60,20 @@ export const withJsonInput =
           input,
           t.string.decode,
           E.chain(JsonFromString.decode),
-          E.fold((_) => Json.decode(input), E.of),
-        ),
+          E.fold((_) => Json.decode(input), E.of)
+        )
       ),
       RA.sequence(E.Applicative),
       E.mapLeft(
         flow(
           readableReport,
-          logError(
-            context,
-            "Cannot parse incoming queue item into JSON object",
-          ),
-        ),
+          logError(context, "Cannot parse incoming queue item into JSON object")
+        )
       ),
       E.getOrElseW((err) => {
         throw err;
       }),
-      (parsedInputs) => handler(context, ...parsedInputs),
+      (parsedInputs) => handler(context, ...parsedInputs)
     );
 
 /**
@@ -100,12 +96,12 @@ export const processBatchOf =
   <T, U>(
     itemShape: t.Type<T, U>,
     {
-      ignoreMalformedItems = false,
       parallel = true,
+      ignoreMalformedItems = false,
     }: {
-      ignoreMalformedItems?: boolean;
       parallel?: boolean;
-    } = {},
+      ignoreMalformedItems?: boolean;
+    } = {}
   ) =>
   /**
    * @param processSingleItem the procedure that elaborate the single item
@@ -113,15 +109,19 @@ export const processBatchOf =
    *          collected into an array
    */
   <R>(
-    processSingleItem: RTE.ReaderTaskEither<{ item: T }, Error, R>,
-  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, readonly R[]> =>
-  ({ context, inputs: [items], ...rest }): TE.TaskEither<Error, readonly R[]> =>
+    processSingleItem: RTE.ReaderTaskEither<{ item: T }, Error, R>
+  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, ReadonlyArray<R>> =>
+  ({
+    context,
+    inputs: [items],
+    ...rest
+  }): TE.TaskEither<Error, ReadonlyArray<R>> =>
     pipe(
       typeof items === "undefined"
         ? []
         : Array.isArray(items)
-          ? items
-          : [items],
+        ? items
+        : [items],
       // Parse all elements to match the expected type
       RA.map(itemShape.decode),
       RA.separate,
@@ -132,8 +132,8 @@ export const processBatchOf =
           left.map((i) =>
             log(
               context,
-              `Ignoring document, failed to parse: ${JSON.stringify(i)}`,
-            ),
+              `Ignoring document, failed to parse: ${JSON.stringify(i)}`
+            )
           );
           log(context, `Processing ${right.length} items`);
           return TE.right(right);
@@ -143,10 +143,10 @@ export const processBatchOf =
           left.length
         } out of ${right.length + left.length} items.`;
         log(context, msg, "error");
-        return TE.left<Error, readonly T[]>(new Error());
+        return TE.left<Error, ReadonlyArray<T>>(new Error());
       },
       TE.map(RA.map((item) => processSingleItem({ item, ...rest }))),
-      TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq)),
+      TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq))
     );
 
 /**
@@ -170,8 +170,8 @@ export const setBindings =
    * @returns the provided procedure, untouched.
    */
   (
-    procedure: RTE.ReaderTaskEither<AzureFunctionCall & E, L, R>,
-  ): RTE.ReaderTaskEither<AzureFunctionCall & E, L, R> =>
+    procedure: RTE.ReaderTaskEither<E & AzureFunctionCall, L, R>
+  ): RTE.ReaderTaskEither<E & AzureFunctionCall, L, R> =>
     pipe(
       procedure,
       RTE.chain(
@@ -181,8 +181,12 @@ export const setBindings =
               results,
               formatter,
               Object.entries,
-              RA.map(([key, value]) => (context.bindings[key] = value)),
-              (_) => TE.right(results),
-            ),
-      ),
+              RA.map(
+                ([key, value]) =>
+                  // eslint-disable-next-line functional/immutable-data
+                  (context.bindings[key] = value)
+              ),
+              (_) => TE.right(results)
+            )
+      )
     );

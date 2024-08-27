@@ -11,7 +11,6 @@ import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
 import { QueuePermanentError } from "../utils/errors";
@@ -22,7 +21,7 @@ const toServiceLifecycle =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
-    { data, id }: Queue.RequestSyncCmsItem,
+    { id, data }: Queue.RequestSyncCmsItem
   ) =>
     pipe(
       id,
@@ -32,7 +31,7 @@ const toServiceLifecycle =
           O.fold(
             () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
             (currentServiceLifecycle) =>
-              TE.right(currentServiceLifecycle.data.metadata.topic_id),
+              TE.right(currentServiceLifecycle.data.metadata.topic_id)
           ),
           TE.map((topic_id) => ({
             ...data,
@@ -40,26 +39,26 @@ const toServiceLifecycle =
               ...data.metadata,
               topic_id,
             },
-          })),
-        ),
+          }))
+        )
       ),
       TE.map((lifecycleData) => ({
+        id,
         data: lifecycleData,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
-        id,
-      })),
+        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+      }))
     );
 
 const toServicePublication =
   (
     fsmPublicationClient: ServicePublication.FsmClient,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    config: IConfig,
+    config: IConfig
   ) =>
   (
     state: ServicePublication.ItemType["fsm"]["state"],
-    { data, id }: Queue.RequestSyncCmsItem,
+    { id, data }: Queue.RequestSyncCmsItem
   ) =>
     pipe(
       id,
@@ -76,31 +75,30 @@ const toServicePublication =
                     O.fold(
                       () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
                       (currentServiceLifecycle) =>
-                        TE.right(
-                          currentServiceLifecycle.data.metadata.topic_id,
-                        ),
-                    ),
-                  ),
-                ),
+                        TE.right(currentServiceLifecycle.data.metadata.topic_id)
+                    )
+                  )
+                )
               ),
             (currentServicePublication) =>
-              TE.right(currentServicePublication.data.metadata.topic_id),
+              TE.right(currentServicePublication.data.metadata.topic_id)
           ),
+          // eslint-disable-next-line sonarjs/no-identical-functions
           TE.map((topic_id) => ({
             ...data,
             metadata: {
               ...data.metadata,
               topic_id,
             },
-          })),
-        ),
+          }))
+        )
       ),
       TE.map((publicationData) => ({
+        id,
         data: publicationData,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
-        id,
-      })),
+        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
+      }))
     );
 
 export const handleQueueItem = (
@@ -108,7 +106,7 @@ export const handleQueueItem = (
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   fsmPublicationClient: ServicePublication.FsmClient,
-  config: IConfig,
+  config: IConfig
 ) =>
   pipe(
     queueItem,
@@ -116,8 +114,8 @@ export const handleQueueItem = (
     E.mapLeft(
       (err) =>
         new Error(
-          `Error while parsing incoming message, the reason was => ${err.message}`,
-        ),
+          `Error while parsing incoming message, the reason was => ${err.message}`
+        )
     ), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((items) =>
@@ -129,17 +127,14 @@ export const handleQueueItem = (
             toServiceLifecycle(fsmLifecycleClient, config)(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               item.fsm.state as any,
-              item,
+              item
             ),
 
             TE.chain((serviceLifecycle) =>
-              fsmLifecycleClient.override(
-                serviceLifecycle.id,
-                serviceLifecycle,
-              ),
+              fsmLifecycleClient.override(serviceLifecycle.id, serviceLifecycle)
             ),
-            TE.map((_) => void 0),
-          ),
+            TE.map((_) => void 0)
+          )
         ),
         TE.chainW(() =>
           pipe(
@@ -150,24 +145,24 @@ export const handleQueueItem = (
                 toServicePublication(
                   fsmPublicationClient,
                   fsmLifecycleClient,
-                  config,
+                  config
                 )(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   item.fsm.state as any,
-                  item,
+                  item
                 ),
                 TE.chain((servicePublication) =>
                   fsmPublicationClient.override(
                     servicePublication.id,
-                    servicePublication,
-                  ),
+                    servicePublication
+                  )
                 ),
-                TE.map((_) => void 0),
-              ),
-            ),
-          ),
-        ),
-      ),
+                TE.map((_) => void 0)
+              )
+            )
+          )
+        )
+      )
     ),
     TE.getOrElseW((e) => {
       if (e instanceof QueuePermanentError) {
@@ -175,13 +170,13 @@ export const handleQueueItem = (
         return T.of(void 0);
       }
       throw e;
-    }),
+    })
   );
 
 export const createRequestSyncCmsHandler = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   fsmPublicationClient: ServicePublication.FsmClient,
-  config: IConfig,
+  config: IConfig
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
     handleQueueItem(
@@ -189,6 +184,6 @@ export const createRequestSyncCmsHandler = (
       queueItem,
       fsmLifecycleClient,
       fsmPublicationClient,
-      config,
-    )(),
+      config
+    )()
   );

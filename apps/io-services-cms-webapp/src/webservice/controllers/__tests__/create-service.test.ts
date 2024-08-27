@@ -20,7 +20,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
@@ -35,7 +34,7 @@ vi.mock("../../../utils/service-topic-validator", () => ({
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
+      TE.right(O.some({ id, name: "topic name" }))
     ),
   })),
 }));
@@ -61,7 +60,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
+  servicePublicationStore
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -71,49 +70,49 @@ const ownerId = `/an/owner/${anUserId}`;
 const anApimResource = { id: "any-id", name: "any-name" };
 const mockApimService = {
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
   getSubscription: vi.fn(() =>
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    }),
+    })
   ),
-  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
-  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
 } as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
-  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.193.0.0/20"],
   SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.193.0.0/20"],
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
+  cidrs: [] as unknown as ReadonlySet<
+    string &
+      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+  >,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
   _ts: 1,
-  cidrs: [] as unknown as ReadonlySet<
-    IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-      string
-  >,
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedSubscriptionCIDRs",
-  subscriptionId: aManageSubscriptionId as NonEmptyString,
   version: 0 as NonNegativeInteger,
 };
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  }),
+  })
 );
 const containerMock = {
   items: {
-    query: vi.fn(() => ({
-      fetchAll: mockFetchAll,
-    })),
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
       getAsyncIterator: vi.fn(),
+    })),
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
     })),
   },
 } as unknown as Container;
@@ -121,8 +120,8 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const mockAppinsights = {
-  trackError: vi.fn(),
   trackEvent: vi.fn(),
+  trackError: vi.fn(),
 } as any;
 
 const mockContext = {
@@ -147,31 +146,31 @@ describe("createService", () => {
   validateServiceTopicRequest.mockReturnValue(() => TE.right(void 0));
 
   const app = createWebServer({
-    apimService: mockApimService,
     basePath: "api",
-    blobService: mockBlobService,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
-    serviceTopicDao: mockServiceTopicDao,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
+    blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 
   const aNewService = {
-    authorized_recipients: ["BBBBBB99C88D555I"],
+    name: "a service",
     description: "a description",
+    organization: {
+      name: "org",
+      fiscal_code: "00000000000",
+    },
     metadata: {
       scope: "LOCAL",
       topic_id: 1,
     },
-    name: "a service",
-    organization: {
-      fiscal_code: "00000000000",
-      name: "org",
-    },
+    authorized_recipients: ["BBBBBB99C88D555I"],
   };
 
   it("should not accept invalid payloads", async () => {
@@ -229,7 +228,7 @@ describe("createService", () => {
 
   it("should fail when cannot find apim user", async () => {
     vi.mocked(mockApimService.getUserByEmail).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
+      TE.left({ statusCode: 500 })
     );
 
     const spied = vi.spyOn(serviceLifecycleStore, "save");
@@ -249,7 +248,7 @@ describe("createService", () => {
 
   it("should fail when cannot find apim product", async () => {
     vi.mocked(mockApimService.getProductByName).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
+      TE.left({ statusCode: 500 })
     );
 
     const spied = vi.spyOn(serviceLifecycleStore, "save");
@@ -269,7 +268,7 @@ describe("createService", () => {
 
   it("should fail when cannot create subscription", async () => {
     vi.mocked(mockApimService.upsertSubscription).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
+      TE.left({ statusCode: 500 })
     );
 
     const spied = vi.spyOn(serviceLifecycleStore, "save");

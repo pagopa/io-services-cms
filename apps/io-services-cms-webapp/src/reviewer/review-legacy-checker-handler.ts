@@ -6,7 +6,6 @@ import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-
 import { JiraIssue } from "../lib/clients/jira-client";
 import { JiraProxy } from "../utils/jira-proxy";
 import { getLogger } from "../utils/logger";
@@ -22,23 +21,23 @@ const JiraLegacyIssueStatusIdMap: Record<string, string> = {
   10280: "REJECTED",
 };
 
-export interface IssueItemPair {
+export type IssueItemPair = {
   issue: JiraIssue;
   item: ServiceReviewRowDataTable;
-}
+};
 
 export const processBatchOfReviews =
   (
     context: Context,
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
   (items: ServiceReviewRowDataTable[]) =>
     pipe(
       items,
       buildIssueItemPairs(jiraProxy),
-      TE.chain(updateReview(dao, fsmLifecycleClient, context)),
+      TE.chain(updateReview(dao, fsmLifecycleClient, context))
     );
 
 /**
@@ -52,7 +51,7 @@ export const buildIssueItemPairs =
       // from pending items to their relative jira issues
       jiraProxy.searchJiraIssuesByKeyAndStatus(
         items.map((item) => item.ticket_key),
-        ["APPROVED", "REJECTED", "DONE", "Completata"],
+        ["APPROVED", "REJECTED", "DONE", "Completata"]
       ),
       TE.map((jiraResponse) => jiraResponse.issues),
       // consider only the issues associated with a pending review
@@ -69,7 +68,7 @@ export const buildIssueItemPairs =
             // be sure the pending review is not undefined
             .filter((_): _ is IssueItemPair => typeof _.item !== "undefined")
         );
-      }),
+      })
     );
 
 /**
@@ -84,7 +83,7 @@ export const updateReview =
   (
     dao: ServiceReviewDao,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    context: Context,
+    context: Context
   ) =>
   (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> => {
     const logger = getLogger(context, logPrefix, "updateReview");
@@ -101,11 +100,11 @@ export const updateReview =
             TE.mapLeft((err) => {
               logger.logError(err, "Error updating legacy review status on DB");
               return E.toError(err);
-            }),
-          ),
-        ),
+            })
+          )
+        )
       ),
-      TE.map((_) => void 0),
+      TE.map((_) => void 0)
     );
   };
 
@@ -114,7 +113,7 @@ const makeServiceLifecycleApply =
   (
     serviceReview: ServiceReviewRowDataTable,
     jiraIssue: JiraIssue,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) => {
     const logger = getLogger(context, logPrefix, "makeServiceLifecycleApply");
     return pipe(
@@ -126,8 +125,8 @@ const makeServiceLifecycleApply =
             () =>
               TE.left(
                 new Error(
-                  `Service ${serviceReview.service_id} not found cannot ovverride after legacy review`,
-                ),
+                  `Service ${serviceReview.service_id} not found cannot ovverride after legacy review`
+                )
               ),
             flow(
               O.fromPredicate((service) => service.fsm.state !== "deleted"),
@@ -135,7 +134,7 @@ const makeServiceLifecycleApply =
                 () => {
                   logger.log(
                     "warn",
-                    `Service ${serviceReview.service_id} is deleted, skipping it`,
+                    `Service ${serviceReview.service_id} is deleted, skipping it`
                   );
                   return TE.right(void 0);
                 },
@@ -144,15 +143,15 @@ const makeServiceLifecycleApply =
                   (updateService) =>
                     fsmLifecycleClient.override(
                       updateService.id,
-                      updateService,
+                      updateService
                     ),
-                  TE.map((_) => void 0),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+                  TE.map((_) => void 0)
+                )
+              )
+            )
+          )
+        )
+      )
     );
   };
 
@@ -183,7 +182,7 @@ const buildUpdatedServiceLifecycleItem =
   };
 
 const decodeLegacyJiraIssueStatus = (
-  issue: JiraIssue,
+  issue: JiraIssue
 ): "APPROVED" | "REJECTED" => {
   // Trying Decoding using the status id
   const decondedStatus =
@@ -195,13 +194,13 @@ const decodeLegacyJiraIssueStatus = (
 
   // Trying Decoding using the status id
   if (
-    ["APPROVATO", "APPROVED", "COMPLETATA"].includes(
-      issue.fields.status.name.toUpperCase(),
+    ["COMPLETATA", "APPROVATO", "APPROVED"].includes(
+      issue.fields.status.name.toUpperCase()
     )
   ) {
     return "APPROVED";
   } else if (
-    ["REJECTED", "RIFIUTATO"].includes(issue.fields.status.name.toUpperCase())
+    ["RIFIUTATO", "REJECTED"].includes(issue.fields.status.name.toUpperCase())
   ) {
     return "REJECTED";
   }
@@ -213,9 +212,9 @@ export const createReviewLegacyCheckerHandler =
   (
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    fsmLifecycleClient: ServiceLifecycle.FsmClient
   ) =>
   (context: Context): Promise<unknown> =>
     dao.executeOnPending(
-      processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient),
+      processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient)
     )();

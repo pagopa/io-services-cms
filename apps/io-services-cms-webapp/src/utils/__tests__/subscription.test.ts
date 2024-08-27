@@ -3,7 +3,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../config";
 import { serviceOwnerCheckManageTask } from "../subscription";
 
@@ -18,7 +17,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    }),
+    })
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -31,7 +30,7 @@ describe("subscription", () => {
       mockApimService,
       aServiceId,
       aManageSubscriptionId,
-      anUserId,
+      anUserId
     )();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -49,7 +48,7 @@ describe("subscription", () => {
       mockApimService,
       aServiceId,
       aDifferentManageSubscriptionId,
-      aDifferentUserId,
+      aDifferentUserId
     )();
 
     expect(E.isLeft(result)).toBeTruthy();
@@ -63,7 +62,7 @@ describe("subscription", () => {
       mockApimService,
       aServiceId,
       aNotManageSubscriptionId,
-      aDifferentUserId,
+      aDifferentUserId
     )();
     expect(mockApimService.getSubscription).not.toHaveBeenCalled();
     expect(E.isLeft(result)).toBeTruthy();
@@ -77,7 +76,7 @@ describe("subscription", () => {
       getSubscription: vi.fn(() =>
         TE.left({
           statusCode: 404,
-        }),
+        })
       ),
     } as unknown as ApimUtils.ApimService;
 
@@ -85,9 +84,9 @@ describe("subscription", () => {
       mockApimServiceNotFound,
       aServiceId,
       aNotManageSubscriptionId,
-      aDifferentUserId,
+      aDifferentUserId
     )();
-    expect(mockApimServiceNotFound.getSubscription).toHaveBeenCalledWith();
+    expect(mockApimServiceNotFound.getSubscription).toHaveBeenCalled();
     expect(E.isLeft(result)).toBeTruthy();
 
     if (E.isLeft(result)) {

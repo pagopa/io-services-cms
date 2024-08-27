@@ -24,7 +24,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
@@ -35,31 +34,31 @@ import { ErrorResponseTypes } from "../../utils/logger";
 
 const logPrefix = "GetServiceHandler";
 
-interface Dependencies {
-  apimService: ApimUtils.ApimService;
-  config: IConfig;
+type Dependencies = {
   fsmPublicationClient: ServicePublication.FsmClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
-}
+  config: IConfig;
+};
 
 type HandlerResponseTypes =
-  | ErrorResponseTypes
-  | IResponseSuccessJson<ServiceResponsePayload>;
+  | IResponseSuccessJson<ServiceResponsePayload>
+  | ErrorResponseTypes;
 
 type PublishServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId,
+  serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
 export const makeGetServiceHandler =
   ({
-    apimService,
-    config,
     fsmPublicationClient,
+    apimService,
     telemetryClient,
+    config,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
     genericServiceRetrieveHandler(
@@ -67,7 +66,7 @@ export const makeGetServiceHandler =
       apimService,
       telemetryClient,
       config,
-      itemToResponse,
+      itemToResponse
     )(context, auth, serviceId, logPrefix, EventNameEnum.GetServicePublication);
 
 export const applyRequestMiddelwares =
@@ -83,14 +82,15 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config,
+        config
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString),
+      RequiredParamMiddleware("serviceId", NonEmptyString)
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
-      ),
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
+      )
     );
   };

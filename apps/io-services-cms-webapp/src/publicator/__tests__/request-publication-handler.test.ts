@@ -5,7 +5,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { handleQueueItem } from "../request-publication-handler";
 
 const createContext = () =>
@@ -13,14 +12,15 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+  } as unknown as Context);
 
 const atimestamp = 1685529694747;
 const aService = {
+  id: "aServiceId",
   data: {
-    authorized_cidrs: [],
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -28,14 +28,13 @@ const aService = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
-  id: "aServiceId",
 } as unknown as ServiceLifecycle.definitions.Service;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
@@ -52,14 +51,14 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "published" },
-        }),
+        })
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      mockFsmPublicationClient,
+      mockFsmPublicationClient
     )();
 
     expect(mockFsmPublicationClient.release).not.toHaveBeenCalled();
@@ -78,20 +77,20 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "published" },
-        }),
+        })
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmPublicationClient,
+      mockFsmPublicationClient
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
     expect(mockFsmPublicationClient.release).toBeCalledWith(
       aService.id,
       aService,
-      autoPublishQueueItem.autoPublish,
+      autoPublishQueueItem.autoPublish
     );
   });
 
@@ -108,20 +107,20 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "unpublished" },
-        }),
+        })
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       autoPublishQueueItem as unknown as Json,
-      mockFsmPublicationClient,
+      mockFsmPublicationClient
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
     expect(mockFsmPublicationClient.release).toBeCalledWith(
       aService.id,
       aService,
-      autoPublishQueueItem.autoPublish,
+      autoPublishQueueItem.autoPublish
     );
   });
 });

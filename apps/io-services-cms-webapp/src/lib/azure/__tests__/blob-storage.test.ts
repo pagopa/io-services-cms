@@ -1,7 +1,6 @@
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
-
 import { upsertBlobFromImageBuffer } from "../blob-storage";
 
 describe("upsertBlobFromImageBuffer", () => {
@@ -17,7 +16,7 @@ describe("upsertBlobFromImageBuffer", () => {
       mockBlobService,
       containerName,
       blobName,
-      content,
+      content
     )();
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {

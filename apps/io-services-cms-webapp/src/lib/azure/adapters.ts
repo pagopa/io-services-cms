@@ -1,11 +1,10 @@
 import { AzureFunction, Context } from "@azure/functions";
-import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { Express } from "express";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import { Express } from "express";
+import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
 import { pipe } from "fp-ts/lib/function";
-
 import { log } from "./misc";
 
 /**
@@ -23,10 +22,7 @@ export const expressToAzureFunction =
 /**
  * @typedef AzureFunctionCall Describe the context of an Azure Function invocation alongside its inputs
  */
-export interface AzureFunctionCall {
-  context: Context;
-  inputs: unknown[];
-}
+export type AzureFunctionCall = { context: Context; inputs: unknown[] };
 
 /**
  * Adapts a procedure in the form of a ReaderTaskReader into an AzureFunction.
@@ -40,7 +36,7 @@ export interface AzureFunctionCall {
  */
 export const toAzureFunctionHandler =
   <L, R>(
-    procedure: RTE.ReaderTaskEither<AzureFunctionCall, L, R>,
+    procedure: RTE.ReaderTaskEither<AzureFunctionCall, L, R>
   ): AzureFunction =>
   (context, ...inputs) =>
     pipe(
@@ -52,7 +48,7 @@ export const toAzureFunctionHandler =
             : new UnhandledProcedureError(context, E.toError(f).message);
         log(context, error.message, "error");
         throw error;
-      }),
+      })
     )({ context, inputs })();
 
 class UnhandledProcedureError extends Error {

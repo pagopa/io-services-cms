@@ -16,51 +16,51 @@ export enum OrderParamEnum {
 export type OrderParam = t.TypeOf<typeof OrderParam>;
 export const OrderParam = enumType<OrderParamEnum>(OrderParamEnum, "order");
 
-export interface Page<T> {
+export type Page<T> = {
+  resources: ReadonlyArray<T>;
   continuationToken?: string;
-  resources: readonly T[];
-}
+};
 
-export interface CosmosHelper {
-  fetchItems: <T>(
-    query: SqlQuerySpec,
-    codec: t.Type<T>,
-  ) => TE.TaskEither<Error, O.Option<readonly T[]>>;
+export type CosmosHelper = {
   fetchSingleItem: <T>(
     query: SqlQuerySpec,
-    codec: t.Type<T>,
+    codec: t.Type<T>
   ) => TE.TaskEither<Error, O.Option<T>>;
-}
+  fetchItems: <T>(
+    query: SqlQuerySpec,
+    codec: t.Type<T>
+  ) => TE.TaskEither<Error, O.Option<ReadonlyArray<T>>>;
+};
 
-export interface CosmosPagedHelper<T> {
+export type CosmosPagedHelper<T> = {
   pageFetch: (
     query: SqlQuerySpecWithOrder,
     limit?: number,
-    continuationToken?: string,
+    continuationToken?: string
   ) => TE.TaskEither<Error, O.Option<Page<T>>>;
-}
+};
 
-export type SqlQuerySpecWithOrder = {
+export type SqlQuerySpecWithOrder = SqlQuerySpec & {
   order?: OrderParam;
   orderBy?: string;
-} & SqlQuerySpec;
+};
 
 export const makeCosmosHelper = (container: Container): CosmosHelper => {
   const fetchSingleItem = <T>(
     query: SqlQuerySpec,
-    codec: t.Type<T>,
+    codec: t.Type<T>
   ): TE.TaskEither<Error, O.Option<T>> =>
     pipe(
       E.tryCatch(
         () => container.items.query(query),
-        (err) => new Error(`Failed to query CosmosDB: ${err}`),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
       ),
       TE.fromEither,
       TE.chainW((cosmosQueryIterator) =>
         TE.tryCatch(
           () => cosmosQueryIterator.fetchAll(),
-          (err) => new Error(`Failed to fetchSingleItem: ${err}`),
-        ),
+          (err) => new Error(`Failed to fetchSingleItem: ${err}`)
+        )
       ),
       TE.chainW(({ resources }) =>
         pipe(
@@ -71,30 +71,30 @@ export const makeCosmosHelper = (container: Container): CosmosHelper => {
             flow(
               codec.decode,
               E.bimap(flow(readableReport, E.toError), (mappedResult) =>
-                O.some(mappedResult),
+                O.some(mappedResult)
               ),
-              TE.fromEither,
-            ),
-          ),
-        ),
-      ),
+              TE.fromEither
+            )
+          )
+        )
+      )
     );
 
   const fetchItems = <T>(
     query: SqlQuerySpec,
-    codec: t.Type<T>,
-  ): TE.TaskEither<Error, O.Option<readonly T[]>> =>
+    codec: t.Type<T>
+  ): TE.TaskEither<Error, O.Option<ReadonlyArray<T>>> =>
     pipe(
       E.tryCatch(
         () => container.items.query(query),
-        (err) => new Error(`Failed to query CosmosDB: ${err}`),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
       ),
       TE.fromEither,
       TE.chainW((cosmosQueryIterator) =>
         TE.tryCatch(
           () => cosmosQueryIterator.fetchAll(),
-          (err) => new Error(`Failed to fetchItems: ${err}`),
-        ),
+          (err) => new Error(`Failed to fetchItems: ${err}`)
+        )
       ),
       TE.chainW(({ resources }) =>
         pipe(
@@ -105,23 +105,23 @@ export const makeCosmosHelper = (container: Container): CosmosHelper => {
             flow(
               RA.traverse(E.Applicative)(codec.decode),
               E.bimap(flow(readableReport, E.toError), (mappedResult) =>
-                O.some(mappedResult),
+                O.some(mappedResult)
               ),
-              TE.fromEither,
-            ),
-          ),
-        ),
-      ),
+              TE.fromEither
+            )
+          )
+        )
+      )
     );
 
   return {
-    fetchItems,
     fetchSingleItem,
+    fetchItems,
   };
 };
 
 const buildQuerySpec = (
-  querySpecWithOrder: SqlQuerySpecWithOrder,
+  querySpecWithOrder: SqlQuerySpecWithOrder
 ): SqlQuerySpec => {
   const query =
     querySpecWithOrder.order && querySpecWithOrder.orderBy
@@ -129,36 +129,36 @@ const buildQuerySpec = (
       : querySpecWithOrder.query;
 
   return {
-    parameters: querySpecWithOrder.parameters,
     query,
+    parameters: querySpecWithOrder.parameters,
   };
 };
 
 export const makeCosmosPagedHelper = <T>(
   codec: t.Type<T>,
   container: Container,
-  defualtPageFetchSize: number,
+  defualtPageFetchSize: number
 ): CosmosPagedHelper<T> => ({
   pageFetch: (
     query: SqlQuerySpecWithOrder,
     limit = defualtPageFetchSize,
-    continuationToken?: string,
+    continuationToken?: string
   ): TE.TaskEither<Error, O.Option<Page<T>>> =>
     pipe(
       E.tryCatch(
         () =>
           container.items.query(buildQuerySpec(query), {
-            continuation: continuationToken,
             maxItemCount: limit,
+            continuation: continuationToken,
           }),
-        (err) => new Error(`Failed to query CosmosDB: ${err}`),
+        (err) => new Error(`Failed to query CosmosDB: ${err}`)
       ),
       TE.fromEither,
       TE.chainW((cosmosQueryIterator) =>
         TE.tryCatch(
           () => cosmosQueryIterator.fetchNext(),
-          (err) => new Error(`Failed to fetch next page: ${err}`),
-        ),
+          (err) => new Error(`Failed to fetch next page: ${err}`)
+        )
       ),
       TE.chainW((page) =>
         pipe(
@@ -172,12 +172,12 @@ export const makeCosmosPagedHelper = <T>(
                 O.some({
                   continuationToken: page.continuationToken,
                   resources: mappedResult,
-                }),
+                })
               ),
-              TE.fromEither,
-            ),
-          ),
-        ),
-      ),
+              TE.fromEither
+            )
+          )
+        )
+      )
     ),
 });

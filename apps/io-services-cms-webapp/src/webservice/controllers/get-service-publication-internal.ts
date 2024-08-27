@@ -14,7 +14,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
@@ -26,29 +25,29 @@ import { ErrorResponseTypes } from "../../utils/logger";
 
 const logPrefix = "GetServicePublicationInternalHandler";
 
-interface Dependencies {
-  apimService: ApimUtils.ApimService;
-  config: IConfig;
+type Dependencies = {
   fsmPublicationClient: ServicePublication.FsmClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
-}
+  config: IConfig;
+};
 
 type HandlerResponseTypes =
-  | ErrorResponseTypes
-  | IResponseSuccessJson<ServiceResponsePayload>;
+  | IResponseSuccessJson<ServiceResponsePayload>
+  | ErrorResponseTypes;
 
 type GetServicePublicationServiceInternalHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
-  serviceId: ServiceLifecycle.definitions.ServiceId,
+  serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
 export const makeGetServicePublicationInternalHandler =
   ({
-    apimService,
-    config,
     fsmPublicationClient,
+    apimService,
     telemetryClient,
+    config,
   }: Dependencies): GetServicePublicationServiceInternalHandler =>
   (context, auth, serviceId) =>
     genericServiceRetrieveHandler(
@@ -56,11 +55,11 @@ export const makeGetServicePublicationInternalHandler =
       apimService,
       telemetryClient,
       config,
-      itemToResponse,
+      itemToResponse
     )(context, auth, serviceId, logPrefix, EventNameEnum.GetServicePublication);
 
 export const applyRequestMiddelwares = (
-  handler: GetServicePublicationServiceInternalHandler,
+  handler: GetServicePublicationServiceInternalHandler
 ) => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
@@ -68,7 +67,12 @@ export const applyRequestMiddelwares = (
     // only allow requests by users belonging to certain groups
     AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
     // extract the service id from the path variables
-    RequiredParamMiddleware("serviceId", NonEmptyString),
+    RequiredParamMiddleware("serviceId", NonEmptyString)
   );
-  return wrapRequestHandler(middlewaresWrap(handler));
+  return wrapRequestHandler(
+    middlewaresWrap(
+      // eslint-disable-next-line max-params
+      handler
+    )
+  );
 };

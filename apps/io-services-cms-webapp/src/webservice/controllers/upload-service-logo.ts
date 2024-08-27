@@ -35,7 +35,6 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as UPNG from "upng-js";
-
 import { IConfig } from "../../config";
 import { Logo as LogoPayload } from "../../generated/api/Logo";
 import { upsertBlobFromImageBuffer } from "../../lib/azure/blob-storage";
@@ -50,7 +49,7 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "UploadServiceLogoHandler";
 
-type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
+type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
 
 type IUploadServiceLogoHandler = (
   context: Context,
@@ -58,21 +57,22 @@ type IUploadServiceLogoHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
-  logoPayload: LogoPayload,
+  logoPayload: LogoPayload
 ) => Promise<HandlerResponseTypes>;
 
-interface Dependencies {
+type Dependencies = {
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
   blobService: BlobService;
   telemetryClient: TelemetryClient;
-}
+};
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const imageValidationErrorResponse = (details?: string) =>
   ResponseErrorValidation(
     "Image not valid",
-    details ?? "The base64 representation of the logo is invalid",
+    details ?? "The base64 representation of the logo is invalid"
   );
 
 const validateImage = (bufferImage: Buffer) =>
@@ -83,8 +83,8 @@ const validateImage = (bufferImage: Buffer) =>
         imageValidationErrorResponse(
           `Fail decoding provided image, the reason is: ${
             err instanceof Error ? err.message : err
-          }`,
-        ),
+          }`
+        )
     ),
     E.chain((img) =>
       pipe(
@@ -93,11 +93,11 @@ const validateImage = (bufferImage: Buffer) =>
           () => img.width > 0 && img.height > 0,
           () =>
             imageValidationErrorResponse(
-              `Image has invalid dimensions width: ${img.width} height: ${img.height}`,
-            ),
-        ),
-      ),
-    ),
+              `Image has invalid dimensions width: ${img.width} height: ${img.height}`
+            )
+        )
+      )
+    )
   );
 
 const uploadImage =
@@ -108,19 +108,19 @@ const uploadImage =
         blobService,
         "services",
         `${lowerCaseServiceId}.png`,
-        bufferImage,
+        bufferImage
       ),
       TE.mapLeft((err) =>
         ResponseErrorInternal(
-          `Error trying to connect to storage ${err.message}`,
-        ),
+          `Error trying to connect to storage ${err.message}`
+        )
       ),
       TE.chain(
         TE.fromOption(() =>
-          ResponseErrorInternal("Error trying to upload image logo on storage"),
-        ),
+          ResponseErrorInternal("Error trying to upload image logo on storage")
+        )
       ),
-      TE.map(() => ResponseSuccessNoContent()),
+      TE.map(() => ResponseSuccessNoContent())
     );
 
 export const makeUploadServiceLogoHandler =
@@ -138,7 +138,7 @@ export const makeUploadServiceLogoHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId,
+        auth.userId
       ),
       TE.chainW((_) =>
         pipe(
@@ -146,27 +146,27 @@ export const makeUploadServiceLogoHandler =
           validateImage,
           TE.fromEither,
           TE.chainW(() =>
-            uploadImage(blobService)(lowerCaseServiceId, bufferImage),
-          ),
-        ),
+            uploadImage(blobService)(lowerCaseServiceId, bufferImage)
+          )
+        )
       ),
       TE.map(
         trackEventOnResponseOK(
           telemetryClient,
           EventNameEnum.UploadServiceLogo,
           {
-            serviceId,
             userSubscriptionId: auth.subscriptionId,
-          },
-        ),
+            serviceId,
+          }
+        )
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          serviceId,
           userSubscriptionId: auth.subscriptionId,
-        }),
+          serviceId,
+        })
       ),
-      TE.toUnion,
+      TE.toUnion
     )();
   };
 
@@ -183,18 +183,19 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config,
+        config
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(LogoPayload),
+      RequiredBodyPayloadMiddleware(LogoPayload)
     );
     return wrapRequestHandler(
       middlewaresWrap(
+        // eslint-disable-next-line max-params
         checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
-      ),
+          ipTuple(c, u)
+        )
+      )
     );
   };

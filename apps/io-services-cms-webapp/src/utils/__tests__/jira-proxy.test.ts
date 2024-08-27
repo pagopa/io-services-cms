@@ -3,7 +3,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vitest } from "vitest";
-
 import * as config from "../../config";
 import {
   JiraAPIClient,
@@ -14,17 +13,17 @@ import {
 import { Delegate, JiraIssueStatusFilter, jiraProxy } from "../jira-proxy";
 
 const JIRA_CONFIG = {
-  JIRA_CONTRACT_CUSTOM_FIELD: "customfield_1",
-  JIRA_DELEGATE_EMAIL_CUSTOM_FIELD: "customfield_2",
-  JIRA_DELEGATE_NAME_CUSTOM_FIELD: "customfield_3",
-  JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
-  JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
   JIRA_NAMESPACE_URL: "anUrl",
-  JIRA_ORGANIZATION_CF_CUSTOM_FIELD: "customfield_4",
-  JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: "customfield_5",
   JIRA_PROJECT_NAME: "BOARD",
   JIRA_TOKEN: "token",
   JIRA_USERNAME: "aJiraUsername",
+  JIRA_CONTRACT_CUSTOM_FIELD: "customfield_1",
+  JIRA_DELEGATE_EMAIL_CUSTOM_FIELD: "customfield_2",
+  JIRA_DELEGATE_NAME_CUSTOM_FIELD: "customfield_3",
+  JIRA_ORGANIZATION_CF_CUSTOM_FIELD: "customfield_4",
+  JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: "customfield_5",
+  JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
 } as config.JiraConfig;
 
 const mockFetchJson = vitest.fn();
@@ -40,9 +39,11 @@ const aCreateJiraIssueResponse = {
 };
 
 const aService = {
+  id: "aServiceId",
   data: {
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -50,19 +51,17 @@ const aService = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
   },
-  id: "aServiceId",
 } as unknown as ServiceLifecycle.definitions.Service;
 
 const aDelegate = {
-  email: "mario.rossi@email.it",
   name: "Mario Rossi",
+  email: "mario.rossi@email.it",
   permissions: [
     "apiservicewrite",
     "apilimitedmessagewrite",
@@ -73,6 +72,8 @@ const aDelegate = {
 } as Delegate;
 
 const aJiraIssue: JiraIssue = {
+  id: "122796" as NonEmptyString,
+  key: "IEST-17" as NonEmptyString,
   fields: {
     comment: {
       comments: [
@@ -86,14 +87,12 @@ const aJiraIssue: JiraIssue = {
     },
     statuscategorychangedate: "2023-04-06T15:58:21.264+0200" as NonEmptyString,
   },
-  id: "122796" as NonEmptyString,
-  key: "IEST-17" as NonEmptyString,
 };
 
 const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
-  issues: [aJiraIssue],
   startAt: 0,
   total: 12,
+  issues: [aJiraIssue],
 };
 
 const anEmptySearchJiraIssuesResponse: SearchJiraIssuesResponse = {
@@ -104,7 +103,7 @@ const anEmptySearchJiraIssuesResponse: SearchJiraIssuesResponse = {
 describe("Service Review Proxy", () => {
   it("should create a service review on Jira", async () => {
     mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(aCreateJiraIssueResponse),
+      Promise.resolve(aCreateJiraIssueResponse)
     );
     const mockFetch = getMockFetchWithStatus(201);
 
@@ -114,14 +113,14 @@ describe("Service Review Proxy", () => {
     const serviceReviewTicket = await proxy.createJiraIssue(
       aService,
       aDelegate,
-      firstPublication,
+      firstPublication
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body:
         expect.any(String) &&
         expect.stringContaining(
-          `"${aJiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD}":"12345678901"`,
+          `"${aJiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD}":"12345678901"`
         ),
       headers: expect.any(Object),
       method: "POST",
@@ -131,7 +130,7 @@ describe("Service Review Proxy", () => {
 
   it("should create a service review on Jira with High priority in case of national service", async () => {
     mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(aCreateJiraIssueResponse),
+      Promise.resolve(aCreateJiraIssueResponse)
     );
     const mockFetch = getMockFetchWithStatus(201);
 
@@ -152,14 +151,14 @@ describe("Service Review Proxy", () => {
     const serviceReviewTicket = await proxy.createJiraIssue(
       aNationalService,
       aDelegate,
-      firstPublication,
+      firstPublication
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body:
         expect.any(String) &&
         expect.stringContaining(
-          `"priority":{"id":"${JIRA_CONFIG.JIRA_ISSUE_HIGH_PRIORITY_ID}"}`,
+          `"priority":{"id":"${JIRA_CONFIG.JIRA_ISSUE_HIGH_PRIORITY_ID}"}`
         ),
       headers: expect.any(Object),
       method: "POST",
@@ -169,7 +168,7 @@ describe("Service Review Proxy", () => {
 
   it("should retrieve service reviews on Jira", async () => {
     mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(aSearchJiraIssuesResponse),
+      Promise.resolve(aSearchJiraIssuesResponse)
     );
     const mockFetch = getMockFetchWithStatus(200);
 
@@ -182,7 +181,7 @@ describe("Service Review Proxy", () => {
     const searchStatuses: JiraIssueStatusFilter[] = ["APPROVED", "REJECTED"];
     const serviceReviews = await proxy.searchJiraIssuesByKeyAndStatus(
       searchKeys,
-      searchStatuses,
+      searchStatuses
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -192,8 +191,8 @@ describe("Service Review Proxy", () => {
           `"jql":"project = ${
             aJiraClient.config.JIRA_PROJECT_NAME
           } AND key IN(${searchKeys.join(
-            ",",
-          )}) AND status IN (APPROVED,REJECTED)"`,
+            ","
+          )}) AND status IN (APPROVED,REJECTED)"`
         ),
       headers: expect.any(Object),
       method: "POST",
@@ -203,21 +202,21 @@ describe("Service Review Proxy", () => {
 
   it("should retrieve a service review by its ID", async () => {
     mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(aSearchJiraIssuesResponse),
+      Promise.resolve(aSearchJiraIssuesResponse)
     );
     const mockFetch = getMockFetchWithStatus(200);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getJiraIssueByServiceId(
-      "aServiceId" as NonEmptyString,
+      "aServiceId" as NonEmptyString
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body:
         expect.any(String) &&
         expect.stringContaining(
-          `"jql":"project = ${aJiraClient.config.JIRA_PROJECT_NAME} AND summary ~ 'Review #aServiceId'`,
+          `"jql":"project = ${aJiraClient.config.JIRA_PROJECT_NAME} AND summary ~ 'Review #aServiceId'`
         ),
       headers: expect.any(Object),
       method: "POST",
@@ -227,7 +226,7 @@ describe("Service Review Proxy", () => {
       expect(O.isSome(serviceReview.right));
       if (O.isSome(serviceReview.right)) {
         expect(E.isRight(JiraIssue.decode(serviceReview.right.value))).toBe(
-          true,
+          true
         );
       }
     }
@@ -235,14 +234,14 @@ describe("Service Review Proxy", () => {
 
   it("should not retrieve a service review for a wrong service ID", async () => {
     mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(anEmptySearchJiraIssuesResponse),
+      Promise.resolve(anEmptySearchJiraIssuesResponse)
     );
     const mockFetch = getMockFetchWithStatus(200);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getPendingAndRejectedJiraIssueByServiceId(
-      "aWrongServiceId" as NonEmptyString,
+      "aWrongServiceId" as NonEmptyString
     )();
 
     expect(mockFetch).toBeCalledWith(expect.any(String), {
@@ -261,20 +260,20 @@ describe("Service Review Proxy", () => {
       Promise.resolve({
         errorMessages: ["A specific JIRA error message"],
         errors: {},
-      }),
+      })
     );
     const mockFetch = getMockFetchWithStatus(500);
 
     const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
     const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
     const serviceReview = await proxy.getJiraIssueByServiceId(
-      "aServiceId" as NonEmptyString,
+      "aServiceId" as NonEmptyString
     )();
 
     expect(E.isLeft(serviceReview)).toBeTruthy();
     if (E.isLeft(serviceReview)) {
       expect(serviceReview.left.message).toContain(
-        "Jira API searchJiraIssues returns an error",
+        "Jira API searchJiraIssues returns an error"
       );
     }
   });

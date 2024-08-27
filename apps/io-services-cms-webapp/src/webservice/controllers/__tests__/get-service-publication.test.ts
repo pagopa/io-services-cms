@@ -21,7 +21,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../../config";
 import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { WebServerDependencies, createWebServer } from "../../index";
@@ -39,7 +38,7 @@ vi.mock("../../lib/clients/apim-client", async () => {
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
+      TE.right(O.some({ id, name: "topic name" }))
     ),
   })),
 }));
@@ -55,7 +54,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
+  servicePublicationStore
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -64,13 +63,13 @@ const ownerId = `/an/owner/${anUserId}`;
 const anApimResource = { id: "any-id", name: "any-name" };
 
 const mockApimService = {
-  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getSubscription: vi.fn(() =>
     TE.right({
       _etag: "_etag",
       ownerId,
-    }),
+    })
   ),
+  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
   upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
 } as unknown as ApimUtils.ApimService;
@@ -80,33 +79,33 @@ const mockConfig = {
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
+  cidrs: [] as unknown as ReadonlySet<
+    string &
+      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+  >,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
   _ts: 1,
-  cidrs: [] as unknown as ReadonlySet<
-    IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-      string
-  >,
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedSubscriptionCIDRs",
-  subscriptionId: aManageSubscriptionId as NonEmptyString,
   version: 0 as NonNegativeInteger,
 };
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  }),
+  })
 );
 const containerMock = {
   items: {
-    query: vi.fn(() => ({
-      fetchAll: mockFetchAll,
-    })),
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
       getAsyncIterator: vi.fn(),
+    })),
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
     })),
   },
 } as unknown as Container;
@@ -114,9 +113,12 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const aServicePub = {
+  id: "aServiceId",
+  last_update: "aServiceLastUpdate",
   data: {
-    authorized_recipients: [],
+    name: "aServiceName",
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -125,20 +127,17 @@ const aServicePub = {
       scope: "LOCAL",
       topic_id: 1,
     },
-    name: "aServiceName",
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
   },
-  id: "aServiceId",
-  last_update: "aServiceLastUpdate",
 } as unknown as ServicePublication.ItemType;
 
 const mockAppinsights = {
-  trackError: vi.fn(),
   trackEvent: vi.fn(),
+  trackError: vi.fn(),
 } as any;
 
 const mockContext = {
@@ -162,15 +161,15 @@ describe("getServicePublication", () => {
   });
 
   const app = createWebServer({
-    apimService: mockApimService,
     basePath: "api",
-    blobService: mockBlobService,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
-    serviceTopicDao: mockServiceTopicDao,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
+    blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
@@ -207,8 +206,8 @@ describe("getServicePublication", () => {
     expect(response.body).toStrictEqual(
       await pipe(
         getPublicationItemToResponse(mockConfig)(asServiceWithStatus),
-        TE.toUnion,
-      )(),
+        TE.toUnion
+      )()
     );
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
@@ -239,7 +238,7 @@ describe("getServicePublication", () => {
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
     expect(response.text).toContain(
-      "You do not have enough permission to complete the operation you requested",
+      "You do not have enough permission to complete the operation you requested"
     );
     expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);

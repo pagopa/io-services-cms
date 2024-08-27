@@ -23,7 +23,6 @@ import * as RR from "fp-ts/ReadonlyRecord";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
-
 import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
@@ -63,7 +62,7 @@ import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-servic
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 
 // the application global configuration
@@ -72,14 +71,14 @@ const config = getConfigOrThrow();
 // client to interact with Api Management
 const apimClient = ApimUtils.getApimClient(
   config,
-  config.AZURE_SUBSCRIPTION_ID,
+  config.AZURE_SUBSCRIPTION_ID
 );
 
 // Apim Service, used to operates on Apim resources
 const apimService = ApimUtils.getApimService(
   apimClient,
   config.AZURE_APIM_RESOURCE_GROUP,
-  config.AZURE_APIM,
+  config.AZURE_APIM
 );
 
 // client to interact with cms cosmos db
@@ -91,37 +90,35 @@ const appBackendCosmosDatabase = getAppBackendCosmosDatabase(config);
 // create a store for the ServiceLifecycle finite state machine
 const serviceLifecycleStore = stores.createCosmosStore(
   cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
-  ServiceLifecycle.ItemType,
+  ServiceLifecycle.ItemType
 );
 
 // create a store for the ServicePublication finite state machine
 const servicePublicationStore = stores.createCosmosStore(
   cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
-  ServicePublication.ItemType,
+  ServicePublication.ItemType
 );
 
 const serviceHistoryPagedHelper = makeCosmosPagedHelper(
   ServiceHistory,
   cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_HISTORY),
-  config.DEFAULT_PAGED_FETCH_LIMIT,
+  config.DEFAULT_PAGED_FETCH_LIMIT
 );
 
 const servicePublicationCosmosHelper = makeCosmosHelper(
-  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_PUBLICATION)
 );
 
 const serviceLifecycleCosmosHelper = makeCosmosHelper(
-  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
+  cmsCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_LIFECYCLE)
 );
 
 const serviceDetailCosmosHelper = makeCosmosHelper(
-  appBackendCosmosDatabase.container(
-    config.COSMOSDB_CONTAINER_SERVICES_DETAILS,
-  ),
+  appBackendCosmosDatabase.container(config.COSMOSDB_CONTAINER_SERVICES_DETAILS)
 );
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
-  legacyCosmosDbInstance.container(SUBSCRIPTION_CIDRS_COLLECTION_NAME),
+  legacyCosmosDbInstance.container(SUBSCRIPTION_CIDRS_COLLECTION_NAME)
 );
 
 // Get an instance of ServiceLifecycle client
@@ -129,12 +126,12 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 
 // Get an instance of ServicePublication client
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
+  servicePublicationStore
 );
 
 // AppInsights client for Telemetry
 const telemetryClient = initTelemetryClient(
-  config.APPINSIGHTS_INSTRUMENTATIONKEY,
+  config.APPINSIGHTS_INSTRUMENTATIONKEY
 );
 
 const legacyServicesContainer = cosmosdbClient
@@ -148,21 +145,21 @@ const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
-    apimService,
     basePath: BASE_PATH,
-    blobService,
+    apimService,
     config,
     fsmLifecycleClient,
     fsmPublicationClient,
-    serviceHistoryPagedHelper,
-    serviceLifecycleCosmosHelper,
-    servicePublicationCosmosHelper,
-    serviceTopicDao: getServiceTopicDao(config),
     subscriptionCIDRsModel,
     telemetryClient,
+    blobService,
+    serviceTopicDao: getServiceTopicDao(config),
+    serviceHistoryPagedHelper,
+    servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   },
   createWebServer,
-  expressToAzureFunction,
+  expressToAzureFunction
 );
 
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
@@ -171,7 +168,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   apimService,
   fsmLifecycleClient,
   fsmPublicationClient,
-  config,
+  config
 );
 
 export const onRequestValidationEntryPoint = pipe(
@@ -179,9 +176,9 @@ export const onRequestValidationEntryPoint = pipe(
     config,
     fsmLifecycleClient,
     fsmPublicationClient,
-    serviceLifecycleCosmosHelper,
-    servicePublicationCosmosHelper,
     telemetryClient,
+    servicePublicationCosmosHelper,
+    serviceLifecycleCosmosHelper,
   }),
   processBatchOf(t.union([t.string.pipe(JsonFromString), Json]), {
     parallel: false,
@@ -191,10 +188,10 @@ export const onRequestValidationEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestReview")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const createRequestPublicationEntryPoint =
@@ -206,7 +203,7 @@ export const createRequestDeletionEntryPoint =
 export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
   fsmLifecycleClient,
   fsmPublicationClient,
-  config,
+  config
 );
 
 export const onRequestSyncLegacyEntryPoint =
@@ -216,13 +213,13 @@ export const createRequestHistoricizationEntryPoint =
   createRequestHistoricizationHandler();
 
 export const createRequestDetailEntryPoint = createRequestDetailHandler(
-  serviceDetailCosmosHelper,
+  serviceDetailCosmosHelper
 );
 
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getServiceReviewDao(config),
   jiraProxy(jiraClient(config), config),
-  fsmLifecycleClient,
+  fsmLifecycleClient
 );
 
 export const createRequestReviewLegacyEntryPoint =
@@ -232,7 +229,7 @@ export const createRequestReviewLegacyEntryPoint =
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
     }),
-    config,
+    config
   );
 
 export const serviceReviewLegacyCheckerEntryPoint =
@@ -243,9 +240,9 @@ export const serviceReviewLegacyCheckerEntryPoint =
     }),
     jiraProxy(
       jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString }),
-      config,
+      config
     ),
-    fsmLifecycleClient,
+    fsmLifecycleClient
   );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(
@@ -257,28 +254,28 @@ export const onServiceLifecycleChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestDeletion")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
-    ),
-    requestHistoricization: pipe(
-      results,
-      RA.map(RR.lookup("requestHistoricization")),
-      RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
-    ),
-    requestPublication: pipe(
-      results,
-      RA.map(RR.lookup("requestPublication")),
-      RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
     requestReview: pipe(
       results,
       RA.map(RR.lookup("requestReview")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+    requestPublication: pipe(
+      results,
+      RA.map(RR.lookup("requestPublication")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
+    ),
+    requestHistoricization: pipe(
+      results,
+      RA.map(RR.lookup("requestHistoricization")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const onServicePublicationChangeEntryPoint = pipe(
@@ -289,10 +286,10 @@ export const onServicePublicationChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestHistoricization")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const onLegacyServiceChangeEntryPoint = pipe(
@@ -303,10 +300,10 @@ export const onLegacyServiceChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestSyncCms")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const onServiceHistoryChangeEntryPoint = pipe(
@@ -317,10 +314,10 @@ export const onServiceHistoryChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestSyncLegacy")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const onServiceDetailPublicationChangeEntryPoint = pipe(
@@ -331,10 +328,10 @@ export const onServiceDetailPublicationChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestDetailPublication")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );
 
 export const onServiceDetailLifecycleChangeEntryPoint = pipe(
@@ -345,8 +342,8 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
       results,
       RA.map(RR.lookup("requestDetailLifecycle")),
       RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
+      RA.map((item) => pipe(item.value, JSON.stringify))
     ),
   })),
-  toAzureFunctionHandler,
+  toAzureFunctionHandler
 );

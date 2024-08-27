@@ -16,7 +16,6 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
@@ -32,14 +31,13 @@ type RequestSyncLegacyAction = Action<
 const noAction = {};
 
 const cmsToLegacy = (
-  serviceHistory: ServiceHistory,
+  serviceHistory: ServiceHistory
 ): Queue.RequestSyncLegacyItem => {
   const legacyServiceBase = {
     authorizedCIDRs: toAuthorizedCIDRs(serviceHistory.data.authorized_cidrs),
     authorizedRecipients: toAuthorizedRecipients(
-      serviceHistory.data.authorized_recipients,
+      serviceHistory.data.authorized_recipients
     ),
-    cmsTag: true,
     departmentName:
       serviceHistory.data.organization.department_name ??
       ("-" as NonEmptyString),
@@ -48,7 +46,9 @@ const cmsToLegacy = (
     organizationName: serviceHistory.data.organization.name,
     requireSecureChannels: serviceHistory.data.require_secure_channel,
     serviceId: serviceHistory.serviceId,
+    cmsTag: true,
     serviceMetadata: {
+      scope: ServiceScopeEnum[serviceHistory.data.metadata.scope],
       address: serviceHistory.data.metadata.address,
       appAndroid: serviceHistory.data.metadata.app_android,
       appIos: serviceHistory.data.metadata.app_ios,
@@ -58,7 +58,6 @@ const cmsToLegacy = (
       pec: serviceHistory.data.metadata.pec,
       phone: serviceHistory.data.metadata.phone,
       privacyUrl: serviceHistory.data.metadata.privacy_url,
-      scope: ServiceScopeEnum[serviceHistory.data.metadata.scope],
       supportUrl: serviceHistory.data.metadata.support_url,
       tokenName: serviceHistory.data.metadata.token_name,
       tosUrl: serviceHistory.data.metadata.tos_url,
@@ -73,7 +72,7 @@ const cmsToLegacy = (
       ...legacyServiceBase.serviceMetadata,
       ...getSpecialFields(
         serviceHistory.data.metadata.category,
-        serviceHistory.data.metadata.custom_special_flow,
+        serviceHistory.data.metadata.custom_special_flow
       ),
     },
   };
@@ -94,8 +93,8 @@ const manageIsVisibleField = (item: ServiceHistory) => {
 };
 
 const getSpecialFields = (
-  cat?: "SPECIAL" | "STANDARD",
-  customSpecialFlow?: string,
+  cat?: "STANDARD" | "SPECIAL",
+  customSpecialFlow?: string
 ):
   | {
       category: SpecialServiceCategoryEnum;
@@ -144,15 +143,15 @@ const shouldServiceBeSynced =
         flow(
           O.fold(
             () => true,
-            (_) => false,
-          ),
-        ),
-      ),
+            (_) => false
+          )
+        )
+      )
     );
   };
 
 const toRequestSyncLegacyAction = (
-  serviceHistory: ServiceHistory,
+  serviceHistory: ServiceHistory
 ): RequestSyncLegacyAction => ({
   requestSyncLegacy: cmsToLegacy(serviceHistory),
 });
@@ -161,7 +160,7 @@ export const handler =
   (
     config: IConfig,
     apimService: ApimUtils.ApimService,
-    fsmPublicationClient: ServicePublication.FsmClient,
+    fsmPublicationClient: ServicePublication.FsmClient
   ): RTE.ReaderTaskEither<
     { item: ServiceHistory },
     Error,
@@ -184,7 +183,7 @@ export const handler =
               isUserEnabledForCmsToLegacySync(
                 config,
                 apimService,
-                item.serviceId,
+                item.serviceId
               ),
               TE.chainW((isUserEnabled) =>
                 pipe(
@@ -192,12 +191,12 @@ export const handler =
                   O.fromPredicate((_) => isUserEnabled),
                   O.map(toRequestSyncLegacyAction),
                   O.getOrElse(() => noAction),
-                  TE.right,
-                ),
-              ),
-            ),
+                  TE.right
+                )
+              )
+            )
           ),
-          O.getOrElse(() => TE.right(noAction)),
-        ),
-      ),
+          O.getOrElse(() => TE.right(noAction))
+        )
+      )
     );

@@ -17,24 +17,24 @@ import { TaskEither } from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 type ErrorResponses =
+  | IResponseErrorNotFound
   | IResponseErrorForbiddenNotAuthorized
   | IResponseErrorInternal
-  | IResponseErrorNotFound
   | IResponseErrorTooManyRequests;
 
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
   ownerSubscriptionId.startsWith(ApimUtils.definitions.MANAGE_APIKEY_PREFIX);
 
 const extractOwnerId = (
-  fullPath?: string,
+  fullPath?: string
 ): Either<IResponseErrorNotFound, NonEmptyString> =>
   pipe(
     fullPath,
     O.fromNullable,
     O.foldW(
       () => E.left(ResponseErrorNotFound("Not found", "ownerId not found")),
-      (f) => E.right(pipe(f as NonEmptyString, ApimUtils.parseOwnerIdFullPath)),
-    ),
+      (f) => E.right(pipe(f as NonEmptyString, ApimUtils.parseOwnerIdFullPath))
+    )
   );
 
 /**
@@ -55,7 +55,7 @@ export const serviceOwnerCheckManageTask = (
   apimService: ApimUtils.ApimService,
   serviceId: NonEmptyString,
   ownerSubscriptionId: NonEmptyString,
-  userId: NonEmptyString,
+  userId: NonEmptyString
 ): TaskEither<ErrorResponses, NonEmptyString> =>
   pipe(
     ownerSubscriptionId,
@@ -68,10 +68,10 @@ export const serviceOwnerCheckManageTask = (
           statusCode === 404
             ? ResponseErrorNotFound("Not found", `${serviceId} not found`)
             : ResponseErrorInternal(
-                `An error has occurred while retrieving service '${serviceId}'`,
-              ),
-        ),
-      ),
+                `An error has occurred while retrieving service '${serviceId}'`
+              )
+        )
+      )
     ),
     TE.chainW((serviceSubscription) =>
       pipe(
@@ -81,8 +81,8 @@ export const serviceOwnerCheckManageTask = (
         TE.chainW((ownerId) =>
           ownerId === userId
             ? TE.right(serviceId)
-            : TE.left(ResponseErrorForbiddenNotAuthorized),
-        ),
-      ),
-    ),
+            : TE.left(ResponseErrorForbiddenNotAuthorized)
+        )
+      )
+    )
   );

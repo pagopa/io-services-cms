@@ -1,21 +1,22 @@
 import { ServiceId } from "@io-services-cms/models/service-lifecycle/definitions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as T from "fp-ts/Task";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { isNumber } from "fp-ts/lib/number";
+import * as T from "fp-ts/Task";
 import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
-
 import { IConfig } from "../../config";
 import { JIRA_REST_API_PATH, SearchJiraIssuesPayload } from "./jira-client";
 
 export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
 export const JiraLegacyIssue = t.type({
+  id: NonEmptyString,
+  key: NonEmptyString,
   fields: t.intersection([
     t.type({
       comment: t.type({
@@ -29,16 +30,14 @@ export const JiraLegacyIssue = t.type({
       statuscategorychangedate: t.string,
     }),
   ]),
-  id: NonEmptyString,
-  key: NonEmptyString,
 });
 export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
 export const SearchJiraLegacyIssuesResponse = t.intersection([
   t.type({
-    issues: t.readonlyArray(JiraLegacyIssue),
     startAt: t.number,
     total: t.number,
+    issues: t.readonlyArray(JiraLegacyIssue),
   }),
   t.partial({
     warningMessages: t.readonlyArray(t.string),
@@ -48,26 +47,26 @@ export type SearchJiraLegacyIssuesResponse = t.TypeOf<
   typeof SearchJiraLegacyIssuesResponse
 >;
 
-export interface JiraLegacyOptions {
+export type JiraLegacyOptions = {
   defaultRetryAfter?: number;
   maxRetry?: number;
-}
+};
 
-export interface JiraLegacyAPIClient {
+export type JiraLegacyAPIClient = {
   readonly searchJiraIssueByServiceId: (
     serviceId: ServiceId,
-    options?: JiraLegacyOptions,
+    options?: JiraLegacyOptions
   ) => TE.TaskEither<Error, O.Option<JiraLegacyIssue>>;
-}
+};
 
 export const jiraLegacyClient = (
   config: IConfig,
-  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch,
+  fetchApi: typeof fetch = nodeFetch as unknown as typeof fetch
 ): JiraLegacyAPIClient => {
   const jiraHeaders = {
     Accept: "application/json",
     Authorization: `Basic ${Buffer.from(
-      `${config.JIRA_USERNAME}:${config.JIRA_TOKEN}`,
+      `${config.JIRA_USERNAME}:${config.JIRA_TOKEN}`
     ).toString("base64")}`,
     "Content-Type": "application/json",
   };
@@ -80,7 +79,7 @@ export const jiraLegacyClient = (
     }: {
       defaultRetryAfter?: number;
       maxRetry?: number;
-    } = {},
+    } = {}
   ) => {
     const bodyData: SearchJiraIssuesPayload = {
       fields: [
@@ -93,8 +92,8 @@ export const jiraLegacyClient = (
       ],
       fieldsByKeys: false,
       jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND labels = ${JIRA_SERVICE_TAG_PREFIX}${serviceId} ORDER BY created DESC`,
-      maxResults: 1,
       startAt: 0,
+      maxResults: 1,
     };
 
     return pipe(
@@ -107,7 +106,7 @@ export const jiraLegacyClient = (
           method: "POST",
         },
         defaultRetryAfter,
-        maxRetry,
+        maxRetry
       ),
       TE.chain((response) =>
         pipe(
@@ -119,16 +118,16 @@ export const jiraLegacyClient = (
                   response.status
                 }, headers: ${extractHeaders(response)}, error: ${
                   E.toError(err).message
-                }`,
-              ),
+                }`
+              )
           ),
           TE.chain((responseBody) =>
             pipe(
               checkJiraResponse(response.status, responseBody),
-              TE.fromEither,
-            ),
-          ),
-        ),
+              TE.fromEither
+            )
+          )
+        )
       ),
       TE.chain((responseBody) =>
         pipe(
@@ -136,9 +135,9 @@ export const jiraLegacyClient = (
           SearchJiraLegacyIssuesResponse.decode,
           TE.fromEither,
           TE.mapLeft((errors) => E.toError(readableReport(errors))),
-          TE.map((result) => O.fromNullable(result.issues[0])),
-        ),
-      ),
+          TE.map((result) => O.fromNullable(result.issues[0]))
+        )
+      )
     );
   };
 
@@ -147,7 +146,7 @@ export const jiraLegacyClient = (
     fetchApi: typeof fetch,
     options: RequestInit,
     defaultRetryAfter: number,
-    maxRetryCount: number,
+    maxRetryCount: number
   ): TE.TaskEither<Error, Response> => {
     const attempt = (retryCount: number): TE.TaskEither<Error, Response> =>
       pipe(
@@ -158,29 +157,29 @@ export const jiraLegacyClient = (
                 response.headers.get("Retry-After"),
                 O.fromNullable,
                 O.chain((delay) =>
-                  isNumber(Number(delay)) ? O.some(delay) : O.none,
+                  isNumber(Number(delay)) ? O.some(delay) : O.none
                 ),
                 O.fold(
                   () => defaultRetryAfter,
-                  (retryAfter) => Number(retryAfter) * 1000,
+                  (retryAfter) => Number(retryAfter) * 1000
                 ),
                 (retryAfter) =>
                   retryCount < maxRetryCount
                     ? pipe(
                         T.delay(retryAfter)(attempt(retryCount + 1)),
                         TE.map(TE.right),
-                        TE.flatten,
+                        TE.flatten
                       )
                     : TE.left(
                         new Error(
                           `Cannot Contact jira after retries, statusCode: ${
                             response.status
-                          }, headers: ${extractHeaders(response)}`,
-                        ),
-                      ),
+                          }, headers: ${extractHeaders(response)}`
+                        )
+                      )
               )
-            : TE.right(response),
-        ),
+            : TE.right(response)
+        )
       );
 
     return attempt(0);
@@ -190,6 +189,7 @@ export const jiraLegacyClient = (
     try {
       const headers: Record<string, string> = {};
       response.headers.forEach((value, key) => {
+        // eslint-disable-next-line functional/immutable-data
         headers[key] = value;
       });
       return JSON.stringify(headers);
@@ -201,7 +201,7 @@ export const jiraLegacyClient = (
   const checkJiraResponse = (
     status: number,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    responseBody: any,
+    responseBody: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): E.Either<Error, any> => {
     if (status === 200 || status === 201) {
@@ -209,32 +209,32 @@ export const jiraLegacyClient = (
     } else if (status === 400) {
       return E.left(
         new Error(
-          `Invalid request, responseBody: ${JSON.stringify(responseBody)}`,
-        ),
+          `Invalid request, responseBody: ${JSON.stringify(responseBody)}`
+        )
       );
     } else if (status === 401) {
       return E.left(
         new Error(
           `Jira secrets misconfiguration, responseBody: ${JSON.stringify(
-            responseBody,
-          )}`,
-        ),
+            responseBody
+          )}`
+        )
       );
     } else if (status >= 500) {
       return E.left(
         new Error(
           `Jira API returns an error, responseBody: ${JSON.stringify(
-            responseBody,
-          )}`,
-        ),
+            responseBody
+          )}`
+        )
       );
     } else {
       return E.left(
         new Error(
           `Unknown status code ${status} received, responseBody: ${JSON.stringify(
-            responseBody,
-          )}`,
-        ),
+            responseBody
+          )}`
+        )
       );
     }
   };

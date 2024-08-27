@@ -8,7 +8,6 @@ import {
   FsmTransitionExecutionError,
 } from "@io-services-cms/models";
 import { describe, expect, test } from "vitest";
-
 import { fsmToApiError } from "../fsm-error-converters";
 
 describe("FSM error converters", () => {

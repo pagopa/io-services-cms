@@ -4,7 +4,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../config";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
@@ -25,16 +24,19 @@ const mockConfig = {
 } as unknown as IConfig;
 
 const aBaseQueueMessage = {
-  apimUserId: ownerId,
   isNewTicket: true,
   serviceId: "aServiceId",
   ticketId: "aTicketId",
   ticketKey: "aTicketKey",
+  apimUserId: ownerId,
 };
 const aBaseServiceLifecycle = {
+  id: "aServiceId",
+  last_update: "aServiceLastUpdate",
   data: {
-    authorized_recipients: [],
+    name: "aServiceName",
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -42,35 +44,35 @@ const aBaseServiceLifecycle = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
-    name: "aServiceName",
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
   },
   fsm: {
     state: "draft",
   },
-  id: "aServiceId",
-  last_update: "aServiceLastUpdate",
 } as unknown as ServiceLifecycle.ItemType;
 
 const anInsertQueryResult: QueryResult = {
   command: "string",
-  fields: [],
-  oid: 1,
   rowCount: 1,
+  oid: 1,
+  fields: [],
   rows: [],
 };
 
 const mainMockServiceReviewDao = {
+  insert: vi.fn((data: ServiceReviewRowDataTable) => {
+    return TE.of(anInsertQueryResult);
+  }),
   executeOnPending: vi.fn(
-    (fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>) =>
-      TE.of(aVoidFn()),
-  ),
-  insert: vi.fn((data: ServiceReviewRowDataTable) =>
-    TE.of(anInsertQueryResult),
+    (
+      fn: (items: ServiceReviewRowDataTable[]) => TE.TaskEither<Error, void>
+    ) => {
+      return TE.of(aVoidFn());
+    }
   ),
   updateStatus: vi.fn(),
 };
@@ -80,7 +82,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+  } as unknown as Context);
 
 describe("Request Review Legacy Handler", () => {
   it("should set to submitted status the item", async () => {
@@ -97,14 +99,14 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -115,11 +117,11 @@ describe("Request Review Legacy Handler", () => {
       ...aServiceLifecycle,
       fsm: {
         ...aServiceLifecycle.fsm,
-        lastTransition: SYNC_FROM_LEGACY,
         state: "submitted",
+        lastTransition: SYNC_FROM_LEGACY,
       },
     });
-    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith();
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalled();
   });
 
   it("should set to submitted status the item when wildcard is present in inclusionList", async () => {
@@ -136,7 +138,7 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
@@ -147,7 +149,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      excusiveConfig,
+      excusiveConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -158,11 +160,11 @@ describe("Request Review Legacy Handler", () => {
       ...aServiceLifecycle,
       fsm: {
         ...aServiceLifecycle.fsm,
-        lastTransition: SYNC_FROM_LEGACY,
         state: "submitted",
+        lastTransition: SYNC_FROM_LEGACY,
       },
     });
-    expect(mainMockServiceReviewDao.insert).toHaveBeenCalledWith();
+    expect(mainMockServiceReviewDao.insert).toHaveBeenCalled();
   });
 
   it("should do nothing when a service is not related to an allowed user", async () => {
@@ -179,7 +181,7 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
@@ -190,7 +192,7 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      excusiveConfig,
+      excusiveConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -208,11 +210,11 @@ describe("Request Review Legacy Handler", () => {
     };
     const aCurrentlyDeletedServiceLifecycle = {
       ...aBaseServiceLifecycle,
+      id: aServiceId,
       fsm: {
         ...aBaseServiceLifecycle.fsm,
         state: "deleted",
       },
-      id: aServiceId,
     } as unknown as ServiceLifecycle.ItemType;
 
     const mockFsmLifecycleClient = {
@@ -221,14 +223,14 @@ describe("Request Review Legacy Handler", () => {
         TE.right({
           ...aCurrentlyDeletedServiceLifecycle,
           fsm: { state: "submitted" },
-        }),
+        })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -253,14 +255,14 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.some(aServiceLifecycle))),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await handler(context, JSON.stringify(aQueueMessage));
@@ -283,18 +285,18 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.right(O.none)),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(context, JSON.stringify(aQueueMessage))
     ).rejects.toThrowError(`Service ${aServiceId} not found `);
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
@@ -317,18 +319,18 @@ describe("Request Review Legacy Handler", () => {
     const mockFsmLifecycleClient = {
       fetch: vi.fn(() => TE.left(new Error("error fetching service"))),
       override: vi.fn(() =>
-        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } }),
+        TE.right({ ...aServiceLifecycle, fsm: { state: "submitted" } })
       ),
     } as unknown as ServiceLifecycle.FsmClient;
 
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(context, JSON.stringify(aQueueMessage))
     ).rejects.toThrowError("error fetching service");
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
@@ -356,11 +358,11 @@ describe("Request Review Legacy Handler", () => {
     const handler = createRequestReviewLegacyHandler(
       mockFsmLifecycleClient,
       mainMockServiceReviewDao,
-      mockConfig,
+      mockConfig
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(context, JSON.stringify(aQueueMessage))
     ).rejects.toThrowError("error overriding the service");
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
@@ -368,8 +370,8 @@ describe("Request Review Legacy Handler", () => {
       ...aServiceLifecycle,
       fsm: {
         ...aServiceLifecycle.fsm,
-        lastTransition: SYNC_FROM_LEGACY,
         state: "submitted",
+        lastTransition: SYNC_FROM_LEGACY,
       },
     });
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();

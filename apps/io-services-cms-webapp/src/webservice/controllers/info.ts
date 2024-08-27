@@ -1,10 +1,12 @@
-import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import {
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
+
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
+import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
 import { IConfig, envConfig } from "../../config";
 import { healthcheck as checkPostgresDbHealth } from "../../lib/clients/pg-client";
@@ -18,7 +20,7 @@ export const makeInfoHandler = () =>
     healthcheck.checkApplicationHealth(IConfig, [
       (c) =>
         healthcheck.checkAzureStorageHealth(
-          c.INTERNAL_STORAGE_CONNECTION_STRING,
+          c.INTERNAL_STORAGE_CONNECTION_STRING
         ),
       (c) =>
         healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_URI, c.COSMOSDB_KEY),
@@ -29,7 +31,7 @@ export const makeInfoHandler = () =>
       ResponseSuccessJson({
         name: packageJson.name,
         version: packageJson.version,
-      }),
+      })
     ),
-    TE.toUnion,
+    TE.toUnion
   );

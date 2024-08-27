@@ -21,7 +21,7 @@ import {
  * @returns API http error
  */
 export const fsmToApiError = (
-  err: ServiceLifecycle.AllFsmErrors | ServicePublication.AllFsmErrors,
+  err: ServiceLifecycle.AllFsmErrors | ServicePublication.AllFsmErrors
 ) => {
   switch (err.constructor) {
     case FsmNoApplicableTransitionError:

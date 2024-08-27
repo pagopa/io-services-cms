@@ -2,7 +2,6 @@ import { Queue, ServicePublication } from "@io-services-cms/models";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-
 import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 
 type Actions = "requestHistoricization";
@@ -18,7 +17,7 @@ type OnReleaseActions = RequestHistoricizationAction;
 const noAction = {};
 
 const onReleaseHandler = (
-  item: ServicePublication.CosmosResource,
+  item: ServicePublication.CosmosResource
 ): RequestHistoricizationAction => ({
   requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });

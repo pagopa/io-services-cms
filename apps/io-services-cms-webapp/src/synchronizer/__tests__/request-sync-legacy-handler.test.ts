@@ -25,7 +25,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { handleQueueItem } from "../request-sync-legacy-handler";
 
 const createContext = () =>
@@ -33,7 +32,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+  } as unknown as Context);
 
 const anOrganizationFiscalCode = "12345678901" as OrganizationFiscalCode;
 
@@ -74,7 +73,6 @@ const aRetrievedService: RetrievedService = {
 const aLegacyService = {
   authorizedCIDRs: toAuthorizedCIDRs(["127.0.0.1" as CIDR]),
   authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
-  cmsTag: true,
   departmentName: "aDepartmentName",
   isVisible: true,
   maxAllowedPaymentAmount: 1000000,
@@ -82,11 +80,14 @@ const aLegacyService = {
   organizationName: "anOrganizationName",
   requireSecureChannels: false,
   serviceId: "sid",
+  serviceName: "aServiceName",
+  cmsTag: true,
   serviceMetadata: {
+    category: StandardServiceCategoryEnum.STANDARD,
+    scope: ServiceScopeEnum.LOCAL,
     address: "anAddress",
     appAndroid: "anAppAndroidUrl",
     appIos: "anAppIosUrl",
-    category: StandardServiceCategoryEnum.STANDARD,
     cta: "aCta",
     customSpecialFlow: undefined,
     description: "aDescription",
@@ -94,13 +95,11 @@ const aLegacyService = {
     pec: "aPec",
     phone: "aPhone",
     privacyUrl: "aPrivacyUrl",
-    scope: ServiceScopeEnum.LOCAL,
     supportUrl: "aSupportUrl",
     tokenName: "aTokenName",
     tosUrl: "aTosUrl",
     webUrl: "aWebUrl",
   },
-  serviceName: "aServiceName",
 } as unknown as Service;
 
 const aRequestSyncLegacyItem = {
@@ -117,15 +116,15 @@ describe("Sync Legacy Handler", () => {
     const context = createContext();
     const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
     const legacyServiceModelMock = {
-      create: vi.fn(),
       findOneByServiceId: vi.fn(),
+      create: vi.fn(),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(legacyServiceModelMock.findOneByServiceId).not.toBeCalled();
@@ -134,8 +133,10 @@ describe("Sync Legacy Handler", () => {
   it("should return an error if find legacy service fails", async () => {
     const context = createContext();
     const legacyServiceModelMock = {
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.left(CosmosEmptyResponse);
+      }),
       create: vi.fn(),
-      findLastVersionByModelId: vi.fn(() => TE.left(CosmosEmptyResponse)),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
@@ -143,8 +144,8 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock,
-      )(),
+        legacyServiceModelMock
+      )()
     ).rejects.toThrowError(CosmosEmptyResponse.kind);
 
     expect(legacyServiceModelMock.create).not.toBeCalled();
@@ -158,8 +159,12 @@ describe("Sync Legacy Handler", () => {
   it("should return an error if legacy service creation fails", async () => {
     const context = createContext();
     const legacyServiceModelMock = {
-      create: vi.fn(() => TE.left(CosmosConflictResponse)),
-      findLastVersionByModelId: vi.fn(() => TE.right(O.none)),
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.none);
+      }),
+      create: vi.fn(() => {
+        return TE.left(CosmosConflictResponse);
+      }),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
@@ -167,8 +172,8 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock,
-      )(),
+        legacyServiceModelMock
+      )()
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
     expect(legacyServiceModelMock.update).not.toBeCalled();
@@ -182,19 +187,21 @@ describe("Sync Legacy Handler", () => {
   it("should return an error if legacy service update fails", async () => {
     const context = createContext();
     const legacyServiceModelMock = {
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.some(aRetrievedService));
+      }),
       create: vi.fn(),
-      findLastVersionByModelId: vi.fn(() =>
-        TE.right(O.some(aRetrievedService)),
-      ),
-      update: vi.fn(() => TE.left(CosmosConflictResponse)),
+      update: vi.fn(() => {
+        return TE.left(CosmosConflictResponse);
+      }),
     } as unknown as ServiceModel;
 
     await expect(() =>
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock,
-      )(),
+        legacyServiceModelMock
+      )()
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
     expect(legacyServiceModelMock.create).not.toBeCalled();
@@ -208,15 +215,19 @@ describe("Sync Legacy Handler", () => {
   it("should create a new legacy service with CMS tag", async () => {
     const context = createContext();
     const legacyServiceModelMock = {
-      create: vi.fn(() => TE.right(aRetrievedService)),
-      findLastVersionByModelId: vi.fn(() => TE.right(O.none)),
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.none);
+      }),
+      create: vi.fn(() => {
+        return TE.right(aRetrievedService);
+      }),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
@@ -227,7 +238,7 @@ describe("Sync Legacy Handler", () => {
     ]);
     expect(legacyServiceModelMock.create).toBeCalledTimes(1);
     expect(legacyServiceModelMock.create).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true }),
+      expect.objectContaining({ cmsTag: true })
     );
   });
   it("should create a new legacy service with CMS tag on, when only minimal data is set", async () => {
@@ -236,19 +247,19 @@ describe("Sync Legacy Handler", () => {
     const aMinimalService = {
       authorizedCIDRs: toAuthorizedCIDRs(["127.0.0.1" as CIDR]),
       authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
-      cmsTag: true,
       departmentName: "-",
       isVisible: true,
       organizationFiscalCode: "12345678901",
       organizationName: "anOrganizationName",
       serviceId: "sid",
+      serviceName: "aServiceName",
+      cmsTag: true,
       serviceMetadata: {
         category: StandardServiceCategoryEnum.STANDARD,
+        scope: ServiceScopeEnum.LOCAL,
         customSpecialFlow: undefined,
         description: "aDescription",
-        scope: ServiceScopeEnum.LOCAL,
       },
-      serviceName: "aServiceName",
     } as unknown as Service;
 
     const aRequestSyncMinimalLegacyItem = {
@@ -257,15 +268,19 @@ describe("Sync Legacy Handler", () => {
     } as unknown as Queue.RequestSyncLegacyItem;
 
     const legacyServiceModelMock = {
-      create: vi.fn(() => TE.right(aRetrievedService)),
-      findLastVersionByModelId: vi.fn(() => TE.right(O.none)),
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.none);
+      }),
+      create: vi.fn(() => {
+        return TE.right(aRetrievedService);
+      }),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncMinimalLegacyItem as unknown as Json,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
@@ -276,29 +291,29 @@ describe("Sync Legacy Handler", () => {
     ]);
     expect(legacyServiceModelMock.create).toBeCalledTimes(1);
     expect(legacyServiceModelMock.create).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true }),
+      expect.objectContaining({ cmsTag: true })
     );
   });
 
   it("should update a new legacy service with CMS tag", async () => {
     const context = createContext();
     const legacyServiceModelMock = {
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.some(aRetrievedService));
+      }),
       create: vi.fn(),
-      findLastVersionByModelId: vi.fn(() =>
-        TE.right(O.some(aRetrievedService)),
-      ),
       update: vi.fn(() =>
         TE.right({
           ...aRetrievedService,
           ...aLegacyService,
-        }),
+        })
       ),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
@@ -312,11 +327,11 @@ describe("Sync Legacy Handler", () => {
       JSON.stringify({
         ...aRetrievedService,
         ...aRequestSyncLegacyItem,
-      }),
+      })
     );
     console.log("expected:", expected);
     expect(legacyServiceModelMock.update).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true }),
+      expect.objectContaining({ cmsTag: true })
     );
   });
 
@@ -326,19 +341,19 @@ describe("Sync Legacy Handler", () => {
     const aServiceWithoutCidrs = {
       authorizedCIDRs: toAuthorizedCIDRs([]),
       authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
-      cmsTag: true,
       departmentName: "-",
       isVisible: true,
       organizationFiscalCode: "12345678901",
       organizationName: "anOrganizationName",
       serviceId: "sid",
+      serviceName: "aServiceName",
+      cmsTag: true,
       serviceMetadata: {
         category: StandardServiceCategoryEnum.STANDARD,
+        scope: ServiceScopeEnum.LOCAL,
         customSpecialFlow: undefined,
         description: "aDescription",
-        scope: ServiceScopeEnum.LOCAL,
       },
-      serviceName: "aServiceName",
     } as unknown as Service;
 
     const aRequestSyncLegacyItem = {
@@ -347,15 +362,19 @@ describe("Sync Legacy Handler", () => {
     } as unknown as Queue.RequestSyncLegacyItem;
 
     const legacyServiceModelMock = {
-      create: vi.fn((x) => TE.right(x)),
-      findLastVersionByModelId: vi.fn(() => TE.right(O.none)),
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.none);
+      }),
+      create: vi.fn((x) => {
+        return TE.right(x);
+      }),
       update: vi.fn(),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
@@ -368,7 +387,7 @@ describe("Sync Legacy Handler", () => {
     expect(legacyServiceModelMock.create).toBeCalledWith(
       expect.objectContaining({
         authorizedCIDRs: new Set(["0.0.0.0/0"]) as Set<CIDR>,
-      }),
+      })
     );
   });
 
@@ -378,19 +397,19 @@ describe("Sync Legacy Handler", () => {
     const aServiceWithoutCidrs = {
       authorizedCIDRs: toAuthorizedCIDRs([]),
       authorizedRecipients: toAuthorizedRecipients(["BBBBBB01B02C123D"]),
-      cmsTag: true,
       departmentName: "-",
       isVisible: true,
       organizationFiscalCode: "12345678901",
       organizationName: "anOrganizationName",
       serviceId: "sid",
+      serviceName: "aServiceName",
+      cmsTag: true,
       serviceMetadata: {
         category: StandardServiceCategoryEnum.STANDARD,
+        scope: ServiceScopeEnum.LOCAL,
         customSpecialFlow: undefined,
         description: "aDescription",
-        scope: ServiceScopeEnum.LOCAL,
       },
-      serviceName: "aServiceName",
     } as unknown as Service;
 
     const aRequestSyncLegacyItem = {
@@ -399,22 +418,22 @@ describe("Sync Legacy Handler", () => {
     } as unknown as Queue.RequestSyncLegacyItem;
 
     const legacyServiceModelMock = {
+      findLastVersionByModelId: vi.fn(() => {
+        return TE.right(O.some(aRetrievedService));
+      }),
       create: vi.fn(),
-      findLastVersionByModelId: vi.fn(() =>
-        TE.right(O.some(aRetrievedService)),
-      ),
       update: vi.fn(() =>
         TE.right({
           ...aRetrievedService,
           ...aLegacyService,
-        }),
+        })
       ),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock,
+      legacyServiceModelMock
     )();
 
     expect(res).toBeUndefined();
@@ -428,12 +447,12 @@ describe("Sync Legacy Handler", () => {
       JSON.stringify({
         ...aRetrievedService,
         ...aRequestSyncLegacyItem,
-      }),
+      })
     );
     expect(legacyServiceModelMock.update).toBeCalledWith(
       expect.objectContaining({
         authorizedCIDRs: new Set(["0.0.0.0/0"]) as Set<CIDR>,
-      }),
+      })
     );
   });
 });

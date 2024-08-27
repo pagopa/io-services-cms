@@ -4,7 +4,6 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { describe, expect, it } from "vitest";
-
 import { CommaSeparatedListOf } from "../comma-separated-list";
 
 describe("CommaSeparatedListOf", () => {
@@ -17,7 +16,7 @@ describe("CommaSeparatedListOf", () => {
     ${"'a,b,c' into ['a','b','c]"}        | ${"a,b,c"}            | ${["a", "b", "c"]}      | ${t.string}
     ${"trim elements"}                    | ${"a , b, c "}        | ${["a", "b", "c"]}      | ${t.string}
     ${"fiscal codes"}                     | ${"AAABBB80A01C123D"} | ${["AAABBB80A01C123D"]} | ${FiscalCode}
-  `("should parse $title", ({ decoder, expected, input }) => {
+  `("should parse $title", ({ input, expected, decoder }) => {
     pipe(
       CommaSeparatedListOf(decoder).decode(input),
       E.fold(
@@ -26,8 +25,8 @@ describe("CommaSeparatedListOf", () => {
         },
         (value) => {
           expect(value).toEqual(expected);
-        },
-      ),
+        }
+      )
     );
   });
 
@@ -36,7 +35,7 @@ describe("CommaSeparatedListOf", () => {
     ${"non-string values"}    | ${123}       | ${t.any}
     ${"invalid fiscal codes"} | ${"invalid"} | ${FiscalCode}
     ${"'1,2,3' into [1,2,3]"} | ${"1,2,3"}   | ${t.number}
-  `("should fail to parse $title", ({ decoder, input }) => {
+  `("should fail to parse $title", ({ input, decoder }) => {
     const result = CommaSeparatedListOf(decoder).decode(input);
     expect(E.isLeft(result)).toBeTruthy();
   });

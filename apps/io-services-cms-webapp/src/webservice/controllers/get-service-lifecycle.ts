@@ -24,42 +24,42 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
+import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
 import { IConfig } from "../../config";
-import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
-import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { ErrorResponseTypes } from "../../utils/logger";
 
 const logPrefix = "GetServiceLifecycleHandler";
 
 type HandlerResponseTypes =
-  | ErrorResponseTypes
-  | IResponseSuccessJson<ServiceResponsePayload>;
+  | IResponseSuccessJson<ServiceResponsePayload>
+  | ErrorResponseTypes;
 
 type GetServiceLifecycleHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId,
+  serviceId: ServiceLifecycle.definitions.ServiceId
 ) => Promise<HandlerResponseTypes>;
 
-interface Dependencies {
-  apimService: ApimUtils.ApimService;
-  config: IConfig;
+type Dependencies = {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
-}
+  config: IConfig;
+};
 
 export const makeGetServiceLifecycleHandler =
   ({
-    apimService,
-    config,
     fsmLifecycleClient,
+    apimService,
     telemetryClient,
+    config,
   }: Dependencies): GetServiceLifecycleHandler =>
   (context, auth, __, ___, serviceId) =>
     genericServiceRetrieveHandler(
@@ -67,7 +67,7 @@ export const makeGetServiceLifecycleHandler =
       apimService,
       telemetryClient,
       config,
-      itemToResponse,
+      itemToResponse
     )(context, auth, serviceId, logPrefix, EventNameEnum.GetServiceLifecycle);
 
 export const applyRequestMiddelwares =
@@ -83,14 +83,15 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config,
+        config
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString),
+      RequiredParamMiddleware("serviceId", NonEmptyString)
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
-      ),
+        // eslint-disable-next-line max-params
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
+      )
     );
   };

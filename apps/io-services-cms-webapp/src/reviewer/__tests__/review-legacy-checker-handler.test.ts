@@ -5,7 +5,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { JiraIssue } from "../../lib/clients/jira-client";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
@@ -28,9 +27,11 @@ const mockContext = {
 } as any;
 
 const aService = {
+  id: "s1",
   data: {
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -38,14 +39,12 @@ const aService = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
   },
-  id: "s1",
 } as unknown as ServiceLifecycle.definitions.Service;
 
 const aService2 = {
@@ -56,22 +55,24 @@ const aService2 = {
 const anItem1: ServiceReviewRowDataTable = {
   service_id: "s1" as NonEmptyString,
   service_version: "v1" as NonEmptyString,
-  status: "PENDING",
   ticket_id: "tid1" as NonEmptyString,
   ticket_key: "tk1" as NonEmptyString,
+  status: "PENDING",
 };
 
 const anItem2: ServiceReviewRowDataTable = {
   service_id: "s2" as NonEmptyString,
   service_version: "v2" as NonEmptyString,
-  status: "PENDING",
   ticket_id: "tid2" as NonEmptyString,
   ticket_key: "tk2" as NonEmptyString,
+  status: "PENDING",
 };
 
 const anItemList: ServiceReviewRowDataTable[] = [anItem1, anItem2];
 
 const aJiraIssue1: JiraIssue = {
+  id: anItem1.ticket_id,
+  key: anItem1.ticket_key,
   fields: {
     comment: {
       comments: [
@@ -84,10 +85,10 @@ const aJiraIssue1: JiraIssue = {
     },
     statuscategorychangedate: "2023-05-12T15:10:05.173+0200" as NonEmptyString,
   },
-  id: anItem1.ticket_id,
-  key: anItem1.ticket_key,
 };
 const aJiraIssue2: JiraIssue = {
+  id: anItem2.ticket_id,
+  key: anItem2.ticket_key,
   fields: {
     comment: {
       comments: [{ body: "reason comment 1" }, { body: "reason comment 2" }],
@@ -97,33 +98,31 @@ const aJiraIssue2: JiraIssue = {
     },
     statuscategorychangedate: "2023-05-12T15:24:09.173+0200" as NonEmptyString,
   },
-  id: anItem2.ticket_id,
-  key: anItem2.ticket_key,
 };
 
 const anInsertQueryResult: QueryResult = {
   command: "string",
-  fields: [],
-  oid: 1,
   rowCount: 1,
+  oid: 1,
+  fields: [],
   rows: [],
 };
 
 const mainMockServiceReviewDao = {
-  executeOnPending: vi.fn(),
   insert: vi.fn(),
-  updateStatus: vi.fn((data: ServiceReviewRowDataTable) =>
-    TE.of(anInsertQueryResult),
-  ),
+  executeOnPending: vi.fn(),
+  updateStatus: vi.fn((data: ServiceReviewRowDataTable) => {
+    return TE.of(anInsertQueryResult);
+  }),
 };
 
 const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
+  searchJiraIssuesByKeyAndStatus: vi.fn(),
   getJiraIssueByServiceId: vi.fn(),
   getPendingAndRejectedJiraIssueByServiceId: vi.fn(),
-  reOpenJiraIssue: vi.fn(),
-  searchJiraIssuesByKeyAndStatus: vi.fn(),
   updateJiraIssue: vi.fn(),
+  reOpenJiraIssue: vi.fn(),
 };
 
 describe("Service Review Legacy Checker Handler tests", () => {
@@ -132,10 +131,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            issues: [aJiraIssue1, aJiraIssue2],
             startAt: 0,
             total: 2,
-          }),
+            issues: [aJiraIssue1, aJiraIssue2],
+          })
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -159,10 +158,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            issues: [],
             startAt: 0,
             total: 0,
-          }),
+            issues: [],
+          })
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
@@ -177,10 +176,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            issues: [],
             startAt: 0,
             total: 0,
-          }),
+            issues: [],
+          })
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -193,7 +192,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
 
     it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
-        () => TE.left(new Error()),
+        () => TE.left(new Error())
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -214,27 +213,27 @@ describe("Service Review Legacy Checker Handler tests", () => {
             O.some({
               ...aService,
               fsm: { state: "submitted" },
-            }),
-          ),
+            })
+          )
         )
         .mockImplementationOnce(() =>
           TE.right(
             O.some({
               ...aService2,
               fsm: { state: "submitted" },
-            }),
-          ),
+            })
+          )
         );
 
       const mockFsmLifecycleClient = {
-        fetch: mockFetch,
         override: vi.fn((_, service) => TE.right(service)),
+        fetch: mockFetch,
       } as unknown as ServiceLifecycle.FsmClient;
 
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([
         {
           issue: aJiraIssue1,
@@ -254,8 +253,8 @@ describe("Service Review Legacy Checker Handler tests", () => {
       expect(mockFsmLifecycleClient.override).toBeCalledWith(aService.id, {
         ...aService,
         fsm: {
-          approvalDate: aJiraIssue1.fields.statuscategorychangedate,
           state: "approved",
+          approvalDate: aJiraIssue1.fields.statuscategorychangedate,
         },
       });
 
@@ -263,10 +262,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
       expect(mockFsmLifecycleClient.override).toBeCalledWith(aService2.id, {
         ...aService2,
         fsm: {
+          state: "rejected",
           reason: aJiraIssue2.fields.comment.comments
             .map((value) => value.body)
             .join("|"),
-          state: "rejected",
         },
       });
 
@@ -287,7 +286,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([])();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -303,30 +302,30 @@ describe("Service Review Legacy Checker Handler tests", () => {
           O.some({
             ...aService,
             fsm: { state: "submitted" },
-          }),
-        ),
+          })
+        )
       );
 
       const mockFsmLifecycleClient = {
-        fetch: mockFetch,
         override: vi.fn(() => TE.left(new Error("Error overriding service"))),
+        fetch: mockFetch,
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult),
+        Promise.resolve({} as QueryResult)
       );
       const mockServiceReviewDao = {
-        executeOnPending: vi.fn(),
         insert: vi.fn(),
+        executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([
         {
           issue: aJiraIssue1,
@@ -339,9 +338,9 @@ describe("Service Review Legacy Checker Handler tests", () => {
         expect(result.left.message).eq("Error overriding service");
       }
 
-      expect(mockFsmLifecycleClient.fetch).toBeCalledWith();
-      expect(mockFsmLifecycleClient.override).toBeCalledWith();
-      expect(mockServiceReviewDao.updateStatus).toBeCalledWith();
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
+      expect(mockFsmLifecycleClient.override).toBeCalled();
+      expect(mockServiceReviewDao.updateStatus).toBeCalled();
       expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
     });
 
@@ -351,7 +350,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([])();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -363,25 +362,25 @@ describe("Service Review Legacy Checker Handler tests", () => {
 
     it("Should fails when fetch return none", async () => {
       const mockFsmLifecycleClient = {
-        fetch: vi.fn(() => TE.right(O.none)),
         override: vi.fn((_, service) => TE.right(service)),
+        fetch: vi.fn(() => TE.right(O.none)),
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult),
+        Promise.resolve({} as QueryResult)
       );
       const mockServiceReviewDao = {
-        executeOnPending: vi.fn(),
         insert: vi.fn(),
+        executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([
         {
           issue: aJiraIssue1,
@@ -392,13 +391,13 @@ describe("Service Review Legacy Checker Handler tests", () => {
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).eq(
-          `Service ${anItem1.service_id} not found cannot ovverride after legacy review`,
+          `Service ${anItem1.service_id} not found cannot ovverride after legacy review`
         );
       }
 
-      expect(mockFsmLifecycleClient.fetch).toBeCalledWith();
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
       expect(mockFsmLifecycleClient.override).not.toBeCalled();
-      expect(mockServiceReviewDao.updateStatus).toBeCalledWith();
+      expect(mockServiceReviewDao.updateStatus).toBeCalled();
       expect(mockServiceReviewDao_onUpdateStatus).not.toBeCalled();
     });
 
@@ -408,30 +407,30 @@ describe("Service Review Legacy Checker Handler tests", () => {
           O.some({
             ...aService,
             fsm: { state: "deleted" },
-          }),
-        ),
+          })
+        )
       );
 
       const mockFsmLifecycleClient = {
-        fetch: mockFetch,
         override: vi.fn((_, service) => TE.right(service)),
+        fetch: mockFetch,
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult),
+        Promise.resolve({} as QueryResult)
       );
       const mockServiceReviewDao = {
-        executeOnPending: vi.fn(),
         insert: vi.fn(),
+        executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext,
+        mockContext
       )([
         {
           issue: aJiraIssue1,
@@ -441,10 +440,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
 
       expect(E.isRight(result)).toBeTruthy();
 
-      expect(mockFsmLifecycleClient.fetch).toBeCalledWith();
+      expect(mockFsmLifecycleClient.fetch).toBeCalled();
       expect(mockFsmLifecycleClient.override).not.toBeCalled();
-      expect(mockServiceReviewDao.updateStatus).toBeCalledWith();
-      expect(mockServiceReviewDao_onUpdateStatus).toBeCalledWith();
+      expect(mockServiceReviewDao.updateStatus).toBeCalled();
+      expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
     });
   });
 });

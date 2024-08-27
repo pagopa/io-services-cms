@@ -8,11 +8,10 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Mock, afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../config";
 import { TelemetryClient } from "../../utils/applicationinsight";
-import { CosmosHelper } from "../../utils/cosmos-helper";
 import { createServiceValidationHandler } from "../service-validation-handler";
+import { CosmosHelper } from "../../utils/cosmos-helper";
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -35,13 +34,13 @@ const fsmPublicationClientMock = {
 };
 
 const servicePublicationCosmosHelperMock: CosmosHelper = {
-  fetchItems: vi.fn(() => TE.right(O.none)),
   fetchSingleItem: vi.fn(() => TE.right(O.none)),
+  fetchItems: vi.fn(() => TE.right(O.none)),
 };
 
 const serviceLifecycleCosmosHelperMock: CosmosHelper = {
-  fetchItems: vi.fn(() => TE.right(O.none)),
   fetchSingleItem: vi.fn(() => TE.right(O.none)),
+  fetchItems: vi.fn(() => TE.right(O.none)),
 };
 
 const appinsightsMocks = {
@@ -49,87 +48,87 @@ const appinsightsMocks = {
 };
 
 const aValidRequestValidationItem = {
+  id: "aServiceId",
   data: {
-    authorized_cidrs: [],
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
+      privacy_url: "https://url.com",
       address: "via tal dei tali 123",
       email: "service@email.it",
-      privacy_url: "https://url.com",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
-  id: "aServiceId",
   version: "aVersion",
 } as unknown as Queue.RequestReviewItem;
 
 const aNonValidRequestValidationItem = {
+  id: "aServiceId",
   data: {
-    authorized_cidrs: [],
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       email: "service@email.it",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
-  id: "aServiceId",
   version: "aVersion",
 } as unknown as Queue.RequestReviewItem;
 
 const aNoContactRequestValidationItem = {
+  id: "aServiceId",
   data: {
-    authorized_cidrs: [],
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       privacy_url: "https://url.com",
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
-  id: "aServiceId",
   version: "aVersion",
 } as unknown as Queue.RequestReviewItem;
 
 const aSpecificService = {
+  id: "aSpecificServiceId",
   data: {
-    authorized_cidrs: [],
-    authorized_recipients: [],
+    name: "aServiceName" as NonEmptyString,
     description: "aServiceDescription",
+    authorized_recipients: [],
     max_allowed_payment_amount: 123,
     metadata: {
       scope: "LOCAL",
     },
-    name: "aServiceName" as NonEmptyString,
     organization: {
-      fiscal_code: "12345678901",
       name: "anOrganizationName",
+      fiscal_code: "12345678901",
     },
     require_secure_channel: false,
+    authorized_cidrs: [],
   },
-  id: "aSpecificServiceId",
   version: "aVersion",
 } as unknown as Queue.RequestReviewItem;
 
@@ -141,9 +140,9 @@ describe("Service Validation Handler", () => {
         fsmLifecycleClientMock as unknown as ServiceLifecycle.FsmClient,
       fsmPublicationClient:
         fsmPublicationClientMock as unknown as ServicePublication.FsmClient,
-      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperMock,
-      servicePublicationCosmosHelper: servicePublicationCosmosHelperMock,
       telemetryClient: appinsightsMocks as unknown as TelemetryClient,
+      servicePublicationCosmosHelper: servicePublicationCosmosHelperMock,
+      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperMock,
     };
   it("should fail when incoming item is not a valid RequestReviewItem", async () => {
     const { id, ...anInvalidRequestValidationItem } =
@@ -168,16 +167,16 @@ describe("Service Validation Handler", () => {
       ...aValidRequestValidationItem,
       data: {
         ...aValidRequestValidationItem.data,
+        require_secure_channel: false,
         metadata: {
           ...aValidRequestValidationItem.data.metadata,
           tos_url: "http://localhost",
         },
-        require_secure_channel: false,
       },
     };
     const errorMessage = "reject fail";
     fsmLifecycleClientMock.reject.mockReturnValue(
-      TE.left(new Error(errorMessage)),
+      TE.left(new Error(errorMessage))
     );
 
     const res = await createServiceValidationHandler(dependenciesMock)({
@@ -193,7 +192,7 @@ describe("Service Validation Handler", () => {
       anInvalidSecureChannelItem.id,
       expect.objectContaining({
         reason: expect.stringMatching(/is not a valid/),
-      }),
+      })
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
@@ -202,39 +201,39 @@ describe("Service Validation Handler", () => {
 
   it.each([
     {
-      expected: /tos_url(?=.*is not a valid)/,
+      scenario:
+        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelFalseConfig)",
       item: {
         ...aValidRequestValidationItem,
         data: {
           ...aValidRequestValidationItem.data,
+          require_secure_channel: false,
           metadata: {
             ...aValidRequestValidationItem.data.metadata,
             tos_url: "http://localhost",
           },
-          require_secure_channel: false,
         },
       },
-      scenario:
-        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelFalseConfig)",
+      expected: /tos_url(?=.*is not a valid)/,
     },
     {
-      expected: /tos_url\] is not a valid/,
+      scenario:
+        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelTrueConfig)",
       item: {
         ...aValidRequestValidationItem,
         data: {
           ...aValidRequestValidationItem.data,
+          require_secure_channel: true,
           metadata: {
             ...aValidRequestValidationItem.data.metadata,
             tos_url: "invalid url",
           },
-          require_secure_channel: true,
         },
       },
-      scenario:
-        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelTrueConfig)",
+      expected: /tos_url\] is not a valid/,
     },
     {
-      expected: /support_url\] is not a valid/,
+      scenario: "incoming item fails strict validation",
       item: {
         ...aValidRequestValidationItem,
         data: {
@@ -245,19 +244,19 @@ describe("Service Validation Handler", () => {
           },
         },
       },
-      scenario: "incoming item fails strict validation",
+      expected: /support_url\] is not a valid/,
     },
     {
-      expected: /privacy_url\] is not a valid/,
-      item: aNonValidRequestValidationItem,
       scenario: "incoming item fails if privacy_url is undefined",
+      item: aNonValidRequestValidationItem,
+      expected: /privacy_url\] is not a valid/,
     },
     {
-      expected: /email\] is not a valid/,
-      item: aNoContactRequestValidationItem,
       scenario: "incoming item fails if all contact field are undefined",
+      item: aNoContactRequestValidationItem,
+      expected: /email\] is not a valid/,
     },
-  ])("should reject review when $scenario", async ({ expected, item }) => {
+  ])("should reject review when $scenario", async ({ item, expected }) => {
     fsmLifecycleClientMock.reject.mockReturnValue(TE.right(void 0));
 
     const res = await createServiceValidationHandler(dependenciesMock)({
@@ -273,7 +272,7 @@ describe("Service Validation Handler", () => {
       item.id,
       expect.objectContaining({
         reason: expect.stringMatching(expected),
-      }),
+      })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -300,8 +299,8 @@ describe("Service Validation Handler", () => {
 
     const res = await createServiceValidationHandler({
       ...dependenciesMock,
-      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperPresentMock,
       servicePublicationCosmosHelper: servicePublicationCosmosHelperPresentMock,
+      serviceLifecycleCosmosHelper: serviceLifecycleCosmosHelperPresentMock,
     })({
       item: aValidRequestValidationItem,
     })();
@@ -315,9 +314,9 @@ describe("Service Validation Handler", () => {
       aValidRequestValidationItem.id,
       expect.objectContaining({
         reason: expect.stringMatching(
-          `Il servizio '${aValidRequestValidationItem.data.name}' ha lo stesso nome di un altro del servizio con ID '${anAlreadyPresentServiceId}'. Per questo motivo non è possibile procedere con l’approvazione del servizio, che risulta essere il duplicato di un altro.`,
+          `Il servizio '${aValidRequestValidationItem.data.name}' ha lo stesso nome di un altro del servizio con ID '${anAlreadyPresentServiceId}'. Per questo motivo non è possibile procedere con l’approvazione del servizio, che risulta essere il duplicato di un altro.`
         ),
-      }),
+      })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -327,10 +326,10 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
     expect(
-      servicePublicationCosmosHelperPresentMock.fetchItems,
+      servicePublicationCosmosHelperPresentMock.fetchItems
     ).toHaveBeenCalledOnce();
     expect(
-      serviceLifecycleCosmosHelperPresentMock.fetchSingleItem,
+      serviceLifecycleCosmosHelperPresentMock.fetchSingleItem
     ).toHaveBeenCalledOnce();
   });
 
@@ -350,7 +349,7 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aValidRequestValidationItem.id,
+      aValidRequestValidationItem.id
     );
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
@@ -372,7 +371,7 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aValidRequestValidationItem.id,
+      aValidRequestValidationItem.id
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -382,10 +381,10 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
     expect(
-      servicePublicationCosmosHelperMock.fetchItems,
+      servicePublicationCosmosHelperMock.fetchItems
     ).toHaveBeenCalledOnce();
     expect(
-      serviceLifecycleCosmosHelperMock.fetchSingleItem,
+      serviceLifecycleCosmosHelperMock.fetchSingleItem
     ).not.toHaveBeenCalled();
   });
 
@@ -395,8 +394,8 @@ describe("Service Validation Handler", () => {
         O.some({
           ...aValidRequestValidationItem,
           data: { ...aValidRequestValidationItem.data, name: "different name" },
-        }),
-      ),
+        })
+      )
     );
 
     const res = await createServiceValidationHandler(dependenciesMock)({
@@ -411,7 +410,7 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aValidRequestValidationItem.id,
+      aValidRequestValidationItem.id
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -421,10 +420,10 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
     expect(
-      servicePublicationCosmosHelperMock.fetchItems,
+      servicePublicationCosmosHelperMock.fetchItems
     ).toHaveBeenCalledOnce();
     expect(
-      serviceLifecycleCosmosHelperMock.fetchSingleItem,
+      serviceLifecycleCosmosHelperMock.fetchSingleItem
     ).not.toHaveBeenCalled();
   });
 
@@ -437,12 +436,12 @@ describe("Service Validation Handler", () => {
             ...aValidRequestValidationItem.data,
             authorized_cidrs: ["0.0.0.0/0"],
           },
-        }),
-      ),
+        })
+      )
     );
     const errorMessage = "approve fail";
     fsmLifecycleClientMock.approve.mockReturnValue(
-      TE.left(new Error(errorMessage)),
+      TE.left(new Error(errorMessage))
     );
 
     const res = await createServiceValidationHandler(dependenciesMock)({
@@ -455,12 +454,12 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aValidRequestValidationItem.id,
+      aValidRequestValidationItem.id
     );
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledOnce();
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledWith(
       aValidRequestValidationItem.id,
-      expect.objectContaining({ approvalDate: expect.any(String) }),
+      expect.objectContaining({ approvalDate: expect.any(String) })
     );
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
     expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
@@ -473,15 +472,15 @@ describe("Service Validation Handler", () => {
           ...aValidRequestValidationItem,
           data: {
             ...aValidRequestValidationItem.data,
+            require_secure_channel: true,
             authorized_cidrs: ["0.0.0.0/0"],
             metadata: {
               ...aValidRequestValidationItem.data.metadata,
               tos_url: "https://localhost",
             },
-            require_secure_channel: true,
           },
-        }),
-      ),
+        })
+      )
     );
     fsmLifecycleClientMock.approve.mockReturnValue(TE.right(void 0));
 
@@ -495,12 +494,12 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aValidRequestValidationItem.id,
+      aValidRequestValidationItem.id
     );
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledOnce();
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledWith(
       aValidRequestValidationItem.id,
-      expect.objectContaining({ approvalDate: expect.any(String) }),
+      expect.objectContaining({ approvalDate: expect.any(String) })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -510,7 +509,7 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
 
-  it("should approve review when service is in inclusion list even if it doesn't have privacy_url or contact", async () => {
+    it("should approve review when service is in inclusion list even if it doesn't have privacy_url or contact", async () => {
     fsmPublicationClientMock
       .getStore()
       .fetch.mockReturnValue(TE.right(O.some(aSpecificService)));
@@ -526,12 +525,12 @@ describe("Service Validation Handler", () => {
 
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledOnce();
     expect(fsmPublicationClientMock.getStore().fetch).toHaveBeenCalledWith(
-      aSpecificService.id,
+      aSpecificService.id
     );
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledOnce();
     expect(fsmLifecycleClientMock.approve).toHaveBeenCalledWith(
       aSpecificService.id,
-      expect.objectContaining({ approvalDate: expect.any(String) }),
+      expect.objectContaining({ approvalDate: expect.any(String) })
     );
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledOnce();
     expect(appinsightsMocks.trackEvent).toHaveBeenCalledWith({
@@ -541,3 +540,5 @@ describe("Service Validation Handler", () => {
     expect(fsmLifecycleClientMock.reject).not.toHaveBeenCalled();
   });
 });
+
+

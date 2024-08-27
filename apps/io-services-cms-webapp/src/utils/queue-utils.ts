@@ -3,7 +3,6 @@ import * as E from "fp-ts/lib/Either";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
-
 import { QueuePermanentError } from "./errors";
 
 export const parseIncomingMessage =
@@ -15,8 +14,7 @@ export const parseIncomingMessage =
       E.mapLeft(
         flow(
           readableReport,
-          (_) =>
-            new QueuePermanentError(`Error parsing incoming message: ${_}`),
-        ),
-      ),
+          (_) => new QueuePermanentError(`Error parsing incoming message: ${_}`)
+        )
+      )
     );

@@ -12,16 +12,55 @@ import {
 import { Errors } from "io-ts";
 
 export type ErrorResponseTypes =
-  | IResponseErrorConflict
   | IResponseErrorForbiddenNotAuthorized
-  | IResponseErrorInternal
   | IResponseErrorNotFound
+  | IResponseErrorConflict
   | IResponseErrorTooManyRequests
+  | IResponseErrorInternal
   | IResponseErrorValidation;
 
-type LogLevel = "error" | "info" | "warn";
+type LogLevel = "info" | "warn" | "error";
 
-export const getLogger = (context: Context, logPrefix: string, step = "-") => ({
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const getLogger = (
+  context: Context,
+  logPrefix: string,
+  step: string = "-"
+) => ({
+  logCosmosErrors: (errs: CosmosErrors): void =>
+    context.log.error(
+      `${logPrefix}|${step}|COSMOS_ERROR|ERROR_DETAILS=${
+        errs.kind === "COSMOS_EMPTY_RESPONSE" ||
+        errs.kind === "COSMOS_CONFLICT_RESPONSE"
+          ? errs.kind
+          : errs.kind === "COSMOS_DECODING_ERROR"
+          ? errorsToReadableMessages(errs.error).join("/")
+          : JSON.stringify(errs.error)
+      }`
+    ),
+  logErrors: (errs: Errors): void =>
+    context.log.error(
+      `${logPrefix}|${step}|ERROR=${errorsToReadableMessages(errs)}`
+    ),
+  logError: (err: Error, message: string): void =>
+    context.log.error(
+      `${logPrefix}|${step}|MESSAGE=${message}|ERROR=${err.message}`
+    ),
+  logErrorResponse: (
+    errorResponse: ErrorResponseTypes,
+    addititionalInfo?: unknown
+  ) => {
+    context.log.error(
+      `${logPrefix}|${step}|${handleErrorResponseType(errorResponse)}|${
+        addititionalInfo ? JSON.stringify(addititionalInfo) : ""
+      }`
+    );
+    return errorResponse;
+  },
+  logUnknown: (errs: unknown): void =>
+    context.log.error(
+      `${logPrefix}|${step}|UNKNOWN_ERROR=${JSON.stringify(errs)}`
+    ),
   log: (level: LogLevel, message: string): void => {
     switch (level) {
       case "warn":
@@ -35,40 +74,6 @@ export const getLogger = (context: Context, logPrefix: string, step = "-") => ({
         break;
     }
   },
-  logCosmosErrors: (errs: CosmosErrors): void =>
-    context.log.error(
-      `${logPrefix}|${step}|COSMOS_ERROR|ERROR_DETAILS=${
-        errs.kind === "COSMOS_EMPTY_RESPONSE" ||
-        errs.kind === "COSMOS_CONFLICT_RESPONSE"
-          ? errs.kind
-          : errs.kind === "COSMOS_DECODING_ERROR"
-            ? errorsToReadableMessages(errs.error).join("/")
-            : JSON.stringify(errs.error)
-      }`,
-    ),
-  logError: (err: Error, message: string): void =>
-    context.log.error(
-      `${logPrefix}|${step}|MESSAGE=${message}|ERROR=${err.message}`,
-    ),
-  logErrorResponse: (
-    errorResponse: ErrorResponseTypes,
-    addititionalInfo?: unknown,
-  ) => {
-    context.log.error(
-      `${logPrefix}|${step}|${handleErrorResponseType(errorResponse)}|${
-        addititionalInfo ? JSON.stringify(addititionalInfo) : ""
-      }`,
-    );
-    return errorResponse;
-  },
-  logErrors: (errs: Errors): void =>
-    context.log.error(
-      `${logPrefix}|${step}|ERROR=${errorsToReadableMessages(errs)}`,
-    ),
-  logUnknown: (errs: unknown): void =>
-    context.log.error(
-      `${logPrefix}|${step}|UNKNOWN_ERROR=${JSON.stringify(errs)}`,
-    ),
 });
 
 const handleErrorResponseType = (errorResponse: ErrorResponseTypes) =>

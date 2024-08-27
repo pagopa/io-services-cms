@@ -44,7 +44,6 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePagination } from "../../generated/api/ServicePagination";
@@ -61,8 +60,8 @@ import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 const logPrefix = "GetServicesHandler";
 
 type HandlerResponseTypes =
-  | ErrorResponseTypes
-  | IResponseSuccessJson<ServicePagination>;
+  | IResponseSuccessJson<ServicePagination>
+  | ErrorResponseTypes;
 
 type GetServicesHandler = (
   context: Context,
@@ -71,23 +70,23 @@ type GetServicesHandler = (
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
   limit: O.Option<number>,
-  offset: O.Option<number>,
+  offset: O.Option<number>
 ) => Promise<HandlerResponseTypes>;
 
-interface Dependencies {
+type Dependencies = {
+  // An instance of ServiceLifecycle client
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   // The app configuration
   config: IConfig;
-  // An instance of ServiceLifecycle client
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
-}
+};
 
-export interface ServiceSubscriptionPair {
+export type ServiceSubscriptionPair = {
   service: ServiceResponsePayload;
   subscription: SubscriptionContract;
-}
+};
 
 // utility to extract a non-empty id from an object
 const pickId = (obj: unknown): E.Either<Error, NonEmptyString> =>
@@ -97,53 +96,53 @@ const pickId = (obj: unknown): E.Either<Error, NonEmptyString> =>
     E.bimap(
       (err) =>
         new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-      ({ id }) => ApimUtils.parseOwnerIdFullPath(id),
-    ),
+      ({ id }) => ApimUtils.parseOwnerIdFullPath(id)
+    )
   );
 
 const getUserIdTask = (
   apimService: ApimUtils.ApimService,
-  userEmail: EmailString,
+  userEmail: EmailString
 ) =>
   pipe(
     apimService.getUserByEmail(userEmail),
     TE.mapLeft(
       (err) =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
+        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
     ),
     TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-    TE.chain(flow(pickId, TE.fromEither)),
+    TE.chain(flow(pickId, TE.fromEither))
   );
 
 const buildServicePagination = (
   serviceSubscriptionPairs: ServiceSubscriptionPair[],
   limit: number,
-  offset: number,
+  offset: number
 ): ServicePagination => ({
+  value: serviceSubscriptionPairs.map((pair) => pair.service),
   pagination: {
     count: serviceSubscriptionPairs.length,
     limit,
     offset,
   },
-  value: serviceSubscriptionPairs.map((pair) => pair.service),
 });
 
 const getServices =
   (config: IConfig) =>
   (
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    subscriptions: readonly SubscriptionContract[],
+    subscriptions: ReadonlyArray<SubscriptionContract>
   ): TE.TaskEither<
     Error | IResponseErrorInternal,
-    readonly ServiceResponsePayload[]
+    ReadonlyArray<ServiceResponsePayload>
   > =>
     pipe(
       fsmLifecycleClient
         .getStore()
         .bulkFetch(
           subscriptions.map(
-            (subscription) => subscription.name as NonEmptyString,
-          ),
+            (subscription) => subscription.name as NonEmptyString
+          )
         ),
       TE.map(
         flow(
@@ -151,26 +150,26 @@ const getServices =
             flow(
               O.fold(
                 () => TE.right({} as ServiceResponsePayload),
-                (service) => itemToResponse(config)(service),
-              ),
-            ),
+                (service) => itemToResponse(config)(service)
+              )
+            )
           ),
-          RA.sequence(TE.ApplicativeSeq), // TODO: is it better to use TE.ApplicativeSeq?!?
-        ),
+          RA.sequence(TE.ApplicativeSeq) // TODO: is it better to use TE.ApplicativeSeq?!?
+        )
       ),
-      TE.flattenW,
+      TE.flattenW
     );
 
 const getLimit = (limit: O.Option<number>, defaultValue: number) =>
   pipe(
     limit,
-    O.getOrElse(() => defaultValue),
+    O.getOrElse(() => defaultValue)
   );
 
 const getOffset = (offset: O.Option<number>) =>
   pipe(
     offset,
-    O.getOrElse(() => 0),
+    O.getOrElse(() => 0)
   );
 
 /**
@@ -180,27 +179,27 @@ const getOffset = (offset: O.Option<number>) =>
  * @returns
  */
 export const buildServiceSubscriptionPairs = (
-  subscriptions: readonly SubscriptionContract[],
-  services: readonly ServiceResponsePayload[],
+  subscriptions: ReadonlyArray<SubscriptionContract>,
+  services: ReadonlyArray<ServiceResponsePayload>
 ) =>
   subscriptions
     // associate each service with its subscription
     .map((subscription) => ({
-      service: services.find((s) => s.id === subscription.name),
       subscription,
+      service: services.find((s) => s.id === subscription.name),
     }))
     // be sure both subscription and service are not undefined
     .filter(
       (_): _ is ServiceSubscriptionPair =>
         typeof _.subscription !== "undefined" &&
-        typeof _.service !== "undefined",
+        typeof _.service !== "undefined"
     );
 
 export const makeGetServicesHandler =
   ({
+    fsmLifecycleClient,
     apimService,
     config,
-    fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
   (context, auth, __, ___, userEmail, limit, offset) =>
@@ -211,46 +210,46 @@ export const makeGetServicesHandler =
           apimService.getUserSubscriptions(
             userId,
             getOffset(offset),
-            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
+            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT)
           ),
-          TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`)),
-        ),
+          TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`))
+        )
       ),
       TE.chain((subscriptions) =>
         pipe(
           getServices(config)(fsmLifecycleClient, subscriptions),
           TE.map((services) =>
-            buildServiceSubscriptionPairs(subscriptions, services),
-          ),
-        ),
+            buildServiceSubscriptionPairs(subscriptions, services)
+          )
+        )
       ),
       TE.map((serviceSubscriptionPairs) =>
         ResponseSuccessJson<ServicePagination>(
           buildServicePagination(
             serviceSubscriptionPairs,
             getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
-            getOffset(offset),
-          ),
-        ),
+            getOffset(offset)
+          )
+        )
       ),
       TE.mapLeft((err) =>
-        "kind" in err ? err : ResponseErrorInternal(err.message),
+        "kind" in err ? err : ResponseErrorInternal(err.message)
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServices, {
+          userSubscriptionId: auth.subscriptionId,
           limit,
           offset,
-          userSubscriptionId: auth.subscriptionId,
-        }),
+        })
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
+          userSubscriptionId: auth.subscriptionId,
           limit,
           offset,
-          userSubscriptionId: auth.subscriptionId,
-        }),
+        })
       ),
-      TE.toUnion,
+      TE.toUnion
     )();
 
 export const applyRequestMiddelwares =
@@ -266,7 +265,7 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config,
+        config
       ),
       // extract the user email from the request headers
       UserEmailMiddleware(),
@@ -278,20 +277,21 @@ export const applyRequestMiddelwares =
             1,
             typeof config.PAGINATION_MAX_LIMIT,
             IWithinRangeIntegerTag<1, typeof config.PAGINATION_MAX_LIMIT>
-          >(1, config.PAGINATION_MAX_LIMIT),
-        ),
+          >(1, config.PAGINATION_MAX_LIMIT)
+        )
       ),
       // extract offset as number of records to skip from query params
       OptionalQueryParamMiddleware(
         "offset",
-        IntegerFromString.pipe(NonNegativeInteger),
-      ),
+        IntegerFromString.pipe(NonNegativeInteger)
+      )
     );
     return wrapRequestHandler(
       middlewaresWrap(
+        // eslint-disable-next-line max-params
         checkSourceIpForHandler(handler, (_, __, c, u, ___, ____, _____) =>
-          ipTuple(c, u),
-        ),
-      ),
+          ipTuple(c, u)
+        )
+      )
     );
   };

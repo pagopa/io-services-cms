@@ -6,34 +6,33 @@ import {
 import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 import { IResponse } from "@pagopa/ts-commons/lib/responses";
 import * as E from "fp-ts/lib/Either";
-
 import { BackofficeInternalSubnetCIDRs } from "../config";
 
 export const AzureUserAttributesManageMiddlewareWrapper =
   (
     subscriptionCIDRsModel: SubscriptionCIDRsModel,
-    { BACKOFFICE_INTERNAL_SUBNET_CIDRS }: BackofficeInternalSubnetCIDRs,
+    { BACKOFFICE_INTERNAL_SUBNET_CIDRS }: BackofficeInternalSubnetCIDRs
   ): IRequestMiddleware<
     | "IResponseErrorForbiddenNotAuthorized"
-    | "IResponseErrorInternal"
-    | "IResponseErrorQuery",
+    | "IResponseErrorQuery"
+    | "IResponseErrorInternal",
     IAzureUserAttributesManage
   > =>
   async (
-    request,
+    request
   ): Promise<
     E.Either<
       IResponse<
         | "IResponseErrorForbiddenNotAuthorized"
-        | "IResponseErrorInternal"
         | "IResponseErrorQuery"
+        | "IResponseErrorInternal"
       >,
       IAzureUserAttributesManage
     >
   > => {
     // Execute the AzureUserAttributesManageMiddleware
     const originalMiddelwareResult = await AzureUserAttributesManageMiddleware(
-      subscriptionCIDRsModel,
+      subscriptionCIDRsModel
     )(request);
 
     // eslint-disable-next-line no-console
@@ -43,7 +42,7 @@ export const AzureUserAttributesManageMiddlewareWrapper =
       " | headers.forwarded: ",
       request.headers?.forwarded,
       " | X-Forwarded-For: ",
-      request.header ? request.header("X-Forwarded-For") : undefined,
+      request.header ? request.header("X-Forwarded-For") : undefined
     );
 
     // If the middleware fails or the request comes outside the Backoffice subnet

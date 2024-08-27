@@ -3,7 +3,6 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, test, vi } from "vitest";
-
 import { TopicPostgreSqlConfig } from "../../../config";
 import { FiscalCode } from "../../../generated/api/FiscalCode";
 import { ServicePayload } from "../../../generated/api/ServicePayload";
@@ -15,7 +14,7 @@ import {
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
+      TE.right(O.some({ id, name: "topic name" }))
     ),
   })),
 }));
@@ -34,30 +33,30 @@ const aSandboxFiscalCode = "AAAAAA00A00A000A";
 const mockDbConfig = {} as unknown as TopicPostgreSqlConfig;
 
 describe("test service-lifecycle-converters", () => {
-  test("service-lifecycle-converters", () => {
+  test("test service-lifecycle-converters", () => {
     const result = toServiceStatus(fsm);
     expect(result.reason).not.toBeDefined();
   });
 
   test("Authorized Recipients should contains the default fiscal code and the one on request", () => {
     const aNewService = {
-      authorized_recipients: [anAutorizedFiscalCode],
+      name: "a service",
       description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
       metadata: {
         scope: "LOCAL",
         topic_id: 1,
       },
-      name: "a service",
-      organization: {
-        fiscal_code: "00000000000",
-        name: "org",
-      },
+      authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
 
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode,
+      aSandboxFiscalCode as FiscalCode
     );
     expect(result.data.authorized_recipients).toBeDefined();
     expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
@@ -67,23 +66,23 @@ describe("test service-lifecycle-converters", () => {
 
   test("Should not add the default sandbox recipient when already present", () => {
     const aNewService = {
-      authorized_recipients: [aSandboxFiscalCode],
+      name: "a service",
       description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
       metadata: {
         scope: "LOCAL",
         topic_id: 1,
       },
-      name: "a service",
-      organization: {
-        fiscal_code: "00000000000",
-        name: "org",
-      },
+      authorized_recipients: [aSandboxFiscalCode],
     } as unknown as ServicePayload;
 
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode,
+      aSandboxFiscalCode as FiscalCode
     );
     expect(result.data.authorized_recipients).toBeDefined();
     expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
@@ -92,23 +91,23 @@ describe("test service-lifecycle-converters", () => {
 
   test("Converting a Payload which lack of metadata.category the Item should contain the default one", () => {
     const aNewService = {
-      authorized_recipients: [anAutorizedFiscalCode],
+      name: "a service",
       description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
       metadata: {
         scope: "LOCAL",
         topic_id: 1,
       },
-      name: "a service",
-      organization: {
-        fiscal_code: "00000000000",
-        name: "org",
-      },
+      authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
 
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode,
+      aSandboxFiscalCode as FiscalCode
     );
     expect(result.data.metadata).toBeDefined();
     expect(result.data.metadata.category).toBeDefined();
@@ -118,24 +117,24 @@ describe("test service-lifecycle-converters", () => {
   test("Converting a Payload have metadata.custom_special_flow the Item should mantain it", () => {
     const aCustomSpecialFlow = "aCustomSpecialFlow";
     const aNewService = {
-      authorized_recipients: [anAutorizedFiscalCode],
+      name: "a service",
       description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "00000000000",
+      },
       metadata: {
-        custom_special_flow: aCustomSpecialFlow,
         scope: "LOCAL",
+        custom_special_flow: aCustomSpecialFlow,
         topic_id: 1,
       },
-      name: "a service",
-      organization: {
-        fiscal_code: "00000000000",
-        name: "org",
-      },
+      authorized_recipients: [anAutorizedFiscalCode],
     } as unknown as ServicePayload;
 
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode,
+      aSandboxFiscalCode as FiscalCode
     );
     expect(result.data.metadata).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBeDefined();

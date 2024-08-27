@@ -7,7 +7,6 @@ import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-
 import { withJsonInput } from "../lib/azure/misc";
 import { CosmosHelper } from "../utils/cosmos-helper";
 import { QueuePermanentError } from "../utils/errors";
@@ -16,22 +15,23 @@ import { parseIncomingMessage } from "../utils/queue-utils";
 const PUBLICATION_KIND = "publication";
 
 export const toServiceDetail = (
-  service: Queue.RequestDetailItem,
+  service: Queue.RequestDetailItem
 ): ServiceDetail => ({
-  cms_last_update_ts: service.cms_last_update_ts,
-  description: service.data.description,
   id: service.id,
-  kind: service.kind,
-  metadata: service.data.metadata,
   name: service.data.name,
-  organization: service.data.organization,
+  description: service.data.description,
   require_secure_channel: service.data.require_secure_channel,
+  organization: service.data.organization,
+  metadata: service.data.metadata,
+  cms_last_update_ts: service.cms_last_update_ts,
+  kind: service.kind,
 });
 
 const getServiceIdOnDetailContainer =
   (serviceDetailCosmosHelper: CosmosHelper) => (serviceId: NonEmptyString) =>
     serviceDetailCosmosHelper.fetchSingleItem(
       {
+        query: `SELECT VALUE c.id FROM c WHERE c.id = @serviceId AND c.kind = @pubKind`,
         parameters: [
           {
             name: "@serviceId",
@@ -42,9 +42,8 @@ const getServiceIdOnDetailContainer =
             value: PUBLICATION_KIND,
           },
         ],
-        query: `SELECT VALUE c.id FROM c WHERE c.id = @serviceId AND c.kind = @pubKind`,
       },
-      NonEmptyString,
+      NonEmptyString
     );
 
 const shouldUpsertLifecycleService =
@@ -57,11 +56,11 @@ const shouldUpsertLifecycleService =
           queryResult,
           O.fold(
             () => TE.right(true),
-            () => TE.right(false),
-          ),
-        ),
+            () => TE.right(false)
+          )
+        )
       ),
-      TE.mapLeft((err) => new Error(`An Error has occurred: ${err.message}`)),
+      TE.mapLeft((err) => new Error(`An Error has occurred: ${err.message}`))
     );
 
 const shouldUpsertServiceDetails =
@@ -72,16 +71,16 @@ const shouldUpsertServiceDetails =
       B.fold(
         () =>
           pipe(
-            shouldUpsertLifecycleService(serviceDetailCosmosHelper)(service),
+            shouldUpsertLifecycleService(serviceDetailCosmosHelper)(service)
           ),
-        () => TE.of(true),
-      ),
+        () => TE.of(true)
+      )
     );
 
 export const handleQueueItem = (
   context: Context,
   serviceDetailCosmosHelper: CosmosHelper,
-  queueItem: Json,
+  queueItem: Json
 ) =>
   pipe(
     queueItem,
@@ -95,14 +94,15 @@ export const handleQueueItem = (
             () => void 0,
             () =>
               pipe(
+                // eslint-disable-next-line functional/immutable-data
                 (context.bindings.serviceDetailDocument = JSON.stringify(
-                  toServiceDetail(service),
-                )),
-              ),
-          ),
+                  toServiceDetail(service)
+                ))
+              )
+          )
         ),
-        TE.map((_) => void 0),
-      ),
+        TE.map((_) => void 0)
+      )
     ),
     TE.getOrElse((e) => {
       if (e instanceof QueuePermanentError) {
@@ -110,12 +110,12 @@ export const handleQueueItem = (
         return T.of(void 0);
       }
       throw e;
-    }),
+    })
   );
 
 export const createRequestDetailHandler = (
-  serviceDetailCosmosHelper: CosmosHelper,
+  serviceDetailCosmosHelper: CosmosHelper
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, serviceDetailCosmosHelper, queueItem)(),
+    handleQueueItem(context, serviceDetailCosmosHelper, queueItem)()
   );

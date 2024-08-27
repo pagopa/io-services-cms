@@ -20,7 +20,6 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
@@ -35,7 +34,7 @@ vi.mock("../../../utils/service-topic-validator", () => ({
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
+      TE.right(O.some({ id, name: "topic name" }))
     ),
   })),
 }));
@@ -51,7 +50,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
+  servicePublicationStore
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -63,7 +62,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    }),
+    })
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -72,33 +71,33 @@ const mockConfig = {
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
+  cidrs: [] as unknown as ReadonlySet<
+    string &
+      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
+  >,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
   _ts: 1,
-  cidrs: [] as unknown as ReadonlySet<
-    IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-      string
-  >,
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedSubscriptionCIDRs",
-  subscriptionId: aManageSubscriptionId as NonEmptyString,
   version: 0 as NonNegativeInteger,
 };
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  }),
+  })
 );
 const containerMock = {
   items: {
-    query: vi.fn(() => ({
-      fetchAll: mockFetchAll,
-    })),
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
       getAsyncIterator: vi.fn(),
+    })),
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
     })),
   },
 } as unknown as Container;
@@ -106,8 +105,8 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const mockAppinsights = {
-  trackError: vi.fn(),
   trackEvent: vi.fn(),
+  trackError: vi.fn(),
 } as any;
 
 const mockContext = {
@@ -133,52 +132,54 @@ describe("editService", () => {
   validateServiceTopicRequest.mockReturnValue(() => TE.right(void 0));
 
   const app = createWebServer({
-    apimService: mockApimService,
     basePath: "api",
-    blobService: mockBlobService,
+    apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClient,
     fsmPublicationClient,
-    serviceTopicDao: mockServiceTopicDao,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
+    blobService: mockBlobService,
+    serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 
   const aServicePayload = {
-    authorized_recipients: ["AAAAAA00A00A000A"],
-    description: "string",
-    max_allowed_payment_amount: 0,
-    metadata: {
-      address: "via casa mia 245",
-      app_android: "string",
-      app_ios: "string",
-      cta: "string",
-      email: "string",
-      pec: "string",
-      phone: "string",
-      privacy_url: "string",
-      scope: "NATIONAL",
-      support_url: "string",
-      token_name: "string",
-      topic_id: 1,
-      tos_url: "string",
-      web_url: "string",
-    },
     name: "string",
+    description: "string",
     organization: {
-      department_name: "string",
-      fiscal_code: "12345678901",
       name: "string",
+      fiscal_code: "12345678901",
+      department_name: "string",
     },
     require_secure_channel: true,
+    authorized_recipients: ["AAAAAA00A00A000A"],
+    max_allowed_payment_amount: 0,
+    metadata: {
+      web_url: "string",
+      app_ios: "string",
+      app_android: "string",
+      tos_url: "string",
+      privacy_url: "string",
+      address: "via casa mia 245",
+      phone: "string",
+      email: "string",
+      pec: "string",
+      cta: "string",
+      token_name: "string",
+      support_url: "string",
+      scope: "NATIONAL",
+      topic_id: 1,
+    },
   };
 
   const aService = {
+    id: "aServiceId",
     data: {
-      authorized_recipients: [],
+      name: "aServiceName",
       description: "aServiceDescription",
+      authorized_recipients: [],
       max_allowed_payment_amount: 123,
       metadata: {
         address: "via tal dei tali 123",
@@ -187,14 +188,12 @@ describe("editService", () => {
         scope: "LOCAL",
         topic_id: 1,
       },
-      name: "aServiceName",
       organization: {
-        fiscal_code: "12345678901",
         name: "anOrganizationName",
+        fiscal_code: "12345678901",
       },
       require_secure_channel: false,
     },
-    id: "aServiceId",
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should fail when cannot find requested service", async () => {
@@ -298,15 +297,15 @@ describe("editService", () => {
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["0.0.0.0/0"] as unknown as ReadonlySet<
-        IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-          string
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
       >,
     };
 
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      }),
+      })
     );
 
     const response = await request(app)
@@ -331,15 +330,15 @@ describe("editService", () => {
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["127.0.0.1/32"] as unknown as ReadonlySet<
-        IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-          string
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
       >,
     };
 
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      }),
+      })
     );
 
     const response = await request(app)
@@ -364,15 +363,15 @@ describe("editService", () => {
     const aNewRetrievedSubscriptionCIDRs = {
       ...aRetrievedSubscriptionCIDRs,
       cidrs: ["127.1.1.2/32"] as unknown as ReadonlySet<
-        IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-          string
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
       >,
     };
 
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      }),
+      })
     );
 
     const response = await request(app)
@@ -399,15 +398,15 @@ describe("editService", () => {
         "127.0.0.1/32",
         "127.2.2.3/32",
       ] as unknown as ReadonlySet<
-        IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
-          string
+        string &
+          IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
       >,
     };
 
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      }),
+      })
     );
 
     const response = await request(app)
