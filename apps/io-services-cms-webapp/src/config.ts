@@ -19,6 +19,7 @@ import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+
 import { FiscalCode } from "./generated/api/FiscalCode";
 import { CommaSeparatedListOf } from "./utils/comma-separated-list";
 
@@ -30,34 +31,34 @@ const InternalStorageAccount = t.type({
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
     IntegerFromString.pipe(ServiceLifecycle.definitions.MaxAllowedAmount),
-    "1000000" as unknown as ServiceLifecycle.definitions.MaxAllowedAmount
+    "1000000" as unknown as ServiceLifecycle.definitions.MaxAllowedAmount,
   ),
   SANDBOX_FISCAL_CODE: withDefault(
     FiscalCode,
-    "AAAAAA00A00A000A" as FiscalCode
+    "AAAAAA00A00A000A" as FiscalCode,
   ),
 });
 
 // Jira configuration
 export const JiraConfig = t.type({
-  JIRA_NAMESPACE_URL: NonEmptyString,
-  JIRA_PROJECT_NAME: NonEmptyString,
-  JIRA_TOKEN: NonEmptyString,
-  JIRA_USERNAME: EmailAddress,
   JIRA_CONTRACT_CUSTOM_FIELD: NonEmptyString,
   JIRA_DELEGATE_EMAIL_CUSTOM_FIELD: NonEmptyString,
   JIRA_DELEGATE_NAME_CUSTOM_FIELD: NonEmptyString,
-  JIRA_ORGANIZATION_CF_CUSTOM_FIELD: NonEmptyString,
-  JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
-  JIRA_TRANSITION_UPDATED_ID: NonEmptyString,
-  JIRA_ISSUE_MEDIUM_PRIORITY_ID: withDefault(
-    NonEmptyString,
-    "3" as NonEmptyString
-  ),
   JIRA_ISSUE_HIGH_PRIORITY_ID: withDefault(
     NonEmptyString,
-    "2" as NonEmptyString
+    "2" as NonEmptyString,
   ),
+  JIRA_ISSUE_MEDIUM_PRIORITY_ID: withDefault(
+    NonEmptyString,
+    "3" as NonEmptyString,
+  ),
+  JIRA_NAMESPACE_URL: NonEmptyString,
+  JIRA_ORGANIZATION_CF_CUSTOM_FIELD: NonEmptyString,
+  JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: NonEmptyString,
+  JIRA_PROJECT_NAME: NonEmptyString,
+  JIRA_TOKEN: NonEmptyString,
+  JIRA_TRANSITION_UPDATED_ID: NonEmptyString,
+  JIRA_USERNAME: EmailAddress,
 });
 export type JiraConfig = t.TypeOf<typeof JiraConfig>;
 
@@ -68,23 +69,23 @@ export const JiraLegacyProjectName = t.type({
 
 export type PostgreSqlConfig = t.TypeOf<typeof PostgreSqlConfig>;
 export const PostgreSqlConfig = t.type({
+  REVIEWER_DB_APP_NAME: withDefault(
+    NonEmptyString,
+    "reviewer" as NonEmptyString,
+  ),
   REVIEWER_DB_HOST: NonEmptyString,
   REVIEWER_DB_IDLE_TIMEOUT: withDefault(
     NumberFromString,
-    "30000" as unknown as number
+    "30000" as unknown as number,
   ),
   REVIEWER_DB_NAME: NonEmptyString,
   REVIEWER_DB_PASSWORD: NonEmptyString,
   REVIEWER_DB_PORT: NumberFromString,
-  REVIEWER_DB_USER: NonEmptyString,
   REVIEWER_DB_READ_MAX_ROW: withDefault(
     IntegerFromString,
-    "50" as unknown as number
+    "50" as unknown as number,
   ),
-  REVIEWER_DB_APP_NAME: withDefault(
-    NonEmptyString,
-    "reviewer" as NonEmptyString
-  ),
+  REVIEWER_DB_USER: NonEmptyString,
 });
 
 export type ReviewerPostgreSqlConfig = t.TypeOf<
@@ -109,25 +110,25 @@ export const TopicPostgreSqlConfig = t.intersection([
 
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
 export const CosmosConfig = t.type({
-  COSMOSDB_CONNECTIONSTRING: NonEmptyString,
-  COSMOSDB_URI: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_APP_BE_NAME: NonEmptyString,
-  COSMOSDB_KEY: NonEmptyString,
+  COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_DETAILS: NonEmptyString,
+  COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICES_DETAILS: NonEmptyString,
+  COSMOSDB_KEY: NonEmptyString,
+  COSMOSDB_NAME: NonEmptyString,
+  COSMOSDB_URI: NonEmptyString,
 });
 
 export type CosmosLegacyConfig = t.TypeOf<typeof CosmosLegacyConfig>;
 export const CosmosLegacyConfig = t.type({
   LEGACY_COSMOSDB_CONNECTIONSTRING: NonEmptyString,
-  LEGACY_COSMOSDB_NAME: NonEmptyString,
-  LEGACY_COSMOSDB_URI: NonEmptyString,
-  LEGACY_COSMOSDB_KEY: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE: NonEmptyString,
+  LEGACY_COSMOSDB_KEY: NonEmptyString,
+  LEGACY_COSMOSDB_NAME: NonEmptyString,
+  LEGACY_COSMOSDB_URI: NonEmptyString,
   LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION: NumberFromString,
 });
 
@@ -135,21 +136,21 @@ export const CosmosLegacyConfig = t.type({
 export const ApimConfig = t.type({
   AZURE_APIM: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
-  AZURE_SUBSCRIPTION_ID: NonEmptyString,
   AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
+  AZURE_SUBSCRIPTION_ID: NonEmptyString,
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
 // Queue configuration
 export const QueueConfig = t.type({
-  REQUEST_REVIEW_QUEUE: NonEmptyString,
-  REQUEST_PUBLICATION_QUEUE: NonEmptyString,
-  REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
-  REQUEST_SYNC_LEGACY_QUEUE: NonEmptyString,
-  REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
-  REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
-  REQUEST_VALIDATION_QUEUE: NonEmptyString,
   REQUEST_DETAIL_QUEUE: NonEmptyString,
+  REQUEST_HISTORICIZATION_QUEUE: NonEmptyString,
+  REQUEST_PUBLICATION_QUEUE: NonEmptyString,
+  REQUEST_REVIEW_LEGACY_QUEUE: NonEmptyString,
+  REQUEST_REVIEW_QUEUE: NonEmptyString,
+  REQUEST_SYNC_CMS_QUEUE: NonEmptyString,
+  REQUEST_SYNC_LEGACY_QUEUE: NonEmptyString,
+  REQUEST_VALIDATION_QUEUE: NonEmptyString,
 });
 export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
@@ -162,11 +163,11 @@ export const ApplicationInsightConfig = t.type({
 export const PaginationConfig = t.type({
   PAGINATION_DEFAULT_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "20" as unknown as NonNegativeInteger
+    "20" as unknown as NonNegativeInteger,
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger,
   ),
 });
 export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
@@ -175,18 +176,23 @@ export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
 const ServiceIdQualityCheckExclusionList = t.type({
   SERVICEID_QUALITY_CHECK_EXCLUSION_LIST: withDefault(
     CommaSeparatedListOf(ServiceLifecycle.definitions.ServiceId),
-    []
+    [],
   ),
 });
 
 const FeatureFlags = t.type({
+  // UserId List allowed to automatic service approval
+  USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: withDefault(
+    CommaSeparatedListOf(NonEmptyString),
+    [],
+  ),
   /**
    * UserId List allowed to sync services from CMS to Legacy
    * @deprecated this feature flag will be removed in future releases
    */
   USERID_CMS_TO_LEGACY_SYNC_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
-    []
+    [],
   ),
   /**
    * UserId List allowed to sync services from CMS to Legacy
@@ -194,7 +200,7 @@ const FeatureFlags = t.type({
    */
   USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
-    []
+    [],
   ),
   /**
    * UserId List allowed to sync JIRA ticket events from Legacy to CMS
@@ -202,12 +208,7 @@ const FeatureFlags = t.type({
    */
   USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
-    []
-  ),
-  // UserId List allowed to automatic service approval
-  USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: withDefault(
-    CommaSeparatedListOf(NonEmptyString),
-    []
+    [],
   ),
 });
 
@@ -232,14 +233,14 @@ export type ServiceValidationConfig = t.TypeOf<typeof ServiceValidationConfig>;
 
 // Default Application Values
 const DefaultValues = t.type({
+  DEFAULT_PAGED_FETCH_LIMIT: withDefault(
+    NumberFromString,
+    "10" as unknown as number,
+  ),
   // Default Topic ID for services on legacy -> CMS sync
   LEGACY_SYNC_DEFAULT_TOPIC_ID: withDefault(
     NumberFromString,
-    "0" as unknown as number
-  ),
-  DEFAULT_PAGED_FETCH_LIMIT: withDefault(
-    NumberFromString,
-    "10" as unknown as number
+    "0" as unknown as number,
   ),
 });
 
@@ -304,5 +305,5 @@ export const getConfigOrThrow = (): IConfig =>
     errorOrConfig,
     E.getOrElseW((errors) => {
       throw new Error(`Invalid configuration: ${readableReport(errors)}`);
-    })
+    }),
   );

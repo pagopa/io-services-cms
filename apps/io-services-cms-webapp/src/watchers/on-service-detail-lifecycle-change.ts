@@ -37,7 +37,7 @@ export const handler: RTE.ReaderTaskEither<
     item.fsm.state === "draft",
     B.fold(
       () => noAction,
-      () => pipe(item, onDetailLifecycleHandler)
+      () => pipe(item, onDetailLifecycleHandler),
     ),
-    TE.right
+    TE.right,
   );

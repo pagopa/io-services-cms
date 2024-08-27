@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-literal-enum-member */
 import {
   Queue,
   ServiceLifecycle,
@@ -15,6 +16,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
 import lodash from "lodash";
+
 import { IConfig, ServiceValidationConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper } from "../utils/cosmos-helper";
@@ -27,10 +29,10 @@ type Actions = "requestReview";
 type Action<A extends Actions, B> = Record<A, B>;
 type RequestReviewAction = Action<"requestReview", Json>;
 
-type ValidationError = {
-  serviceId: Queue.RequestReviewItem["id"];
+interface ValidationError {
   reason: string;
-};
+  serviceId: Queue.RequestReviewItem["id"];
+}
 
 type ValidSecureChannelFalseConfig = t.TypeOf<
   typeof ValidSecureChannelFalseConfig
@@ -83,7 +85,7 @@ enum EventNameEnum {
 const validate =
   (config: IConfig) =>
   (
-    item: Queue.RequestReviewItem
+    item: Queue.RequestReviewItem,
   ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
     pipe(
       item,
@@ -93,16 +95,16 @@ const validate =
           isServiceAllowedForQualitySkip(config, item.id),
           B.fold(
             () => Queue.RequestReviewItemQualityStrict.decode(s),
-            () => Queue.RequestReviewItemStrict.decode(s)
-          )
-        )
+            () => Queue.RequestReviewItemStrict.decode(s),
+          ),
+        ),
       ),
       E.mapLeft(
         flow(readableReport, (errorMessage) => ({
-          serviceId: item.id,
           reason: errorMessage,
-        }))
-      )
+          serviceId: item.id,
+        })),
+      ),
     );
 
 const getDuplicatesOnServicePublication =
@@ -110,7 +112,6 @@ const getDuplicatesOnServicePublication =
   (item: Queue.RequestReviewItemStrict) =>
     servicePublicationCosmosHelper.fetchItems(
       {
-        query: `SELECT VALUE c.id FROM c WHERE STRINGEQUALS(c.data.name, @serviceName, true) AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
         parameters: [
           {
             name: "@serviceName",
@@ -125,28 +126,29 @@ const getDuplicatesOnServicePublication =
             value: item.id,
           },
         ],
+        query: `SELECT VALUE c.id FROM c WHERE STRINGEQUALS(c.data.name, @serviceName, true) AND c.data.organization.fiscal_code = @organizationFiscalCode AND c.id != @currentServiceId`,
       },
-      NonEmptyString
+      NonEmptyString,
     );
 const getNotDeletedDuplicatesOnServiceLifecycle =
   (serviceLifecycleCosmosHelper: CosmosHelper) =>
-  (serviceIds: ReadonlyArray<NonEmptyString>) =>
+  (serviceIds: readonly NonEmptyString[]) =>
     serviceLifecycleCosmosHelper.fetchSingleItem(
       {
         query: `SELECT VALUE c.id FROM c WHERE c.id IN ('${serviceIds.join(
-          "', '"
+          "', '",
         )}') AND c.fsm.state != 'deleted'`,
       },
-      NonEmptyString
+      NonEmptyString,
     );
 
 const validateDuplicates =
   (
     servicePublicationCosmosHelper: CosmosHelper,
-    serviceLifecycleCosmosHelper: CosmosHelper
+    serviceLifecycleCosmosHelper: CosmosHelper,
   ) =>
   (
-    item: Queue.RequestReviewItemStrict
+    item: Queue.RequestReviewItemStrict,
   ): TE.TaskEither<Error | ValidationError, Queue.RequestReviewItemStrict> =>
     pipe(
       // Get Duplicate Services
@@ -160,7 +162,7 @@ const validateDuplicates =
               pipe(
                 // Check if duplicates found are not related to deleted service
                 getNotDeletedDuplicatesOnServiceLifecycle(
-                  serviceLifecycleCosmosHelper
+                  serviceLifecycleCosmosHelper,
                 )(result),
                 TE.chainW((queryResult) =>
                   pipe(
@@ -171,16 +173,16 @@ const validateDuplicates =
                       (result) =>
                         // check if duplicates found are not related to deleted service
                         TE.left({
-                          serviceId: item.id,
                           reason: `Il servizio '${item.data.name}' ha lo stesso nome di un altro del servizio con ID '${result}'. Per questo motivo non è possibile procedere con l’approvazione del servizio, che risulta essere il duplicato di un altro.`,
-                        })
-                    )
-                  )
-                )
-              )
-          )
-        )
-      )
+                          serviceId: item.id,
+                        }),
+                    ),
+                  ),
+                ),
+              ),
+          ),
+        ),
+      ),
     );
 
 const onRequestManualValidationHandler =
@@ -199,7 +201,7 @@ const onRequestManualValidationHandler =
       }),
       (_) => ({
         requestReview: item,
-      })
+      }),
     );
 
 const isManualReviewRequested =
@@ -208,16 +210,16 @@ const isManualReviewRequested =
     pipe(
       config.MANUAL_REVIEW_PROPERTIES,
       RA.map((path) => lodash.matchesProperty(path, lodash.get(origin, path))),
-      RA.some((matchesPropertyFn) => !pipe(comparand, matchesPropertyFn))
+      RA.some((matchesPropertyFn) => !pipe(comparand, matchesPropertyFn)),
     );
 
 const onRequestApproveHandler =
   (
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    telemetryClient: TelemetryClient
+    telemetryClient: TelemetryClient,
   ) =>
   (
-    serviceId: ServiceLifecycle.definitions.ServiceId
+    serviceId: ServiceLifecycle.definitions.ServiceId,
   ): TE.TaskEither<ServiceLifecycle.AllFsmErrors, NoAction> =>
     pipe(
       fsmLifecycleClient.approve(serviceId, {
@@ -227,18 +229,18 @@ const onRequestApproveHandler =
         telemetryClient.trackEvent({
           name: EventNameEnum.AutoApprove,
           properties: { serviceId },
-        })
+        }),
       ),
-      TE.map((_) => noAction)
+      TE.map((_) => noAction),
     );
 
 const onRequestRejectHandler =
   (
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    telemetryClient: TelemetryClient
+    telemetryClient: TelemetryClient,
   ) =>
   (
-    error: ValidationError
+    error: ValidationError,
   ): TE.TaskEither<ServiceLifecycle.AllFsmErrors, NoAction> =>
     pipe(
       fsmLifecycleClient.reject(error.serviceId, {
@@ -248,22 +250,22 @@ const onRequestRejectHandler =
         telemetryClient.trackEvent({
           name: EventNameEnum.AutoReject,
           properties: { serviceId: error.serviceId },
-        })
+        }),
       ),
-      TE.map((_) => noAction)
+      TE.map((_) => noAction),
     );
 
-type Dependencies = {
+interface Dependencies {
   config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
-  servicePublicationCosmosHelper: CosmosHelper;
   serviceLifecycleCosmosHelper: CosmosHelper;
+  servicePublicationCosmosHelper: CosmosHelper;
   telemetryClient: TelemetryClient;
-};
+}
 
 type ServiceValidationHandler = (
-  dependencies: Dependencies
+  dependencies: Dependencies,
 ) => RTE.ReaderTaskEither<
   { item: Json },
   Error,
@@ -275,9 +277,9 @@ export const createServiceValidationHandler: ServiceValidationHandler =
     config,
     fsmLifecycleClient,
     fsmPublicationClient,
-    telemetryClient,
-    servicePublicationCosmosHelper,
     serviceLifecycleCosmosHelper,
+    servicePublicationCosmosHelper,
+    telemetryClient,
   }) =>
   ({ item }) =>
     pipe(
@@ -288,8 +290,8 @@ export const createServiceValidationHandler: ServiceValidationHandler =
       TE.chainW(
         validateDuplicates(
           servicePublicationCosmosHelper,
-          serviceLifecycleCosmosHelper
-        )
+          serviceLifecycleCosmosHelper,
+        ),
       ),
       TE.chainW((validService) =>
         pipe(
@@ -301,31 +303,31 @@ export const createServiceValidationHandler: ServiceValidationHandler =
                 pipe(
                   { item, serviceId: validService.id },
                   onRequestManualValidationHandler(telemetryClient),
-                  TE.right
+                  TE.right,
                 ),
               (servicePub) =>
                 isManualReviewRequested(config)(servicePub, item)
                   ? pipe(
                       { item, serviceId: validService.id },
                       onRequestManualValidationHandler(telemetryClient),
-                      TE.right
+                      TE.right,
                     )
                   : onRequestApproveHandler(
                       fsmLifecycleClient,
-                      telemetryClient
-                    )(servicePub.id)
-            )
-          )
-        )
+                      telemetryClient,
+                    )(servicePub.id),
+            ),
+          ),
+        ),
       ),
       TE.orElse((error) => {
         if ("reason" in error) {
           return onRequestRejectHandler(
             fsmLifecycleClient,
-            telemetryClient
+            telemetryClient,
           )(error);
         } else {
           return TE.left(error);
         }
-      })
+      }),
     );

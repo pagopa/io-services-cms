@@ -14,6 +14,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import {
   EventNameEnum,
   TelemetryClient,
@@ -23,31 +24,31 @@ import { CosmosHelper } from "../../utils/cosmos-helper";
 import { ErrorResponseTypes } from "../../utils/logger";
 // FIXME: This Handler is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
 
-type CheckResult = {
-  service_id?: NonEmptyString;
+interface CheckResult {
   is_duplicate: boolean;
-};
+  service_id?: NonEmptyString;
+}
 
-type Dependencies = {
-  servicePublicationCosmosHelper: CosmosHelper;
+interface Dependencies {
   serviceLifecycleCosmosHelper: CosmosHelper;
+  servicePublicationCosmosHelper: CosmosHelper;
   telemetryClient: TelemetryClient;
-};
+}
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<CheckResult>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<CheckResult>;
 
 type CheckServiceDuplicationInternalHandler = (
   organizationFiscalCode: NonEmptyString,
   serviceName: NonEmptyString,
-  serviceId: O.Option<ServiceLifecycle.definitions.ServiceId>
+  serviceId: O.Option<ServiceLifecycle.definitions.ServiceId>,
 ) => Promise<HandlerResponseTypes>;
 
 export const makeCheckServiceDuplicationInternalHandler =
   ({
-    servicePublicationCosmosHelper,
     serviceLifecycleCosmosHelper,
+    servicePublicationCosmosHelper,
     telemetryClient,
   }: Dependencies): CheckServiceDuplicationInternalHandler =>
   (serviceName, organizationFiscalCode, newServiceId) =>
@@ -56,7 +57,7 @@ export const makeCheckServiceDuplicationInternalHandler =
       getDuplicatesOnServicePublication(servicePublicationCosmosHelper)(
         serviceName,
         organizationFiscalCode,
-        newServiceId
+        newServiceId,
       ),
       TE.chainW((publicationQueryResult) =>
         pipe(
@@ -67,7 +68,7 @@ export const makeCheckServiceDuplicationInternalHandler =
               pipe(
                 // Check if duplicates found are not related to deleted service
                 getNotDeletedDuplicatesOnServiceLifecycle(
-                  serviceLifecycleCosmosHelper
+                  serviceLifecycleCosmosHelper,
                 )(publicationResult),
                 TE.chainW((lifecycleQueryResult) =>
                   pipe(
@@ -80,14 +81,14 @@ export const makeCheckServiceDuplicationInternalHandler =
                         ({
                           is_duplicate: true,
                           service_id: lifecycleResult,
-                        })
+                        }),
                     ),
-                    TE.right
-                  )
-                )
-              )
-          )
-        )
+                    TE.right,
+                  ),
+                ),
+              ),
+          ),
+        ),
       ),
       TE.map((resp) => ResponseSuccessJson(resp)),
       TE.map(
@@ -96,13 +97,13 @@ export const makeCheckServiceDuplicationInternalHandler =
           EventNameEnum.CheckServiceDuplicationInternal,
           {
             serviceName,
-          }
-        )
+          },
+        ),
       ),
       TE.mapLeft((err) =>
-        ResponseErrorInternal(`An Error has occurred: ${err.message}`)
+        ResponseErrorInternal(`An Error has occurred: ${err.message}`),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 const getDuplicatesOnServicePublication =
@@ -110,7 +111,7 @@ const getDuplicatesOnServicePublication =
   (
     serviceName: NonEmptyString,
     organizationFiscalCode: NonEmptyString,
-    newServiceId: O.Option<ServiceLifecycle.definitions.ServiceId>
+    newServiceId: O.Option<ServiceLifecycle.definitions.ServiceId>,
   ) => {
     const baseQuery = `SELECT VALUE c.id FROM c WHERE STRINGEQUALS(c.data.name, @serviceName, true) AND c.data.organization.fiscal_code = @organizationFiscalCode`;
 
@@ -141,35 +142,35 @@ const getDuplicatesOnServicePublication =
 
     return servicePublicationCosmosHelper.fetchItems(
       {
-        query,
         parameters: queryParameters,
+        query,
       },
-      NonEmptyString
+      NonEmptyString,
     );
   };
 
 const getNotDeletedDuplicatesOnServiceLifecycle =
   (serviceLifecycleCosmosHelper: CosmosHelper) =>
-  (serviceIds: ReadonlyArray<NonEmptyString>) => {
+  (serviceIds: readonly NonEmptyString[]) => {
     const query = `SELECT VALUE c.id FROM c WHERE c.id IN ('${serviceIds.join(
-      "', '"
+      "', '",
     )}') AND c.fsm.state != 'deleted'`;
 
     return serviceLifecycleCosmosHelper.fetchSingleItem(
       {
         query,
       },
-      NonEmptyString
+      NonEmptyString,
     );
   };
 
 export const applyRequestMiddelwares = (
-  handler: CheckServiceDuplicationInternalHandler
+  handler: CheckServiceDuplicationInternalHandler,
 ) => {
   const middlewaresWrap = withRequestMiddlewares(
     RequiredQueryParamMiddleware("serviceName", NonEmptyString),
     RequiredQueryParamMiddleware("organizationFiscalCode", NonEmptyString),
-    OptionalQueryParamMiddleware("serviceId", NonEmptyString)
+    OptionalQueryParamMiddleware("serviceId", NonEmptyString),
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 };

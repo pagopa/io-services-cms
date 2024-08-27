@@ -29,6 +29,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import {
   EventNameEnum,
@@ -42,26 +43,26 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "UnpublishServiceHandler";
 
-type Dependencies = {
-  fsmPublicationClient: ServicePublication.FsmClient;
+interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
-type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
+type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
 
 type UnPublishServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  serviceId: ServiceLifecycle.definitions.ServiceId,
 ) => Promise<HandlerResponseTypes>;
 
 export const makeUnpublishServiceHandler =
   ({
-    fsmPublicationClient,
     apimService,
+    fsmPublicationClient,
     telemetryClient,
   }: Dependencies): UnPublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
@@ -70,31 +71,31 @@ export const makeUnpublishServiceHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW(
         flow(
           fsmPublicationClient.unpublish,
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft(fsmToApiError)
-        )
+          TE.mapLeft(fsmToApiError),
+        ),
       ),
       TE.bimap(
         (err) =>
           getLogger(context, logPrefix).logErrorResponse(err, {
-            userSubscriptionId: auth.subscriptionId,
             serviceId,
+            userSubscriptionId: auth.subscriptionId,
           }),
         trackEventOnResponseOK(
           telemetryClient,
           EventNameEnum.UnpublishService,
           {
-            userSubscriptionId: auth.subscriptionId,
             serviceId,
-          }
-        )
+            userSubscriptionId: auth.subscriptionId,
+          },
+        ),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares =
@@ -110,15 +111,15 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
+      RequiredParamMiddleware("serviceId", NonEmptyString),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
-      )
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
+      ),
     );
   };
