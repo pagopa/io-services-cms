@@ -4,7 +4,6 @@ export default [
   ...pagopa,
   {
     rules: {
-      // Altre regole...
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_" },
