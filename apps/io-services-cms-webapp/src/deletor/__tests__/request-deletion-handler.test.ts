@@ -5,6 +5,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { handleQueueItem } from "../request-deletion-handler";
 
 const createContext = () =>
@@ -12,11 +13,9 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
-const deleteMock = vi.fn((id: NonEmptyString) => {
-  return TE.of(void 0);
-});
+const deleteMock = vi.fn(() => TE.of(void 0));
 const mockFsmPublicationClient = {
   getStore: vi.fn(() => ({
     delete: deleteMock,
@@ -38,7 +37,7 @@ describe("Service Deletion Handler", () => {
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
     )();
 
     expect(mockFsmPublicationClient.getStore).toBeCalledTimes(0);
@@ -57,9 +56,7 @@ describe("Service Deletion Handler", () => {
 
     const mockFsmPublicationClientFailure = {
       getStore: vi.fn(() => ({
-        delete: vi.fn((id: NonEmptyString) => {
-          return TE.left(new Error("A transient error"));
-        }),
+        delete: vi.fn(() => TE.left(new Error("A transient error"))),
       })),
     } as unknown as ServicePublication.FsmClient;
 
@@ -67,8 +64,8 @@ describe("Service Deletion Handler", () => {
       handleQueueItem(
         context,
         aValidQueueItem,
-        mockFsmPublicationClientFailure
-      )()
+        mockFsmPublicationClientFailure,
+      )(),
     ).rejects.toThrowError("A transient error");
   });
 });

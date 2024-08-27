@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Context } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
@@ -7,6 +6,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
 import { pipe } from "fp-ts/lib/function";
+
 import { JiraIssue } from "../lib/clients/jira-client";
 import { JiraProxy } from "../utils/jira-proxy";
 import { getLogger } from "../utils/logger";
@@ -15,10 +15,10 @@ import {
   ServiceReviewRowDataTable,
 } from "../utils/service-review-dao";
 
-export type IssueItemPair = {
+export interface IssueItemPair {
   issue: JiraIssue;
   item: ServiceReviewRowDataTable;
-};
+}
 
 const logPrefix = "ReviewerCheckerHandler";
 
@@ -30,7 +30,7 @@ const JiraIssueStatusIdMap: Record<string, string> = {
 const makeServiceLifecycleApply = (
   serviceReview: ServiceReviewRowDataTable,
   jiraIssue: JiraIssue,
-  fsmLifecycleClient: ServiceLifecycle.FsmClient
+  fsmLifecycleClient: ServiceLifecycle.FsmClient,
 ) => {
   const jiraIssueStatus = decodeJiraIssueStatus(jiraIssue);
   switch (jiraIssueStatus) {
@@ -42,7 +42,7 @@ const makeServiceLifecycleApply = (
             .join("|"),
         },
         (data) => fsmLifecycleClient.reject(serviceReview.service_id, data),
-        TE.map((_) => void 0)
+        TE.map((_) => void 0),
       );
     case "APPROVED":
       return pipe(
@@ -50,7 +50,7 @@ const makeServiceLifecycleApply = (
           approvalDate: jiraIssue.fields.statuscategorychangedate,
         },
         (data) => fsmLifecycleClient.approve(serviceReview.service_id, data),
-        TE.map((_) => void 0)
+        TE.map((_) => void 0),
       );
     default:
       throw new Error("It should not happen");
@@ -61,7 +61,7 @@ export const createReviewCheckerHandler =
   (
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
   async (context: Context): Promise<unknown> => {
     const logger = getLogger(context, logPrefix, "createReviewCheckerHandler");
@@ -71,10 +71,10 @@ export const createReviewCheckerHandler =
       TE.getOrElse((err) => {
         logger.logError(
           err,
-          "An error occurred while processing the batch of reviews"
+          "An error occurred while processing the batch of reviews",
         );
         throw err;
-      })
+      }),
     )();
   };
 
@@ -91,7 +91,7 @@ export const buildIssueItemPairs =
       // from pending items to their relative jira issues
       jiraProxy.searchJiraIssuesByKeyAndStatus(
         items.map((item) => item.ticket_key),
-        ["APPROVED", "REJECTED"]
+        ["APPROVED", "REJECTED"],
       ),
       TE.map((jiraResponse) => jiraResponse.issues),
       // consider only the issues associated with a pending review
@@ -112,7 +112,7 @@ export const buildIssueItemPairs =
       TE.mapLeft((err) => {
         logger.logError(err, "An error occurred while building IssueItemPairs");
         return err;
-      })
+      }),
     );
   };
 
@@ -128,7 +128,7 @@ export const updateReview =
   (
     context: Context,
     dao: ServiceReviewDao,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
   (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> => {
     const logger = getLogger(context, logPrefix, "updateReview");
@@ -145,20 +145,20 @@ export const updateReview =
                   () => {
                     logger.logError(
                       fsmError,
-                      `An ${fsmError.kind} has occurred`
+                      `An ${fsmError.kind} has occurred`,
                     );
                     return pipe(fsmError, E.toError, TE.left);
                   },
                   () => {
                     logger.log(
                       "warn",
-                      `${fsmError.message} - skipping service having id ${item.service_id}`
+                      `${fsmError.message} - skipping service having id ${item.service_id}`,
                     );
                     return TE.right(void 0);
-                  }
-                )
-              )
-            )
+                  },
+                ),
+              ),
+            ),
           ),
           pipe(
             dao.updateStatus({
@@ -168,15 +168,15 @@ export const updateReview =
             TE.mapLeft((err) => {
               logger.logError(
                 err,
-                "An error occurred while updating the status"
+                "An error occurred while updating the status",
               );
               return E.toError(err);
-            })
-          )
-        )
+            }),
+          ),
+        ),
       ),
       // we don't need data as result, just return void
-      TE.map((_) => void 0)
+      TE.map((_) => void 0),
     );
   };
 
@@ -194,7 +194,7 @@ const decodeJiraIssueStatus = (issue: JiraIssue): "APPROVED" | "REJECTED" => {
   ) {
     return "APPROVED";
   } else if (
-    ["RIFIUTATO", "REJECTED"].includes(issue.fields.status.name.toUpperCase())
+    ["REJECTED", "RIFIUTATO"].includes(issue.fields.status.name.toUpperCase())
   ) {
     return "REJECTED";
   }
@@ -207,7 +207,7 @@ export const processBatchOfReviews =
     context: Context,
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
-    fsmLifecycleClient: ServiceLifecycle.FsmClient
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
   (items: ServiceReviewRowDataTable[]) =>
     pipe(
@@ -217,8 +217,8 @@ export const processBatchOfReviews =
       TE.mapLeft((err) => {
         getLogger(context, logPrefix, "processBatchOfReviews").logError(
           err,
-          "An error occurred processing the batch of reviews"
+          "An error occurred processing the batch of reviews",
         );
         return err;
-      })
+      }),
     );

@@ -4,16 +4,17 @@ import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as RE from "fp-ts/lib/ReaderEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../config";
 import { buildRequestHistoricizationQueueMessage } from "../historicizer/request-historicization-handler";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 type Actions =
-  | "requestReview"
-  | "requestPublication"
   | "requestDeletion"
-  | "requestUnpublication"
-  | "requestHistoricization";
+  | "requestHistoricization"
+  | "requestPublication"
+  | "requestReview"
+  | "requestUnpublication";
 
 type Action<A extends Actions, B> = Record<A, B>;
 
@@ -35,18 +36,18 @@ type RequestHistoricizationAction = Action<
 >;
 
 const onAnyChangesHandler = (
-  item: ServiceLifecycle.CosmosResource
+  item: ServiceLifecycle.CosmosResource,
 ): RequestHistoricizationAction => ({
   requestHistoricization: buildRequestHistoricizationQueueMessage(item),
 });
 
 const onSubmitHandler = (
-  item: ServiceLifecycle.CosmosResource
+  item: ServiceLifecycle.CosmosResource,
 ): RequestReviewAction => ({
   requestReview: {
-    id: item.id,
     data: item.data,
-    // eslint-disable-next-line no-underscore-dangle
+    id: item.id,
+
     version: item._etag,
   },
 });
@@ -55,17 +56,17 @@ const onApproveHandler =
   ({ MAX_ALLOWED_PAYMENT_AMOUNT }: IConfig) =>
   (item: ServiceLifecycle.CosmosResource): RequestPublicationAction => ({
     requestPublication: {
-      id: item.id,
+      autoPublish: ServiceLifecycle.getAutoPublish(item),
       data: {
         ...item.data,
         max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
       },
-      autoPublish: ServiceLifecycle.getAutoPublish(item),
+      id: item.id,
     },
   });
 
 const onDeleteHandler = (
-  item: ServiceLifecycle.CosmosResource
+  item: ServiceLifecycle.CosmosResource,
 ): RequestDeletionItem => ({
   requestDeletion: {
     id: item.id,
@@ -75,8 +76,8 @@ const onDeleteHandler = (
 const getSpecificAction =
   (config: IConfig) =>
   (
-    item: ServiceLifecycle.CosmosResource
-  ): O.Option<OnSubmitActions | OnApproveActions | OnDeleteActions> => {
+    item: ServiceLifecycle.CosmosResource,
+  ): O.Option<OnApproveActions | OnDeleteActions | OnSubmitActions> => {
     switch (item.fsm.state) {
       case "submitted":
         return pipe(item, onSubmitHandler, O.some);
@@ -96,13 +97,13 @@ const getSpecificAction =
 // - In any case we should historicize the change by invocking the OnRequestHistoricization function via the it in request-historicization queue
 export const handler =
   (
-    config: IConfig
+    config: IConfig,
   ): RE.ReaderEither<
     { item: ServiceLifecycle.CosmosResource },
     Error,
-    | RequestHistoricizationAction
-    | ((OnSubmitActions | OnApproveActions | OnDeleteActions) &
+    | ((OnApproveActions | OnDeleteActions | OnSubmitActions) &
         RequestHistoricizationAction)
+    | RequestHistoricizationAction
   > =>
   ({ item }) =>
     pipe(
@@ -125,10 +126,10 @@ export const handler =
                 O.fold(
                   () => E.right(historicizationAction),
                   (specificAction) =>
-                    E.right({ ...specificAction, ...historicizationAction })
-                )
-              )
-          )
-        )
-      )
+                    E.right({ ...specificAction, ...historicizationAction }),
+                ),
+              ),
+          ),
+        ),
+      ),
     );

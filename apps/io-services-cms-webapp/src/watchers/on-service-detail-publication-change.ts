@@ -21,7 +21,7 @@ const onDetailPublicationHandler = ({
 }: ServicePublication.CosmosResource): RequestDetailPublicationAction => ({
   requestDetailPublication: {
     ...item,
-    // eslint-disable-next-line no-underscore-dangle
+
     cms_last_update_ts: _ts,
     kind: "publication",
   },

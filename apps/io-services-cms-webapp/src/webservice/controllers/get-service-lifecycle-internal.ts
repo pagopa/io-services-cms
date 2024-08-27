@@ -14,11 +14,11 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
-import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 
 import { IConfig } from "../../config";
+import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
+import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { ErrorResponseTypes } from "../../utils/logger";
 
@@ -27,29 +27,29 @@ import { ErrorResponseTypes } from "../../utils/logger";
 const logPrefix = "GetServiceLifecycleInternalHandler";
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<ServiceResponsePayload>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<ServiceResponsePayload>;
 
 type GetServiceLifecycleInternalHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  serviceId: ServiceLifecycle.definitions.ServiceId,
 ) => Promise<HandlerResponseTypes>;
 
-type Dependencies = {
+interface Dependencies {
+  apimService: ApimUtils.ApimService;
+  config: IConfig;
   // A store od ServiceLifecycle objects
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  apimService: ApimUtils.ApimService;
   telemetryClient: TelemetryClient;
-  config: IConfig;
-};
+}
 
 export const makeGetServiceLifecycleInternalHandler =
   ({
-    fsmLifecycleClient,
     apimService,
-    telemetryClient,
     config,
+    fsmLifecycleClient,
+    telemetryClient,
   }: Dependencies): GetServiceLifecycleInternalHandler =>
   (context, auth, serviceId) =>
     genericServiceRetrieveHandler(
@@ -57,11 +57,11 @@ export const makeGetServiceLifecycleInternalHandler =
       apimService,
       telemetryClient,
       config,
-      itemToResponse
+      itemToResponse,
     )(context, auth, serviceId, logPrefix, EventNameEnum.GetServiceLifecycle);
 
 export const applyRequestMiddelwares = (
-  handler: GetServiceLifecycleInternalHandler
+  handler: GetServiceLifecycleInternalHandler,
 ) => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
@@ -69,12 +69,7 @@ export const applyRequestMiddelwares = (
     // only allow requests by users belonging to certain groups
     AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
     // extract the service id from the path variables
-    RequiredParamMiddleware("serviceId", NonEmptyString)
+    RequiredParamMiddleware("serviceId", NonEmptyString),
   );
-  return wrapRequestHandler(
-    middlewaresWrap(
-      // eslint-disable-next-line max-params
-      handler
-    )
-  );
+  return wrapRequestHandler(middlewaresWrap(handler));
 };

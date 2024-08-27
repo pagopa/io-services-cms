@@ -16,6 +16,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
+
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
@@ -43,11 +44,9 @@ const aSubscriptionCollection = [
 
 // Service resource mock *******************************
 const aServiceLifecycle1 = {
-  id: aName1,
   data: {
-    name: "aServiceName",
-    description: "aServiceDescription",
     authorized_recipients: [],
+    description: "aServiceDescription",
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -55,15 +54,17 @@ const aServiceLifecycle1 = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
+    name: "aServiceName",
     organization: {
-      name: "anOrganizationName",
       fiscal_code: "12345678901",
+      name: "anOrganizationName",
     },
     require_secure_channel: false,
   },
   fsm: {
     state: "draft",
   },
+  id: aName1,
 } as unknown as ServiceLifecycle.ItemType;
 const aServiceLifecycle2 = { ...aServiceLifecycle1, id: aName2 };
 const aServiceLifecycle3 = { ...aServiceLifecycle1, id: aName3 };
@@ -81,17 +82,17 @@ const mockApimService = {
 } as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 100,
-  BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
 } as unknown as IConfig;
 
 // FSM client mock *******************************
 const aBulkFetchRightValue = TE.of(
-  aServiceList.map((service) => O.fromNullable(service))
+  aServiceList.map((service) => O.fromNullable(service)),
 );
 
-let mockFsmLifecycleClient = {
+const mockFsmLifecycleClient = {
   getStore: vi.fn(() => ({
     bulkFetch: vi.fn(() => aBulkFetchRightValue),
   })),
@@ -105,33 +106,33 @@ const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
-  subscriptionId: aManageSubscriptionId as NonEmptyString,
-  cidrs: [] as unknown as ReadonlySet<
-    string &
-      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
-  >,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
   _ts: 1,
+  cidrs: [] as unknown as ReadonlySet<
+    IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
+      string
+  >,
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedSubscriptionCIDRs",
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
   version: 0 as NonNegativeInteger,
 };
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
       getAsyncIterator: vi.fn(),
-    })),
-    query: vi.fn(() => ({
-      fetchAll: mockFetchAll,
     })),
   },
 } as unknown as Container;
@@ -139,8 +140,8 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const mockAppinsights = {
-  trackEvent: vi.fn(),
   trackError: vi.fn(),
+  trackEvent: vi.fn(),
 } as any;
 
 const mockContext = {
@@ -160,15 +161,15 @@ const mockServiceTopicDao = {
 
 describe("getServices", () => {
   const app = createWebServer({
-    basePath: "api",
     apimService: mockApimService,
+    basePath: "api",
+    blobService: mockBlobService,
     config: mockConfig,
     fsmLifecycleClient: mockFsmLifecycleClient,
     fsmPublicationClient: mockFsmPublicationClient,
+    serviceTopicDao: mockServiceTopicDao,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
@@ -222,7 +223,7 @@ describe("getServices", () => {
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty(
       "limit",
-      mockConfig.PAGINATION_DEFAULT_LIMIT
+      mockConfig.PAGINATION_DEFAULT_LIMIT,
     );
   });
 

@@ -10,10 +10,10 @@ import { pipe } from "fp-ts/lib/function";
 const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
 // Avoid to initialize Application Insights more than once
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
 export const initTelemetryClient = (
   intrumentationKey: NonEmptyString,
-  env = process.env
+  env = process.env,
 ) =>
   ai.defaultClient
     ? ai.defaultClient
@@ -21,7 +21,7 @@ export const initTelemetryClient = (
         disableAppInsights: env.APPINSIGHTS_DISABLE === "true",
         samplingPercentage: pipe(
           IntegerFromString.decode(env.APPINSIGHTS_SAMPLING_PERCENTAGE),
-          E.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE)
+          E.getOrElse(() => DEFAULT_SAMPLING_PERCENTAGE),
         ),
       });
 
@@ -31,7 +31,7 @@ export const trackEventOnResponseOK =
   <R>(
     telemetryClient: ReturnType<typeof initTelemetryClient>,
     eventName: EventNameEnum,
-    eventProperties: Record<string, unknown>
+    eventProperties: Record<string, unknown>,
   ) =>
   (response: R) => {
     telemetryClient.trackEvent({
@@ -42,16 +42,16 @@ export const trackEventOnResponseOK =
   };
 
 export enum EventNameEnum {
+  CheckServiceDuplicationInternal = "services.duplication.internal",
   CreateService = "create",
   DeleteService = "delete",
   EditService = "edit",
-  GetServiceKeys = "keys.get",
   GetServiceHistory = "history.get",
+  GetServiceKeys = "keys.get",
   GetServiceLifecycle = "lifecycle.get",
   GetServiceLifecycleInternal = "lifecycle.get.internal",
   GetServicePublication = "publication.get",
   GetServicePublicationInternal = "publication.get.internal",
-  CheckServiceDuplicationInternal = "services.duplication.internal",
   GetServices = "all.get",
   PublishService = "publish",
   RegenerateServiceKeys = "keys.regenerate",

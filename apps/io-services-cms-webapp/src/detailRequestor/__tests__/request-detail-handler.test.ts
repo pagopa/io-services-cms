@@ -2,31 +2,32 @@ import { Context } from "@azure/functions";
 import { Queue, ServiceDetail } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import { Json } from "io-ts-types";
-import { assert, describe, expect, it, vi } from "vitest";
-import { handleQueueItem, toServiceDetail } from "../request-detail-handler";
-import { CosmosHelper } from "../../utils/cosmos-helper";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { Json } from "io-ts-types";
+import { assert, describe, expect, it, vi } from "vitest";
+
+import { CosmosHelper } from "../../utils/cosmos-helper";
+import { handleQueueItem, toServiceDetail } from "../request-detail-handler";
 
 const createContext = () =>
   ({
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
 const serviceDetailCosmosHelperMock: CosmosHelper = {
-  fetchSingleItem: vi.fn(() => TE.right(O.none)),
   fetchItems: vi.fn(() => TE.right(O.none)),
+  fetchSingleItem: vi.fn(() => TE.right(O.none)),
 };
 
 const aGenericPublicationItemType = {
-  id: "aServiceId",
+  cms_last_update_ts: 1234567890,
   data: {
-    name: "aServiceName" as NonEmptyString,
-    description: "aServiceDescription",
+    authorized_cidrs: [],
     authorized_recipients: [],
+    description: "aServiceDescription",
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -34,26 +35,26 @@ const aGenericPublicationItemType = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
+    name: "aServiceName" as NonEmptyString,
     organization: {
-      name: "anOrganizationName",
       fiscal_code: "12345678901",
+      name: "anOrganizationName",
     },
     require_secure_channel: false,
-    authorized_cidrs: [],
   },
   fsm: {
     state: "published",
   },
+  id: "aServiceId",
   kind: "publication",
-  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const aGenericLifecycleItemType = {
-  id: "aServiceId",
+  cms_last_update_ts: 1234567890,
   data: {
-    name: "aServiceName" as NonEmptyString,
-    description: "aServiceDescription",
+    authorized_cidrs: [],
     authorized_recipients: [],
+    description: "aServiceDescription",
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123",
@@ -61,18 +62,18 @@ const aGenericLifecycleItemType = {
       pec: "service@pec.it",
       scope: "LOCAL",
     },
+    name: "aServiceName" as NonEmptyString,
     organization: {
-      name: "anOrganizationName",
       fiscal_code: "12345678901",
+      name: "anOrganizationName",
     },
     require_secure_channel: false,
-    authorized_cidrs: [],
   },
   fsm: {
     state: "draft",
   },
+  id: "aServiceId",
   kind: "lifecycle",
-  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
@@ -84,11 +85,11 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      anInvalidQueueItem
+      anInvalidQueueItem,
     )();
 
     expect(
-      serviceDetailCosmosHelperMock.fetchSingleItem
+      serviceDetailCosmosHelperMock.fetchSingleItem,
     ).not.toHaveBeenCalled();
   });
 
@@ -98,15 +99,15 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      aGenericPublicationItemType
+      aGenericPublicationItemType,
     )();
 
     expect(
-      serviceDetailCosmosHelperMock.fetchSingleItem
+      serviceDetailCosmosHelperMock.fetchSingleItem,
     ).not.toHaveBeenCalled();
 
     expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericPublicationItemType))
+      JSON.stringify(toServiceDetail(aGenericPublicationItemType)),
     );
   });
 
@@ -116,13 +117,15 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      aGenericLifecycleItemType
+      aGenericLifecycleItemType,
     )();
 
-    expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
+    expect(
+      serviceDetailCosmosHelperMock.fetchSingleItem,
+    ).toHaveBeenCalledWith();
 
     expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericLifecycleItemType))
+      JSON.stringify(toServiceDetail(aGenericLifecycleItemType)),
     );
   });
 
@@ -130,17 +133,19 @@ describe("Service Detail Handler", () => {
     const context = createContext();
 
     const serviceDetailCosmosHelperMockPubFound = {
-      fetchSingleItem: vi.fn(() => TE.right(O.some("aServiceId"))),
       fetchItems: vi.fn(() => TE.right(O.none)),
+      fetchSingleItem: vi.fn(() => TE.right(O.some("aServiceId"))),
     } as unknown as CosmosHelper;
 
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMockPubFound,
-      aGenericLifecycleItemType
+      aGenericLifecycleItemType,
     )();
 
-    expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
+    expect(
+      serviceDetailCosmosHelperMock.fetchSingleItem,
+    ).toHaveBeenCalledWith();
 
     expect(context.bindings.serviceDetailDocument).toBeUndefined();
   });
@@ -152,20 +157,20 @@ describe("Service Detail Handler", () => {
       expect(res.right.id).toBe(aGenericPublicationItemType.id);
       expect(res.right.name).toBe(aGenericPublicationItemType.data.name);
       expect(res.right.description).toBe(
-        aGenericPublicationItemType.data.description
+        aGenericPublicationItemType.data.description,
       );
       expect(res.right.require_secure_channel).toBe(
-        aGenericPublicationItemType.data.require_secure_channel
+        aGenericPublicationItemType.data.require_secure_channel,
       );
       expect(res.right.organization).toBe(
-        aGenericPublicationItemType.data.organization
+        aGenericPublicationItemType.data.organization,
       );
       expect(res.right.metadata).toBe(
-        aGenericPublicationItemType.data.metadata
+        aGenericPublicationItemType.data.metadata,
       );
       expect(res.right.kind).toBe(aGenericPublicationItemType.kind);
       expect(res.right.cms_last_update_ts).toBe(
-        aGenericPublicationItemType.cms_last_update_ts
+        aGenericPublicationItemType.cms_last_update_ts,
       );
     } else {
       assert.fail("Expected right");

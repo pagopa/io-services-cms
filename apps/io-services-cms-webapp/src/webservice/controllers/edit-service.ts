@@ -30,6 +30,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
@@ -50,16 +51,16 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "EditServiceHandler";
 
-type Dependencies = {
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
-  config: IConfig;
+interface Dependencies {
   apimService: ApimUtils.ApimService;
+  config: IConfig;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<ServiceResponsePayload>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<ServiceResponsePayload>;
 
 type EditServiceHandler = (
   context: Context,
@@ -67,14 +68,14 @@ type EditServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
-  servicePayload: ServiceRequestPayload
+  servicePayload: ServiceRequestPayload,
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
   ({
-    fsmLifecycleClient,
-    config,
     apimService,
+    config,
+    fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): EditServiceHandler =>
   (context, auth, __, ___, serviceId, servicePayload) =>
@@ -83,14 +84,14 @@ export const makeEditServiceHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW((_) =>
         pipe(
           servicePayload.metadata.topic_id,
           validateServiceTopicRequest(config),
-          TE.map(() => _)
-        )
+          TE.map(() => _),
+        ),
       ),
       TE.chainW((sId) =>
         pipe(
@@ -98,27 +99,27 @@ export const makeEditServiceHandler =
             data: payloadToItem(
               serviceId,
               servicePayload,
-              config.SANDBOX_FISCAL_CODE
+              config.SANDBOX_FISCAL_CODE,
             ),
           }),
           TE.mapLeft(fsmToApiError),
           TE.chainW(itemToResponse(config)),
-          TE.map(ResponseSuccessJson)
-        )
+          TE.map(ResponseSuccessJson),
+        ),
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.EditService, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares =
@@ -134,19 +135,18 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload),
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        // eslint-disable-next-line max-params
         checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u)
-        )
-      )
+          ipTuple(c, u),
+        ),
+      ),
     );
   };

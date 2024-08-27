@@ -32,6 +32,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import {
   EventNameEnum,
@@ -45,20 +46,20 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "PublishServiceHandler";
 
-type Dependencies = {
-  fsmPublicationClient: ServicePublication.FsmClient;
+interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
-type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
+type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
 
 type PublishServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  serviceId: ServiceLifecycle.definitions.ServiceId,
 ) => Promise<HandlerResponseTypes>;
 
 const retrieveServicePublicationTask =
@@ -76,18 +77,18 @@ const retrieveServicePublicationTask =
             TE.left(
               ResponseErrorNotFound(
                 "Not found",
-                `no item with id ${serviceId} found`
-              )
-            )
-          )
-        )
-      )
+                `no item with id ${serviceId} found`,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
 export const makePublishServiceHandler =
   ({
-    fsmPublicationClient,
     apimService,
+    fsmPublicationClient,
     telemetryClient,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId) =>
@@ -96,29 +97,29 @@ export const makePublishServiceHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW(retrieveServicePublicationTask(fsmPublicationClient)),
       TE.chainW(
         flow(
           fsmPublicationClient.publish,
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft(fsmToApiError)
-        )
+          TE.mapLeft(fsmToApiError),
+        ),
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.PublishService, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares =
@@ -134,15 +135,14 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
+      RequiredParamMiddleware("serviceId", NonEmptyString),
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
-      )
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
+      ),
     );
   };

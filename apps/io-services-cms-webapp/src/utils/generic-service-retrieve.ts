@@ -11,6 +11,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../config";
 import {
   EventNameEnum,
@@ -20,42 +21,42 @@ import {
 import { getLogger } from "./logger";
 import { serviceOwnerCheckManageTask } from "./subscription";
 
-type GenericStore<T> = {
+interface GenericStore<T> {
   fetch: (id: NonEmptyString) => TE.TaskEither<Error, O.Option<T>>;
-};
+}
 
 type GenericItemToResponse<T, V> = (
-  dbConfig: IConfig
+  dbConfig: IConfig,
 ) => (item: T) => TE.TaskEither<IResponseErrorInternal, V>;
 
 export const genericServiceRetrieveHandler =
   <
-    T extends Record<string, unknown> & {
-      fsm: { state: string } & { [x: string]: unknown } & {
+    T extends {
+      fsm: {
         lastTransition?: string | undefined;
-      };
-    },
-    V
+      } & { state: string } & Record<string, unknown>;
+    } & Record<string, unknown>,
+    V,
   >(
     store: GenericStore<T>,
     apimService: ApimUtils.ApimService,
     telemetryClient: TelemetryClient,
     config: IConfig,
-    itemToResponse: GenericItemToResponse<T, V>
+    itemToResponse: GenericItemToResponse<T, V>,
   ) =>
   (
     context: Context,
     auth: IAzureApiAuthorization,
     serviceId: NonEmptyString,
     logPrefix: string,
-    event: EventNameEnum
+    event: EventNameEnum,
   ) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW(
         flow(
@@ -64,25 +65,25 @@ export const genericServiceRetrieveHandler =
           TE.chainW(
             flow(
               TE.fromOption(() =>
-                ResponseErrorNotFound("Not found", `${serviceId} not found`)
+                ResponseErrorNotFound("Not found", `${serviceId} not found`),
               ),
               TE.chainW(itemToResponse(config)),
-              TE.map(ResponseSuccessJson<V>)
-            )
-          )
-        )
+              TE.map(ResponseSuccessJson<V>),
+            ),
+          ),
+        ),
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, event, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();

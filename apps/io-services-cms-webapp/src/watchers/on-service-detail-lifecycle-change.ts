@@ -22,7 +22,7 @@ const onDetailLifecycleHandler = ({
 }: ServiceLifecycle.CosmosResource): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
-    // eslint-disable-next-line no-underscore-dangle
+
     cms_last_update_ts: _ts,
     kind: "lifecycle",
   },
@@ -37,7 +37,7 @@ export const handler: RTE.ReaderTaskEither<
     item.fsm.state === "draft",
     B.fold(
       () => noAction,
-      () => pipe(item, onDetailLifecycleHandler)
+      () => pipe(item, onDetailLifecycleHandler),
     ),
-    TE.right
+    TE.right,
   );

@@ -3,6 +3,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { JiraConfig } from "../config";
 import {
   CreateJiraIssueResponse,
@@ -22,7 +23,7 @@ const formatServiceScope = (scope: string) =>
 
 const getTicketPriority = (
   jiraConfig: JiraConfig,
-  scope: string
+  scope: string,
 ): NonEmptyString =>
   scope === "NATIONAL"
     ? jiraConfig.JIRA_ISSUE_HIGH_PRIORITY_ID
@@ -36,74 +37,74 @@ const formatIssueTitle = (serviceId: NonEmptyString) =>
 
 // DONE and Completata will be removed whe legacy jira will be removed
 export type JiraIssueStatusFilter =
-  | "NEW"
-  | "REVIEW"
-  | "REJECTED"
   | "APPROVED"
+  | "Completata"
   | "DONE"
-  | "Completata";
+  | "NEW"
+  | "REJECTED"
+  | "REVIEW";
 
-export type JiraProxy = {
+export interface JiraProxy {
   readonly createJiraIssue: (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate,
-    firstPublication: boolean
+    firstPublication: boolean,
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
-  readonly searchJiraIssuesByKeyAndStatus: (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
-  ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
   readonly getJiraIssueByServiceId: (
-    serviceId: NonEmptyString
+    serviceId: NonEmptyString,
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
   readonly getPendingAndRejectedJiraIssueByServiceId: (
-    serviceId: NonEmptyString
+    serviceId: NonEmptyString,
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
+  readonly reOpenJiraIssue: (
+    ticketKey: NonEmptyString,
+  ) => TE.TaskEither<Error, void>;
+  readonly searchJiraIssuesByKeyAndStatus: (
+    jiraIssueKeys: readonly NonEmptyString[],
+    jiraIssueStatuses: readonly JiraIssueStatusFilter[],
+  ) => TE.TaskEither<Error, SearchJiraIssuesResponse>;
   readonly updateJiraIssue: (
     ticketKey: NonEmptyString,
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate,
-    firstPublication: boolean
+    firstPublication: boolean,
   ) => TE.TaskEither<Error, void>;
-  readonly reOpenJiraIssue: (
-    ticketKey: NonEmptyString
-  ) => TE.TaskEither<Error, void>;
-};
+}
 
-export type Delegate = {
+export interface Delegate {
+  email?: string;
   firstName?: string;
   lastName?: string;
-  email?: string;
-  permissions: Array<string | undefined>;
-};
+  permissions: (string | undefined)[];
+}
 
 export const jiraProxy = (
   jiraClient: JiraAPIClient,
-  jiraConfig: JiraConfig
+  jiraConfig: JiraConfig,
 ): JiraProxy => {
   const buildIssueCustomFields = (
     service: ServiceLifecycle.definitions.Service,
-    delegate: Delegate
+    delegate: Delegate,
   ) => {
     const customFields: Map<string, unknown> = new Map<string, unknown>();
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD,
-      service.data.organization.fiscal_code
+      service.data.organization.fiscal_code,
     );
     customFields.set(jiraClient.config.JIRA_CONTRACT_CUSTOM_FIELD, {
       value: "Null",
     });
     customFields.set(
       jiraClient.config.JIRA_ORGANIZATION_NAME_CUSTOM_FIELD,
-      service.data.organization.name
+      service.data.organization.name,
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_NAME_CUSTOM_FIELD,
-      `${delegate.firstName || ""} ${delegate.lastName || ""}`
+      `${delegate.firstName || ""} ${delegate.lastName || ""}`,
     );
     customFields.set(
       jiraClient.config.JIRA_DELEGATE_EMAIL_CUSTOM_FIELD,
-      `${delegate.email || ""}`
+      `${delegate.email || ""}`,
     );
     return customFields;
   };
@@ -111,7 +112,7 @@ export const jiraProxy = (
   const buildIssueDescription = (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate,
-    firstPublication: boolean
+    firstPublication: boolean,
   ) =>
     `h1. Dati Servizio
     \n\nEffettua la review del servizio al seguente [link|https://developer.io.italia.it/service/${
@@ -123,14 +124,14 @@ export const jiraProxy = (
     \n\n*Descrizione*: ${formatOptionalStringValue(service.data.description)}
     \n\n----\n\nh3. _Contatti:_
     \n\n*Url di supporto:* ${formatOptionalStringValue(
-      service.data.metadata.support_url
+      service.data.metadata.support_url,
     )}
     \n\n*Telefono:* ${formatOptionalStringValue(service.data.metadata.phone)}
     \n\n*E-mail:* ${formatOptionalStringValue(service.data.metadata.email)}
     \n\n*Pec:* ${formatOptionalStringValue(service.data.metadata.pec)}
     \n\nh3. _Sicurezza e Privacy:_
     \n\n*Privacy Url:* ${formatOptionalStringValue(
-      service.data.metadata.privacy_url
+      service.data.metadata.privacy_url,
     )}
     \n\nh3. _Dati account (API V2):_
     \n\n${formatOptionalStringValue(delegate.email)}
@@ -142,21 +143,21 @@ export const jiraProxy = (
   const createJiraIssue = (
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate,
-    firstPublication: boolean
+    firstPublication: boolean,
   ): TE.TaskEither<Error, CreateJiraIssueResponse> =>
     jiraClient.createJiraIssue(
       formatIssueTitle(service.id),
       buildIssueDescription(service, delegate, firstPublication),
       getTicketPriority(jiraConfig, service.data.metadata.scope),
       [`service-${service.id}` as NonEmptyString],
-      buildIssueCustomFields(service, delegate)
+      buildIssueCustomFields(service, delegate),
     );
 
   const updateJiraIssue = (
     ticketKey: NonEmptyString,
     service: ServiceLifecycle.definitions.Service,
     delegate: Delegate,
-    firstPublication: boolean
+    firstPublication: boolean,
   ): TE.TaskEither<Error, void> =>
     jiraClient.updateJiraIssue(
       ticketKey,
@@ -164,103 +165,103 @@ export const jiraProxy = (
       buildIssueDescription(service, delegate, firstPublication),
       getTicketPriority(jiraConfig, service.data.metadata.scope),
       [`service-${service.id}` as NonEmptyString],
-      buildIssueCustomFields(service, delegate)
+      buildIssueCustomFields(service, delegate),
     );
 
   const reOpenJiraIssue = (
-    ticketKey: NonEmptyString
+    ticketKey: NonEmptyString,
   ): TE.TaskEither<Error, void> =>
     jiraClient.applyJiraIssueTransition(
       ticketKey,
       jiraClient.config.JIRA_TRANSITION_UPDATED_ID,
-      "L'ente ha richiesto una nuova review"
+      "L'ente ha richiesto una nuova review",
     );
 
   const buildSearchIssuesBasePayload = (
-    jql: string
+    jql: string,
   ): SearchJiraIssuesPayload => ({
     fields: ["status", "comment", "statuscategorychangedate"],
     fieldsByKeys: false,
+    jql,
     maxResults: 1,
     startAt: 0,
-    jql,
   });
 
   const buildSearchJiraIssuesByKeyAndStatusPayload = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
+    jiraIssueKeys: readonly NonEmptyString[],
+    jiraIssueStatuses: readonly JiraIssueStatusFilter[],
   ) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
       } AND key IN(${jiraIssueKeys.join(
-        ","
-      )}) AND status IN (${jiraIssueStatuses.join(",")})`
+        ",",
+      )}) AND status IN (${jiraIssueStatuses.join(",")})`,
     ),
     maxResults: jiraIssueKeys.length,
   });
 
   const searchJiraIssuesByKeyAndStatus = (
-    jiraIssueKeys: ReadonlyArray<NonEmptyString>,
-    jiraIssueStatuses: ReadonlyArray<JiraIssueStatusFilter>
+    jiraIssueKeys: readonly NonEmptyString[],
+    jiraIssueStatuses: readonly JiraIssueStatusFilter[],
   ): TE.TaskEither<Error, SearchJiraIssuesResponse> =>
     jiraClient.searchJiraIssues(
       buildSearchJiraIssuesByKeyAndStatusPayload(
         jiraIssueKeys,
-        jiraIssueStatuses
-      )
+        jiraIssueStatuses,
+      ),
     );
 
   const buildGetJiraIssueByServiceIdPayload = (serviceId: NonEmptyString) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
-      } AND summary ~ '${formatIssueTitle(serviceId)}'`
+      } AND summary ~ '${formatIssueTitle(serviceId)}'`,
     ),
   });
 
   const buildGetPendingAndRejectedJiraIssueByServiceIdPayload = (
-    serviceId: NonEmptyString
+    serviceId: NonEmptyString,
   ) => ({
     ...buildSearchIssuesBasePayload(
       `project = ${
         jiraClient.config.JIRA_PROJECT_NAME
       } AND summary ~ '${formatIssueTitle(
-        serviceId
-      )}' AND status IN (NEW , REVIEW , REJECTED)`
+        serviceId,
+      )}' AND status IN (NEW , REVIEW , REJECTED)`,
     ),
   });
 
   const getJiraIssueByServiceId = (
-    serviceId: NonEmptyString
+    serviceId: NonEmptyString,
   ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
     pipe(
       jiraClient.searchJiraIssues(
-        buildGetJiraIssueByServiceIdPayload(serviceId)
+        buildGetJiraIssueByServiceIdPayload(serviceId),
       ),
       TE.map((response) =>
-        response.issues.length > 0 ? O.some(response.issues[0]) : O.none
-      )
+        response.issues.length > 0 ? O.some(response.issues[0]) : O.none,
+      ),
     );
 
   const getPendingAndRejectedJiraIssueByServiceId = (
-    serviceId: NonEmptyString
+    serviceId: NonEmptyString,
   ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
     pipe(
       jiraClient.searchJiraIssues(
-        buildGetPendingAndRejectedJiraIssueByServiceIdPayload(serviceId)
+        buildGetPendingAndRejectedJiraIssueByServiceIdPayload(serviceId),
       ),
       TE.map((response) =>
-        response.issues.length > 0 ? O.some(response.issues[0]) : O.none
-      )
+        response.issues.length > 0 ? O.some(response.issues[0]) : O.none,
+      ),
     );
 
   return {
     createJiraIssue,
-    searchJiraIssuesByKeyAndStatus,
     getJiraIssueByServiceId,
     getPendingAndRejectedJiraIssueByServiceId,
-    updateJiraIssue,
     reOpenJiraIssue,
+    searchJiraIssuesByKeyAndStatus,
+    updateJiraIssue,
   };
 };

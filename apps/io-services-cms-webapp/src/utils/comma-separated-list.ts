@@ -7,11 +7,11 @@ import * as t from "io-ts";
  *
  * @returns either a decode error or the array of decoded items
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
 export const CommaSeparatedListOf = (decoder: t.Mixed) =>
-  new t.Type<ReadonlyArray<t.TypeOf<typeof decoder>>, string, unknown>(
+  new t.Type<readonly t.TypeOf<typeof decoder>[], string, unknown>(
     `CommaSeparatedListOf<${decoder.name}>`,
-    (value: unknown): value is ReadonlyArray<t.TypeOf<typeof decoder>> =>
+    (value: unknown): value is readonly t.TypeOf<typeof decoder>[] =>
       Array.isArray(value) && value.every((e) => decoder.is(e)),
     (input /* , context */) =>
       t.readonlyArray(decoder).decode(
@@ -21,8 +21,8 @@ export const CommaSeparatedListOf = (decoder: t.Mixed) =>
               .map((e) => e.trim())
               .filter(Boolean)
           : !input
-          ? [] // fallback to empty array in case of empty input
-          : input // it should not happen, but in case we let the decoder fail
+            ? [] // fallback to empty array in case of empty input
+            : input, // it should not happen, but in case we let the decoder fail
       ),
-    String
+    String,
   );

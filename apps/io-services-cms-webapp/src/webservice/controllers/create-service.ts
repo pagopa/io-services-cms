@@ -35,6 +35,7 @@ import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
@@ -59,8 +60,8 @@ import { validateServiceTopicRequest } from "../../utils/service-topic-validator
 const logPrefix = "CreateServiceHandler";
 
 type HandlerResponseTypes =
-  | IResponseJsonWithStatus<ServiceResponsePayload>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseJsonWithStatus<ServiceResponsePayload>;
 
 type ICreateServiceHandler = (
   context: Context,
@@ -68,17 +69,17 @@ type ICreateServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   userEmail: EmailAddress,
-  servicePayload: ServiceRequestPayload
+  servicePayload: ServiceRequestPayload,
 ) => Promise<HandlerResponseTypes>;
 
-type Dependencies = {
-  // An instance of ServiceLifecycle client
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+interface Dependencies {
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   config: IConfig;
+  // An instance of ServiceLifecycle client
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
 // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
 // utility to extract a non-empty id from an object
@@ -89,25 +90,25 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
     TE.fromEither,
     TE.mapLeft(
       (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`)
+        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
     ),
-    TE.map((_) => _.id)
+    TE.map((_) => _.id),
   );
 
 const createSubscriptionTask = (
   apimService: ApimUtils.ApimService,
   userEmail: EmailString,
   subscriptionId: NonEmptyString,
-  config: IConfig
+  config: IConfig,
 ): TE.TaskEither<Error, SubscriptionContract> => {
   const getUserId = pipe(
     apimService.getUserByEmail(userEmail),
     TE.mapLeft(
       (err) =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`)
+        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
     ),
     TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-    TE.chain(pickId)
+    TE.chain(pickId),
   );
 
   // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
@@ -116,44 +117,44 @@ const createSubscriptionTask = (
     TE.mapLeft(
       (err) =>
         new Error(
-          `Failed to fetch product by its name, code: ${err.statusCode}`
-        )
+          `Failed to fetch product by its name, code: ${err.statusCode}`,
+        ),
     ),
     TE.chain(TE.fromOption(() => new Error(`Cannot find product`))),
-    TE.chain(pickId)
+    TE.chain(pickId),
   );
 
   const createSubscription = ({
-    userId,
     productId,
+    userId,
   }: {
-    userId: NonEmptyString;
     productId: NonEmptyString;
+    userId: NonEmptyString;
   }) =>
     pipe(
       apimService.upsertSubscription(productId, userId, subscriptionId),
       TE.mapLeft(
         (err) =>
           new Error(
-            `Failed to fetch create subcription, code: ${err.statusCode}`
-          )
-      )
+            `Failed to fetch create subcription, code: ${err.statusCode}`,
+          ),
+      ),
     );
 
   return pipe(
     sequenceS(TE.ApplicativePar)({
-      userId: getUserId,
       productId: getProductId,
+      userId: getUserId,
     }),
-    TE.chain(createSubscription)
+    TE.chain(createSubscription),
   );
 };
 
 export const makeCreateServiceHandler =
   ({
-    fsmLifecycleClient,
     apimService,
     config,
+    fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
   (context, auth, _, __, userEmail, servicePayload) => {
@@ -162,7 +163,7 @@ export const makeCreateServiceHandler =
 
     const createSubscriptionStep = pipe(
       createSubscriptionTask(apimService, userEmail, serviceId, config),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message))
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
     );
 
     const createServiceStep = pipe(
@@ -170,14 +171,14 @@ export const makeCreateServiceHandler =
         data: payloadToItem(
           serviceId,
           servicePayload,
-          config.SANDBOX_FISCAL_CODE
+          config.SANDBOX_FISCAL_CODE,
         ),
       }),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
       TE.chain(itemToResponse(config)),
       TE.map((result) =>
-        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201)
-      )
+        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201),
+      ),
     );
 
     return pipe(
@@ -187,17 +188,17 @@ export const makeCreateServiceHandler =
       TE.chainW((_) => createServiceStep),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
           serviceName: servicePayload.name,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
       TE.mapLeft((err) =>
         logger.logErrorResponse(err, {
           userSubscriptionId: auth.subscriptionId,
-        })
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
   };
 
@@ -214,19 +215,18 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the user email from the request headers
       UserEmailMiddleware(),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload)
+      RequiredBodyPayloadMiddleware(ServiceRequestPayload),
     );
     return wrapRequestHandler(
       middlewaresWrap(
-        // eslint-disable-next-line max-params
         checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u)
-        )
-      )
+          ipTuple(c, u),
+        ),
+      ),
     );
   };

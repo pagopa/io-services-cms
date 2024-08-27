@@ -7,6 +7,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
+
 import { withJsonInput } from "../lib/azure/misc";
 import { QueuePermanentError } from "../utils/errors";
 import { parseIncomingMessage } from "../utils/queue-utils";
@@ -14,7 +15,7 @@ import { parseIncomingMessage } from "../utils/queue-utils";
 export const handleQueueItem = (
   _context: Context,
   queueItem: Json,
-  legacyServiceModel: ServiceModel
+  legacyServiceModel: ServiceModel,
 ) =>
   pipe(
     queueItem,
@@ -40,7 +41,7 @@ export const handleQueueItem = (
                         ? (new Set(["0.0.0.0/0"]) as Set<CIDR>)
                         : x.authorizedCIDRs,
                     isVisible: x.isVisible ?? false,
-                  })
+                  }),
               ),
             (existingService) =>
               pipe(
@@ -58,12 +59,12 @@ export const handleQueueItem = (
                   _context.log.info(`update param: ${JSON.stringify(x)}`);
                   return x;
                 },
-                (x) => legacyServiceModel.update(x)
-              )
-          )
+                (x) => legacyServiceModel.update(x),
+              ),
+          ),
         ),
-        TE.map((_) => void 0)
-      )
+        TE.map((_) => void 0),
+      ),
     ),
     TE.getOrElseW((e) => {
       if (e instanceof QueuePermanentError) {
@@ -72,7 +73,7 @@ export const handleQueueItem = (
       } else if (e instanceof Error) {
         _context.log.error(
           `An Error has occurred while persisting data, the reason was => ${e.message}`,
-          e
+          e,
         );
         throw e;
       } else {
@@ -80,9 +81,9 @@ export const handleQueueItem = (
           `An ${
             e.kind
           } has occurred while persisting data, the reason was => ${JSON.stringify(
-            e
+            e,
           )}`,
-          e
+          e,
         );
         switch (e.kind) {
           case "COSMOS_EMPTY_RESPONSE":
@@ -92,18 +93,19 @@ export const handleQueueItem = (
             throw E.toError(e.error);
           case "COSMOS_ERROR_RESPONSE":
             throw E.toError(e.error.message);
-          default:
+          default: {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const _: never = e;
             throw new Error(`should not have executed this with ${e}`);
+          }
         }
       }
-    })
+    }),
   );
 
 export const createRequestSyncLegacyHandler = (
-  legacyServiceModel: ServiceModel
+  legacyServiceModel: ServiceModel,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, queueItem, legacyServiceModel)()
+    handleQueueItem(context, queueItem, legacyServiceModel)(),
   );

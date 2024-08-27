@@ -1,13 +1,12 @@
-import * as E from "fp-ts/lib/Either";
-
-import { EmailString } from "@pagopa/ts-commons/lib/strings";
+import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 import {
   ResponseErrorForbiddenNotAuthorized,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
+import { EmailString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
-import { IRequestMiddleware } from "@pagopa/ts-commons/lib/request_middleware";
 
 /**
  * Extracts the user email from the provided header.
@@ -30,8 +29,8 @@ export const UserEmailMiddleware =
         flow(
           EmailString.decode,
           E.mapLeft((_) =>
-            ResponseErrorInternal(`Failed to decode provided email`)
-          )
-        )
-      )
+            ResponseErrorInternal(`Failed to decode provided email`),
+          ),
+        ),
+      ),
     );

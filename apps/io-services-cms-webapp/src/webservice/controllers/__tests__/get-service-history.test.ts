@@ -17,6 +17,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { IConfig } from "../../../config";
 import { itemsToResponse } from "../../../utils/converters/service-history-converters";
 import { CosmosPagedHelper } from "../../../utils/cosmos-helper";
@@ -25,7 +26,7 @@ import { WebServerDependencies, createWebServer } from "../../index";
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -41,12 +42,9 @@ const ownerId = `/an/owner/${anUserId}`;
 const aServiceId = "aServiceId";
 const aContinuationToken = "aContinuationToken";
 const aServiceHistoryItem = {
-  id: "aServiceId" as NonEmptyString,
-  last_update: "aServiceLastUpdate" as NonEmptyString,
   data: {
-    name: "aServiceName" as NonEmptyString,
-    description: "aServiceDescription" as NonEmptyString,
     authorized_recipients: [],
+    description: "aServiceDescription" as NonEmptyString,
     max_allowed_payment_amount: 123,
     metadata: {
       address: "via tal dei tali 123" as NonEmptyString,
@@ -55,9 +53,10 @@ const aServiceHistoryItem = {
       scope: "LOCAL",
       topic_id: 1,
     },
+    name: "aServiceName" as NonEmptyString,
     organization: {
-      name: "anOrganizationName" as NonEmptyString,
       fiscal_code: "12345678901" as NonEmptyString,
+      name: "anOrganizationName" as NonEmptyString,
     },
 
     require_secure_channel: false,
@@ -65,6 +64,8 @@ const aServiceHistoryItem = {
   fsm: {
     state: "draft",
   },
+  id: "aServiceId" as NonEmptyString,
+  last_update: "aServiceLastUpdate" as NonEmptyString,
 } as unknown as ServiceHistoryCosmosType;
 
 const mockApimService = {
@@ -72,7 +73,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -82,33 +83,33 @@ const mockConfig = {
 } as unknown as IConfig;
 
 const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
-  subscriptionId: aManageSubscriptionId as NonEmptyString,
-  cidrs: [] as unknown as ReadonlySet<
-    string &
-      IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$">
-  >,
   _etag: "_etag",
   _rid: "_rid",
   _self: "_self",
   _ts: 1,
+  cidrs: [] as unknown as ReadonlySet<
+    IPatternStringTag<"^([0-9]{1,3}[.]){3}[0-9]{1,3}(/([0-9]|[1-2][0-9]|3[0-2]))?$"> &
+      string
+  >,
   id: "xyz" as NonEmptyString,
   kind: "IRetrievedSubscriptionCIDRs",
+  subscriptionId: aManageSubscriptionId as NonEmptyString,
   version: 0 as NonNegativeInteger,
 };
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
+    query: vi.fn(() => ({
+      fetchAll: mockFetchAll,
+    })),
     readAll: vi.fn(() => ({
       fetchAll: mockFetchAll,
       getAsyncIterator: vi.fn(),
-    })),
-    query: vi.fn(() => ({
-      fetchAll: mockFetchAll,
     })),
   },
 } as unknown as Container;
@@ -116,8 +117,8 @@ const containerMock = {
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const mockAppinsights = {
-  trackEvent: vi.fn(),
   trackError: vi.fn(),
+  trackEvent: vi.fn(),
 } as any;
 
 const mockContext = {
@@ -132,16 +133,16 @@ const mockServiceTopicDao = {
 } as any;
 
 const mockWebServer = (
-  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>,
 ) => {
   const app = createWebServer({
-    basePath: "api",
     apimService: mockApimService,
+    basePath: "api",
     config: mockConfig,
-    subscriptionCIDRsModel,
-    serviceTopicDao: mockServiceTopicDao,
-    telemetryClient: mockAppinsights,
     serviceHistoryPagedHelper,
+    serviceTopicDao: mockServiceTopicDao,
+    subscriptionCIDRsModel,
+    telemetryClient: mockAppinsights,
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
@@ -161,10 +162,10 @@ describe("getServiceHistory", () => {
       pageFetch: vi.fn(() =>
         TE.right(
           O.some({
-            resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+            resources: serviceHistoryList,
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -178,23 +179,22 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: "DESC",
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: "DESC",
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       undefined,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -217,10 +217,10 @@ describe("getServiceHistory", () => {
       pageFetch: vi.fn(() =>
         TE.right(
           O.some({
-            resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+            resources: serviceHistoryList,
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -234,23 +234,22 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: anOrder,
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: anOrder,
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       undefined,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -273,10 +272,10 @@ describe("getServiceHistory", () => {
       pageFetch: vi.fn(() =>
         TE.right(
           O.some({
-            resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+            resources: serviceHistoryList,
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -290,23 +289,22 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: "DESC",
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: "DESC",
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       aLimit,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -331,14 +329,14 @@ describe("getServiceHistory", () => {
           O.some({
             continuationToken: aContinuationToken,
             resources: serviceHistoryList,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
     const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
       .get(
-        `/api/services/${aServiceId}/history?continuationToken=${anotherContinuationToken}`
+        `/api/services/${aServiceId}/history?continuationToken=${anotherContinuationToken}`,
       )
       .send()
       .set("x-user-email", "example@email.com")
@@ -348,23 +346,22 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: "DESC",
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: "DESC",
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       undefined,
-      anotherContinuationToken
+      anotherContinuationToken,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -394,18 +391,18 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: "DESC",
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: "DESC",
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       undefined,
-      undefined
+      undefined,
     );
 
     expect(response.body).toEqual({
@@ -431,18 +428,18 @@ describe("getServiceHistory", () => {
 
     expect(mockServiceHistoryPagedHelper.pageFetch).toHaveBeenCalledWith(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order: "DESC",
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: aServiceId,
           },
         ],
-        order: "DESC",
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       undefined,
-      undefined
+      undefined,
     );
 
     expect(response.body.detail).toEqual("COSMOS ERROR RETURNED");
@@ -457,10 +454,10 @@ describe("getServiceHistory", () => {
       pageFetch: vi.fn(() =>
         TE.right(
           O.some({
-            resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+            resources: serviceHistoryList,
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 

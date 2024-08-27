@@ -1,16 +1,16 @@
-import { describe, it, expect, assert } from "vitest";
+import { Context } from "@azure/functions";
+import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { assert, describe, expect, it } from "vitest";
 
 import { processBatchOf, setBindings } from "../misc";
-import { Context } from "@azure/functions";
 
 const mockContext = {
-  log: console,
   executionContext: { functionName: "aFunctionName" },
+  log: console,
 } as unknown as Context;
 
 describe(`processBatchOf`, () => {
@@ -33,15 +33,15 @@ describe(`processBatchOf`, () => {
     ${"bad items ignored"}         | ${[anItem, anotherItem, "wrong shape"]} | ${[aResult, anotherResult]} | ${true}
   `(
     "should succeed on $scenario",
-    async ({ items, expected, ignoreMalformedItems }) => {
+    async ({ expected, ignoreMalformedItems, items }) => {
       const result = await pipe(
         aProcedure,
         processBatchOf(aShape, { ignoreMalformedItems }),
-        RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`))
+        RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`)),
       )({ context: mockContext, inputs: [items] })();
 
       expect(result).toEqual(expected);
-    }
+    },
   );
 
   it.each`
@@ -51,14 +51,14 @@ describe(`processBatchOf`, () => {
     ${"the procedure fails and parallel=false "} | ${[anItem, anItem]}        | ${true}              | ${false} | ${aFailingProcedure}
   `(
     "should fail on $scenario",
-    async ({ items, ignoreMalformedItems, parallel, procedure }) => {
+    async ({ ignoreMalformedItems, items, parallel, procedure }) => {
       const result = await pipe(
         procedure,
-        processBatchOf(aShape, { ignoreMalformedItems, parallel })
+        processBatchOf(aShape, { ignoreMalformedItems, parallel }),
       )({ context: mockContext, inputs: [items] })();
 
       expect(E.isLeft(result)).toBe(true);
-    }
+    },
   );
 });
 
@@ -80,7 +80,7 @@ describe("setBindings", () => {
     const result = await pipe(
       aProcedure,
       setBindings(aFormatter),
-      RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`))
+      RTE.getOrElseW((_) => assert.fail(`It's not supposed to be here`)),
     )({ context, inputs: [] })();
 
     // @ts-ignore
@@ -93,7 +93,7 @@ describe("setBindings", () => {
 
     const result = await pipe(
       aFailingProcedure,
-      setBindings(aFormatter)
+      setBindings(aFormatter),
     )({ context, inputs: [] })();
 
     // @ts-ignore

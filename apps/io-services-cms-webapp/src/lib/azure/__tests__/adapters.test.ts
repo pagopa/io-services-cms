@@ -1,11 +1,12 @@
-import { describe, it, expect, vi, beforeEach, assert } from "vitest";
-import * as TE from "fp-ts/lib/TaskEither";
-import { toAzureFunctionHandler } from "../adapters";
 import { Context } from "@azure/functions";
+import * as TE from "fp-ts/lib/TaskEither";
+import { assert, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { toAzureFunctionHandler } from "../adapters";
 
 const mockContext = {
-  log: console,
   executionContext: { functionName: "aFunctionName" },
+  log: console,
 } as unknown as Context;
 
 beforeEach(() => {
@@ -49,7 +50,7 @@ describe(`toAzureFunctionHandler`, () => {
     try {
       const result = await handler(mockContext);
       assert.fail(
-        `It's not supposed to be here, result: ${JSON.stringify(result)}`
+        `It's not supposed to be here, result: ${JSON.stringify(result)}`,
       );
     } catch (error) {
       expect(aFailingProcedure).toHaveBeenCalledWith({
