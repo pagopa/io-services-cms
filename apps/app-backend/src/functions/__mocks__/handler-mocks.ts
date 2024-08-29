@@ -6,7 +6,7 @@ export const httpHandlerInputMocks: H.HandlerEnvironment<H.HttpRequest> = {
   input: H.request("mockurl"),
   inputDecoder: H.HttpRequest,
   logger: {
-    log: () => () => {},
     format: L.format.simple,
+    log: () => () => {},
   },
 };

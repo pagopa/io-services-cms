@@ -10,8 +10,8 @@ export const mockFeaturedServices = {
     {
       id: "anotherServiceId",
       name: "anotherServiceName",
-      version: 1,
       organization_name: "anOrganizationName",
+      version: 1,
     },
   ],
 } as unknown as FeaturedServices;

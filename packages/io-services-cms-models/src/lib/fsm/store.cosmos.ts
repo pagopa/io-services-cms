@@ -11,16 +11,17 @@ import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+
 import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T>;
 
 export const createCosmosStore = <
-  T extends WithState<string, Record<string, unknown>>
+  T extends WithState<string, Record<string, unknown>>,
 >(
   container: Container,
-  codec: t.Type<T>
+  codec: t.Type<T>,
 ): CosmosStore<T> => {
   const fetch = (id: string) =>
     pipe(
@@ -31,8 +32,8 @@ export const createCosmosStore = <
           new Error(
             `Failed to read item id#${id} from database, ${
               E.toError(err).message
-            }`
-          )
+            }`,
+          ),
       ),
       TE.chain((rr) =>
         rr.statusCode === 404
@@ -53,19 +54,19 @@ export const createCosmosStore = <
                 (err) =>
                   new Error(
                     `Unable to parse resorce from the database, ${readableReport(
-                      err
-                    )}`
-                  )
-              )
-            )
-      )
+                      err,
+                    )}`,
+                  ),
+              ),
+            ),
+      ),
     );
 
   const buildReadOperations = (ids: string[]): ReadOperationInput[] =>
     ids.map((id) => ({
-      partitionKey: id,
-      operationType: BulkOperationType.Read,
       id,
+      operationType: BulkOperationType.Read,
+      partitionKey: id,
     }));
 
   const bulkFetch = (ids: string[]) =>
@@ -78,8 +79,8 @@ export const createCosmosStore = <
           }),
         (err) =>
           new Error(
-            `Failed to bulk read items from database, ${E.toError(err).message}`
-          )
+            `Failed to bulk read items from database, ${E.toError(err).message}`,
+          ),
       ),
       TE.map((operationResponses) =>
         operationResponses.map(
@@ -93,18 +94,18 @@ export const createCosmosStore = <
                   last_update: res.resourceBody
                     ? new Date(
                         // eslint-disable-next-line no-underscore-dangle
-                        (res.resourceBody._ts as number) * 1000
+                        (res.resourceBody._ts as number) * 1000,
                       ).toISOString() // Unix timestamp
                     : new Date().toISOString(),
                   version: res.eTag,
                 },
                 codec.decode,
-                E.fold(() => O.none, O.some)
-              )
-            )
-          )
-        )
-      )
+                E.fold(() => O.none, O.some),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
   const save = (id: string, value: T) =>
@@ -119,8 +120,8 @@ export const createCosmosStore = <
             new Error(
               `Failed to save item id#${id} from database, ${
                 E.toError(err).message
-              }`
-            )
+              }`,
+            ),
         ),
       TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
@@ -129,7 +130,7 @@ export const createCosmosStore = <
             new Date(itemResponse.resource._ts * 1000).toISOString() // Unix timestamp
           : undefined,
         version: itemResponse.etag,
-      }))
+      })),
     );
 
   // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
@@ -144,8 +145,8 @@ export const createCosmosStore = <
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const code = (err as any).code; // Extract code property
         return code === 404 ? TE.right(void 0) : TE.left(E.toError(err));
-      })
+      }),
     );
 
-  return { fetch, bulkFetch, save, delete: deleteItem };
+  return { bulkFetch, delete: deleteItem, fetch, save };
 };

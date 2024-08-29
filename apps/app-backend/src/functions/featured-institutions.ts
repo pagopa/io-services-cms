@@ -5,6 +5,7 @@ import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { FeaturedItemsConfig } from "../config";
 import { Institutions } from "../generated/definitions/internal/Institutions";
 import { BlobServiceClientDependency } from "../utils/blob-storage/dependency";
@@ -16,7 +17,7 @@ import { getBlobAsObject } from "../utils/blob-storage/helper";
  */
 
 export const retrieveInstitutionsItems: (
-  featuredItemsConfig: FeaturedItemsConfig
+  featuredItemsConfig: FeaturedItemsConfig,
 ) => RTE.ReaderTaskEither<
   BlobServiceClientDependency,
   H.HttpError,
@@ -29,23 +30,23 @@ export const retrieveInstitutionsItems: (
         Institutions,
         blobServiceClient,
         featuredItemsConfig.FEATURED_ITEMS_CONTAINER_NAME,
-        featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME
+        featuredItemsConfig.FEATURED_INSTITUTIONS_FILE_NAME,
       ),
       TE.mapLeft(
         (err) =>
           new H.HttpError(
-            `An error occurred retrieving featuredInstitutions file from blobService: [${err.message}]`
-          )
+            `An error occurred retrieving featuredInstitutions file from blobService: [${err.message}]`,
+          ),
       ),
-      TE.map(O.getOrElse(() => ({ institutions: [] } as Institutions))) // Return an empty list if the file is not found
+      TE.map(O.getOrElse(() => ({ institutions: [] }) as Institutions)), // Return an empty list if the file is not found
     );
 
 export const makeFeaturedInstitutionsHandler: (
-  featuredItemsConfig: FeaturedItemsConfig
+  featuredItemsConfig: FeaturedItemsConfig,
 ) => H.Handler<
   H.HttpRequest,
-  | H.HttpResponse<Institutions, 200>
-  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
+  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>
+  | H.HttpResponse<Institutions, 200>,
   BlobServiceClientDependency
 > = (featuredItemsConfig: FeaturedItemsConfig) =>
   H.of((_: H.HttpRequest) =>
@@ -56,19 +57,19 @@ export const makeFeaturedInstitutionsHandler: (
       RTE.orElseW((error) =>
         pipe(
           RTE.right(
-            H.problemJson({ status: error.status, title: error.message })
+            H.problemJson({ status: error.status, title: error.message }),
           ),
           RTE.chainFirstW((errorResponse) =>
             L.errorRTE(
               `Error executing GetFeaturedInstitutionsFn`,
-              errorResponse
-            )
-          )
-        )
-      )
-    )
+              errorResponse,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 
 export const GetFeaturedInstitutionsFn = (
-  featuredItemsConfig: FeaturedItemsConfig
+  featuredItemsConfig: FeaturedItemsConfig,
 ) => httpAzureFunction(makeFeaturedInstitutionsHandler(featuredItemsConfig));

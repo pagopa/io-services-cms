@@ -1,63 +1,63 @@
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
-import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export enum FilterCompositionEnum {
   and = "and ",
-  or = "or ",
   none = "",
+  or = "or ",
 }
 export const FilterCompositionType = enumType<FilterCompositionEnum>(
   FilterCompositionEnum,
-  "FilterCompositionEnum"
+  "FilterCompositionEnum",
 );
 export type FilterCompositionType = t.TypeOf<typeof FilterCompositionType>;
 
 export enum FilterFieldEnum {
-  name = "name",
   displayName = "displayName",
-  stateComment = "stateComment",
+  name = "name",
   ownerId = "ownerId",
-  scope = "scope",
-  userId = "userId",
   productId = "productId",
+  scope = "scope",
+  stateComment = "stateComment",
+  userId = "userId",
 }
 export const FilterFieldType = enumType<FilterFieldEnum>(
   FilterFieldEnum,
-  "FilterFieldEnum"
+  "FilterFieldEnum",
 );
 export type FilterFieldType = t.TypeOf<typeof FilterCompositionType>;
 
 export enum FilterSupportedOperatorsEnum {
-  ge = "ge",
-  le = "le",
   eq = "eq",
-  ne = "ne",
+  ge = "ge",
   gt = "gt",
+  le = "le",
   lt = "lt",
+  ne = "ne",
 }
 export const FilterSupportedOperatorsType =
   enumType<FilterSupportedOperatorsEnum>(
     FilterSupportedOperatorsEnum,
-    "FilterSupportedOperatorsEnum"
+    "FilterSupportedOperatorsEnum",
   );
 export type FilterSupportedOperatorsType = t.TypeOf<
   typeof FilterSupportedOperatorsType
 >;
 
 export enum FilterSupportedFunctionsEnum {
-  substringof = "substringof",
   contains = "contains",
-  startswith = "startswith",
   endswith = "endswith",
+  startswith = "startswith",
+  substringof = "substringof",
 }
 export const FilterSupportedFunctionsType =
   enumType<FilterSupportedFunctionsEnum>(
     FilterSupportedFunctionsEnum,
-    "FilterSupportedFunctionsEnum"
+    "FilterSupportedFunctionsEnum",
   );
 export type FilterSupportedFunctionsType = t.TypeOf<
   typeof FilterSupportedFunctionsType
@@ -93,19 +93,19 @@ export interface FilterManipulationResultType {
 
 /** Build `FilterManipulationResultType` object */
 const fnBuildFilterManipulation = (
-  decodedApimFilter: E.Either<t.Errors, ApimFilterType>
+  decodedApimFilter: E.Either<t.Errors, ApimFilterType>,
 ): E.Either<Error, FilterManipulationResultType> =>
   pipe(
     decodedApimFilter,
     E.bimap(flow(readableReport, E.toError), (filter) => ({
       filter,
       result: "",
-    }))
+    })),
   );
 
 /** Build `$filter` result string */
 const fnBuildFilterResult = (
-  filterManipulation: E.Either<Error, FilterManipulationResultType>
+  filterManipulation: E.Either<Error, FilterManipulationResultType>,
 ): O.Option<string> =>
   flow(
     E.fold(
@@ -115,14 +115,14 @@ const fnBuildFilterResult = (
         fnInverseFilter,
         fnCheckFilterType,
         fnInverseFilterCloseBrackets,
-        fnEvaluateFilterResult
-      )
-    )
+        fnEvaluateFilterResult,
+      ),
+    ),
   )(filterManipulation);
 
 /** fnComposeFilter */
 const fnComposeFilter = (
-  fm: FilterManipulationResultType
+  fm: FilterManipulationResultType,
 ): FilterManipulationResultType => ({
   filter: fm.filter,
   result: fm.filter.composeFilter,
@@ -130,7 +130,7 @@ const fnComposeFilter = (
 
 /** fnInverseFilter */
 const fnInverseFilter = (
-  fm: FilterManipulationResultType
+  fm: FilterManipulationResultType,
 ): FilterManipulationResultType =>
   fm.filter.inverse
     ? {
@@ -141,7 +141,7 @@ const fnInverseFilter = (
 
 /** fnInverseFilter */
 const fnInverseFilterCloseBrackets = (
-  fm: FilterManipulationResultType
+  fm: FilterManipulationResultType,
 ): FilterManipulationResultType =>
   fm.filter.inverse
     ? {
@@ -152,7 +152,7 @@ const fnInverseFilterCloseBrackets = (
 
 /** fnInverseFilter */
 const fnCheckFilterType = (
-  fm: FilterManipulationResultType
+  fm: FilterManipulationResultType,
 ): FilterManipulationResultType =>
   fm.filter.filterType in FilterSupportedOperatorsEnum
     ? {
@@ -166,7 +166,7 @@ const fnCheckFilterType = (
 
 /** fnEvaluateFilterResult */
 const fnEvaluateFilterResult = (
-  fm: FilterManipulationResultType
+  fm: FilterManipulationResultType,
 ): O.Option<string> => pipe(fm.result, O.fromNullable);
 
 /**
@@ -190,5 +190,5 @@ export const buildApimFilter = (apimFilter: ApimFilterType): O.Option<string> =>
     apimFilter,
     ApimFilterType.decode,
     fnBuildFilterManipulation,
-    fnBuildFilterResult
+    fnBuildFilterResult,
   );
