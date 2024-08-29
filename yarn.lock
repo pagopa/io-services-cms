@@ -3548,19 +3548,18 @@ __metadata:
   dependencies:
     "@azure/arm-apimanagement": 8.1.2
     "@azure/identity": ^3.1.4
-    "@pagopa/eslint-config": ^3.0.0
+    "@pagopa/eslint-config": ^4.0.1
     "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
     "@pagopa/ts-commons": ^13.1.1
-    "@rushstack/eslint-patch": ^1.2.0
     "@vitest/coverage-v8": ^1.0.4
-    eslint: ^8.38.0
+    eslint: ^8.57.0
     fp-ts: ^2.16.5
     io-ts: ^2.2.21
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
-    prettier: ^2.8.7
+    prettier: ^3.2.5
     typescript: ^5.0.4
     vitest: ^1.0.4
   languageName: unknown
