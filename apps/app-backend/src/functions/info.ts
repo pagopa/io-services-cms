@@ -1,11 +1,11 @@
 import * as H from "@pagopa/handler-kit";
+import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
+import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as Task from "fp-ts/lib/Task";
 import { pipe } from "fp-ts/lib/function";
 
-import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
-import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import { IConfig } from "../config";
 import { ApplicationInfo } from "../generated/definitions/internal/ApplicationInfo";
 import { Institution } from "../generated/definitions/internal/Institution";
@@ -24,17 +24,17 @@ import { HealthCheckBuilder } from "../utils/health-check";
 type ProblemSource = AzureCosmosProblemSource;
 const applicativeValidation = RTE.getApplicativeReaderTaskValidation(
   Task.ApplicativePar,
-  RA.getSemigroup<healthcheck.HealthProblem<ProblemSource>>()
+  RA.getSemigroup<healthcheck.HealthProblem<ProblemSource>>(),
 );
 
 export const makeInfoHandler: (
-  config: IConfig
+  config: IConfig,
 ) => H.Handler<
   H.HttpRequest,
   H.HttpResponse<ApplicationInfo, 200>,
-  ServiceDetailsContainerDependency &
-    AzureSearchClientDependency<Institution> &
-    BlobServiceClientDependency
+  AzureSearchClientDependency<Institution> &
+    BlobServiceClientDependency &
+    ServiceDetailsContainerDependency
 > = (config: IConfig) =>
   H.of((_: H.HttpRequest) =>
     pipe(
@@ -42,13 +42,13 @@ export const makeInfoHandler: (
         makeCosmosDBHealthCheck,
         makeAzureSearchHealthCheck,
         makeAzureBlobStorageHealthCheck(config),
-      ] as ReadonlyArray<HealthCheckBuilder>,
+      ] as readonly HealthCheckBuilder[],
       RA.sequence(applicativeValidation),
       RTE.map(() =>
-        H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION })
+        H.successJson({ name: APPLICATION_NAME, version: APPLICATION_VERSION }),
       ),
-      RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n")))
-    )
+      RTE.mapLeft((problems) => new H.HttpError(problems.join("\n\n"))),
+    ),
   );
 
 export const InfoFn = (config: IConfig) =>

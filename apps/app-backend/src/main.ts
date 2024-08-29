@@ -3,7 +3,6 @@ import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import * as E from "fp-ts/Either";
 import { pipe } from "fp-ts/lib/function";
-import { initApplicationInsight } from "./utils/applicationinsight/helper";
 
 import { getConfigOrError } from "./config";
 import { GetFeaturedInstitutionsFn } from "./functions/featured-institutions";
@@ -14,6 +13,7 @@ import { SearchInstitutionsFn } from "./functions/search-institutions";
 import { SearchServicesFn } from "./functions/search-services";
 import { Institution } from "./generated/definitions/internal/Institution";
 import { ServiceMinified } from "./generated/definitions/internal/ServiceMinified";
+import { initApplicationInsight } from "./utils/applicationinsight/helper";
 import { makeAzureSearchClient } from "./utils/azure-search/client";
 import { buildServiceDetailsContainerDependency } from "./utils/cosmos-db/helper";
 
@@ -26,12 +26,12 @@ const config = pipe(
     // eslint-disable-next-line no-console
     console.error("Error while loading configuration", error);
     throw error;
-  })
+  }),
 );
 // Handlers Depedencies
 const blobServiceClient = new BlobServiceClient(
   `https://${config.FEATURED_ITEMS_STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
-  new DefaultAzureCredential()
+  new DefaultAzureCredential(),
 );
 
 // Service Details Container Dependency
@@ -43,7 +43,7 @@ const institutionsSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_ENDPOINT,
   config.AZURE_SEARCH_SERVICE_VERSION,
   config.AZURE_SEARCH_INSTITUTIONS_INDEX_NAME,
-  config.AZURE_SEARCH_API_KEY
+  config.AZURE_SEARCH_API_KEY,
 );
 
 const servicesSearchClient = makeAzureSearchClient(
@@ -51,13 +51,13 @@ const servicesSearchClient = makeAzureSearchClient(
   config.AZURE_SEARCH_ENDPOINT,
   config.AZURE_SEARCH_SERVICE_VERSION,
   config.AZURE_SEARCH_SERVICES_INDEX_NAME,
-  config.AZURE_SEARCH_API_KEY
+  config.AZURE_SEARCH_API_KEY,
 );
 
 const Info = InfoFn(config)({
   ...serviceDetailsContainerDependency,
-  searchClient: institutionsSearchClient,
   blobServiceClient,
+  searchClient: institutionsSearchClient,
 });
 app.http("Info", {
   authLevel: "anonymous",
@@ -70,20 +70,20 @@ const GetFeaturedServices = GetFeaturedServicesFn(config)({
   blobServiceClient,
 });
 app.http("GetFeaturedServices", {
-  methods: ["GET"],
-  route: "services/featured",
   authLevel: "anonymous",
   handler: GetFeaturedServices,
+  methods: ["GET"],
+  route: "services/featured",
 });
 
 const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
   blobServiceClient,
 });
 app.http("GetFeaturedInstitutions", {
-  methods: ["GET"],
-  route: "institutions/featured",
   authLevel: "anonymous",
   handler: GetFeaturedInstitutions,
+  methods: ["GET"],
+  route: "institutions/featured",
 });
 
 const SearchInstitutions = SearchInstitutionsFn(config)({

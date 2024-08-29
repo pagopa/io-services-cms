@@ -6,6 +6,7 @@ import {
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 import { vi } from "vitest";
+
 import { NotificationChannelEnum } from "../../generated/definitions/internal/NotificationChannel";
 import { ServiceDetails as ApiResponseServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
 import {
@@ -14,78 +15,78 @@ import {
 } from "../../generated/definitions/internal/ServiceMetadata";
 
 export const buildCosmosDbServiceDetails = (
-  require_secure_channel: boolean
+  require_secure_channel: boolean,
 ): CosmosDbServiceDetails => ({
-  id: "aServiceId" as NonEmptyString,
-  name: "aServiceName" as NonEmptyString,
   cms_last_update_ts: 1,
   description: "aServiceDescription" as NonEmptyString,
-  organization: {
-    name: "aServiceOrganization" as NonEmptyString,
-    fiscal_code: "01234567890" as OrganizationFiscalCode,
-  },
-  require_secure_channel,
+  id: "aServiceId" as NonEmptyString,
+  kind: "publication",
   metadata: {
-    scope: ScopeEnum.LOCAL,
-    web_url: "aServiceWebUrl" as NonEmptyString,
-    app_ios: "aServiceAppIos" as NonEmptyString,
-    app_android: "aServiceAppAndroid" as NonEmptyString,
-    tos_url: "aServiceTosUrl" as NonEmptyString,
-    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
     address: "aServiceAddress" as NonEmptyString,
-    phone: "aServicePhone" as NonEmptyString,
+    app_android: "aServiceAppAndroid" as NonEmptyString,
+    app_ios: "aServiceAppIos" as NonEmptyString,
+    category: CategoryEnum.STANDARD,
+    cta: "aServiceCta" as NonEmptyString,
     email: "aServiceEmail" as NonEmptyString,
     pec: "aServicePec" as NonEmptyString,
-    cta: "aServiceCta" as NonEmptyString,
-    token_name: "aServiceTokenName" as NonEmptyString,
+    phone: "aServicePhone" as NonEmptyString,
+    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
+    scope: ScopeEnum.LOCAL,
     support_url: "aServiceSupportUrl" as NonEmptyString,
-    category: CategoryEnum.STANDARD,
+    token_name: "aServiceTokenName" as NonEmptyString,
     topic_id: 1,
+    tos_url: "aServiceTosUrl" as NonEmptyString,
+    web_url: "aServiceWebUrl" as NonEmptyString,
   },
-  kind: "publication",
+  name: "aServiceName" as NonEmptyString,
+  organization: {
+    fiscal_code: "01234567890" as OrganizationFiscalCode,
+    name: "aServiceOrganization" as NonEmptyString,
+  },
+  require_secure_channel,
 });
 
 export const buildApiResponseServiceDetails = (
-  available_notification_channels?: NotificationChannelEnum[]
+  available_notification_channels?: NotificationChannelEnum[],
 ): ApiResponseServiceDetails => ({
-  id: "aServiceId",
-  name: "aServiceName",
-  version: 1,
-  description: "aServiceDescription",
-  organization: {
-    name: "aServiceOrganization" as NonEmptyString,
-    fiscal_code: "01234567890" as OrganizationFiscalCode,
-  },
   available_notification_channels,
+  description: "aServiceDescription",
+  id: "aServiceId",
   metadata: {
-    scope: ScopeEnum.LOCAL,
-    web_url: "aServiceWebUrl" as NonEmptyString,
-    app_ios: "aServiceAppIos" as NonEmptyString,
-    app_android: "aServiceAppAndroid" as NonEmptyString,
-    tos_url: "aServiceTosUrl" as NonEmptyString,
-    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
     address: "aServiceAddress" as NonEmptyString,
-    phone: "aServicePhone" as NonEmptyString,
+    app_android: "aServiceAppAndroid" as NonEmptyString,
+    app_ios: "aServiceAppIos" as NonEmptyString,
+    category: CategoryEnum.STANDARD,
+    cta: "aServiceCta" as NonEmptyString,
     email: "aServiceEmail" as NonEmptyString,
     pec: "aServicePec" as NonEmptyString,
-    cta: "aServiceCta" as NonEmptyString,
-    token_name: "aServiceTokenName" as NonEmptyString,
+    phone: "aServicePhone" as NonEmptyString,
+    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
+    scope: ScopeEnum.LOCAL,
     support_url: "aServiceSupportUrl" as NonEmptyString,
-    category: CategoryEnum.STANDARD,
+    token_name: "aServiceTokenName" as NonEmptyString,
+    tos_url: "aServiceTosUrl" as NonEmptyString,
+    web_url: "aServiceWebUrl" as NonEmptyString,
   },
+  name: "aServiceName",
+  organization: {
+    fiscal_code: "01234567890" as OrganizationFiscalCode,
+    name: "aServiceOrganization" as NonEmptyString,
+  },
+  version: 1,
 });
 
 export const mockServiceDetailsContainer = (
   statusCode: number,
   resource?: unknown,
   errorMessage?: string,
-  reject = false
+  reject = false,
 ) => {
   const readMock = reject
     ? vi.fn().mockRejectedValue(new Error(errorMessage))
     : vi.fn().mockResolvedValue({
-        statusCode,
         resource,
+        statusCode,
       });
   return {
     item: vi.fn().mockImplementation(() => ({

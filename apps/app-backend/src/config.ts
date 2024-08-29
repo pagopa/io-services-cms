@@ -5,11 +5,6 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import * as t from "io-ts";
-
-import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
-
 import {
   IntegerFromString,
   NonNegativeInteger,
@@ -18,27 +13,30 @@ import {
 import * as reporters from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as t from "io-ts";
 
 export type FeaturedItemsConfig = t.TypeOf<typeof FeaturedItemsConfig>;
 export const FeaturedItemsConfig = t.type({
-  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME: NonEmptyString,
-  FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
-  FEATURED_SERVICES_FILE_NAME: NonEmptyString,
   FEATURED_INSTITUTIONS_FILE_NAME: NonEmptyString,
+  FEATURED_ITEMS_CONTAINER_NAME: NonEmptyString,
+  FEATURED_ITEMS_STORAGE_ACCOUNT_NAME: NonEmptyString,
+  FEATURED_SERVICES_FILE_NAME: NonEmptyString,
 });
 
 export type AzureSearchConfig = t.TypeOf<typeof AzureSearchConfig>;
 export const AzureSearchConfig = t.intersection([
   t.type({
     AZURE_SEARCH_ENDPOINT: NonEmptyString,
-    AZURE_SEARCH_SERVICE_VERSION: NonEmptyString,
     AZURE_SEARCH_INSTITUTIONS_INDEX_NAME: NonEmptyString,
+    AZURE_SEARCH_SERVICE_VERSION: NonEmptyString,
     AZURE_SEARCH_SERVICES_INDEX_NAME: NonEmptyString,
   }),
   t.partial({
     AZURE_SEARCH_API_KEY: NonEmptyString, // If not provided AzureSearch will authenticate with managed identity
-    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE: NonEmptyString,
     AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PARAMETER: NonEmptyString,
+    AZURE_SEARCH_INSTITUTIONS_SCOPE_SCORING_PROFILE: NonEmptyString,
   }),
 ]);
 
@@ -46,9 +44,9 @@ export const AzureSearchConfig = t.intersection([
 export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
 export const CosmosConfig = t.intersection([
   t.type({
-    COSMOSDB_URI: NonEmptyString,
-    COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_CONTAINER_SERVICE_DETAILS: NonEmptyString,
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
   }),
   t.partial({
     COSMOSDB_KEY: NonEmptyString,
@@ -60,19 +58,19 @@ export type PaginationConfig = t.TypeOf<typeof PaginationConfig>;
 export const PaginationConfig = t.type({
   PAGINATION_DEFAULT_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "20" as unknown as NonNegativeInteger
+    "20" as unknown as NonNegativeInteger,
   ),
   PAGINATION_MAX_LIMIT: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger,
   ),
   PAGINATION_MAX_OFFSET: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100" as unknown as NonNegativeInteger
+    "100" as unknown as NonNegativeInteger,
   ),
   PAGINATION_MAX_OFFSET_AI_SEARCH: withDefault(
     IntegerFromString.pipe(NonNegativeInteger),
-    "100000" as unknown as NonNegativeInteger
+    "100000" as unknown as NonNegativeInteger,
   ),
 });
 
@@ -110,9 +108,9 @@ export const getConfigOrError = (): E.Either<Error, IConfig> =>
   pipe(
     errorOrConfig,
     E.mapLeft(
-      (errors: ReadonlyArray<t.ValidationError>) =>
+      (errors: readonly t.ValidationError[]) =>
         new Error(
-          `Invalid configuration: ${reporters.readableReportSimplified(errors)}`
-        )
-    )
+          `Invalid configuration: ${reporters.readableReportSimplified(errors)}`,
+        ),
+    ),
   );

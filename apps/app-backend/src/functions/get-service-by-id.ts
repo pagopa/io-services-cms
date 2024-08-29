@@ -1,17 +1,16 @@
+import { ServiceDetail as CosmosDbServiceDetails } from "@io-services-cms/models";
 import * as H from "@pagopa/handler-kit";
+import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
 import * as L from "@pagopa/logger";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as B from "fp-ts/boolean";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-
 import { flow, pipe } from "fp-ts/lib/function";
 
-import { ServiceDetail as CosmosDbServiceDetails } from "@io-services-cms/models";
-import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { AvailableNotificationChannels } from "../generated/definitions/internal/AvailableNotificationChannels";
 import { NotificationChannelEnum } from "../generated/definitions/internal/NotificationChannel";
 import { ServiceDetails as ApiResponseServiceDetails } from "../generated/definitions/internal/ServiceDetails";
@@ -28,7 +27,7 @@ import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency
  */
 
 const executeGetServiceById: (
-  serviceId: NonEmptyString
+  serviceId: NonEmptyString,
 ) => RTE.ReaderTaskEither<
   ServiceDetailsContainerDependency,
   H.HttpError,
@@ -43,8 +42,8 @@ const executeGetServiceById: (
           new H.HttpError(
             `An error has occurred while fetching service having ID ${serviceId} [${
               E.toError(err).message
-            }]`
-          )
+            }]`,
+          ),
       ),
       TE.chain((rr) =>
         pipe(
@@ -57,12 +56,12 @@ const executeGetServiceById: (
                 B.fold(
                   () =>
                     new H.HttpError(
-                      `An error has occurred while fetching service '${serviceId}', reason: ${rr.statusCode}`
+                      `An error has occurred while fetching service '${serviceId}', reason: ${rr.statusCode}`,
                     ),
                   () =>
-                    new H.HttpNotFoundError(`Service '${serviceId}' not found`)
+                    new H.HttpNotFoundError(`Service '${serviceId}' not found`),
                 ),
-                E.left
+                E.left,
               ),
             ({ resource }) =>
               pipe(
@@ -73,30 +72,30 @@ const executeGetServiceById: (
                     readableReport,
                     (err) =>
                       new H.HttpError(
-                        `An error has occurred while decoding service having ID ${serviceId} [${err}]`
-                      )
-                  )
-                )
-              )
+                        `An error has occurred while decoding service having ID ${serviceId} [${err}]`,
+                      ),
+                  ),
+                ),
+              ),
           ),
-          TE.fromEither
-        )
+          TE.fromEither,
+        ),
       ),
-      TE.map(toApiResponseServiceDetails)
+      TE.map(toApiResponseServiceDetails),
     );
 
 export const toApiResponseServiceDetails = (
-  cosmosDbServiceDetail: CosmosDbServiceDetails
+  cosmosDbServiceDetail: CosmosDbServiceDetails,
 ): ApiResponseServiceDetails => ({
-  id: cosmosDbServiceDetail.id,
-  name: cosmosDbServiceDetail.name,
-  version: cosmosDbServiceDetail.cms_last_update_ts,
-  description: cosmosDbServiceDetail.description,
-  organization: cosmosDbServiceDetail.organization,
-  metadata: toApiResponseServiceMetadata(cosmosDbServiceDetail.metadata),
   available_notification_channels: calculateAvailableNotificationChannels(
-    cosmosDbServiceDetail
+    cosmosDbServiceDetail,
   ),
+  description: cosmosDbServiceDetail.description,
+  id: cosmosDbServiceDetail.id,
+  metadata: toApiResponseServiceMetadata(cosmosDbServiceDetail.metadata),
+  name: cosmosDbServiceDetail.name,
+  organization: cosmosDbServiceDetail.organization,
+  version: cosmosDbServiceDetail.cms_last_update_ts,
 });
 
 // TODO: in MVP0 we are not mapping the topic conversion
@@ -106,8 +105,8 @@ const toApiResponseServiceMetadata = ({
   ...metadata
 }: CosmosDbServiceDetails["metadata"]): ApiResponseServiceDetails["metadata"] => ({
   ...metadata,
-  scope: mapScope(metadata.scope),
   category: mapCategory(metadata.category),
+  scope: mapScope(metadata.scope),
 });
 
 const calculateAvailableNotificationChannels = ({
@@ -117,30 +116,30 @@ const calculateAvailableNotificationChannels = ({
     require_secure_channel,
     B.fold(
       () => [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK],
-      () => [NotificationChannelEnum.WEBHOOK]
-    )
+      () => [NotificationChannelEnum.WEBHOOK],
+    ),
   );
 
 const mapScope = (
-  scope: CosmosDbServiceDetails["metadata"]["scope"]
+  scope: CosmosDbServiceDetails["metadata"]["scope"],
 ): ScopeEnum =>
   pipe(
     scope === ScopeEnum.NATIONAL,
     B.fold(
       () => ScopeEnum.LOCAL,
-      () => ScopeEnum.NATIONAL
-    )
+      () => ScopeEnum.NATIONAL,
+    ),
   );
 
 const mapCategory = (
-  category: CosmosDbServiceDetails["metadata"]["category"]
+  category: CosmosDbServiceDetails["metadata"]["category"],
 ): CategoryEnum =>
   pipe(
     category === CategoryEnum.SPECIAL,
     B.fold(
       () => CategoryEnum.STANDARD,
-      () => CategoryEnum.SPECIAL
-    )
+      () => CategoryEnum.SPECIAL,
+    ),
   );
 
 export const makeGetServiceByIdHandler: H.Handler<
@@ -158,14 +157,14 @@ export const makeGetServiceByIdHandler: H.Handler<
     RTE.orElseW((error) =>
       pipe(
         RTE.right(
-          H.problemJson({ status: error.status, title: error.message })
+          H.problemJson({ status: error.status, title: error.message }),
         ),
         RTE.chainFirstW((errorResponse) =>
-          L.errorRTE(`Error executing GetServiceByIdFn`, errorResponse)
-        )
-      )
-    )
-  )
+          L.errorRTE(`Error executing GetServiceByIdFn`, errorResponse),
+        ),
+      ),
+    ),
+  ),
 );
 
 export const GetServiceByIdFn = httpAzureFunction(makeGetServiceByIdHandler);
