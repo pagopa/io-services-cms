@@ -24,6 +24,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { last } from "fp-ts/lib/ReadonlyArray";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -38,7 +39,7 @@ vi.mock("../../lib/clients/apim-client", async () => {
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -54,7 +55,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -67,7 +68,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
@@ -96,7 +97,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -133,6 +134,7 @@ const aServicePub = {
     },
     require_secure_channel: false,
   },
+  last_update_ts: 1234567890,
 } as unknown as ServicePublication.ItemType;
 
 const mockAppinsights = {
@@ -206,8 +208,8 @@ describe("getServicePublication", () => {
     expect(response.body).toStrictEqual(
       await pipe(
         getPublicationItemToResponse(mockConfig)(asServiceWithStatus),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
     );
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
@@ -238,7 +240,7 @@ describe("getServicePublication", () => {
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
     expect(response.text).toContain(
-      "You do not have enough permission to complete the operation you requested"
+      "You do not have enough permission to complete the operation you requested",
     );
     expect(mockContext.log.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);

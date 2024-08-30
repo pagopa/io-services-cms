@@ -39,7 +39,7 @@ export const itemToResponse =
           id,
           last_update: last_update_ts
             ? new Date(last_update_ts * 1000).toISOString()
-            : new Date().getTime().toString(),
+            : new Date().toISOString(),
           status: toServiceStatusType(state),
           ...data,
           metadata: {

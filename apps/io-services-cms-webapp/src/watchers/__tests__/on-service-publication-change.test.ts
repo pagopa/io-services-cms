@@ -27,15 +27,15 @@ const aServicePublicationCosmosResource = {
 } as unknown as ServicePublication.CosmosResource;
 
 const { _ts, _etag, ...aService } = aServicePublicationCosmosResource;
-
-const expectedLastUpdate = new Date(_ts * 1000).toISOString();
 const expectedVersion = _etag;
+const aLastUpdateTs = Math.floor(Date.now() / 1000);
 
 describe("On Service Publication Change Handler", () => {
   it.each`
-    scenario                     | item                                                                       | expected
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update: expectedLastUpdate, fsm: { state: "unpublished" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}   | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update: expectedLastUpdate, fsm: { state: "published" } } }}
+    scenario                     | item                                                                                                    | expected
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: _ts, fsm: { state: "unpublished" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: _ts, fsm: { state: "published" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, last_update_ts: aLastUpdateTs }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: aLastUpdateTs, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

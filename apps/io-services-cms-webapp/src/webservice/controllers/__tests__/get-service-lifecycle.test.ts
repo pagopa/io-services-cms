@@ -28,7 +28,7 @@ import { WebServerDependencies, createWebServer } from "../../index";
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -44,7 +44,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -56,7 +56,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -82,7 +82,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -157,6 +157,7 @@ describe("getServiceLifecycle", () => {
       },
       require_secure_channel: false,
     },
+    last_update_ts: 1234567890,
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should fail when cannot find requested service", async () => {
@@ -191,8 +192,8 @@ describe("getServiceLifecycle", () => {
     expect(response.body).toStrictEqual(
       await pipe(
         getLifecycleItemToResponse(mockConfig)(asServiceLifecycleWithStatus),
-        TE.toUnion
-      )()
+        TE.toUnion,
+      )(),
     );
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);

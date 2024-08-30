@@ -39,21 +39,24 @@ const aPublicationService = {
 } as unknown as ServicePublication.ItemType;
 
 const expectedHistoricization = {
-  last_update: new Date(_ts * 1000).toISOString(),
+  last_update_ts: _ts,
   version: _etag,
 };
 
+const aLastUpdateTs = Math.floor(Date.now() / 1000);
+
 describe("On Service Lifecycle Change Handler", () => {
   it.each`
-    scenario                                     | item                                                                                                    | expected
-    ${"request-review"}                          | ${{ ...aServiceLifecycleCosmosResource, version: "aVersion", fsm: { state: "submitted" } }}             | ${{ requestReview: { ...aService, version: expectedHistoricization.version }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "submitted" } } }}
-    ${"no-op (empty object)"}                    | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" } }}                                      | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "draft" } } }}
-    ${"request-publication"}                     | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved", autoPublish: true } }}                | ${{ requestPublication: { ...aPublicationService, autoPublish: true }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved", autoPublish: true } } }}
-    ${"request-publication-with-no-autopublish"} | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved" } }}                                   | ${{ requestPublication: { ...aPublicationService, autoPublish: false }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved" } } }}
-    ${"no-op (empty object)"}                    | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "rejected" } }}                                   | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "rejected" } } }}
-    ${"request-deletion"}                        | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "deleted" } }}                                    | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "deleted" } } }}
-    ${"request-deletion legacy"}                 | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } }}  | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } } }}
-    ${"no-op (approved from Legacy)"}            | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } }} | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } } }}
+    scenario                                        | item                                                                                                    | expected
+    ${"request-review"}                             | ${{ ...aServiceLifecycleCosmosResource, version: "aVersion", fsm: { state: "submitted" } }}             | ${{ requestReview: { ...aService, version: expectedHistoricization.version }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "submitted" } } }}
+    ${"no-op (empty object)"}                       | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" }, last_update_ts: aLastUpdateTs }}       | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, last_update_ts: aLastUpdateTs, fsm: { state: "draft" } } }}
+    ${"no-op (empty object) last_update_ts valued"} | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" } }}                                      | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "draft" } } }}
+    ${"request-publication"}                        | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved", autoPublish: true } }}                | ${{ requestPublication: { ...aPublicationService, autoPublish: true }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved", autoPublish: true } } }}
+    ${"request-publication-with-no-autopublish"}    | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved" } }}                                   | ${{ requestPublication: { ...aPublicationService, autoPublish: false }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved" } } }}
+    ${"no-op (empty object)"}                       | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "rejected" } }}                                   | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "rejected" } } }}
+    ${"request-deletion"}                           | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "deleted" } }}                                    | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "deleted" } } }}
+    ${"request-deletion legacy"}                    | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } }}  | ${{ requestDeletion: { id: aPublicationService.id }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "deleted", lastTransition: SYNC_FROM_LEGACY } } }}
+    ${"no-op (approved from Legacy)"}               | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } }} | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved", lastTransition: SYNC_FROM_LEGACY } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = handler({
       MAX_ALLOWED_PAYMENT_AMOUNT: 1000000,
@@ -63,7 +66,7 @@ describe("On Service Lifecycle Change Handler", () => {
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       const actual = res.right;
-      expect(actual.requestHistoricization.last_update).not.empty;
+      expect(actual.requestHistoricization.last_update_ts).toBeDefined();
       const {
         requestHistoricization: { ...actualRequestHistoricization },
         ...actualOthersActions
@@ -75,14 +78,14 @@ describe("On Service Lifecycle Change Handler", () => {
       expect({
         requestHistoricization: {
           ...actualRequestHistoricization,
-          last_update: null,
+          last_update_ts: null,
           version: null,
         },
         ...actualOthersActions,
       }).toStrictEqual({
         requestHistoricization: {
           ...expectedRequestHistoricization,
-          last_update: null,
+          last_update_ts: null,
           version: null,
         },
         ...expectedOthersActions,

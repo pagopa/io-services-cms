@@ -18,12 +18,13 @@ const noAction = {};
 
 const onDetailLifecycleHandler = ({
   _ts,
+  last_update_ts,
   ...item
 }: ServiceLifecycle.CosmosResource): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_last_update_ts: _ts,
+    cms_last_update_ts: last_update_ts ?? _ts,
     kind: "lifecycle",
   },
 });

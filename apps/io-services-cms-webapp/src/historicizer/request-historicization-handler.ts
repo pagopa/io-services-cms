@@ -37,8 +37,8 @@ export const toServiceHistory = ({
   ...service
 }: Queue.RequestHistoricizationItem): ServiceHistory => ({
   ...service,
-  id: last_update_ts.toString() as NonEmptyString, // last_update contains the service-lifecycle/service-publication _ts value
-  last_update: new Date(last_update_ts * 1000).toISOString() as NonEmptyString,
+  id: last_update_ts.toString() as NonEmptyString, // id contains the service-lifecycle/service-publication last_update_ts/_ts value
+  last_update: new Date(last_update_ts * 1000).toISOString() as NonEmptyString, // last_update contains the service-lifecycle/service-publication  last_update_ts/_ts ISO String rapresentation
   serviceId: service.id,
 });
 

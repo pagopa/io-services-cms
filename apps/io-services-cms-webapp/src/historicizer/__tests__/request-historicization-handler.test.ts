@@ -14,9 +14,9 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
-const atimestamp = 1685529694747;
+const atimestamp = 1685529694;
 const aGenericItemType = {
   id: "aServiceId",
   data: {
@@ -40,7 +40,7 @@ const aGenericItemType = {
   fsm: {
     state: "published",
   },
-  last_update: new Date(atimestamp).toISOString(),
+  last_update_ts: atimestamp,
 } as unknown as Queue.RequestHistoricizationItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
@@ -68,9 +68,9 @@ describe("Service Historicization Handler", () => {
       await handleQueueItem(context, item)();
 
       expect(context.bindings.serviceHistoryDocument).toBe(
-        JSON.stringify(toServiceHistory(expected))
+        JSON.stringify(toServiceHistory(expected)),
       );
-    }
+    },
   );
 
   it("[buildDocument] should build document starting from a service", async () => {
