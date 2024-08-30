@@ -89,32 +89,6 @@ export interface ServiceSubscriptionPair {
   subscription: SubscriptionContract;
 }
 
-// utility to extract a non-empty id from an object
-const pickId = (obj: unknown): E.Either<Error, NonEmptyString> =>
-  pipe(
-    obj,
-    t.type({ id: NonEmptyString }).decode,
-    E.bimap(
-      (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-      ({ id }) => ApimUtils.parseOwnerIdFullPath(id),
-    ),
-  );
-
-const getUserIdTask = (
-  apimService: ApimUtils.ApimService,
-  userEmail: EmailString,
-) =>
-  pipe(
-    apimService.getUserByEmail(userEmail),
-    TE.mapLeft(
-      (err) =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
-    ),
-    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-    TE.chain(flow(pickId, TE.fromEither)),
-  );
-
 const buildServicePagination = (
   serviceSubscriptionPairs: ServiceSubscriptionPair[],
   limit: number,
@@ -205,17 +179,12 @@ export const makeGetServicesHandler =
   }: Dependencies): GetServicesHandler =>
   (context, auth, __, ___, userEmail, limit, offset) =>
     pipe(
-      getUserIdTask(apimService, userEmail),
-      TE.chainW((userId) =>
-        pipe(
-          apimService.getUserSubscriptions(
-            userId,
-            getOffset(offset),
-            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
-          ),
-          TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`)),
-        ),
+      apimService.getUserSubscriptions(
+        auth.userId,
+        getOffset(offset),
+        getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
       ),
+      TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`)),
       TE.chain((subscriptions) =>
         pipe(
           getServices(config)(fsmLifecycleClient, subscriptions),

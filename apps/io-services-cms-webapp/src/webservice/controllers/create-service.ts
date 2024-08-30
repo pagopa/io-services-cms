@@ -97,20 +97,10 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 
 const createSubscriptionTask = (
   apimService: ApimUtils.ApimService,
-  userEmail: EmailString,
+  userId: NonEmptyString,
   subscriptionId: NonEmptyString,
   config: IConfig,
 ): TE.TaskEither<Error, SubscriptionContract> => {
-  const getUserId = pipe(
-    apimService.getUserByEmail(userEmail),
-    TE.mapLeft(
-      (err) =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
-    ),
-    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
-    TE.chain(pickId),
-  );
-
   // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
   const getProductId = pipe(
     apimService.getProductByName(config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME),
@@ -142,10 +132,8 @@ const createSubscriptionTask = (
     );
 
   return pipe(
-    sequenceS(TE.ApplicativePar)({
-      productId: getProductId,
-      userId: getUserId,
-    }),
+    getProductId,
+    TE.map((productId) => ({ productId, userId })),
     TE.chain(createSubscription),
   );
 };
@@ -162,7 +150,7 @@ export const makeCreateServiceHandler =
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimService, userEmail, serviceId, config),
+      createSubscriptionTask(apimService, auth.userId, serviceId, config),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
     );
 
