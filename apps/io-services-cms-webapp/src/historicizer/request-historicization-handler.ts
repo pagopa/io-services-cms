@@ -20,22 +20,25 @@ import { parseIncomingMessage } from "../utils/queue-utils";
 export const buildRequestHistoricizationQueueMessage = ({
   _etag,
   _ts,
+  last_update_ts,
   ...otherProps
 }:
   | ServiceLifecycle.CosmosResource
   | ServicePublication.CosmosResource): Queue.RequestHistoricizationItem => ({
   ...otherProps,
   // eslint-disable-next-line no-underscore-dangle
-  last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle/service-publication record
+  last_update_ts: last_update_ts ?? _ts, // when the service-lifecycle/service-publication record lack of last_update_ts, the _ts value is used
   // eslint-disable-next-line no-underscore-dangle
   version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle/service-publication record
 });
 
-export const toServiceHistory = (
-  service: Queue.RequestHistoricizationItem,
-): ServiceHistory => ({
+export const toServiceHistory = ({
+  last_update_ts,
+  ...service
+}: Queue.RequestHistoricizationItem): ServiceHistory => ({
   ...service,
-  id: new Date(service.last_update).getTime().toString() as NonEmptyString, // last_update contains the service-lifecycle/service-publication _ts value
+  id: last_update_ts.toString() as NonEmptyString, // last_update contains the service-lifecycle/service-publication _ts value
+  last_update: new Date(last_update_ts * 1000).toISOString() as NonEmptyString,
   serviceId: service.id,
 });
 
@@ -44,7 +47,6 @@ export const handleQueueItem = (context: Context, queueItem: Json) =>
     queueItem,
     parseIncomingMessage(Queue.RequestHistoricizationItem),
     TE.fromEither,
-    TE.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.map((service) => {
       context.bindings.serviceHistoryDocument = JSON.stringify(
         toServiceHistory(service),

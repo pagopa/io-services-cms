@@ -18,10 +18,10 @@ type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T>;
 
 export const createCosmosStore = <
-  T extends WithState<string, Record<string, unknown>>,
+  T extends WithState<string, Record<string, unknown>>
 >(
   container: Container,
-  codec: t.Type<T>,
+  codec: t.Type<T>
 ): CosmosStore<T> => {
   const fetch = (id: string) =>
     pipe(
@@ -32,8 +32,8 @@ export const createCosmosStore = <
           new Error(
             `Failed to read item id#${id} from database, ${
               E.toError(err).message
-            }`,
-          ),
+            }`
+          )
       ),
       TE.chain((rr) =>
         rr.statusCode === 404
@@ -44,7 +44,7 @@ export const createCosmosStore = <
               {
                 ...rr.resource,
                 // eslint-disable-next-line no-underscore-dangle
-                last_update: new Date(rr.resource._ts * 1000).toISOString(), // Unix timestamp
+                last_update_ts: rr.resource?.last_update_ts ?? rr.resource?._ts,
                 version: rr.etag,
               },
               codec.decode,
@@ -54,12 +54,12 @@ export const createCosmosStore = <
                 (err) =>
                   new Error(
                     `Unable to parse resorce from the database, ${readableReport(
-                      err,
-                    )}`,
-                  ),
-              ),
-            ),
-      ),
+                      err
+                    )}`
+                  )
+              )
+            )
+      )
     );
 
   const buildReadOperations = (ids: string[]): ReadOperationInput[] =>
@@ -79,8 +79,8 @@ export const createCosmosStore = <
           }),
         (err) =>
           new Error(
-            `Failed to bulk read items from database, ${E.toError(err).message}`,
-          ),
+            `Failed to bulk read items from database, ${E.toError(err).message}`
+          )
       ),
       TE.map((operationResponses) =>
         operationResponses.map(
@@ -91,21 +91,17 @@ export const createCosmosStore = <
               pipe(
                 {
                   ...res.resourceBody,
-                  last_update: res.resourceBody
-                    ? new Date(
-                        // eslint-disable-next-line no-underscore-dangle
-                        (res.resourceBody._ts as number) * 1000,
-                      ).toISOString() // Unix timestamp
-                    : new Date().toISOString(),
+                  last_update_ts:
+                    res.resourceBody?.last_update_ts ?? res.resourceBody?._ts,
                   version: res.eTag,
                 },
                 codec.decode,
-                E.fold(() => O.none, O.some),
-              ),
-            ),
-          ),
-        ),
-      ),
+                E.fold(() => O.none, O.some)
+              )
+            )
+          )
+        )
+      )
     );
 
   const save = (id: string, value: T) =>
@@ -115,22 +111,25 @@ export const createCosmosStore = <
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ({ last_update, version, ...valueToSave }) =>
         TE.tryCatch(
-          () => container.items.upsert({ ...valueToSave, id }),
+          () =>
+            container.items.upsert({
+              ...valueToSave,
+              id,
+              last_update_ts: Math.floor(Date.now() / 1000),
+            }),
           (err) =>
             new Error(
               `Failed to save item id#${id} from database, ${
                 E.toError(err).message
-              }`,
-            ),
+              }`
+            )
         ),
       TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
-        last_update: itemResponse.resource
-          ? // eslint-disable-next-line no-underscore-dangle
-            new Date(itemResponse.resource._ts * 1000).toISOString() // Unix timestamp
-          : undefined,
+        last_update_ts:
+          itemResponse.resource?.last_update_ts ?? itemResponse.resource?._ts,
         version: itemResponse.etag,
-      })),
+      }))
     );
 
   // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
@@ -145,7 +144,7 @@ export const createCosmosStore = <
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const code = (err as any).code; // Extract code property
         return code === 404 ? TE.right(void 0) : TE.left(E.toError(err));
-      }),
+      })
     );
 
   return { bulkFetch, delete: deleteItem, fetch, save };

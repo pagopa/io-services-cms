@@ -184,7 +184,7 @@ export const Service = t.intersection([
     id: ServiceId,
   }),
   t.partial({
-    last_update: NonEmptyString,
+    last_update_ts: t.Integer,
     version: NonEmptyString,
   }),
 ]);
@@ -202,7 +202,7 @@ export const ServiceStrict = t.intersection([
     id: ServiceId,
   }),
   t.partial({
-    last_update: NonEmptyString,
+    last_update_ts: t.Integer,
     version: NonEmptyString,
   }),
 ]);

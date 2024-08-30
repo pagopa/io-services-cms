@@ -5,6 +5,7 @@ import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
 import { ServiceLifecycle, ServicePublication } from "../..";
 import { createCosmosStore } from "../fsm/store.cosmos";
+import { last } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
 const anItem = {
   id: "anItemId" as NonEmptyString,
@@ -26,16 +27,13 @@ const anItem = {
 
 describe("store cosmos tests", () => {
   it("result should be some on fetch having status 200", async () => {
-    const aFetchElement = {
-      statusCode: 200,
-      resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
-    } as unknown as ItemResponse<ServiceLifecycle.ItemType>;
-
+    const recordCosmosTs = 1687787624;
+    const recordLastUpdateTs = 1787787624;
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
         read: vi.fn().mockResolvedValue({
           statusCode: 200,
-          resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
+          resource: { ...anItem, last_update_ts: recordLastUpdateTs, _ts: recordCosmosTs, _etag: "anEtag" },
         }),
       })),
     } as unknown as Container;
@@ -46,6 +44,39 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(O.isSome(result.right)).toBeTruthy();
+      if(O.isSome(result.right)){
+        expect(result.right.value).toHaveProperty("last_update_ts");
+        expect(result.right.value.last_update_ts).toBe(recordLastUpdateTs);
+        expect(result.right.value).toHaveProperty("version");
+        expect(result.right.value.version).toBe("anEtag");
+      }
+    }
+  });
+
+  it("result should be some on fetch having status 200 and having last_update_ts valued with _ts in case is missing", async () => {
+    const recordCosmosTs = 1687787624;
+
+    const containerMock = {
+      item: vi.fn((a: string, b: string) => ({
+        read: vi.fn().mockResolvedValue({
+          statusCode: 200,
+          resource: { ...anItem, _ts: recordCosmosTs, _etag: "anEtag" },
+        }),
+      })),
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+    const result = await store.fetch("anItemId")();
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(O.isSome(result.right)).toBeTruthy();
+      if(O.isSome(result.right)){
+        expect(result.right.value).toHaveProperty("last_update_ts");
+        expect(result.right.value.last_update_ts).toBe(recordCosmosTs);
+        expect(result.right.value).toHaveProperty("version");
+        expect(result.right.value.version).toBe("anEtag");
+      }
     }
   });
 
@@ -85,12 +116,24 @@ describe("store cosmos tests", () => {
   });
 
   it("result should contain some on bulkFetch elements have status 200", async () => {
+    const recordCosmosTs = 1687787624;
+    const recordLastUpdateTs = 1787787624;
     const bulkFetchResult = [
       {
         resourceBody: {
           ...anItem,
-          _ts: 1687787624,
+          _ts: recordCosmosTs,
           _etag: "anEtag",
+        },
+        statusCode: 200,
+      },
+      {
+        resourceBody: {
+          ...anItem,
+          id: "anItemId2" as NonEmptyString,
+          last_update_ts: recordLastUpdateTs,
+          _ts: recordCosmosTs,
+          _etag: "anEtag2",
         },
         statusCode: 200,
       },
@@ -106,8 +149,25 @@ describe("store cosmos tests", () => {
 
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      expect(result.right).toHaveLength(1);
+      expect(result.right).toHaveLength(2);
+
+      // Case record lacking last_update_ts
       expect(O.isSome(result.right[0])).toBeTruthy();
+      if (O.isSome(result.right[0])) {
+        expect(result.right[0].value).toHaveProperty("last_update_ts");
+        expect(result.right[0].value.last_update_ts).toBe(recordCosmosTs);
+        expect(result.right[0].value).toHaveProperty("version");
+        expect(result.right[0].value.version).toBe("anEtag");
+      }
+
+      // Case record with last_update_ts
+      expect(O.isSome(result.right[1])).toBeTruthy();
+      if (O.isSome(result.right[1])) {
+        expect(result.right[1].value).toHaveProperty("last_update_ts");
+        expect(result.right[1].value.last_update_ts).toBe(recordLastUpdateTs);
+        expect(result.right[1].value).toHaveProperty("version");
+        expect(result.right[1].value.version).toBe("anEtag");
+      }
     }
   });
 
@@ -195,6 +255,7 @@ describe("store cosmos tests", () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
     const aTs = 1687787624;
+    const aLastUpdateTs = 1787787624;
     const anItemToBeSaved = {
       data: {
         name: "a service",
@@ -216,7 +277,7 @@ describe("store cosmos tests", () => {
       items: {
         upsert: vi.fn().mockResolvedValue({
           statusCode: 200,
-          resource: { _ts: aTs, _etag: anEtag },
+          resource: { last_update_ts: aLastUpdateTs, _ts: aTs, _etag: anEtag },
           etag: anEtag,
         }),
       },
@@ -235,8 +296,8 @@ describe("store cosmos tests", () => {
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      expect(result.right).toHaveProperty("last_update");
-      expect(result.right.last_update).toBe(new Date(aTs * 1000).toISOString());
+      expect(result.right).toHaveProperty("last_update_ts");
+      expect(result.right.last_update_ts).toBe(aLastUpdateTs);
       expect(result.right).toHaveProperty("version");
       expect(result.right.version).toBe(anEtag);
     }
