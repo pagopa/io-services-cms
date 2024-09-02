@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.3
+
+### Patch Changes
+
+- 14cf65c: refactor: remove useless getUserByEmail calls
+
 ## 1.32.2
 
 ### Patch Changes
