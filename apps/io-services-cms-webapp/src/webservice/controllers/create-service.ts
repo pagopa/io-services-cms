@@ -30,8 +30,7 @@ import {
   HttpStatusCodeEnum,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { sequenceS } from "fp-ts/lib/Apply";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
