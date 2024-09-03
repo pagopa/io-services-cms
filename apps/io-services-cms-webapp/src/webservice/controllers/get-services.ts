@@ -2,7 +2,6 @@ import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
@@ -45,7 +44,6 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePagination } from "../../generated/api/ServicePagination";
-import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -66,7 +64,6 @@ type GetServicesHandler = (
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  userEmail: EmailAddress,
   limit: O.Option<number>,
   offset: O.Option<number>,
 ) => Promise<HandlerResponseTypes>;
@@ -174,7 +171,7 @@ export const makeGetServicesHandler =
     fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
-  (context, auth, __, ___, userEmail, limit, offset) =>
+  (context, auth, __, ___, limit, offset) =>
     pipe(
       apimService.getUserSubscriptions(
         auth.userId,
@@ -234,8 +231,6 @@ export const applyRequestMiddelwares =
         subscriptionCIDRsModel,
         config,
       ),
-      // extract the user email from the request headers
-      UserEmailMiddleware(),
       // extract limit as number of records to return from query params
       OptionalQueryParamMiddleware(
         "limit",
@@ -256,7 +251,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____, _____) =>
+        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
           ipTuple(c, u),
         ),
       ),

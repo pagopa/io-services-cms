@@ -2,7 +2,6 @@ import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
@@ -39,7 +38,6 @@ import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
-import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -68,7 +66,6 @@ type ICreateServiceHandler = (
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  userEmail: EmailAddress,
   servicePayload: ServiceRequestPayload,
 ) => Promise<HandlerResponseTypes>;
 
@@ -155,7 +152,7 @@ export const makeCreateServiceHandler =
     fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
-  (context, auth, _, __, userEmail, servicePayload) => {
+  (context, auth, _, __, servicePayload) => {
     const logger = getLogger(context, logPrefix);
     const serviceId = ulidGenerator();
 
@@ -193,7 +190,6 @@ export const makeCreateServiceHandler =
       ),
       TE.mapLeft((err) =>
         logger.logErrorResponse(err, {
-          details: JSON.stringify(err.detail),
           userSubscriptionId: auth.subscriptionId,
         }),
       ),
@@ -216,17 +212,13 @@ export const applyRequestMiddelwares =
         subscriptionCIDRsModel,
         config,
       ),
-      // extract the user email from the request headers
-      UserEmailMiddleware(),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(ServiceRequestPayload),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
+        checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
       ),
     );
   };
