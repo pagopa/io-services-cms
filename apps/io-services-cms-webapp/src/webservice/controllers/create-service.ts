@@ -30,7 +30,8 @@ import {
   HttpStatusCodeEnum,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -96,10 +97,20 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 
 const createSubscriptionTask = (
   apimService: ApimUtils.ApimService,
-  userId: NonEmptyString,
+  userEmail: EmailString,
   subscriptionId: NonEmptyString,
   config: IConfig,
 ): TE.TaskEither<Error, SubscriptionContract> => {
+  const getUserId = pipe(
+    apimService.getUserByEmail(userEmail),
+    TE.mapLeft(
+      (err) =>
+        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
+    ),
+    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
+    TE.chain(pickId),
+  );
+
   // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
   const getProductId = pipe(
     apimService.getProductByName(config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME),
@@ -131,8 +142,10 @@ const createSubscriptionTask = (
     );
 
   return pipe(
-    getProductId,
-    TE.map((productId) => ({ productId, userId })),
+    sequenceS(TE.ApplicativePar)({
+      productId: getProductId,
+      userId: getUserId,
+    }),
     TE.chain(createSubscription),
   );
 };
@@ -149,7 +162,7 @@ export const makeCreateServiceHandler =
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimService, auth.userId, serviceId, config),
+      createSubscriptionTask(apimService, userEmail, serviceId, config),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
     );
 

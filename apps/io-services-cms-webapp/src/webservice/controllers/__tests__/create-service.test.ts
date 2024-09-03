@@ -34,7 +34,7 @@ vi.mock("../../../utils/service-topic-validator", () => ({
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
+      TE.right(O.some({ id, name: "topic name" }))
     ),
   })),
 }));
@@ -60,7 +60,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
+  servicePublicationStore
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -70,12 +70,13 @@ const ownerId = `/an/owner/${anUserId}`;
 const anApimResource = { id: "any-id", name: "any-name" };
 const mockApimService = {
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
   upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
   getSubscription: vi.fn(() =>
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    }),
+    })
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -102,7 +103,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  }),
+  })
 );
 const containerMock = {
   items: {
@@ -225,9 +226,29 @@ describe("createService", () => {
     expect(response.statusCode).toBe(403);
   });
 
+  it("should fail when cannot find apim user", async () => {
+    vi.mocked(mockApimService.getUserByEmail).mockImplementation(() =>
+      TE.left({ statusCode: 500 })
+    );
+
+    const spied = vi.spyOn(serviceLifecycleStore, "save");
+
+    const response = await request(app)
+      .post("/api/services")
+      .send(aNewService)
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(response.statusCode).toBe(500);
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(spied).not.toHaveBeenCalled();
+  });
+
   it("should fail when cannot find apim product", async () => {
     vi.mocked(mockApimService.getProductByName).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
+      TE.left({ statusCode: 500 })
     );
 
     const spied = vi.spyOn(serviceLifecycleStore, "save");
@@ -247,7 +268,7 @@ describe("createService", () => {
 
   it("should fail when cannot create subscription", async () => {
     vi.mocked(mockApimService.upsertSubscription).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
+      TE.left({ statusCode: 500 })
     );
 
     const spied = vi.spyOn(serviceLifecycleStore, "save");

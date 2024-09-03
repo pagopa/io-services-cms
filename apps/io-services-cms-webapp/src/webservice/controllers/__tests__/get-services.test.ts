@@ -24,6 +24,13 @@ const aName2 = "a-name-2";
 const aName3 = "a-name-3";
 
 // Apim resource mock *******************************
+const anApimResource = { id: "any-id", name: "any-name" };
+
+const anApimUserResource = {
+  ...anApimResource,
+  id: "/subscriptions/uuid/resourceGroups/a-rg-name/providers/Microsoft.ApiManagement/service/a-service-name/users/a-user-id",
+};
+
 const anApimSubscriptionResource1 = { id: "an-id-1", name: aName1 };
 const anApimSubscriptionResource2 = { id: "an-id-2", name: aName2 };
 const anApimSubscriptionResource3 = { id: "an-id-3", name: aName3 };
@@ -68,6 +75,7 @@ const aServiceList = [
 
 // Apim service mock *******************************
 const mockApimService = {
+  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimUserResource))),
   getUserSubscriptions: vi.fn((_) => TE.right(aSubscriptionCollection)),
   parseOwnerIdFullPath: vi.fn((_) => "a-user-id"),
 } as unknown as ApimUtils.ApimService;
@@ -80,7 +88,7 @@ const mockConfig = {
 
 // FSM client mock *******************************
 const aBulkFetchRightValue = TE.of(
-  aServiceList.map((service) => O.fromNullable(service)),
+  aServiceList.map((service) => O.fromNullable(service))
 );
 
 let mockFsmLifecycleClient = {
@@ -114,7 +122,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  }),
+  })
 );
 const containerMock = {
   items: {
@@ -214,7 +222,7 @@ describe("getServices", () => {
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty(
       "limit",
-      mockConfig.PAGINATION_DEFAULT_LIMIT,
+      mockConfig.PAGINATION_DEFAULT_LIMIT
     );
   });
 
