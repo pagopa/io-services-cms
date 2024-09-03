@@ -33,7 +33,13 @@ describe("store cosmos tests", () => {
       item: vi.fn((a: string, b: string) => ({
         read: vi.fn().mockResolvedValue({
           statusCode: 200,
-          resource: { ...anItem, last_update_ts: recordLastUpdateTs, _ts: recordCosmosTs, _etag: "anEtag" },
+          resource: {
+            ...anItem,
+            last_update_ts: recordLastUpdateTs,
+            _ts: recordCosmosTs,
+            _etag: "anEtag",
+          },
+          etag: "anEtag",
         }),
       })),
     } as unknown as Container;
@@ -44,7 +50,7 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(O.isSome(result.right)).toBeTruthy();
-      if(O.isSome(result.right)){
+      if (O.isSome(result.right)) {
         expect(result.right.value).toHaveProperty("last_update_ts");
         expect(result.right.value.last_update_ts).toBe(recordLastUpdateTs);
         expect(result.right.value).toHaveProperty("version");
@@ -61,6 +67,7 @@ describe("store cosmos tests", () => {
         read: vi.fn().mockResolvedValue({
           statusCode: 200,
           resource: { ...anItem, _ts: recordCosmosTs, _etag: "anEtag" },
+          etag: "anEtag",
         }),
       })),
     } as unknown as Container;
@@ -71,7 +78,7 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(O.isSome(result.right)).toBeTruthy();
-      if(O.isSome(result.right)){
+      if (O.isSome(result.right)) {
         expect(result.right.value).toHaveProperty("last_update_ts");
         expect(result.right.value.last_update_ts).toBe(recordCosmosTs);
         expect(result.right.value).toHaveProperty("version");
@@ -125,6 +132,7 @@ describe("store cosmos tests", () => {
           _ts: recordCosmosTs,
           _etag: "anEtag",
         },
+        eTag: "anEtag",
         statusCode: 200,
       },
       {
@@ -135,6 +143,7 @@ describe("store cosmos tests", () => {
           _ts: recordCosmosTs,
           _etag: "anEtag2",
         },
+        eTag: "anEtag2",
         statusCode: 200,
       },
     ];
@@ -166,7 +175,7 @@ describe("store cosmos tests", () => {
         expect(result.right[1].value).toHaveProperty("last_update_ts");
         expect(result.right[1].value.last_update_ts).toBe(recordLastUpdateTs);
         expect(result.right[1].value).toHaveProperty("version");
-        expect(result.right[1].value.version).toBe("anEtag");
+        expect(result.right[1].value.version).toBe("anEtag2");
       }
     }
   });
@@ -277,7 +286,7 @@ describe("store cosmos tests", () => {
       items: {
         upsert: vi.fn().mockResolvedValue({
           statusCode: 200,
-          resource: { last_update_ts: aLastUpdateTs, _ts: aTs, _etag: anEtag },
+          resource: { _ts: aTs, _etag: anEtag },
           etag: anEtag,
         }),
       },
@@ -292,12 +301,12 @@ describe("store cosmos tests", () => {
     expect(containerMock.items.upsert).toBeCalledTimes(1);
     expect(containerMock.items.upsert).toBeCalledWith({
       ...anItemToBeSaved,
+      last_update_ts: expect.any(Number),
       id: anItemId,
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(result.right).toHaveProperty("last_update_ts");
-      expect(result.right.last_update_ts).toBe(aLastUpdateTs);
       expect(result.right).toHaveProperty("version");
       expect(result.right.version).toBe(anEtag);
     }
