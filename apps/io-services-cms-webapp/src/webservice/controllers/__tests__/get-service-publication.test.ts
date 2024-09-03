@@ -115,7 +115,6 @@ const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
 const aServicePub = {
   id: "aServiceId",
-  last_update: "aServiceLastUpdate",
   data: {
     name: "aServiceName",
     description: "aServiceDescription",

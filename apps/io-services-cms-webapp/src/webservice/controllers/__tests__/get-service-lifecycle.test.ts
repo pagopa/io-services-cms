@@ -138,7 +138,6 @@ describe("getServiceLifecycle", () => {
 
   const aServiceLifecycle = {
     id: "aServiceId",
-    last_update: "aServiceLastUpdate",
     data: {
       name: "aServiceName",
       description: "aServiceDescription",

@@ -32,7 +32,7 @@ const aBaseQueueMessage = {
 };
 const aBaseServiceLifecycle = {
   id: "aServiceId",
-  last_update: "aServiceLastUpdate",
+  last_update_ts: 1234567890,
   data: {
     name: "aServiceName",
     description: "aServiceDescription",
