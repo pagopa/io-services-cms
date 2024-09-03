@@ -47,7 +47,7 @@ const mocks: {
   aSamplePayload: { test: "test" },
   aBaseServiceLifecycle: ({
     id: "aServiceId",
-    last_update: "aServiceLastUpdate",
+    last_update_ts: 1725351542,
     data: {
       name: "aServiceName",
       description: "aServiceDescription",
@@ -524,7 +524,9 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: new Date(
+              mocks.aBaseServiceLifecycle.last_update_ts * 1000
+            ).toISOString(),
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -544,7 +546,9 @@ describe("Services TEST", () => {
           {
             id: aServiceNotInPublicationId,
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: new Date(
+              mocks.aBaseServiceLifecycle.last_update_ts * 1000
+            ).toISOString(),
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -650,7 +654,9 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: new Date(
+              mocks.aBaseServiceLifecycle.last_update_ts * 1000
+            ).toISOString(),
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -864,7 +870,9 @@ describe("Services TEST", () => {
             id: aServiceInLifecycleId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: new Date(
+              mocks.aBaseServiceLifecycle.last_update_ts * 1000
+            ).toISOString(),
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
