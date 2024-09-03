@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.5
+
+### Patch Changes
+
+- 223832c: remove getUserEmail calls
+
 ## 1.32.4
 
 ### Patch Changes
