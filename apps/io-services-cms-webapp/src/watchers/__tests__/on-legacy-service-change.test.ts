@@ -142,6 +142,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
+            last_update_ts: expect.any(Number),
           },
         ],
       });
@@ -184,6 +185,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
+            last_update_ts: expect.any(Number),
           },
         ],
       });
@@ -264,8 +266,8 @@ describe("On Legacy Service Change Handler", () => {
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({
         requestSyncCms: [
-          { ...aServiceLifecycleItem, kind: "LifecycleItemType" },
-          { ...aServicePublicationItem, kind: "PublicationItemType" },
+          { ...aServiceLifecycleItem, kind: "LifecycleItemType", last_update_ts: expect.any(Number) },
+          { ...aServicePublicationItem, kind: "PublicationItemType", last_update_ts: expect.any(Number) },
         ],
       });
     }

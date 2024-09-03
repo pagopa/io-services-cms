@@ -4,7 +4,6 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as T from "fp-ts/lib/Task";
@@ -22,7 +21,7 @@ const toServiceLifecycle =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
-    { data, id }: Queue.RequestSyncCmsItem,
+    { data, id, last_update_ts }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -48,6 +47,7 @@ const toServiceLifecycle =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
         id,
+        last_update_ts,
       })),
     );
 
@@ -113,12 +113,6 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage(Queue.RequestSyncCmsItems),
-    E.mapLeft(
-      (err) =>
-        new Error(
-          `Error while parsing incoming message, the reason was => ${err.message}`,
-        ),
-    ), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((items) =>
       pipe(
