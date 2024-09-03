@@ -396,9 +396,12 @@ const toUser = ({
     role: identityTokenPayload.organization.roles[0]?.role,
     logo_url: institution.logo
   },
-  permissions: apimUser.groups
-    .filter(group => group.type === "custom")
-    .map(group => group.name),
+  permissions: {
+    apimGroups: apimUser.groups
+      .filter(group => group.type === "custom")
+      .map(group => group.name),
+    selcGroups: identityTokenPayload.organization.groups
+  },
   parameters: {
     userId: apimUser.name,
     userEmail: apimUser.email,

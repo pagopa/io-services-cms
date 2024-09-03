@@ -20,7 +20,7 @@ export const hasRequiredAuthorizations = (
   requiredAuthorizations: RequiredAuthorizations
 ) =>
   hasRequiredPermissions(
-    session?.user?.permissions,
+    session?.user?.permissions.apimGroups,
     requiredAuthorizations.requiredPermissions
   ) &&
   hasRequiredRole(

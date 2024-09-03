@@ -20,7 +20,10 @@ import {
 const anUserEmail = "anEmail@email.it";
 const anUserId = "anUserId";
 const aSubscriptionId = "aSubscriptionId";
-const aUserPermissions = ["permission1", "permission2"];
+const aUserPermissions = {
+  apimGroups: ["permission1", "permission2"],
+  selcGroups: ["g1", "g2"]
+};
 const jwtMock = ({
   permissions: aUserPermissions,
   parameters: {
@@ -236,7 +239,9 @@ describe("Services TEST", () => {
           "x-user-email": anUserEmail,
           "x-user-id": anUserId,
           "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.join(",")
+          "x-user-groups": aUserPermissions.apimGroups.join(","),
+          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-channel": "BO"
         })
       );
 
@@ -278,7 +283,9 @@ describe("Services TEST", () => {
           "x-user-email": anUserEmail,
           "x-user-id": anUserId,
           "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.join(","),
+          "x-user-groups": aUserPermissions.apimGroups.join(","),
+          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test"
         })
@@ -321,7 +328,9 @@ describe("Services TEST", () => {
           "x-user-email": anUserEmail,
           "x-user-id": anUserId,
           "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.join(","),
+          "x-user-groups": aUserPermissions.apimGroups.join(","),
+          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test"
         })
@@ -367,7 +376,9 @@ describe("Services TEST", () => {
           "x-user-email": anUserEmail,
           "x-user-id": anUserId,
           "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.join(","),
+          "x-user-groups": aUserPermissions.apimGroups.join(","),
+          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test"
         })
@@ -425,7 +436,9 @@ describe("Services TEST", () => {
           "x-user-email": anUserEmail,
           "x-user-id": anUserId,
           "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.join(","),
+          "x-user-groups": aUserPermissions.apimGroups.join(","),
+          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test"
         })

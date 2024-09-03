@@ -72,7 +72,7 @@ describe("[auth utils] hasRequiredRole", () => {
 describe("[auth utils] hasRequiredAuthorizations", () => {
   const aSession: any = {
     user: {
-      permissions: ["p1", "p2"],
+      permissions: { apimGroups: ["p1", "p2"] },
       institution: { role: "aRole" }
     }
   };
