@@ -12,8 +12,8 @@ import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { FSMStore, WithState } from "./types";
 import { unixSeconds } from "../../utils/date-utils";
+import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T>;
