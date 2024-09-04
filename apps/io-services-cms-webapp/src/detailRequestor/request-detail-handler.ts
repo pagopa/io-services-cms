@@ -18,7 +18,7 @@ const PUBLICATION_KIND = "publication";
 export const toServiceDetail = (
   service: Queue.RequestDetailItem,
 ): ServiceDetail => ({
-  cms_last_update_ts: service.cms_last_update_ts,
+  cms_modified_at: service.cms_modified_at,
   description: service.data.description,
   id: service.id,
   kind: service.kind,

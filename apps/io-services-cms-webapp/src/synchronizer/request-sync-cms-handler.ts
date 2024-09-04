@@ -21,7 +21,7 @@ const toServiceLifecycle =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
-    { data, id, last_update_ts }: Queue.RequestSyncCmsItem,
+    { data, id, modified_at }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -47,7 +47,7 @@ const toServiceLifecycle =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
         id,
-        last_update_ts,
+        modified_at,
       })),
     );
 

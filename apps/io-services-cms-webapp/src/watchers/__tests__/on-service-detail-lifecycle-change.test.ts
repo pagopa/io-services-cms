@@ -31,7 +31,7 @@ describe("On Service Detail Lifecycle Change Handler", () => {
     ${"no-action-deleted"}        | ${{ ...aService, fsm: { state: "deleted" }, _ts: 1234567890 }}   | ${{}}
     ${"no-action-rejected"}       | ${{ ...aService, fsm: { state: "rejected" }, _ts: 1234567890 }}  | ${{}}
     ${"no-action-submitted"}      | ${{ ...aService, fsm: { state: "submitted" }, _ts: 1234567890 }} | ${{}}
-    ${"request-detail-lifecycle"} | ${{ ...aService, fsm: { state: "draft" }, _ts: 1234567890 }}     | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle", cms_last_update_ts: 1234567890 } }}
+    ${"request-detail-lifecycle"} | ${{ ...aService, fsm: { state: "draft" }, _ts: 1234567890 }}     | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle", cms_modified_at: 1234567890 } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

@@ -129,7 +129,7 @@ const aServicePub = {
       fiscal_code: "12345678901",
     },
     require_secure_channel: false,
-    last_update_ts: 1234567890,
+    modified_at: 1234567890,
   },
 } as unknown as ServicePublication.ItemType;
 

@@ -45,7 +45,7 @@ export const createCosmosStore = <
               {
                 ...rr.resource,
                 // eslint-disable-next-line no-underscore-dangle
-                last_update_ts: rr.resource?.last_update_ts ?? rr.resource?._ts,
+                modified_at: rr.resource?.modified_at ?? rr.resource?._ts,
                 version: rr.etag,
               },
               codec.decode,
@@ -92,8 +92,8 @@ export const createCosmosStore = <
               pipe(
                 {
                   ...res.resourceBody,
-                  last_update_ts:
-                    res.resourceBody?.last_update_ts ?? res.resourceBody?._ts,
+                  modified_at:
+                    res.resourceBody?.modified_at ?? res.resourceBody?._ts,
                   version: res.eTag,
                 },
                 codec.decode,
@@ -116,7 +116,7 @@ export const createCosmosStore = <
             container.items.upsert({
               ...valueToSave,
               id,
-              last_update_ts: unixSeconds(),
+              modified_at: unixSeconds(),
             }),
           (err) =>
             new Error(
@@ -127,8 +127,8 @@ export const createCosmosStore = <
         ),
       TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
-        last_update_ts:
-          itemResponse.resource?.last_update_ts ?? itemResponse.resource?._ts,
+        modified_at:
+          itemResponse.resource?.modified_at ?? itemResponse.resource?._ts,
         version: itemResponse.etag,
       })),
     );

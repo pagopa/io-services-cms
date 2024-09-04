@@ -39,14 +39,14 @@ export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
   fsm,
   data,
   id,
-  last_update_ts
+  modified_at
 }: ServiceLifecycle.ItemType): ServiceListItem => {
   const { topic_id, ...otherMetadata } = data.metadata;
   return {
     id,
     status: toServiceStatus(fsm),
-    last_update: last_update_ts
-      ? (new Date(last_update_ts * 1000).toISOString() as NonEmptyString)
+    last_update: modified_at
+      ? (new Date(modified_at * 1000).toISOString() as NonEmptyString)
       : new Date().toISOString(),
     name: data.name,
     description: data.description,

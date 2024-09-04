@@ -21,27 +21,27 @@ import { parseIncomingMessage } from "../utils/queue-utils";
 export const buildRequestHistoricizationQueueMessage = ({
   _etag,
   _ts,
-  last_update_ts,
+  modified_at,
   ...otherProps
 }:
   | ServiceLifecycle.CosmosResource
   | ServicePublication.CosmosResource): Queue.RequestHistoricizationItem => ({
   ...otherProps,
   // eslint-disable-next-line no-underscore-dangle
-  last_update_ts: last_update_ts ?? _ts, // when the service-lifecycle/service-publication record lack of last_update_ts, the _ts value is used
+  modified_at: modified_at ?? _ts, // when the service-lifecycle/service-publication record lack of modified_at, the _ts value is used
   // eslint-disable-next-line no-underscore-dangle
   version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle/service-publication record
 });
 
 export const toServiceHistory = ({
-  last_update_ts,
+  modified_at,
   ...service
 }: Queue.RequestHistoricizationItem): ServiceHistory => ({
   ...service,
-  id: last_update_ts.toString() as NonEmptyString, // id contains the service-lifecycle/service-publication last_update_ts/_ts value
+  id: modified_at.toString() as NonEmptyString, // id contains the service-lifecycle/service-publication modified_at/_ts value
   last_update: DateUtils.isoStringfromUnixSeconds(
-    last_update_ts,
-  ) as NonEmptyString, // last_update contains the service-lifecycle/service-publication  last_update_ts/_ts ISO String rapresentation
+    modified_at,
+  ) as NonEmptyString, // last_update contains the service-lifecycle/service-publication  modified_at/_ts ISO String rapresentation
   serviceId: service.id,
 });
 

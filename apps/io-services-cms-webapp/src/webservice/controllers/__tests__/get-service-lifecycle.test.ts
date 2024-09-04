@@ -156,7 +156,7 @@ describe("getServiceLifecycle", () => {
       },
       require_secure_channel: false,
     },
-    last_update_ts: 1234567890,
+    modified_at: 1234567890,
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should fail when cannot find requested service", async () => {

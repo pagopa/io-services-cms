@@ -40,7 +40,7 @@ const aGenericItemType = {
   fsm: {
     state: "published",
   },
-  last_update_ts: atimestamp,
+  modified_at: atimestamp,
 } as unknown as Queue.RequestHistoricizationItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;

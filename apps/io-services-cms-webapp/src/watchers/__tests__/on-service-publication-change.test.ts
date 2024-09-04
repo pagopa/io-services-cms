@@ -33,9 +33,9 @@ const aLastUpdateTs = DateUtils.unixSeconds();
 describe("On Service Publication Change Handler", () => {
   it.each`
     scenario                     | item                                                                                                    | expected
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: _ts, fsm: { state: "unpublished" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: _ts, fsm: { state: "published" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, last_update_ts: aLastUpdateTs }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, last_update_ts: aLastUpdateTs, fsm: { state: "published" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: _ts, fsm: { state: "unpublished" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: _ts, fsm: { state: "published" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, modified_at: aLastUpdateTs }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: aLastUpdateTs, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

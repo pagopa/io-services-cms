@@ -35,7 +35,7 @@ describe("store cosmos tests", () => {
           statusCode: 200,
           resource: {
             ...anItem,
-            last_update_ts: recordLastUpdateTs,
+            modified_at: recordLastUpdateTs,
             _ts: recordCosmosTs,
             _etag: "anEtag",
           },
@@ -51,15 +51,15 @@ describe("store cosmos tests", () => {
     if (E.isRight(result)) {
       expect(O.isSome(result.right)).toBeTruthy();
       if (O.isSome(result.right)) {
-        expect(result.right.value).toHaveProperty("last_update_ts");
-        expect(result.right.value.last_update_ts).toBe(recordLastUpdateTs);
+        expect(result.right.value).toHaveProperty("modified_at");
+        expect(result.right.value.modified_at).toBe(recordLastUpdateTs);
         expect(result.right.value).toHaveProperty("version");
         expect(result.right.value.version).toBe("anEtag");
       }
     }
   });
 
-  it("result should be some on fetch having status 200 and having last_update_ts valued with _ts in case is missing", async () => {
+  it("result should be some on fetch having status 200 and having modified_at valued with _ts in case is missing", async () => {
     const recordCosmosTs = 1687787624;
 
     const containerMock = {
@@ -79,8 +79,8 @@ describe("store cosmos tests", () => {
     if (E.isRight(result)) {
       expect(O.isSome(result.right)).toBeTruthy();
       if (O.isSome(result.right)) {
-        expect(result.right.value).toHaveProperty("last_update_ts");
-        expect(result.right.value.last_update_ts).toBe(recordCosmosTs);
+        expect(result.right.value).toHaveProperty("modified_at");
+        expect(result.right.value.modified_at).toBe(recordCosmosTs);
         expect(result.right.value).toHaveProperty("version");
         expect(result.right.value.version).toBe("anEtag");
       }
@@ -139,7 +139,7 @@ describe("store cosmos tests", () => {
         resourceBody: {
           ...anItem,
           id: "anItemId2" as NonEmptyString,
-          last_update_ts: recordLastUpdateTs,
+          modified_at: recordLastUpdateTs,
           _ts: recordCosmosTs,
           _etag: "anEtag2",
         },
@@ -160,20 +160,20 @@ describe("store cosmos tests", () => {
     if (E.isRight(result)) {
       expect(result.right).toHaveLength(2);
 
-      // Case record lacking last_update_ts
+      // Case record lacking modified_at
       expect(O.isSome(result.right[0])).toBeTruthy();
       if (O.isSome(result.right[0])) {
-        expect(result.right[0].value).toHaveProperty("last_update_ts");
-        expect(result.right[0].value.last_update_ts).toBe(recordCosmosTs);
+        expect(result.right[0].value).toHaveProperty("modified_at");
+        expect(result.right[0].value.modified_at).toBe(recordCosmosTs);
         expect(result.right[0].value).toHaveProperty("version");
         expect(result.right[0].value.version).toBe("anEtag");
       }
 
-      // Case record with last_update_ts
+      // Case record with modified_at
       expect(O.isSome(result.right[1])).toBeTruthy();
       if (O.isSome(result.right[1])) {
-        expect(result.right[1].value).toHaveProperty("last_update_ts");
-        expect(result.right[1].value.last_update_ts).toBe(recordLastUpdateTs);
+        expect(result.right[1].value).toHaveProperty("modified_at");
+        expect(result.right[1].value.modified_at).toBe(recordLastUpdateTs);
         expect(result.right[1].value).toHaveProperty("version");
         expect(result.right[1].value.version).toBe("anEtag2");
       }
@@ -301,12 +301,12 @@ describe("store cosmos tests", () => {
     expect(containerMock.items.upsert).toBeCalledTimes(1);
     expect(containerMock.items.upsert).toBeCalledWith({
       ...anItemToBeSaved,
-      last_update_ts: expect.any(Number),
+      modified_at: expect.any(Number),
       id: anItemId,
     });
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      expect(result.right).toHaveProperty("last_update_ts");
+      expect(result.right).toHaveProperty("modified_at");
       expect(result.right).toHaveProperty("version");
       expect(result.right.version).toBe(anEtag);
     }

@@ -10,7 +10,7 @@ import {
 
 export type ServiceDetail = t.TypeOf<typeof ServiceDetail>;
 export const ServiceDetail = t.type({
-  cms_last_update_ts: t.Integer, // this will be used to value the version field on the serviceDetails(pp-backend api)
+  cms_modified_at: t.Integer, // this will be used to value the version field on the serviceDetails(pp-backend api)
   description: NonEmptyString,
   id: ServiceId,
   kind: t.union([t.literal("publication"), t.literal("lifecycle")]),

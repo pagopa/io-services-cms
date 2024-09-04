@@ -65,7 +65,7 @@ export const itemToResponse =
     },
     fsm,
     id,
-    last_update_ts,
+    modified_at,
   }: ServiceLifecycle.ItemType): TE.TaskEither<
     IResponseErrorInternal,
     ServiceResponsePayload
@@ -76,8 +76,8 @@ export const itemToResponse =
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
           id,
-          last_update: last_update_ts
-            ? DateUtils.isoStringfromUnixSeconds(last_update_ts)
+          last_update: modified_at
+            ? DateUtils.isoStringfromUnixSeconds(modified_at)
             : new Date().getTime().toString(),
           status: toServiceStatus(fsm),
           ...data,
