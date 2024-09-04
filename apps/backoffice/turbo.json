@@ -83,17 +83,6 @@
       "dependsOn": [
         "build"
       ]
-    },
-    "coverage": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "tsconfig.json"
-      ],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
     }
   }
 }

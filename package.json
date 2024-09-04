@@ -4,7 +4,6 @@
   "scripts": {
     "test": "turbo run test --no-daemon",
     "test:integrations": "turbo run test:integrations --no-daemon",
-    "coverage" : "turbo run coverage --no-daemon",
     "format": "turbo run format --no-daemon",
     "lint": "turbo run lint --no-daemon",
     "build": "turbo run build --no-daemon",
