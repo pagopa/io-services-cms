@@ -24,7 +24,7 @@ const aServiceLifecycleCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: DateUtils.unixSeconds(),
+  _ts: DateUtils.unixTimestamp(),
   _etag: "aServiceEtag",
 } as unknown as ServiceLifecycle.CosmosResource;
 
@@ -43,7 +43,7 @@ const expectedHistoricization = {
   version: _etag,
 };
 
-const aLastUpdateTs = DateUtils.unixSeconds();
+const aLastUpdateTs = DateUtils.unixTimestamp();
 
 describe("On Service Lifecycle Change Handler", () => {
   it.each`

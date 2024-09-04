@@ -41,7 +41,7 @@ const aBaseServiceLifecycleItem = {
     authorized_cidrs: [],
   },
   fsm: { state: "approved" },
-  modified_at: DateUtils.unixSeconds(),
+  modified_at: DateUtils.unixTimestamp(),
 } as unknown as ServiceLifecycle.ItemType;
 
 const aServiceLifecycleItem = {

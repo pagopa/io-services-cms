@@ -22,13 +22,13 @@ const aServicePublicationCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: DateUtils.unixSeconds(),
+  _ts: DateUtils.unixTimestamp(),
   _etag: "aServiceEtag",
 } as unknown as ServicePublication.CosmosResource;
 
 const { _ts, _etag, ...aService } = aServicePublicationCosmosResource;
 const expectedVersion = _etag;
-const aLastUpdateTs = DateUtils.unixSeconds();
+const aLastUpdateTs = DateUtils.unixTimestamp();
 
 describe("On Service Publication Change Handler", () => {
   it.each`

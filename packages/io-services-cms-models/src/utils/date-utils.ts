@@ -4,14 +4,14 @@
  *
  * @returns {Number}
  */
-const unixSeconds = (date = Date.now()): number => Math.floor(date / 1000);
+const unixTimestamp = (date = Date.now()): number => Math.floor(date / 1000);
 
 /**
  * Returns the ISOString rapresentation for a given UNIX timestamp in seconds.
  *
  * @returns {String}
  */
-const isoStringfromUnixSeconds = (unixSeconds: number): string =>
+const isoStringfromUnixTimestamp = (unixSeconds: number): string =>
   new Date(unixSeconds * 1000).toISOString();
 
-export { isoStringfromUnixSeconds, unixSeconds };
+export { isoStringfromUnixTimestamp, unixTimestamp };

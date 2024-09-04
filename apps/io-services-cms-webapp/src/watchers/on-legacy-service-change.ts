@@ -89,7 +89,7 @@ const fromLegacyToCmsService = (
     status === "published" || status === "unpublished"
       ? "PublicationItemType"
       : "LifecycleItemType",
-  modified_at: DateUtils.unixSeconds(),
+  modified_at: DateUtils.unixTimestamp(),
 });
 
 const getDescription = (service: LegacyService) =>
