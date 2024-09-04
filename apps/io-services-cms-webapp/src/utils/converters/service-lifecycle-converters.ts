@@ -78,7 +78,7 @@ export const itemToResponse =
           id,
           last_update: modified_at
             ? DateUtils.isoStringfromUnixTimestamp(modified_at)
-            : new Date().getTime().toString(),
+            : new Date().getTime().toISOString(),
           status: toServiceStatus(fsm),
           ...data,
           metadata: {
