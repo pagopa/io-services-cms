@@ -179,7 +179,7 @@ export async function forwardIoServicesCmsRequest<
       "x-user-id": backofficeUser.parameters.userId,
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc": backofficeUser.permissions.selcGroups?.join(","), // TODO: check if all edge cases are handled
+      "x-user-groups-selc": backofficeUser.permissions.selcGroups?.join(","),
       "x-channel": "BO",
       "X-Forwarded-For": nextRequest.headers.get("X-Forwarded-For") ?? undefined
     } as any;
