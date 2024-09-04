@@ -2,7 +2,6 @@ import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
@@ -30,7 +29,7 @@ import {
   HttpStatusCodeEnum,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
-import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -39,7 +38,6 @@ import * as t from "io-ts";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
-import { UserEmailMiddleware } from "../../lib/middlewares/user-email-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -68,7 +66,6 @@ type ICreateServiceHandler = (
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  userEmail: EmailAddress,
   servicePayload: ServiceRequestPayload,
 ) => Promise<HandlerResponseTypes>;
 
@@ -97,17 +94,15 @@ const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
 
 const createSubscriptionTask = (
   apimService: ApimUtils.ApimService,
-  userEmail: EmailString,
+  userId: NonEmptyString,
   subscriptionId: NonEmptyString,
   config: IConfig,
 ): TE.TaskEither<Error, SubscriptionContract> => {
   const getUserId = pipe(
-    apimService.getUserByEmail(userEmail),
+    apimService.getUser(userId),
     TE.mapLeft(
-      (err) =>
-        new Error(`Failed to fetch user by its email, code: ${err.statusCode}`),
+      (err) => new Error(`Failed to fetch user, code: ${err.statusCode}`),
     ),
-    TE.chain(TE.fromOption(() => new Error(`Cannot find user`))),
     TE.chain(pickId),
   );
 
@@ -157,12 +152,12 @@ export const makeCreateServiceHandler =
     fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
-  (context, auth, _, __, userEmail, servicePayload) => {
+  (context, auth, _, __, servicePayload) => {
     const logger = getLogger(context, logPrefix);
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimService, userEmail, serviceId, config),
+      createSubscriptionTask(apimService, auth.userId, serviceId, config),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
     );
 
@@ -217,17 +212,13 @@ export const applyRequestMiddelwares =
         subscriptionCIDRsModel,
         config,
       ),
-      // extract the user email from the request headers
-      UserEmailMiddleware(),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(ServiceRequestPayload),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
+        checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
       ),
     );
   };

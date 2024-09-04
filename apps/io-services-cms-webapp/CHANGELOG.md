@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.32.5
+
+### Patch Changes
+
+- 223832c: remove getUserEmail calls
+
+## 1.32.4
+
+### Patch Changes
+
+- 48df3fd: revert remove getUserByEmail calls
+
+## 1.32.3
+
+### Patch Changes
+
+- 14cf65c: refactor: remove useless getUserByEmail calls
+
 ## 1.32.2
 
 ### Patch Changes

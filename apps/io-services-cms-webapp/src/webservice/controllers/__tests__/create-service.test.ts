@@ -48,7 +48,7 @@ vi.mock("../../../lib/clients/apim-client", async () => {
 
   return {
     getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-    getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+    getUser: vi.fn((_) => TE.right(anApimResource)),
     upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
   };
 });
@@ -70,7 +70,7 @@ const ownerId = `/an/owner/${anUserId}`;
 const anApimResource = { id: "any-id", name: "any-name" };
 const mockApimService = {
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-  getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
+  getUser: vi.fn((_) => TE.right(anApimResource)),
   upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
   getSubscription: vi.fn(() =>
     TE.right({
@@ -227,7 +227,7 @@ describe("createService", () => {
   });
 
   it("should fail when cannot find apim user", async () => {
-    vi.mocked(mockApimService.getUserByEmail).mockImplementation(() =>
+    vi.mocked(mockApimService.getUser).mockImplementation(() =>
       TE.left({ statusCode: 500 })
     );
 
