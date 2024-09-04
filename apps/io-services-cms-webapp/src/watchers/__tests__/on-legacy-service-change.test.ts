@@ -1,6 +1,6 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
-  LegacyService,
+  LegacyServiceCosmosResource,
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
@@ -49,14 +49,15 @@ const aLegacyService = {
     webUrl: "aWebUrl",
     version: 1,
   },
-} as unknown as LegacyService;
+  _ts: 123456789,
+} as unknown as LegacyServiceCosmosResource;
 
 const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
   id: aLegacyService.serviceId,
   data: {
     authorized_cidrs: Array.from(aLegacyService.authorizedCIDRs.values()),
     authorized_recipients: Array.from(
-      aLegacyService.authorizedRecipients.values()
+      aLegacyService.authorizedRecipients.values(),
     ),
     description: aLegacyService.serviceMetadata?.description as NonEmptyString,
     max_allowed_payment_amount: aLegacyService.maxAllowedPaymentAmount,
@@ -105,7 +106,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -114,7 +115,7 @@ describe("On Legacy Service Change Handler", () => {
     const item = {
       ...aLegacyService,
       serviceName: "DELETED aServiceName",
-    } as unknown as LegacyService;
+    } as unknown as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -127,7 +128,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -142,7 +143,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
-            modified_at: expect.any(Number),
+            modified_at: aLegacyService._ts,
           },
         ],
       });
@@ -153,7 +154,7 @@ describe("On Legacy Service Change Handler", () => {
     const item = {
       ...aLegacyService,
       serviceName: "DELETED",
-    } as unknown as LegacyService;
+    } as unknown as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -166,7 +167,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -185,7 +186,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
-            modified_at: expect.any(Number),
+            modified_at: aLegacyService._ts,
           },
         ],
       });
@@ -205,7 +206,7 @@ describe("On Legacy Service Change Handler", () => {
       serviceId: "aServiceIdScoppia",
       serviceName: "aServiceName",
       version: 1,
-    } as unknown as LegacyService;
+    } as unknown as LegacyServiceCosmosResource;
 
     const mockServiceModel = {
       find: vi.fn(() => TE.right(O.some(item))),
@@ -218,7 +219,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).toHaveBeenCalled();
@@ -236,7 +237,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "LifecycleItemType",
             }),
           ]),
-        })
+        }),
       );
     }
   });
@@ -244,7 +245,7 @@ describe("On Legacy Service Change Handler", () => {
   it("should map a visible item to a requestSyncCms action containing a service lifecycle with APPROVED status and a service publication with PUBLISHED status", async () => {
     const item = {
       ...aLegacyService,
-    } as unknown as LegacyService;
+    } as unknown as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -257,7 +258,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -266,8 +267,16 @@ describe("On Legacy Service Change Handler", () => {
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual({
         requestSyncCms: [
-          { ...aServiceLifecycleItem, kind: "LifecycleItemType", modified_at: expect.any(Number) },
-          { ...aServicePublicationItem, kind: "PublicationItemType", modified_at: expect.any(Number) },
+          {
+            ...aServiceLifecycleItem,
+            kind: "LifecycleItemType",
+            modified_at: aLegacyService._ts,
+          },
+          {
+            ...aServicePublicationItem,
+            kind: "PublicationItemType",
+            modified_at: aLegacyService._ts,
+          },
         ],
       });
     }
@@ -277,7 +286,7 @@ describe("On Legacy Service Change Handler", () => {
     const item = {
       ...aLegacyService,
       isVisible: false,
-    } as LegacyService;
+    } as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -292,7 +301,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).toHaveBeenCalled();
@@ -307,7 +316,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "LifecycleItemType",
             }),
           ]),
-        })
+        }),
       );
     }
   });
@@ -317,7 +326,7 @@ describe("On Legacy Service Change Handler", () => {
       ...aLegacyService,
       version: 1,
       isVisible: false,
-    } as LegacyService;
+    } as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -330,8 +339,8 @@ describe("On Legacy Service Change Handler", () => {
             ...aLegacyService,
             version: 0,
             isVisible: true,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as ServiceModel;
 
@@ -340,7 +349,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     const previousVersionId = `${item.serviceId}-${(item.version - 1)
@@ -366,7 +375,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "PublicationItemType",
             }),
           ]),
-        })
+        }),
       );
     }
   });
@@ -376,7 +385,7 @@ describe("On Legacy Service Change Handler", () => {
       ...aLegacyService,
       version: 2,
       isVisible: false,
-    } as LegacyService;
+    } as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -392,8 +401,8 @@ describe("On Legacy Service Change Handler", () => {
               ...aLegacyService,
               version: 0,
               isVisible: true,
-            })
-          )
+            }),
+          ),
         ),
     } as unknown as ServiceModel;
 
@@ -402,7 +411,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     const versionOne = `${item.serviceId}-${(1).toString().padStart(16, "0")}`;
@@ -433,7 +442,7 @@ describe("On Legacy Service Change Handler", () => {
               kind: "PublicationItemType",
             }),
           ]),
-        })
+        }),
       );
     }
   });
@@ -442,7 +451,7 @@ describe("On Legacy Service Change Handler", () => {
     const item = {
       ...aLegacyService,
       cmsTag: true,
-    } as LegacyService;
+    } as LegacyServiceCosmosResource;
 
     const mockConfig = {
       USERID_LEGACY_TO_CMS_SYNC_INCLUSION_LIST: [anUserId],
@@ -455,7 +464,7 @@ describe("On Legacy Service Change Handler", () => {
     const result = await handler(
       mockConfig,
       mockApimService,
-      mockServiceModel
+      mockServiceModel,
     )({ item })();
 
     expect(mockServiceModel.find).not.toHaveBeenCalled();
@@ -495,21 +504,20 @@ describe("On Legacy Service Change Handler", () => {
         ...aLegacyService,
         isVisible: false,
         version: 6,
-      } as LegacyService;
+      } as LegacyServiceCosmosResource;
 
       const previousService = {
         ...aLegacyService,
         isVisible: true,
         version: 5,
-      } as LegacyService;
+      } as LegacyServiceCosmosResource;
 
       const mockServiceModel = {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(mockServiceModel)(
-        currentService
-      )();
+      const result =
+        await serviceWasPublished(mockServiceModel)(currentService)();
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -522,21 +530,20 @@ describe("On Legacy Service Change Handler", () => {
         ...aLegacyService,
         isVisible: false,
         version: 6,
-      } as LegacyService;
+      } as LegacyServiceCosmosResource;
 
       const previousService = {
         ...aLegacyService,
         isVisible: false,
         version: 5,
-      } as LegacyService;
+      } as LegacyServiceCosmosResource;
 
       const mockServiceModel = {
         find: vi.fn(() => TE.right(O.some(previousService))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(mockServiceModel)(
-        currentService
-      )();
+      const result =
+        await serviceWasPublished(mockServiceModel)(currentService)();
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -549,15 +556,14 @@ describe("On Legacy Service Change Handler", () => {
         ...aLegacyService,
         isVisible: false,
         version: 0,
-      } as LegacyService;
+      } as LegacyServiceCosmosResource;
 
       const mockServiceModel = {
         find: vi.fn(() => TE.left(new Error("should not be called"))),
       } as unknown as ServiceModel;
 
-      const result = await serviceWasPublished(mockServiceModel)(
-        currentService
-      )();
+      const result =
+        await serviceWasPublished(mockServiceModel)(currentService)();
 
       expect(mockServiceModel.find).not.toHaveBeenCalled();
       expect(E.isRight(result)).toBeTruthy();
