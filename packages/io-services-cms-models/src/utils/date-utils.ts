@@ -11,7 +11,7 @@ const unixSeconds = (date = Date.now()): number => {
 /**
  * Returns the ISOString rapresentation for a given UNIX timestamp in seconds.
  *
- * @returns {Number}
+ * @returns {String}
  */
 const isoStringfromUnixSeconds = (unixSeconds: number): string => {
   return new Date(unixSeconds * 1000).toISOString();
