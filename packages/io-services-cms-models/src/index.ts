@@ -15,3 +15,4 @@ export { ServiceHistory } from "./service-history";
 export { LegacyService } from "./service-legacy";
 export * as ServiceLifecycle from "./service-lifecycle";
 export * as ServicePublication from "./service-publication";
+export * as DateUtils from "./utils/date-utils";

@@ -1,4 +1,4 @@
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import { DateUtils, ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
 import { IConfig } from "../../config";
@@ -24,7 +24,7 @@ const aServiceLifecycleCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: Math.floor(Date.now() / 1000),
+  _ts: DateUtils.unixSeconds(),
   _etag: "aServiceEtag",
 } as unknown as ServiceLifecycle.CosmosResource;
 
@@ -43,7 +43,7 @@ const expectedHistoricization = {
   version: _etag,
 };
 
-const aLastUpdateTs = Math.floor(Date.now() / 1000);
+const aLastUpdateTs = DateUtils.unixSeconds();
 
 describe("On Service Lifecycle Change Handler", () => {
   it.each`

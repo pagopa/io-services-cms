@@ -13,6 +13,7 @@ import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { FSMStore, WithState } from "./types";
+import { unixSeconds } from "../../utils/date-utils";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T>;
@@ -115,7 +116,7 @@ export const createCosmosStore = <
             container.items.upsert({
               ...valueToSave,
               id,
-              last_update_ts: Math.floor(Date.now() / 1000),
+              last_update_ts: unixSeconds(),
             }),
           (err) =>
             new Error(

@@ -1,5 +1,6 @@
 import { Context } from "@azure/functions";
 import {
+  DateUtils,
   Queue,
   ServiceLifecycle,
   ServicePublication,
@@ -40,7 +41,7 @@ const aBaseServiceLifecycleItem = {
     authorized_cidrs: [],
   },
   fsm: { state: "approved" },
-  last_update_ts: Math.floor(Date.now() / 1000),
+  last_update_ts: DateUtils.unixSeconds(),
 } as unknown as ServiceLifecycle.ItemType;
 
 const aServiceLifecycleItem = {

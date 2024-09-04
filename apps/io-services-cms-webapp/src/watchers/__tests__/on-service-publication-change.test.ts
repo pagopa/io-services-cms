@@ -1,4 +1,4 @@
-import { ServicePublication } from "@io-services-cms/models";
+import { DateUtils, ServicePublication } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
 import { handler } from "../on-service-publication-change";
@@ -22,13 +22,13 @@ const aServicePublicationCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: Math.floor(Date.now() / 1000),
+  _ts: DateUtils.unixSeconds(),
   _etag: "aServiceEtag",
 } as unknown as ServicePublication.CosmosResource;
 
 const { _ts, _etag, ...aService } = aServicePublicationCosmosResource;
 const expectedVersion = _etag;
-const aLastUpdateTs = Math.floor(Date.now() / 1000);
+const aLastUpdateTs = DateUtils.unixSeconds();
 
 describe("On Service Publication Change Handler", () => {
   it.each`

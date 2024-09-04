@@ -1,4 +1,4 @@
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { DateUtils, ServiceLifecycle } from "@io-services-cms/models";
 import {
   IResponseErrorInternal,
   ResponseErrorInternal,
@@ -77,7 +77,7 @@ export const itemToResponse =
         (topic) => ({
           id,
           last_update: last_update_ts
-            ? new Date(last_update_ts * 1000).toISOString()
+            ? DateUtils.isoStringfromUnixSeconds(last_update_ts)
             : new Date().getTime().toString(),
           status: toServiceStatus(fsm),
           ...data,
