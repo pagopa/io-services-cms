@@ -8,10 +8,10 @@ import * as t from "io-ts";
  * @returns either a decode error or the array of decoded items
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const CommaSeparatedListOf = (decoder: t.Mixed) =>
-  new t.Type<readonly t.TypeOf<typeof decoder>[], string, unknown>(
+export const CommaSeparatedListOf = <A>(decoder: t.Type<A>) =>
+  new t.Type<readonly A[], string, unknown>(
     `CommaSeparatedListOf<${decoder.name}>`,
-    (value: unknown): value is readonly t.TypeOf<typeof decoder>[] =>
+    (value: unknown): value is readonly A[] =>
       Array.isArray(value) && value.every((e) => decoder.is(e)),
     (input /* , context */) =>
       t.readonlyArray(decoder).decode(
