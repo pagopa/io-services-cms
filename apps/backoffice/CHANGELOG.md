@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.11.7
+
+### Patch Changes
+
+- 260da22: set new CMS headers needed for handling Selfcare Groups
+
 ## 1.11.6
 
 ### Patch Changes
