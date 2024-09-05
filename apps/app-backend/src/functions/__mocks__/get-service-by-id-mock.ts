@@ -17,7 +17,7 @@ import {
 export const buildCosmosDbServiceDetails = (
   require_secure_channel: boolean,
 ): CosmosDbServiceDetails => ({
-  cms_modified_at: 1,
+  cms_last_update_ts: 1,
   description: "aServiceDescription" as NonEmptyString,
   id: "aServiceId" as NonEmptyString,
   kind: "publication",

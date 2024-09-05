@@ -23,7 +23,7 @@ export type RequestDetailItem = t.TypeOf<typeof RequestDetailItem>;
 export const RequestDetailItem = t.intersection([
   Service,
   t.type({
-    cms_modified_at: t.Integer, // this will be used to value the version field on the serviceDetails(pp-backend api)
+    cms_last_update_ts: t.Integer, // this will be used to value the version field on the serviceDetails(pp-backend api)
     kind: t.union([t.literal("publication"), t.literal("lifecycle")]),
   }),
 ]);

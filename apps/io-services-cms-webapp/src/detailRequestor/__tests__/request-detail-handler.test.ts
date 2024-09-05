@@ -45,7 +45,7 @@ const aGenericPublicationItemType = {
     state: "published",
   },
   kind: "publication",
-  cms_modified_at: 1234567890,
+  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const aGenericLifecycleItemType = {
@@ -72,7 +72,7 @@ const aGenericLifecycleItemType = {
     state: "draft",
   },
   kind: "lifecycle",
-  cms_modified_at: 1234567890,
+  cms_last_update_ts: 1234567890,
 } as unknown as Queue.RequestDetailItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
@@ -164,8 +164,8 @@ describe("Service Detail Handler", () => {
         aGenericPublicationItemType.data.metadata
       );
       expect(res.right.kind).toBe(aGenericPublicationItemType.kind);
-      expect(res.right.cms_modified_at).toBe(
-        aGenericPublicationItemType.cms_modified_at
+      expect(res.right.cms_last_update_ts).toBe(
+        aGenericPublicationItemType.cms_last_update_ts
       );
     } else {
       assert.fail("Expected right");

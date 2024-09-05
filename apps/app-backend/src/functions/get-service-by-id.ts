@@ -95,7 +95,7 @@ export const toApiResponseServiceDetails = (
   metadata: toApiResponseServiceMetadata(cosmosDbServiceDetail.metadata),
   name: cosmosDbServiceDetail.name,
   organization: cosmosDbServiceDetail.organization,
-  version: cosmosDbServiceDetail.cms_modified_at,
+  version: cosmosDbServiceDetail.cms_last_update_ts,
 });
 
 // TODO: in MVP0 we are not mapping the topic conversion

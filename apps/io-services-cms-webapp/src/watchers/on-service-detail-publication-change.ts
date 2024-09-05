@@ -23,7 +23,7 @@ const onDetailPublicationHandler = ({
   requestDetailPublication: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_modified_at: modified_at ?? _ts,
+    cms_last_update_ts: modified_at ?? _ts,
     kind: "publication",
   },
 });

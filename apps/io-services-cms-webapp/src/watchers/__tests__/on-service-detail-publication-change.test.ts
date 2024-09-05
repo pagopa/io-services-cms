@@ -29,7 +29,7 @@ describe("On Service Detail Publication Change Handler", () => {
   it.each`
     scenario                        | item                                                             | expected
     ${"no-action"}                  | ${{ ...aService, fsm: { state: "unpublished" } }}                | ${{}}
-    ${"request-detail-publication"} | ${{ ...aService, fsm: { state: "published" }, _ts: 1234567890 }} | ${{ requestDetailPublication: { ...aService, fsm: { state: "published" }, kind: "publication", cms_modified_at: 1234567890 } }}
+    ${"request-detail-publication"} | ${{ ...aService, fsm: { state: "published" }, _ts: 1234567890 }} | ${{ requestDetailPublication: { ...aService, fsm: { state: "published" }, kind: "publication", cms_last_update_ts: 1234567890 } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();
