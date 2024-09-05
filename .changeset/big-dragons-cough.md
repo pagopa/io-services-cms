@@ -1,7 +1,6 @@
 ---
 "@io-services-cms/models": minor
 "io-services-cms-webapp": minor
-"io-services-app-backend": patch
 "io-services-cms-backoffice": patch
 ---
 
