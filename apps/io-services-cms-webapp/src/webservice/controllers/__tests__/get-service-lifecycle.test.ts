@@ -1,6 +1,7 @@
 import { Container } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
+  DateUtils,
   ServiceLifecycle,
   ServicePublication,
   stores,
@@ -156,7 +157,7 @@ describe("getServiceLifecycle", () => {
       },
       require_secure_channel: false,
     },
-    modified_at: 1234567890,
+    modified_at: DateUtils.unixTimestamp(),
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should fail when cannot find requested service", async () => {

@@ -1,5 +1,6 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
+  DateUtils,
   LegacyServiceCosmosResource,
   ServiceLifecycle,
   ServicePublication,
@@ -49,7 +50,7 @@ const aLegacyService = {
     webUrl: "aWebUrl",
     version: 1,
   },
-  _ts: 123456789,
+  _ts: DateUtils.unixTimestampInSeconds(),
 } as unknown as LegacyServiceCosmosResource;
 
 const aServiceLifecycleItem: ServiceLifecycle.ItemType = {
@@ -143,7 +144,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
-            modified_at: aLegacyService._ts,
+            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts),
           },
         ],
       });
@@ -186,7 +187,7 @@ describe("On Legacy Service Change Handler", () => {
               state: "deleted",
             },
             kind: "LifecycleItemType",
-            modified_at: aLegacyService._ts,
+            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts),
           },
         ],
       });
@@ -270,12 +271,12 @@ describe("On Legacy Service Change Handler", () => {
           {
             ...aServiceLifecycleItem,
             kind: "LifecycleItemType",
-            modified_at: aLegacyService._ts,
+            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts),
           },
           {
             ...aServicePublicationItem,
             kind: "PublicationItemType",
-            modified_at: aLegacyService._ts,
+            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts),
           },
         ],
       });

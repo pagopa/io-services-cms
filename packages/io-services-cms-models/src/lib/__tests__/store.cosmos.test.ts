@@ -1,11 +1,15 @@
-import { Container, ItemResponse } from "@azure/cosmos";
+import { Container } from "@azure/cosmos";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vi } from "vitest";
 import { ServiceLifecycle, ServicePublication } from "../..";
+import {
+  unixSecondsToMillis,
+  unixTimestamp,
+  unixTimestampInSeconds,
+} from "../../utils/date-utils";
 import { createCosmosStore } from "../fsm/store.cosmos";
-import { last } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
 const anItem = {
   id: "anItemId" as NonEmptyString,
@@ -27,15 +31,15 @@ const anItem = {
 
 describe("store cosmos tests", () => {
   it("result should be some on fetch having status 200", async () => {
-    const recordCosmosTs = 1687787624;
-    const recordLastUpdateTs = 1787787624;
+    const recordCosmosTs = unixTimestampInSeconds();
+    const recordModifiedAt = unixTimestamp();
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
         read: vi.fn().mockResolvedValue({
           statusCode: 200,
           resource: {
             ...anItem,
-            modified_at: recordLastUpdateTs,
+            modified_at: recordModifiedAt,
             _ts: recordCosmosTs,
             _etag: "anEtag",
           },
@@ -52,7 +56,7 @@ describe("store cosmos tests", () => {
       expect(O.isSome(result.right)).toBeTruthy();
       if (O.isSome(result.right)) {
         expect(result.right.value).toHaveProperty("modified_at");
-        expect(result.right.value.modified_at).toBe(recordLastUpdateTs);
+        expect(result.right.value.modified_at).toBe(recordModifiedAt);
         expect(result.right.value).toHaveProperty("version");
         expect(result.right.value.version).toBe("anEtag");
       }
@@ -60,7 +64,7 @@ describe("store cosmos tests", () => {
   });
 
   it("result should be some on fetch having status 200 and having modified_at valued with _ts in case is missing", async () => {
-    const recordCosmosTs = 1687787624;
+    const recordCosmosTs = unixTimestampInSeconds();
 
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
@@ -80,7 +84,9 @@ describe("store cosmos tests", () => {
       expect(O.isSome(result.right)).toBeTruthy();
       if (O.isSome(result.right)) {
         expect(result.right.value).toHaveProperty("modified_at");
-        expect(result.right.value.modified_at).toBe(recordCosmosTs);
+        expect(result.right.value.modified_at).toBe(
+          unixSecondsToMillis(recordCosmosTs),
+        );
         expect(result.right.value).toHaveProperty("version");
         expect(result.right.value.version).toBe("anEtag");
       }
@@ -92,7 +98,11 @@ describe("store cosmos tests", () => {
       item: vi.fn((a: string, b: string) => ({
         read: vi.fn().mockResolvedValue({
           statusCode: 404,
-          resource: { ...anItem, _ts: 1687787624, _etag: "anEtag" },
+          resource: {
+            ...anItem,
+            _ts: unixTimestampInSeconds(),
+            _etag: "anEtag",
+          },
         }),
       })),
     } as unknown as Container;
@@ -110,7 +120,10 @@ describe("store cosmos tests", () => {
     const containerMock = {
       item: vi.fn((a: string, b: string) => ({
         read: vi.fn().mockResolvedValue({
-          resource: { bad_prop_one: "bad_prop_one", _ts: 1687787624 },
+          resource: {
+            bad_prop_one: "bad_prop_one",
+            _ts: unixTimestampInSeconds(),
+          },
           statusCode: 200,
         }),
       })),
@@ -123,8 +136,8 @@ describe("store cosmos tests", () => {
   });
 
   it("result should contain some on bulkFetch elements have status 200", async () => {
-    const recordCosmosTs = 1687787624;
-    const recordLastUpdateTs = 1787787624;
+    const recordCosmosTs = unixTimestampInSeconds();
+    const recordModifiedAt = unixTimestamp();
     const bulkFetchResult = [
       {
         resourceBody: {
@@ -139,7 +152,7 @@ describe("store cosmos tests", () => {
         resourceBody: {
           ...anItem,
           id: "anItemId2" as NonEmptyString,
-          modified_at: recordLastUpdateTs,
+          modified_at: recordModifiedAt,
           _ts: recordCosmosTs,
           _etag: "anEtag2",
         },
@@ -164,7 +177,9 @@ describe("store cosmos tests", () => {
       expect(O.isSome(result.right[0])).toBeTruthy();
       if (O.isSome(result.right[0])) {
         expect(result.right[0].value).toHaveProperty("modified_at");
-        expect(result.right[0].value.modified_at).toBe(recordCosmosTs);
+        expect(result.right[0].value.modified_at).toBe(
+          unixSecondsToMillis(recordCosmosTs),
+        );
         expect(result.right[0].value).toHaveProperty("version");
         expect(result.right[0].value.version).toBe("anEtag");
       }
@@ -173,7 +188,7 @@ describe("store cosmos tests", () => {
       expect(O.isSome(result.right[1])).toBeTruthy();
       if (O.isSome(result.right[1])) {
         expect(result.right[1].value).toHaveProperty("modified_at");
-        expect(result.right[1].value.modified_at).toBe(recordLastUpdateTs);
+        expect(result.right[1].value.modified_at).toBe(recordModifiedAt);
         expect(result.right[1].value).toHaveProperty("version");
         expect(result.right[1].value.version).toBe("anEtag2");
       }
@@ -210,7 +225,7 @@ describe("store cosmos tests", () => {
       {
         resourceBody: {
           ...anItem,
-          _ts: 1687787624,
+          _ts: unixTimestampInSeconds(),
           _etag: "anEtag",
         },
         statusCode: 200,
@@ -238,7 +253,7 @@ describe("store cosmos tests", () => {
       {
         resourceBody: {
           bad_prop: "bad prop",
-          _ts: 1687787624,
+          _ts: unixTimestampInSeconds(),
           _etag: "anEtag",
         },
         statusCode: 200,
@@ -263,8 +278,8 @@ describe("store cosmos tests", () => {
   it("result save the element", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
-    const aTs = 1687787624;
-    const aLastUpdateTs = 1787787624;
+    const aTs = unixTimestampInSeconds();
+    const previousModifiedAt = unixTimestamp() - 20000;
     const anItemToBeSaved = {
       data: {
         name: "a service",
@@ -280,14 +295,21 @@ describe("store cosmos tests", () => {
         authorized_cidrs: [],
       },
       fsm: { state: "approved" },
+      modified_at: previousModifiedAt,
     } as unknown as ServiceLifecycle.ItemType;
 
     const containerMock = {
       items: {
-        upsert: vi.fn().mockResolvedValue({
-          statusCode: 200,
-          resource: { _ts: aTs, _etag: anEtag },
-          etag: anEtag,
+        upsert: vi.fn().mockImplementation((input) => {
+          return Promise.resolve({
+            statusCode: 200,
+            resource: {
+              _ts: aTs,
+              _etag: anEtag,
+              modified_at: input.modified_at,
+            },
+            etag: anEtag,
+          });
         }),
       },
     } as unknown as Container;
@@ -295,8 +317,6 @@ describe("store cosmos tests", () => {
     const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
 
     const result = await store.save(anItemId, anItemToBeSaved)();
-
-    console.log(result);
 
     expect(containerMock.items.upsert).toBeCalledTimes(1);
     expect(containerMock.items.upsert).toBeCalledWith({
@@ -307,6 +327,8 @@ describe("store cosmos tests", () => {
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(result.right).toHaveProperty("modified_at");
+      // save method will replace the previous modified_at with the current timestamp, so should be greater than the previous
+      expect(result.right.modified_at).toBeGreaterThan(previousModifiedAt);
       expect(result.right).toHaveProperty("version");
       expect(result.right.version).toBe(anEtag);
     }

@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { Queue, ServiceHistory } from "@io-services-cms/models";
+import { DateUtils, Queue, ServiceHistory } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { Json } from "io-ts-types";
@@ -16,7 +16,7 @@ const createContext = () =>
     log: { ...console, verbose: console.log },
   }) as unknown as Context;
 
-const atimestamp = 1685529694;
+const atimestamp = DateUtils.unixTimestamp();
 const aGenericItemType = {
   id: "aServiceId",
   data: {

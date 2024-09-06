@@ -28,7 +28,7 @@ export const buildRequestHistoricizationQueueMessage = ({
   | ServicePublication.CosmosResource): Queue.RequestHistoricizationItem => ({
   ...otherProps,
   // eslint-disable-next-line no-underscore-dangle
-  modified_at: modified_at ?? _ts, // when the service-lifecycle/service-publication record lack of modified_at, the _ts value is used
+  modified_at: modified_at ?? DateUtils.unixSecondsToMillis(_ts), // when the service-lifecycle/service-publication record lack of modified_at, the _ts value is used
   // eslint-disable-next-line no-underscore-dangle
   version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle/service-publication record
 });

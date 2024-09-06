@@ -12,7 +12,7 @@ import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { unixTimestamp } from "../../utils/date-utils";
+import { unixSecondsToMillis, unixTimestamp } from "../../utils/date-utils";
 import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
@@ -45,7 +45,11 @@ export const createCosmosStore = <
               {
                 ...rr.resource,
                 // eslint-disable-next-line no-underscore-dangle
-                modified_at: rr.resource?.modified_at ?? rr.resource?._ts,
+                modified_at:
+                  rr.resource?.modified_at ??
+                  (rr.resource?._ts
+                    ? unixSecondsToMillis(rr.resource._ts)
+                    : unixTimestamp()),
                 version: rr.etag,
               },
               codec.decode,
@@ -93,7 +97,10 @@ export const createCosmosStore = <
                 {
                   ...res.resourceBody,
                   modified_at:
-                    res.resourceBody?.modified_at ?? res.resourceBody?._ts,
+                    res.resourceBody?.modified_at ??
+                    (res.resourceBody?._ts
+                      ? unixSecondsToMillis(res.resourceBody._ts as number)
+                      : unixTimestamp()),
                   version: res.eTag,
                 },
                 codec.decode,
@@ -128,7 +135,10 @@ export const createCosmosStore = <
       TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
         modified_at:
-          itemResponse.resource?.modified_at ?? itemResponse.resource?._ts,
+          itemResponse.resource?.modified_at ??
+          (itemResponse.resource?._ts
+            ? unixSecondsToMillis(itemResponse.resource._ts)
+            : unixTimestamp()),
         version: itemResponse.etag,
       })),
     );

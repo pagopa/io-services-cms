@@ -22,20 +22,21 @@ const aServicePublicationCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: DateUtils.unixTimestamp(),
+  _ts: DateUtils.unixTimestampInSeconds(),
   _etag: "aServiceEtag",
 } as unknown as ServicePublication.CosmosResource;
 
 const { _ts, _etag, ...aService } = aServicePublicationCosmosResource;
 const expectedVersion = _etag;
-const aLastUpdateTs = DateUtils.unixTimestamp();
+const expectedTsModifiedAt = DateUtils.unixSecondsToMillis(_ts);
+const aModifiedAt = DateUtils.unixTimestamp();
 
 describe("On Service Publication Change Handler", () => {
   it.each`
     scenario                     | item                                                                                                    | expected
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: _ts, fsm: { state: "unpublished" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: _ts, fsm: { state: "published" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, modified_at: aLastUpdateTs }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: aLastUpdateTs, fsm: { state: "published" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "unpublished" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "published" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, modified_at: aModifiedAt }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: aModifiedAt, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();
     expect(E.isRight(res)).toBeTruthy();

@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { LegacyServiceCosmosResource, Queue } from "@io-services-cms/models";
+import {
+  DateUtils,
+  LegacyServiceCosmosResource,
+  Queue,
+} from "@io-services-cms/models";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
@@ -91,7 +95,7 @@ const fromLegacyToCmsService = (
     status === "published" || status === "unpublished"
       ? "PublicationItemType"
       : "LifecycleItemType",
-  modified_at: service._ts,
+  modified_at: DateUtils.unixSecondsToMillis(service._ts),
 });
 
 const getDescription = (service: LegacyServiceCosmosResource) =>

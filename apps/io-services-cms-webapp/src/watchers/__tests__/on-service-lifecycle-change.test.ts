@@ -24,7 +24,7 @@ const aServiceLifecycleCosmosResource = {
     },
     require_secure_channel: false,
   },
-  _ts: DateUtils.unixTimestamp(),
+  _ts: DateUtils.unixTimestampInSeconds(),
   _etag: "aServiceEtag",
 } as unknown as ServiceLifecycle.CosmosResource;
 
@@ -39,17 +39,17 @@ const aPublicationService = {
 } as unknown as ServicePublication.ItemType;
 
 const expectedHistoricization = {
-  modified_at: _ts,
+  modified_at: DateUtils.unixSecondsToMillis(_ts),
   version: _etag,
 };
 
-const aLastUpdateTs = DateUtils.unixTimestamp();
+const aModifiedAt = DateUtils.unixTimestamp();
 
 describe("On Service Lifecycle Change Handler", () => {
   it.each`
     scenario                                        | item                                                                                                    | expected
     ${"request-review"}                             | ${{ ...aServiceLifecycleCosmosResource, version: "aVersion", fsm: { state: "submitted" } }}             | ${{ requestReview: { ...aService, version: expectedHistoricization.version }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "submitted" } } }}
-    ${"no-op (empty object)"}                       | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" }, modified_at: aLastUpdateTs }}       | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, modified_at: aLastUpdateTs, fsm: { state: "draft" } } }}
+    ${"no-op (empty object)"}                       | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" }, modified_at: aModifiedAt }}       | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, modified_at: aModifiedAt, fsm: { state: "draft" } } }}
     ${"no-op (empty object) modified_at valued"} | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "draft" } }}                                      | ${{ requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "draft" } } }}
     ${"request-publication"}                        | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved", autoPublish: true } }}                | ${{ requestPublication: { ...aPublicationService, autoPublish: true }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved", autoPublish: true } } }}
     ${"request-publication-with-no-autopublish"}    | ${{ ...aServiceLifecycleCosmosResource, fsm: { state: "approved" } }}                                   | ${{ requestPublication: { ...aPublicationService, autoPublish: false }, requestHistoricization: { ...aService, ...expectedHistoricization, fsm: { state: "approved" } } }}

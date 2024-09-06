@@ -110,29 +110,6 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
-const aServicePub = {
-  id: "aServiceId",
-  data: {
-    name: "aServiceName",
-    description: "aServiceDescription",
-    authorized_recipients: [],
-    max_allowed_payment_amount: 123,
-    metadata: {
-      address: "via tal dei tali 123",
-      email: "service@email.it",
-      pec: "service@pec.it",
-      scope: "LOCAL",
-      topic_id: 1,
-    },
-    organization: {
-      name: "anOrganizationName",
-      fiscal_code: "12345678901",
-    },
-    require_secure_channel: false,
-    modified_at: 1234567890,
-  },
-} as unknown as ServicePublication.ItemType;
-
 const mockAppinsights = {
   trackEvent: vi.fn(),
   trackError: vi.fn(),
