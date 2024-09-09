@@ -50,7 +50,7 @@ export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
     id,
     status: toServiceStatus(fsm),
     last_update: modified_at
-      ? (DateUtils.isoStringfromUnixTimestamp(modified_at) as NonEmptyString)
+      ? (DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString)
       : new Date().toISOString(),
     name: data.name,
     description: data.description,
