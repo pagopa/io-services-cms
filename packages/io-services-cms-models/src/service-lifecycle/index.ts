@@ -463,6 +463,7 @@ function apply(
 function override(
   id: ItemType["id"],
   item: ItemType,
+  preserveModifiedAt = false,
 ): ReaderTaskEither<LifecycleStore, Error, ItemType> {
   return (store) =>
     pipe(
@@ -479,7 +480,7 @@ function override(
           TE.fromEither,
         ),
       ),
-      TE.chain((_) => saveItem(store)(id, item)),
+      TE.chain((_) => saveItem(store)(id, item, preserveModifiedAt)),
     );
 }
 
@@ -489,11 +490,19 @@ export const getAutoPublish = (service: ItemType): boolean =>
 // method to save a "normalized" item in the store
 const saveItem =
   (store: LifecycleStore) =>
-  (id: NonEmptyString, item: ItemType): TE.TaskEither<Error, ItemType> =>
-    store.save(id, {
-      ...item,
-      data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
-    });
+  (
+    id: NonEmptyString,
+    item: ItemType,
+    preserveModifiedAt = false,
+  ): TE.TaskEither<Error, ItemType> =>
+    store.save(
+      id,
+      {
+        ...item,
+        data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
+      },
+      preserveModifiedAt,
+    );
 
 const getFsmClient = (store: LifecycleStore) => ({
   approve: (id: ServiceId, args: { approvalDate: string }) =>

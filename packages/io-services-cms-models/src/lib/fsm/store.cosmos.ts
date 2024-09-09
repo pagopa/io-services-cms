@@ -112,18 +112,18 @@ export const createCosmosStore = <
       ),
     );
 
-  const save = (id: string, value: T) =>
+  const save = (id: string, value: T, preserveModifiedAt = false) =>
     pipe(
       value,
       // last_update is not part of the value to save
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ({ last_update, version, ...valueToSave }) =>
+      ({ last_update, modified_at, version, ...valueToSave }) =>
         TE.tryCatch(
           () =>
             container.items.upsert({
               ...valueToSave,
               id,
-              modified_at: unixTimestamp(),
+              modified_at: preserveModifiedAt ? modified_at : unixTimestamp(),
             }),
           (err) =>
             new Error(

@@ -78,6 +78,7 @@ const aBaseServicePublicationItem = {
     authorized_cidrs: [],
   },
   fsm: { state: "published" },
+  modified_at: DateUtils.unixTimestamp(),
 } as unknown as Queue.RequestSyncCmsItem;
 
 const aServicePublicationItem = {
@@ -177,6 +178,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 
@@ -202,6 +204,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 
@@ -229,6 +232,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
 
     expect(mockFsmLifecycleClient.override).toBeCalledTimes(1);
@@ -241,6 +245,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 
@@ -331,6 +336,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 
@@ -383,6 +389,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
 
     expect(mockFsmLifecycleNoItemClient.override).toBeCalledTimes(1);
@@ -402,6 +409,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 
@@ -443,6 +451,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
 
     expect(mockFsmLifecycleClient.override).toBeCalledTimes(1);
@@ -455,6 +464,7 @@ describe("Sync CMS Handler", () => {
           lastTransition: SYNC_FROM_LEGACY,
         },
       },
+      true, // preserveModifiedAt
     );
   });
 });

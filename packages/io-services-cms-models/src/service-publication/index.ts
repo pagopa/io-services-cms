@@ -408,6 +408,7 @@ function apply(
 function override(
   id: ItemType["id"],
   item: ItemType,
+  preserveModifiedAt = false,
 ): ReaderTaskEither<PublicationStore, Error, ItemType> {
   return (store) =>
     pipe(
@@ -427,7 +428,7 @@ function override(
           TE.fromEither,
         ),
       ),
-      TE.chain((_) => saveItem(store)(id, item)),
+      TE.chain((_) => saveItem(store)(id, item, preserveModifiedAt)),
     );
 }
 
@@ -479,11 +480,19 @@ function release(
 // as the only service publication entrypoint will be the copy on approval fro lifecycle
 const saveItem =
   (store: PublicationStore) =>
-  (id: NonEmptyString, item: ItemType): TE.TaskEither<Error, ItemType> =>
-    store.save(id, {
-      ...item,
-      data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
-    });
+  (
+    id: NonEmptyString,
+    item: ItemType,
+    preserveModifiedAt = false,
+  ): TE.TaskEither<Error, ItemType> =>
+    store.save(
+      id,
+      {
+        ...item,
+        data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
+      },
+      preserveModifiedAt,
+    );
 
 const getFsmClient = (store: PublicationStore) => ({
   getStore: () => store,

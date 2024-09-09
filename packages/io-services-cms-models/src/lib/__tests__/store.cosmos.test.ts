@@ -334,6 +334,65 @@ describe("store cosmos tests", () => {
     }
   });
 
+  it("result save the element preserving modifiedAt", async () => {
+    const anItemId = "anItemId";
+    const anEtag = "anEtag";
+    const aTs = unixTimestampInSeconds();
+    const previousModifiedAt = unixTimestamp() - 20000;
+    const anItemToBeSaved = {
+      data: {
+        name: "a service",
+        description: "a description",
+        organization: {
+          name: "org",
+          fiscal_code: "00000000000",
+        },
+        metadata: {
+          scope: "LOCAL",
+        },
+        authorized_recipients: ["AAAAAA00A00A000A"],
+        authorized_cidrs: [],
+      },
+      fsm: { state: "approved" },
+      modified_at: previousModifiedAt,
+    } as unknown as ServiceLifecycle.ItemType;
+
+    const containerMock = {
+      items: {
+        upsert: vi.fn().mockImplementation((input) => {
+          return Promise.resolve({
+            statusCode: 200,
+            resource: {
+              _ts: aTs,
+              _etag: anEtag,
+              modified_at: input.modified_at,
+            },
+            etag: anEtag,
+          });
+        }),
+      },
+    } as unknown as Container;
+
+    const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+    const result = await store.save(anItemId, anItemToBeSaved, true)();
+
+    expect(containerMock.items.upsert).toBeCalledTimes(1);
+    expect(containerMock.items.upsert).toBeCalledWith({
+      ...anItemToBeSaved,
+      modified_at: expect.any(Number),
+      id: anItemId,
+    });
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toHaveProperty("modified_at");
+      // save method should not replace the modified_at field with the current timestamp, so should be equal
+      expect(result.right.modified_at).toEqual(previousModifiedAt);
+      expect(result.right).toHaveProperty("version");
+      expect(result.right.version).toBe(anEtag);
+    }
+  });
+
   it("should delete the element", async () => {
     const anItemId = "anItemId";
     const anEtag = "anEtag";
