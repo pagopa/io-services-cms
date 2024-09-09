@@ -23,6 +23,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+const apiGetNotFoundServiceKeysFullPath =
+  "/api/services/aNotFoundServiceId/keys";
 const apiGetDeletedServiceKeysFullPath = "/api/services/aDeletedServiceId/keys";
 const apiGetServiceKeysFullPath = "/api/services/aServiceId/keys";
 const aManageSubscriptionId = "MANAGE-123";
@@ -158,7 +160,27 @@ describe("getServiceKeys", () => {
 
   setAppContext(app, mockContext);
 
+  it("should return 404 when service is not found", async () => {
+    const response = await request(app)
+      .get(apiGetNotFoundServiceKeysFullPath)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", userId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockApimService.listSecrets).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(response.statusCode).toBe(404);
+  });
+
   it("should return 404 when service is Deleted", async () => {
+    await serviceLifecycleStore.save("aDeletedServiceId", {
+      ...aServiceLifecycle,
+      id: "s1" as NonEmptyString,
+      fsm: { state: "deleted" },
+    })();
+
     const response = await request(app)
       .get(apiGetDeletedServiceKeysFullPath)
       .send()
