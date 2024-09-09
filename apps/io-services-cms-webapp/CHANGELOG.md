@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.32.6
+
+### Patch Changes
+
+- 8c7f468: fix BACKOFFICE_INTERNAL_SUBNET_CIDRS type
+
 ## 1.32.5
 
 ### Patch Changes
