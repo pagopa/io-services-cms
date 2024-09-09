@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { DateUtils, ServiceLifecycle } from "@io-services-cms/models";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
@@ -32,7 +32,7 @@ const aBaseQueueMessage = {
 };
 const aBaseServiceLifecycle = {
   id: "aServiceId",
-  last_update: "aServiceLastUpdate",
+  modified_at: DateUtils.unixTimestamp(),
   data: {
     name: "aServiceName",
     description: "aServiceDescription",

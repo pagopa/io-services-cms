@@ -12,6 +12,7 @@ import * as TE from "fp-ts/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { unixSecondsToMillis, unixTimestamp } from "../../utils/date-utils";
 import { FSMStore, WithState } from "./types";
 
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
@@ -44,7 +45,11 @@ export const createCosmosStore = <
               {
                 ...rr.resource,
                 // eslint-disable-next-line no-underscore-dangle
-                last_update: new Date(rr.resource._ts * 1000).toISOString(), // Unix timestamp
+                modified_at:
+                  rr.resource?.modified_at ??
+                  (rr.resource?._ts
+                    ? unixSecondsToMillis(rr.resource._ts)
+                    : unixTimestamp()),
                 version: rr.etag,
               },
               codec.decode,
@@ -91,12 +96,11 @@ export const createCosmosStore = <
               pipe(
                 {
                   ...res.resourceBody,
-                  last_update: res.resourceBody
-                    ? new Date(
-                        // eslint-disable-next-line no-underscore-dangle
-                        (res.resourceBody._ts as number) * 1000,
-                      ).toISOString() // Unix timestamp
-                    : new Date().toISOString(),
+                  modified_at:
+                    res.resourceBody?.modified_at ??
+                    (res.resourceBody?._ts
+                      ? unixSecondsToMillis(res.resourceBody._ts as number)
+                      : unixTimestamp()),
                   version: res.eTag,
                 },
                 codec.decode,
@@ -108,14 +112,19 @@ export const createCosmosStore = <
       ),
     );
 
-  const save = (id: string, value: T) =>
+  const save = (id: string, value: T, preserveModifiedAt = false) =>
     pipe(
       value,
       // last_update is not part of the value to save
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      ({ last_update, version, ...valueToSave }) =>
+      ({ last_update, modified_at, version, ...valueToSave }) =>
         TE.tryCatch(
-          () => container.items.upsert({ ...valueToSave, id }),
+          () =>
+            container.items.upsert({
+              ...valueToSave,
+              id,
+              modified_at: preserveModifiedAt ? modified_at : unixTimestamp(),
+            }),
           (err) =>
             new Error(
               `Failed to save item id#${id} from database, ${
@@ -125,10 +134,11 @@ export const createCosmosStore = <
         ),
       TE.map((itemResponse: ItemResponse<ItemDefinition>) => ({
         ...value,
-        last_update: itemResponse.resource
-          ? // eslint-disable-next-line no-underscore-dangle
-            new Date(itemResponse.resource._ts * 1000).toISOString() // Unix timestamp
-          : undefined,
+        modified_at:
+          itemResponse.resource?.modified_at ??
+          (itemResponse.resource?._ts
+            ? unixSecondsToMillis(itemResponse.resource._ts)
+            : unixTimestamp()),
         version: itemResponse.etag,
       })),
     );

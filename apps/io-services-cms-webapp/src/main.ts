@@ -1,6 +1,6 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
-  LegacyService,
+  LegacyServiceCosmosResource,
   ServiceHistory,
   ServiceLifecycle,
   ServicePublication,
@@ -297,7 +297,7 @@ export const onServicePublicationChangeEntryPoint = pipe(
 
 export const onLegacyServiceChangeEntryPoint = pipe(
   onLegacyServiceChangeHandler(config, apimService, legacyServiceModel),
-  processBatchOf(LegacyService, { parallel: false }),
+  processBatchOf(LegacyServiceCosmosResource, { parallel: false }),
   setBindings((results) => ({
     requestSyncCms: pipe(
       results,

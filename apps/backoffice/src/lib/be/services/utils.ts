@@ -9,7 +9,11 @@ import {
 import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
-import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
+import {
+  DateUtils,
+  ServiceLifecycle,
+  ServicePublication
+} from "@io-services-cms/models";
 import {
   NonEmptyString,
   OrganizationFiscalCode
@@ -39,13 +43,15 @@ export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
   fsm,
   data,
   id,
-  last_update
+  modified_at
 }: ServiceLifecycle.ItemType): ServiceListItem => {
   const { topic_id, ...otherMetadata } = data.metadata;
   return {
     id,
     status: toServiceStatus(fsm),
-    last_update: last_update ?? new Date().toISOString(),
+    last_update: modified_at
+      ? (DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString)
+      : new Date().toISOString(),
     name: data.name,
     description: data.description,
     organization: data.organization,

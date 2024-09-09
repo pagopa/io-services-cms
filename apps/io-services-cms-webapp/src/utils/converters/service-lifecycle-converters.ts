@@ -1,4 +1,4 @@
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { DateUtils, ServiceLifecycle } from "@io-services-cms/models";
 import {
   IResponseErrorInternal,
   ResponseErrorInternal,
@@ -65,7 +65,7 @@ export const itemToResponse =
     },
     fsm,
     id,
-    last_update,
+    modified_at,
   }: ServiceLifecycle.ItemType): TE.TaskEither<
     IResponseErrorInternal,
     ServiceResponsePayload
@@ -76,7 +76,9 @@ export const itemToResponse =
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
           id,
-          last_update: last_update ?? new Date().getTime().toString(),
+          last_update: modified_at
+            ? DateUtils.isoStringfromUnixMillis(modified_at)
+            : new Date().toISOString(),
           status: toServiceStatus(fsm),
           ...data,
           metadata: {

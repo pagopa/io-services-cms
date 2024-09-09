@@ -1,4 +1,5 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
@@ -37,6 +38,7 @@ const mocks: {
   statusOK: number;
   statusNoContent: number;
   aSamplePayload: { test: string };
+  aModificationDate: Date;
   aBaseServiceLifecycle: ServiceLifecycle.ItemType;
   anUserId: string;
   anInstitution: Institution;
@@ -44,81 +46,85 @@ const mocks: {
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
   aServiceTopicsListResponse: ServiceTopicList;
-} = vi.hoisted(() => ({
-  statusOK: 200,
-  statusNoContent: 204,
-  aSamplePayload: { test: "test" },
-  aBaseServiceLifecycle: ({
-    id: "aServiceId",
-    last_update: "aServiceLastUpdate",
-    data: {
-      name: "aServiceName",
-      description: "aServiceDescription",
-      authorized_recipients: [],
-      authorized_cidrs: [],
-      max_allowed_payment_amount: 123,
-      metadata: {
-        address: "via tal dei tali 123",
-        email: "service@email.it",
-        pec: "service@pec.it",
-        scope: "LOCAL"
+} = vi.hoisted(() => {
+  const aModificationDate = new Date();
+  return {
+    statusOK: 200,
+    statusNoContent: 204,
+    aSamplePayload: { test: "test" },
+    aModificationDate,
+    aBaseServiceLifecycle: ({
+      id: "aServiceId",
+      modified_at: aModificationDate.getTime(),
+      data: {
+        name: "aServiceName",
+        description: "aServiceDescription",
+        authorized_recipients: [],
+        authorized_cidrs: [],
+        max_allowed_payment_amount: 123,
+        metadata: {
+          address: "via tal dei tali 123",
+          email: "service@email.it",
+          pec: "service@pec.it",
+          scope: "LOCAL"
+        },
+        organization: {
+          name: "anOrganizationName",
+          fiscal_code: "12345678901"
+        },
+        require_secure_channel: false
       },
-      organization: {
-        name: "anOrganizationName",
-        fiscal_code: "12345678901"
+      fsm: {
+        state: "draft"
+      }
+    } as unknown) as ServiceLifecycle.ItemType,
+    anUserId: "anUserId",
+    anInstitution: {
+      id: "anInstitutionId",
+      name: "anInstitutionName",
+      fiscalCode: "12345678901",
+      role: "admin"
+    },
+    migrationItem: {
+      status: {
+        completed: 99,
+        failed: 7,
+        initial: 63,
+        processing: 94
       },
-      require_secure_channel: false
-    },
-    fsm: {
-      state: "draft"
-    }
-  } as unknown) as ServiceLifecycle.ItemType,
-  anUserId: "anUserId",
-  anInstitution: {
-    id: "anInstitutionId",
-    name: "anInstitutionName",
-    fiscalCode: "12345678901",
-    role: "admin"
-  },
-  migrationItem: {
-    status: {
-      completed: 99,
-      failed: 7,
-      initial: 63,
-      processing: 94
-    },
-    delegate: {
-      sourceId: "3ef50230-9c1f-4cf0-9f4d-af6c0dcf6288",
+      delegate: {
+        sourceId: "3ef50230-9c1f-4cf0-9f4d-af6c0dcf6288",
+        sourceName: "Name",
+        sourceSurname: "Surname",
+        sourceEmail: "test@email.test"
+      },
+      lastUpdate: "2023-05-05T14:25:49.277Z"
+    } as MigrationItem,
+    migrationData: {
+      status: {
+        completed: 31,
+        failed: 64,
+        initial: 31,
+        processing: 25
+      }
+    } as MigrationData,
+    migrationDelegate: {
+      sourceId: "c7fd5462-7fa2-4321-a4a4-237523445d1c",
       sourceName: "Name",
       sourceSurname: "Surname",
-      sourceEmail: "test@email.test"
-    },
-    lastUpdate: "2023-05-05T14:25:49.277Z"
-  } as MigrationItem,
-  migrationData: {
-    status: {
-      completed: 31,
-      failed: 64,
-      initial: 31,
-      processing: 25
-    }
-  } as MigrationData,
-  migrationDelegate: {
-    sourceId: "c7fd5462-7fa2-4321-a4a4-237523445d1c",
-    sourceName: "Name",
-    sourceSurname: "Surname",
-    sourceEmail: "test@test.test",
-    subscriptionCounter: 17
-  } as MigrationDelegate,
-  aServiceTopicsListResponse: {
-    topics: [
-      {
-        id: 1,
-        name: "Ambiente e animali"
-      }
-    ]
-  } as ServiceTopicList
-}));
+      sourceEmail: "test@test.test",
+      subscriptionCounter: 17
+    } as MigrationDelegate,
+    aServiceTopicsListResponse: {
+      topics: [
+        {
+          id: 1,
+          name: "Ambiente e animali"
+        }
+      ]
+    } as ServiceTopicList
+  };
+});
 
 const { getIoServicesCmsClient, getTopicsProvider } = vi.hoisted(() => ({
   getIoServicesCmsClient: vi.fn().mockReturnValue({
@@ -537,7 +543,7 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -557,7 +563,7 @@ describe("Services TEST", () => {
           {
             id: aServiceNotInPublicationId,
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -663,7 +669,7 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
@@ -877,7 +883,7 @@ describe("Services TEST", () => {
             id: aServiceInLifecycleId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: "aServiceLastUpdate",
+            last_update: mocks.aModificationDate.toISOString(),
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {

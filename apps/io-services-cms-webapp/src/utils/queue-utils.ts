@@ -16,7 +16,9 @@ export const parseIncomingMessage =
         flow(
           readableReport,
           (_) =>
-            new QueuePermanentError(`Error parsing incoming message: ${_}`),
+            new QueuePermanentError(
+              `Error parsing incoming message: ${_}, MessageContent: ${JSON.stringify(queueItem)}`,
+            ),
         ),
       ),
     );

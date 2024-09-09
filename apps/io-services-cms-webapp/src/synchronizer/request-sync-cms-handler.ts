@@ -4,7 +4,6 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as T from "fp-ts/lib/Task";
@@ -22,7 +21,7 @@ const toServiceLifecycle =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
-    { data, id }: Queue.RequestSyncCmsItem,
+    { data, id, modified_at }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -48,6 +47,7 @@ const toServiceLifecycle =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
         id,
+        modified_at,
       })),
     );
 
@@ -59,7 +59,7 @@ const toServicePublication =
   ) =>
   (
     state: ServicePublication.ItemType["fsm"]["state"],
-    { data, id }: Queue.RequestSyncCmsItem,
+    { data, id, modified_at }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -100,6 +100,7 @@ const toServicePublication =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
         id,
+        modified_at,
       })),
     );
 
@@ -113,12 +114,6 @@ export const handleQueueItem = (
   pipe(
     queueItem,
     parseIncomingMessage(Queue.RequestSyncCmsItems),
-    E.mapLeft(
-      (err) =>
-        new Error(
-          `Error while parsing incoming message, the reason was => ${err.message}`,
-        ),
-    ), // TODO: map as _permanent_ error
     TE.fromEither,
     TE.chainW((items) =>
       pipe(
@@ -136,6 +131,7 @@ export const handleQueueItem = (
               fsmLifecycleClient.override(
                 serviceLifecycle.id,
                 serviceLifecycle,
+                true, // this parameter will preserve the original legacy modified_at date of the item
               ),
             ),
             TE.map((_) => void 0),
@@ -160,6 +156,7 @@ export const handleQueueItem = (
                   fsmPublicationClient.override(
                     servicePublication.id,
                     servicePublication,
+                    true, // this parameter will preserve the original legacy modified_at date of the item
                   ),
                 ),
                 TE.map((_) => void 0),

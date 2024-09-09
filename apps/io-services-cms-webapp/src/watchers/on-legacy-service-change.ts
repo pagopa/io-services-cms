@@ -1,5 +1,9 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { LegacyService, Queue } from "@io-services-cms/models";
+import {
+  DateUtils,
+  LegacyServiceCosmosResource,
+  Queue,
+} from "@io-services-cms/models";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
@@ -21,17 +25,19 @@ type RequestSyncCmsAction = Action<
 
 const onLegacyServiceChangeHandler =
   (legacyServiceModel: ServiceModel) =>
-  (item: LegacyService): TE.TaskEither<Error, RequestSyncCmsAction> =>
+  (
+    item: LegacyServiceCosmosResource,
+  ): TE.TaskEither<Error, RequestSyncCmsAction> =>
     pipe(
       legacyToCms(item, legacyServiceModel),
       TE.map((docs) => ({ requestSyncCms: docs })),
     );
 
-const isDeletedService = (service: LegacyService) =>
+const isDeletedService = (service: LegacyServiceCosmosResource) =>
   service.serviceName.startsWith("DELETED");
 
 const getLegacyToCmsStatus = (
-  service: LegacyService,
+  service: LegacyServiceCosmosResource,
   wasPublished = false,
 ): Queue.RequestSyncCmsItem["fsm"]["state"][] => {
   if (isDeletedService(service)) {
@@ -46,7 +52,7 @@ const getLegacyToCmsStatus = (
 };
 
 const fromLegacyToCmsService = (
-  service: LegacyService,
+  service: LegacyServiceCosmosResource,
   status: Queue.RequestSyncCmsItem["fsm"]["state"],
 ): Queue.RequestSyncCmsItem => ({
   data: {
@@ -89,12 +95,16 @@ const fromLegacyToCmsService = (
     status === "published" || status === "unpublished"
       ? "PublicationItemType"
       : "LifecycleItemType",
+  modified_at: DateUtils.unixSecondsToMillis(service._ts),
 });
 
-const getDescription = (service: LegacyService) =>
+const getDescription = (service: LegacyServiceCosmosResource) =>
   service.serviceMetadata?.description ?? ("-" as NonEmptyString);
 
-const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
+const legacyToCms = (
+  item: LegacyServiceCosmosResource,
+  legacyServiceModel: ServiceModel,
+) =>
   pipe(
     item,
     O.fromPredicate((item) => !isDeletedService(item) && !item.isVisible),
@@ -110,7 +120,7 @@ const legacyToCms = (item: LegacyService, legacyServiceModel: ServiceModel) =>
 
 export const serviceWasPublished =
   (legacyServiceModel: ServiceModel) =>
-  (item: LegacyService): TE.TaskEither<Error, boolean> =>
+  (item: LegacyServiceCosmosResource): TE.TaskEither<Error, boolean> =>
     pipe(
       item,
       buildPreviousVersionId,
@@ -139,7 +149,7 @@ export const serviceWasPublished =
     );
 
 export const buildPreviousVersionId = (
-  item: LegacyService,
+  item: LegacyServiceCosmosResource,
 ): O.Option<NonEmptyString> => {
   if (item.version === 0) {
     return O.none;
@@ -160,7 +170,7 @@ export const handler =
     apimService: ApimUtils.ApimService,
     legacyServiceModel: ServiceModel,
   ): RTE.ReaderTaskEither<
-    { item: LegacyService },
+    { item: LegacyServiceCosmosResource },
     Error,
     NoAction | RequestSyncCmsAction
   > =>
