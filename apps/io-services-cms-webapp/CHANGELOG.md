@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.33.0
+
+### Minor Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+
+### Patch Changes
+
+- Updated dependencies [f41b5ae]
+  - @io-services-cms/models@1.20.0
+
 ## 1.32.6
 
 ### Patch Changes
