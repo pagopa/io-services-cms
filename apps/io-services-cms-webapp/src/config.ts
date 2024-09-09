@@ -7,6 +7,7 @@
 
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
 import {
   IntegerFromString,
@@ -220,7 +221,7 @@ export type ExternalStorageAccountConfiguration = t.TypeOf<
 >;
 
 export const BackofficeInternalSubnetCIDRs = t.type({
-  BACKOFFICE_INTERNAL_SUBNET_CIDRS: CommaSeparatedListOf(NonEmptyString),
+  BACKOFFICE_INTERNAL_SUBNET_CIDRS: CommaSeparatedListOf(CIDR),
 });
 export type BackofficeInternalSubnetCIDRs = t.TypeOf<
   typeof BackofficeInternalSubnetCIDRs
