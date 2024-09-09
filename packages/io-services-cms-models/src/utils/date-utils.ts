@@ -38,7 +38,7 @@ const unixSecondsToMillis = (unixSeconds: number): number => unixSeconds * 1000;
  * when not providing the `date` argument to the method call.
  *
  * @param {Date} date - The date to convert to UNIX timestamp
- * @returns {Number}
+ * @returns {Number} the timestamp expressed in milliseconds
  */
 const unixTimestamp = (date: Date = new Date()): number => date.getTime();
 
