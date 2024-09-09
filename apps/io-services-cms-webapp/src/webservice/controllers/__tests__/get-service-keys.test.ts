@@ -23,6 +23,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+const apiGetDeletedServiceKeysFullPath = "/api/services/aDeletedServiceId/keys";
 const apiGetServiceKeysFullPath = "/api/services/aServiceId/keys";
 const aManageSubscriptionId = "MANAGE-123";
 const userId = "123";
@@ -46,7 +47,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const mockApimService = {
@@ -54,7 +55,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
   listSecrets: vi.fn(() => TE.right(anApimResource)),
 } as unknown as ApimUtils.ApimService;
@@ -81,7 +82,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -96,6 +97,27 @@ const containerMock = {
 } as unknown as Container;
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
+
+const aServiceLifecycle = {
+  id: "aServiceId",
+  data: {
+    name: "aServiceName",
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      address: "via tal dei tali 123",
+      email: "service@email.it",
+      pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+  },
+} as unknown as ServiceLifecycle.ItemType;
 
 const mockAppinsights = {
   trackEvent: vi.fn(),
@@ -136,7 +158,27 @@ describe("getServiceKeys", () => {
 
   setAppContext(app, mockContext);
 
+  it("should return 404 when service is Deleted", async () => {
+    const response = await request(app)
+      .get(apiGetDeletedServiceKeysFullPath)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", userId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockApimService.listSecrets).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(response.statusCode).toBe(404);
+  });
+
   it("should retrieve service keys", async () => {
+    await serviceLifecycleStore.save("aServiceId", {
+      ...aServiceLifecycle,
+      id: "s1" as NonEmptyString,
+      fsm: { state: "draft" },
+    })();
+
     const response = await request(app)
       .get(apiGetServiceKeysFullPath)
       .send()
@@ -152,13 +194,13 @@ describe("getServiceKeys", () => {
       JSON.stringify({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
-      })
+      }),
     );
   });
 
   it("should fail with a not found error when cannot find requested service subscription", async () => {
     vi.mocked(mockApimService.listSecrets).mockImplementationOnce(() =>
-      TE.left({ statusCode: 404 })
+      TE.left({ statusCode: 404 }),
     );
 
     const response = await request(app)
@@ -176,7 +218,7 @@ describe("getServiceKeys", () => {
 
   it("should fail with a generic error if service subscription returns an error", async () => {
     vi.mocked(mockApimService.listSecrets).mockImplementationOnce(() =>
-      TE.left({ statusCode: 500 })
+      TE.left({ statusCode: 500 }),
     );
 
     const response = await request(app)
@@ -195,7 +237,7 @@ describe("getServiceKeys", () => {
   it("should fail with a generic error if manage subscription returns an error", async () => {
     // first getSubscription for manage key middleware
     vi.mocked(mockApimService.listSecrets).mockImplementationOnce(() =>
-      TE.left({ statusCode: 500 })
+      TE.left({ statusCode: 500 }),
     );
 
     const response = await request(app)
