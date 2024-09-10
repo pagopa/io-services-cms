@@ -24,11 +24,14 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
   IResponseSuccessJson,
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
@@ -57,11 +60,37 @@ type GetServiceKeysHandler = (
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
 }
 
+const checkService =
+  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (serviceId: NonEmptyString): TE.TaskEither<ErrorResponseTypes, void> =>
+    pipe(
+      serviceId,
+      fsmLifecycleClient.getStore().fetch,
+      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+      TE.chainW(
+        flow(
+          O.filter((service) => service.fsm.state !== "deleted"),
+          O.map(() => void 0),
+          TE.fromOption(() =>
+            ResponseErrorNotFound(
+              "Not found",
+              `no item with id ${serviceId} found`,
+            ),
+          ),
+        ),
+      ),
+    );
+
 export const makeGetServiceKeysHandler =
-  ({ apimService, telemetryClient }: Dependencies): GetServiceKeysHandler =>
+  ({
+    apimService,
+    fsmLifecycleClient,
+    telemetryClient,
+  }: Dependencies): GetServiceKeysHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -70,6 +99,7 @@ export const makeGetServiceKeysHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.chainW(checkService(fsmLifecycleClient)),
       TE.chainW(() =>
         pipe(
           apimService.listSecrets(serviceId),
