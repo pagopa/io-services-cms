@@ -5,15 +5,15 @@ import { useEffect, useState } from "react";
 const useScreenSize = () => {
   const theme = useTheme();
   const [screenSize, setScreenSize] = useState({
+    height: window.innerHeight,
     width: window.innerWidth,
-    height: window.innerHeight
   });
 
   useEffect(() => {
     const handleResize = () => {
       setScreenSize({
+        height: window.innerHeight,
         width: window.innerWidth,
-        height: window.innerHeight
       });
     };
 

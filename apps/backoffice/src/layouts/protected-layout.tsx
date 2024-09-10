@@ -2,8 +2,8 @@ import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
 import { RequiredAuthorizations } from "@/types/auth";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 type Props = {
@@ -12,12 +12,12 @@ type Props = {
 
 /** Manage protected routes */
 export const ProtectedLayout = ({
+  children,
   requiredPermissions,
   requiredRole,
-  children
 }: Props): JSX.Element => {
   const router = useRouter();
-  const { status: sessionStatus, data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
 
   const authenticated = sessionStatus === "authenticated";
   const unauthenticated = sessionStatus === "unauthenticated";
@@ -25,7 +25,7 @@ export const ProtectedLayout = ({
 
   const authorized = hasRequiredAuthorizations(session, {
     requiredPermissions,
-    requiredRole
+    requiredRole,
   });
   const unauthorized = !authorized;
 
@@ -39,14 +39,14 @@ export const ProtectedLayout = ({
       console.log("not authenticated or authorized");
       router.push({
         pathname: getConfiguration().BACK_OFFICE_LOGIN_PATH,
-        query: { returnUrl: router.asPath }
+        query: { returnUrl: router.asPath },
       });
     }
   }, [loading, unauthenticated, unauthorized, session, sessionStatus, router]);
 
   // if the user refreshed the page or somehow navigated to the protected page
   if (loading) {
-    return <LoaderFullscreen title="app.title" content="loading" />;
+    return <LoaderFullscreen content="loading" title="app.title" />;
   }
 
   // if the user is authenticated and authorized, render the page

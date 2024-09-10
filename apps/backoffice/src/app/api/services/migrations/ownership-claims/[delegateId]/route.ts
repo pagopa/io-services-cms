@@ -1,13 +1,14 @@
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
+import { HTTP_STATUS_ACCEPTED } from "@/config/constants";
+import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   claimOwnershipForDelegate,
-  retrieveOwnershipClaimLatestForDelegate
+  retrieveOwnershipClaimLatestForDelegate,
 } from "@/lib/be/services/business";
-import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { HTTP_STATUS_ACCEPTED } from "@/config/constants";
-import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NextRequest, NextResponse } from "next/server";
+
+import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @description Migrate delegate's services
@@ -16,30 +17,30 @@ export const POST = withJWTAuthHandler(
   async (
     request: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { delegateId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { delegateId: string } },
   ) => {
     try {
       const requestBody = await request.json().catch((_: unknown) => undefined);
 
       await claimOwnershipForDelegate(
         backofficeUser.institution.fiscalCode,
-        params.delegateId
+        params.delegateId,
       );
 
       return new Response(null, {
-        status: HTTP_STATUS_ACCEPTED
+        status: HTTP_STATUS_ACCEPTED,
       });
     } catch (error) {
       console.error(
         `An Error has occurred while requesting Ownership Claims for delegate ${params.delegateId}, intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error
+        error,
       );
       return handleInternalErrorResponse("OwnershipClaimsRequestError", error);
     }
-  }
+  },
 );
 
 /**
@@ -49,14 +50,14 @@ export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { delegateId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { delegateId: string } },
   ) => {
     try {
       const response = await retrieveOwnershipClaimLatestForDelegate(
         backofficeUser.institution.fiscalCode,
-        params.delegateId
+        params.delegateId,
       );
 
       return sanitizedNextResponseJson(response);
@@ -64,12 +65,12 @@ export const GET = withJWTAuthHandler(
       console.error(
         `An Error has occurred while retrieving delegate ${params.delegateId} Ownership claims for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error
+        error,
       );
       return handleInternalErrorResponse(
         "OwnershipClaimsDelegateRetrieveError",
-        error
+        error,
       );
     }
-  }
+  },
 );

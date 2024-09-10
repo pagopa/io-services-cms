@@ -2,36 +2,36 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 
-export type DrawerBaseContentHeader = {
+export interface DrawerBaseContentHeader {
   startIcon?: ReactNode;
   title: string;
-};
+}
 
-export type DrawerBaseContentProps = {
-  width?: string | number;
-  minWidth?: string | number;
-  maxWidth?: string | number;
-  header: DrawerBaseContentHeader;
+export interface DrawerBaseContentProps {
   children: ReactNode;
-};
+  header: DrawerBaseContentHeader;
+  maxWidth?: number | string;
+  minWidth?: number | string;
+  width?: number | string;
+}
 
 /** Render MUI Drawer basic content, with custom width, header and body _(as children)_ */
 export const DrawerBaseContent = ({
-  width,
-  minWidth,
-  maxWidth,
+  children,
   header,
-  children
+  maxWidth,
+  minWidth,
+  width,
 }: DrawerBaseContentProps) => {
   const { t } = useTranslation();
 
   return (
     <Box
       data-testid="bo-io-drawer-base-content"
-      width={width}
-      minWidth={minWidth}
-      maxWidth={maxWidth}
       marginBottom={5}
+      maxWidth={maxWidth}
+      minWidth={minWidth}
+      width={width}
     >
       <Stack direction="row" spacing={1}>
         {header.startIcon}

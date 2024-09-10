@@ -9,7 +9,7 @@ import {
   Close,
   Feedback,
   History,
-  UnfoldMore
+  UnfoldMore,
 } from "@mui/icons-material";
 import { TimelineConnector } from "@mui/lab";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
@@ -20,44 +20,45 @@ import {
   TimelineNotificationDot,
   TimelineNotificationItem,
   TimelineNotificationOppositeContent,
-  TimelineNotificationSeparator
+  TimelineNotificationSeparator,
 } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+
 import {
   ServiceInfoContent,
   ServiceRejectReasonContent,
   ServiceStatus,
-  fromServiceLifecycleToService
+  fromServiceLifecycleToService,
 } from ".";
 import {
   DrawerBaseContainer,
   DrawerBaseContent,
-  useDrawer
+  useDrawer,
 } from "../drawer-provider";
 
-export type ServiceHistoryComponentProps = {
+export interface ServiceHistoryComponentProps {
   historyData?: ServiceHistory;
-  showHistory: boolean;
   loading?: boolean;
-  onLoadMoreClick: (continuationToken: string) => void;
   onClose: () => void;
-};
+  onLoadMoreClick: (continuationToken: string) => void;
+  showHistory: boolean;
+}
 
 /** Render service history */
 export const ServiceHistoryComponent = ({
   historyData,
-  showHistory,
   loading,
+  onClose,
   onLoadMoreClick,
-  onClose
+  showHistory,
 }: ServiceHistoryComponentProps) => {
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(showHistory);
   const [historyContent, setHistoryContent] = useState<ServiceHistory>({
-    items: []
+    items: [],
   });
 
   const getMonthShort = (dateString: string): string => {
@@ -80,10 +81,10 @@ export const ServiceHistoryComponent = ({
   };
 
   function getLifecycleStatusOrNull(
-    value: string
+    value: string,
   ): ServiceLifecycleStatusTypeEnum | null {
     return Object.values(ServiceLifecycleStatusTypeEnum).includes(
-      value as ServiceLifecycleStatusTypeEnum
+      value as ServiceLifecycleStatusTypeEnum,
     )
       ? (value as ServiceLifecycleStatusTypeEnum)
       : null;
@@ -106,7 +107,7 @@ export const ServiceHistoryComponent = ({
           />
         );
       default:
-        return <TimelineNotificationDot variant="filled" size="small" />;
+        return <TimelineNotificationDot size="small" variant="filled" />;
     }
   };
 
@@ -114,17 +115,17 @@ export const ServiceHistoryComponent = ({
   const handleClose = () => {
     onClose();
     setHistoryContent({
-      items: []
+      items: [],
     });
   };
 
   useEffect(() => {
-    setHistoryContent(prevHistoryData => ({
+    setHistoryContent((prevHistoryData) => ({
       continuationToken: historyData?.continuationToken,
       items: [
         ...Array.from(prevHistoryData?.items ?? []),
-        ...Array.from(historyData?.items ?? [])
-      ]
+        ...Array.from(historyData?.items ?? []),
+      ],
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyData]);
@@ -135,14 +136,14 @@ export const ServiceHistoryComponent = ({
   }, [showHistory]);
 
   const renderServiceStatus = (
-    item: ServiceHistoryItem
+    item: ServiceHistoryItem,
   ): JSX.Element | null => {
     const status = getLifecycleStatusOrNull(item.status.value);
     return status ? (
       <ServiceStatus
         status={{
+          reason: item.status.reason,
           value: status,
-          reason: item.status.reason
         }}
       />
     ) : null;
@@ -150,13 +151,13 @@ export const ServiceHistoryComponent = ({
 
   const renderHistoryContent = () => (
     <DrawerBaseContent
-      width="25vw"
-      minWidth="305px"
-      maxWidth="400px"
       header={{
         startIcon: <History color="inherit" />,
-        title: "service.history.title"
+        title: "service.history.title",
       }}
+      maxWidth="400px"
+      minWidth="305px"
+      width="25vw"
     >
       <TimelineNotification>
         {historyContent?.items?.map((item, i) => (
@@ -164,12 +165,12 @@ export const ServiceHistoryComponent = ({
             <TimelineNotificationOppositeContent>
               <Typography
                 color="text.secondary"
-                variant="caption"
                 component="div"
+                variant="caption"
               >
                 {getMonthShort(item.last_update).toUpperCase()}
               </Typography>
-              <Typography variant="sidenav" component="div">
+              <Typography component="div" variant="sidenav">
                 {getDay(item.last_update)}
               </Typography>
             </TimelineNotificationOppositeContent>
@@ -180,9 +181,9 @@ export const ServiceHistoryComponent = ({
             </TimelineNotificationSeparator>
             <TimelineNotificationContent>
               <Typography
-                variant="caption"
                 color="text.secondary"
                 component="div"
+                variant="caption"
               >
                 {getTime(item.last_update)}
               </Typography>
@@ -191,37 +192,37 @@ export const ServiceHistoryComponent = ({
 
               <Typography
                 color="text.primary"
-                variant="caption"
                 component="div"
+                variant="caption"
               >
                 {t(`service.history.status.${item.status.value}`)}
               </Typography>
               {item.status.value === "rejected" ? (
                 <ButtonNaked
-                  variant="naked"
                   color="primary"
-                  startIcon={<Feedback />}
                   onClick={() =>
                     openRejectionReasonDrawer(item.status.reason ?? "")
                   }
+                  startIcon={<Feedback />}
+                  variant="naked"
                 >
                   {t("service.history.readRejectReason")}
                 </ButtonNaked>
               ) : null}
               {item.status.value === "draft" ? (
                 <ButtonNaked
-                  variant="naked"
                   color="primary"
                   endIcon={<ArrowForward />}
                   onClick={() =>
                     openHistoryItemDetailsDrawer({
                       ...item,
                       status: {
+                        reason: item.status.reason,
                         value: ServiceLifecycleStatusTypeEnum.draft,
-                        reason: item.status.reason
-                      }
+                      },
                     })
                   }
+                  variant="naked"
                 >
                   {t("routes.service.viewDetails")}
                 </ButtonNaked>
@@ -242,12 +243,12 @@ export const ServiceHistoryComponent = ({
     if (historyContent.continuationToken) {
       return (
         <Button
-          startIcon={<UnfoldMore />}
           color="primary"
-          variant="outlined"
           onClick={() =>
             onLoadMoreClick(historyContent.continuationToken ?? "")
           }
+          startIcon={<UnfoldMore />}
+          variant="outlined"
         >
           {t("buttons.loadMore")}
         </Button>
@@ -255,10 +256,10 @@ export const ServiceHistoryComponent = ({
     } else if (loading) {
       return (
         <Button
-          startIcon={<CircularProgress size={15} sx={{ marginY: 1 }} />}
           color="primary"
-          variant="naked"
+          startIcon={<CircularProgress size={15} sx={{ marginY: 1 }} />}
           sx={{ cursor: "default", height: 6, padding: 3 }}
+          variant="naked"
         >
           {t("loading")}
         </Button>
@@ -268,7 +269,7 @@ export const ServiceHistoryComponent = ({
 
   const openHistoryItemDetailsDrawer = (historyItem: ServiceLifecycle) => {
     openDrawer(
-      <ServiceInfoContent data={fromServiceLifecycleToService(historyItem)} />
+      <ServiceInfoContent data={fromServiceLifecycleToService(historyItem)} />,
     );
   };
 
@@ -277,7 +278,7 @@ export const ServiceHistoryComponent = ({
   };
 
   return (
-    <DrawerBaseContainer open={isDrawerOpen} onClose={handleClose}>
+    <DrawerBaseContainer onClose={handleClose} open={isDrawerOpen}>
       {renderHistoryContent()}
     </DrawerBaseContainer>
   );

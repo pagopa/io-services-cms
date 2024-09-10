@@ -2,7 +2,7 @@ import { FormStepSectionWrapper } from "@/components/forms";
 import {
   AutocompleteController,
   SelectController,
-  TextFieldController
+  TextFieldController,
 } from "@/components/forms/controllers";
 import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopic } from "@/generated/api/ServiceTopic";
@@ -18,34 +18,35 @@ import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
+
 import { ServicePreview } from "..";
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z.object({
-    name: z
-      .string()
-      .min(1, { message: t("forms.errors.field.required") })
-      .max(100, { message: t("forms.errors.field.max", { max: 100 }) }),
     description: z
       .string()
       .min(1, { message: t("forms.errors.field.required") })
       .max(1000, { message: t("forms.errors.field.max", { max: 1000 }) }),
     metadata: z.object({
-      scope: z.string(),
-      topic_id: z.union([
-        z.string().min(1, { message: t("forms.errors.field.required") }),
-        z.number().min(0, { message: t("forms.errors.field.required") })
-      ]),
       address: z
         .string()
         .max(100, { message: t("forms.errors.field.max", { max: 100 }) })
-        .optional()
-    })
+        .optional(),
+      scope: z.string(),
+      topic_id: z.union([
+        z.string().min(1, { message: t("forms.errors.field.required") }),
+        z.number().min(0, { message: t("forms.errors.field.required") }),
+      ]),
+    }),
+    name: z
+      .string()
+      .min(1, { message: t("forms.errors.field.required") })
+      .max(100, { message: t("forms.errors.field.max", { max: 100 }) }),
   });
 
-export type ServiceBuilderStep1Props = {
+export interface ServiceBuilderStep1Props {
   topics?: ServiceTopic[];
-};
+}
 
 /** First step of Service create/update process */
 export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
@@ -58,8 +59,8 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
 
   const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [topicList, setTopicList] = useState<{ label: string; id: number }[]>(
-    []
+  const [topicList, setTopicList] = useState<{ id: number; label: string }[]>(
+    [],
   );
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
 
   useEffect(() => {
     if (topics) {
-      setTopicList(topics.map(item => ({ label: item.name, id: item.id })));
+      setTopicList(topics.map((item) => ({ id: item.id, label: item.name })));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics]);
@@ -79,54 +80,54 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
   return (
     <>
       <FormStepSectionWrapper
+        icon={<MenuBookIcon />}
         key={0}
         title={t("forms.service.description.label")}
-        icon={<MenuBookIcon />}
       >
         <TextFieldController
-          required
-          name="name"
-          label={t("forms.service.name.label")}
-          placeholder={t("forms.service.name.placeholder")}
           helperText={
             <span
               dangerouslySetInnerHTML={{
-                __html: t("forms.service.name.helperText")
+                __html: t("forms.service.name.helperText"),
               }}
             />
           }
+          label={t("forms.service.name.label")}
+          name="name"
+          placeholder={t("forms.service.name.placeholder")}
+          required
         />
         <Grid
-          container
-          spacing={2}
-          justifyContent="center"
           alignItems="flex-start"
+          container
+          justifyContent="center"
+          spacing={2}
         >
           <Grid item xs>
             <TextFieldController
-              required
-              name="description"
-              label={t("forms.service.description.label")}
-              placeholder={t("forms.service.description.placeholder")}
               helperText={
                 <span
                   dangerouslySetInnerHTML={{
-                    __html: t("forms.service.description.helperText")
+                    __html: t("forms.service.description.helperText"),
                   }}
                 />
               }
+              label={t("forms.service.description.label")}
               multiline
+              name="description"
+              placeholder={t("forms.service.description.placeholder")}
+              required
               rows={7}
             />
           </Grid>
           <Grid item xs="auto">
             <ButtonNaked
               color="primary"
-              startIcon={<Preview />}
-              size="medium"
-              sx={{ fontWeight: 700, marginTop: 3 }}
               disabled={!isPreviewEnabled}
               onClick={() => setIsPreviewOpen(true)}
+              size="medium"
+              startIcon={<Preview />}
+              sx={{ fontWeight: 700, marginTop: 3 }}
             >
               {t("service.preview.button")}
             </ButtonNaked>
@@ -134,33 +135,33 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
         </Grid>
       </FormStepSectionWrapper>
       <FormStepSectionWrapper
+        icon={<PaletteIcon />}
         key={2}
         title={t("forms.service.attributes")}
-        icon={<PaletteIcon />}
       >
-        <Grid container columnSpacing={2}>
+        <Grid columnSpacing={2} container>
           <Grid item xs={6}>
             <SelectController
-              name="metadata.scope"
-              label={t("forms.service.metadata.scope.label")}
-              placeholder={t("forms.service.metadata.scope.placeholder")}
-              items={[
-                {
-                  label: t("forms.service.metadata.scope.national"),
-                  value: ScopeEnum.NATIONAL
-                },
-                {
-                  label: t("forms.service.metadata.scope.local"),
-                  value: ScopeEnum.LOCAL
-                }
-              ]}
               helperText={
                 <span
                   dangerouslySetInnerHTML={{
-                    __html: t("forms.service.metadata.scope.helperText")
+                    __html: t("forms.service.metadata.scope.helperText"),
                   }}
                 />
               }
+              items={[
+                {
+                  label: t("forms.service.metadata.scope.national"),
+                  value: ScopeEnum.NATIONAL,
+                },
+                {
+                  label: t("forms.service.metadata.scope.local"),
+                  value: ScopeEnum.LOCAL,
+                },
+              ]}
+              label={t("forms.service.metadata.scope.label")}
+              name="metadata.scope"
+              placeholder={t("forms.service.metadata.scope.placeholder")}
             />
           </Grid>
           <Grid item xs={6}>
@@ -175,31 +176,31 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
           </Grid>
           <Grid item xs={6}>
             <AutocompleteController
-              name="metadata.topic_id"
-              label={t("forms.service.metadata.topic.label")}
-              placeholder={t("forms.service.metadata.topic.placeholder")}
-              items={topicList}
               helperText={
                 <span
                   dangerouslySetInnerHTML={{
-                    __html: t("forms.service.metadata.topic.helperText")
+                    __html: t("forms.service.metadata.topic.helperText"),
                   }}
                 />
               }
+              items={topicList}
+              label={t("forms.service.metadata.topic.label")}
+              name="metadata.topic_id"
+              placeholder={t("forms.service.metadata.topic.placeholder")}
             />
           </Grid>
         </Grid>
         <TextFieldController
-          name="metadata.address"
-          label={t("forms.service.metadata.address.label")}
-          placeholder={t("forms.service.metadata.address.placeholder")}
           helperText={
             <span
               dangerouslySetInnerHTML={{
-                __html: t("forms.service.metadata.address.helperText")
+                __html: t("forms.service.metadata.address.helperText"),
               }}
             />
           }
+          label={t("forms.service.metadata.address.label")}
+          name="metadata.address"
+          placeholder={t("forms.service.metadata.address.placeholder")}
         />
         {/* 
         // TODO should be developed in the next MVPs
@@ -218,10 +219,10 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
         /> */}
       </FormStepSectionWrapper>
       <ServicePreview
+        description={watchedDescription}
+        institutionName={session?.user?.institution.name}
         isOpen={isPreviewOpen}
         name={watchedName}
-        institutionName={session?.user?.institution.name}
-        description={watchedDescription}
         onChange={setIsPreviewOpen}
       />
     </>

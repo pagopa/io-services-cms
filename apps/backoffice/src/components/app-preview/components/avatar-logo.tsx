@@ -3,14 +3,15 @@ import { AccountBalanceRounded } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import Image from "next/image";
 import React, { useState } from "react";
+
 import { IOColors } from ".";
 
 const LOGO_SIZE = 48;
 
-export type AvatarLogoProps = {
+export interface AvatarLogoProps {
   organizationFiscalCode: string;
   serviceId: string;
-};
+}
 
 /** Render rounded box with service/institution logo */
 const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
@@ -22,14 +23,14 @@ const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
     }${serviceId?.toLowerCase()}.png?${Date.now()}`;
 
   const [logoExists, setLogoExists] = useState(true);
-  const [logoFile] = useState<string | ArrayBuffer | null>(logoFullPath());
+  const [logoFile] = useState<ArrayBuffer | null | string>(logoFullPath());
 
   const renderNoLogo = () => (
     <Box
-      paddingX="9px"
-      paddingTop={0.5}
-      fontSize={32}
       color={IOColors["grey-300"]}
+      fontSize={32}
+      paddingTop={0.5}
+      paddingX="9px"
     >
       <AccountBalanceRounded fontSize="inherit" />
     </Box>
@@ -37,24 +38,24 @@ const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
 
   const renderLogo = () => (
     <Image
-      src={logoFile as string}
-      width={LOGO_SIZE}
-      height={LOGO_SIZE}
-      style={{ objectFit: "scale-down" }}
       alt="logo"
-      unoptimized={true}
+      height={LOGO_SIZE}
       onError={() => setLogoExists(false)}
       onLoadingComplete={() => setLogoExists(true)}
+      src={logoFile as string}
+      style={{ objectFit: "scale-down" }}
+      unoptimized={true}
+      width={LOGO_SIZE}
     />
   );
 
   return (
     <Box
-      width={66}
+      border="1px solid #E7E7E7"
+      borderRadius={1}
       height={66}
       padding={1}
-      borderRadius={1}
-      border="1px solid #E7E7E7"
+      width={66}
     >
       {logoExists ? renderLogo() : renderNoLogo()}
     </Box>

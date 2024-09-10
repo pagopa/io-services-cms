@@ -10,9 +10,8 @@ import { useEffect, useState } from "react";
 export const Header = () => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { data: institutionsData, fetchData: institutionsFetchData } = useFetch<
-    UserAuthorizedInstitutions
-  >();
+  const { data: institutionsData, fetchData: institutionsFetchData } =
+    useFetch<UserAuthorizedInstitutions>();
 
   const getSelfcareInstitutionDashboardUrl = () =>
     `${getConfiguration().SELFCARE_URL}/dashboard/${
@@ -22,16 +21,16 @@ export const Header = () => {
   const products: ProductSwitchItem[] = [
     {
       id: getConfiguration().BACK_OFFICE_ID,
-      title: getConfiguration().BACK_OFFICE_TITLE,
+      linkType: "internal",
       productUrl: "",
-      linkType: "internal"
+      title: getConfiguration().BACK_OFFICE_TITLE,
     },
     {
       id: getConfiguration().SELFCARE_ID,
-      title: getConfiguration().SELFCARE_TITLE,
+      linkType: "internal",
       productUrl: getSelfcareInstitutionDashboardUrl(),
-      linkType: "internal"
-    }
+      title: getConfiguration().SELFCARE_TITLE,
+    },
   ];
 
   const [parties, setParties] = useState(Array<PartySwitchItem>());
@@ -54,7 +53,7 @@ export const Header = () => {
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +
-        `?institutionId=${party.id}&productId=${products[0].id}`
+        `?institutionId=${party.id}&productId=${products[0].id}`,
     });
   };
 
@@ -67,9 +66,9 @@ export const Header = () => {
     if (session?.user) {
       const currentParty: PartySwitchItem = {
         id: session.user.institution.id,
+        logoUrl: session.user.institution.logo_url,
         name: session.user.institution.name,
         productRole: t(`roles.${session.user.institution.role}`),
-        logoUrl: session.user.institution.logo_url
       };
       setParties([currentParty]);
       setSelectedPartyId(currentParty.id);
@@ -79,16 +78,17 @@ export const Header = () => {
   /** Build and set list of user authorized institutions _(useful for institution switch)_ */
   const buildPartyList = () => {
     if (session?.user && institutionsData?.authorizedInstitutions) {
-      const filteredInstitutions = institutionsData.authorizedInstitutions.filter(
-        institution => institution.id !== session.user?.institution.id
-      );
+      const filteredInstitutions =
+        institutionsData.authorizedInstitutions.filter(
+          (institution) => institution.id !== session.user?.institution.id,
+        );
       const otherParties: PartySwitchItem[] = filteredInstitutions.map(
-        institution => ({
+        (institution) => ({
           id: institution.id ?? "",
+          logoUrl: institution.logo_url,
           name: institution.name ?? "",
           productRole: t(`roles.${institution.role}`),
-          logoUrl: institution.logo_url
-        })
+        }),
       );
       setParties([...parties, ...otherParties]);
     }
@@ -106,20 +106,20 @@ export const Header = () => {
       {},
       UserAuthorizedInstitutions,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <HeaderProduct
+      onSelectedParty={selectedPartyChange}
+      onSelectedProduct={selectedProductChange}
+      partyId={selectedPartyId}
+      partyList={parties}
       productId={selectedProductId}
       productsList={products}
-      onSelectedProduct={selectedProductChange}
-      onSelectedParty={selectedPartyChange}
-      partyList={parties}
-      partyId={selectedPartyId}
     />
   );
 };

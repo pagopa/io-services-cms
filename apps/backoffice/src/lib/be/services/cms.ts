@@ -10,12 +10,11 @@ export type IoServicesCmsClient = ReturnType<typeof getIoServicesCmsClient>;
  * @returns the response or an error
  */
 export const callIoServicesCms = async <
-  T extends keyof ReturnType<typeof getIoServicesCmsClient>
+  T extends keyof ReturnType<typeof getIoServicesCmsClient>,
 >(
   operationId: T,
-  requestPayload: any
+  requestPayload: any,
 ) => await getIoServicesCmsClient()[operationId](requestPayload);
 
-export const getServiceTopics = (xForwardedFor: string | undefined) => {
-  return getTopicsProvider().getServiceTopics(xForwardedFor);
-};
+export const getServiceTopics = (xForwardedFor: string | undefined) =>
+  getTopicsProvider().getServiceTopics(xForwardedFor);

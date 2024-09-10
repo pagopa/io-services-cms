@@ -1,77 +1,80 @@
-import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
+import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
 import { ServiceTopic } from "@/generated/api/ServiceTopic";
 
-export type ServiceOrganization = {
-  name: string;
-  fiscal_code: string;
+export interface ServiceOrganization {
   department_name: string;
-};
-
-export type ServiceCommonData = {
+  fiscal_code: string;
   name: string;
-  description: string;
-  require_secure_channel: boolean;
+}
+
+export interface ServiceCommonData {
   authorized_cidrs: string[];
   authorized_recipients: string[];
+  description: string;
   max_allowed_payment_amount: number;
-};
+  name: string;
+  require_secure_channel: boolean;
+}
 
-export type ServiceMetadata = {
-  web_url?: string;
-  app_ios?: string;
-  app_android?: string;
-  tos_url?: string;
-  privacy_url?: string;
+export interface ServiceMetadata {
   address?: string;
-  phone?: string;
+  app_android?: string;
+  app_ios?: string;
+  category?: string;
+  cta?: string;
+  custom_special_flow?: string;
   email?: string;
   pec?: string;
-  cta?: string;
-  token_name?: string;
-  support_url?: string;
-  category?: string;
-  custom_special_flow?: string;
+  phone?: string;
+  privacy_url?: string;
   scope: ScopeEnum;
+  support_url?: string;
+  token_name?: string;
   topic?: ServiceTopic;
-};
+  tos_url?: string;
+  web_url?: string;
+}
 
 export type AssistanceChannelType = "email" | "pec" | "phone" | "support_url";
-export type AssistanceChannel = { type: AssistanceChannelType; value: string };
-export type AssistanceChannelsMetadata = {
+export interface AssistanceChannel {
+  type: AssistanceChannelType;
+  value: string;
+}
+export interface AssistanceChannelsMetadata {
   email?: string;
   pec?: string;
   phone?: string;
   support_url?: string;
-};
+}
 
-export type ServiceCreateUpdatePayloadMetadata = {
-  web_url: string;
-  app_ios: string;
-  app_android: string;
-  tos_url: string;
-  privacy_url: string;
+export interface ServiceCreateUpdatePayloadMetadata {
   address: string;
+  app_android: string;
+  app_ios: string;
+  assistanceChannels: AssistanceChannel[];
+  category?: string;
   cta: {
     text: string;
     url: string;
   };
-  assistanceChannels: AssistanceChannel[];
-  token_name?: string;
-  category?: string;
   custom_special_flow?: string;
+  privacy_url: string;
   scope: ScopeEnum;
-  topic_id?: string | number;
-};
+  token_name?: string;
+  topic_id?: number | string;
+  tos_url: string;
+  web_url: string;
+}
 
 /** `Service` type used to view details */
 export type Service = {
   id: string;
-  status: ServiceLifecycleStatus;
-  visibility?: ServicePublicationStatusType;
   lastUpdate: string;
   metadata: ServiceMetadata;
+  status: ServiceLifecycleStatus;
+  visibility?: ServicePublicationStatusType;
 } & ServiceCommonData;
 
 /** `ServiceCreateUpdatePayload` type used to create/update services in frontend forms.\

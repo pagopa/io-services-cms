@@ -1,10 +1,8 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_NO_CONTENT
+  HTTP_STATUS_NO_CONTENT,
 } from "@/config/constants";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -12,43 +10,45 @@ import { ServiceList } from "@/generated/api/ServiceList";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
+
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import { getServiceList } from "./apim";
 import {
   IoServicesCmsClient,
   callIoServicesCms,
-  getServiceTopics
+  getServiceTopics,
 } from "./cms";
 import {
   retrieveLifecycleServices,
-  retrievePublicationServices
+  retrievePublicationServices,
 } from "./cosmos";
 import {
   claimOwnership,
   getDelegatesByOrganization,
   getLatestOwnershipClaimStatus,
-  getOwnershipClaimStatus
+  getOwnershipClaimStatus,
 } from "./subscription-migration";
 import {
   buildMissingService,
   reducePublicationServicesList,
   reduceServiceTopicsList,
-  toServiceListItem
+  toServiceListItem,
 } from "./utils";
 
-type PathParameters = {
-  serviceId?: string;
+interface PathParameters {
+  continuationToken?: string;
   keyType?: string;
   limit?: string;
   offset?: string;
   order?: string;
-  continuationToken?: string;
-};
+  serviceId?: string;
+}
 
 /**
  * @description This method Will retrieve the specified list of services partition for the given user
@@ -64,7 +64,7 @@ export const retrieveServiceList = async (
   institution: Institution,
   limit: number,
   offset: number,
-  serviceId?: string
+  serviceId?: string,
 ): Promise<ServiceList> =>
   pipe(
     getServiceList(userId, limit, offset, serviceId),
@@ -72,77 +72,78 @@ export const retrieveServiceList = async (
     TE.bind("serviceTopicsMap", ({ apimServices }) =>
       pipe(
         TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
-        TE.map(({ topics }) => reduceServiceTopicsList(topics))
-      )
+        TE.map(({ topics }) => reduceServiceTopicsList(topics)),
+      ),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind("lifecycleServices", ({ apimServices, serviceTopicsMap }) =>
       pipe(
         apimServices.value
           ? apimServices.value.map(
-              subscription => subscription.name as NonEmptyString
+              (subscription) => subscription.name as NonEmptyString,
             )
           : [],
         retrieveLifecycleServices,
-        TE.map(RA.map(toServiceListItem(serviceTopicsMap)))
-      )
+        TE.map(RA.map(toServiceListItem(serviceTopicsMap))),
+      ),
     ),
     // get services from services-publication cosmos container
     // create a Record list which contains the service id and its visibility
     TE.bind("publicationServices", ({ lifecycleServices }) =>
       pipe(
         lifecycleServices.map(
-          publicationService => publicationService.id as NonEmptyString
+          (publicationService) => publicationService.id as NonEmptyString,
         ),
         retrievePublicationServices,
-        TE.map(reducePublicationServicesList)
-      )
+        TE.map(reducePublicationServicesList),
+      ),
     ),
     TE.bindW("missingServices", ({ apimServices, lifecycleServices }) =>
       pipe(
         // Extract service names from apimServices
         apimServices.value
-          ? apimServices.value.map(subscription => ({
+          ? apimServices.value.map((subscription) => ({
+              createdDate: subscription.createdDate,
               id: subscription.name as NonEmptyString,
-              createdDate: subscription.createdDate
             }))
           : [],
 
         // Find the difference between apimServices and lifecycleServices using service names
-        services =>
+        (services) =>
           services.filter(
-            service => !lifecycleServices.map(s => s.id).includes(service.id)
+            (service) =>
+              !lifecycleServices.map((s) => s.id).includes(service.id),
           ),
-        TE.right
-      )
+        TE.right,
+      ),
     ),
     // create response payload
     TE.map(
       ({
         apimServices,
         lifecycleServices,
+        missingServices,
         publicationServices,
-        missingServices
       }) => ({
+        pagination: { count: apimServices.count ?? 0, limit, offset },
         value: [
-          ...lifecycleServices.map(service => ({
+          ...lifecycleServices.map((service) => ({
             ...service,
-            visibility: publicationServices[service.id]
+            visibility: publicationServices[service.id],
           })),
-          ...missingServices.map(missingService =>
+          ...missingServices.map((missingService) =>
             buildMissingService(
               missingService.id,
               institution,
-              missingService.createdDate
-            )
-          )
+              missingService.createdDate,
+            ),
+          ),
         ],
-        pagination: { offset, limit, count: apimServices.count ?? 0 }
-      })
+      }),
     ),
-    TE.getOrElse(error => {
+    TE.getOrElse((error) => {
       throw error;
-    })
+    }),
   )();
 
 /**
@@ -151,20 +152,20 @@ export const retrieveServiceList = async (
  * the following method is responsible for forwarding requests to the corresponding io-services-cms APIs
  */
 export async function forwardIoServicesCmsRequest<
-  T extends keyof IoServicesCmsClient
+  T extends keyof IoServicesCmsClient,
 >(
   operationId: T,
   {
-    nextRequest,
     backofficeUser,
+    jsonBody,
+    nextRequest,
     pathParams,
-    jsonBody
   }: {
-    nextRequest: NextRequest;
     backofficeUser: BackOfficeUser;
-    pathParams?: PathParameters;
     jsonBody?: any;
-  }
+    nextRequest: NextRequest;
+    pathParams?: PathParameters;
+  },
 ): Promise<Response> {
   try {
     // extract jsonBody
@@ -174,14 +175,15 @@ export async function forwardIoServicesCmsRequest<
     // create the request payload
     const requestPayload = {
       ...pathParams,
+      "X-Forwarded-For":
+        nextRequest.headers.get("X-Forwarded-For") ?? undefined,
       body: requestBody,
-      "x-user-email": backofficeUser.parameters.userEmail,
-      "x-user-id": backofficeUser.parameters.userId,
+      "x-channel": "BO",
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
+      "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
       "x-user-groups-selc": backofficeUser.permissions.selcGroups?.join(","),
-      "x-channel": "BO",
-      "X-Forwarded-For": nextRequest.headers.get("X-Forwarded-For") ?? undefined
+      "x-user-id": backofficeUser.parameters.userId,
     } as any;
 
     // call the io-services-cms API and return the response
@@ -190,11 +192,11 @@ export async function forwardIoServicesCmsRequest<
     if (E.isLeft(result)) {
       return NextResponse.json(
         {
-          title: "validationError",
+          detail: readableReport(result.left),
           status: HTTP_STATUS_BAD_REQUEST as any,
-          detail: readableReport(result.left)
+          title: "validationError",
         },
-        { status: HTTP_STATUS_BAD_REQUEST }
+        { status: HTTP_STATUS_BAD_REQUEST },
       );
     }
 
@@ -202,7 +204,7 @@ export async function forwardIoServicesCmsRequest<
     // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
     if (status === HTTP_STATUS_NO_CONTENT || value === undefined) {
       return new Response(null, {
-        status
+        status,
       });
     }
 
@@ -211,27 +213,26 @@ export async function forwardIoServicesCmsRequest<
   } catch (error) {
     console.error(
       `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
-      error
+      error,
     );
 
     return NextResponse.json(
       {
-        title: "InternalError",
+        detail: "Error forwarding io-services-cms request",
         status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
-        detail: "Error forwarding io-services-cms request"
+        title: "InternalError",
       },
-      { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
+      { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
     );
   }
 }
 
 export const retrieveServiceTopics = async (
-  nextRequest: NextRequest
-): Promise<ServiceTopicList> => {
-  return await getServiceTopics(
-    nextRequest.headers.get("X-Forwarded-For") ?? undefined
+  nextRequest: NextRequest,
+): Promise<ServiceTopicList> =>
+  await getServiceTopics(
+    nextRequest.headers.get("X-Forwarded-For") ?? undefined,
   );
-};
 
 /**
  * SUBSCRIPTIONS
@@ -240,27 +241,22 @@ export const retrieveServiceTopics = async (
  **/
 
 export const retrieveOwnershipClaimLatestStatus = async (
-  organizationFiscalCode: string
-): Promise<MigrationItemList> => {
-  return await getLatestOwnershipClaimStatus(organizationFiscalCode);
-};
+  organizationFiscalCode: string,
+): Promise<MigrationItemList> =>
+  await getLatestOwnershipClaimStatus(organizationFiscalCode);
 
 export const retrieveOwnershipClaimLatestForDelegate = async (
   organizationFiscalCode: string,
-  delegateId: string
-): Promise<MigrationData> => {
-  return await getOwnershipClaimStatus(organizationFiscalCode, delegateId);
-};
+  delegateId: string,
+): Promise<MigrationData> =>
+  await getOwnershipClaimStatus(organizationFiscalCode, delegateId);
 
 export const claimOwnershipForDelegate = async (
   organizationFiscalCode: string,
-  delegateId: string
-): Promise<void> => {
-  return await claimOwnership(organizationFiscalCode, delegateId);
-};
+  delegateId: string,
+): Promise<void> => await claimOwnership(organizationFiscalCode, delegateId);
 
 export const retrieveOrganizationDelegates = async (
-  organizationFiscalCode: string
-): Promise<MigrationDelegateList> => {
-  return await getDelegatesByOrganization(organizationFiscalCode);
-};
+  organizationFiscalCode: string,
+): Promise<MigrationDelegateList> =>
+  await getDelegatesByOrganization(organizationFiscalCode);

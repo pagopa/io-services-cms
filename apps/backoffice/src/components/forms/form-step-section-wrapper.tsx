@@ -2,17 +2,17 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 
-export type FormStepSectionWrapperProps = {
-  title: string;
-  icon?: ReactNode;
+export interface FormStepSectionWrapperProps {
   children: ReactNode;
-};
+  icon?: ReactNode;
+  title: string;
+}
 
 /** Purely layout component to wrap the contents of the form section within a well-defined graphic scheme */
 export const FormStepSectionWrapper = ({
-  title,
+  children,
   icon,
-  children
+  title,
 }: FormStepSectionWrapperProps) => {
   const { t } = useTranslation();
 
@@ -21,10 +21,10 @@ export const FormStepSectionWrapper = ({
       border={1}
       borderColor="#E3E7EB"
       borderRadius={2}
-      padding={3}
       marginY={3}
+      padding={3}
     >
-      <Stack direction="row" alignItems="center" gap={1} marginBottom={2}>
+      <Stack alignItems="center" direction="row" gap={1} marginBottom={2}>
         {icon}
         <Typography variant="sidenav">{title}</Typography>
       </Stack>

@@ -1,10 +1,11 @@
 import React, { ReactNode, createContext, useContext, useState } from "react";
+
 import { DrawerBaseContainer } from ".";
 
 interface DrawerOptions {
+  closeDrawer: () => void;
   isDrawerOpen: boolean;
   openDrawer: (content: ReactNode) => void;
-  closeDrawer: () => void;
 }
 
 const DrawerContext = createContext<DrawerOptions | undefined>(undefined);
@@ -29,12 +30,12 @@ export const DrawerProvider: React.FC<{
     <DrawerContext.Provider
       data-testid="bo-io-drawer-provider"
       value={{
+        closeDrawer,
         isDrawerOpen,
         openDrawer,
-        closeDrawer
       }}
     >
-      <DrawerBaseContainer open={isDrawerOpen} onClose={closeDrawer}>
+      <DrawerBaseContainer onClose={closeDrawer} open={isDrawerOpen}>
         {drawerContent}
       </DrawerBaseContainer>
       {children}

@@ -1,10 +1,10 @@
 import {
   ServiceListItem,
-  VisibilityEnum
+  VisibilityEnum,
 } from "@/generated/api/ServiceListItem";
 import {
   CategoryEnum,
-  ScopeEnum
+  ScopeEnum,
 } from "@/generated/services-cms/ServiceBaseMetadata";
 import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
@@ -12,62 +12,71 @@ import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 import {
   DateUtils,
   ServiceLifecycle,
-  ServicePublication
+  ServicePublication,
 } from "@io-services-cms/models";
 import {
   NonEmptyString,
-  OrganizationFiscalCode
+  OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
+
 import { Institution } from "../../../../types/next-auth";
 
-export const MISSING_SERVICE_NAME = "Servizio non disponibile" as NonEmptyString;
-export const MISSING_SERVICE_DESCRIPTION = "Descrizione non disponibile" as NonEmptyString;
-export const MISSING_SERVICE_ORGANIZATION = "Istituzione non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_NAME =
+  "Servizio non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_DESCRIPTION =
+  "Descrizione non disponibile" as NonEmptyString;
+export const MISSING_SERVICE_ORGANIZATION =
+  "Istituzione non disponibile" as NonEmptyString;
 
 export const reducePublicationServicesList = (
-  publicationServices: ReadonlyArray<ServicePublication.ItemType>
+  publicationServices: readonly ServicePublication.ItemType[],
 ) =>
   pipe(
     publicationServices,
-    RA.map(item => [item.id, item.fsm.state] as [string, VisibilityEnum]),
-    arr =>
-      arr.reduce((acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, VisibilityEnum>)
+    RA.map((item) => [item.id, item.fsm.state] as [string, VisibilityEnum]),
+    (arr) =>
+      arr.reduce(
+        (acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, VisibilityEnum>,
+      ),
   );
 
-export const toServiceListItem = (topicsMap: Record<string, ServiceTopic>) => ({
-  fsm,
-  data,
-  id,
-  modified_at
-}: ServiceLifecycle.ItemType): ServiceListItem => {
-  const { topic_id, ...otherMetadata } = data.metadata;
-  return {
+export const toServiceListItem =
+  (topicsMap: Record<string, ServiceTopic>) =>
+  ({
+    data,
+    fsm,
     id,
-    status: toServiceStatus(fsm),
-    last_update: modified_at
-      ? (DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString)
-      : new Date().toISOString(),
-    name: data.name,
-    description: data.description,
-    organization: data.organization,
-    metadata: {
-      ...otherMetadata,
-      scope: toScopeType(otherMetadata.scope),
-      category: toCategoryType(otherMetadata.category),
-      topic: decodeServiceTopic(topic_id, topicsMap)
-    },
-    authorized_recipients: data.authorized_recipients,
-    authorized_cidrs: data.authorized_cidrs
+    modified_at,
+  }: ServiceLifecycle.ItemType): ServiceListItem => {
+    const { topic_id, ...otherMetadata } = data.metadata;
+    return {
+      authorized_cidrs: data.authorized_cidrs,
+      authorized_recipients: data.authorized_recipients,
+      description: data.description,
+      id,
+      last_update: modified_at
+        ? (DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString)
+        : new Date().toISOString(),
+      metadata: {
+        ...otherMetadata,
+        category: toCategoryType(otherMetadata.category),
+        scope: toScopeType(otherMetadata.scope),
+        topic: decodeServiceTopic(topic_id, topicsMap),
+      },
+      name: data.name,
+      organization: data.organization,
+      status: toServiceStatus(fsm),
+    };
   };
-};
 
 const toServiceStatus = (
-  fsm: ServiceLifecycle.ItemType["fsm"]
+  fsm: ServiceLifecycle.ItemType["fsm"],
 ): ServiceLifecycleStatus => {
   switch (fsm.state) {
     case "approved":
@@ -77,8 +86,8 @@ const toServiceStatus = (
       return { value: ServiceLifecycleStatusTypeEnum[fsm.state] };
     case "rejected":
       return {
+        reason: (fsm.reason as string) ?? undefined, // FIXME
         value: ServiceLifecycleStatusTypeEnum[fsm.state],
-        reason: (fsm.reason as string) ?? undefined // FIXME
       };
 
     default:
@@ -88,7 +97,7 @@ const toServiceStatus = (
 };
 
 const toScopeType = (
-  s: ServiceLifecycle.ItemType["data"]["metadata"]["scope"]
+  s: ServiceLifecycle.ItemType["data"]["metadata"]["scope"],
 ): ScopeEnum => {
   switch (s) {
     case "LOCAL":
@@ -101,7 +110,7 @@ const toScopeType = (
 };
 
 const toCategoryType = (
-  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"]
+  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"],
 ): CategoryEnum => {
   switch (s) {
     case "STANDARD":
@@ -114,7 +123,7 @@ const toCategoryType = (
 
 const decodeServiceTopic = (
   topic_id: number | undefined,
-  topicsMap: Record<string, ServiceTopic>
+  topicsMap: Record<string, ServiceTopic>,
 ): ServiceTopic | undefined => {
   if (topic_id !== undefined && topic_id !== null) {
     return topicsMap[topic_id.toString()];
@@ -125,32 +134,35 @@ const decodeServiceTopic = (
 export const buildMissingService = (
   serviceId: string,
   institution: Institution,
-  lastUpdate = new Date()
+  lastUpdate = new Date(),
 ): ServiceListItem => ({
-  id: serviceId,
-  status: { value: ServiceLifecycleStatusTypeEnum.deleted },
-  last_update: lastUpdate.toISOString(),
-  name: MISSING_SERVICE_NAME,
-  description: MISSING_SERVICE_DESCRIPTION,
-  organization: {
-    name: (institution.name as NonEmptyString) ?? MISSING_SERVICE_ORGANIZATION,
-    fiscal_code: (institution.fiscalCode ??
-      "00000000000") as OrganizationFiscalCode
-  },
-  metadata: {
-    scope: ScopeEnum.LOCAL,
-    category: CategoryEnum.STANDARD
-  },
+  authorized_cidrs: [],
   authorized_recipients: [],
-  authorized_cidrs: []
+  description: MISSING_SERVICE_DESCRIPTION,
+  id: serviceId,
+  last_update: lastUpdate.toISOString(),
+  metadata: {
+    category: CategoryEnum.STANDARD,
+    scope: ScopeEnum.LOCAL,
+  },
+  name: MISSING_SERVICE_NAME,
+  organization: {
+    fiscal_code: (institution.fiscalCode ??
+      "00000000000") as OrganizationFiscalCode,
+    name: (institution.name as NonEmptyString) ?? MISSING_SERVICE_ORGANIZATION,
+  },
+  status: { value: ServiceLifecycleStatusTypeEnum.deleted },
 });
 
 export const reduceServiceTopicsList = (
-  topics: ReadonlyArray<ServiceTopic> | undefined
+  topics: readonly ServiceTopic[] | undefined,
 ): Record<string, ServiceTopic> =>
   topics
-    ? topics.reduce((acc, topic) => {
-        acc[topic.id] = topic;
-        return acc;
-      }, {} as Record<string, ServiceTopic>)
+    ? topics.reduce(
+        (acc, topic) => {
+          acc[topic.id] = topic;
+          return acc;
+        },
+        {} as Record<string, ServiceTopic>,
+      )
     : ({} as Record<string, ServiceTopic>);

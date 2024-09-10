@@ -28,40 +28,40 @@ import axios from "axios";
 import { useTranslation } from "next-i18next";
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
+
 import { MigrationLatest } from ".";
 import { MigrationModal } from "./migration-modal";
 
 // migration status as it matters for this component
-export type MigrationStatus = "done" | "doing" | "todo" | "failed";
-export type MigrationStatusColor = "info" | "success" | "warning" | "error";
-export type MigrationChipStatus = {
-  label: MigrationStatus;
+export type MigrationStatus = "doing" | "done" | "failed" | "todo";
+export type MigrationStatusColor = "error" | "info" | "success" | "warning";
+export interface MigrationChipStatus {
   color: MigrationStatusColor;
-};
+  label: MigrationStatus;
+}
 
-export type DelegateStatusPair = {
-  delegate: MigrationDelegate;
+export interface DelegateStatusPair {
   data: MigrationData;
-};
+  delegate: MigrationDelegate;
+}
 
 /** Renders subscriptions migrator helper _(from old Deleloper Portal)_ */
 export const MigrationManager = () => {
   const { t } = useTranslation();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importInProgress, setImportInProgress] = useState(false);
-  const [migrationStatusList, setMigrationStatusList] = useState<
-    Array<DelegateStatusPair>
-  >();
+  const [migrationStatusList, setMigrationStatusList] =
+    useState<DelegateStatusPair[]>();
 
   const {
     data: migrationItemsData,
+    fetchData: migrationItemsFetchData,
     loading: migrationItemsLoading,
-    fetchData: migrationItemsFetchData
   } = useFetch<MigrationItemList>();
   const {
     data: migrationDelegatesData,
+    fetchData: migrationDelegatesFetchData,
     loading: migrationDelegatesLoading,
-    fetchData: migrationDelegatesFetchData
   } = useFetch<MigrationDelegateList>();
 
   const handleOpenImportModal = () => {
@@ -77,7 +77,7 @@ export const MigrationManager = () => {
   const getDelegateMigrationStatus = async (delegateId: string) => {
     try {
       const { data, status } = await axios.get<MigrationData>(
-        getMigrationOwnershipClaimsUrl(delegateId)
+        getMigrationOwnershipClaimsUrl(delegateId),
       );
       return { data, status };
     } catch (error) {
@@ -93,7 +93,7 @@ export const MigrationManager = () => {
   const postDelegateMigrationOwnershipClaims = async (delegateId: string) => {
     try {
       const { status } = await axios.post<void>(
-        getMigrationOwnershipClaimsUrl(delegateId)
+        getMigrationOwnershipClaimsUrl(delegateId),
       );
       return { status };
     } catch (error) {
@@ -102,19 +102,19 @@ export const MigrationManager = () => {
   };
 
   const fetchDelegateStatusPairs = async () => {
-    const pairs: Array<DelegateStatusPair> = [];
+    const pairs: DelegateStatusPair[] = [];
     try {
       if (migrationDelegatesData && migrationDelegatesData.delegates) {
         const promises = migrationDelegatesData.delegates.map(
-          async delegate => {
+          async (delegate) => {
             const result = await getDelegateMigrationStatus(delegate.sourceId);
             if (result.status === 200) {
               pairs.push({
+                data: result.data,
                 delegate,
-                data: result.data
               });
             }
-          }
+          },
         );
         await Promise.all(promises);
         setMigrationStatusList([...pairs]);
@@ -132,18 +132,18 @@ export const MigrationManager = () => {
       await Promise.all(delegates.map(postDelegateMigrationOwnershipClaims));
       enqueueSnackbar(
         buildSnackbarItem({
+          message: "",
           severity: "success",
           title: t("notifications.success"),
-          message: ""
-        })
+        }),
       );
     } catch (error) {
       enqueueSnackbar(
         buildSnackbarItem({
+          message: JSON.stringify(error),
           severity: "error",
           title: t("notifications.exceptionError"),
-          message: JSON.stringify(error)
-        })
+        }),
       );
     } finally {
       setImportInProgress(false);
@@ -156,7 +156,7 @@ export const MigrationManager = () => {
       "getServicesMigrationStatus",
       {},
       MigrationItemList,
-      { notify: "errors" }
+      { notify: "errors" },
     );
   };
 
@@ -173,7 +173,7 @@ export const MigrationManager = () => {
         "getServicesMigrationDelegates",
         {},
         MigrationDelegateList,
-        { notify: "errors" }
+        { notify: "errors" },
       );
     } else {
       // reset DelegateStatusPair list
@@ -191,7 +191,7 @@ export const MigrationManager = () => {
   return (
     <CardBaseContainer>
       <Typography variant="h6">{t("subscriptions.migration.title")}</Typography>
-      <Stack direction="column" spacing={3} marginY={3} alignItems="center">
+      <Stack alignItems="center" direction="column" marginY={3} spacing={3}>
         <Alert severity="warning">
           <AlertTitle>
             {t("subscriptions.migration.disclaimer.title")}
@@ -199,13 +199,13 @@ export const MigrationManager = () => {
           {t("subscriptions.migration.disclaimer.description")}
         </Alert>
         <ButtonWithLoader
-          label="subscriptions.migration.action"
-          onClick={handleOpenImportModal}
-          loading={importInProgress}
           disabled={importInProgress}
+          fullWidth
+          label="subscriptions.migration.action"
+          loading={importInProgress}
+          onClick={handleOpenImportModal}
           startIcon={<Upload fontSize="inherit" />}
           sx={{ fontWeight: 700 }}
-          fullWidth
         />
         <Divider />
         <MigrationLatest
@@ -214,10 +214,10 @@ export const MigrationManager = () => {
         />
       </Stack>
       <MigrationModal
-        migrationStatusList={migrationStatusList}
         isOpen={isImportModalOpen}
-        onOpenChange={setIsImportModalOpen}
+        migrationStatusList={migrationStatusList}
         onImportClick={claimOwnership}
+        onOpenChange={setIsImportModalOpen}
       />
     </CardBaseContainer>
   );

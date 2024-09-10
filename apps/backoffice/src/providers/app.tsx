@@ -13,26 +13,24 @@ declare module "notistack" {
   }
 }
 
-type AppProviderProps = {
+interface AppProviderProps {
   children: ReactNode;
-};
+}
 
-export const AppProvider = ({ children }: AppProviderProps) => {
-  return (
-    <ThemeProvider theme={appTheme}>
-      <CssBaseline />
-      <DialogProvider>
-        <DrawerProvider>
-          <SnackbarProvider
-            Components={{
-              custom: Notification
-            }}
-            maxSnack={5}
-          >
-            {children}
-          </SnackbarProvider>
-        </DrawerProvider>
-      </DialogProvider>
-    </ThemeProvider>
-  );
-};
+export const AppProvider = ({ children }: AppProviderProps) => (
+  <ThemeProvider theme={appTheme}>
+    <CssBaseline />
+    <DialogProvider>
+      <DrawerProvider>
+        <SnackbarProvider
+          Components={{
+            custom: Notification,
+          }}
+          maxSnack={5}
+        >
+          {children}
+        </SnackbarProvider>
+      </DrawerProvider>
+    </DialogProvider>
+  </ThemeProvider>
+);

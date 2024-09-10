@@ -9,51 +9,51 @@ import {
   AssistanceChannelType,
   AssistanceChannelsMetadata,
   Service,
-  ServiceCreateUpdatePayload
+  ServiceCreateUpdatePayload,
 } from "@/types/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
 
 const adaptServiceCommonData = (
-  service: ServiceLifecycle | ServicePublication
+  service: ServiceLifecycle | ServicePublication,
 ) => ({
-  lastUpdate: service.last_update,
-  name: service.name,
-  description: service.description,
-  require_secure_channel: service.require_secure_channel ?? false,
   authorized_cidrs: service.authorized_cidrs
-    ? ((service.authorized_cidrs as unknown) as string[])
+    ? (service.authorized_cidrs as unknown as string[])
     : [],
   authorized_recipients: service.authorized_recipients
-    ? ((service.authorized_recipients as unknown) as string[])
+    ? (service.authorized_recipients as unknown as string[])
     : [],
+  description: service.description,
+  lastUpdate: service.last_update,
   max_allowed_payment_amount: service.max_allowed_payment_amount ?? 0,
-  topic: service.metadata.topic
+  name: service.name,
+  require_secure_channel: service.require_secure_channel ?? false,
+  topic: service.metadata.topic,
 });
 
 const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
-  web_url: metadata.web_url,
-  app_ios: metadata.app_ios,
-  app_android: metadata.app_android,
-  tos_url: metadata.tos_url,
-  privacy_url: metadata.privacy_url,
   address: metadata.address,
-  phone: metadata.phone,
+  app_android: metadata.app_android,
+  app_ios: metadata.app_ios,
+  category: metadata.category,
+  cta: metadata.cta,
+  custom_special_flow: metadata.custom_special_flow,
   email: metadata.email,
   pec: metadata.pec,
-  cta: metadata.cta,
-  token_name: metadata.token_name,
-  support_url: metadata.support_url,
-  category: metadata.category,
-  custom_special_flow: metadata.custom_special_flow,
+  phone: metadata.phone,
+  privacy_url: metadata.privacy_url,
   scope: metadata.scope,
-  topic: metadata.topic
+  support_url: metadata.support_url,
+  token_name: metadata.token_name,
+  topic: metadata.topic,
+  tos_url: metadata.tos_url,
+  web_url: metadata.web_url,
 });
 
 export const fromServiceLifecycleToService = (
   service?: ServiceLifecycle,
-  visibility?: ServicePublicationStatusType
+  visibility?: ServicePublicationStatusType,
 ): Service | undefined => {
   if (service) {
     return {
@@ -61,13 +61,13 @@ export const fromServiceLifecycleToService = (
       status: service.status,
       visibility,
       ...adaptServiceCommonData(service),
-      metadata: adaptServiceMetadata(service.metadata)
+      metadata: adaptServiceMetadata(service.metadata),
     };
   }
 };
 
 export const fromServicePublicationToService = (
-  service?: ServicePublication
+  service?: ServicePublication,
 ): Service | undefined => {
   if (service) {
     return {
@@ -75,7 +75,7 @@ export const fromServicePublicationToService = (
       status: { value: ServiceLifecycleStatusTypeEnum.approved },
       visibility: service?.status,
       ...adaptServiceCommonData(service),
-      metadata: adaptServiceMetadata(service.metadata)
+      metadata: adaptServiceMetadata(service.metadata),
     };
   }
 };
@@ -86,14 +86,14 @@ export const fromServicePublicationToService = (
  * @returns `Validation<ApiServicePayload>`
  */
 export const fromServiceCreateUpdatePayloadToApiServicePayload = (
-  feService: ServiceCreateUpdatePayload
+  feService: ServiceCreateUpdatePayload,
 ) =>
   pipe(
     convertAssistanceChannelsArrayToObj(feService.metadata.assistanceChannels),
     buildBaseServicePayload(feService),
     clearUndefinedNullEmptyProperties,
     removeAssistanceChannelsArray,
-    ApiServicePayload.decode
+    ApiServicePayload.decode,
   );
 
 /**
@@ -102,52 +102,52 @@ export const fromServiceCreateUpdatePayloadToApiServicePayload = (
  * @returns `ServiceCreateUpdatePayload`
  */
 export const fromServiceLifecycleToServiceCreateUpdatePayload = (
-  sl: ServiceLifecycle
+  sl: ServiceLifecycle,
 ): ServiceCreateUpdatePayload => ({
-  name: sl.name,
-  description: sl.description,
-  require_secure_channel: sl.require_secure_channel ?? false,
   authorized_cidrs: sl.authorized_cidrs
     ? Array.from(sl.authorized_cidrs.values())
     : [],
   authorized_recipients: sl.authorized_recipients
     ? Array.from(sl.authorized_recipients.values())
     : [],
+  description: sl.description,
   max_allowed_payment_amount: sl.max_allowed_payment_amount ?? 0,
   metadata: {
-    web_url: sl.metadata.web_url ?? "",
-    app_ios: sl.metadata.app_ios ?? "",
-    app_android: sl.metadata.app_android ?? "",
-    tos_url: sl.metadata.tos_url ?? "",
-    privacy_url: sl.metadata.privacy_url ?? "",
     address: sl.metadata.address ?? "",
+    app_android: sl.metadata.app_android ?? "",
+    app_ios: sl.metadata.app_ios ?? "",
     assistanceChannels: convertAssistanceChannelsObjToArray(sl.metadata),
-    cta: buildCtaObj(sl.metadata.cta),
-    token_name: sl.metadata.token_name ?? "",
     category: sl.metadata.category ?? "",
+    cta: buildCtaObj(sl.metadata.cta),
     custom_special_flow: sl.metadata.custom_special_flow ?? "",
+    privacy_url: sl.metadata.privacy_url ?? "",
     scope: sl.metadata.scope,
-    topic_id: sl.metadata.topic?.id
-  }
+    token_name: sl.metadata.token_name ?? "",
+    topic_id: sl.metadata.topic?.id,
+    tos_url: sl.metadata.tos_url ?? "",
+    web_url: sl.metadata.web_url ?? "",
+  },
+  name: sl.name,
+  require_secure_channel: sl.require_secure_channel ?? false,
 });
 
-const buildBaseServicePayload = (
-  s: ServiceCreateUpdatePayload
-) => (assistanceChannels: { [key: string]: string }) => ({
-  ...s,
-  require_secure_channel: s.require_secure_channel,
-  authorized_cidrs: s.authorized_cidrs,
-  authorized_recipients: s.authorized_recipients,
-  max_allowed_payment_amount: s.max_allowed_payment_amount,
-  metadata: {
-    ...s.metadata,
-    cta: buildCtaString(s.metadata.cta),
-    ...assistanceChannels
-  }
-});
+const buildBaseServicePayload =
+  (s: ServiceCreateUpdatePayload) =>
+  (assistanceChannels: Record<string, string>) => ({
+    ...s,
+    authorized_cidrs: s.authorized_cidrs,
+    authorized_recipients: s.authorized_recipients,
+    max_allowed_payment_amount: s.max_allowed_payment_amount,
+    metadata: {
+      ...s.metadata,
+      cta: buildCtaString(s.metadata.cta),
+      ...assistanceChannels,
+    },
+    require_secure_channel: s.require_secure_channel,
+  });
 
 const convertAssistanceChannelsArrayToObj = (arr: AssistanceChannel[]) => {
-  const result: { [key: string]: string } = {};
+  const result: Record<string, string> = {};
   for (const channel of arr) {
     result[channel.type] = channel.value;
   }
@@ -155,14 +155,14 @@ const convertAssistanceChannelsArrayToObj = (arr: AssistanceChannel[]) => {
 };
 
 const convertAssistanceChannelsObjToArray = (
-  obj: AssistanceChannelsMetadata
+  obj: AssistanceChannelsMetadata,
 ) => {
   const channels: AssistanceChannel[] = [];
   const allowedTypes: AssistanceChannelType[] = [
     "email",
     "pec",
     "phone",
-    "support_url"
+    "support_url",
   ];
 
   for (const key in obj) {
@@ -188,7 +188,7 @@ const buildCtaObj = (ctaString?: string) => {
   if (NonEmptyString.is(ctaString)) {
     return {
       text: getCtaTextFromCtaString(ctaString),
-      url: getCtaUrlFromCtaString(ctaString)
+      url: getCtaUrlFromCtaString(ctaString),
     };
   }
   return { text: "", url: "" };
@@ -198,7 +198,7 @@ const getCtaTextFromCtaString = (value: string) => {
   // Splits the string into lines
   const lines = value.split("\n");
   // Find the line containing 'text: "<text>"'
-  const textLine = lines.find(line => line.includes("text:"));
+  const textLine = lines.find((line) => line.includes("text:"));
   // Extract the text between the quotes
   const match = /\"(.+?)\"/.exec(textLine ?? "");
   if (match) {
@@ -211,7 +211,7 @@ const getCtaUrlFromCtaString = (value: string) => {
   // Splits the string into lines
   const lines = value.split("\n");
   // Find the line containing 'text: "<text>"'
-  const actionLine = lines.find(line => line.includes("action:"));
+  const actionLine = lines.find((line) => line.includes("action:"));
   // Extract the text between the quotes
   const match = /iohandledlink:\/\/(.+?)\"/.exec(actionLine ?? "");
   if (match) {
@@ -230,8 +230,8 @@ const getCtaUrlFromCtaString = (value: string) => {
 const clearUndefinedNullEmptyProperties = (s: any): any => {
   if (_.isObject(s) && !_.isArray(s)) {
     return _.mapValues(
-      _.pickBy(s, val => !_.isUndefined(val) && !_.isNull(val) && val !== ""),
-      clearUndefinedNullEmptyProperties
+      _.pickBy(s, (val) => !_.isUndefined(val) && !_.isNull(val) && val !== ""),
+      clearUndefinedNullEmptyProperties,
     );
   }
   return s;

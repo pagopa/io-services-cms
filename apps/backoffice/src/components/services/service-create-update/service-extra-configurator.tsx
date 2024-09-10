@@ -2,12 +2,12 @@ import { useDrawer } from "@/components/drawer-provider";
 import { FormStepSectionWrapper } from "@/components/forms";
 import {
   TextFieldController,
-  UrlFieldController
+  UrlFieldController,
 } from "@/components/forms/controllers";
 import {
   AddCircleOutline,
   Link,
-  RemoveCircleOutline
+  RemoveCircleOutline,
 } from "@mui/icons-material";
 import {
   Box,
@@ -19,7 +19,7 @@ import {
   ListItemIcon,
   ListItemText,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useEffect, useState } from "react";
@@ -30,7 +30,7 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 /** Configure extra parameters/configuration for a service _(i.e.: cta, fims protocol, idpay, ...)_ */
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
-  const { openDrawer, closeDrawer } = useDrawer();
+  const { closeDrawer, openDrawer } = useDrawer();
   const { formState, getValues, setValue } = useFormContext();
   const [isCtaVisible, setIsCtaVisible] = useState(false);
 
@@ -47,16 +47,16 @@ export const ServiceExtraConfigurator = () => {
 
   const areCtaUrlAndTextEmpty = () =>
     getValues(["metadata.cta.text", "metadata.cta.url"]).filter(
-      value => value.trim() === ""
+      (value) => value.trim() === "",
     ).length === 2;
 
   const renderExtraConfigListItem = (options: {
-    type: ServiceExtraConfigurationType;
-    disabled: boolean;
-    label: string;
-    description: string;
-    icon: ReactNode;
     arriving?: boolean;
+    description: string;
+    disabled: boolean;
+    icon: ReactNode;
+    label: string;
+    type: ServiceExtraConfigurationType;
   }) => (
     <ListItem disablePadding>
       <ListItemButton
@@ -66,13 +66,13 @@ export const ServiceExtraConfigurator = () => {
         <ListItemIcon>{options.icon}</ListItemIcon>
         <ListItemText
           primary={
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack alignItems="center" direction="row" spacing={1}>
               <Typography fontWeight={600}>{t(options.label)}</Typography>
               {options.arriving ? (
                 <Chip
-                  size="small"
-                  label={t("forms.service.extraConfig.arriving")}
                   color="info"
+                  label={t("forms.service.extraConfig.arriving")}
+                  size="small"
                 />
               ) : null}
             </Stack>
@@ -91,16 +91,16 @@ export const ServiceExtraConfigurator = () => {
             {t("forms.service.extraConfig.label")}
           </Typography>
         </Stack>
-        <Typography variant="body2" marginTop={3}>
+        <Typography marginTop={3} variant="body2">
           {t("forms.service.extraConfig.description")}
         </Typography>
         <List sx={{ marginTop: 3 }}>
           {renderExtraConfigListItem({
-            type: "cta",
-            disabled: false,
-            label: "forms.service.extraConfig.cta.label",
             description: "forms.service.extraConfig.cta.description",
-            icon: <Link />
+            disabled: false,
+            icon: <Link />,
+            label: "forms.service.extraConfig.cta.label",
+            type: "cta",
           })}
           {/*
           // TODO: as we are awaiting official communications, we do not show (even if disabled) extra configurations that are not agreed upon 
@@ -128,27 +128,27 @@ export const ServiceExtraConfigurator = () => {
 
   const renderCta = () => (
     <FormStepSectionWrapper
+      icon={<Link />}
       key={1}
       title={t("forms.service.extraConfig.cta.label")}
-      icon={<Link />}
     >
       <TextFieldController
-        required
-        name="metadata.cta.text"
         label={t("forms.service.metadata.cta.text.label")}
+        name="metadata.cta.text"
         placeholder={t("forms.service.metadata.cta.text.placeholder")}
+        required
       />
       <UrlFieldController
-        required
-        name="metadata.cta.url"
         label={t("forms.service.metadata.cta.url.label")}
+        name="metadata.cta.url"
         placeholder={t("forms.service.metadata.cta.url.placeholder")}
+        required
       />
       <Button
-        variant="text"
-        startIcon={<RemoveCircleOutline />}
         color="error"
         onClick={handleRemoveCta}
+        startIcon={<RemoveCircleOutline />}
+        variant="text"
       >
         {t("forms.service.extraConfig.remove")}
       </Button>
@@ -164,9 +164,9 @@ export const ServiceExtraConfigurator = () => {
     <Box marginTop={5}>
       {isCtaVisible ? renderCta() : null}
       <Button
-        variant="text"
-        startIcon={<AddCircleOutline />}
         onClick={openExtraConfigurationDrawer}
+        startIcon={<AddCircleOutline />}
+        variant="text"
       >
         {t("forms.service.extraConfig.label")}
       </Button>

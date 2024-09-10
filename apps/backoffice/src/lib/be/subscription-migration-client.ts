@@ -4,7 +4,7 @@ import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import {
   getKeepAliveAgentOptions,
   newHttpAgent,
-  newHttpsAgent
+  newHttpsAgent,
 } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -14,30 +14,31 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+
 import { HealthChecksError } from "./errors";
 
-export type SubscriptionsMigrationClient = {
+export interface SubscriptionsMigrationClient {
+  claimOwnership: (
+    organizationFiscalCode: string,
+    delegateId: string,
+  ) => TE.TaskEither<Error, void>;
+  getDelegatesByOrganization: (
+    organizationFiscalCode: string,
+  ) => TE.TaskEither<Error, MigrationDelegateList>;
   getLatestOwnershipClaimStatus: (
-    organizationFiscalCode: string
+    organizationFiscalCode: string,
   ) => TE.TaskEither<Error, MigrationItemList>;
   getOwnershipClaimStatus: (
     organizationFiscalCode: string,
-    delegateId: string
+    delegateId: string,
   ) => TE.TaskEither<Error, MigrationData>;
-  claimOwnership: (
-    organizationFiscalCode: string,
-    delegateId: string
-  ) => TE.TaskEither<Error, void>;
-  getDelegatesByOrganization: (
-    organizationFiscalCode: string
-  ) => TE.TaskEither<Error, MigrationDelegateList>;
-};
+}
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
   SUBSCRIPTION_MIGRATION_API_KEY: NonEmptyString,
-  SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString
+  SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString,
+  SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
 });
 
 type MigrationDataAdapter = t.TypeOf<typeof MigrationDataAdapter>;
@@ -46,8 +47,8 @@ const MigrationDataAdapter = t.partial({
     COMPLETED: t.string,
     FAILED: t.string,
     INITIAL: t.string,
-    PROCESSING: t.string
-  })
+    PROCESSING: t.string,
+  }),
 });
 
 let subscriptionsMigrationConfig: Config;
@@ -59,7 +60,7 @@ const getSubscriptionsMigrationConfig = (): Config => {
 
     if (E.isLeft(result)) {
       throw new Error("error parsing subscriptions migration config", {
-        cause: readableReport(result.left)
+        cause: readableReport(result.left),
       });
     }
 
@@ -78,12 +79,12 @@ const getAxiosInstance: () => AxiosInstance = () => {
 
   return axios.create({
     baseURL: configuration.SUBSCRIPTION_MIGRATION_API_URL,
-    timeout: 9000,
     headers: {
-      "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY
+      "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY,
     },
     httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env)),
+    timeout: 9000,
   });
 };
 
@@ -91,68 +92,68 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
   const axiosInstance = getAxiosInstance();
 
   const getLatestOwnershipClaimStatus = (
-    organizationFiscalCode: string
+    organizationFiscalCode: string,
   ): TE.TaskEither<Error, MigrationItemList> =>
     pipe(
       TE.tryCatch(
         () =>
           axiosInstance.get(
-            `/organizations/${organizationFiscalCode}/ownership-claims/latest`
+            `/organizations/${organizationFiscalCode}/ownership-claims/latest`,
           ),
-        identity
+        identity,
       ),
-      TE.mapLeft(e => {
+      TE.mapLeft((e) => {
         if (axios.isAxiosError(e)) {
           return new Error(
-            `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`
+            `subscriptions migration getLatestOwnershipClaimStatus Axios error catched ${e.message}`,
           );
         } else {
           return new Error(
-            `Error calling subscriptions migration getLatestOwnershipClaimStatus API: ${e}`
+            `Error calling subscriptions migration getLatestOwnershipClaimStatus API: ${e}`,
           );
         }
       }),
-      TE.chainW(response =>
+      TE.chainW((response) =>
         pipe(
           response.data,
           MigrationItemList.decode,
           E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
+          TE.fromEither,
+        ),
+      ),
     );
 
   const getOwnershipClaimStatus = (
     organizationFiscalCode: string,
-    delegateId: string
+    delegateId: string,
   ): TE.TaskEither<Error, MigrationData> =>
     pipe(
       TE.tryCatch(
         () =>
           axiosInstance.get(
-            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
+            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`,
           ),
-        identity
+        identity,
       ),
-      TE.mapLeft(e => {
+      TE.mapLeft((e) => {
         if (axios.isAxiosError(e)) {
           return new Error(
-            `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`
+            `subscriptions migration getOwnershipClaimStatus Axios error catched ${e.message}`,
           );
         } else {
           return new Error(
-            `Error calling subscriptions migration getOwnershipClaimStatus API: ${e}`
+            `Error calling subscriptions migration getOwnershipClaimStatus API: ${e}`,
           );
         }
       }),
-      TE.chainW(response =>
+      TE.chainW((response) =>
         pipe(
           response.data,
           MigrationDataAdapter.decode,
           E.mapLeft(flow(readableReport, E.toError)),
           // This is an adapter cause io-subscriptions-migration API returns a different shape than the one defined in the openapi spec
           E.map(
-            migrationData =>
+            (migrationData) =>
               ({
                 data: {
                   completed: migrationData?.data?.COMPLETED
@@ -166,85 +167,85 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
                     : undefined,
                   processing: migrationData?.data?.PROCESSING
                     ? +migrationData?.data?.PROCESSING
-                    : undefined
-                }
-              } as MigrationData)
+                    : undefined,
+                },
+              }) as MigrationData,
           ),
-          TE.fromEither
-        )
-      )
+          TE.fromEither,
+        ),
+      ),
     );
 
   const claimOwnership = (
     organizationFiscalCode: string,
-    delegateId: string
+    delegateId: string,
   ): TE.TaskEither<Error, void> =>
     pipe(
       TE.tryCatch(
         () =>
           axiosInstance.post(
-            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`
+            `/organizations/${organizationFiscalCode}/ownership-claims/${delegateId}`,
           ),
-        identity
+        identity,
       ),
-      TE.mapLeft(e => {
+      TE.mapLeft((e) => {
         if (axios.isAxiosError(e)) {
           return new Error(
-            `subscriptions migration claimOwnership Axios error catched ${e.message}`
+            `subscriptions migration claimOwnership Axios error catched ${e.message}`,
           );
         } else {
           return new Error(
-            `Error calling subscriptions migration claimOwnership API: ${e}`
+            `Error calling subscriptions migration claimOwnership API: ${e}`,
           );
         }
       }),
-      TE.map(_ => void 0)
+      TE.map((_) => void 0),
     );
 
   const getDelegatesByOrganization = (
-    organizationFiscalCode: string
+    organizationFiscalCode: string,
   ): TE.TaskEither<Error, MigrationDelegateList> =>
     pipe(
       TE.tryCatch(
         () =>
           axiosInstance.get(
-            `/organizations/${organizationFiscalCode}/delegates`
+            `/organizations/${organizationFiscalCode}/delegates`,
           ),
-        identity
+        identity,
       ),
-      TE.mapLeft(e => {
+      TE.mapLeft((e) => {
         if (axios.isAxiosError(e)) {
           return new Error(
-            `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`
+            `subscriptions migration getDelegatesByOrganization Axios error catched ${e}, organizationFiscalCode: ${organizationFiscalCode}`,
           );
         } else {
           return new Error(
-            `Error calling subscriptions migration getDelegatesByOrganization API: ${e}`
+            `Error calling subscriptions migration getDelegatesByOrganization API: ${e}`,
           );
         }
       }),
-      TE.chainW(response =>
+      TE.chainW((response) =>
         pipe(
           response.data,
           MigrationDelegateList.decode,
           E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
+          TE.fromEither,
+        ),
+      ),
     );
 
   return {
+    claimOwnership,
+    getDelegatesByOrganization,
     getLatestOwnershipClaimStatus,
     getOwnershipClaimStatus,
-    claimOwnership,
-    getDelegatesByOrganization
   };
 };
 
-const transoform = (myObject: { [key: string]: string }) => {
-  const transformedObject: { [key: string]: number } = {};
+const transoform = (myObject: Record<string, string>) => {
+  const transformedObject: Record<string, number> = {};
 
-  return Object.keys(myObject).forEach(key => {
+  return Object.keys(myObject).forEach((key) => {
     transformedObject[key.toLowerCase()] = Number(myObject[key]);
   });
 };

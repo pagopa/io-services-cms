@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
   Box,
@@ -5,21 +6,21 @@ import {
   Card,
   CardContent,
   Grid,
-  Typography
+  Typography,
 } from "@mui/material";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+
 import { aMockedIdentiyToken } from "../../../mocks/data/selfcare-data";
-import { getConfiguration } from "@/config";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
   return (
     <Grid
+      alignItems="center"
       container
       direction="column"
       justifyContent="center"
-      alignItems="center"
     >
       <Grid item padding={5}>
         <Typography textAlign="center" variant="h3">
@@ -32,7 +33,7 @@ export default function Selfcare() {
       <Grid item padding={5}>
         <Card raised sx={{ width: 300 }}>
           <CardContent sx={{ textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography gutterBottom variant="h6">
               App IO
             </Typography>
             <Typography variant="body2">
@@ -45,7 +46,7 @@ export default function Selfcare() {
                 }#token=${aMockedIdentiyToken}`}
                 passHref
               >
-                <Button variant="outlined" endIcon={<ArrowForward />}>
+                <Button endIcon={<ArrowForward />} variant="outlined">
                   Accedi al BackOffice IO
                 </Button>
               </NextLink>
@@ -65,8 +66,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

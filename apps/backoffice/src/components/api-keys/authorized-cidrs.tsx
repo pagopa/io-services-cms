@@ -4,11 +4,12 @@ import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
+
 import { TextFieldArrayController } from "../forms/controllers";
 import { arrayOfIPv4CidrSchema } from "../forms/schemas";
 import { LoaderSkeleton } from "../loaders";
 
-export type AuthorizedCidrsProps = {
+export interface AuthorizedCidrsProps {
   /** List of IPs in CIDR format */
   cidrs?: string[];
   /** Description text */
@@ -17,11 +18,11 @@ export type AuthorizedCidrsProps = {
   editable?: boolean;
   /** Event triggered when user click on **Save** button */
   onSaveClick?: (cidrs: string[]) => void;
-};
+}
 
 // Zod schema validation type for ipV4/cidr
 const schema = z.object({
-  cidrs: arrayOfIPv4CidrSchema
+  cidrs: arrayOfIPv4CidrSchema,
 });
 
 /** Show and Edit an IP List in CIDR format */
@@ -29,16 +30,16 @@ export const AuthorizedCidrs = ({
   cidrs,
   description,
   editable,
-  onSaveClick
+  onSaveClick,
 }: AuthorizedCidrsProps) => {
   const { t } = useTranslation();
 
   const formMethods = useForm({
     defaultValues: { cidrs },
+    mode: "onChange",
     resolver: zodResolver(schema),
-    mode: "onChange"
   });
-  const { getValues, formState, reset } = formMethods;
+  const { formState, getValues, reset } = formMethods;
 
   const handleSave = () => {
     if (onSaveClick) {
@@ -59,40 +60,40 @@ export const AuthorizedCidrs = ({
   return (
     <Box
       bgcolor="background.paper"
+      borderRadius={0.5}
       id="card-details"
       padding={3}
-      borderRadius={0.5}
     >
       <Typography variant="h6">{t("authorizedCidrs.title")}</Typography>
       <Typography
-        variant="body2"
         color="text.secondary"
-        marginTop={1}
         marginBottom={3}
+        marginTop={1}
+        variant="body2"
       >
         {t(description)}
       </Typography>
       <LoaderSkeleton loading={cidrs === undefined} style={{ width: "50%" }}>
         <FormProvider {...formMethods}>
-          <Box marginTop={3} component="form" autoComplete="off">
+          <Box autoComplete="off" component="form" marginTop={3}>
             <TextFieldArrayController
-              name="cidrs"
               addButtonLabel={t("authorizedCidrs.add")}
+              addCancelButton={formState.isDirty}
               addDefaultValue=""
-              size="small"
+              addSaveButton={formState.isDirty && formState.isValid}
+              editable={editable}
               inputProps={{
                 style: {
-                  textAlign: "center"
-                }
+                  textAlign: "center",
+                },
               }}
-              sx={{ maxWidth: "185px" }}
-              editable={editable}
-              readOnly
-              addSaveButton={formState.isDirty && formState.isValid}
-              onSaveClick={handleSave}
-              addCancelButton={formState.isDirty}
+              name="cidrs"
               onCancelClick={handleCancel}
+              onSaveClick={handleSave}
+              readOnly
               showGenericErrorMessage
+              size="small"
+              sx={{ maxWidth: "185px" }}
             />
           </Box>
         </FormProvider>

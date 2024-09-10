@@ -17,5 +17,5 @@ export const sanitizeObject = (obj: any): any => {
   }
 };
 
-export const sanitizedNextResponseJson = (obj: any, status: number = 200) =>
+export const sanitizedNextResponseJson = (obj: any, status = 200) =>
   NextResponse.json(sanitizeObject(obj), { status });

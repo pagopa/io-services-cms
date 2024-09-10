@@ -4,9 +4,9 @@ import { AppProvider } from "@/providers/app";
 import "@/styles/globals.css";
 import { RequiredAuthorizations } from "@/types/auth";
 import { NextPage } from "next";
+import { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
 import { appWithTranslation } from "next-i18next";
-import { AppProps } from "next/app";
 import { ReactElement, ReactNode } from "react";
 
 /**
@@ -22,9 +22,9 @@ if (getConfiguration().API_BACKEND_MOCKING) {
 }
 
 /** Used to define page layout */
-type NextPageWithLayout = NextPage & {
+type NextPageWithLayout = {
   getLayout?: (page: ReactElement, pageProps: unknown) => ReactNode;
-};
+} & NextPage;
 
 /**
  * Used to define public/protected pages, and more granular authorizations with `RequiredAuthorizations`.
@@ -37,16 +37,17 @@ type NextPageWithLayout = NextPage & {
  * To define a public page _(route)_: `Page.publicRoute = true`
  * - `publicRoute` overwrite `requiredRole` and `requiredPermissions`.
  */
-type NextPageWithAuth = NextPage & {
+type NextPageWithAuth = {
   publicRoute?: boolean;
-} & RequiredAuthorizations;
+} & NextPage &
+  RequiredAuthorizations;
 
-type AppPropsWithAuthAndLayout = AppProps & {
+type AppPropsWithAuthAndLayout = {
   Component: NextPageWithAuth & NextPageWithLayout;
-};
+} & AppProps;
 
 const App = ({ Component, pageProps }: AppPropsWithAuthAndLayout) => {
-  const getLayout = Component.getLayout ?? (page => page);
+  const getLayout = Component.getLayout ?? ((page) => page);
   const pageContent = getLayout(<Component {...pageProps} />, pageProps);
 
   return (

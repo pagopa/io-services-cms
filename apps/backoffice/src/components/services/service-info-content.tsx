@@ -3,14 +3,15 @@ import { Service } from "@/types/service";
 import { Category, PrivacyTip } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
 import { ServiceStatus } from ".";
 import { CardRowType, CardRows } from "../cards";
 import { DrawerBaseContent } from "../drawer-provider";
 import { MarkdownView } from "../markdown-view";
 
-export type ServiceInfoContentProps = {
+export interface ServiceInfoContentProps {
   data?: Service;
-};
+}
 
 /** Render service details information */
 export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
@@ -21,29 +22,29 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
     const rowsMin: CardRowType[] = [];
     rowsMin.push({
       label: "routes.service.status",
-      value: <ServiceStatus status={data?.status} />
+      value: <ServiceStatus status={data?.status} />,
     });
     if (data?.status.value === ServiceLifecycleStatusTypeEnum.approved) {
       rowsMin.push({
         label: "routes.service.visibility",
+        renderValueOnNewLine: true,
         value: data?.visibility
           ? t(`service.visibility.${data?.visibility}`)
           : undefined,
-        renderValueOnNewLine: true
       });
     }
     rowsMin.push(
       {
         label: "routes.service.serviceId",
+        renderValueOnNewLine: true,
         value: data?.id,
-        renderValueOnNewLine: true
       },
       {
-        label: "routes.service.lastUpdate",
-        value: data?.lastUpdate,
         kind: "datetime",
-        renderValueOnNewLine: true
-      }
+        label: "routes.service.lastUpdate",
+        renderValueOnNewLine: true,
+        value: data?.lastUpdate,
+      },
     );
     return rowsMin;
   };
@@ -53,85 +54,85 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
     ...buildRowsMin(),
     {
       label: "forms.service.metadata.scope.label",
+      renderValueOnNewLine: true,
       value: t(
-        `forms.service.metadata.scope.${data?.metadata.scope.toLowerCase()}`
+        `forms.service.metadata.scope.${data?.metadata.scope.toLowerCase()}`,
       ),
-      renderValueOnNewLine: true
     },
     {
       label: "routes.service.name",
+      renderValueOnNewLine: true,
       value: data?.name,
-      renderValueOnNewLine: true
     },
     {
       label: "routes.service.topic",
+      renderValueOnNewLine: true,
       value: data?.metadata.topic?.name ?? t("undefined"),
-      renderValueOnNewLine: true
-    }
+    },
   ];
 
   /** row list for full drawer details */
   const rowsLinksContacts: CardRowType[] = [
     {
-      label: "routes.service.privacyUrl",
-      value: data?.metadata.privacy_url ?? "",
       kind: "link",
-      renderValueOnNewLine: true
+      label: "routes.service.privacyUrl",
+      renderValueOnNewLine: true,
+      value: data?.metadata.privacy_url ?? "",
     },
     {
-      label: "routes.service.tosUrl",
-      value: data?.metadata.tos_url ?? "",
       kind: "link",
-      renderValueOnNewLine: true
+      label: "routes.service.tosUrl",
+      renderValueOnNewLine: true,
+      value: data?.metadata.tos_url ?? "",
     },
     {
       label: "routes.service.phone",
+      renderValueOnNewLine: true,
       value: data?.metadata.phone ?? "",
-      renderValueOnNewLine: true
     },
     {
+      kind: "link",
       label: "routes.service.supportUrl",
+      renderValueOnNewLine: true,
       value: data?.metadata.support_url ?? "",
-      kind: "link",
-      renderValueOnNewLine: true
     },
     {
-      label: "routes.service.webUrl",
-      value: data?.metadata.web_url ?? "",
       kind: "link",
-      renderValueOnNewLine: true
+      label: "routes.service.webUrl",
+      renderValueOnNewLine: true,
+      value: data?.metadata.web_url ?? "",
     },
     {
       label: "routes.service.address",
+      renderValueOnNewLine: true,
       value: data?.metadata.address ?? "",
-      renderValueOnNewLine: true
     },
     {
       label: "routes.service.email",
+      renderValueOnNewLine: true,
       value: data?.metadata.email ?? "",
-      renderValueOnNewLine: true
     },
     {
       label: "routes.service.pec",
+      renderValueOnNewLine: true,
       value: data?.metadata.pec ?? "",
-      renderValueOnNewLine: true
     },
     {
+      kind: "link",
       label: "routes.service.appIos",
+      renderValueOnNewLine: true,
       value: data?.metadata.app_ios ?? "",
-      kind: "link",
-      renderValueOnNewLine: true
     },
     {
-      label: "routes.service.appAndroid",
-      value: data?.metadata.app_android ?? "",
       kind: "link",
-      renderValueOnNewLine: true
-    }
+      label: "routes.service.appAndroid",
+      renderValueOnNewLine: true,
+      value: data?.metadata.app_android ?? "",
+    },
   ];
 
   const renderSectionTitle = (text: string) => (
-    <Box marginTop={4} marginBottom={2}>
+    <Box marginBottom={2} marginTop={4}>
       <Typography id="section-title" variant="overline">
         {t(text)}
       </Typography>
@@ -141,7 +142,7 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
   const renderSensitiveService = () => {
     if (data?.require_secure_channel)
       return (
-        <Stack direction="row" alignContent="center" spacing={1} marginTop={3}>
+        <Stack alignContent="center" direction="row" marginTop={3} spacing={1}>
           <PrivacyTip sx={{ fontSize: "24px" }} />
           <Typography variant="body2">
             {t("routes.service.sensitive")}
@@ -152,13 +153,13 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
 
   return (
     <DrawerBaseContent
-      width="25vw"
-      minWidth="305px"
-      maxWidth="400px"
       header={{
         startIcon: <Category color="inherit" />,
-        title: "service.details"
+        title: "service.details",
       }}
+      maxWidth="400px"
+      minWidth="305px"
+      width="25vw"
     >
       <CardRows rows={rowsExt} />
       {renderSectionTitle("routes.service.description")}

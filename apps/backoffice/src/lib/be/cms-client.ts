@@ -7,22 +7,23 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
+
 import { HealthChecksError } from "./errors";
 
 let ioServicesCmsClient: Client;
 let topicsProvider: TopicsProvider;
 
-export type TopicsProvider = {
+export interface TopicsProvider {
   getServiceTopics: (
-    xForwardedFor: string | undefined
+    xForwardedFor: string | undefined,
   ) => Promise<ServiceTopicList>;
-};
+}
 
 const Config = t.type({
-  API_SERVICES_CMS_URL: NonEmptyString,
+  API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES: NumberFromString,
   API_SERVICES_CMS_BASE_PATH: NonEmptyString,
   API_SERVICES_CMS_MOCKING: BooleanFromString,
-  API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES: NumberFromString
+  API_SERVICES_CMS_URL: NonEmptyString,
 });
 
 const getIoServicesCmsClientConfig = () => {
@@ -30,7 +31,7 @@ const getIoServicesCmsClientConfig = () => {
 
   if (E.isLeft(result)) {
     throw new Error("error parsing io-services-cms client config", {
-      cause: readableReport(result.left)
+      cause: readableReport(result.left),
     });
   }
   return result.right;
@@ -45,9 +46,9 @@ const buildIoServicesCmsClient = (): Client => {
   }
 
   return createClient({
+    basePath: configuration.API_SERVICES_CMS_BASE_PATH,
     baseUrl: configuration.API_SERVICES_CMS_URL,
     fetchApi: getFetch(process.env),
-    basePath: configuration.API_SERVICES_CMS_BASE_PATH
   });
 };
 
@@ -62,12 +63,11 @@ const buildTopicsProvider = (): TopicsProvider => {
   let cachedServiceTopics: ServiceTopicList;
   let cachedServiceTopicsExpiration: Date;
 
-  const {
-    API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES
-  } = getIoServicesCmsClientConfig();
+  const { API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES } =
+    getIoServicesCmsClientConfig();
 
   const getServiceTopics = async (
-    xForwardedFor: string | undefined
+    xForwardedFor: string | undefined,
   ): Promise<ServiceTopicList> => {
     // topic list not expired
     if (
@@ -80,7 +80,7 @@ const buildTopicsProvider = (): TopicsProvider => {
 
     // Retrieving topics from io-services-cms
     const response = await getIoServicesCmsClient().getServiceTopics({
-      "X-Forwarded-For": xForwardedFor
+      "X-Forwarded-For": xForwardedFor,
     } as any);
 
     if (E.isLeft(response)) {
@@ -105,7 +105,7 @@ const buildTopicsProvider = (): TopicsProvider => {
   };
 
   return {
-    getServiceTopics
+    getServiceTopics,
   };
 };
 
@@ -124,15 +124,15 @@ export async function getIoServicesCmsHealth() {
 
     if (E.isLeft(infoRes)) {
       throw new Error(
-        `Service CMS client encounter the error => ${infoRes.left}`
+        `Service CMS client encounter the error => ${infoRes.left}`,
       );
     }
     const { status, value } = infoRes.right;
     if (status !== 200) {
       throw new Error(
         `Service CMS is not healthy, Info response status ${status}, value ${JSON.stringify(
-          value
-        )}`
+          value,
+        )}`,
       );
     }
   } catch (e) {

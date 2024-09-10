@@ -1,56 +1,55 @@
 import { Box } from "@mui/material";
+
 import { IOColors, MobileIcon, MobileTypography } from "../../components";
 
-type ServicePreviewTopbarProps = {
-  serviceName?: string;
+interface ServicePreviewTopbarProps {
   opacity: number;
-};
+  serviceName?: string;
+}
 
 /** Display App IO top navigation bar */
 const ServicePreviewTopbar = ({
   opacity,
-  serviceName
-}: ServicePreviewTopbarProps) => {
-  return (
-    <Box
-      height={56}
-      flexDirection="row"
-      display="flex"
-      justifyContent="space-between"
-      alignItems="center"
-      paddingY={2}
-      paddingX={3}
-      borderBottom={`1px solid ${IOColors["grey-50"]}`}
-      sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
-    >
-      <MobileIcon
-        icon="MobileIconArrowBack"
-        width={24}
-        height={24}
-        color={IOColors["grey-850"]}
-      />
+  serviceName,
+}: ServicePreviewTopbarProps) => (
+  <Box
+    alignItems="center"
+    borderBottom={`1px solid ${IOColors["grey-50"]}`}
+    display="flex"
+    flexDirection="row"
+    height={56}
+    justifyContent="space-between"
+    paddingX={3}
+    paddingY={2}
+    sx={{ backgroundColor: `rgb(244,245,248,${1 - opacity})` }}
+  >
+    <MobileIcon
+      color={IOColors["grey-850"]}
+      height={24}
+      icon="MobileIconArrowBack"
+      width={24}
+    />
 
-      <MobileTypography
-        noWrap
-        fontSize={14}
-        fontWeight={400}
-        lineHeight="33px"
-        textOverflow="ellipsis"
-        paddingX={2}
-        sx={{
-          opacity
-        }}
-      >
-        {serviceName}
-      </MobileTypography>
-      <MobileIcon
-        icon="MobileIconQMark"
-        width={16}
-        height={24}
-        color={IOColors["grey-850"]}
-      />
-    </Box>
-  );
-};
+    <MobileTypography
+      fontSize={14}
+      fontWeight={400}
+      lineHeight="33px"
+      noWrap
+      paddingX={2}
+      sx={{
+        opacity,
+      }}
+      textOverflow="ellipsis"
+    >
+      {serviceName}
+    </MobileTypography>
+    <MobileIcon
+      color={IOColors["grey-850"]}
+      height={24}
+      icon="MobileIconQMark"
+      width={16}
+    />
+  </Box>
+);
 
 export default ServicePreviewTopbar;

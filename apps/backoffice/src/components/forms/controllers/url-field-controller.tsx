@@ -15,50 +15,48 @@ export function UrlFieldController({
   ...props
 }: UrlFieldControllerProps) {
   const { t } = useTranslation();
-  const { register, control, formState } = useFormContext();
+  const { control, formState, register } = useFormContext();
   const error = get(formState.errors, name);
 
   return (
     <Controller
-      name={name}
       control={control}
+      name={name}
       render={({ field: { onChange, value } }) => (
         <Grid
+          alignItems="center"
+          columnSpacing={2}
           container
           direction="row"
           justifyContent="center"
-          alignItems="center"
-          columnSpacing={2}
         >
           <Grid item xs={true}>
             <TextField
               {...register(name)}
               {...props}
-              fullWidth
-              margin="normal"
-              value={value}
               InputProps={{
                 endAdornment: error ? (
                   <InputAdornment position="end">
                     <ErrorOutlineRoundedIcon color="error" />
                   </InputAdornment>
-                ) : (
-                  undefined
-                )
+                ) : undefined,
               }}
               error={!!error}
+              fullWidth
               helperText={error ? error.message : null}
+              margin="normal"
               onChange={onChange}
+              value={value}
             />
           </Grid>
           <Grid item xs="auto">
             <ButtonNaked
               color="primary"
-              startIcon={<OpenInNew />}
+              disabled={value ? (value.length === 0 ?? false) : true}
+              onClick={() => window.open(value, "_blank")}
               onFocusVisible={function noRefCheck() {}}
               size="large"
-              disabled={value ? value.length === 0 ?? false : true}
-              onClick={() => window.open(value, "_blank")}
+              startIcon={<OpenInNew />}
             >
               {t("forms.testUrl")}
             </ButtonNaked>

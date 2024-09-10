@@ -5,50 +5,50 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  SelectProps
+  SelectProps,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 export type SelectControllerProps = {
-  name: string;
+  helperText?: ReactNode;
   items: {
     label: string;
-    value: string | number | readonly string[] | undefined;
+    value: number | readonly string[] | string | undefined;
   }[];
-  helperText?: ReactNode;
+  name: string;
 } & SelectProps;
 
 /** Controller for MUI `Select` component.\
  * Used for collecting user provided information from a list of options. */
 export function SelectController({
-  name,
-  items,
   helperText,
+  items,
+  name,
   ...props
 }: SelectControllerProps) {
   const { t } = useTranslation();
-  const { register, control } = useFormContext();
+  const { control, register } = useFormContext();
 
   if (items.length === 0) return; // avoid mui out-of-range error
   return (
     <Controller
-      name={name}
       control={control}
+      name={name}
       render={({ field: { onChange, value } }) => (
         <FormControl fullWidth margin="normal">
           <InputLabel id={`${name}-label`}>{props.label}</InputLabel>
           <Select
             {...props}
             {...register(name)}
-            id={name}
-            labelId={`${name}-label`}
-            value={value}
-            onChange={onChange}
-            fullWidth
-            input={<OutlinedInput id="select-label" label={props.label} />}
             MenuProps={{ disableScrollLock: true }}
+            fullWidth
+            id={name}
+            input={<OutlinedInput id="select-label" label={props.label} />}
+            labelId={`${name}-label`}
+            onChange={onChange}
+            value={value}
           >
             {items.map((item, index) => (
               <MenuItem key={index} value={item.value}>

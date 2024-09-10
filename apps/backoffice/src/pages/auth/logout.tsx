@@ -9,14 +9,14 @@ export default function Logout() {
     signOut({ callbackUrl: getConfiguration().SELFCARE_URL });
   }, []);
 
-  return <LoaderFullscreen title="app.title" content="auth.leaving" />;
+  return <LoaderFullscreen content="auth.leaving" title="app.title" />;
 }
 
 export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }

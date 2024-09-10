@@ -1,7 +1,7 @@
 import { Typography, TypographyProps } from "@mui/material";
 
-interface MobileTypographyProps extends TypographyProps {}
+type MobileTypographyProps = TypographyProps;
 
-export const MobileTypography = (props: MobileTypographyProps) => {
-  return <Typography {...props} fontFamily="TitilliumSansPro, sans-serif" />;
-};
+export const MobileTypography = (props: MobileTypographyProps) => (
+  <Typography {...props} fontFamily="TitilliumSansPro, sans-serif" />
+);

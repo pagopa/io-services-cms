@@ -1,28 +1,29 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
 import { ButtonExit } from "../buttons";
 import { LoaderSkeleton } from "../loaders";
 import { PageBreadcrumbs } from "./page-breadcrumbs";
 import { PageHtmlHeadTitle } from "./page-html-head-title";
 
-export type PageHeaderProps = {
-  title?: string;
-  titleVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+export interface PageHeaderProps {
   description?: string;
   hideBreadcrumbs?: boolean;
-  /** Displays an exit button, to abort the current page operation  */
-  showExit?: boolean;
   /** Event triggered on exit button click */
   onExitClick?: () => void;
-};
+  /** Displays an exit button, to abort the current page operation  */
+  showExit?: boolean;
+  title?: string;
+  titleVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+}
 
 export const PageHeader = ({
-  title,
-  titleVariant = "h4",
   description,
   hideBreadcrumbs,
+  onExitClick,
   showExit,
-  onExitClick
+  title,
+  titleVariant = "h4",
 }: PageHeaderProps) => {
   const { t } = useTranslation();
 
@@ -35,7 +36,7 @@ export const PageHeader = ({
         </Box>
       ) : null}
       {hideBreadcrumbs ? null : <PageBreadcrumbs />}
-      <Box marginBottom={3} id="bo-io-page-title-descr">
+      <Box id="bo-io-page-title-descr" marginBottom={3}>
         <Typography marginBottom={2} variant={titleVariant}>
           <LoaderSkeleton
             loading={title === undefined}

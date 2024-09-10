@@ -1,107 +1,108 @@
 import { useTranslation } from "next-i18next";
+
 import { MobileIcon } from "../../components";
 import ServicePreviewSectionList from "./service-preview-section-list";
 import { ServicePreviewSectionListItemProps } from "./service-preview-section-list-item";
 
-type ServicePreviewInfoSectionProps = {
-  websiteLink?: string;
+interface ServicePreviewInfoSectionProps {
+  address?: string;
   appStoreLink?: string;
   customerCareLink?: string;
-  phoneNumber?: string;
   email?: string;
-  pec?: string;
   fiscalCode?: string;
-  address?: string;
+  pec?: string;
+  phoneNumber?: string;
   serviceId?: string;
-};
+  websiteLink?: string;
+}
 
 const ServicePreviewInfoSection = ({
-  websiteLink,
+  address,
   appStoreLink,
   customerCareLink,
-  phoneNumber,
   email,
-  pec,
   fiscalCode,
-  address,
-  serviceId
+  pec,
+  phoneNumber,
+  serviceId,
+  websiteLink,
 }: ServicePreviewInfoSectionProps) => {
   const { t } = useTranslation();
   const serviceInfo: ServicePreviewSectionListItemProps[] = [
     {
-      variant: "link",
-      startIcon: <MobileIcon icon="MobileIconWebsite" width={24} height={24} />,
-      value: websiteLink,
+      isUrl: true,
       label: t("service.inAppPreview.sections.info.websiteLabel"),
-      isUrl: true
+      startIcon: <MobileIcon height={24} icon="MobileIconWebsite" width={24} />,
+      value: websiteLink,
+      variant: "link",
     },
     {
-      variant: "link",
+      label: t("service.inAppPreview.sections.info.appStoreLabel"),
       startIcon: (
-        <MobileIcon icon="MobileIconPhoneApp" width={16} height={24} />
+        <MobileIcon height={24} icon="MobileIconPhoneApp" width={16} />
       ),
       value: appStoreLink,
-      label: t("service.inAppPreview.sections.info.appStoreLabel")
+      variant: "link",
     },
     {
-      variant: "link",
+      isUrl: true,
+      label: t("service.inAppPreview.sections.info.customerCareLabel"),
       startIcon: (
-        <MobileIcon icon="MobileIconCustomerCare" width={24} height={24} />
+        <MobileIcon height={24} icon="MobileIconCustomerCare" width={24} />
       ),
       value: customerCareLink,
-      label: t("service.inAppPreview.sections.info.customerCareLabel"),
-      isUrl: true
+      variant: "link",
     },
     {
-      variant: "link",
+      label: t("service.inAppPreview.sections.info.phoneLabel"),
       startIcon: (
-        <MobileIcon icon="MobileIconPhoneCall" width={24} height={24} />
+        <MobileIcon height={24} icon="MobileIconPhoneCall" width={24} />
       ),
       value: phoneNumber,
-      label: t("service.inAppPreview.sections.info.phoneLabel")
+      variant: "link",
     },
     {
-      variant: "link",
-      startIcon: <MobileIcon icon="MobileIconEmail" width={24} height={20} />,
-      value: email,
+      isEmail: true,
       label: t("service.inAppPreview.sections.info.emailLabel"),
-      isEmail: true
-    },
-    {
+      startIcon: <MobileIcon height={20} icon="MobileIconEmail" width={24} />,
+      value: email,
       variant: "link",
-      startIcon: <MobileIcon icon="MobileIconPec" width={24} height={22} />,
-      value: pec,
+    },
+    {
+      isEmail: true,
       label: t("service.inAppPreview.sections.info.pecLabel"),
-      isEmail: true
+      startIcon: <MobileIcon height={22} icon="MobileIconPec" width={24} />,
+      value: pec,
+      variant: "link",
     },
     {
-      variant: "info",
-      startIcon: (
-        <MobileIcon icon="MobileIconFiscalCode" width={24} height={21} />
-      ),
-      endIcon: <MobileIcon icon="MobileIconCopy" width={24} height={25} />,
-      value: fiscalCode,
+      endIcon: <MobileIcon height={25} icon="MobileIconCopy" width={24} />,
       isPrimaryValue: true,
-      label: t("service.inAppPreview.sections.info.fiscalCodeLabel")
+      label: t("service.inAppPreview.sections.info.fiscalCodeLabel"),
+      startIcon: (
+        <MobileIcon height={21} icon="MobileIconFiscalCode" width={24} />
+      ),
+      value: fiscalCode,
+      variant: "info",
     },
     {
-      variant: "info",
-      startIcon: <MobileIcon icon="MobileIconAddress" width={20} height={24} />,
+      label: t("service.inAppPreview.sections.info.addressLabel"),
+      startIcon: <MobileIcon height={24} icon="MobileIconAddress" width={20} />,
       value: address,
-      label: t("service.inAppPreview.sections.info.addressLabel")
+      variant: "info",
     },
     {
-      variant: "info",
-      startIcon: <MobileIcon icon="MobileIconId" width={24} height={25} />,
+      label: t("service.inAppPreview.sections.info.serviceIDLabel"),
+      startIcon: <MobileIcon height={25} icon="MobileIconId" width={24} />,
       value: serviceId,
-      label: t("service.inAppPreview.sections.info.serviceIDLabel")
-    }
+      variant: "info",
+    },
   ];
 
   return (
     <ServicePreviewSectionList
-      title="service.inAppPreview.sections.info.title"
       items={serviceInfo}
+      title="service.inAppPreview.sections.info.title"
     />
   );
 };

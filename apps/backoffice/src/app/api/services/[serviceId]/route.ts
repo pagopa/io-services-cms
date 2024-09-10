@@ -2,6 +2,7 @@ import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
+
 import { BackOfficeUser } from "../../../../../types/next-auth";
 
 /**
@@ -11,15 +12,15 @@ export const GET = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) =>
     forwardIoServicesCmsRequest("getService", {
-      nextRequest,
       backofficeUser,
-      pathParams: params
-    })
+      nextRequest,
+      pathParams: params,
+    }),
 );
 
 /**
@@ -29,9 +30,9 @@ export const PUT = withJWTAuthHandler(
   async (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) => {
     let jsonBody;
     try {
@@ -39,24 +40,24 @@ export const PUT = withJWTAuthHandler(
     } catch (_) {
       return NextResponse.json(
         {
-          title: "validationError",
+          detail: "invalid JSON body",
           status: HTTP_STATUS_BAD_REQUEST as any,
-          detail: "invalid JSON body"
+          title: "validationError",
         },
-        { status: HTTP_STATUS_BAD_REQUEST }
+        { status: HTTP_STATUS_BAD_REQUEST },
       );
     }
     jsonBody.organization = {
+      fiscal_code: backofficeUser.institution.fiscalCode,
       name: backofficeUser.institution.name,
-      fiscal_code: backofficeUser.institution.fiscalCode
     };
     return forwardIoServicesCmsRequest("updateService", {
-      nextRequest,
       backofficeUser,
       jsonBody,
-      pathParams: params
+      nextRequest,
+      pathParams: params,
     });
-  }
+  },
 );
 
 /**
@@ -66,13 +67,13 @@ export const DELETE = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) =>
     forwardIoServicesCmsRequest("deleteService", {
-      nextRequest,
       backofficeUser,
-      pathParams: params
-    })
+      nextRequest,
+      pathParams: params,
+    }),
 );

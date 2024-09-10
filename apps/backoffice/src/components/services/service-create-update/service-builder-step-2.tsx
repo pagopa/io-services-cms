@@ -1,7 +1,7 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import {
   SwitchController,
-  UrlFieldController
+  UrlFieldController,
 } from "@/components/forms/controllers";
 import { getOptionalUrlSchema, getUrlSchema } from "@/components/forms/schemas";
 import { AssistanceChannelType } from "@/types/service";
@@ -11,32 +11,33 @@ import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
+
 import { ServiceAssistanceChannels } from "./service-assistance-channels";
 
 const regexPhone = new RegExp(
-  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/
+  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/,
 );
 
 const getSingleAssistanceChannelSchema = (
-  t: TFunction<"translation", undefined>
+  t: TFunction<"translation", undefined>,
 ) =>
   z.union([
     z.object({
       type: z.literal("email"),
-      value: z.string().email(t("forms.errors.field.email"))
+      value: z.string().email(t("forms.errors.field.email")),
     }),
     z.object({
       type: z.literal("pec"),
-      value: z.string().email(t("forms.errors.field.email"))
+      value: z.string().email(t("forms.errors.field.email")),
     }),
     z.object({
       type: z.literal("phone"),
-      value: z.string().regex(regexPhone, t("forms.errors.field.phone"))
+      value: z.string().regex(regexPhone, t("forms.errors.field.phone")),
     }),
     z.object({
       type: z.literal("support_url"),
-      value: getUrlSchema(t)
-    })
+      value: getUrlSchema(t),
+    }),
   ]);
 
 const getAssistanceChannelsSchema = (t: TFunction<"translation", undefined>) =>
@@ -44,7 +45,7 @@ const getAssistanceChannelsSchema = (t: TFunction<"translation", undefined>) =>
     .array(getSingleAssistanceChannelSchema(t))
     .min(1)
     .refine(
-      values => {
+      (values) => {
         const types = new Set<AssistanceChannelType>();
         for (const item of values) {
           if (types.has(item.type)) {
@@ -55,32 +56,32 @@ const getAssistanceChannelsSchema = (t: TFunction<"translation", undefined>) =>
         return true;
       },
       {
-        message: t("forms.errors.field.assistanceChannels")
-      }
+        message: t("forms.errors.field.assistanceChannels"),
+      },
     );
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z
     .object({
-      require_secure_channel: z.boolean(),
       metadata: z.object({
+        app_android: getOptionalUrlSchema(t),
+        app_ios: getOptionalUrlSchema(t),
+        assistanceChannels: getAssistanceChannelsSchema(t),
         privacy_url: getUrlSchema(t),
         tos_url: getOptionalUrlSchema(t),
-        assistanceChannels: getAssistanceChannelsSchema(t),
         web_url: getOptionalUrlSchema(t),
-        app_android: getOptionalUrlSchema(t),
-        app_ios: getOptionalUrlSchema(t)
-      })
+      }),
+      require_secure_channel: z.boolean(),
     })
     .refine(
-      schema =>
+      (schema) =>
         schema.require_secure_channel === false ||
         (schema.require_secure_channel === true &&
           schema.metadata.tos_url !== ""),
       {
         message: t("forms.errors.field.privacyCritical"),
-        path: ["metadata.tos_url"]
-      }
+        path: ["metadata.tos_url"],
+      },
     );
 
 /** Second step of Service create/update process */
@@ -92,51 +93,51 @@ export const ServiceBuilderStep2 = () => {
   return (
     <>
       <FormStepSectionWrapper
+        icon={<PrivacyTipIcon />}
         key={0}
         title={t("forms.service.legalInfo")}
-        icon={<PrivacyTipIcon />}
       >
         <UrlFieldController
-          required
-          name="metadata.privacy_url"
           label={t("forms.service.metadata.privacyUrl.label")}
+          name="metadata.privacy_url"
           placeholder={t("forms.service.metadata.privacyUrl.placeholder")}
+          required
         />
         <SwitchController
-          name="require_secure_channel"
-          label={t("forms.service.requireSecureChannel.label")}
           helperText={t("forms.service.requireSecureChannel.helperText")}
+          label={t("forms.service.requireSecureChannel.label")}
+          name="require_secure_channel"
         />
         {requiredTosUrl ? (
           <UrlFieldController
-            required={requiredTosUrl}
-            name="metadata.tos_url"
             label={t("forms.service.metadata.tosUrl.label")}
+            name="metadata.tos_url"
             placeholder={t("forms.service.metadata.tosUrl.placeholder")}
+            required={requiredTosUrl}
           />
         ) : null}
       </FormStepSectionWrapper>
       <FormStepSectionWrapper
+        icon={<SupportAgent />}
         key={1}
         title={t("forms.service.assistanceChannels.label")}
-        icon={<SupportAgent />}
       >
         <ServiceAssistanceChannels />
       </FormStepSectionWrapper>
       <FormStepSectionWrapper key={2} title={t("forms.service.otherChannels")}>
         <UrlFieldController
-          name="metadata.web_url"
           label={t("forms.service.metadata.webUrl.label")}
+          name="metadata.web_url"
           placeholder={t("forms.service.metadata.webUrl.placeholder")}
         />
         <UrlFieldController
-          name="metadata.app_android"
           label={t("forms.service.metadata.appAndroid.label")}
+          name="metadata.app_android"
           placeholder={t("forms.service.metadata.appAndroid.placeholder")}
         />
         <UrlFieldController
-          name="metadata.app_ios"
           label={t("forms.service.metadata.appIos.label")}
+          name="metadata.app_ios"
           placeholder={t("forms.service.metadata.appIos.placeholder")}
         />
       </FormStepSectionWrapper>

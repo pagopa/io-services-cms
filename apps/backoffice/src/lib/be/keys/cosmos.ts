@@ -2,17 +2,18 @@ import { Cidr } from "@/generated/api/Cidr";
 import { getSubscriptionCIDRsModel } from "@/lib/be/legacy-cosmos";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+
 import { cosmosErrorsToManagedInternalError } from "../errors";
 
 export async function getSubscriptionAuthorizedCIDRs(subscriptionId: string) {
   const result = await getSubscriptionCIDRsModel().findLastVersionByModelId([
-    subscriptionId as NonEmptyString
+    subscriptionId as NonEmptyString,
   ])();
 
   if (E.isLeft(result)) {
     throw cosmosErrorsToManagedInternalError(
       `Error has occurred while upserting subscription CIDRs reason => ${result.left.kind}`,
-      result.left
+      result.left,
     );
   }
 
@@ -21,18 +22,18 @@ export async function getSubscriptionAuthorizedCIDRs(subscriptionId: string) {
 
 export async function upsertSubscriptionAuthorizedCIDRs(
   subscriptionId: string,
-  cidrs: ReadonlyArray<Cidr>
+  cidrs: readonly Cidr[],
 ) {
   const result = await getSubscriptionCIDRsModel().upsert({
     cidrs: new Set(cidrs),
     kind: "INewSubscriptionCIDRs",
-    subscriptionId: subscriptionId as NonEmptyString
+    subscriptionId: subscriptionId as NonEmptyString,
   })();
 
   if (E.isLeft(result)) {
     throw cosmosErrorsToManagedInternalError(
       `An error has occurred while upserting subscription CIDRs reason => ${result.left.kind}`,
-      result.left
+      result.left,
     );
   }
 

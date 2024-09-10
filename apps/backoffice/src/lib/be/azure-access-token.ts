@@ -1,12 +1,13 @@
 import {
   AccessToken,
   AzureAuthorityHosts,
-  ClientSecretCredential
+  ClientSecretCredential,
 } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
+
 import { HealthChecksError } from "./errors";
 
 //Instanza contentente le credenziali per accedere ad Azure
@@ -17,7 +18,7 @@ const Config = t.type({
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-  AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString
+  AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString,
 });
 
 let azureConfig: Config;
@@ -29,8 +30,8 @@ const getAzureConfig = (): Config => {
     if (E.isLeft(result)) {
       throw new Error(
         `error parsing azure access-token config, ${readableReport(
-          result.left
-        )}`
+          result.left,
+        )}`,
       );
     }
     azureConfig = result.right;
@@ -49,11 +50,11 @@ const refreshAzureAccessToken = async (): Promise<AccessToken> => {
       apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
       apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
       {
-        authorityHost: AzureAuthorityHosts.AzurePublicCloud
-      }
+        authorityHost: AzureAuthorityHosts.AzurePublicCloud,
+      },
     );
     tokenResponse = await credential.getToken(
-      apimConfig.AZURE_CREDENTIALS_SCOPE_URL
+      apimConfig.AZURE_CREDENTIALS_SCOPE_URL,
     );
   } catch (e) {
     console.error("Error retrieving on Azure Access Token", e);
@@ -73,8 +74,8 @@ export const getAzureAccessToken = async (): Promise<string> => {
     accessToken = await refreshAzureAccessToken();
     console.debug(
       `Azure AccessToken initialized: Expiration Date is => $${new Date(
-        accessToken.expiresOnTimestamp
-      )}`
+        accessToken.expiresOnTimestamp,
+      )}`,
     );
   } else {
     // Lazy Referesh accessToken
@@ -84,12 +85,12 @@ export const getAzureAccessToken = async (): Promise<string> => {
       accessToken = await refreshAzureAccessToken();
       console.debug(
         `Azure AccessToken has expired and was refreshed: Old Expiration Date was => $${expires}, New Expiration Date is => $${new Date(
-          accessToken.expiresOnTimestamp
-        )}`
+          accessToken.expiresOnTimestamp,
+        )}`,
       );
     } else {
       console.debug(
-        `Azure AccessToken is still good expired and was refreshed: Expiration Date was => $${expires}`
+        `Azure AccessToken is still good expired and was refreshed: Expiration Date was => $${expires}`,
       );
     }
   }

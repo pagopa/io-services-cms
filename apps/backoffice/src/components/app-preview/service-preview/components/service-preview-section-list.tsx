@@ -1,18 +1,19 @@
 import { List, Stack } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
 import ServicePreviewSectionListItem, {
-  ServicePreviewSectionListItemProps
+  ServicePreviewSectionListItemProps,
 } from "./service-preview-section-list-item";
 import ServicePreviewSectionTitle from "./service-preview-section-title";
 
-export type ServicePreviewSectionListProps = {
-  title: string;
+export interface ServicePreviewSectionListProps {
   items: ServicePreviewSectionListItemProps[];
-};
+  title: string;
+}
 
 const ServicePreviewSectionList = ({
+  items,
   title,
-  items
 }: ServicePreviewSectionListProps) => {
   const { t } = useTranslation();
 

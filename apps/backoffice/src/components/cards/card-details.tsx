@@ -1,43 +1,44 @@
 import { ArrowForward } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
-import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
+import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
+
 import { CardBaseContainer, CardRowType, CardRows } from ".";
 
-export type CardDetailsCtaType = {
+export interface CardDetailsCtaType {
+  /** call to action function performed on button click */
+  fn?: Function;
+  /** call to action href */
+  href?: string;
   /** call to action end icon */
   icon?: ReactNode;
   /** call to action label */
   label: string;
-  /** call to action href */
-  href?: string;
   /** href target */
   target?: "_blank" | "_self";
-  /** call to action function performed on button click */
-  fn?: Function;
-};
+}
 
-export type CardDetailsProps = {
-  /** Card title */
-  title: string;
-  /** Array of label/value rows displayed as a list */
-  rows: CardRowType[];
-  /** If defined, render a custom card body content */
-  customContent?: ReactNode;
+export interface CardDetailsProps {
   /** Call to action link placed in card footer */
   cta?: CardDetailsCtaType;
-};
+  /** If defined, render a custom card body content */
+  customContent?: ReactNode;
+  /** Array of label/value rows displayed as a list */
+  rows: CardRowType[];
+  /** Card title */
+  title: string;
+}
 
 /**
  * Card used to show detailed general-purpose information.
  */
 export const CardDetails = ({
-  title,
-  rows,
+  cta,
   customContent,
-  cta
+  rows,
+  title,
 }: CardDetailsProps) => {
   const { t } = useTranslation();
 
@@ -45,9 +46,9 @@ export const CardDetails = ({
     <ButtonNaked
       color="primary"
       endIcon={cta.icon ?? <ArrowForward />}
+      onClick={() => (cta.fn ? cta.fn() : null)}
       size="medium"
       sx={{ fontWeight: 700 }}
-      onClick={() => (cta.fn ? cta.fn() : null)}
     >
       {t(cta.label)}
     </ButtonNaked>
@@ -61,8 +62,8 @@ export const CardDetails = ({
           {cta.href ? (
             <NextLink
               href={cta.href}
-              target={cta.target ?? "_self"}
               rel="noreferrer"
+              target={cta.target ?? "_self"}
             >
               {renderCallToActionButton(cta)}
             </NextLink>
@@ -79,7 +80,7 @@ export const CardDetails = ({
         {t(title)}
       </Typography>
       {customContent ?? null}
-      <Box marginTop={rows.length > 0 ? 4 : 0} id="body-rows">
+      <Box id="body-rows" marginTop={rows.length > 0 ? 4 : 0}>
         <CardRows rows={rows} />
       </Box>
       {renderCallToAction()}

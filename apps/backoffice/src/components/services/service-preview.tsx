@@ -8,27 +8,28 @@ import {
   DialogTitle,
   Grid,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+
 import { MarkdownView } from "../markdown-view";
 
-export type ServicePreviewProps = {
+export interface ServicePreviewProps {
+  description: string;
+  institutionName?: string;
   isOpen: boolean;
   name?: string;
-  institutionName?: string;
-  description: string;
   onChange: (isOpen: boolean) => void;
-};
+}
 
 /** Render a minimal service preview */
 export const ServicePreview = ({
+  description,
+  institutionName,
   isOpen,
   name,
-  institutionName,
-  description,
-  onChange
+  onChange,
 }: ServicePreviewProps) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
@@ -43,8 +44,10 @@ export const ServicePreview = ({
   }, [isOpen]);
 
   return (
-    <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
-      <DialogTitle id="s-preview-title">{t("service.preview.title")}</DialogTitle>
+    <Dialog disableScrollLock onClose={handleClose} open={isDialogOpen}>
+      <DialogTitle id="s-preview-title">
+        {t("service.preview.title")}
+      </DialogTitle>
       <DialogContent sx={{ minWidth: "600px" }}>
         <Alert severity="info">
           <Typography id="s-preview-info" variant="body2">
@@ -60,29 +63,33 @@ export const ServicePreview = ({
               <Typography variant="body2">{institutionName}</Typography>
             </Stack>
           </Grid>
-          <Grid item xs="auto" paddingTop={1} paddingRight={1}>
+          <Grid item paddingRight={1} paddingTop={1} xs="auto">
             <AccountBalanceRounded color="disabled" fontSize="large" />
           </Grid>
           <Grid
             item
-            xs={12}
             marginTop={3}
             sx={{
-              fontSize: "16px",
-              lineHeight: "22px",
               "& a": {
                 color: "#0073E6",
+                fontWeight: 600,
                 textDecoration: "underline",
-                fontWeight: 600
-              }
+              },
+              fontSize: "16px",
+              lineHeight: "22px",
             }}
+            xs={12}
           >
             <MarkdownView>{description}</MarkdownView>
           </Grid>
         </Grid>
       </DialogContent>
       <DialogActions sx={{ paddingX: 3, paddingY: 2 }}>
-        <Button id="s-preview-close-button" variant="outlined" onClick={handleClose}>
+        <Button
+          id="s-preview-close-button"
+          onClick={handleClose}
+          variant="outlined"
+        >
           {t("buttons.close")}
         </Button>
       </DialogActions>

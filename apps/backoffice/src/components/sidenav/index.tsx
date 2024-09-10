@@ -11,25 +11,25 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import { useTheme } from "@mui/material/styles";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
-import { useRouter } from "next/router";
 import { Fragment, ReactElement, useEffect, useRef, useState } from "react";
 
 export type SidenavItem = {
+  hasBottomDivider?: boolean;
   href: string;
   icon: JSX.Element | null;
+  linkType: "external" | "internal";
   text: string;
-  linkType: "internal" | "external";
-  hasBottomDivider?: boolean;
 } & RequiredAuthorizations;
 
-export type SidenavProps = {
+export interface SidenavProps {
   /** Sidenav menu items */
   items: SidenavItem[];
   /** Sidenav menu width change event */
   onWidthChange: (width: number) => void;
-};
+}
 
 export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
   const { t } = useTranslation();
@@ -39,13 +39,13 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
   const theme = useTheme();
   const screenSize = useScreenSize();
 
-  const [settings, setSettings] = useState({ width: 300, collapse: false });
-  const prevWidthRef = useRef<number | null>(null);
+  const [settings, setSettings] = useState({ collapse: false, width: 300 });
+  const prevWidthRef = useRef<null | number>(null);
 
   /** Render a tooltip wrapper on menu item text when menu is closed _(collapse=true)_ */
   const renderTooltipOnCollapse = (text: string, children: ReactElement) =>
     settings.collapse ? (
-      <Tooltip title={text} placement="right" arrow>
+      <Tooltip arrow placement="right" title={text}>
         {children}
       </Tooltip>
     ) : (
@@ -54,13 +54,13 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
 
   /** Closes the menu */
   const setMenuCollapsed = () => {
-    setSettings({ width: 87, collapse: true });
+    setSettings({ collapse: true, width: 87 });
     updateWidthRef();
   };
 
   /** Open the menu */
   const setMenuOpen = (width: number) => {
-    setSettings({ width, collapse: false });
+    setSettings({ collapse: false, width });
     updateWidthRef();
   };
 
@@ -119,34 +119,34 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
     <Box
       id="sidenav"
       sx={{
-        height: "100%",
-        maxWidth: settings.width,
         backgroundColor: "background.paper",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between"
+        height: "100%",
+        justifyContent: "space-between",
+        maxWidth: settings.width,
       }}
     >
       <Box id="menu-items">
-        <List component="nav" aria-label="menu-back-office">
+        <List aria-label="menu-back-office" component="nav">
           {items
             .filter(({ requiredPermissions, requiredRole }) =>
               hasRequiredAuthorizations(session, {
+                requiredPermissions,
                 requiredRole,
-                requiredPermissions
-              })
+              }),
             )
             .map((item, index) => (
               <Fragment key={index}>
                 {renderTooltipOnCollapse(
                   t(item.text),
                   <ListItemButton
+                    onClick={() => handleMenuClick(item)}
                     selected={
                       router.pathname === item.href ||
                       (item.href.length > 1 &&
                         router.pathname.startsWith(item.href))
                     }
-                    onClick={() => handleMenuClick(item)}
                   >
                     <ListItemIcon
                       sx={
@@ -165,7 +165,7 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
                         <ExitToAppRounded color="action" />
                       </ListItemIcon>
                     ) : null}
-                  </ListItemButton>
+                  </ListItemButton>,
                 )}
                 {item.hasBottomDivider ? <Divider /> : null}
               </Fragment>
@@ -177,10 +177,10 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
         <Divider />
         <IconButton
           aria-label="open-close"
-          sx={{ margin: 2.75 }}
-          onClick={_ =>
+          onClick={(_) =>
             settings.collapse ? manageMenuOpen(true) : setMenuCollapsed()
           }
+          sx={{ margin: 2.75 }}
         >
           <Menu />
         </IconButton>

@@ -2,6 +2,7 @@ import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
+
 import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
@@ -10,7 +11,7 @@ import { BackOfficeUser } from "../../../../types/next-auth";
 export const POST = withJWTAuthHandler(
   async (
     nextRequest: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser }
+    { backofficeUser }: { backofficeUser: BackOfficeUser },
   ) => {
     let jsonBody;
     try {
@@ -18,23 +19,23 @@ export const POST = withJWTAuthHandler(
     } catch (_) {
       return NextResponse.json(
         {
-          title: "validationError",
+          detail: "invalid JSON body",
           status: HTTP_STATUS_BAD_REQUEST as any,
-          detail: "invalid JSON body"
+          title: "validationError",
         },
-        { status: HTTP_STATUS_BAD_REQUEST }
+        { status: HTTP_STATUS_BAD_REQUEST },
       );
     }
     jsonBody.organization = {
+      fiscal_code: backofficeUser.institution.fiscalCode,
       name: backofficeUser.institution.name,
-      fiscal_code: backofficeUser.institution.fiscalCode
     };
     return forwardIoServicesCmsRequest("createService", {
-      nextRequest,
       backofficeUser,
-      jsonBody
+      jsonBody,
+      nextRequest,
     });
-  }
+  },
 );
 
 /**
@@ -43,18 +44,18 @@ export const POST = withJWTAuthHandler(
 export const GET = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser }
+    { backofficeUser }: { backofficeUser: BackOfficeUser },
   ) => {
     const limit = nextRequest.nextUrl.searchParams.get("limit");
     const offset = nextRequest.nextUrl.searchParams.get("offset");
 
     return forwardIoServicesCmsRequest("getServices", {
-      nextRequest,
       backofficeUser,
+      nextRequest,
       pathParams: {
         limit: limit ?? undefined,
-        offset: offset ?? undefined
-      }
+        offset: offset ?? undefined,
+      },
     });
-  }
+  },
 );

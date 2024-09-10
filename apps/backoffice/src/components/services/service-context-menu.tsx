@@ -3,7 +3,7 @@ import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import {
   ServicePublicationStatusType,
-  ServicePublicationStatusTypeEnum
+  ServicePublicationStatusTypeEnum,
 } from "@/generated/api/ServicePublicationStatusType";
 import {
   Check,
@@ -12,7 +12,7 @@ import {
   Edit,
   History,
   MoreVert,
-  PhoneAndroid
+  PhoneAndroid,
 } from "@mui/icons-material";
 import {
   Button,
@@ -20,54 +20,55 @@ import {
   Menu,
   MenuItem,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
+
 import { ButtonWithTooltip } from "../buttons";
 import { useDialog } from "../dialog-provider";
 
 export enum ServiceContextMenuActions {
-  publish = "publish",
-  unpublish = "unpublish",
-  submitReview = "submitReview",
-  history = "history",
+  delete = "delete",
   edit = "edit",
-  delete = "delete"
+  history = "history",
+  publish = "publish",
+  submitReview = "submitReview",
+  unpublish = "unpublish",
 }
 
-export type ServiceContextMenuProps = {
-  /** If `true` shows ServicePublication actions only */
-  releaseMode: boolean;
+export interface ServiceContextMenuProps {
   lifecycleStatus?: ServiceLifecycleStatus;
-  publicationStatus?: ServicePublicationStatusType;
-  onPublishClick: () => void;
-  onUnpublishClick: () => void;
-  onSubmitReviewClick: () => void;
+  onDeleteClick: () => void;
+  onEditClick: () => void;
   onHistoryClick: () => void;
   onPreviewClick: () => void;
-  onEditClick: () => void;
-  onDeleteClick: () => void;
-};
+  onPublishClick: () => void;
+  onSubmitReviewClick: () => void;
+  onUnpublishClick: () => void;
+  publicationStatus?: ServicePublicationStatusType;
+  /** If `true` shows ServicePublication actions only */
+  releaseMode: boolean;
+}
 
 /** Service context menu */
 export const ServiceContextMenu = ({
-  releaseMode,
   lifecycleStatus,
-  publicationStatus,
-  onPublishClick,
-  onUnpublishClick,
-  onSubmitReviewClick,
+  onDeleteClick,
+  onEditClick,
   onHistoryClick,
   onPreviewClick,
-  onEditClick,
-  onDeleteClick
+  onPublishClick,
+  onSubmitReviewClick,
+  onUnpublishClick,
+  publicationStatus,
+  releaseMode,
 }: ServiceContextMenuProps) => {
   const { t } = useTranslation();
   const showDialog = useDialog();
 
-  const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<null | HTMLElement>(
-    null
+  const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<HTMLElement | null>(
+    null,
   );
   const isEditMenuOpen = Boolean(editMenuAnchorEl);
 
@@ -84,9 +85,9 @@ export const ServiceContextMenu = ({
   const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
     handleEditMenuClose();
     const raiseClickEvent = await showDialog({
-      title: t(`service.${action}.modal.title`),
+      confirmButtonLabel: t(`service.${action}.modal.button`),
       message: t(`service.${action}.modal.description`),
-      confirmButtonLabel: t(`service.${action}.modal.button`)
+      title: t(`service.${action}.modal.title`),
     });
     if (raiseClickEvent) {
       switch (action) {
@@ -152,12 +153,14 @@ export const ServiceContextMenu = ({
   /** Shows "Publish in App IO" action button */
   const renderPublishAction = () => (
     <Button
+      onClick={(_) =>
+        handleConfirmationModal(ServiceContextMenuActions.publish)
+      }
       size="medium"
-      variant="contained"
       startIcon={<Check />}
-      onClick={_ => handleConfirmationModal(ServiceContextMenuActions.publish)}
+      variant="contained"
     >
-      <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
+      <Typography color="inherit" fontWeight={600} noWrap variant="body2">
         {t("service.actions.publish")}
       </Typography>
     </Button>
@@ -166,15 +169,15 @@ export const ServiceContextMenu = ({
   /** Shows "Hide from App IO" action button */
   const renderUnpublishAction = () => (
     <Button
-      size="medium"
-      variant="outlined"
-      sx={{ bgcolor: "background.paper" }}
-      startIcon={<Close />}
-      onClick={_ =>
+      onClick={(_) =>
         handleConfirmationModal(ServiceContextMenuActions.unpublish)
       }
+      size="medium"
+      startIcon={<Close />}
+      sx={{ bgcolor: "background.paper" }}
+      variant="outlined"
     >
-      <Typography variant="body2" fontWeight={600} color="inherit" noWrap>
+      <Typography color="inherit" fontWeight={600} noWrap variant="body2">
         {t("service.actions.unpublish")}
       </Typography>
     </Button>
@@ -185,14 +188,14 @@ export const ServiceContextMenu = ({
     if (hasSubmitReviewAction()) {
       return (
         <Button
-          size="medium"
-          variant="contained"
-          onClick={_ =>
-            handleConfirmationModal(ServiceContextMenuActions.submitReview)
-          }
           disabled={
             lifecycleStatus?.value !== ServiceLifecycleStatusTypeEnum.draft
           }
+          onClick={(_) =>
+            handleConfirmationModal(ServiceContextMenuActions.submitReview)
+          }
+          size="medium"
+          variant="contained"
         >
           {t("service.actions.submitReview")}
         </Button>
@@ -206,45 +209,45 @@ export const ServiceContextMenu = ({
       return (
         <>
           <Button
-            id="edit-menu-button"
-            aria-label="edit-menu-button"
             aria-controls={isEditMenuOpen ? "edit-menu" : undefined}
-            aria-haspopup="true"
             aria-expanded={isEditMenuOpen ? "true" : undefined}
+            aria-haspopup="true"
+            aria-label="edit-menu-button"
+            id="edit-menu-button"
             onClick={handleEditMenuClick}
             size="medium"
-            variant="text"
             sx={{ bgcolor: "background.paper", padding: 0 }}
+            variant="text"
           >
             <MoreVert />
           </Button>
           <Menu
-            id="edit-menu"
-            anchorEl={editMenuAnchorEl}
-            open={isEditMenuOpen}
-            onClose={handleEditMenuClose}
             MenuListProps={{
-              "aria-labelledby": "edit-menu-button"
+              "aria-labelledby": "edit-menu-button",
             }}
+            anchorEl={editMenuAnchorEl}
             disableScrollLock
+            id="edit-menu"
+            onClose={handleEditMenuClose}
+            open={isEditMenuOpen}
           >
-            <MenuItem onClick={handleEditClick} disabled={releaseMode}>
+            <MenuItem disabled={releaseMode} onClick={handleEditClick}>
               <ListItemIcon>
-                <Edit fontSize="inherit" color="primary" />
+                <Edit color="primary" fontSize="inherit" />
               </ListItemIcon>
-              <Typography variant="inherit" color="primary" marginLeft={1}>
+              <Typography color="primary" marginLeft={1} variant="inherit">
                 {t("service.actions.edit")}
               </Typography>
             </MenuItem>
             <MenuItem
-              onClick={_ =>
+              onClick={(_) =>
                 handleConfirmationModal(ServiceContextMenuActions.delete)
               }
             >
               <ListItemIcon>
-                <Delete fontSize="inherit" color="error" />
+                <Delete color="error" fontSize="inherit" />
               </ListItemIcon>
-              <Typography variant="inherit" color="error" marginLeft={1}>
+              <Typography color="error" marginLeft={1} variant="inherit">
                 {t("service.actions.delete")}
               </Typography>
             </MenuItem>
@@ -258,19 +261,19 @@ export const ServiceContextMenu = ({
     <Stack direction="row-reverse" spacing={2}>
       {renderEditActions()}
       <ButtonWithTooltip
-        isVisible={true}
-        tooltipTitle="service.actions.history"
-        onClick={onHistoryClick}
         icon={<History />}
+        isVisible={true}
+        onClick={onHistoryClick}
         size="medium"
+        tooltipTitle="service.actions.history"
         variant="text"
       />
       <ButtonWithTooltip
-        isVisible={getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED}
-        tooltipTitle="service.actions.preview"
-        onClick={onPreviewClick}
         icon={<PhoneAndroid />}
+        isVisible={getConfiguration().BACK_OFFICE_IN_APP_PREVIEW_ENABLED}
+        onClick={onPreviewClick}
         size="medium"
+        tooltipTitle="service.actions.preview"
         variant="text"
       />
       {!releaseMode ? renderSubmitReviewAction() : null}
