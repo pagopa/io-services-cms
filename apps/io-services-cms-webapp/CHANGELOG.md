@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.33.2
+
+### Patch Changes
+
+- 14be0d0: fix regenerate service keys on deleted services
+
 ## 1.33.1
 
 ### Patch Changes
