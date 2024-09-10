@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.33.1
+
+### Patch Changes
+
+- afce2d2: Get ServiceKey will now return 404 when invoked for deleted services
+
 ## 1.33.0
 
 ### Minor Changes
