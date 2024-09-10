@@ -14,7 +14,7 @@ export interface AvatarLogoProps {
 }
 
 /** Render rounded box with service/institution logo */
-const AvatarLogo = ({ organizationFiscalCode, serviceId }: AvatarLogoProps) => {
+const AvatarLogo = ({ serviceId }: AvatarLogoProps) => {
   const configuration = getConfiguration();
 
   const logoFullPath = () =>

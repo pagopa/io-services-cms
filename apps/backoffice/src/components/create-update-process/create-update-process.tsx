@@ -96,7 +96,11 @@ export function CreateUpdateProcess<T extends FieldValues>({
   };
 
   const handleNext = () => {
-    isValid ? increaseStep() : trigger();
+    if (isValid) {
+      increaseStep();
+    } else {
+      trigger();
+    }
   };
 
   const handleComplete = () => {

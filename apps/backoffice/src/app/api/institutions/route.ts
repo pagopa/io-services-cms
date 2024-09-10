@@ -2,7 +2,7 @@ import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { retrieveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
 

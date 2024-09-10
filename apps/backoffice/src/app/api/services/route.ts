@@ -20,6 +20,7 @@ export const POST = withJWTAuthHandler(
       return NextResponse.json(
         {
           detail: "invalid JSON body",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           status: HTTP_STATUS_BAD_REQUEST as any,
           title: "validationError",
         },

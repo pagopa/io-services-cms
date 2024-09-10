@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { Institution } from "@/generated/selfcare/Institution";
@@ -28,6 +29,7 @@ if (
   getConfiguration().SELFCARE_API_MOCKING ||
   getConfiguration().API_APIM_MOCKING
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { setupMocks } = require("../../../../../mocks");
   setupMocks();
 }

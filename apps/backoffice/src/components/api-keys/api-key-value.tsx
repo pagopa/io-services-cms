@@ -1,6 +1,5 @@
 import { obscure } from "@/utils/string-util";
 import { Box, Stack, Typography } from "@mui/material";
-import { useTranslation } from "next-i18next";
 
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
@@ -12,7 +11,7 @@ export interface ApiKeyValueProps {
 
 /** API Key value component */
 export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
-  const { t } = useTranslation();
+  //TODO: removed useTranslation() because it's not used, is it needed?
 
   const renderKeyValue = (value: string) => (
     <Typography noWrap variant="monospaced">

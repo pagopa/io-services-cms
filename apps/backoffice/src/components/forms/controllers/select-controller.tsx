@@ -7,7 +7,6 @@ import {
   Select,
   SelectProps,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -28,7 +27,7 @@ export function SelectController({
   name,
   ...props
 }: SelectControllerProps) {
-  const { t } = useTranslation();
+  //TODO: removed useTranslation() because it's not used, is it needed?
   const { control, register } = useFormContext();
 
   if (items.length === 0) return; // avoid mui out-of-range error

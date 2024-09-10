@@ -6,7 +6,7 @@ import {
   retrieveOwnershipClaimLatestForDelegate,
 } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
@@ -22,7 +22,7 @@ export const POST = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUser; params: { delegateId: string } },
   ) => {
     try {
-      const requestBody = await request.json().catch((_: unknown) => undefined);
+      const _ = await request.json().catch((_: unknown) => undefined);
 
       await claimOwnershipForDelegate(
         backofficeUser.institution.fiscalCode,

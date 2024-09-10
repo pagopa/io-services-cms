@@ -8,7 +8,6 @@ import {
   Select,
   SelectProps,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -27,14 +26,14 @@ export function MultiSelectController({
   name,
   ...props
 }: MultiSelectControllerProps) {
-  const { t } = useTranslation();
+  //TODO: removed useTranslation() because it's not used, is it needed?
   const { control, register } = useFormContext();
 
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, value } }) => (
+      render={({ field: { onChange } }) => (
         <FormControl fullWidth margin="normal">
           <InputLabel id={`${name}-label`}>{props.label}</InputLabel>
           <Select

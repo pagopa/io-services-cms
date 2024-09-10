@@ -53,6 +53,7 @@ export const PUT = withJWTAuthHandler(
         {
           detail:
             error instanceof Error ? error.message : "Something went wrong",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
           title: "ManageKeyRegenerateError",
         },

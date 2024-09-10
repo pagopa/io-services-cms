@@ -17,7 +17,6 @@ export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
     {
-      backofficeUser,
       params,
     }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
   ) => {
@@ -36,6 +35,7 @@ export const GET = withJWTAuthHandler(
         return NextResponse.json(
           {
             detail: error.message,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             status: HTTP_STATUS_NOT_FOUND as any,
             title: "InstitutionNotFoundError",
           },

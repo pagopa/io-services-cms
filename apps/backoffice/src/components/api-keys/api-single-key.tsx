@@ -24,6 +24,7 @@ export interface ApiSingleKeyProps {
 export const ApiSingleKey = ({
   keyType,
   keyValue,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBlockClick,
   onRotateClick,
 }: ApiSingleKeyProps) => {
