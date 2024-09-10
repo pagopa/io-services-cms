@@ -323,6 +323,7 @@ export const createWebServer = ({
     pipe(
       makeRegenerateServiceKeysHandler({
         apimService,
+        fsmLifecycleClient,
         telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(
