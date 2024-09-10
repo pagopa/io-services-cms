@@ -29,9 +29,8 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { SubscriptionKeyType } from "../../generated/api/SubscriptionKeyType";
@@ -40,6 +39,7 @@ import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
+import { checkService } from "../../utils/check-service";
 
 const logPrefix = "RegenerateServiceKeysHandler";
 
@@ -62,26 +62,6 @@ interface Dependencies {
   telemetryClient: TelemetryClient;
 }
 
-const checkService =
-  (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
-  (serviceId: NonEmptyString): TE.TaskEither<ErrorResponseTypes, void> =>
-    pipe(
-      serviceId,
-      fsmLifecycleClient.getStore().fetch,
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      TE.chainW(
-        flow(
-          O.filter((service) => service.fsm.state !== "deleted"),
-          O.map(() => void 0),
-          TE.fromOption(() =>
-            ResponseErrorNotFound(
-              "Not found",
-              `no item with id ${serviceId} found`,
-            ),
-          ),
-        ),
-      ),
-    );
 
 export const makeRegenerateServiceKeysHandler =
   ({
