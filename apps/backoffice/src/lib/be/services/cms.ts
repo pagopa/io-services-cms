@@ -13,6 +13,7 @@ export const callIoServicesCms = async <
   T extends keyof ReturnType<typeof getIoServicesCmsClient>,
 >(
   operationId: T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requestPayload: any,
 ) => await getIoServicesCmsClient()[operationId](requestPayload);
 

@@ -46,6 +46,7 @@ export interface ServiceHistoryComponentProps {
 }
 
 /** Render service history */
+// eslint-disable-next-line max-lines-per-function
 export const ServiceHistoryComponent = ({
   historyData,
   loading,

@@ -71,9 +71,11 @@ export const Sidenav = ({ items, onWidthChange }: SidenavProps) => {
    * https://nextjs.org/docs/pages/api-reference/functions/use-router#routerpush
    */
   const handleMenuClick = (item: SidenavItem) => {
-    item.linkType === "internal"
-      ? router.push(item.href)
-      : window.open(item.href, "_blank");
+    if (item.linkType === "internal") {
+      router.push(item.href);
+    } else {
+      window.open(item.href, "_blank");
+    }
   };
 
   /**

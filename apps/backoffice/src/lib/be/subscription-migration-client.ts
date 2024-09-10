@@ -65,6 +65,7 @@ const getSubscriptionsMigrationConfig = (): Config => {
     }
 
     if (result.right.SUBSCRIPTION_MIGRATION_API_MOCKING) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { setupMocks } = require("../../../mocks");
       setupMocks();
     }
@@ -240,14 +241,6 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
     getLatestOwnershipClaimStatus,
     getOwnershipClaimStatus,
   };
-};
-
-const transoform = (myObject: Record<string, string>) => {
-  const transformedObject: Record<string, number> = {};
-
-  return Object.keys(myObject).forEach((key) => {
-    transformedObject[key.toLowerCase()] = Number(myObject[key]);
-  });
 };
 
 export const getSubscriptionsMigrationClient = () => {

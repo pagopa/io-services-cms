@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -69,7 +70,7 @@ export const retrieveServiceList = async (
   pipe(
     getServiceList(userId, limit, offset, serviceId),
     TE.bindTo("apimServices"),
-    TE.bind("serviceTopicsMap", ({ apimServices }) =>
+    TE.bind("serviceTopicsMap", (_) =>
       pipe(
         TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
         TE.map(({ topics }) => reduceServiceTopicsList(topics)),

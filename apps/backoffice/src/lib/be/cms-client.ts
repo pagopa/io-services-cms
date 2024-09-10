@@ -41,6 +41,7 @@ const buildIoServicesCmsClient = (): Client => {
   const configuration = getIoServicesCmsClientConfig();
 
   if (configuration.API_SERVICES_CMS_MOCKING) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { setupMocks } = require("../../../mocks");
     setupMocks();
   }
@@ -81,6 +82,7 @@ const buildTopicsProvider = (): TopicsProvider => {
     // Retrieving topics from io-services-cms
     const response = await getIoServicesCmsClient().getServiceTopics({
       "X-Forwarded-For": xForwardedFor,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     if (E.isLeft(response)) {

@@ -15,6 +15,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 /** This is a mock page, for development purpose only */
 export default function SelfcareDashboard() {
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const institutionId = router.query.institutionId as string;
 
   return (

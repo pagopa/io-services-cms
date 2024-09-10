@@ -64,9 +64,14 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
   );
 
   useEffect(() => {
-    NonEmptyString.is(watchedName) && NonEmptyString.is(watchedDescription)
-      ? setIsPreviewEnabled(true)
-      : setIsPreviewEnabled(false);
+    if (
+      NonEmptyString.is(watchedName) &&
+      NonEmptyString.is(watchedDescription)
+    ) {
+      setIsPreviewEnabled(true);
+    } else {
+      setIsPreviewEnabled(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedName, watchedDescription]);
 

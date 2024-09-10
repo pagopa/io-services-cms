@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * MigrationManager Component
  *
@@ -92,6 +93,7 @@ export const MigrationManager = () => {
   // direct axios fetch
   const postDelegateMigrationOwnershipClaims = async (delegateId: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
       const { status } = await axios.post<void>(
         getMigrationOwnershipClaimsUrl(delegateId),
       );

@@ -52,6 +52,7 @@ export interface ServiceContextMenuProps {
 }
 
 /** Service context menu */
+// eslint-disable-next-line max-lines-per-function
 export const ServiceContextMenu = ({
   lifecycleStatus,
   onDeleteClick,

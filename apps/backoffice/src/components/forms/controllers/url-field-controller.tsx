@@ -52,9 +52,8 @@ export function UrlFieldController({
           <Grid item xs="auto">
             <ButtonNaked
               color="primary"
-              disabled={value ? (value.length === 0 ?? false) : true}
+              disabled={value ? value.length === 0 : true}
               onClick={() => window.open(value, "_blank")}
-              onFocusVisible={function noRefCheck() {}}
               size="large"
               startIcon={<OpenInNew />}
             >

@@ -79,6 +79,7 @@ const getTypographyDefaultColor = (
 ) =>
   isServiceStatusValueDeleted(serviceStatusValue) ? "text.disabled" : "inherit";
 
+// eslint-disable-next-line max-lines-per-function
 export default function Services() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -372,6 +373,8 @@ export default function Services() {
     );
   };
 
+  //TODO: id not used, is it a leftover?
+  /*eslint-disable @typescript-eslint/no-unused-vars */
   const getServices = (id?: string) => {
     servicesFetchData(
       "getServiceList",

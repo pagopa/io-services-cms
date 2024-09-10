@@ -54,6 +54,7 @@ const getSelfcareConfig = (): Config => {
     }
 
     if (result.right.SELFCARE_API_MOCKING) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { setupMocks } = require("../../../mocks");
       setupMocks();
     }

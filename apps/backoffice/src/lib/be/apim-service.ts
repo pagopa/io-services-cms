@@ -57,6 +57,7 @@ const getApimConfig = (): Config => {
     }
 
     if (result.right.API_APIM_MOCKING) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { setupMocks } = require("../../../mocks");
       setupMocks();
     }

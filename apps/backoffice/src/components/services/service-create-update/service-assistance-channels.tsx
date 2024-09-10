@@ -22,6 +22,7 @@ export const ServiceAssistanceChannels = () => {
     control,
     name: "metadata.assistanceChannels",
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errorText, setErrorText] = useState<string>();
 
   const selectableAssistanceChannels = [
@@ -59,9 +60,11 @@ export const ServiceAssistanceChannels = () => {
   };
 
   useEffect(() => {
-    isValid
-      ? setErrorText(undefined)
-      : setErrorText(errors.metadata?.assistanceChannels?.message ?? "");
+    if (isValid) {
+      setErrorText(undefined);
+    } else {
+      setErrorText(errors.metadata?.assistanceChannels?.message ?? "");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid, fields]);
 

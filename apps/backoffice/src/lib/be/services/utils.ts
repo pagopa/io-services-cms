@@ -91,6 +91,7 @@ const toServiceStatus = (
       };
 
     default:
+      // eslint-disable-next-line no-case-declarations
       const _: never = fsm;
       return ServiceLifecycleStatusTypeEnum[fsm];
   }
@@ -104,6 +105,7 @@ const toScopeType = (
     case "NATIONAL":
       return ScopeEnum[s];
     default:
+      // eslint-disable-next-line no-case-declarations
       const _: never = s;
       return ScopeEnum[s];
   }

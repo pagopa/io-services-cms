@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import xss from "xss";
 
@@ -9,7 +10,9 @@ export const sanitizeObject = (obj: any): any => {
   } else if (typeof obj === "object" && obj !== null) {
     const sanitizedObj: any = {};
     for (const key in obj) {
-      sanitizedObj[key] = sanitizeObject(obj[key]);
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        sanitizedObj[key] = sanitizeObject(obj[key]);
+      }
     }
     return sanitizedObj;
   } else {

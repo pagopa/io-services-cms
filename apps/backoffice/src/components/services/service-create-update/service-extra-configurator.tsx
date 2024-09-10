@@ -31,6 +31,7 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { closeDrawer, openDrawer } = useDrawer();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { formState, getValues, setValue } = useFormContext();
   const [isCtaVisible, setIsCtaVisible] = useState(false);
 

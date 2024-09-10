@@ -14,7 +14,7 @@ export const FormStepSectionWrapper = ({
   icon,
   title,
 }: FormStepSectionWrapperProps) => {
-  const { t } = useTranslation();
+  useTranslation();
 
   return (
     <Box

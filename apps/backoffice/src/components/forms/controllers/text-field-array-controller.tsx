@@ -97,7 +97,9 @@ export function TextFieldArrayController({
   );
 
   const handleCancelClick = () => {
-    onCancelClick && onCancelClick();
+    if (onCancelClick) {
+      onCancelClick();
+    }
     setRenderedFields(initializeFieldsStatus());
   };
 

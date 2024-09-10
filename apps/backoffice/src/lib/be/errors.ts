@@ -63,6 +63,7 @@ export const handleInternalErrorResponse = (
   return NextResponse.json(
     {
       detail: message,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
       title,
     },

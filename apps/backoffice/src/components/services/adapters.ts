@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-useless-escape */
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceMetadata } from "@/generated/api/ServiceMetadata";
@@ -166,7 +168,7 @@ const convertAssistanceChannelsObjToArray = (
   ];
 
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const type = key as AssistanceChannelType;
       if (allowedTypes.includes(type)) {
         const value = obj[key as keyof AssistanceChannelsMetadata];

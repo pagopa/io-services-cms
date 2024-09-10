@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/api/client";
@@ -111,6 +112,7 @@ const useFetch = <RC>() => {
   const [options, setOptions] = useState<UseFetchOptions>();
 
   const { push } = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = useSession();
 
   // used to show notifications

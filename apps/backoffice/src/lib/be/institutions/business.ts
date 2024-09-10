@@ -11,13 +11,6 @@ type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to 
 // Type utility to extract the resolved type of a ReadonlyArray of Promises
 type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
-// Type utility to extract the resolved type of an array of Promises
-type ArrayElementType<T> = T extends (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
-
-type test = ReadonlyArrayElementType<
-  PromiseValue<ReturnType<typeof getUserAuthorizedInstitutions>>
->;
-
 export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string,
 ): Promise<UserAuthorizedInstitutions> => {
