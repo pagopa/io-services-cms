@@ -1,11 +1,14 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
+import {
+  ResponseErrorInternal,
+  ResponseErrorNotFound,
+} from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { ErrorResponseTypes } from "./logger";
 import { flow, pipe } from "fp-ts/lib/function";
-import { ResponseErrorInternal, ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 
+import { ErrorResponseTypes } from "./logger";
 
 export const checkService =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient) =>

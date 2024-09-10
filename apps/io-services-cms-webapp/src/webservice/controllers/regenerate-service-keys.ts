@@ -24,8 +24,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
   IResponseSuccessJson,
-  ResponseErrorInternal,
-  ResponseErrorNotFound,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -37,9 +35,9 @@ import { SubscriptionKeyType } from "../../generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
 import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
-import { checkService } from "../../utils/check-service";
 
 const logPrefix = "RegenerateServiceKeysHandler";
 
@@ -61,7 +59,6 @@ interface Dependencies {
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
 }
-
 
 export const makeRegenerateServiceKeysHandler =
   ({
