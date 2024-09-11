@@ -23,7 +23,7 @@
         "openapi.yaml"
       ],
       "outputs": [
-        "src/generated/api/**"
+        "src/generated/api/**/*"
       ],
       "dependsOn": [
         "clean:api-definitions"
@@ -34,7 +34,7 @@
         "../io-services-cms-webapp/openapi.yaml"
       ],
       "outputs": [
-        "src/generated/services-cms/**"
+        "src/generated/services-cms/**/*"
       ],
       "dependsOn": [
         "clean:services-cms"
@@ -45,7 +45,7 @@
         "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
       ],
       "outputs": [
-        "src/types/selfcare/*"
+        "src/types/selfcare/**/*"
       ],
       "dependsOn": [
         "clean:selfcare-api-models"
