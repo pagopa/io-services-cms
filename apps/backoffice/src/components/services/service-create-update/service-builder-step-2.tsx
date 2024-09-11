@@ -15,8 +15,8 @@ import * as z from "zod";
 import { ServiceAssistanceChannels } from "./service-assistance-channels";
 
 const regexPhone = new RegExp(
-  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/,
-); //NOSONAR
+  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/, //NOSONAR
+);
 
 const getSingleAssistanceChannelSchema = (
   t: TFunction<"translation", undefined>,
