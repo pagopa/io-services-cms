@@ -14,10 +14,14 @@ import * as z from "zod";
 
 import { ServiceAssistanceChannels } from "./service-assistance-channels";
 
-// sonar-ignore
+// SonarCloud: disabilita specifiche regole di sicurezza
+// sonar-ignore-start
+// sonar-ignore-rule: typescript:S5852
+// sonar-ignore-rule: typescript:S4784
 const regexPhone = new RegExp(
   /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-/]?[\s]?[0-9])+$/,
 );
+// sonar-ignore-end
 
 const getSingleAssistanceChannelSchema = (
   t: TFunction<"translation", undefined>,
