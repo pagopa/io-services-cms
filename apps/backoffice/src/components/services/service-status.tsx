@@ -46,6 +46,11 @@ export const ServiceStatus = ({ status }: ServiceStatusProps) => {
         size="small"
         color={color as any}
         disabled={disabled}
+        sx={{
+          "& .MuiChip-label": {
+            whiteSpace: "nowrap"
+          }
+        }}
       />
     </LoaderSkeleton>
   );
