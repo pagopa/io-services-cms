@@ -761,6 +761,48 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /groups:
+    get:
+      tags:
+        - groups
+      summary: Retrieve all groups
+      description: Retrieve all groups owned by the calling user
+      operationId: getGroups
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: The number of groups to return
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: The number of groups to skip before starting to collect the result set
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Groups fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupPagination'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /institutions:
     get:
       tags:
@@ -1278,6 +1320,25 @@ components:
               type: string
               enum: [published, unpublished]
         - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+    GroupPagination:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+        pagination:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
   securitySchemes:
     cookieAuth:
       type: apiKey
