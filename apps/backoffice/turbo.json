@@ -38,12 +38,10 @@
     },
     "coverage:b4f": {
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.node.ts"],
-      "command": "vitest run --config ./vitest.config.node.ts --coverage",
       "dependsOn": ["build"]
     },
     "coverage:fe": {
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.react.ts"],
-      "command": "vitest run --config ./vitest.config.react.ts --coverage",
       "dependsOn": ["build"]
     },
     "coverage": {
