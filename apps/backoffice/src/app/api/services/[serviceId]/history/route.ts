@@ -20,7 +20,7 @@ export const GET = withJWTAuthHandler(
     const continuationToken =
       nextRequest.nextUrl.searchParams.get("continuationToken");
 
-    console.log("edited", params);
+    console.log("edited again", params);
 
     return forwardIoServicesCmsRequest("getServiceHistory", {
       backofficeUser,
