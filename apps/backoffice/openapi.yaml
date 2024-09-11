@@ -822,8 +822,8 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all institution groups
-      description: Retrieve all groups for given institution
+      summary: Retrieve all active institution groups
+      description: Retrieve all active groups for the given institution
       operationId: getInstitutionGroups
       security:
         - cookieAuth: []
