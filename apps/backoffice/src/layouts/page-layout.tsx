@@ -1,24 +1,22 @@
 import { Box } from "@mui/material";
 import { ReactNode } from "react";
 
-type PageLayoutProps = {
-  isFullWidth?: boolean;
+interface PageLayoutProps {
   children: ReactNode;
-};
+  isFullWidth?: boolean;
+}
 
 export const PageLayout = ({
+  children,
   isFullWidth = true,
-  children
-}: PageLayoutProps) => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      padding={3}
-      width={isFullWidth ? "100%" : "60%"}
-      marginX={isFullWidth ? "" : "auto"}
-    >
-      {children}
-    </Box>
-  );
-};
+}: PageLayoutProps) => (
+  <Box
+    display="flex"
+    flexDirection="column"
+    marginX={isFullWidth ? "" : "auto"}
+    padding={3}
+    width={isFullWidth ? "100%" : "60%"}
+  >
+    {children}
+  </Box>
+);

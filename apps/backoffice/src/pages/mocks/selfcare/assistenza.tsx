@@ -1,6 +1,6 @@
 import { Card, CardContent, Grid, Typography } from "@mui/material";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 /** This is a mock page, for development purpose only */
 export default function Assistenza() {
@@ -9,10 +9,10 @@ export default function Assistenza() {
 
   return (
     <Grid
+      alignItems="center"
       container
       direction="column"
       justifyContent="center"
-      alignItems="center"
     >
       <Grid item padding={5}>
         <Typography textAlign="center" variant="h3">
@@ -25,7 +25,7 @@ export default function Assistenza() {
       <Grid item padding={5}>
         <Card raised sx={{ width: 300 }}>
           <CardContent sx={{ textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography gutterBottom variant="h6">
               Prodotto
             </Typography>
             <Typography variant="body2">{productId}</Typography>
@@ -44,8 +44,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

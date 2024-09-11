@@ -2,13 +2,14 @@ import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycle
 import { Service } from "@/types/service";
 import { ReadMore } from "@mui/icons-material";
 import { useTranslation } from "next-i18next";
+
 import { ServiceInfoContent, ServiceStatus } from ".";
 import { CardDetails, CardRowType } from "../cards";
 import { useDrawer } from "../drawer-provider";
 
-export type ServiceInfoProps = {
+export interface ServiceInfoProps {
   data?: Service;
-};
+}
 
 /** Render service basic information card and service details drawer */
 export const ServiceInfo = ({ data }: ServiceInfoProps) => {
@@ -20,26 +21,26 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
     const rowsMin: CardRowType[] = [];
     rowsMin.push({
       label: "routes.service.status",
-      value: <ServiceStatus status={data?.status} />
+      value: <ServiceStatus status={data?.status} />,
     });
     if (data?.status.value === ServiceLifecycleStatusTypeEnum.approved) {
       rowsMin.push({
         label: "routes.service.visibility",
         value: data?.visibility
           ? t(`service.visibility.${data?.visibility}`)
-          : undefined
+          : undefined,
       });
     }
     rowsMin.push(
       {
         label: "routes.service.serviceId",
-        value: data?.id
+        value: data?.id,
       },
       {
+        kind: "datetime",
         label: "routes.service.lastUpdate",
         value: data?.lastUpdate,
-        kind: "datetime"
-      }
+      },
     );
     return rowsMin;
   };
@@ -50,13 +51,13 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
 
   return (
     <CardDetails
-      title="routes.service.information"
       cta={{
+        fn: openDetails,
         icon: <ReadMore style={{ fontSize: "24px" }} />,
         label: "routes.service.viewDetails",
-        fn: openDetails
       }}
       rows={buildRowsMin()}
+      title="routes.service.information"
     />
   );
 };

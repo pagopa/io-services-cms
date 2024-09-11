@@ -1,11 +1,12 @@
 import { ArrowBack } from "@mui/icons-material";
 import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
+
 import { useDialog } from "../dialog-provider";
 
-export type ButtonExitProps = {
+export interface ButtonExitProps {
   onClick: () => void;
-};
+}
 
 /**
  * Implements and displays an exit button, including the logic for opening a confirmation modal.
@@ -18,8 +19,8 @@ export const ButtonExit = ({ onClick }: ButtonExitProps) => {
 
   const handleExit = async () => {
     const confirmed = await showDialog({
+      message: t("forms.cancel.description"),
       title: t("forms.cancel.title"),
-      message: t("forms.cancel.description")
     });
     if (confirmed) {
       onClick();
@@ -30,11 +31,11 @@ export const ButtonExit = ({ onClick }: ButtonExitProps) => {
 
   return (
     <ButtonNaked
-      data-testid="bo-io-button-exit"
       color="primary"
-      startIcon={<ArrowBack />}
-      size="medium"
+      data-testid="bo-io-button-exit"
       onClick={handleExit}
+      size="medium"
+      startIcon={<ArrowBack />}
     >
       {t("buttons.exit")}
     </ButtonNaked>

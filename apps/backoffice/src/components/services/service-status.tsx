@@ -3,11 +3,12 @@ import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycle
 import { Chip } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+
 import { LoaderSkeleton } from "../loaders";
 
-export type ServiceStatusProps = {
+export interface ServiceStatusProps {
   status?: ServiceLifecycleStatus;
-};
+}
 
 /** Render `ServiceLifecycle` **status** as MUI `Chip` component with a particular color based on status value */
 export const ServiceStatus = ({ status }: ServiceStatusProps) => {
@@ -40,12 +41,12 @@ export const ServiceStatus = ({ status }: ServiceStatusProps) => {
   return (
     <LoaderSkeleton loading={status === undefined} style={{ width: "100%" }}>
       <Chip
-        id="service-status"
         aria-label={status?.value}
-        label={t(`service.status.${status?.value}`)}
-        size="small"
         color={color as any}
         disabled={disabled}
+        id="service-status"
+        label={t(`service.status.${status?.value}`)}
+        size="small"
       />
     </LoaderSkeleton>
   );

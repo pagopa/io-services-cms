@@ -1,8 +1,8 @@
 import { ArrowForwardIos } from "@mui/icons-material";
 import { Box, Breadcrumbs, Typography } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 
 export const PageBreadcrumbs = () => {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ export const PageBreadcrumbs = () => {
   const getRouteSections = () =>
     removeQueryParamsIfExists(router.asPath)
       .split("/")
-      .filter(val => val !== "");
+      .filter((val) => val !== "");
 
   const routeSectionsCount = getRouteSections().length;
 
@@ -45,7 +45,7 @@ export const PageBreadcrumbs = () => {
   const getRouteSectionPath = (routeSection: string) =>
     router.asPath.substring(
       0,
-      router.asPath.indexOf(routeSection) + routeSection.length
+      router.asPath.indexOf(routeSection) + routeSection.length,
     );
 
   if (!isVisible()) return;
@@ -54,14 +54,14 @@ export const PageBreadcrumbs = () => {
       <Breadcrumbs separator={<ArrowForwardIos sx={{ fontSize: 8 }} />}>
         {getRouteSections().map((crumb, index) =>
           isChildRoute(index) ? (
-            <Typography key={index} color={"text.disabled"}>
+            <Typography color={"text.disabled"} key={index}>
               {getRouteLocale(crumb)}
             </Typography>
           ) : (
-            <NextLink key={index} href={getRouteSectionPath(crumb)}>
+            <NextLink href={getRouteSectionPath(crumb)} key={index}>
               <Typography fontWeight={600}>{getRouteLocale(crumb)}</Typography>
             </NextLink>
-          )
+          ),
         )}
       </Breadcrumbs>
     </Box>

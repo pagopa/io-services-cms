@@ -2,75 +2,75 @@ import {
   Autocomplete,
   FormControl,
   FormHelperText,
-  TextField
+  TextField,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 import { Controller, get, useFormContext } from "react-hook-form";
 
-export type AutocompleteControllerProps = {
-  name: string;
+export interface AutocompleteControllerProps {
+  helperText?: ReactNode;
   items: AutocompleteOption[];
   label?: ReactNode;
+  name: string;
   placeholder?: string;
-  helperText?: ReactNode;
-};
+}
 
-export type AutocompleteOption = {
+export interface AutocompleteOption {
+  id: number | string | undefined;
   label: string;
-  id: string | number | undefined;
-};
+}
 
 /** Controller for MUI `Autocomplete` component.\
  * The autocomplete is a normal text input enhanced by a panel of suggested options. */
 export function AutocompleteController({
-  name,
+  helperText,
   items,
   label,
+  name,
   placeholder,
-  helperText
 }: AutocompleteControllerProps) {
   const { t } = useTranslation();
-  const { register, control, formState } = useFormContext();
+  const { control, formState, register } = useFormContext();
   const error = get(formState.errors, name);
 
   if (items.length === 0) return; // avoid mui out-of-range error
   return (
     <Controller
-      name={name}
       control={control}
+      name={name}
       render={({ field: { onChange, value } }) => (
         <FormControl fullWidth margin="normal">
           <Autocomplete
             {...register(name)}
-            id={name}
-            value={value}
-            onChange={(_, v) => onChange(v?.id ?? "")}
-            fullWidth
+            clearOnBlur
             disablePortal
             freeSolo
-            clearOnBlur
-            options={items}
-            noOptionsText={t("forms.noOptionsText")}
-            getOptionLabel={o =>
-              items.find(i =>
-                typeof o === "number" ? i.id === o : i.id === o.id
+            fullWidth
+            getOptionLabel={(o) =>
+              items.find((i) =>
+                typeof o === "number" ? i.id === o : i.id === o.id,
               )?.label ?? ""
             }
+            id={name}
             isOptionEqualToValue={(o, v) =>
               typeof v === "number" ? o.id === v : false
             }
-            renderInput={params => (
+            noOptionsText={t("forms.noOptionsText")}
+            onChange={(_, v) => onChange(v?.id ?? "")}
+            options={items}
+            renderInput={(params) => (
               <TextField
                 {...params}
+                error={!!error}
                 label={label}
                 placeholder={placeholder}
-                error={!!error}
               />
             )}
+            value={value}
           />
           <FormHelperText error={!!error}>
-            {error ? error.message : helperText ?? null}
+            {error ? error.message : (helperText ?? null)}
           </FormHelperText>
         </FormControl>
       )}

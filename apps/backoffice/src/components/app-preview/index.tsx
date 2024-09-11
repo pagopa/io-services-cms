@@ -8,71 +8,70 @@ import {
   Grid,
   Stack,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
-import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 import { useState } from "react";
+
 import { IconButtonClose } from "../buttons";
 import PhoneFrame from "./phone-frame";
 import ServicePreview from "./service-preview";
 
-type AppPreviewProps = {
-  itemToPreview?: Service;
-  showPreview: boolean;
+interface AppPreviewProps {
   editUrl?: string;
+  itemToPreview?: Service;
   onClose: () => void;
-};
+  showPreview: boolean;
+}
 
-const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => {
-  return (
-    <Stack
-      width={180}
-      height={150}
-      padding={1}
-      borderRadius={2}
-      bgcolor="background.paper"
-      zIndex={99}
-      position="absolute"
-      right={50}
-      boxShadow="-5px 5px 30px gray"
-    >
-      <Box display="flex" justifyContent="flex-end">
-        <Button
-          onClick={toggleInfobBox}
-          variant="text"
-          style={{
-            height: 24,
-            minWidth: 24,
-            padding: 0,
-            backgroundColor: "transparent"
-          }}
-        >
-          <Close fontSize="small" />
-        </Button>
-      </Box>
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        gap={1}
-        paddingBottom={1}
+const ScrollInfoBox = (toggleInfobBox: () => void, infoboxText: string) => (
+  <Stack
+    bgcolor="background.paper"
+    borderRadius={2}
+    boxShadow="-5px 5px 30px gray"
+    height={150}
+    padding={1}
+    position="absolute"
+    right={50}
+    width={180}
+    zIndex={99}
+  >
+    <Box display="flex" justifyContent="flex-end">
+      <Button
+        onClick={toggleInfobBox}
+        style={{
+          backgroundColor: "transparent",
+          height: 24,
+          minWidth: 24,
+          padding: 0,
+        }}
+        variant="text"
       >
-        <MouseIcon color="action" />
-        <Typography fontSize={14} textAlign="center" fontWeight="600">
-          {infoboxText}
-        </Typography>
-      </Box>
-    </Stack>
-  );
-};
+        <Close fontSize="small" />
+      </Button>
+    </Box>
+    <Box
+      alignItems="center"
+      display="flex"
+      flexDirection="column"
+      gap={1}
+      paddingBottom={1}
+    >
+      <MouseIcon color="action" />
+      <Typography fontSize={14} fontWeight="600" textAlign="center">
+        {infoboxText}
+      </Typography>
+    </Box>
+  </Stack>
+);
 
 export const AppPreview = ({
-  itemToPreview,
-  showPreview,
   editUrl,
-  onClose
+  itemToPreview,
+  onClose,
+  showPreview,
 }: AppPreviewProps) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -83,23 +82,23 @@ export const AppPreview = ({
   };
 
   return (
-    <Dialog open={showPreview} onClose={onClose} disableScrollLock>
+    <Dialog disableScrollLock onClose={onClose} open={showPreview}>
       <Stack
         flexDirection={"column"}
-        sx={{ minWidth: 600 }}
-        padding={2.5}
         gap={1.5}
+        padding={2.5}
+        sx={{ minWidth: 600 }}
       >
-        <Grid container spacing={0} alignItems="center">
+        <Grid alignItems="center" container spacing={0}>
           <Grid item xs={8}>
             <Stack direction={"row"} gap={1}>
               <Typography fontWeight={700} variant="h6">
                 {t("service.inAppPreview.title")}
               </Typography>
               <Tooltip
-                title={t("service.inAppPreview.titleTooltip")}
-                placement="bottom"
                 arrow
+                placement="bottom"
+                title={t("service.inAppPreview.titleTooltip")}
               >
                 <InfoOutlined color="disabled" />
               </Tooltip>
@@ -108,27 +107,27 @@ export const AppPreview = ({
               <ButtonNaked
                 color="primary"
                 endIcon={<Edit fontSize="small" />}
-                size="medium"
-                sx={{ marginTop: 1, fontWeight: 700 }}
                 onClick={() => router.push(editUrl)}
+                size="medium"
+                sx={{ fontWeight: 700, marginTop: 1 }}
               >
                 {t("service.actions.edit")}
               </ButtonNaked>
             )}
           </Grid>
-          <Grid item xs={4} textAlign="right">
+          <Grid item textAlign="right" xs={4}>
             <IconButtonClose onClick={onClose} />
           </Grid>
         </Grid>
         <Box
-          flexGrow={1}
-          paddingY={2}
-          display="flex"
-          justifyContent="center"
           alignItems="center"
+          display="flex"
+          flexGrow={1}
+          justifyContent="center"
+          paddingY={2}
           sx={{
             backgroundImage: "url('/img/app_preview_bg.png')",
-            backgroundSize: "cover"
+            backgroundSize: "cover",
           }}
         >
           {isInfoOpen &&

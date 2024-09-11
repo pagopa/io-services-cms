@@ -1,60 +1,59 @@
 import { Grid } from "@mui/material";
+
 import {
   ButtonBack,
   ButtonCancel,
   ButtonNext,
-  ButtonWithLoader
+  ButtonWithLoader,
 } from "../buttons";
 import {
   ConfirmButtonLabelsType,
-  CreateUpdateMode
+  CreateUpdateMode,
 } from "./create-update-process";
 
-export type ProcessActionsProps = {
-  disabled?: boolean;
-  stepsNumber: number;
-  currentStepIndex: number;
-  mode: CreateUpdateMode;
+export interface ProcessActionsProps {
   confirmButtonLabels: ConfirmButtonLabelsType;
-  onCancel: () => void;
+  currentStepIndex: number;
+  disabled?: boolean;
+  mode: CreateUpdateMode;
   onBack: () => void;
-  onNext: () => void;
+  onCancel: () => void;
   onComplete: () => void;
-};
+  onNext: () => void;
+  stepsNumber: number;
+}
 
 /** Render process action buttons such as cancel/back/next/send related to current process step */
 export const ProcessActions = ({
-  disabled,
-  stepsNumber,
-  currentStepIndex,
-  mode,
   confirmButtonLabels,
-  onCancel,
+  currentStepIndex,
+  disabled,
+  mode,
   onBack,
+  onCancel,
+  onComplete,
   onNext,
-  onComplete
-}: ProcessActionsProps) => {
-  return (
-    <Grid container spacing={0} marginTop={3}>
-      <Grid item xs={6}>
-        {currentStepIndex > 0 ? (
-          <ButtonBack onClick={onBack} disabled={disabled} />
-        ) : (
-          <ButtonCancel onClick={onCancel} disabled={disabled} />
-        )}
-      </Grid>
-      <Grid item xs={6} textAlign="right">
-        {currentStepIndex < stepsNumber - 1 ? (
-          <ButtonNext onClick={onNext} disabled={disabled} />
-        ) : (
-          <ButtonWithLoader
-            label={confirmButtonLabels[mode]}
-            onClick={onComplete}
-            loading={disabled}
-            disabled={disabled}
-          />
-        )}
-      </Grid>
+  stepsNumber,
+}: ProcessActionsProps) => (
+  <Grid container marginTop={3} spacing={0}>
+    <Grid item xs={6}>
+      {currentStepIndex > 0 ? (
+        <ButtonBack disabled={disabled} onClick={onBack} />
+      ) : (
+        <ButtonCancel disabled={disabled} onClick={onCancel} />
+      )}
     </Grid>
-  );
-};
+    <Grid item textAlign="right" xs={6}>
+      {currentStepIndex < stepsNumber - 1 ? (
+        <ButtonNext disabled={disabled} onClick={onNext} />
+      ) : (
+        <ButtonWithLoader
+          disabled={disabled}
+          label={confirmButtonLabels[mode]}
+          loading={disabled}
+          onClick={onComplete}
+        />
+      )}
+    </Grid>
+  </Grid>
+);

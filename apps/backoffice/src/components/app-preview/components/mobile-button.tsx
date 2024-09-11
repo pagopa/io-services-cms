@@ -1,38 +1,39 @@
 import { Button } from "@mui/material";
+
 import { IOColors } from ".";
 import { MobileTypography } from "./mobile-typography";
 
-export type MobileButtonProps = {
-  text: string;
+export interface MobileButtonProps {
   isPrimary?: boolean;
-};
+  text: string;
+}
 
 /** Render IO App button with **Readex Pro** font */
-export const MobileButton = ({ text, isPrimary }: MobileButtonProps) => {
+export const MobileButton = ({ isPrimary, text }: MobileButtonProps) => {
   const buttonPrimaryStyles = {
-    borderRadius: "8px",
-    backgroundColor: IOColors["blueIO-500"],
     "&:hover": {
-      backgroundColor: IOColors["blueIO-500"]
-    }
+      backgroundColor: IOColors["blueIO-500"],
+    },
+    backgroundColor: IOColors["blueIO-500"],
+    borderRadius: "8px",
   };
 
   const buttonSecondaryStyles = {
     "&:hover": {
-      backgroundColor: IOColors["white"]
-    }
+      backgroundColor: IOColors["white"],
+    },
   };
 
   return (
     <Button
-      variant={isPrimary ? "contained" : "text"}
-      sx={isPrimary ? buttonPrimaryStyles : buttonSecondaryStyles}
       fullWidth
+      sx={isPrimary ? buttonPrimaryStyles : buttonSecondaryStyles}
+      variant={isPrimary ? "contained" : "text"}
     >
       <MobileTypography
+        color={isPrimary ? IOColors["white"] : IOColors["blueIO-500"]}
         fontSize="16px"
         fontWeight={600}
-        color={isPrimary ? IOColors["white"] : IOColors["blueIO-500"]}
       >
         {text}
       </MobileTypography>

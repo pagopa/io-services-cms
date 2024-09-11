@@ -3,14 +3,15 @@ import useFetch from "@/hooks/use-fetch";
 import { Cancel, CloudDone, CloudUpload } from "@mui/icons-material";
 import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import * as tt from "io-ts";
-import { Trans, useTranslation } from "next-i18next";
 import Image from "next/image";
+import { Trans, useTranslation } from "next-i18next";
 import { useState } from "react";
+
 import { CardBaseContainer } from "../cards";
 
-export type ServiceLogoProps = {
+export interface ServiceLogoProps {
   serviceId: string;
-};
+}
 
 /** Render a card with the service logo and the possibility of uploading/modifying it */
 export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
@@ -24,10 +25,10 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
 
   const [logoExists, setLogoExists] = useState(true);
   const [hasPendingLogo, setHasPendingLogo] = useState(false);
-  const [logoFile, setLogoFile] = useState<string | ArrayBuffer | null>(
-    logoFullPath()
+  const [logoFile, setLogoFile] = useState<ArrayBuffer | null | string>(
+    logoFullPath(),
   );
-  const { loading, fetchData } = useFetch<unknown>();
+  const { fetchData, loading } = useFetch<unknown>();
 
   /** handle file read after file selection */
   const handleImageChanged = (event: any) => {
@@ -55,8 +56,8 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
       { body: { logo: logo as any }, serviceId },
       tt.unknown,
       {
-        notify: "all"
-      }
+        notify: "all",
+      },
     );
     handleCancel();
   };
@@ -65,9 +66,9 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
     if (hasPendingLogo)
       return (
         <Button
-          variant="text"
-          startIcon={<CloudDone />}
           onClick={handleUploadServiceLogo}
+          startIcon={<CloudDone />}
+          variant="text"
         >
           {t("Salva immagine")}
         </Button>
@@ -78,10 +79,10 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
     if (hasPendingLogo)
       return (
         <Button
-          variant="text"
           color="error"
-          startIcon={<Cancel />}
           onClick={handleCancel}
+          startIcon={<Cancel />}
+          variant="text"
         >
           {t("Annulla")}
         </Button>
@@ -91,13 +92,13 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
   const renderChangeButton = () => {
     if (logoExists && !hasPendingLogo)
       return (
-        <Button component="label" variant="text" startIcon={<CloudUpload />}>
+        <Button component="label" startIcon={<CloudUpload />} variant="text">
           {t("Cambia immagine")}
           <input
-            hidden
             accept="image/png"
-            type="file"
+            hidden
             onChange={handleImageChanged}
+            type="file"
           />
         </Button>
       );
@@ -105,21 +106,21 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
 
   const renderNoLogo = () => (
     <Box
-      padding={3}
-      borderRadius={1}
-      border="1px dashed #0073E6"
       bgcolor="rgba(0, 115, 230, 0.08)"
+      border="1px dashed #0073E6"
+      borderRadius={1}
+      padding={3}
     >
       <Box component="label" sx={{ cursor: "pointer" }}>
         <input
-          hidden
           accept="image/png"
-          type="file"
+          hidden
           onChange={handleImageChanged}
+          type="file"
         />
-        <Stack direction="column" spacing={1} alignItems="center">
+        <Stack alignItems="center" direction="column" spacing={1}>
           <CloudUpload color="primary" />
-          <Typography variant="body2" color="primary">
+          <Typography color="primary" variant="body2">
             {t("service.logo.dropzoneText")}
           </Typography>
           <Typography fontSize={12}>
@@ -132,14 +133,14 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
 
   const renderLogo = () => (
     <Image
-      src={logoFile as string}
-      width={200}
-      height={100}
-      style={{ objectFit: "scale-down" }}
       alt="service logo"
-      unoptimized={true}
+      height={100}
       onError={() => setLogoExists(false)}
       onLoadingComplete={() => setLogoExists(true)}
+      src={logoFile as string}
+      style={{ objectFit: "scale-down" }}
+      unoptimized={true}
+      width={200}
     />
   );
 
@@ -148,18 +149,18 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
       <Box textAlign="center">
         {logoExists ? renderLogo() : renderNoLogo()}
         <Stack
+          alignItems="center"
           direction="row"
           justifyContent="center"
-          alignItems="center"
-          spacing={1}
           marginTop={1}
+          spacing={1}
         >
           {loading ? (
             <Box
               display="flex"
               flexDirection="column"
               justifyContent="center"
-              sx={{ width: "80%", height: "48px", marginTop: 1 }}
+              sx={{ height: "48px", marginTop: 1, width: "80%" }}
             >
               <LinearProgress />
             </Box>
@@ -172,7 +173,7 @@ export const ServiceLogo = ({ serviceId }: ServiceLogoProps) => {
           )}
         </Stack>
         <Box marginTop={1}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography color="text.secondary" variant="body2">
             <Trans i18nKey="service.logo.disclaimerText" />
           </Typography>
         </Box>

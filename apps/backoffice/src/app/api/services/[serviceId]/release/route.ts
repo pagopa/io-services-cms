@@ -1,6 +1,7 @@
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
+
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
@@ -10,15 +11,15 @@ export const POST = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) =>
     forwardIoServicesCmsRequest("releaseService", {
-      nextRequest,
       backofficeUser,
-      pathParams: params
-    })
+      nextRequest,
+      pathParams: params,
+    }),
 );
 
 /**
@@ -28,15 +29,15 @@ export const GET = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) =>
     forwardIoServicesCmsRequest("getPublishedService", {
-      nextRequest,
       backofficeUser,
-      pathParams: params
-    })
+      nextRequest,
+      pathParams: params,
+    }),
 );
 
 /**
@@ -46,13 +47,13 @@ export const DELETE = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
     {
+      backofficeUser,
       params,
-      backofficeUser
-    }: { params: { serviceId: string }; backofficeUser: BackOfficeUser }
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) =>
     forwardIoServicesCmsRequest("unpublishService", {
-      nextRequest,
       backofficeUser,
-      pathParams: params
-    })
+      nextRequest,
+      pathParams: params,
+    }),
 );

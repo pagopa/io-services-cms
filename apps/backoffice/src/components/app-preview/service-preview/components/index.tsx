@@ -19,5 +19,5 @@ export {
   ServicePreviewSectionListItem,
   ServicePreviewSectionTitle,
   ServicePreviewTOSSection,
-  ServicePreviewTopbar
+  ServicePreviewTopbar,
 };

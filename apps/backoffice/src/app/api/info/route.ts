@@ -1,6 +1,6 @@
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_OK
+  HTTP_STATUS_OK,
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
@@ -11,6 +11,7 @@ import { getLegacyCosmosHealth } from "@/lib/be/legacy-cosmos";
 import { getSelfcareHealth } from "@/lib/be/selfcare-client";
 import { getSubscriptionsMigrationHealth } from "@/lib/be/subscription-migration-client";
 import { NextResponse } from "next/server";
+
 import packageJson from "../../../../package.json";
 
 export const dynamic = "force-dynamic";
@@ -29,15 +30,15 @@ export async function GET() {
     getIoServicesCmsHealth(),
     getAzureAccessTokenHealth(),
     getCosmosStoreHealth(),
-    getSubscriptionsMigrationHealth()
+    getSubscriptionsMigrationHealth(),
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
 
   const response = {
+    health,
     name: packageJson.name,
     version: packageJson.version,
-    health
   };
 
   return NextResponse.json(response, { status });

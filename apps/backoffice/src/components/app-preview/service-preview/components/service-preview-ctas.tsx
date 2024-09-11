@@ -3,12 +3,13 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 import FM from "front-matter";
+
 import { CTAS, ServiceMessageCTA } from "../../../../types/ctas";
 import { MobileButton } from "../../components";
 
-type ServicePreviewCTAsProps = {
+interface ServicePreviewCTAsProps {
   cta?: string;
-};
+}
 
 const ServicePreviewCTAs = ({ cta }: ServicePreviewCTAsProps) => {
   const maybeCTAs = extractCTAs(cta);
@@ -18,8 +19,8 @@ const ServicePreviewCTAs = ({ cta }: ServicePreviewCTAsProps) => {
   }
 
   return (
-    <Stack paddingX={3} paddingY={2} direction="column">
-      <MobileButton text={maybeCTAs.value.cta_1.text} isPrimary />
+    <Stack direction="column" paddingX={3} paddingY={2}>
+      <MobileButton isPrimary text={maybeCTAs.value.cta_1.text} />
       {maybeCTAs.value.cta_2 && (
         <MobileButton text={maybeCTAs.value.cta_2.text} />
       )}
@@ -31,7 +32,7 @@ const extractCTAs = (cta?: string): O.Option<CTAS> =>
   pipe(
     cta,
     O.fromNullable,
-    O.chain(cta =>
+    O.chain((cta) =>
       pipe(
         cta,
         O.of,
@@ -41,19 +42,19 @@ const extractCTAs = (cta?: string): O.Option<CTAS> =>
           pipe(
             E.tryCatch(() => FM<ServiceMessageCTA>(cta).attributes, E.toError),
             E.mapLeft(() => console.error("Front matter CTAs decoding error")),
-            O.fromEither
-          )
+            O.fromEither,
+          ),
         ),
-        O.chain(attributes =>
+        O.chain((attributes) =>
           pipe(
             attributes["it"], // TODO: think about use current user locale
             CTAS.decode,
-            O.fromEither
+            O.fromEither,
             // TODO: check if the decoded actions are valid
-          )
-        )
-      )
-    )
+          ),
+        ),
+      ),
+    ),
   );
 
 export default ServicePreviewCTAs;

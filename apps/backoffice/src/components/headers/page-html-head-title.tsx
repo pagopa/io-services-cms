@@ -1,9 +1,9 @@
-import { useTranslation } from "next-i18next";
 import Head from "next/head";
+import { useTranslation } from "next-i18next";
 
-export type PageHtmlHeadTitleProps = {
+export interface PageHtmlHeadTitleProps {
   section: string;
-};
+}
 
 export const PageHtmlHeadTitle = ({ section }: PageHtmlHeadTitleProps) => {
   const { t } = useTranslation();
@@ -13,7 +13,7 @@ export const PageHtmlHeadTitle = ({ section }: PageHtmlHeadTitleProps) => {
   return (
     <Head>
       <title>{getTitle()}</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta content="width=device-width, initial-scale=1" name="viewport" />
     </Head>
   );
 };

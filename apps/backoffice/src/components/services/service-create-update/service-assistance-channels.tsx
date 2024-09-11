@@ -1,6 +1,6 @@
 import {
   SelectController,
-  TextFieldController
+  TextFieldController,
 } from "@/components/forms/controllers";
 import { AssistanceChannel, AssistanceChannelType } from "@/types/service";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
@@ -14,53 +14,57 @@ export const ServiceAssistanceChannels = () => {
   const { t } = useTranslation();
   const {
     control,
-    formState: { isValid, errors }
+    formState: { errors, isValid },
   } = useFormContext<{
     metadata: { assistanceChannels: AssistanceChannel[] };
   }>();
-  const { fields, append, remove } = useFieldArray({
+  const { append, fields, remove } = useFieldArray({
     control,
-    name: "metadata.assistanceChannels"
+    name: "metadata.assistanceChannels",
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errorText, setErrorText] = useState<string>();
 
   const selectableAssistanceChannels = [
     {
       label: t("forms.service.assistanceChannels.email"),
-      value: "email"
+      value: "email",
     },
     {
       label: t("forms.service.assistanceChannels.pec"),
-      value: "pec"
+      value: "pec",
     },
     {
       label: t("forms.service.assistanceChannels.phone"),
-      value: "phone"
+      value: "phone",
     },
     {
       label: t("forms.service.assistanceChannels.supportUrl"),
-      value: "support_url"
-    }
+      value: "support_url",
+    },
   ];
 
   const getAvailableAssistanceChannels = () => {
-    const presentChannels = fields.map(field => field.type);
+    const presentChannels = fields.map((field) => field.type);
     return selectableAssistanceChannels.filter(
-      item => presentChannels.indexOf(item.value as AssistanceChannelType) < 0
+      (item) =>
+        presentChannels.indexOf(item.value as AssistanceChannelType) < 0,
     );
   };
 
   const handleAddChannel = () => {
     append({
       type: getAvailableAssistanceChannels()[0].value as AssistanceChannelType,
-      value: ""
+      value: "",
     });
   };
 
   useEffect(() => {
-    isValid
-      ? setErrorText(undefined)
-      : setErrorText(errors.metadata?.assistanceChannels?.message ?? "");
+    if (isValid) {
+      setErrorText(undefined);
+    } else {
+      setErrorText(errors.metadata?.assistanceChannels?.message ?? "");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isValid, fields]);
 
@@ -68,11 +72,11 @@ export const ServiceAssistanceChannels = () => {
     <Box>
       {fields.map((field, index) => (
         <Grid
-          key={field.id}
-          container
-          spacing={2}
-          direction="row"
           alignItems="flex-start"
+          container
+          direction="row"
+          key={field.id}
+          spacing={2}
         >
           {index > 0 && (
             <Grid item width="50px">
@@ -87,40 +91,40 @@ export const ServiceAssistanceChannels = () => {
           )}
           <Grid item xs={3}>
             <SelectController
-              name={`metadata.assistanceChannels[${index}].type`}
-              label=""
-              placeholder={t("forms.service.assistanceChannels.channelType")}
               defaultValue={`metadata.assistanceChannels[${index}].type`}
               items={selectableAssistanceChannels}
+              label=""
+              name={`metadata.assistanceChannels[${index}].type`}
+              placeholder={t("forms.service.assistanceChannels.channelType")}
             />
           </Grid>
           <Grid item xs>
             <TextFieldController
-              name={`metadata.assistanceChannels[${index}].value`}
-              label=""
-              placeholder={t("forms.service.assistanceChannels.placeholder")}
               helperText={
                 index === 0 && (
                   <span
                     dangerouslySetInnerHTML={{
-                      __html: t("forms.service.assistanceChannels.notice")
+                      __html: t("forms.service.assistanceChannels.notice"),
                     }}
                   />
                 )
               }
+              label=""
+              name={`metadata.assistanceChannels[${index}].value`}
+              placeholder={t("forms.service.assistanceChannels.placeholder")}
             />
           </Grid>
         </Grid>
       ))}
-      <Typography fontSize="14px" color="error" fontWeight={600}>
+      <Typography color="error" fontSize="14px" fontWeight={600}>
         {errors.metadata?.assistanceChannels?.message}
       </Typography>
       {fields.length < 4 && (
         <Button
-          variant="text"
-          startIcon={<AddCircleOutline />}
           onClick={handleAddChannel}
+          startIcon={<AddCircleOutline />}
           sx={{ marginTop: 1 }}
+          variant="text"
         >
           {t("forms.service.assistanceChannels.add")}
         </Button>
