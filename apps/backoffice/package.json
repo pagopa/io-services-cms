@@ -21,11 +21,11 @@
     "clean:api-definitions": "rm -rf ./src/generated/api",
     "clean:services-cms": "rm -rf ./src/generated/services-cms",
     "clean:selfcare-api-models": "rm -rf ./src/types/selfcare",
-    "clean": "yarn clean:api-definitions && yarn clean:services-cms && yarn clean:selfcare-api-models",
+    "clean:all": "yarn clean:api-definitions && yarn clean:services-cms && yarn clean:selfcare-api-models",
     "generate:api-definitions": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
     "generate:services-cms": "gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
     "generate:selfcare-api-models": "gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml --out-dir ./src/generated/selfcare --response-decoders",
-    "generate": "yarn clean && yarn generate:api-definitions && yarn generate:services-cms && yarn generate:selfcare-api-models"
+    "generate": "yarn clean:all && yarn generate:api-definitions && yarn generate:services-cms && yarn generate:selfcare-api-models"
   },
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",

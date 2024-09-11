@@ -1,40 +1,19 @@
 {
   "extends": ["//"],
   "tasks": {
-    "clean:api-definitions": {
-      "inputs": ["openapi.yaml"]
-    },
-    "clean:services-cms": {
-      "inputs": ["../io-services-cms-webapp/openapi.yaml"]
-    },
-    "clean:selfcare-api-models": {
-      "inputs": [
-        "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
-      ]
-    },
-    "clean": {
-      "dependsOn": [
-        "clean:api-definitions",
-        "clean:services-cms",
-        "clean:selfcare-api-models"
-      ]
-    },
     "generate:api-definitions": {
       "inputs": ["openapi.yaml"],
-      "outputs": ["src/generated/api/**/*"],
-      "dependsOn": ["clean:api-definitions"]
+      "outputs": ["src/generated/api/**/*"]
     },
     "generate:services-cms": {
       "inputs": ["../io-services-cms-webapp/openapi.yaml"],
-      "outputs": ["src/generated/services-cms/**/*"],
-      "dependsOn": ["clean:services-cms"]
+      "outputs": ["src/generated/services-cms/**/*"]
     },
     "generate:selfcare-api-models": {
       "inputs": [
         "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
       ],
-      "outputs": ["src/types/selfcare/**/*"],
-      "dependsOn": ["clean:selfcare-api-models"]
+      "outputs": ["src/types/selfcare/**/*"]
     },
     "generate": {
       "dependsOn": [
@@ -54,8 +33,21 @@
         "!README.md",
         "!vitest.config.*"
       ],
-      "dependsOn": ["clean", "generate"],
+      "dependsOn": ["generate"],
       "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "coverage:b4f": {
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.node.ts"],
+      "command": "vitest run --config ./vitest.config.node.ts --coverage",
+      "dependsOn": ["build"]
+    },
+    "coverage:fe": {
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "vitest.config.react.ts"],
+      "command": "vitest run --config ./vitest.config.react.ts --coverage",
+      "dependsOn": ["build"]
+    },
+    "coverage": {
+      "dependsOn": ["coverage:b4f", "coverage:fe"]
     },
     "typecheck": {
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
