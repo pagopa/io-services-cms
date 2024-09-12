@@ -3,7 +3,10 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { retrieveUserGroups } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { handleBadRequestErrorResponse, handleInternalErrorResponse } from "@/lib/be/errors";
+import {
+  handleBadRequestErrorResponse,
+  handleInternalErrorResponse
+} from "@/lib/be/errors";
 
 /**
  * @description Retrieve groups for an Institution ID
@@ -19,7 +22,9 @@ export const GET = withJWTAuthHandler(
     if (backofficeUser.institution.role === "ADMIN") {
       try {
         const limit = parseFunction(request.nextUrl.searchParams.get("size"));
-        const offset = parseFunction(request.nextUrl.searchParams.get("number"));
+        const offset = parseFunction(
+          request.nextUrl.searchParams.get("number")
+        );
         const institutionResponse = await retrieveUserGroups(
           params.institutionId,
           limit,
@@ -47,15 +52,17 @@ export const GET = withJWTAuthHandler(
   }
 );
 
-const parseFunction = (variable : string | null) : number =>{
-  if(typeof variable === 'string'){
+const parseFunction = (variable: string | null): number => {
+  if (typeof variable === "string") {
     try {
-      return parseInt(variable);
+      return parseInt(variable, 10);
     } catch (error) {
       throw new Error(`cannot parse variable because : ${error}`);
     }
-  }else{
-    throw handleBadRequestErrorResponse("ParseFunctionError","Cannot parse null variable");
+  } else {
+    throw handleBadRequestErrorResponse(
+      "ParseFunctionError",
+      "Cannot parse null variable"
+    );
   }
-  
-}
+};
