@@ -5,10 +5,7 @@ import {
   InstitutionNotFoundError,
   ManagedInternalError,
 } from "@/lib/be/errors";
-import {
-  getSelfcareClient,
-  UserInstitutions
-} from "@/lib/be/selfcare-client";
+import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
 import { isAxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 
@@ -54,19 +51,19 @@ export const getInstitutionById = async (id: string): Promise<Institution> => {
 
 export const getInstitutionGroups = async (
   institutionId: string,
-  limit?:number,
-  offset?:number
+  limit?: number,
+  offset?: number,
 ): Promise<PageOfUserGroupResource> => {
   const apiResult = await getSelfcareClient().getInstitutionGroups(
     institutionId,
     offset,
-    limit
+    limit,
   )();
 
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
       "Error calling selfcare getUserGroups API",
-      apiResult.left
+      apiResult.left,
     );
   }
 

@@ -1,22 +1,24 @@
+import { GroupPagination } from "@/generated/api/GroupPagination";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
+
+import { ManagedInternalError } from "../errors";
 import {
   getInstitutionById,
+  getInstitutionGroups,
   getUserAuthorizedInstitutions,
-  getInstitutionGroups
 } from "./selfcare";
-import { GroupPagination } from "@/generated/api/GroupPagination";
-import { ManagedInternalError } from "../errors";
 
 // Type utility to extract the resolved type of a Promise
 type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to an Utils monorepo package
 
 // Type utility to extract the resolved type of a ReadonlyArray of Promises
-type ReadonlyArrayElementType<T> = T extends ReadonlyArray<infer U> ? U : never; // TODO: move to an Utils monorepo package
+type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
 // Type utility to extract the resolved type of an array of Promises
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ArrayElementType<T> = T extends (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
 export const retrieveUserAuthorizedInstitutions = async (
@@ -34,7 +36,7 @@ export const retrieveInstitution = async (
 export const retrieveUserGroups = async (
   institutionId: string,
   limit?: number,
-  offset?: number
+  offset?: number,
 ): Promise<GroupPagination> => {
   const apiResult = await getInstitutionGroups(institutionId, limit, offset);
   return toGroupPagination(apiResult);
@@ -68,29 +70,29 @@ const toUserAuthorizedInstitution = (
 });
 
 const toGroupPagination = (
-  pageOfUserGroupResource: PromiseValue<ReturnType<typeof getInstitutionGroups>>
+  pageOfUserGroupResource: PromiseValue<
+    ReturnType<typeof getInstitutionGroups>
+  >,
 ): GroupPagination => ({
   pagination: {
     count: pageOfUserGroupResource.totalElements ?? 0,
     limit: pageOfUserGroupResource.size ?? 0,
-    offset: pageOfUserGroupResource.number ?? 0
+    offset: pageOfUserGroupResource.number ?? 0,
   },
-  value: toGroups(pageOfUserGroupResource.content ?? [])
+  value: toGroups(pageOfUserGroupResource.content ?? []),
 });
-
 
 // TODO : this need to be fixed
 const toGroups = (
   userGroupResources: Exclude<
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
     undefined
-  >
-): GroupPagination["value"] => {
-  return userGroupResources?.map(userGroupResource => {
+  >,
+): GroupPagination["value"] =>
+  userGroupResources?.map((userGroupResource) => {
     if (userGroupResource.id && userGroupResource.name !== undefined) {
       return { id: userGroupResource.id, name: userGroupResource.name };
     } else {
       throw new ManagedInternalError("Error toGroups mapping");
     }
   });
-};

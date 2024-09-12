@@ -29,8 +29,9 @@ export const isValidPath = (asPath: string) =>
   /* eslint-disable no-useless-escape */
   /^[a-zA-Z0-9\-_\/]+$/.test(asPath);
 
-
-export const parseStringToNumberFunction = (variable: string | null): number => {
+export const parseStringToNumberFunction = (
+  variable: null | string,
+): number => {
   if (typeof variable === "string") {
     try {
       return parseInt(variable, 10);
@@ -40,7 +41,7 @@ export const parseStringToNumberFunction = (variable: string | null): number => 
   } else {
     throw handleBadRequestErrorResponse(
       "ParseFunctionError",
-      "Cannot parse null variable"
+      "Cannot parse null variable",
     );
   }
 };

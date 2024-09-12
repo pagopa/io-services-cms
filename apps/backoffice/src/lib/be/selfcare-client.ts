@@ -27,16 +27,15 @@ export interface SelfcareClient {
   getInstitutionById: (
     id: string,
   ) => TE.TaskEither<AxiosError | Error, Institution>;
-  getUserAuthorizedInstitutions: (
-    userId: string,
-  ) => TE.TaskEither<Error, UserInstitutions>;
   getInstitutionGroups: (
     institutionId: string,
     limit?: number,
-    offset?: number
+    offset?: number,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
-};
-
+  getUserAuthorizedInstitutions: (
+    userId: string,
+  ) => TE.TaskEither<Error, UserInstitutions>;
+}
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -149,7 +148,7 @@ const buildSelfcareClient = (): SelfcareClient => {
   const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
     institutionId: string,
     limit?: number,
-    offset?: number
+    offset?: number,
   ) =>
     pipe(
       TE.tryCatch(
@@ -157,34 +156,34 @@ const buildSelfcareClient = (): SelfcareClient => {
           axiosInstance.get(`${groupsApi}`, {
             params: {
               institutionId,
-              status: "ACTIVE",
               page: offset,
-              size: limit
-            }
+              size: limit,
+              status: "ACTIVE",
+            },
           }),
-        identity
+        identity,
       ),
-      TE.mapLeft(e => {
+      TE.mapLeft((e) => {
         if (axios.isAxiosError(e)) {
           return e;
         } else {
           return new Error(`Error calling selfcare getUserGroups API: ${e}`);
         }
       }),
-      TE.chainW(response =>
+      TE.chainW((response) =>
         pipe(
           response.data,
           PageOfUserGroupResource.decode,
           E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither
-        )
-      )
+          TE.fromEither,
+        ),
+      ),
     );
 
   return {
-    getUserAuthorizedInstitutions,
     getInstitutionById,
-    getInstitutionGroups
+    getInstitutionGroups,
+    getUserAuthorizedInstitutions,
   };
 };
 
