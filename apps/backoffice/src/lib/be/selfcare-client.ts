@@ -30,9 +30,6 @@ export interface SelfcareClient {
   getUserAuthorizedInstitutions: (
     userId: string,
   ) => TE.TaskEither<Error, UserInstitutions>;
-  getInstitutionById: (
-    id: string
-  ) => TE.TaskEither<Error | AxiosError, Institution>;
   getInstitutionGroups: (
     institutionId: string,
     limit?: number,
