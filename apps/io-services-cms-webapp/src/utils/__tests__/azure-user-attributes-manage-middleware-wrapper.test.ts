@@ -17,22 +17,22 @@ const { AzureUserAttributesManageMiddleware } = vi.hoisted(() => ({
           authorizedCIDRs: mocks.authorizedCIDRs,
           email: "" as any,
           kind: "IAzureUserAttributesManage",
-        })
-      )
+        }),
+      ),
   ),
 }));
 
 vi.mock(
-  "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage",
+  "../../lib/middlewares/azure_user_attributes_manage-middleware",
   async () => {
     const actual = await vi.importActual(
-      "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage"
+      "../../lib/middlewares/azure_user_attributes_manage-middleware",
     );
     return {
       ...(actual as any),
       AzureUserAttributesManageMiddleware,
     };
-  }
+  },
 );
 
 const subscriptionCIDRsModelMock = {
@@ -40,14 +40,14 @@ const subscriptionCIDRsModelMock = {
     Promise.resolve(
       E.right({
         authorizedCIDRs: new Set(),
-      })
-    )
+      }),
+    ),
   ),
 } as unknown as SubscriptionCIDRsModel;
 
 const BackofficeInternalSubnetCIDRMock = {
   BACKOFFICE_INTERNAL_SUBNET_CIDRS: ["127.0.0.0/16"],
-} as BackofficeInternalSubnetCIDRs;
+} as unknown as BackofficeInternalSubnetCIDRs;
 
 describe("AzureUserAttributesManageMiddlewareWrapper", () => {
   it("should return an empty CIDRs list when no authorized CIDRs was set by the user", async () => {
@@ -55,7 +55,7 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
-      BackofficeInternalSubnetCIDRMock
+      BackofficeInternalSubnetCIDRMock,
     )(requestMock);
 
     expect(E.isRight(result)).toBeTruthy();
@@ -80,13 +80,13 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
           authorizedCIDRs: new Set(returningCIDRs),
           email: "" as any,
           kind: "IAzureUserAttributesManage",
-        })
-      )
+        }),
+      ),
     );
 
     const result = await AzureUserAttributesManageMiddlewareWrapper(
       subscriptionCIDRsModelMock,
-      BackofficeInternalSubnetCIDRMock
+      BackofficeInternalSubnetCIDRMock,
     )(requestMock);
 
     expect(E.isRight(result)).toBeTruthy();
