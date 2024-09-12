@@ -1,3 +1,5 @@
+import { handleBadRequestErrorResponse } from "@/lib/be/errors";
+
 /** Utility to check if a string is null, undefined or empty */
 export const isNullUndefinedOrEmpty = (value: null | string | undefined) =>
   !value || value.trim().length === 0;
@@ -26,3 +28,19 @@ export const isValidPath = (asPath: string) =>
   // Implement path validation logic, i.e. check that it does not contain dangerous characters
   /* eslint-disable no-useless-escape */
   /^[a-zA-Z0-9\-_\/]+$/.test(asPath);
+
+
+export const parseStringToNumberFunction = (variable: string | null): number => {
+  if (typeof variable === "string") {
+    try {
+      return parseInt(variable, 10);
+    } catch (error) {
+      throw new Error(`cannot parse variable because : ${error}`);
+    }
+  } else {
+    throw handleBadRequestErrorResponse(
+      "ParseFunctionError",
+      "Cannot parse null variable"
+    );
+  }
+};
