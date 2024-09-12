@@ -6,66 +6,65 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
-  SelectProps
+  SelectProps,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 export type MultiSelectControllerProps = {
-  name: string;
   items: {
     label: string;
     value: string;
   }[];
+  name: string;
 } & SelectProps;
 
 /** Controller for MUI `Select` component.\
  * Used for collecting multiple user provided information from a list of options. */
 export function MultiSelectController({
-  name,
   items,
+  name,
   ...props
 }: MultiSelectControllerProps) {
-  const { t } = useTranslation();
-  const { register, control } = useFormContext();
+  //TODO: removed useTranslation() because it's not used, is it needed?
+  const { control, register } = useFormContext();
 
   return (
     <Controller
-      name={name}
       control={control}
-      render={({ field: { onChange, value } }) => (
+      name={name}
+      render={({ field: { onChange } }) => (
         <FormControl fullWidth margin="normal">
           <InputLabel id={`${name}-label`}>{props.label}</InputLabel>
           <Select
             {...register(name)}
-            id={name}
-            labelId={`${name}-label`}
-            value={[]}
-            onChange={onChange}
-            fullWidth
-            multiple
+            MenuProps={{ disableScrollLock: true }}
             disabled={props.disabled}
+            fullWidth
+            id={name}
             input={
               <OutlinedInput id="select-multiple-chip" label={props.label} />
             }
-            renderValue={selected => (
+            labelId={`${name}-label`}
+            multiple
+            onChange={onChange}
+            renderValue={(selected) => (
               <Box
                 sx={{
                   display: "flex",
                   flexWrap: "wrap",
-                  gap: 0.5
+                  gap: 0.5,
                 }}
               >
                 {selected.map((value: React.Key | null | undefined) => (
                   <Chip
                     key={value}
-                    label={items.find(item => item.value === value)?.label}
+                    label={items.find((item) => item.value === value)?.label}
                   />
                 ))}
               </Box>
             )}
-            MenuProps={{ disableScrollLock: true }}
+            value={[]}
           >
             {items.map((item, keyIndex) => (
               <MenuItem key={keyIndex} value={item.value}>

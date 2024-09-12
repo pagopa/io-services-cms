@@ -1,48 +1,48 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
-import { ReactNode } from "react";
 import { useTranslation } from "next-i18next";
+import { ReactNode } from "react";
 
-export type CardShortcutProps = {
+export interface CardShortcutProps {
+  /** Call to action link placed in card footer */
+  cta?: {
+    endIcon?: ReactNode;
+    href: string;
+    label: string;
+    startIcon?: ReactNode;
+    target?: "_blank" | "_self";
+  };
   /** If defined, render an icon on top of the card */
   icon?: ReactNode;
   /** Card principal text */
   text: string;
-  /** Call to action link placed in card footer */
-  cta?: {
-    startIcon?: ReactNode;
-    label: string;
-    endIcon?: ReactNode;
-    href: string;
-    target?: "_blank" | "_self";
-  };
-};
+}
 
 /**
  * Card used to show a shortcut consisting of a box with a main icon, text and a call to action button.
  */
-export const CardShortcut = ({ icon, text, cta }: CardShortcutProps) => {
+export const CardShortcut = ({ cta, icon, text }: CardShortcutProps) => {
   const { t } = useTranslation();
 
   return (
     <Stack
-      height="100%"
+      alignItems="center"
       bgcolor="#E9E9E9"
-      padding={3}
-      borderRadius={2}
       borderColor="divider"
+      borderRadius={2}
       color="text.secondary"
       direction="column"
+      height="100%"
       justifyContent="center"
-      alignItems="center"
+      padding={3}
       spacing={2}
     >
       {icon ?? null}
       <Typography
-        id="card-title"
-        variant="body2"
-        textAlign="center"
         color="inherit"
+        id="card-title"
+        textAlign="center"
+        variant="body2"
       >
         {t(text)}
       </Typography>
@@ -50,14 +50,14 @@ export const CardShortcut = ({ icon, text, cta }: CardShortcutProps) => {
         <Box marginTop={3}>
           <NextLink
             href={cta.href}
-            target={cta.target ?? "_self"}
             rel="noreferrer"
+            target={cta.target ?? "_self"}
           >
             <Button
-              variant="contained"
+              disableElevation
               size="small"
               startIcon={cta.startIcon}
-              disableElevation
+              variant="contained"
             >
               {t(cta.label)}
             </Button>

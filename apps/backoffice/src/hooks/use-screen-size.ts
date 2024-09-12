@@ -3,17 +3,17 @@ import { useEffect, useState } from "react";
 
 /** React Custom Hook to have updated screen dimensions as width and height _(in pixels)_ */
 const useScreenSize = () => {
-  const theme = useTheme();
+  const _ = useTheme();
   const [screenSize, setScreenSize] = useState({
+    height: window.innerHeight,
     width: window.innerWidth,
-    height: window.innerHeight
   });
 
   useEffect(() => {
     const handleResize = () => {
       setScreenSize({
+        height: window.innerHeight,
         width: window.innerWidth,
-        height: window.innerHeight
       });
     };
 

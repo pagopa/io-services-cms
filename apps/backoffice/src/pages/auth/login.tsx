@@ -1,8 +1,8 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 export default function Login() {
@@ -31,8 +31,8 @@ export default function Login() {
 
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
+      callbackUrl: "/",
       identity_token,
-      callbackUrl: "/"
       //redirect: false
     });
   };
@@ -48,15 +48,15 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 
-  return <LoaderFullscreen title="app.title" content="auth.loading" />;
+  return <LoaderFullscreen content="auth.loading" title="app.title" />;
 }
 
 export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

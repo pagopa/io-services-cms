@@ -5,23 +5,23 @@
 import * as t from "io-ts";
 
 const CTA = t.type({
+  action: t.string,
   text: t.string,
-  action: t.string
 });
 export type CTA = t.TypeOf<typeof CTA>;
 const CTASR = t.type({
-  cta_1: CTA
+  cta_1: CTA,
 });
 
 const CTASO = t.partial({
-  cta_2: CTA
+  cta_2: CTA,
 });
 
 export const CTAS = t.intersection([CTASR, CTASO], "CTAS");
 
 const props = {
+  en: CTAS,
   it: CTAS,
-  en: CTAS
 };
 const ServiceMessageCTA = t.partial(props);
 export const CTALocales = t.keyof(props);

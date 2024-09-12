@@ -1,29 +1,30 @@
 import { ErrorOutline } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { Trans } from "next-i18next";
+
 import { DrawerBaseContent } from "../drawer-provider";
 
-export type ServiceRejectReasonContentProps = {
+export interface ServiceRejectReasonContentProps {
   value?: string;
-};
+}
 
 /** Render service details information */
 export const ServiceRejectReasonContent = ({
-  value
+  value,
 }: ServiceRejectReasonContentProps) => {
   const getAllRejectionReasons = () => value?.replaceAll("|", "<br />");
 
   return (
     <DrawerBaseContent
-      width="26vw"
-      minWidth="320px"
-      maxWidth="415px"
       header={{
         startIcon: <ErrorOutline color="error" />,
-        title: "service.alerts.rejected.reason.title"
+        title: "service.alerts.rejected.reason.title",
       }}
+      maxWidth="415px"
+      minWidth="320px"
+      width="26vw"
     >
-      <Typography variant="body2" marginTop={1}>
+      <Typography marginTop={1} variant="body2">
         {value ? (
           <Trans i18nKey="service.rejected.reason.value">
             {getAllRejectionReasons()}

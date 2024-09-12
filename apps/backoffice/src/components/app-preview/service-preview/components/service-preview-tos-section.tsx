@@ -1,41 +1,42 @@
 import { useTranslation } from "next-i18next";
+
 import { MobileIcon } from "../../components";
 import ServicePreviewSectionList from "./service-preview-section-list";
 import { ServicePreviewSectionListItemProps } from "./service-preview-section-list-item";
 
-type ServicePreviewTOSSectionProps = {
-  tosLink?: string;
+interface ServicePreviewTOSSectionProps {
   privacyLink?: string;
-};
+  tosLink?: string;
+}
 
 const ServicePreviewTOSSection = ({
+  privacyLink,
   tosLink,
-  privacyLink
 }: ServicePreviewTOSSectionProps) => {
   const { t } = useTranslation();
   const serviceTos: ServicePreviewSectionListItemProps[] = [
     {
-      variant: "link",
-      startIcon: <MobileIcon icon="MobileIconMenu" width={24} height={22} />,
-      value: tosLink,
+      isUrl: true,
       label: t("service.inAppPreview.sections.tos.tosLabel"),
-      isUrl: true
+      startIcon: <MobileIcon height={22} icon="MobileIconMenu" width={24} />,
+      value: tosLink,
+      variant: "link",
     },
     {
-      variant: "link",
+      isUrl: true,
+      label: t("service.inAppPreview.sections.tos.privacyLabel"),
       startIcon: (
-        <MobileIcon icon="MobileIconSecurity" width={20} height={24} />
+        <MobileIcon height={24} icon="MobileIconSecurity" width={20} />
       ),
       value: privacyLink,
-      label: t("service.inAppPreview.sections.tos.privacyLabel"),
-      isUrl: true
-    }
+      variant: "link",
+    },
   ];
 
   return (
     <ServicePreviewSectionList
-      title="service.inAppPreview.sections.tos.title"
       items={serviceTos}
+      title="service.inAppPreview.sections.tos.title"
     />
   );
 };

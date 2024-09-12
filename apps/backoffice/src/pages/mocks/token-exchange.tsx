@@ -1,10 +1,11 @@
+import { getConfiguration } from "@/config";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Grid, Typography } from "@mui/material";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
+
 import { aMockedChangeInstitutionIdentiyToken } from "../../../mocks/data/selfcare-data";
-import { getConfiguration } from "@/config";
 
 /**
  * Selfcare change institution page.
@@ -28,7 +29,7 @@ export default function TokenExchange() {
       router.push(
         `${
           getConfiguration().BACK_OFFICE_LOGIN_PATH
-        }#token=${aMockedChangeInstitutionIdentiyToken}`
+        }#token=${aMockedChangeInstitutionIdentiyToken}`,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -36,10 +37,10 @@ export default function TokenExchange() {
 
   return (
     <Grid
+      alignItems="center"
       container
       direction="column"
       justifyContent="center"
-      alignItems="center"
     >
       <Grid item padding={5}>
         <Typography textAlign="center" variant="h3">
@@ -61,8 +62,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

@@ -12,19 +12,19 @@ export const appTheme = createTheme({
       ...theme.components?.MuiChip,
       styleOverrides: {
         ...theme.components?.MuiChip?.styleOverrides,
+        colorError: {
+          backgroundColor: "#FFE0E0",
+          color: "#761F1F",
+        },
         colorSuccess: {
           backgroundColor: "#E1F4E1",
-          color: "#224021"
+          color: "#224021",
         },
         colorWarning: {
           backgroundColor: "#FFF5DA",
-          color: "#614C15"
+          color: "#614C15",
         },
-        colorError: {
-          backgroundColor: "#FFE0E0",
-          color: "#761F1F"
-        }
-      }
-    }
-  }
+      },
+    },
+  },
 });

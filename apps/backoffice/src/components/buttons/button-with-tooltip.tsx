@@ -1,35 +1,35 @@
 import { Button, Tooltip } from "@mui/material";
-import React, { ReactNode } from "react";
 import { useTranslation } from "next-i18next";
+import React, { ReactNode } from "react";
 
-type ButtonWithTooltipProps = {
-  tooltipTitle: string;
-  onClick: () => void;
+interface ButtonWithTooltipProps {
   icon: ReactNode;
-  size: "small" | "medium" | "large";
-  variant: "text" | "outlined" | "contained";
   isVisible: boolean;
-};
+  onClick: () => void;
+  size: "large" | "medium" | "small";
+  tooltipTitle: string;
+  variant: "contained" | "outlined" | "text";
+}
 
 export const ButtonWithTooltip = ({
-  tooltipTitle,
-  onClick,
   icon,
+  isVisible,
+  onClick,
   size,
+  tooltipTitle,
   variant,
-  isVisible
 }: ButtonWithTooltipProps) => {
   const { t } = useTranslation();
 
   return (
     isVisible && (
-      <Tooltip title={t(tooltipTitle)} placement="top" arrow>
+      <Tooltip arrow placement="top" title={t(tooltipTitle)}>
         <Button
           data-testid="bo-io-button-with-tooltip"
-          size={size}
-          variant={variant}
-          sx={{ bgcolor: "background.paper", padding: 0 }}
           onClick={onClick}
+          size={size}
+          sx={{ bgcolor: "background.paper", padding: 0 }}
+          variant={variant}
         >
           {icon}
         </Button>

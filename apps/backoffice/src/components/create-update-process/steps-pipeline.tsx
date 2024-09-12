@@ -1,18 +1,18 @@
 import { Box, Step, StepLabel, Stepper } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
-export type StepsPipelineProps = {
-  steps: string[];
+export interface StepsPipelineProps {
   activeStep: number;
-};
+  steps: string[];
+}
 
 /** Purely layout component to show the list of steps as a MUI Stepper with the indication of the current step
  * within the create/update process */
-export const StepsPipeline = ({ steps, activeStep }: StepsPipelineProps) => {
+export const StepsPipeline = ({ activeStep, steps }: StepsPipelineProps) => {
   const { t } = useTranslation();
 
   return (
-    <Box width={"100%"} marginY={5}>
+    <Box marginY={5} width={"100%"}>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => (
           <Step key={index}>

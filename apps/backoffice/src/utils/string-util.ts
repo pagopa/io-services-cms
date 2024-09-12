@@ -1,5 +1,5 @@
 /** Utility to check if a string is null, undefined or empty */
-export const isNullUndefinedOrEmpty = (value: string | null | undefined) =>
+export const isNullUndefinedOrEmpty = (value: null | string | undefined) =>
   !value || value.trim().length === 0;
 
 /** Utility to obscure string */
@@ -22,7 +22,7 @@ export const sanitizePath = (asPath: string) => {
  * @param asPath nextjs `router.asPath()` value
  * @returns
  */
-export const isValidPath = (asPath: string) => {
+export const isValidPath = (asPath: string) =>
   // Implement path validation logic, i.e. check that it does not contain dangerous characters
-  return /^[a-zA-Z0-9\-_\/]+$/.test(asPath);
-};
+  /* eslint-disable no-useless-escape */
+  /^[a-zA-Z0-9\-_\/]+$/.test(asPath);

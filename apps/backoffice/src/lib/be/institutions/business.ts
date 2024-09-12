@@ -20,17 +20,16 @@ type ReadonlyArrayElementType<T> = T extends ReadonlyArray<infer U> ? U : never;
 type ArrayElementType<T> = T extends (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
 export const retrieveUserAuthorizedInstitutions = async (
-  selfCareUserId: string
+  selfCareUserId: string,
 ): Promise<UserAuthorizedInstitutions> => {
   const apiResult = await getUserAuthorizedInstitutions(selfCareUserId);
   return { authorizedInstitutions: apiResult.map(toUserAuthorizedInstitution) };
 };
 
 export const retrieveInstitution = async (
-  institutionId: string
-): Promise<BackofficeInstitution> => {
-  return toBackofficeInstitution(await getInstitutionById(institutionId));
-};
+  institutionId: string,
+): Promise<BackofficeInstitution> =>
+  toBackofficeInstitution(await getInstitutionById(institutionId));
 
 export const retrieveUserGroups = async (
   institutionId: string,
@@ -42,30 +41,30 @@ export const retrieveUserGroups = async (
 };
 
 const toBackofficeInstitution = (
-  institution: SelfcareInstitution
+  institution: SelfcareInstitution,
 ): BackofficeInstitution => ({
-  id: institution.id,
-  externalId: institution.externalId,
-  originId: institution.originId,
+  address: institution.address,
   description: institution.description,
   digitalAddress: institution.digitalAddress,
-  address: institution.address,
-  zipCode: institution.zipCode,
-  taxCode: institution.taxCode,
-  origin: institution.origin,
+  externalId: institution.externalId,
+  geographicTaxonomies: institution.geographicTaxonomies,
+  id: institution.id,
   institutionType: institution.institutionType,
-  geographicTaxonomies: institution.geographicTaxonomies
+  origin: institution.origin,
+  originId: institution.originId,
+  taxCode: institution.taxCode,
+  zipCode: institution.zipCode,
 });
 
 const toUserAuthorizedInstitution = (
   usesrInstitution: ReadonlyArrayElementType<
     PromiseValue<ReturnType<typeof getUserAuthorizedInstitutions>>
-  >
+  >,
 ): UserAuthorizedInstitution => ({
   id: usesrInstitution.institutionId,
+  logo_url: `https://selfcare.pagopa.it/institutions/${usesrInstitution.institutionId}/logo.png`,
   name: usesrInstitution.institutionDescription,
   role: usesrInstitution.products?.at(0)?.productRole,
-  logo_url: `https://selfcare.pagopa.it/institutions/${usesrInstitution.institutionId}/logo.png`
 });
 
 const toGroupPagination = (

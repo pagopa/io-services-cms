@@ -5,39 +5,39 @@ import { CallSplit } from "@mui/icons-material";
 import { Alert, AlertColor, Box, Stack, Typography } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+
 import { ServiceRejectReasonContent } from ".";
 import { useDrawer } from "../drawer-provider";
 
 type ServiceType = "lifecycle" | "publication";
 
-export type ServiceAlertsProps = {
+export interface ServiceAlertsProps {
+  onServiceLifecycleClick?: () => void;
+  onServicePublicationClick?: () => void;
   /** If `true` shows ServicePublication alerts only */
   releaseMode: boolean;
   serviceLifecycleStatus?: ServiceLifecycleStatus;
   servicePublicationStatus?: ServicePublicationStatusType;
-  onServiceLifecycleClick?: () => void;
-  onServicePublicationClick?: () => void;
-};
+}
 
 /** Render service alerts based on service status and visibility */
 export const ServiceAlerts = ({
+  onServiceLifecycleClick,
+  onServicePublicationClick,
   releaseMode,
   serviceLifecycleStatus,
   servicePublicationStatus,
-  onServiceLifecycleClick,
-  onServicePublicationClick
 }: ServiceAlertsProps) => {
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
-  const [currentServiceType, setCurrentServiceType] = useState<ServiceType>(
-    "lifecycle"
-  );
+  const [currentServiceType, setCurrentServiceType] =
+    useState<ServiceType>("lifecycle");
 
   const renderLifecycleAlert = (
     status: ServiceLifecycleStatus,
     severity: AlertColor,
     message: string,
-    cta?: { label: string; fn: () => void }
+    cta?: { fn: () => void; label: string },
   ) => (
     <Alert
       aria-label={`sl-alert-${status.value}`}
@@ -48,11 +48,11 @@ export const ServiceAlerts = ({
         <Trans i18nKey={message} />{" "}
         {cta ? (
           <Box
-            component="span"
-            onClick={cta.fn}
             color="primary.main"
-            sx={{ textDecoration: "underline", cursor: "pointer" }}
+            component="span"
             fontWeight={600}
+            onClick={cta.fn}
+            sx={{ cursor: "pointer", textDecoration: "underline" }}
           >
             {t(cta.label)}
           </Box>
@@ -64,31 +64,31 @@ export const ServiceAlerts = ({
   const renderPublicationAlert = (status: ServiceLifecycleStatus) => (
     <Alert
       aria-label={`sp-alert`}
+      iconMapping={{
+        info: <CallSplit fontSize="inherit" />,
+      }}
       severity="info"
       variant="outlined"
-      iconMapping={{
-        info: <CallSplit fontSize="inherit" />
-      }}
     >
       <Typography variant="body2">
         <span
           dangerouslySetInnerHTML={{
             __html: t(`service.alerts.${currentServiceType}.message`, {
-              status: t(`service.status.version.${status.value}`).toLowerCase()
-            })
+              status: t(`service.status.version.${status.value}`).toLowerCase(),
+            }),
           }}
         />{" "}
         <Box
+          color="primary.main"
           component="span"
+          fontWeight={600}
           onClick={
             releaseMode ? onServicePublicationClick : onServiceLifecycleClick
           }
-          color="primary.main"
-          sx={{ textDecoration: "underline", cursor: "pointer" }}
-          fontWeight={600}
+          sx={{ cursor: "pointer", textDecoration: "underline" }}
         >
           {t(`service.alerts.${currentServiceType}.viewVersion`, {
-            rawStatus: t(`service.status.raw.${status.value}`).toLowerCase()
+            rawStatus: t(`service.status.raw.${status.value}`).toLowerCase(),
           })}
         </Box>
       </Typography>
@@ -104,15 +104,15 @@ export const ServiceAlerts = ({
           "error",
           "service.alerts.rejected.message",
           {
+            fn: openRejectionReasonDrawer,
             label: "service.alerts.rejected.reason.label",
-            fn: openRejectionReasonDrawer
-          }
+          },
         );
       case ServiceLifecycleStatusTypeEnum.submitted:
         return renderLifecycleAlert(
           serviceLifecycleStatus,
           "warning",
-          "service.alerts.submitted"
+          "service.alerts.submitted",
         );
       default:
         break;
@@ -133,7 +133,7 @@ export const ServiceAlerts = ({
 
   const openRejectionReasonDrawer = () => {
     openDrawer(
-      <ServiceRejectReasonContent value={serviceLifecycleStatus?.reason} />
+      <ServiceRejectReasonContent value={serviceLifecycleStatus?.reason} />,
     );
   };
 
@@ -142,7 +142,7 @@ export const ServiceAlerts = ({
   }, [releaseMode]);
 
   return (
-    <Stack direction="column" spacing={1} marginBottom={3}>
+    <Stack direction="column" marginBottom={3} spacing={1}>
       {!releaseMode ? manageLifecycleAlerts() : null}
       {managePublicationAlerts()}
     </Stack>

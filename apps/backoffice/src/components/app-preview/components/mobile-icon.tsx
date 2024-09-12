@@ -1,7 +1,10 @@
 import { Box } from "@mui/material";
+
 import * as SVGIcon from "../../../../public/mobile/icons";
 
-type MobileIconProps = {
+interface MobileIconProps {
+  color?: string;
+  height: number;
   icon:
     | "MobileIconAddress"
     | "MobileIconArrowBack"
@@ -21,29 +24,27 @@ type MobileIconProps = {
     | "MobileIconSecurity"
     | "MobileIconWebsite";
   width: number;
-  color?: string;
-  height: number;
-};
+}
 
 export const MobileIcon = ({
-  icon,
   color = "currentColor",
+  height,
+  icon,
   width,
-  height
 }: MobileIconProps) => {
   const IconComponent = SVGIcon[icon];
 
   return (
     <Box
-      id="mobile-icon-wrapper"
-      display="flex"
-      justifyContent="center"
       alignItems="center"
-      width={width}
+      display="flex"
       height={height}
+      id="mobile-icon-wrapper"
+      justifyContent="center"
       sx={{
-        fill: color
+        fill: color,
       }}
+      width={width}
     >
       <IconComponent />
     </Box>

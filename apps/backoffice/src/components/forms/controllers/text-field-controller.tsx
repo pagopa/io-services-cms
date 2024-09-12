@@ -12,32 +12,30 @@ export function TextFieldController({
   name,
   ...props
 }: TextFieldControllerProps) {
-  const { register, control, formState } = useFormContext();
+  const { control, formState, register } = useFormContext();
   const error = get(formState.errors, name);
 
   return (
     <Controller
-      name={name}
       control={control}
+      name={name}
       render={({ field: { onChange, value } }) => (
         <TextField
           {...register(name)}
           {...props}
-          fullWidth
-          margin={props.margin ?? "normal"}
-          value={value}
           InputProps={{
             endAdornment: error ? (
               <InputAdornment position="end">
                 <ErrorOutlineRoundedIcon color="error" />
               </InputAdornment>
-            ) : (
-              undefined
-            )
+            ) : undefined,
           }}
           error={!!error}
-          helperText={error ? error.message : props.helperText ?? null}
+          fullWidth
+          helperText={error ? error.message : (props.helperText ?? null)}
+          margin={props.margin ?? "normal"}
           onChange={onChange}
+          value={value}
         />
       )}
     />

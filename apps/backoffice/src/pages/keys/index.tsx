@@ -21,7 +21,7 @@ export default function Keys() {
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
     mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
-      notify: "all"
+      notify: "all",
     });
   };
 
@@ -30,14 +30,14 @@ export default function Keys() {
       "updateManageKeysAuthorizedCidrs",
       { body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) } },
       ManageKeyCIDRs,
-      { notify: "all" }
+      { notify: "all" },
     );
   };
 
   useEffect(() => {
     mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
     acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
-      notify: "errors"
+      notify: "errors",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -45,21 +45,21 @@ export default function Keys() {
   return (
     <>
       <PageHeader
-        title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
+        title={pageTitleLocaleKey}
       />
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <ApiKeys
-            title={t("routes.keys.manage.title")}
             description={t("routes.keys.manage.description")}
             keys={mkData}
             onRotateKey={handleRotateKey}
+            title={t("routes.keys.manage.title")}
           />
         </Grid>
         <Grid item xs={12}>
           <AuthorizedCidrs
-            cidrs={(acData?.cidrs as unknown) as string[]}
+            cidrs={acData?.cidrs as unknown as string[]}
             description="routes.keys.authorizedCidrs.description"
             editable={true}
             onSaveClick={handleUpdateCidrs}
@@ -74,8 +74,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

@@ -1,11 +1,11 @@
 import { HealthChecksError } from "./errors";
 
 type HealthStatus =
-  | { status: "ok" }
-  | { status: "fail"; failures: { service: string; errorMessage: string }[] };
+  | { failures: { errorMessage: string; service: string }[]; status: "fail" }
+  | { status: "ok" };
 
 export default async function healthcheck(
-  checks: Array<Promise<unknown>>
+  checks: Promise<unknown>[],
 ): Promise<HealthStatus> {
   const results = await Promise.allSettled(checks);
 
@@ -14,19 +14,19 @@ export default async function healthcheck(
     .map(({ reason }) => decodeReason(reason));
   if (failures.length > 0) {
     // log all HealthChecksError
-    failures.forEach(f =>
+    failures.forEach((f) =>
       console.error(
         `[HEALTH CHECK ERROR ${f.externalServiceName}] ${f.message} =>`,
-        f.innerError
-      )
+        f.innerError,
+      ),
     );
 
     return {
-      status: "fail",
-      failures: failures.map(f => ({
+      failures: failures.map((f) => ({
+        errorMessage: f.message,
         service: f.externalServiceName,
-        errorMessage: f.message
-      }))
+      })),
+      status: "fail",
     };
   }
   return { status: "ok" };

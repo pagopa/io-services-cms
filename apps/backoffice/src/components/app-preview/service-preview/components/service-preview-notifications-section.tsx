@@ -1,42 +1,43 @@
 import { Box, List, ListItem, Stack, Switch } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
+
 import { IOColors, MobileIcon, MobileTypography } from "../../components";
 import { ServicePreviewSectionTitle } from "./";
 
-type NotificationType = {
-  isVisible: boolean;
-  startIcon: ReactNode;
-  text: string;
+interface NotificationType {
   checked: boolean;
   hideDivider?: boolean;
+  isVisible: boolean;
   onChange?: () => void;
-};
+  startIcon: ReactNode;
+  text: string;
+}
 
 const ServicePreviewNotificationsSection = () => {
   const { t } = useTranslation();
   const [notifications, setNotifications] = useState<NotificationType[]>([
     {
+      checked: true,
       isVisible: true,
-      startIcon: <MobileIcon icon="MobileIconMessage" width={24} height={24} />,
+      startIcon: <MobileIcon height={24} icon="MobileIconMessage" width={24} />,
       text: "service.inAppPreview.sections.notifications.notifyLabel",
-      checked: true
     },
     {
+      checked: true,
       isVisible: true,
       startIcon: (
-        <MobileIcon icon="MobileIconNotification" width={24} height={24} />
+        <MobileIcon height={24} icon="MobileIconNotification" width={24} />
       ),
       text: "service.inAppPreview.sections.notifications.pushLabel",
-      checked: true
     },
     {
-      isVisible: true,
-      startIcon: <MobileIcon icon="MobileIconChecks" width={24} height={14} />,
-      text: "service.inAppPreview.sections.notifications.confirmLabel",
       checked: true,
-      hideDivider: true
-    }
+      hideDivider: true,
+      isVisible: true,
+      startIcon: <MobileIcon height={14} icon="MobileIconChecks" width={24} />,
+      text: "service.inAppPreview.sections.notifications.confirmLabel",
+    },
   ]);
 
   const handleChange = (index: number, checked: boolean) => {
@@ -74,35 +75,35 @@ const ServicePreviewNotificationsSection = () => {
                 sx={{ paddingX: 3, paddingY: 0 }}
               >
                 <Box
-                  display="flex"
-                  flex={1}
-                  paddingY={1}
                   borderBottom={
                     value.hideDivider ? "" : `1px solid ${IOColors["grey-100"]}`
                   }
+                  display="flex"
+                  flex={1}
+                  paddingY={1}
                 >
-                  <Stack width="100%" flexDirection="row">
+                  <Stack flexDirection="row" width="100%">
                     <Box
-                      display="flex"
-                      justifyContent="center"
                       alignItems="center"
-                      fontSize="24px"
                       color={IOColors["grey-650"]}
+                      display="flex"
+                      fontSize="24px"
+                      justifyContent="center"
                       sx={{ opacity: "50%" }}
                     >
                       {value.startIcon}
                     </Box>
                     <Box
                       display="flex"
-                      justifyContent="center"
                       flexDirection="column"
+                      justifyContent="center"
                       marginLeft={1.5}
                     >
                       <MobileTypography
+                        color={IOColors["grey-850"]}
                         fontSize={16}
                         fontWeight={600}
                         lineHeight="24px"
-                        color={IOColors["grey-850"]}
                       >
                         {t(value.text)}
                       </MobileTypography>
@@ -121,7 +122,7 @@ const ServicePreviewNotificationsSection = () => {
                   </Stack>
                 </Box>
               </ListItem>
-            )
+            ),
         )}
       </List>
     </Stack>

@@ -1,6 +1,6 @@
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_OK
+  HTTP_STATUS_OK,
 } from "@/config/constants";
 import { getApimHealth } from "@/lib/be/apim-service";
 import { getAzureAccessTokenHealth } from "@/lib/be/azure-access-token";
@@ -25,13 +25,13 @@ export async function GET() {
     getIoServicesCmsHealth(),
     getAzureAccessTokenHealth(),
     getCosmosStoreHealth(),
-    getSubscriptionsMigrationHealth()
+    getSubscriptionsMigrationHealth(),
   ]);
   const status =
     health.status === "ok" ? HTTP_STATUS_OK : HTTP_STATUS_INTERNAL_SERVER_ERROR;
 
   const response = {
-    status: health.status
+    status: health.status,
   };
 
   return NextResponse.json(response, { status });

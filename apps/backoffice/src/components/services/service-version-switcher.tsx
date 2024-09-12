@@ -11,41 +11,41 @@ import {
   Grid,
   Radio,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { ChangeEvent, useEffect, useState } from "react";
+
 import { ServiceStatus } from ".";
 
 export type ServiceVersionSwitcherType = "lifecycle" | "publication";
 
-export type ServiceVersionSwitcherProps = {
-  service?: ServiceListItem;
+export interface ServiceVersionSwitcherProps {
   isOpen: boolean;
   onChange: (isOpen: boolean) => void;
   onVersionSelected: (
     serviceId: string,
-    version: ServiceVersionSwitcherType
+    version: ServiceVersionSwitcherType,
   ) => void;
-};
+  service?: ServiceListItem;
+}
 
 /** Renders a modal dialog to choose the two versions (last approved or current) of a service. \
  * _(the Publication one and a different Lifecycle one)_. */
 export const ServiceVersionSwitcher = ({
-  service,
   isOpen,
   onChange,
-  onVersionSelected
+  onVersionSelected,
+  service,
 }: ServiceVersionSwitcherProps) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
-  const [selectedVersion, setSelectedVersion] = useState<
-    ServiceVersionSwitcherType
-  >("lifecycle");
+  const [selectedVersion, setSelectedVersion] =
+    useState<ServiceVersionSwitcherType>("lifecycle");
 
   const handelVersionChanged = (
     event: ChangeEvent<HTMLInputElement>,
-    checked: boolean
+    checked: boolean,
   ) => {
     if (checked) {
       setSelectedVersion(event.target.value as ServiceVersionSwitcherType);
@@ -69,23 +69,23 @@ export const ServiceVersionSwitcher = ({
 
   const renderServiceVersionChoice = (
     type: ServiceVersionSwitcherType,
-    isLastApprovedVersion?: boolean
+    isLastApprovedVersion?: boolean,
   ) => (
     <Box
-      marginTop={1}
-      padding={2}
       border="solid"
-      borderRadius={4}
       borderColor={
         type === selectedVersion ? "primary.light" : "background.default"
       }
+      borderRadius={4}
+      marginTop={1}
+      padding={2}
     >
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack alignItems="center" direction="row" spacing={1}>
         <Radio
           checked={selectedVersion === type}
+          name="radio-buttons"
           onChange={handelVersionChanged}
           value={type}
-          name="radio-buttons"
         />
         <Box>
           <Stack direction="row" spacing={1}>
@@ -100,7 +100,7 @@ export const ServiceVersionSwitcher = ({
               <ServiceStatus
                 status={
                   service?.status ?? {
-                    value: ServiceLifecycleStatusTypeEnum.draft
+                    value: ServiceLifecycleStatusTypeEnum.draft,
                   }
                 }
               />
@@ -124,14 +124,14 @@ export const ServiceVersionSwitcher = ({
   );
 
   return (
-    <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
+    <Dialog disableScrollLock onClose={handleClose} open={isDialogOpen}>
       <DialogTitle
         sx={{
-          width: "425px",
           fontWeight: 700,
-          textAlign: "center",
+          paddingTop: 4,
           paddingX: 4,
-          paddingTop: 4
+          textAlign: "center",
+          width: "425px",
         }}
       >
         <Box marginBottom={1}>
@@ -140,7 +140,7 @@ export const ServiceVersionSwitcher = ({
         {t("service.switcher.title")}
       </DialogTitle>
       <DialogContent
-        sx={{ width: "425px", textAlign: "center", paddingX: 4, paddingY: 0 }}
+        sx={{ paddingX: 4, paddingY: 0, textAlign: "center", width: "425px" }}
       >
         <Box marginBottom={4}>
           <Trans i18nKey="service.switcher.description">
@@ -155,18 +155,18 @@ export const ServiceVersionSwitcher = ({
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <Button
-              variant="text"
-              sx={{ fontWeight: 700 }}
               onClick={handleClose}
+              sx={{ fontWeight: 700 }}
+              variant="text"
             >
               {t("buttons.cancel")}
             </Button>
           </Grid>
-          <Grid item xs={6} textAlign="right">
+          <Grid item textAlign="right" xs={6}>
             <Button
-              variant="contained"
-              sx={{ fontWeight: 700 }}
               onClick={handleConfirm}
+              sx={{ fontWeight: 700 }}
+              variant="contained"
             >
               {t("buttons.view")}
             </Button>

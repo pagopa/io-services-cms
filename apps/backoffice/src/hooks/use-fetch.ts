@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/api/client";
@@ -5,42 +6,42 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
-import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 
 /** Custom error type for `useFetch` */
-export type UseFetchError = {
+export interface UseFetchError {
   /** readable error type classification */
   kind: UseFetchErrorStatusType;
-  /** http response status code, defined in case of _"httpError"_ `kind` */
-  status?: number;
   /** additional error info */
   message: string;
-};
+  /** http response status code, defined in case of _"httpError"_ `kind` */
+  status?: number;
+}
 
 /** Custom `useFetch` error classification */
 export type UseFetchErrorStatusType =
+  | "exceptionError"
   | "httpError"
-  | "validationError"
-  | "exceptionError";
+  | "validationError";
 
 /** useFetch options */
-export type UseFetchOptions = {
+export interface UseFetchOptions {
   /** FetchData notifications: \
    * `all` shows all fetchData results, `errors` shows only fetchData error results */
   notify: UseFetchOptionsResultType;
   /** Redirection at fetchData completition */
   redirect?: {
+    /** Navigate to the provided href. Pushes a new history entry. */
+    href: string;
     /** `all` redirect to `href` all fetchData results,\
      * `errors` redirect to `href` only fetchData error results */
     on: UseFetchOptionsResultType;
-    /** Navigate to the provided href. Pushes a new history entry. */
-    href: string;
   };
-};
+}
 export type UseFetchOptionsResultType = "all" | "errors";
 
 /**
@@ -49,11 +50,11 @@ export type UseFetchOptionsResultType = "all" | "errors";
  * For more details visit https://httpwg.org/specs/rfc9110.html#overview.of.status.codes
  */
 type HttpResponseClassType =
-  | "informational"
-  | "successful"
-  | "redirection"
   | "clientError"
+  | "informational"
+  | "redirection"
   | "serverError"
+  | "successful"
   | "unknown";
 
 /**
@@ -62,7 +63,7 @@ type HttpResponseClassType =
  * @returns
  */
 const manageHttpResponseStatusCode = (
-  status: number
+  status: number,
 ): HttpResponseClassType => {
   if (status >= 100 && status <= 199) {
     return "informational";
@@ -82,7 +83,7 @@ const manageHttpResponseStatusCode = (
 /** IO Services CMS generated Api Client */
 const generatedClient: Client = createClient({
   baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-  fetchApi: (fetch as any) as typeof fetch
+  fetchApi: fetch as any as typeof fetch,
 });
 
 /** List of all client operations */
@@ -111,6 +112,7 @@ const useFetch = <RC>() => {
   const [options, setOptions] = useState<UseFetchOptions>();
 
   const { push } = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = useSession();
 
   // used to show notifications
@@ -126,12 +128,12 @@ const useFetch = <RC>() => {
   const setUseFetchError = (
     kind: UseFetchErrorStatusType,
     message: string,
-    status?: number
+    status?: number,
   ) =>
     setError({
       kind,
       message,
-      status
+      status,
     });
 
   /**
@@ -142,24 +144,24 @@ const useFetch = <RC>() => {
    * React Hooks must be called in a React function component or a custom React Hook function. */
   const client: Client = createClient({
     baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-    fetchApi: (fetch as any) as typeof fetch
+    fetchApi: fetch as any as typeof fetch,
   });
 
   const buildNotificationMessage = () =>
     error?.status
-      ? `${error.status} - ${t((error.status as unknown) as string)}`
-      : error?.message ?? "";
+      ? `${error.status} - ${t(error.status as unknown as string)}`
+      : (error?.message ?? "");
 
   const buildNotification = () => {
     enqueueSnackbar(
       buildSnackbarItem({
+        message: buildNotificationMessage(),
         severity: error === undefined ? "success" : "error",
         title:
           error === undefined
             ? t("notifications.success")
             : t(`notifications.${error?.kind as string}`),
-        message: buildNotificationMessage()
-      })
+      }),
     );
   };
 
@@ -204,7 +206,7 @@ const useFetch = <RC>() => {
     operationId: T,
     requestParams: ExtractRequestParams<T>,
     responseCodec: t.Type<RC>,
-    options?: UseFetchOptions
+    options?: UseFetchOptions,
   ) => {
     setOptions(options);
     setData(undefined); // reset data
@@ -212,7 +214,7 @@ const useFetch = <RC>() => {
     try {
       const result = await client[operationId]({
         ...(requestParams as any),
-        bearerAuth: "session?.user?.accessToken" //TODO: update OpenAPI and remove this header (next-auth will automatically set the JWT session as cookie header for each request)
+        bearerAuth: "session?.user?.accessToken", //TODO: update OpenAPI and remove this header (next-auth will automatically set the JWT session as cookie header for each request)
       });
 
       if (E.isLeft(result)) {
@@ -229,7 +231,7 @@ const useFetch = <RC>() => {
 
         /** Set a response class type based on http response status code */
         const httpResponseClassType = manageHttpResponseStatusCode(
-          response.status
+          response.status,
         );
 
         switch (httpResponseClassType) {
@@ -238,9 +240,9 @@ const useFetch = <RC>() => {
             pipe(
               responseCodec.decode(response.value),
               E.fold(
-                e => setUseFetchError("validationError", readableReport(e)),
-                setData
-              )
+                (e) => setUseFetchError("validationError", readableReport(e)),
+                setData,
+              ),
             );
             break;
           case "clientError":
@@ -248,7 +250,7 @@ const useFetch = <RC>() => {
             setUseFetchError(
               "httpError",
               httpResponseClassType,
-              response.status
+              response.status,
             );
             break;
           // todo: manage other response class type
@@ -267,7 +269,7 @@ const useFetch = <RC>() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchTaskCounter]);
 
-  return { data, error, loading, fetchData };
+  return { data, error, fetchData, loading };
 };
 
 export default useFetch;
