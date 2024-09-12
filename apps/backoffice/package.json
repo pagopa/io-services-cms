@@ -20,7 +20,7 @@
     "coverage:fe": "vitest run --config ./vitest.config.react.ts --coverage",
     "clean:api-definitions": "rm -rf ./src/generated/api",
     "clean:services-cms": "rm -rf ./src/generated/services-cms",
-    "clean:selfcare-api-models": "rm -rf ./src/types/selfcare",
+    "clean:selfcare-api-models": "rm -rf ./src/generated/selfcare",
     "generate:api-definitions": "gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
     "generate:services-cms": "gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
     "generate:selfcare-api-models": "gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml --out-dir ./src/generated/selfcare --response-decoders"
