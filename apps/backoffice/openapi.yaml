@@ -1335,6 +1335,9 @@ components:
             $ref: '#/components/schemas/Group'
         pagination:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+      required:
+        - value
+        - pagination
     Group:
       type: object
       properties:
