@@ -1,3 +1,4 @@
+import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import {
   getKeepAliveAgentOptions,
   newHttpAgent,
@@ -28,6 +29,11 @@ export type SelfcareClient = {
   getInstitutionById: (
     id: string
   ) => TE.TaskEither<Error | AxiosError, Institution>;
+  getInstitutionGroups: (
+    institutionId: string,
+    limit?: number,
+    offset?: number
+  ) => TE.TaskEither<Error, PageOfUserGroupResource>;
 };
 
 type Config = t.TypeOf<typeof Config>;
@@ -39,6 +45,7 @@ const Config = t.type({
 
 const institutionsApi = "/institutions";
 const usersApi = "/users";
+const groupsApi = "/user-groups";
 let selfcareConfig: Config;
 let selfcareClient: SelfcareClient;
 
@@ -135,9 +142,45 @@ const buildSelfcareClient = (): SelfcareClient => {
       )
     );
 
+  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
+    institutionId: string,
+    limit?: number,
+    offset?: number
+  ) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(`${groupsApi}`, {
+            params: {
+              institutionId,
+              status: "ACTIVE",
+              page: offset,
+              size: limit
+            }
+          }),
+        identity
+      ),
+      TE.mapLeft(e => {
+        if (axios.isAxiosError(e)) {
+          return e;
+        } else {
+          return new Error(`Error calling selfcare getUserGroups API: ${e}`);
+        }
+      }),
+      TE.chainW(response =>
+        pipe(
+          response.data,
+          PageOfUserGroupResource.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither
+        )
+      )
+    );
+
   return {
     getUserAuthorizedInstitutions,
-    getInstitutionById
+    getInstitutionById,
+    getInstitutionGroups
   };
 };
 
