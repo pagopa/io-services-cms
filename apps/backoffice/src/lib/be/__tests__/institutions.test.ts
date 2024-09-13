@@ -7,7 +7,7 @@ import { InstitutionNotFoundError, ManagedInternalError } from "../errors";
 import {
   retrieveInstitution,
   retrieveUserAuthorizedInstitutions,
-  retrieveUserGroups
+  retrieveInstitutionGroups
 } from "../institutions/business";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
@@ -199,7 +199,7 @@ describe("Institutions", () => {
         getInstitutionGroups
       });
 
-      const result = await retrieveUserGroups(
+      const result = await retrieveInstitutionGroups(
         mocks.institutionGroups.content[0].institutionId
       );
 
@@ -221,15 +221,19 @@ describe("Institutions", () => {
       });
     });
 
-    it("should rejects", async () => {
+    it("should rejects when getInstitutionGroups return an error response", async () => {
       const getInstitutionGroups = vi.fn(() => TE.left({ message: "error" }));
       getSelfcareClient.mockReturnValueOnce({
         getInstitutionGroups
       });
 
       expect(
-        retrieveUserGroups(mocks.institutionGroups.content[0].institutionId)
-      ).rejects.toThrowError();
+        retrieveInstitutionGroups(
+          mocks.institutionGroups.content[0].institutionId
+        )
+      ).rejects.toThrowError(
+        new ManagedInternalError("Error calling selfcare getUserGroups API")
+      );
 
       expect(getInstitutionGroups).toHaveBeenCalledWith(
         mocks.institutionGroups.content[0].institutionId,
@@ -271,7 +275,7 @@ describe("Institutions", () => {
       isAxiosError.mockReturnValueOnce(true);
 
       expect(
-        retrieveUserGroups("institutionGroupsInstID")
+        retrieveInstitutionGroups("institutionGroupsInstID")
       ).rejects.toThrowError(
         new ManagedInternalError("Error toGroups mapping")
       );
