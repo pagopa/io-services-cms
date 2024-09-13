@@ -254,7 +254,7 @@ describe("Institutions", () => {
               institutionId: "institutionGroupsInstID2",
               name: "institutionGroupsName2",
               productId: "institutionGroupsProdID2",
-              status: "DELETED" as StatusEnum
+              status: "ACTIVE" as StatusEnum
             }
           ],
           number: 0,
