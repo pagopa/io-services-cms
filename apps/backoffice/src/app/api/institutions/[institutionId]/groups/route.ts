@@ -1,13 +1,18 @@
-import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
-import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   isBackofficeUserAdmin,
   isInstitutionIdSameAsCaller,
-} from "@/lib/be/utils/utils";
+} from "@/lib/be/authz";
+import {
+  handleBadRequestErrorResponse,
+  handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+  handlerErrorLog,
+} from "@/lib/be/errors";
+import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { parseStringToNumber } from "@/utils/string-util";
-import { NextRequest, NextResponse } from "next/server";
+import * as t from "io-ts";
+import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 
@@ -23,40 +28,33 @@ export const GET = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
   ) => {
     if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
-      return NextResponse.json(
-        {
-          status: 403,
-          title: "Forbidden",
-        },
-        { status: 403 },
-      );
+      return handleForbiddenErrorResponse("Unauthorized institutionId");
     }
     if (!isBackofficeUserAdmin(backofficeUser)) {
-      return NextResponse.json(
-        {
-          detail: "Role not authorized",
-          status: 401,
-          title: "User Unauthorized",
-        },
-        { status: 401 },
-      );
+      return handleForbiddenErrorResponse("Role not authorized");
+    }
+    const maybeLimit = t.number.decode(
+      request.nextUrl.searchParams.get("size"),
+    );
+    if (maybeLimit._tag === "Left") {
+      return handleBadRequestErrorResponse("Size is not a number");
+    }
+    const maybeOffset = t.number.decode(
+      request.nextUrl.searchParams.get("number"),
+    );
+    if (maybeOffset._tag === "Left") {
+      return handleBadRequestErrorResponse("Number is not a number");
     }
     try {
-      const limit = parseStringToNumber(
-        request.nextUrl.searchParams.get("size"),
-      );
-      const offset = parseStringToNumber(
-        request.nextUrl.searchParams.get("number"),
-      );
       const institutionResponse = await retrieveInstitutionGroups(
         params.institutionId,
-        limit,
-        offset,
+        maybeLimit.right,
+        maybeOffset.right,
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
-        `An Error has occurred while searching groups for institutionId: ${params.institutionId}, caused by: `,
+      handlerErrorLog(
+        `An Error has occurred while searching groups for institutionId: ${params.institutionId}`,
         error,
       );
 

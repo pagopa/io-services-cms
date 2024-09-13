@@ -1,6 +1,11 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNAUTHORIZED,
+  HTTP_TITLE_BAD_REQUEST,
+  HTTP_TITLE_FORBIDDEN,
+  HTTP_TITLE_UNAUTHORIZED,
 } from "@/config/constants";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -63,25 +68,41 @@ export const handleInternalErrorResponse = (
   return NextResponse.json(
     {
       detail: message,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
+      status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
       title,
     },
     { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
   );
 };
 
-export const handleBadRequestErrorResponse = (
-  title: string,
-  detail: string,
-): NextResponse =>
+export const handleBadRequestErrorResponse = (detail: string): NextResponse =>
   NextResponse.json(
     {
       detail: detail,
       status: HTTP_STATUS_BAD_REQUEST,
-      title,
+      title: HTTP_TITLE_BAD_REQUEST,
     },
     { status: HTTP_STATUS_BAD_REQUEST },
+  );
+
+export const handleForbiddenErrorResponse = (detail: string): NextResponse =>
+  NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_FORBIDDEN,
+      title: HTTP_TITLE_FORBIDDEN,
+    },
+    { status: HTTP_STATUS_FORBIDDEN },
+  );
+
+export const handleUnauthorizedErrorResponse = (detail: string): NextResponse =>
+  NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_UNAUTHORIZED,
+      title: HTTP_TITLE_UNAUTHORIZED,
+    },
+    { status: HTTP_STATUS_UNAUTHORIZED },
   );
 
 export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
