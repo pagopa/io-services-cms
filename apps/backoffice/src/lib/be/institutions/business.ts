@@ -82,7 +82,7 @@ const toGroupPagination = (
   value: toGroups(pageOfUserGroupResource.content ?? []),
 });
 
-// is this the behavior we want ? , check institution.test row 240
+// is this the behavior we want ? , check institutions.test row 240
 const toGroups = (
   userGroupResources: Exclude<
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
@@ -93,6 +93,9 @@ const toGroups = (
     if (userGroupResource.id && userGroupResource.name !== undefined) {
       return { id: userGroupResource.id, name: userGroupResource.name };
     } else {
-      throw new ManagedInternalError("Error toGroups mapping","group ID or group name are not defined");
+      throw new ManagedInternalError(
+        "Error toGroups mapping",
+        "group ID or group name are not defined",
+      );
     }
   });
