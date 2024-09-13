@@ -237,20 +237,32 @@ describe("Institutions", () => {
         undefined
       );
     });
-    it("should rejects on error response if group ID or group Name is not present", async () => {
-      const val = {...mocks.institutionGroups.content[0]}
-      
-      // const getInstitutionGroups = vi.fn(() =>
-      //   TE.right({...mocks.institutionGroups.content[0] , id:undefined})
-      // );
-
+    it("should rejects on error response if group ID or group Name is not present or undefined", async () => {
       const getInstitutionGroups = vi.fn(() =>
-        TE.left({
-          message: "Received 500 response",
-          response: { status: 500 }
+        TE.right({
+          content: [
+            {
+              description: "institutionGroups description",
+              id: "institutionGroupsID",
+              institutionId: "institutionGroupsInstID",
+              name: "institutionGroupsName",
+              productId: "institutionGroupsProdID",
+              status: "ACTIVE" as StatusEnum
+            },
+            {
+              description: "institutionGroupsDescription2",
+              institutionId: "institutionGroupsInstID2",
+              name: "institutionGroupsName2",
+              productId: "institutionGroupsProdID2",
+              status: "DELETED" as StatusEnum
+            }
+          ],
+          number: 0,
+          size: 0,
+          totalElements: 2,
+          totalPages: 0
         })
       );
-
 
       getSelfcareClient.mockReturnValueOnce({
         getInstitutionGroups
@@ -261,7 +273,7 @@ describe("Institutions", () => {
       expect(
         retrieveUserGroups("institutionGroupsInstID")
       ).rejects.toThrowError(
-        new ManagedInternalError("Error calling selfcare getUserGroups API")
+        new ManagedInternalError("Error toGroups mapping")
       );
 
       expect(getInstitutionGroups).toHaveBeenCalledWith(
