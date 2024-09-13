@@ -26,17 +26,3 @@ export const isValidPath = (asPath: string) =>
   // Implement path validation logic, i.e. check that it does not contain dangerous characters
   /* eslint-disable no-useless-escape */
   /^[a-zA-Z0-9\-_\/]+$/.test(asPath);
-
-export const parseStringToNumber = (
-  variable: null | string | undefined,
-): number => {
-  if (typeof variable === "string") {
-    try {
-      return parseInt(variable, 10);
-    } catch (error) {
-      throw new Error(`cannot parse variable because : ${error}`);
-    }
-  } else {
-    throw new Error("Cannot parse null or undefined variable");
-  }
-};

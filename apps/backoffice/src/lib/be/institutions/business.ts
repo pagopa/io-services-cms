@@ -78,7 +78,6 @@ const toGroupPagination = (
   value: toGroups(pageOfUserGroupResource.content ?? []),
 });
 
-// is this the behavior we want ? , check institutions.test row 240
 const toGroups = (
   userGroupResources: Exclude<
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
