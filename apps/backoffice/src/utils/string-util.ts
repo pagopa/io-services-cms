@@ -29,9 +29,7 @@ export const isValidPath = (asPath: string) =>
   /* eslint-disable no-useless-escape */
   /^[a-zA-Z0-9\-_\/]+$/.test(asPath);
 
-export const parseStringToNumberFunction = (
-  variable: null | string,
-): number => {
+export const parseStringToNumber = (variable: null | string): number => {
   if (typeof variable === "string") {
     try {
       return parseInt(variable, 10);
