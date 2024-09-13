@@ -1,6 +1,10 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import {
+  isBackofficeUserAdmin,
+  isInstitutionIdSameAsCaller,
+} from "@/lib/be/utils/utils";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { parseStringToNumber } from "@/utils/string-util";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,7 +22,16 @@ export const GET = withJWTAuthHandler(
       params,
     }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
   ) => {
-    if (backofficeUser.institution.role !== "ADMIN") {
+    if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
+      return NextResponse.json(
+        {
+          status: 403,
+          title: "Forbidden",
+        },
+        { status: 403 },
+      );
+    }
+    if (!isBackofficeUserAdmin(backofficeUser)) {
       return NextResponse.json(
         {
           detail: "Role not authorized",
