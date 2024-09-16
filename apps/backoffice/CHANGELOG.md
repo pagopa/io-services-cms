@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.12.0
+
+### Minor Changes
+
+- 56eecc4: add new getInstitutionGroups API
+
 ## 1.11.10
 
 ### Patch Changes
