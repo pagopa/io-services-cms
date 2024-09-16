@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.11.10
+
+### Patch Changes
+
+- 9ee67a8: set default empty cidrs when manage cidrs is not found on cosmos
+
 ## 1.11.9
 
 ### Patch Changes
