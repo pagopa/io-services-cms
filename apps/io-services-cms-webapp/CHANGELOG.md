@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.33.4
+
+### Patch Changes
+
+- 9ee67a8: set default empty cidrs when manage cidrs is not found on cosmos
+
 ## 1.33.3
 
 ### Patch Changes
