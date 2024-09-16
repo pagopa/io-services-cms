@@ -44,6 +44,15 @@ resource "azurerm_api_management_api_operation_policy" "create_service_policy_v2
   xml_content = file("./api/io_services_cms/v1/createservice_policy/policy.xml")
 }
 
+resource "azurerm_api_management_api_operation_policy" "update_service_policy_v2" {
+  api_name            = "io-services-cms-api"
+  api_management_name = data.azurerm_api_management.apim_v2.name
+  resource_group_name = data.azurerm_api_management.apim_v2.resource_group_name
+  operation_id        = "updateService"
+
+  xml_content = file("./api/io_services_cms/v1/updateService_policy/policy.xml")
+}
+
 resource "azurerm_api_management_api_operation_policy" "get_service_topics_policy_v2" {
   api_name            = "io-services-cms-api"
   api_management_name = data.azurerm_api_management.apim_v2.name

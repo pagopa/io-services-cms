@@ -1,11 +1,6 @@
 <policies>
     <inbound>
         <base/>
-        <!--Service creation implies subscription creation. 
-            There is an hard-limit o APIM such as creations cannot happen concurrently on the same product
-            (because every subscription creation modifies the arm resource).
-            In order to mitigate so, we limit concurrency ourself.-->
-        <limit-concurrency key="constant-key-all-users" max-count="10" />
         <choose>
             <when condition="@(context.Request.Body != null)">
                 <set-body>
@@ -14,11 +9,7 @@
   try {
     var jsonBody = JObject.Parse(stringBody);
     try {
-      if (context.Request.Headers.ContainsKey("x-user-groups-selc")) {
-        jsonBody["data"]["groupId"] = context.Request.Headers["x-user-groups-selc"][0];
-      } else {
-        jsonBody["data"]["groupId"].Parent.Remove();
-      }
+      jsonBody["data"]["groupId"].Parent.Remove();
       return jsonBody.ToString();
     } catch (Exception) {
       return jsonBody.ToString();
