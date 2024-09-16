@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { SelfcareRoles } from "../../../types/auth";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { isBackofficeUserAdmin , isInstitutionIdSameAsCaller } from "../authz"
 
 
@@ -20,7 +20,7 @@ const backofficeUserMock = {
     {
       id: faker.string.uuid(),
       name: faker.company.name(),
-      role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
+      role: faker.helpers.arrayElement(Object.values(SelfcareRoles.admin)),
       logo_url: faker.image.url()
     }
   ],
@@ -39,6 +39,11 @@ const differentBackofficeOperatorUserMock = {...backofficeUserMock , institution
     logo_url: faker.image.url()}}
 
 const institutionId = "institutionId"
+
+afterEach(() => {
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
+});
 
 
 describe('isBackofficeUserAdmin', () => {
