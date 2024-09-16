@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.11.9
+
+### Patch Changes
+
+- 01c9789: [Renovate] Update @azure/identity to 4.x.x
+- Updated dependencies [01c9789]
+  - @io-services-cms/external-clients@1.1.5
+
 ## 1.11.8
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.5
+
+### Patch Changes
+
+- 01c9789: [Renovate] Update @azure/identity to 4.x.x
+
 ## 1.1.4
 
 ### Patch Changes
