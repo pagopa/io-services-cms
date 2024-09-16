@@ -1,5 +1,6 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
+
 import { LegacyService } from "../service-legacy";
 import { ItemType as LifecycleItemType } from "../service-lifecycle";
 import {
@@ -64,7 +65,7 @@ export type RequestHistoricizationItem = t.TypeOf<
 export const RequestHistoricizationItem = t.intersection([
   t.union([LifecycleItemType, PublicationItemType]),
   t.type({
-    last_update: NonEmptyString, // last_update required
+    modified_at: t.Integer,
   }),
 ]);
 
@@ -88,7 +89,7 @@ export type RequestSyncCmsItems = t.TypeOf<typeof RequestSyncCmsItems>;
 export const RequestSyncCmsItems = t.readonlyArray(RequestSyncCmsItem);
 
 const omitIsVisible = <T extends Record<string, unknown>>(
-  t: T
+  t: T,
 ): Omit<T, "isVisible"> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isVisible, ...rest } = t;
@@ -107,9 +108,9 @@ export const RequestSyncLegacyItem = t.intersection([
 
 export type RequestReviewLegacyItem = t.TypeOf<typeof RequestReviewLegacyItem>;
 export const RequestReviewLegacyItem = t.type({
+  apimUserId: NonEmptyString,
   isNewTicket: t.boolean,
   serviceId: NonEmptyString,
   ticketId: NonEmptyString,
   ticketKey: NonEmptyString,
-  apimUserId: NonEmptyString,
 });

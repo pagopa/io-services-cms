@@ -1,6 +1,6 @@
 import {
   HTTP_STATUS_FORBIDDEN,
-  HTTP_STATUS_UNAUTHORIZED
+  HTTP_STATUS_UNAUTHORIZED,
 } from "@/config/constants";
 import { getAzureAccessToken } from "@/lib/be/azure-access-token";
 import { HealthChecksError, minifyApimError } from "@/lib/be/errors";
@@ -9,7 +9,7 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   getKeepAliveAgentOptions,
   newHttpAgent,
-  newHttpsAgent
+  newHttpsAgent,
 } from "@pagopa/ts-commons/lib/agent";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -20,27 +20,27 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-export type ApimRestClient = {
+export interface ApimRestClient {
   getServiceList: (
     userId: string,
     limit: number,
     offset: number,
     serviceId?: string,
-    isRetry?: boolean
-  ) => TE.TaskEither<Error | AxiosError, SubscriptionCollection>;
-};
+    isRetry?: boolean,
+  ) => TE.TaskEither<AxiosError | Error, SubscriptionCollection>;
+}
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
+  API_APIM_MOCKING: BooleanFromString,
+  AZURE_APIM: NonEmptyString,
+  AZURE_APIM_PRODUCT_NAME: NonEmptyString,
+  AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
+  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-  AZURE_APIM_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
-  AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
-  AZURE_APIM: NonEmptyString,
-  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
-  API_APIM_MOCKING: BooleanFromString
 });
 
 let apimConfig: Config;
@@ -52,11 +52,12 @@ const getApimConfig = (): Config => {
 
     if (E.isLeft(result)) {
       throw new Error(
-        `error parsing apim config, ${readableReport(result.left)}`
+        `error parsing apim config, ${readableReport(result.left)}`,
       );
     }
 
     if (result.right.API_APIM_MOCKING) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { setupMocks } = require("../../../mocks");
       setupMocks();
     }
@@ -72,12 +73,12 @@ const buildApimService: () => ApimUtils.ApimService = () => {
   const apimConfig = getApimConfig();
   const apimClient = ApimUtils.getApimClient(
     apimConfig,
-    apimConfig.AZURE_SUBSCRIPTION_ID
+    apimConfig.AZURE_SUBSCRIPTION_ID,
   );
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
-    apimConfig.AZURE_APIM
+    apimConfig.AZURE_APIM,
   );
 };
 
@@ -93,10 +94,10 @@ const getAxiosInstance = (azureAccessToken: string) => {
 
   return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
-    timeout: 5000,
     headers: { Authorization: `Bearer ${azureAccessToken}` },
     httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env))
+    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env)),
+    timeout: 5000,
   });
 };
 
@@ -123,8 +124,8 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
     limit: number,
     offset: number,
     serviceId?: string,
-    isRetry = false
-  ): TE.TaskEither<Error | AxiosError, SubscriptionCollection> =>
+    isRetry = false,
+  ): TE.TaskEither<AxiosError | Error, SubscriptionCollection> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -132,44 +133,44 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
             `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions`,
             {
               params: {
-                "api-version": "2022-08-01",
-                $skip: offset,
-                $top: limit,
                 $filter: serviceId
                   ? `name eq '${serviceId}' and not startswith(name, 'MANAGE-')`
-                  : `not startswith(name, 'MANAGE-')`
-              }
-            }
+                  : `not startswith(name, 'MANAGE-')`,
+                $skip: offset,
+                $top: limit,
+                "api-version": "2022-08-01",
+              },
+            },
           ),
-        identity
+        identity,
       ),
       TE.map(({ data }) => data),
-      TE.orElse(e => {
+      TE.orElse((e) => {
         if (axios.isAxiosError(e)) {
           if (
             !isRetry &&
             [HTTP_STATUS_FORBIDDEN, HTTP_STATUS_UNAUTHORIZED].includes(
-              e.response?.status ?? 0
+              e.response?.status ?? 0,
             )
           ) {
             return pipe(
               TE.fromIO(() => refreshClient()),
               TE.chain(() =>
-                getServiceList(userId, limit, offset, serviceId, true)
-              )
+                getServiceList(userId, limit, offset, serviceId, true),
+              ),
             );
           }
           return TE.left(e);
         }
         return TE.left(
-          new Error(`Error calling APIM getServiceList API: ${e}`)
+          new Error(`Error calling APIM getServiceList API: ${e}`),
         );
-      })
+      }),
     );
 
   // ritono client
   return {
-    getServiceList
+    getServiceList,
   };
 };
 
@@ -181,8 +182,8 @@ export const getApimHealth: () => Promise<void> = async () => {
     if (E.isLeft(res)) {
       throw new Error(
         `error getting apim product, ${JSON.stringify(
-          minifyApimError(res.left)
-        )}`
+          minifyApimError(res.left),
+        )}`,
       );
     }
   } catch (e) {

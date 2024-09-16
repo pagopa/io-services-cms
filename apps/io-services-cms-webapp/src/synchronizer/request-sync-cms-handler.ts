@@ -4,31 +4,24 @@ import {
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
+
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestSyncCmsItems> =>
-  pipe(
-    queueItem,
-    Queue.RequestSyncCmsItems.decode,
-    E.mapLeft(flow(readableReport, E.toError))
-  );
 
 const toServiceLifecycle =
   (fsmLifecycleClient: ServiceLifecycle.FsmClient, config: IConfig) =>
   (
     state: ServiceLifecycle.ItemType["fsm"]["state"],
-    { id, data }: Queue.RequestSyncCmsItem
+    { data, id, modified_at }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -38,7 +31,7 @@ const toServiceLifecycle =
           O.fold(
             () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
             (currentServiceLifecycle) =>
-              TE.right(currentServiceLifecycle.data.metadata.topic_id)
+              TE.right(currentServiceLifecycle.data.metadata.topic_id),
           ),
           TE.map((topic_id) => ({
             ...data,
@@ -46,26 +39,27 @@ const toServiceLifecycle =
               ...data.metadata,
               topic_id,
             },
-          }))
-        )
+          })),
+        ),
       ),
       TE.map((lifecycleData) => ({
-        id,
         data: lifecycleData,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-      }))
+        fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
+        id,
+        modified_at,
+      })),
     );
 
 const toServicePublication =
   (
     fsmPublicationClient: ServicePublication.FsmClient,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    config: IConfig
+    config: IConfig,
   ) =>
   (
     state: ServicePublication.ItemType["fsm"]["state"],
-    { id, data }: Queue.RequestSyncCmsItem
+    { data, id, modified_at }: Queue.RequestSyncCmsItem,
   ) =>
     pipe(
       id,
@@ -82,48 +76,44 @@ const toServicePublication =
                     O.fold(
                       () => TE.right(config.LEGACY_SYNC_DEFAULT_TOPIC_ID),
                       (currentServiceLifecycle) =>
-                        TE.right(currentServiceLifecycle.data.metadata.topic_id)
-                    )
-                  )
-                )
+                        TE.right(
+                          currentServiceLifecycle.data.metadata.topic_id,
+                        ),
+                    ),
+                  ),
+                ),
               ),
             (currentServicePublication) =>
-              TE.right(currentServicePublication.data.metadata.topic_id)
+              TE.right(currentServicePublication.data.metadata.topic_id),
           ),
-          // eslint-disable-next-line sonarjs/no-identical-functions
           TE.map((topic_id) => ({
             ...data,
             metadata: {
               ...data.metadata,
               topic_id,
             },
-          }))
-        )
+          })),
+        ),
       ),
       TE.map((publicationData) => ({
-        id,
         data: publicationData,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fsm: { state: state as any, lastTransition: SYNC_FROM_LEGACY },
-      }))
+        fsm: { lastTransition: SYNC_FROM_LEGACY, state: state as any },
+        id,
+        modified_at,
+      })),
     );
 
 export const handleQueueItem = (
-  _context: Context,
+  context: Context,
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   fsmPublicationClient: ServicePublication.FsmClient,
-  config: IConfig
+  config: IConfig,
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
-    E.mapLeft(
-      (err) =>
-        new Error(
-          `Error while parsing incoming message, the reason was => ${err.message}`
-        )
-    ), // TODO: map as _permanent_ error
+    parseIncomingMessage(Queue.RequestSyncCmsItems),
     TE.fromEither,
     TE.chainW((items) =>
       pipe(
@@ -134,14 +124,18 @@ export const handleQueueItem = (
             toServiceLifecycle(fsmLifecycleClient, config)(
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               item.fsm.state as any,
-              item
+              item,
             ),
 
             TE.chain((serviceLifecycle) =>
-              fsmLifecycleClient.override(serviceLifecycle.id, serviceLifecycle)
+              fsmLifecycleClient.override(
+                serviceLifecycle.id,
+                serviceLifecycle,
+                true, // this parameter will preserve the original legacy modified_at date of the item
+              ),
             ),
-            TE.map((_) => void 0)
-          )
+            TE.map((_) => void 0),
+          ),
         ),
         TE.chainW(() =>
           pipe(
@@ -152,34 +146,39 @@ export const handleQueueItem = (
                 toServicePublication(
                   fsmPublicationClient,
                   fsmLifecycleClient,
-                  config
+                  config,
                 )(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   item.fsm.state as any,
-                  item
+                  item,
                 ),
                 TE.chain((servicePublication) =>
                   fsmPublicationClient.override(
                     servicePublication.id,
-                    servicePublication
-                  )
+                    servicePublication,
+                    true, // this parameter will preserve the original legacy modified_at date of the item
+                  ),
                 ),
-                TE.map((_) => void 0)
-              )
-            )
-          )
-        )
-      )
+                TE.map((_) => void 0),
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
-    TE.getOrElse((e) => {
+    TE.getOrElseW((e) => {
+      if (e instanceof QueuePermanentError) {
+        context.log.error(`Permanent error: ${e.message}`);
+        return T.of(void 0);
+      }
       throw e;
-    })
+    }),
   );
 
 export const createRequestSyncCmsHandler = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   fsmPublicationClient: ServicePublication.FsmClient,
-  config: IConfig
+  config: IConfig,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
     handleQueueItem(
@@ -187,6 +186,6 @@ export const createRequestSyncCmsHandler = (
       queueItem,
       fsmLifecycleClient,
       fsmPublicationClient,
-      config
-    )()
+      config,
+    )(),
   );

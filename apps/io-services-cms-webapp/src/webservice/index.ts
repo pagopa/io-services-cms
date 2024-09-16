@@ -1,9 +1,3 @@
-import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
-import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import { BlobService } from "azure-storage";
-import bodyParser from "body-parser";
-import express from "express";
-
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceHistory,
@@ -11,11 +5,21 @@ import {
   ServicePublication,
 } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
+import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
+import { BlobService } from "azure-storage";
+import bodyParser from "body-parser";
+import express from "express";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper, CosmosPagedHelper } from "../utils/cosmos-helper";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
+import {
+  applyRequestMiddelwares as applyCheckServiceDuplicationInternalRequestMiddelwares,
+  makeCheckServiceDuplicationInternalHandler,
+} from "./controllers/check-service-duplication-internal";
 import {
   applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
   makeCreateServiceHandler,
@@ -29,6 +33,10 @@ import {
   makeEditServiceHandler,
 } from "./controllers/edit-service";
 import {
+  applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
+  makeGetServiceHistoryHandler,
+} from "./controllers/get-service-history";
+import {
   applyRequestMiddelwares as applyGetServiceKeysRequestMiddelwares,
   makeGetServiceKeysHandler,
 } from "./controllers/get-service-keys";
@@ -36,7 +44,6 @@ import {
   applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
   makeGetServiceLifecycleHandler,
 } from "./controllers/get-service-lifecycle";
-
 import {
   applyRequestMiddelwares as applyGetServiceLifecycleInternalRequestMiddelwares,
   makeGetServiceLifecycleInternalHandler,
@@ -45,16 +52,14 @@ import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
   makeGetServiceHandler,
 } from "./controllers/get-service-publication";
-
-import {
-  applyRequestMiddelwares as applyCheckServiceDuplicationInternalRequestMiddelwares,
-  makeCheckServiceDuplicationInternalHandler,
-} from "./controllers/check-service-duplication-internal";
-
 import {
   applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
   makeGetServicePublicationInternalHandler,
 } from "./controllers/get-service-publication-internal";
+import {
+  applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
+  makeGetServiceTopicsHandler,
+} from "./controllers/get-service-topics";
 import {
   applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
   makeGetServicesHandler,
@@ -81,48 +86,38 @@ import {
   makeUploadServiceLogoHandler,
 } from "./controllers/upload-service-logo";
 
-import {
-  applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
-  makeGetServiceTopicsHandler,
-} from "./controllers/get-service-topics";
-
-import {
-  applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
-  makeGetServiceHistoryHandler,
-} from "./controllers/get-service-history";
-
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
 
-export type WebServerDependencies = {
+export interface WebServerDependencies {
+  apimService: ApimUtils.ApimService;
   basePath: string;
+  blobService: BlobService;
+  config: IConfig;
   fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
-  apimService: ApimUtils.ApimService;
-  config: IConfig;
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
+  serviceLifecycleCosmosHelper: CosmosHelper;
+  servicePublicationCosmosHelper: CosmosHelper;
+  serviceTopicDao: ServiceTopicDao;
   subscriptionCIDRsModel: SubscriptionCIDRsModel;
   telemetryClient: TelemetryClient;
-  blobService: BlobService;
-  serviceTopicDao: ServiceTopicDao;
-  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
-  servicePublicationCosmosHelper: CosmosHelper;
-  serviceLifecycleCosmosHelper: CosmosHelper;
-};
+}
 
 // eslint-disable-next-line max-lines-per-function
 export const createWebServer = ({
+  apimService,
   basePath,
+  blobService,
+  config,
   fsmLifecycleClient,
   fsmPublicationClient,
-  apimService,
-  config,
+  serviceHistoryPagedHelper,
+  serviceLifecycleCosmosHelper,
+  servicePublicationCosmosHelper,
+  serviceTopicDao,
   subscriptionCIDRsModel,
   telemetryClient,
-  blobService,
-  serviceTopicDao,
-  serviceHistoryPagedHelper,
-  servicePublicationCosmosHelper,
-  serviceLifecycleCosmosHelper,
 }: WebServerDependencies) => {
   // mount all routers on router
   const router = express.Router();
@@ -134,26 +129,26 @@ export const createWebServer = ({
     "/services",
     pipe(
       makeCreateServiceHandler({
-        fsmLifecycleClient,
         apimService,
         config,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyCreateServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyCreateServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.get(
     "/services",
     pipe(
       makeGetServicesHandler({
-        fsmLifecycleClient,
         apimService,
         config,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.get(
@@ -162,8 +157,8 @@ export const createWebServer = ({
       makeGetServiceTopicsHandler({
         serviceTopicDao,
       }),
-      applyGetServiceTopicsRequestMiddelwares
-    )
+      applyGetServiceTopicsRequestMiddelwares,
+    ),
   );
 
   // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
@@ -171,12 +166,12 @@ export const createWebServer = ({
     `/internal/services/duplicates`,
     pipe(
       makeCheckServiceDuplicationInternalHandler({
-        servicePublicationCosmosHelper,
         serviceLifecycleCosmosHelper,
+        servicePublicationCosmosHelper,
         telemetryClient,
       }),
-      applyCheckServiceDuplicationInternalRequestMiddelwares
-    )
+      applyCheckServiceDuplicationInternalRequestMiddelwares,
+    ),
   );
 
   // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
@@ -184,129 +179,132 @@ export const createWebServer = ({
     `/internal${serviceLifecyclePath}`,
     pipe(
       makeGetServiceLifecycleInternalHandler({
-        fsmLifecycleClient,
         apimService,
-        telemetryClient,
         config,
+        fsmLifecycleClient,
+        telemetryClient,
       }),
-      applyGetServiceLifecycleInternalRequestMiddelwares
-    )
+      applyGetServiceLifecycleInternalRequestMiddelwares,
+    ),
   );
 
   router.get(
     serviceLifecyclePath,
     pipe(
       makeGetServiceLifecycleHandler({
-        fsmLifecycleClient,
         apimService,
-        telemetryClient,
         config,
+        fsmLifecycleClient,
+        telemetryClient,
       }),
-      applyGetServiceLifecycleRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyGetServiceLifecycleRequestMiddelwares(
+        config,
+        subscriptionCIDRsModel,
+      ),
+    ),
   );
 
   router.put(
     serviceLifecyclePath,
     pipe(
       makeEditServiceHandler({
-        fsmLifecycleClient,
-        config,
         apimService,
+        config,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyEditServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyEditServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.delete(
     serviceLifecyclePath,
     pipe(
       makeDeleteServiceHandler({
-        fsmLifecycleClient,
         apimService,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.get(
     `${serviceLifecyclePath}/history`,
     pipe(
       makeGetServiceHistoryHandler({
-        serviceHistoryPagedHelper,
         apimService,
-        telemetryClient,
         config,
+        serviceHistoryPagedHelper,
+        telemetryClient,
       }),
-      applyGetServiceHistoryRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyGetServiceHistoryRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.put(
     "/services/:serviceId/review",
     pipe(
       makeReviewServiceHandler({
-        fsmLifecycleClient,
         apimService,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyReviewServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyReviewServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.post(
     servicePublicationPath,
     pipe(
       makePublishServiceHandler({
-        fsmPublicationClient,
         apimService,
+        fsmPublicationClient,
         telemetryClient,
       }),
-      applyPublishServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyPublishServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.get(
     servicePublicationPath,
     pipe(
       makeGetServiceHandler({
-        fsmPublicationClient,
         apimService,
-        telemetryClient,
         config,
+        fsmPublicationClient,
+        telemetryClient,
       }),
       applyGetPublicationStatusServiceRequestMiddelwares(
         config,
-        subscriptionCIDRsModel
-      )
-    )
+        subscriptionCIDRsModel,
+      ),
+    ),
   );
   // FIXME: This Api is TEMPORARY and will be removed after the old Developer Portal will be decommissioned
   router.get(
     `/internal${servicePublicationPath}`,
     pipe(
       makeGetServicePublicationInternalHandler({
-        fsmPublicationClient,
         apimService,
-        telemetryClient,
         config,
+        fsmPublicationClient,
+        telemetryClient,
       }),
-      applyGetPublicationServiceInternalRequestMiddelwares
-    )
+      applyGetPublicationServiceInternalRequestMiddelwares,
+    ),
   );
 
   router.delete(
     servicePublicationPath,
     pipe(
       makeUnpublishServiceHandler({
-        fsmPublicationClient,
         apimService,
+        fsmPublicationClient,
         telemetryClient,
       }),
-      applyUnpublishServiceRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyUnpublishServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.get(
@@ -314,10 +312,11 @@ export const createWebServer = ({
     pipe(
       makeGetServiceKeysHandler({
         apimService,
+        fsmLifecycleClient,
         telemetryClient,
       }),
-      applyGetServiceKeysRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyGetServiceKeysRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   router.put(
@@ -325,13 +324,14 @@ export const createWebServer = ({
     pipe(
       makeRegenerateServiceKeysHandler({
         apimService,
+        fsmLifecycleClient,
         telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(
         config,
-        subscriptionCIDRsModel
-      )
-    )
+        subscriptionCIDRsModel,
+      ),
+    ),
   );
 
   router.put(
@@ -342,8 +342,8 @@ export const createWebServer = ({
         blobService,
         telemetryClient,
       }),
-      applyUploadServiceLogoRequestMiddelwares(config, subscriptionCIDRsModel)
-    )
+      applyUploadServiceLogoRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
   );
 
   // configure app

@@ -5,8 +5,8 @@
 export async function register() {
   if (process.env.APP_ENV === "production") {
     if (process.env.NEXT_RUNTIME === "nodejs") {
-      await import('./instrumentation.node')
-      console.info('Instrumentation for Node.js runtime is set!')
+      await import("./instrumentation.node");
+      console.info("Instrumentation for Node.js runtime is set!");
     }
     if (process.env.NEXT_RUNTIME === "edge") {
       console.info("Currently no edge instrumentations is set!");

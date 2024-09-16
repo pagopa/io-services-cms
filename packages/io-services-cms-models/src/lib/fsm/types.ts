@@ -1,7 +1,8 @@
-import * as t from "io-ts";
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
 import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
+import * as t from "io-ts";
 
 /**
  * Metadata to be appended to an element to describe
@@ -32,27 +33,32 @@ export type WithState<S extends string, T> = t.TypeOf<
 export const WithState = <S extends string, T>(state: S, codec: t.Type<T>) =>
   t.intersection([codec, StateMetadata(state)]);
 
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 export type EmptyState = void;
 export const EmptyState = "*";
 
 /**
  * The interface of a store for persisting data
  */
-export type FSMStore<
+export interface FSMStore<
   TT extends WithState<S, T>,
   S extends string = string,
-  T extends Record<string, unknown> = Record<string, unknown>
-> = {
-  fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
-  bulkFetch: (id: string[]) => TE.TaskEither<Error, Array<O.Option<TT>>>;
-  save: (id: string, data: TT) => TE.TaskEither<Error, TT>;
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
+  bulkFetch: (id: string[]) => TE.TaskEither<Error, O.Option<TT>[]>;
   delete: (id: string) => TE.TaskEither<Error, void>;
-};
+  fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
+  save: (
+    id: string,
+    data: TT,
+    preserveModifiedAt?: boolean,
+  ) => TE.TaskEither<Error, TT>;
+}
 
 export type StateSet<
   R extends Record<Names, Ts>,
   Names extends string = string,
-  Ts = unknown
+  Ts = unknown,
 > = {
   [K in keyof R]: t.Type<R[K]>;
 };
@@ -60,35 +66,35 @@ export type StateSet<
 export type StateSetTypes<
   R extends Record<Names, Ts>,
   Names extends string = string,
-  Ts = unknown
+  Ts = unknown,
 > = {
   [K in keyof R]: t.Type<R[K]>;
 };
 
-export type Transition<
+export interface Transition<
   Action extends [string, Record<string, unknown> | void],
   FromState extends [string, unknown] | void,
-  ToState extends [string, unknown]
-> = {
+  ToState extends [string, unknown],
+> {
+  action: Action[0];
+  exec: (
+    params: (Action[1] extends Record<string, unknown>
+      ? { args: Action[1] }
+      : { args: undefined }) &
+      (FromState extends [string, unknown]
+        ? { current: WithState<FromState[0], FromState[1]> }
+        : { current: undefined }) &
+      Record<string, never>,
+  ) => E.Either<
+    FsmTransitionExecutionError,
+    { hasChanges: boolean } & WithState<ToState[0], ToState[1]>
+  >;
+  from: FromState extends [string, unknown] ? FromState[0] : "*";
   id: `apply ${Action[0]} on ${FromState extends [string, unknown]
     ? FromState[0]
     : "*"}`;
-  action: Action[0];
-  from: FromState extends [string, unknown] ? FromState[0] : "*";
   to: ToState[0];
-  exec: (
-    params: (FromState extends [string, unknown]
-      ? { current: WithState<FromState[0], FromState[1]> }
-      : { current: undefined }) &
-      (Action[1] extends Record<string, unknown>
-        ? { args: Action[1] }
-        : { args: undefined }) &
-      Record<string, never>
-  ) => E.Either<
-    FsmTransitionExecutionError,
-    WithState<ToState[0], ToState[1]> & { hasChanges: boolean }
-  >;
-};
+}
 
 export class FsmItemNotFoundError extends Error {
   public kind = "FsmItemNotFoundError";

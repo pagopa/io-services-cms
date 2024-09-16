@@ -9,6 +9,7 @@ import { aMockErrorResponse } from "../data/common-data";
 import {
   aWellKnown,
   getMockInstitution,
+  getMockUserInstitution,
   getSelfCareProblemResponse
 } from "../data/selfcare-data";
 
@@ -27,9 +28,11 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
-    http.get(`${baseURL}/institutions`, () => {
+    http.get(`${baseURL}/users`, ({ request }) => {
+      const url = new URL(request.url);
+      const userId = url.searchParams.get("userId") ?? undefined;
       const resultArray = [
-        HttpResponse.json([getMockInstitution()] as any, {
+        HttpResponse.json([getMockUserInstitution(userId)] as any, {
           status: 200
         }),
         HttpResponse.json(getSelfCareProblemResponse(404) as any, {

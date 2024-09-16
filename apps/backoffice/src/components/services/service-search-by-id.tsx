@@ -4,18 +4,18 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 
-export type ServiceSearchByIdProps = {
+export interface ServiceSearchByIdProps {
+  /** event triggered when the search field is empty */
+  onEmptySearch: () => void;
   /** event triggered when the search icon is clicked. \
    * _(assumes a validated serviceId  `id` output)_ */
   onSearchClick: (id: string) => void;
-  /** event triggered when the search field is empty */
-  onEmptySearch: () => void;
-};
+}
 
 /** Renders a search by `serviceId` field */
 export const ServiceSearchById = ({
+  onEmptySearch,
   onSearchClick,
-  onEmptySearch
 }: ServiceSearchByIdProps) => {
   const { t } = useTranslation();
   const [inputValue, setInputValue] = useState("");
@@ -57,34 +57,34 @@ export const ServiceSearchById = ({
   }, [inputValue]);
 
   return (
-    <Stack paddingY={3} direction="row" spacing={1} alignItems="flex-start">
+    <Stack alignItems="flex-start" direction="row" paddingY={3} spacing={1}>
       <TextField
-        id="service-id"
-        label={t("forms.service.searchById.label")}
-        variant="outlined"
-        value={inputValue}
-        onChange={handleInputChange}
-        size="small"
-        sx={{ width: "450px" }}
         InputProps={{
-          endAdornment: <Search color="disabled" />
+          endAdornment: <Search color="disabled" />,
         }}
         error={!isValid && NonEmptyString.is(inputValue)}
         helperText={handleHelperText()}
+        id="service-id"
+        label={t("forms.service.searchById.label")}
+        onChange={handleInputChange}
+        size="small"
+        sx={{ width: "450px" }}
+        value={inputValue}
+        variant="outlined"
       />
       <Button
-        variant="outlined"
         disabled={!isValid}
-        sx={buttonHeightStyle}
         onClick={handleSearchClick}
+        sx={buttonHeightStyle}
+        variant="outlined"
       >
         {t("forms.service.searchById.search")}
       </Button>
       {isValid ? (
         <Button
-          variant="text"
-          sx={buttonHeightStyle}
           onClick={resetSearchInput}
+          sx={buttonHeightStyle}
+          variant="text"
         >
           {t("forms.service.searchById.clear")}
         </Button>

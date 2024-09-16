@@ -5,33 +5,33 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
 
 /** Define a single table row menu action item */
-export type TableRowMenuAction = {
-  /** menu label */
-  label: string;
-  /** menu icon */
-  icon: ReactNode;
+export interface TableRowMenuAction {
   /** if true, shows menu as danger one _(red text)_ */
   danger?: boolean;
+  /** menu icon */
+  icon: ReactNode;
+  /** menu label */
+  label: string;
   /** event triggered on menu item click */
   onClick: () => void;
-};
+}
 
 /** Define table row menu action items */
-export type TableRowMenuProps = {
+export interface TableRowMenuProps {
   /** list of table row menu action items */
   actions: TableRowMenuAction[];
-};
+}
 
 /** Renders a row related dropdown menu */
 export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
   const { t } = useTranslation();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
 
   const hasNoActions = () => actions.length === 0;
@@ -53,18 +53,18 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
   return (
     <>
       <IconButton
+        aria-haspopup="true"
         aria-label="more"
         id="row-menu-button"
-        aria-haspopup="true"
         onClick={handleMenuClick}
       >
-        <MoreVertRounded fontSize="small" color={"primary"} />
+        <MoreVertRounded color={"primary"} fontSize="small" />
       </IconButton>
       <Menu
-        id="basic-menu"
         anchorEl={anchorEl}
-        open={open}
+        id="basic-menu"
         onClose={handleMenuClose}
+        open={open}
       >
         {actions.map((action, index) => (
           <MenuItem
@@ -75,8 +75,8 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
             <ListItemText>
               <Typography
                 color={action.danger ? "error" : "primary"}
-                variant="body2"
                 fontWeight={600}
+                variant="body2"
               >
                 {t(action.label)}
               </Typography>

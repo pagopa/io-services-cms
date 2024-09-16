@@ -8,54 +8,58 @@ import {
   DefaultValues,
   FieldValues,
   FormProvider,
-  useForm
+  useForm,
 } from "react-hook-form";
 import { ZodType } from "zod";
+
 import { ProcessActions } from ".";
 import { ButtonShowMore } from "../buttons";
 import { buildSnackbarItem } from "../notification";
 import { StepsPipeline } from "./steps-pipeline";
 
 /** Interface for describe a create/update process step */
-export type BuilderStep = {
-  /** title of the step */
-  label: string;
-  /** description for the step */
-  description?: string;
-  /** if specified, a "more info" button will be displayed on top of step _(immediately under step label/description)_ */
-  moreInfoUrl?: string;
+export interface BuilderStep {
   /** content of the step: usually a list of form fields */
   content: ReactNode;
+  /** description for the step */
+  description?: string;
+  /** title of the step */
+  label: string;
+  /** if specified, a "more info" button will be displayed on top of step _(immediately under step label/description)_ */
+  moreInfoUrl?: string;
   /** step fields validation schema as Zod type definitions */
   validationSchema: ZodType<any, any, any>;
-};
+}
 
 export type CreateUpdateMode = "create" | "update";
-export type ConfirmButtonLabelsType = { create: string; update: string };
+export interface ConfirmButtonLabelsType {
+  create: string;
+  update: string;
+}
 
-export type CreateUpdateProcessProps<T> = {
-  /** item for which to carry out the creation or modification process */
-  itemToCreateUpdate: DefaultValues<T>;
-  /** list of step that make up the process */
-  steps: BuilderStep[];
-  /** Process mode: `create` or `update` */
-  mode: CreateUpdateMode;
+export interface CreateUpdateProcessProps<T> {
   /** Label for final confirm button _(in both modes `create` and `update`)_ */
   confirmButtonLabels: ConfirmButtonLabelsType;
+  /** item for which to carry out the creation or modification process */
+  itemToCreateUpdate: DefaultValues<T>;
+  /** Process mode: `create` or `update` */
+  mode: CreateUpdateMode;
   /** event triggered on process exit */
   onCancel: () => void;
   /** event triggered on process completed, with result item of `T` */
   onConfirm: (value: T) => void;
-};
+  /** list of step that make up the process */
+  steps: BuilderStep[];
+}
 
 /** Component for create/update an item o T generic type */
 export function CreateUpdateProcess<T extends FieldValues>({
-  itemToCreateUpdate,
-  steps,
-  mode,
   confirmButtonLabels,
+  itemToCreateUpdate,
+  mode,
   onCancel,
-  onConfirm
+  onConfirm,
+  steps,
 }: CreateUpdateProcessProps<T>) {
   const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
@@ -66,15 +70,15 @@ export function CreateUpdateProcess<T extends FieldValues>({
   const methods = useForm({
     //shouldUnregister: true,
     defaultValues: itemToCreateUpdate,
+    mode: "onChange",
     resolver: zodResolver(steps[currentStepIndex].validationSchema),
-    mode: "onChange"
   });
 
   const {
-    getValues,
     clearErrors,
+    formState: { isValid },
+    getValues,
     trigger,
-    formState: { isValid }
   } = methods;
 
   const decreaseStep = () => {
@@ -92,7 +96,11 @@ export function CreateUpdateProcess<T extends FieldValues>({
   };
 
   const handleNext = () => {
-    isValid ? increaseStep() : trigger();
+    if (isValid) {
+      increaseStep();
+    } else {
+      trigger();
+    }
   };
 
   const handleComplete = () => {
@@ -103,10 +111,10 @@ export function CreateUpdateProcess<T extends FieldValues>({
       if (mode === "update" && _.isEqual(itemToCreateUpdate, getValues())) {
         enqueueSnackbar(
           buildSnackbarItem({
+            message: "",
             severity: "warning",
             title: t("notifications.noChangeError"),
-            message: ""
-          })
+          }),
         );
         return;
       }
@@ -140,28 +148,28 @@ export function CreateUpdateProcess<T extends FieldValues>({
     <>
       <StepsPipeline
         activeStep={currentStepIndex}
-        steps={steps.map(step => step.label)}
+        steps={steps.map((step) => step.label)}
       />
-      <Box bgcolor="background.paper" padding="24px" borderRadius="4px">
+      <Box bgcolor="background.paper" borderRadius="4px" padding="24px">
         <Typography variant="h5">{t(steps[currentStepIndex].label)}</Typography>
         {renderStepDescription()}
         {renderStepMoreInfo()}
         <FormProvider {...methods}>
-          <Box marginY={5} component="form" margin={2} autoComplete="off">
+          <Box autoComplete="off" component="form" margin={2} marginY={5}>
             {steps[currentStepIndex].content}
           </Box>
         </FormProvider>
       </Box>
       <ProcessActions
-        stepsNumber={steps.length}
-        currentStepIndex={currentStepIndex}
-        mode={mode}
         confirmButtonLabels={confirmButtonLabels}
+        currentStepIndex={currentStepIndex}
+        disabled={sended}
+        mode={mode}
         onBack={decreaseStep}
         onCancel={onCancel}
-        onNext={handleNext}
         onComplete={handleComplete}
-        disabled={sended}
+        onNext={handleNext}
+        stepsNumber={steps.length}
       />
     </>
   );

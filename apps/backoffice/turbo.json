@@ -1,27 +1,57 @@
 {
   "extends": ["//"],
   "tasks": {
-    "generate": {
+    "clean:api-definitions": {
+      "inputs": ["openapi.yaml"]
+    },
+    "clean:services-cms": {
+      "inputs": ["../io-services-cms-webapp/openapi.yaml"]
+    },
+    "clean:selfcare-api-models": {
       "inputs": [
-        "openapi.yaml",
-        "selfcare-openapi.yaml",
-        "../io-services-cms-webapp/openapi.yaml"
+        "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
+      ]
+    },
+    "generate:api-definitions": {
+      "inputs": ["openapi.yaml"],
+      "outputs": ["src/generated/api/**"],
+      "dependsOn": ["clean:api-definitions"]
+    },
+    "generate:services-cms": {
+      "inputs": ["../io-services-cms-webapp/openapi.yaml"],
+      "outputs": ["src/generated/services-cms/**"],
+      "dependsOn": ["clean:services-cms"]
+    },
+    "generate:selfcare-api-models": {
+      "inputs": [
+        "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
       ],
-      "outputs": ["src/generated/**/*", "src/types/selfcare/*"]
+      "outputs": ["src/generated/selfcare/*"],
+      "dependsOn": ["clean:selfcare-api-models"]
+    },
+    "generate": {
+      "dependsOn": [
+        "generate:api-definitions",
+        "generate:services-cms",
+        "generate:selfcare-api-models"
+      ]
     },
     "build": {
-      "inputs": ["$TURBO_DEFAULT$","!src/**/__tests__/**","!.eslintrc.json","!.gitignore","!CHANGELOG.md","!openapi.yaml","!README.md","!selfcare-openapi.yaml","!vitest.config.*"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!src/**/__tests__/**",
+        "!.eslintrc.json",
+        "!.gitignore",
+        "!CHANGELOG.md",
+        "!openapi.yaml",
+        "!README.md",
+        "!vitest.config.*"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "typecheck": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "tsconfig.json"
-      ],
-      "dependsOn": [
-        "build"
-      ]
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
+      "dependsOn": ["build"]
     }
   }
 }

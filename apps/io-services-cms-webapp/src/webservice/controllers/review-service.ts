@@ -30,6 +30,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
 import { TelemetryClient } from "../../utils/applicationinsight";
@@ -40,13 +41,13 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "ReviewServiceHandler";
 
-type Dependencies = {
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
-type HandlerResponseTypes = IResponseSuccessNoContent | ErrorResponseTypes;
+type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
 
 type ReviewServiceHandler = (
   context: Context,
@@ -54,13 +55,13 @@ type ReviewServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
-  servicePayload: ReviewRequestPayload
+  servicePayload: ReviewRequestPayload,
 ) => Promise<HandlerResponseTypes>;
 
 export const makeReviewServiceHandler =
   ({
-    fsmLifecycleClient: fsmLifecycleClient,
     apimService,
+    fsmLifecycleClient: fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): ReviewServiceHandler =>
   (context, auth, __, ___, serviceId, body) =>
@@ -69,7 +70,7 @@ export const makeReviewServiceHandler =
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW((sId) =>
         pipe(
@@ -77,28 +78,28 @@ export const makeReviewServiceHandler =
             autoPublish: body.auto_publish ?? false,
           }),
           TE.map(ResponseSuccessNoContent),
-          TE.mapLeft(fsmToApiError)
-        )
+          TE.mapLeft(fsmToApiError),
+        ),
       ),
       TE.map((resp) => {
         telemetryClient.trackEvent({
           name: "api.manage.services.review",
           properties: {
-            userSubscriptionId: auth.subscriptionId,
-            serviceId,
             autoPublish: body.auto_publish,
+            serviceId,
+            userSubscriptionId: auth.subscriptionId,
           },
         });
         return resp;
       }),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
-          serviceId,
           autoPublish: body.auto_publish,
-        })
+          serviceId,
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares =
@@ -114,19 +115,19 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // extract and validate the request body
-      RequiredBodyPayloadMiddleware(ReviewRequestPayload)
+      RequiredBodyPayloadMiddleware(ReviewRequestPayload),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
         checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u)
-        )
-      )
+          ipTuple(c, u),
+        ),
+      ),
     );
   };

@@ -18,7 +18,7 @@ module "app_be_fn" {
   health_check_path   = "/api/v1/info"
   node_version        = 18
 
-  subnet_cidr                          = local.app_be.snet_cidr
+  subnet_cidr                          = var.app_be_snet_cidr
   subnet_pep_id                        = var.peps_snet_id
   private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
   virtual_network = {

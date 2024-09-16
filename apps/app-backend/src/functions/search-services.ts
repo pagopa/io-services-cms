@@ -1,18 +1,18 @@
 import * as H from "@pagopa/handler-kit";
-import * as L from "@pagopa/logger";
-import * as O from "fp-ts/Option";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
-import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
-
 import { httpAzureFunction } from "@pagopa/handler-kit-azure-func";
+import * as L from "@pagopa/logger";
 import {
   IWithinRangeIntegerTag,
   IntegerFromString,
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
+import * as O from "fp-ts/Option";
 import { sequenceS } from "fp-ts/lib/Apply";
+import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
+
 import { PaginationConfig } from "../config";
 import { InstitutionServicesResource } from "../generated/definitions/internal/InstitutionServicesResource";
 import { OrganizationFiscalCode } from "../generated/definitions/internal/OrganizationFiscalCode";
@@ -25,16 +25,16 @@ import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
  * GET /institutions/{institutionId}/services AZF HttpTrigger
  * Search for Istitution's Services on Azure Search Index
  */
-type SearchServicesRequestParams = {
+interface SearchServicesRequestParams {
   institutionId: OrganizationFiscalCode;
   limit: number;
   offset: O.Option<number>;
-};
+}
 
 export const DEFAULT_ORDER_BY = "name asc";
 
 const executeSearch: (
-  requestQueryParams: SearchServicesRequestParams
+  requestQueryParams: SearchServicesRequestParams,
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<ServiceMinified>,
   H.HttpError,
@@ -53,19 +53,19 @@ const executeSearch: (
           ...paginationProperties,
           filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
           orderBy: [DEFAULT_ORDER_BY],
-        })
+        }),
       ),
       TE.map(({ paginationProperties, results }) => ({
-        services: results.resources,
         count: results.count,
         limit: paginationProperties.top,
         offset: paginationProperties.skip ?? 0,
+        services: results.resources,
       })),
-      TE.mapLeft((error) => new H.HttpError(error.message))
+      TE.mapLeft((error) => new H.HttpError(error.message)),
     );
 
 const extractParams: (
-  paginationConfig: PaginationConfig
+  paginationConfig: PaginationConfig,
 ) => RTE.ReaderTaskEither<
   H.HttpRequest,
   H.HttpBadRequestError,
@@ -75,7 +75,7 @@ const extractParams: (
     sequenceS(RTE.ApplyPar)({
       institutionId: PathParamValidatorMiddleware(
         "institutionId",
-        OrganizationFiscalCode
+        OrganizationFiscalCode,
       ),
       limit: pipe(
         OptionalQueryParamMiddleware(
@@ -87,11 +87,11 @@ const extractParams: (
               IWithinRangeIntegerTag<1, NonNegativeInteger>
             >(
               1,
-              (paginationConfig.PAGINATION_MAX_LIMIT + 1) as NonNegativeInteger
-            )
-          )
+              (paginationConfig.PAGINATION_MAX_LIMIT + 1) as NonNegativeInteger,
+            ),
+          ),
         ),
-        RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT))
+        RTE.map(O.getOrElseW(() => paginationConfig.PAGINATION_DEFAULT_LIMIT)),
       ),
       offset: OptionalQueryParamMiddleware(
         "offset",
@@ -103,19 +103,19 @@ const extractParams: (
           >(
             0,
             (paginationConfig.PAGINATION_MAX_OFFSET_AI_SEARCH +
-              1) as NonNegativeInteger
-          )
-        )
+              1) as NonNegativeInteger,
+          ),
+        ),
       ),
-    })
+    }),
   );
 
 export const makeSearchServicesHandler: (
-  paginationConfig: PaginationConfig
+  paginationConfig: PaginationConfig,
 ) => H.Handler<
   H.HttpRequest,
-  | H.HttpResponse<InstitutionServicesResource, 200>
-  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>,
+  | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>
+  | H.HttpResponse<InstitutionServicesResource, 200>,
   AzureSearchClientDependency<ServiceMinified>
 > = (paginationConfig: PaginationConfig) =>
   H.of((request: H.HttpRequest) =>
@@ -128,14 +128,14 @@ export const makeSearchServicesHandler: (
       RTE.orElseW((error) =>
         pipe(
           RTE.right(
-            H.problemJson({ status: error.status, title: error.message })
+            H.problemJson({ status: error.status, title: error.message }),
           ),
           RTE.chainFirstW((errorResponse) =>
-            L.errorRTE(`Error executing SearchServicesFn`, errorResponse)
-          )
-        )
-      )
-    )
+            L.errorRTE(`Error executing SearchServicesFn`, errorResponse),
+          ),
+        ),
+      ),
+    ),
   );
 
 export const SearchServicesFn = (paginationConfig: PaginationConfig) =>

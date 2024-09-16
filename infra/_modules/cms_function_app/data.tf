@@ -27,12 +27,6 @@ data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
 }
 
-data "azurerm_subnet" "backoffice_app_snet" {
-  name                 = "${var.prefix}-${var.env_short}-services-cms-backoffice-snet"
-  virtual_network_name = "${var.prefix}-${var.env_short}-vnet-common"
-  resource_group_name  = "${var.prefix}-${var.env_short}-rg-common"
-}
-
 ####################
 # KeyVault Secrets #
 ####################

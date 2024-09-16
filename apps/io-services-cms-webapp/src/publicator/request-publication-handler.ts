@@ -4,62 +4,56 @@ import {
   Queue,
   ServicePublication,
 } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import * as E from "fp-ts/lib/Either";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-import { withJsonInput } from "../lib/azure/misc";
 
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestPublicationItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestPublicationItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
+import { withJsonInput } from "../lib/azure/misc";
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
   context: Context,
   queueItem: Json,
-  fsmPublicationClient: ServicePublication.FsmClient
+  fsmPublicationClient: ServicePublication.FsmClient,
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
-    E.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
+    parseIncomingMessage(Queue.RequestPublicationItem),
     TE.fromEither,
     TE.chainW((item) =>
       fsmPublicationClient.release(
         item.id,
         {
-          id: item.id,
           data: item.data,
+          id: item.id,
         },
-        item.autoPublish
-      )
+        item.autoPublish,
+      ),
     ),
     TE.fold(
       (e) => {
         if (e instanceof FsmItemNotFoundError) {
           context.log.info(
             `Operation Completed no more action needed => ${e.message}`,
-            e
+            e,
           );
+          return T.of(void 0);
+        } else if (e instanceof QueuePermanentError) {
+          context.log.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         } else {
           throw e;
         }
       },
-      (_) => T.of(void 0)
-    )
+      (_) => T.of(void 0),
+    ),
   );
 
 export const createRequestPublicationHandler = (
-  fsmPublicationClient: ServicePublication.FsmClient
+  fsmPublicationClient: ServicePublication.FsmClient,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, queueItem, fsmPublicationClient)()
+    handleQueueItem(context, queueItem, fsmPublicationClient)(),
   );

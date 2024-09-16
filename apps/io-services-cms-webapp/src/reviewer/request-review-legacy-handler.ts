@@ -13,72 +13,70 @@
 
 import { Context } from "@azure/functions";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
+
 import { IConfig } from "../config";
 import { withJsonInput } from "../lib/azure/misc";
+import { QueuePermanentError } from "../utils/errors";
 import { isUserEnabledForRequestReviewLegacy } from "../utils/feature-flag-handler";
+import { parseIncomingMessage } from "../utils/queue-utils";
 import { ServiceReviewDao } from "../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
-
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestReviewLegacyItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestReviewLegacyItem.decode,
-    E.mapLeft(flow(readableReport, (_) => new Error(_)))
-  );
 
 export const handleQueueItem = (
   context: Context,
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
-  config: IConfig
+  config: IConfig,
 ) =>
   pipe(
     queueItem,
-    parseIncomingMessage,
+    parseIncomingMessage(Queue.RequestReviewLegacyItem),
     TE.fromEither,
     TE.chain((requestReviewLegacy) =>
       pipe(
         isUserEnabledForRequestReviewLegacy(
           config,
-          requestReviewLegacy.apimUserId
+          requestReviewLegacy.apimUserId,
         )
           ? processItem(fsmLifecycleClient, dao, requestReviewLegacy)
-          : TE.right(void 0)
-      )
+          : TE.right(void 0),
+      ),
     ),
-    TE.getOrElse((e) => {
+    TE.getOrElseW((e) => {
+      if (e instanceof QueuePermanentError) {
+        context.log.error(`Permanent error: ${e.message}`);
+        return T.of(void 0);
+      }
       throw e;
-    })
+    }),
   );
 
 const processItem = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
-  requestReviewLegacy: Queue.RequestReviewLegacyItem
+  requestReviewLegacy: Queue.RequestReviewLegacyItem,
 ) =>
   pipe(
     requestReviewLegacy.serviceId,
     fsmLifecycleClient.fetch,
     TE.chain(
       TE.fromOption(
-        () => new Error(`Service ${requestReviewLegacy.serviceId} not found `)
-      )
+        () => new Error(`Service ${requestReviewLegacy.serviceId} not found `),
+      ),
     ),
     // in case of deleted do nothing
     TE.map(
       O.fromPredicate(
-        (currentService) => currentService.fsm.state !== "deleted"
-      )
+        (currentService) => currentService.fsm.state !== "deleted",
+      ),
     ),
     TE.chain(
       flow(
@@ -90,47 +88,47 @@ const processItem = (
             (submittedService) =>
               fsmLifecycleClient.override(
                 submittedService.id,
-                submittedService
+                submittedService,
               ),
             // 2. create entry in service review legacy table
             TE.chain((_) =>
               pipe(
                 dao.insert({
+                  extra_data: {},
                   service_id: requestReviewLegacy.serviceId,
                   service_version: new Date()
                     .getTime()
                     .toString() as NonEmptyString,
+                  status: "PENDING",
                   ticket_id: requestReviewLegacy.ticketId,
                   ticket_key: requestReviewLegacy.ticketKey,
-                  status: "PENDING",
-                  extra_data: {},
                 }),
                 TE.mapLeft(E.toError),
-                TE.map((_) => void 0)
-              )
-            )
-          )
-        )
-      )
-    )
+                TE.map((_) => void 0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 
 const setToSubmitted = (
-  service: ServiceLifecycle.ItemType
+  service: ServiceLifecycle.ItemType,
 ): ServiceLifecycle.ItemType => ({
   ...service,
   fsm: {
     ...service.fsm,
-    state: "submitted",
     lastTransition: SYNC_FROM_LEGACY,
+    state: "submitted",
   },
 });
 
 export const createRequestReviewLegacyHandler = (
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
-  config: IConfig
+  config: IConfig,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, queueItem, fsmLifecycleClient, dao, config)()
+    handleQueueItem(context, queueItem, fsmLifecycleClient, dao, config)(),
   );

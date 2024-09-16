@@ -28,7 +28,7 @@ beforeAll(() => {
     status: "authenticated",
     data: {
       user: {
-        permissions: ["permission1", "permission2"],
+        permissions: { apimGroups: ["permission1", "permission2"] },
         institution: { role: "aRole" }
       }
     }

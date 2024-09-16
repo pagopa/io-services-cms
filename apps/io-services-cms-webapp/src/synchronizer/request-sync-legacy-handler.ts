@@ -1,45 +1,25 @@
 import { Context } from "@azure/functions";
 import { Queue } from "@io-services-cms/models";
-import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
-import { withJsonInput } from "../lib/azure/misc";
 
-const parseIncomingMessage = (
-  queueItem: Json
-): E.Either<Error, Queue.RequestSyncLegacyItem> =>
-  pipe(
-    queueItem,
-    Queue.RequestSyncLegacyItem.decode,
-    E.mapLeft(flow(readableReport, E.toError))
-  );
+import { withJsonInput } from "../lib/azure/misc";
+import { QueuePermanentError } from "../utils/errors";
+import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
   _context: Context,
   queueItem: Json,
-  legacyServiceModel: ServiceModel
+  legacyServiceModel: ServiceModel,
 ) =>
   pipe(
     queueItem,
-    (x) => {
-      _context.log.info(`before parse: ${JSON.stringify(x)}`);
-      return x;
-    },
-    parseIncomingMessage,
-    E.mapLeft((err) => {
-      _context.log.error(
-        `An Error has occurred while parsing incoming message, the reason was => ${JSON.stringify(
-          err.message
-        )}`,
-        err
-      );
-      return new Error("Error while parsing incoming message");
-    }), // TODO: map as _permanent_ error
+    parseIncomingMessage(Queue.RequestSyncLegacyItem),
     TE.fromEither,
     TE.chainW((item) =>
       pipe(
@@ -61,7 +41,7 @@ export const handleQueueItem = (
                         ? (new Set(["0.0.0.0/0"]) as Set<CIDR>)
                         : x.authorizedCIDRs,
                     isVisible: x.isVisible ?? false,
-                  })
+                  }),
               ),
             (existingService) =>
               pipe(
@@ -79,18 +59,21 @@ export const handleQueueItem = (
                   _context.log.info(`update param: ${JSON.stringify(x)}`);
                   return x;
                 },
-                (x) => legacyServiceModel.update(x)
-              )
-          )
+                (x) => legacyServiceModel.update(x),
+              ),
+          ),
         ),
-        TE.map((_) => void 0)
-      )
+        TE.map((_) => void 0),
+      ),
     ),
-    TE.getOrElse((e) => {
-      if (e instanceof Error) {
+    TE.getOrElseW((e) => {
+      if (e instanceof QueuePermanentError) {
+        _context.log.error(`Permanent error: ${e.message}`);
+        return TE.right(void 0);
+      } else if (e instanceof Error) {
         _context.log.error(
           `An Error has occurred while persisting data, the reason was => ${e.message}`,
-          e
+          e,
         );
         throw e;
       } else {
@@ -98,9 +81,9 @@ export const handleQueueItem = (
           `An ${
             e.kind
           } has occurred while persisting data, the reason was => ${JSON.stringify(
-            e
+            e,
           )}`,
-          e
+          e,
         );
         switch (e.kind) {
           case "COSMOS_EMPTY_RESPONSE":
@@ -111,17 +94,17 @@ export const handleQueueItem = (
           case "COSMOS_ERROR_RESPONSE":
             throw E.toError(e.error.message);
           default:
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
             const _: never = e;
             throw new Error(`should not have executed this with ${e}`);
         }
       }
-    })
+    }),
   );
 
 export const createRequestSyncLegacyHandler = (
-  legacyServiceModel: ServiceModel
+  legacyServiceModel: ServiceModel,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
-    handleQueueItem(context, queueItem, legacyServiceModel)()
+    handleQueueItem(context, queueItem, legacyServiceModel)(),
   );

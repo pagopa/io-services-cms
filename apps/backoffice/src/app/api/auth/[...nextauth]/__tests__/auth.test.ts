@@ -4,7 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
-import { Institution } from "../../../../../types/selfcare/Institution";
+import { Institution } from "../../../../../generated/selfcare/Institution";
 import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
@@ -91,9 +91,12 @@ const getExpectedUser = (
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo
   },
-  permissions: apimUser.groups
-    .filter(group => group.type === "custom")
-    .map(group => group.name),
+  permissions: {
+    apimGroups: apimUser.groups
+      .filter(group => group.type === "custom")
+      .map(group => group.name),
+    selcGroups: jwtPayload.organization.groups
+  },
   parameters: {
     userId: apimUser.name,
     userEmail: apimUser.email,

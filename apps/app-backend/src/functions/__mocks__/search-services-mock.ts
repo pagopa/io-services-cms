@@ -2,6 +2,7 @@ import { ServiceMinified } from "../../generated/definitions/internal/ServiceMin
 import { SearchMappedResult } from "../../utils/azure-search/client";
 
 export const mockSearchServicesResult: SearchMappedResult<ServiceMinified> = {
+  count: 2,
   resources: [
     {
       id: "01HKCDP7542ABQTNXGSFDXTG24",
@@ -14,5 +15,4 @@ export const mockSearchServicesResult: SearchMappedResult<ServiceMinified> = {
       version: 2,
     },
   ],
-  count: 2,
 };

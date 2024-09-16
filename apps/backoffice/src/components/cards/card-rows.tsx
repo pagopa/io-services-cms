@@ -1,42 +1,43 @@
 import { Grid, Stack, Typography } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import NextLink from "next/link";
+import { useTranslation } from "next-i18next";
 import React, { ReactNode } from "react";
+
 import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 import { MarkdownView } from "../markdown-view";
 
-export type CardRowType = {
-  /** row label, shown on left */
-  label: string;
-  /** row value, shown on right */
-  value?: string | ReactNode;
-  /** if `true`, renders value on a new line _(the default behaviour renders value inline, with its label on left)_ */
-  renderValueOnNewLine?: boolean;
-  /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis.
-   * _(This is the default behaviour)_ */
-  noWrap?: boolean;
+export interface CardRowType {
   /** If true, a *""copy to clipboard"* icon is shown on right side of *value* */
   copyableValue?: boolean;
   /** row value kind, useful for some specific render modes */
   kind?: CardRowValueType;
-};
+  /** row label, shown on left */
+  label: string;
+  /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis.
+   * _(This is the default behaviour)_ */
+  noWrap?: boolean;
+  /** if `true`, renders value on a new line _(the default behaviour renders value inline, with its label on left)_ */
+  renderValueOnNewLine?: boolean;
+  /** row value, shown on right */
+  value?: ReactNode | string;
+}
 
 export type CardRowValueType = "apikey" | "datetime" | "link" | "markdown";
 
-export type CardRowsProps = {
+export interface CardRowsProps {
   /** Array of label/value rows displayed as a list */
   rows: CardRowType[];
-};
+}
 
 /** Used to show general-purpose information as label/value rows. */
 export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
 
   const renderValue = (
-    value: string | ReactNode | undefined,
-    children: ReactNode
+    value: ReactNode | string | undefined,
+    children: ReactNode,
   ) => (
     <LoaderSkeleton loading={value === undefined} style={{ width: "100%" }}>
       {children}
@@ -45,10 +46,10 @@ export const CardRows = ({ rows }: CardRowsProps) => {
 
   const renderTextValue = (row: CardRowType) => (
     <Typography
-      variant="body2"
+      color={row.kind === "link" ? "primary" : "text"}
       fontWeight={600}
       noWrap={row.noWrap ?? true}
-      color={row.kind === "link" ? "primary" : "text"}
+      variant="body2"
     >
       {row.value
         ? row.kind === "datetime"
@@ -81,14 +82,14 @@ export const CardRows = ({ rows }: CardRowsProps) => {
           row.value ? (
             <NextLink
               href={row.value as string}
-              target="_blank"
               rel="noreferrer"
+              target="_blank"
             >
               {renderTextValue(row)}
             </NextLink>
           ) : (
             renderTextValue(row)
-          )
+          ),
         );
       case "markdown":
         return <MarkdownView>{(row.value as string) ?? ""}</MarkdownView>;
@@ -100,7 +101,7 @@ export const CardRows = ({ rows }: CardRowsProps) => {
             {row.copyableValue ? (
               <CopyToClipboard text={(row.value as string) ?? ""} />
             ) : null}
-          </>
+          </>,
         );
     }
   };
@@ -109,20 +110,20 @@ export const CardRows = ({ rows }: CardRowsProps) => {
     <>
       {rows.map((row, index) => (
         <Grid
+          alignItems="center"
+          columnSpacing={2}
           container
           key={index}
-          spacing={0}
-          columnSpacing={2}
           marginTop={2}
-          alignItems="center"
+          spacing={0}
         >
           <Grid item xs={row.renderValueOnNewLine ? 12 : 4}>
-            <Typography variant="body2" noWrap>
+            <Typography noWrap variant="body2">
               {t(row.label)}
             </Typography>
           </Grid>
           <Grid item xs={row.renderValueOnNewLine ? 12 : 8}>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Stack alignItems="center" direction="row" spacing={0.5}>
               {manageRowValue(row)}
             </Stack>
           </Grid>

@@ -24,7 +24,9 @@ import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
 const apiBasePath = "/api/services/aServiceId/keys/";
+const apiDeletedServiceKeys = "/api/services/aDeletedServiceId/keys/";
 const apiFullPath = `${apiBasePath}primary`;
+const apiDeletedServiceKeysFullPath = `${apiDeletedServiceKeys}primary`;
 const aManageSubscriptionId = "MANAGE-123";
 const userId = "123";
 const ownerId = `/an/owner/${userId}`;
@@ -81,6 +83,27 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
   kind: "IRetrievedSubscriptionCIDRs",
   version: 0 as NonNegativeInteger,
 };
+
+const aServiceLifecycle = {
+  id: "aServiceId",
+  data: {
+    name: "aServiceName",
+    description: "aServiceDescription",
+    authorized_recipients: [],
+    max_allowed_payment_amount: 123,
+    metadata: {
+      address: "via tal dei tali 123",
+      email: "service@email.it",
+      pec: "service@pec.it",
+      scope: "LOCAL",
+    },
+    organization: {
+      name: "anOrganizationName",
+      fiscal_code: "12345678901",
+    },
+    require_secure_channel: false,
+  },
+} as unknown as ServiceLifecycle.ItemType;
 
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
@@ -141,6 +164,12 @@ describe("regenerateSubscriptionKeys", () => {
   setAppContext(app, mockContext);
 
   it("should regenerate primary key", async () => {
+    await serviceLifecycleStore.save("aServiceId", {
+      ...aServiceLifecycle,
+      id: "s1" as NonEmptyString,
+      fsm: { state: "draft" },
+    })();
+
     const response = await request(app)
       .put(apiFullPath)
       .send()
@@ -162,6 +191,12 @@ describe("regenerateSubscriptionKeys", () => {
   });
 
   it("should regenerate secondary key", async () => {
+    await serviceLifecycleStore.save("aServiceId", {
+      ...aServiceLifecycle,
+      id: "s1" as NonEmptyString,
+      fsm: { state: "draft" },
+    })();
+
     const response = await request(app)
       .put(`${apiBasePath}secondary`)
       .send()
@@ -180,6 +215,26 @@ describe("regenerateSubscriptionKeys", () => {
         secondary_key: secondaryKey,
       })
     );
+  });
+
+  it("should return 404 when service is deleted", async () => {
+    await serviceLifecycleStore.save("aDeletedServiceId", {
+      ...aServiceLifecycle,
+      id: "s1" as NonEmptyString,
+      fsm: { state: "deleted" },
+    })();
+
+    const response = await request(app)
+      .put(apiDeletedServiceKeysFullPath)
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-id", userId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(response.statusCode).toBe(404);
   });
 
   it("should fail with a bad request response when use a wrong keyType path param", async () => {

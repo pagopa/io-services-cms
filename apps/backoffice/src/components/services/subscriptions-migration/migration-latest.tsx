@@ -13,40 +13,39 @@ import {
   TableCell,
   TableContainer,
   TableRow,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
 import { MigrationChipStatus } from ".";
 
-export type MigrationLatestProps = {
+export interface MigrationLatestProps {
   migrationItems?: MigrationItemList;
   onRefreshClick: () => void;
-};
+}
 
 /** Render subscriptions migration latest summary status */
 export const MigrationLatest = ({
   migrationItems,
-  onRefreshClick
+  onRefreshClick,
 }: MigrationLatestProps) => {
   const { t } = useTranslation();
   const isEmptyState = migrationItems?.items?.length === 0;
 
   // the full migration status report is reduced so that it's ready to be rendered
   const computeMigrationStatus = (
-    status: MigrationItemStatus
-  ): MigrationChipStatus => {
+    status: MigrationItemStatus,
+  ): MigrationChipStatus =>
     // at least one failed mean the overall process failed
-    return status.failed > 0
-      ? { label: "failed", color: "error" }
+    status.failed > 0
+      ? { color: "error", label: "failed" }
       : // at least one still processing means the overall process still processing
-      status.processing > 0
-      ? { label: "doing", color: "warning" }
-      : // for every other case, we consider it done
-        { label: "done", color: "success" };
-  };
-
+        status.processing > 0
+        ? { color: "warning", label: "doing" }
+        : // for every other case, we consider it done
+          { color: "success", label: "done" };
   return (
-    <Stack direction="column" spacing={3} display="contents">
+    <Stack direction="column" display="contents" spacing={3}>
       <Box>
         <Typography variant="overline">
           {t("subscriptions.migration.status.title")}
@@ -55,11 +54,11 @@ export const MigrationLatest = ({
           {t("subscriptions.migration.status.description")}
         </Typography>
         <Button
-          size="small"
-          variant="naked"
-          sx={{ marginTop: 1 }}
-          startIcon={<Refresh />}
           onClick={onRefreshClick}
+          size="small"
+          startIcon={<Refresh />}
+          sx={{ marginTop: 1 }}
+          variant="naked"
         >
           {t("subscriptions.migration.refresh")}
         </Button>
@@ -71,18 +70,18 @@ export const MigrationLatest = ({
       ) : null}
       <LoaderSkeleton
         loading={migrationItems === undefined}
-        style={{ width: "100%", height: "50px" }}
+        style={{ height: "50px", width: "100%" }}
       >
         <TableContainer>
           <Table size="small">
             <TableBody>
               {migrationItems?.items
-                ?.map(item => ({
+                ?.map((item) => ({
                   ...item,
-                  status: computeMigrationStatus(item.status)
+                  status: computeMigrationStatus(item.status),
                 }))
                 .map((migrationItem, index) => (
-                  <TableRow key={`migration-lates-${index}`} hover>
+                  <TableRow hover key={`migration-lates-${index}`}>
                     <TableCell>
                       <Typography variant="body2">
                         {`${migrationItem.delegate.sourceSurname} ${migrationItem.delegate.sourceName}`}
@@ -90,15 +89,15 @@ export const MigrationLatest = ({
                     </TableCell>
                     <TableCell>
                       <Chip
-                        size="small"
-                        label={t(
-                          `subscriptions.migration.status.${migrationItem.status.label}`
-                        )}
                         color={migrationItem.status.color}
+                        label={t(
+                          `subscriptions.migration.status.${migrationItem.status.label}`,
+                        )}
+                        size="small"
                       />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" textAlign="right">
+                      <Typography textAlign="right" variant="body2">
                         {new Date(migrationItem.lastUpdate).toLocaleString()}
                       </Typography>
                     </TableCell>

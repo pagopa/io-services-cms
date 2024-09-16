@@ -8,6 +8,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool } from "pg";
+
 import { TopicPostgreSqlConfig } from "../config";
 import { getPool, queryDataTable } from "../lib/clients/pg-client";
 
@@ -25,7 +26,7 @@ export const ServiceTopicRowDataTable = t.type({
 
 const createExistsByIdSql = (
   { TOPIC_DB_SCHEMA, TOPIC_DB_TABLE }: TopicPostgreSqlConfig,
-  id: number
+  id: number,
 ): string =>
   knex
     .withSchema(TOPIC_DB_SCHEMA)
@@ -41,12 +42,12 @@ const existsById =
     pipe(
       createExistsByIdSql(dbConfig, id),
       queryDataTable(pool),
-      TE.map((queryResult) => queryResult.rowCount > 0)
+      TE.map((queryResult) => queryResult.rowCount > 0),
     );
 
 const createFindByIdSql = (
   { TOPIC_DB_SCHEMA, TOPIC_DB_TABLE }: TopicPostgreSqlConfig,
-  id: number
+  id: number,
 ): string =>
   knex
     .withSchema(TOPIC_DB_SCHEMA)
@@ -60,7 +61,7 @@ const createFindByIdSql = (
 const findById =
   (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
   (
-    id: number
+    id: number,
   ): TE.TaskEither<DatabaseError | Error, O.Option<ServiceTopicRowDataTable>> => // FIXME: create a specific ValidationError
     pipe(
       createFindByIdSql(dbConfig, id),
@@ -68,8 +69,8 @@ const findById =
       TE.map(
         flow(
           O.fromPredicate((queryResult) => queryResult.rowCount === 1),
-          O.map((queryResult) => queryResult.rows[0])
-        )
+          O.map((queryResult) => queryResult.rows[0]),
+        ),
       ),
       TE.chain(
         flow(
@@ -78,11 +79,11 @@ const findById =
             flow(
               ServiceTopicRowDataTable.decode,
               E.bimap(flow(readableReport, E.toError), O.some),
-              TE.fromEither
-            )
-          )
-        )
-      )
+              TE.fromEither,
+            ),
+          ),
+        ),
+      ),
     );
 
 const createSelectNotDeletedTopicsSql = ({
@@ -100,7 +101,7 @@ const findAllNotDeletedTopics =
   (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
   (): TE.TaskEither<
     DatabaseError | Error,
-    O.Option<ReadonlyArray<ServiceTopicRowDataTable>>
+    O.Option<readonly ServiceTopicRowDataTable[]>
   > =>
     pipe(
       createSelectNotDeletedTopicsSql(dbConfig),
@@ -108,8 +109,8 @@ const findAllNotDeletedTopics =
       TE.map(
         flow(
           O.fromPredicate((queryResult) => queryResult.rowCount > 0),
-          O.map((queryResult) => queryResult.rows)
-        )
+          O.map((queryResult) => queryResult.rows),
+        ),
       ),
       TE.chain(
         flow(
@@ -118,28 +119,27 @@ const findAllNotDeletedTopics =
             flow(
               RA.traverse(E.Applicative)(ServiceTopicRowDataTable.decode),
               E.bimap(flow(readableReport, E.toError), O.some),
-              TE.fromEither
-            )
-          )
-        )
-      )
+              TE.fromEither,
+            ),
+          ),
+        ),
+      ),
     );
 
-// eslint-disable-next-line functional/no-let
 let dao: ServiceTopicDao;
 export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
   if (!dao) {
     dao = pipe(getPool(dbConfig), (pool) => ({
       existsById: existsById(pool, dbConfig),
-      findById: findById(pool, dbConfig),
       findAllNotDeletedTopics: findAllNotDeletedTopics(pool, dbConfig),
+      findById: findById(pool, dbConfig),
     }));
   }
   return dao;
 };
 
-export type ServiceTopicDao = {
+export interface ServiceTopicDao {
   existsById: ReturnType<typeof existsById>;
-  findById: ReturnType<typeof findById>;
   findAllNotDeletedTopics: ReturnType<typeof findAllNotDeletedTopics>;
-};
+  findById: ReturnType<typeof findById>;
+}

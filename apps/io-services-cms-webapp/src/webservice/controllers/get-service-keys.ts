@@ -29,6 +29,7 @@ import {
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
 import {
@@ -37,38 +38,45 @@ import {
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
 const logPrefix = "GetServiceKeysHandler";
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<SubscriptionKeys>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<SubscriptionKeys>;
 
 type GetServiceKeysHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  serviceId: ServiceLifecycle.definitions.ServiceId
+  serviceId: ServiceLifecycle.definitions.ServiceId,
 ) => Promise<HandlerResponseTypes>;
 
-type Dependencies = {
+interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
-};
+}
 
 export const makeGetServiceKeysHandler =
-  ({ apimService, telemetryClient }: Dependencies): GetServiceKeysHandler =>
+  ({
+    apimService,
+    fsmLifecycleClient,
+    telemetryClient,
+  }: Dependencies): GetServiceKeysHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
         serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
+      TE.chainW(checkService(fsmLifecycleClient)),
       TE.chainW(() =>
         pipe(
           apimService.listSecrets(serviceId),
@@ -77,23 +85,23 @@ export const makeGetServiceKeysHandler =
             ResponseSuccessJson<SubscriptionKeys>({
               primary_key: subscription.primaryKey as string,
               secondary_key: subscription.secondaryKey as string,
-            })
-          )
-        )
+            }),
+          ),
+        ),
       ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.GetServiceKeys, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
           serviceId,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares =
@@ -109,15 +117,15 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
-      RequiredParamMiddleware("serviceId", NonEmptyString)
+      RequiredParamMiddleware("serviceId", NonEmptyString),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))
-      )
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
+      ),
     );
   };

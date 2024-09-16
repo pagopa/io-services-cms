@@ -112,7 +112,7 @@ beforeEach(() => {
 });
 
 describe("Sync Legacy Handler", () => {
-  it("should return an Error if queueItem is invalid", async () => {
+  it("should not throw when permanent error occours", async () => {
     const context = createContext();
     const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
     const legacyServiceModelMock = {
@@ -121,9 +121,13 @@ describe("Sync Legacy Handler", () => {
       update: vi.fn(),
     } as unknown as ServiceModel;
 
-    await expect(() =>
-      handleQueueItem(context, anInvalidQueueItem, legacyServiceModelMock)()
-    ).rejects.toThrowError("Error while parsing incoming message");
+    await handleQueueItem(
+      context,
+      anInvalidQueueItem,
+      legacyServiceModelMock
+    )();
+
+    expect(legacyServiceModelMock.findOneByServiceId).not.toBeCalled();
   });
 
   it("should return an error if find legacy service fails", async () => {

@@ -14,8 +14,8 @@ export const getUrlSchema = (t: TFunction<"translation", undefined>) =>
   z
     .string()
     .url(t("forms.errors.field.url"))
-    .refine(value => value.trim() === value, {
-      message: t("forms.errors.field.url")
+    .refine((value) => value.trim() === value, {
+      message: t("forms.errors.field.url"),
     });
 
 export const getOptionalUrlSchema = (t: TFunction<"translation", undefined>) =>

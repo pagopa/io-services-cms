@@ -5,7 +5,7 @@
 /** Selfcare roles */
 export enum SelfcareRoles {
   admin = "admin",
-  operator = "operator"
+  operator = "operator",
 }
 
 /** List of some useful Azure Apim user groups */
@@ -16,12 +16,12 @@ export type UsefulPermissions =
 
 export type UserRole = SelfcareRoles | string;
 
-export type UserPermissions = Array<UsefulPermissions> | Array<string>;
+export type UserPermissions = UsefulPermissions[] | string[];
 
 /** Type used to specify `role/permissions` required for **authorization** purpose */
-export type RequiredAuthorizations = {
-  /** required user role to match */
-  requiredRole?: UserRole;
+export interface RequiredAuthorizations {
   /** required user permissions to match */
   requiredPermissions?: UserPermissions;
-};
+  /** required user role to match */
+  requiredRole?: UserRole;
+}

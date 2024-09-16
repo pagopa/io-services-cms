@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
@@ -8,6 +9,7 @@ import * as B from "fp-ts/boolean";
 import { flow, pipe } from "fp-ts/function";
 import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither";
 import * as t from "io-ts";
+
 import {
   EmptyState,
   FSMStore,
@@ -30,20 +32,20 @@ import { Service, ServiceId } from "./definitions";
 type ToRecord<Q> = Q extends []
   ? {} // eslint-disable-line @typescript-eslint/ban-types
   : Q extends [WithState<infer State, infer T>, ...infer Rest extends unknown[]]
-  ? { [K in State]: Omit<T, "fsm"> } & ToRecord<Rest>
-  : never;
+    ? { [K in State]: Omit<T, "fsm"> } & ToRecord<Rest>
+    : never;
 
 // commodity aliases
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
 export type AllFsmErrors =
+  | FsmItemNotFoundError
   | FsmNoApplicableTransitionError
   | FsmNoTransitionMatchedError
-  | FsmTooManyTransitionsError
-  | FsmTransitionExecutionError
   | FsmStoreFetchError
   | FsmStoreSaveError
-  | FsmItemNotFoundError;
+  | FsmTooManyTransitionsError
+  | FsmTransitionExecutionError;
 
 // All the states admitted by the FSM
 type States = t.TypeOf<typeof States>;
@@ -55,22 +57,22 @@ const States = t.tuple([
   WithState("deleted", Service),
 ]);
 
-type Actions = {
-  create: { data: Service };
-  edit: { data: Service };
-  delete: void;
-  submit: { autoPublish: boolean };
+interface Actions {
   abort: void;
-  reject: { reason: string };
   approve: { approvalDate: string };
-};
+  create: { data: Service };
+  delete: void;
+  edit: { data: Service };
+  reject: { reason: string };
+  submit: { autoPublish: boolean };
+}
 
 // helpers
 type Action<S extends keyof Actions> = [S, Actions[S]];
 type State<S extends keyof ToRecord<States>> = [S, ToRecord<States>[S]];
 
 // Definition of the FSM for service lifecycle
-type FSM = {
+interface FSM {
   states: StateSet<ToRecord<States>>;
   transitions: [
     Transition<Action<"create">, void, State<"draft">>,
@@ -83,9 +85,9 @@ type FSM = {
     Transition<Action<"delete">, State<"rejected">, State<"deleted">>,
     Transition<Action<"delete">, State<"approved">, State<"deleted">>,
     Transition<Action<"edit">, State<"rejected">, State<"draft">>,
-    Transition<Action<"edit">, State<"approved">, State<"draft">>
+    Transition<Action<"edit">, State<"approved">, State<"draft">>,
   ];
-};
+}
 
 // implementation
 /**
@@ -96,166 +98,166 @@ type FSM = {
  */
 const FSM: FSM = {
   states: {
-    draft: Service,
-    submitted: Service,
     approved: Service,
-    rejected: Service,
     deleted: Service,
+    draft: Service,
+    rejected: Service,
+    submitted: Service,
   },
   transitions: [
     {
-      id: "apply create on *",
       action: "create",
-      to: "draft",
-      from: "*",
       exec: ({ args: { data: service } }) =>
         E.right({
           ...service,
-          fsm: { state: "draft", lastTransition: "apply create on *" },
+          fsm: { lastTransition: "apply create on *", state: "draft" },
           hasChanges: true,
         }),
+      from: "*",
+      id: "apply create on *",
+      to: "draft",
     },
     {
-      id: "apply edit on draft",
       action: "edit",
-      from: "draft",
-      to: "draft",
-      exec: ({ current, args: { data } }) =>
+      exec: ({ args: { data }, current }) =>
         E.right({
           ...current,
           ...data,
-          fsm: { state: "draft", lastTransition: "apply edit on draft" },
+          fsm: { lastTransition: "apply edit on draft", state: "draft" },
           hasChanges: true,
         }),
+      from: "draft",
+      id: "apply edit on draft",
+      to: "draft",
     },
     {
-      id: "apply delete on draft",
       action: "delete",
-      from: "draft",
-      to: "deleted",
       exec: ({ current }) =>
         E.right({
           ...current,
-          fsm: { state: "deleted", lastTransition: "apply delete on draft" },
+          fsm: { lastTransition: "apply delete on draft", state: "deleted" },
           hasChanges: true,
         }),
+      from: "draft",
+      id: "apply delete on draft",
+      to: "deleted",
     },
     {
-      id: "apply submit on draft",
       action: "submit",
-      from: "draft",
-      to: "submitted",
-      exec: ({ current, args: { autoPublish } }) =>
+      exec: ({ args: { autoPublish }, current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "submitted",
             autoPublish,
             lastTransition: "apply submit on draft",
+            state: "submitted",
           },
           hasChanges: true,
         }),
+      from: "draft",
+      id: "apply submit on draft",
+      to: "submitted",
     },
     {
-      id: "apply abort on submitted",
       action: "abort",
-      from: "submitted",
-      to: "draft",
       exec: ({ current }) =>
         E.right({
           ...current,
-          fsm: { state: "draft", lastTransition: "apply abort on submitted" },
+          fsm: { lastTransition: "apply abort on submitted", state: "draft" },
           hasChanges: true,
         }),
+      from: "submitted",
+      id: "apply abort on submitted",
+      to: "draft",
     },
     {
-      id: "apply approve on submitted",
       action: "approve",
-      from: "submitted",
-      to: "approved",
-      exec: ({ current, args: { approvalDate } }) =>
+      exec: ({ args: { approvalDate }, current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "approved",
             approvalDate,
             autoPublish: getAutoPublish(current),
             lastTransition: "apply approve on submitted",
+            state: "approved",
           },
           hasChanges: true,
         }),
-    },
-    {
-      id: "apply reject on submitted",
-      action: "reject",
       from: "submitted",
-      to: "rejected",
-      exec: ({ current, args: { reason } }) =>
+      id: "apply approve on submitted",
+      to: "approved",
+    },
+    {
+      action: "reject",
+      exec: ({ args: { reason }, current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "rejected",
-            reason,
             lastTransition: "apply reject on submitted",
+            reason,
+            state: "rejected",
           },
           hasChanges: true,
         }),
+      from: "submitted",
+      id: "apply reject on submitted",
+      to: "rejected",
     },
     {
-      id: "apply delete on rejected",
       action: "delete",
-      from: "rejected",
-      to: "deleted",
       exec: ({ current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "deleted",
             lastTransition: "apply delete on rejected",
+            state: "deleted",
           },
           hasChanges: true,
         }),
+      from: "rejected",
+      id: "apply delete on rejected",
+      to: "deleted",
     },
     {
-      id: "apply delete on approved",
       action: "delete",
-      from: "approved",
-      to: "deleted",
       exec: ({ current }) =>
         E.right({
           ...current,
           fsm: {
-            state: "deleted",
             lastTransition: "apply delete on approved",
+            state: "deleted",
           },
           hasChanges: true,
         }),
-    },
-    {
-      id: "apply edit on rejected",
-      action: "edit",
-      from: "rejected",
-      to: "draft",
-      exec: ({ current, args: { data } }) =>
-        E.right({
-          ...current,
-          ...data,
-          fsm: { state: "draft", lastTransition: "apply edit on reject" },
-          hasChanges: true,
-        }),
-    },
-    {
-      id: "apply edit on approved",
-      action: "edit",
       from: "approved",
-      to: "draft",
-      exec: ({ current, args: { data } }) =>
+      id: "apply delete on approved",
+      to: "deleted",
+    },
+    {
+      action: "edit",
+      exec: ({ args: { data }, current }) =>
         E.right({
           ...current,
           ...data,
-          fsm: { state: "draft", lastTransition: "apply edit on approved" },
+          fsm: { lastTransition: "apply edit on reject", state: "draft" },
           hasChanges: true,
         }),
+      from: "rejected",
+      id: "apply edit on rejected",
+      to: "draft",
+    },
+    {
+      action: "edit",
+      exec: ({ args: { data }, current }) =>
+        E.right({
+          ...current,
+          ...data,
+          fsm: { lastTransition: "apply edit on approved", state: "draft" },
+          hasChanges: true,
+        }),
+      from: "approved",
+      id: "apply edit on approved",
+      to: "draft",
     },
   ],
 };
@@ -281,12 +283,12 @@ type LifecycleStore = FSMStore<States[number]>;
 function apply(
   appliedAction: "create" | "edit",
   id: ServiceId,
-  args: { data: Service }
+  args: { data: Service },
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
   id: ServiceId,
-  args: { autoPublish: boolean }
+  args: { autoPublish: boolean },
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -295,7 +297,7 @@ function apply(
 function apply(
   appliedAction: "approve",
   id: ServiceId,
-  args: { approvalDate: string }
+  args: { approvalDate: string },
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -304,7 +306,7 @@ function apply(
 function apply(
   appliedAction: "reject",
   id: ServiceId,
-  args: { reason: string }
+  args: { reason: string },
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -312,7 +314,7 @@ function apply(
 >;
 function apply(
   appliedAction: "delete",
-  id: ServiceId
+  id: ServiceId,
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -321,12 +323,12 @@ function apply(
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
-  args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"]
+  args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"],
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
   return (store) => {
     // check transitions for the action to apply
     const applicableTransitions = FSM.transitions.filter(
-      ({ action }) => action === appliedAction
+      ({ action }) => action === appliedAction,
     );
     if (!applicableTransitions.length) {
       return TE.left(new FsmNoApplicableTransitionError(appliedAction));
@@ -354,13 +356,13 @@ function apply(
                 // this filter is also a type guard to narrow possible from states to EmptyState only
                 RA.filter(
                   <T extends FSM["transitions"][number]>(
-                    tr: T
-                  ): tr is T & { from: "*" } => tr.from === EmptyState
+                    tr: T,
+                  ): tr is { from: "*" } & T => tr.from === EmptyState,
                 ),
                 E.fromPredicate(
                   // we must have matched at least ONE transition
                   (matchedTransitions) => matchedTransitions.length > 0,
-                  (_) => new FsmItemNotFoundError(id)
+                  (_) => new FsmItemNotFoundError(id),
                 ),
                 // bind all data into a lazy implementation of exec
                 E.map(
@@ -368,15 +370,15 @@ function apply(
                     (tr) =>
                       (): E.Either<
                         FsmTransitionExecutionError,
-                        AllResults & { hasChanges: boolean }
+                        { hasChanges: boolean } & AllResults
                       > =>
                         // FIXME: avoid this forcing
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
-                        tr.exec({ args })
-                  )
+                        tr.exec({ args }),
+                  ),
                 ),
-                TE.fromEither
+                TE.fromEither,
               ),
             (item) =>
               pipe(
@@ -384,8 +386,9 @@ function apply(
                 // this filter is also a type guard to narrow possible from states to any state but EmptyState
                 RA.filter(
                   <T extends FSM["transitions"][number]>(
-                    tr: T
-                  ): tr is T & { from: AllStateNames } => tr.from !== EmptyState
+                    tr: T,
+                  ): tr is { from: AllStateNames } & T =>
+                    tr.from !== EmptyState,
                 ),
                 RA.map((tr) =>
                   pipe(
@@ -402,7 +405,7 @@ function apply(
                       (current) =>
                         (): E.Either<
                           FsmTransitionExecutionError,
-                          AllResults & { hasChanges: boolean }
+                          { hasChanges: boolean } & AllResults
                         > =>
                           tr.exec({
                             // FIXME: avoid this forcing
@@ -413,9 +416,9 @@ function apply(
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore
                             current,
-                          })
-                    )
-                  )
+                          }),
+                    ),
+                  ),
                 ),
                 // skip unmatched transitions
                 RA.filter(E.isRight),
@@ -423,18 +426,18 @@ function apply(
                 E.fromPredicate(
                   // we must have matched at least ONE transition
                   (matchedTransitions) => matchedTransitions.length > 0,
-                  (_) => new FsmNoTransitionMatchedError()
+                  (_) => new FsmNoTransitionMatchedError(),
                 ),
-                TE.fromEither
-              )
-          )
-        )
+                TE.fromEither,
+              ),
+          ),
+        ),
       ),
       // avoid indeterminism: fail if more than a transition is applicable
       TE.filterOrElse(
         // we must have matched exactly ONE transition (no matched transitions condition has been verified above)
         (matchedTransitions) => matchedTransitions.length === 1,
-        (_) => new FsmTooManyTransitionsError()
+        (_) => new FsmTooManyTransitionsError(),
       ),
       // apply the only transition to turn the element in the new state
       TE.map((matchedTransitions) => matchedTransitions[0]),
@@ -448,18 +451,19 @@ function apply(
             // no changes to save
             () => TE.right(newItem),
             // has changes to save
-            () => saveItem(store)(id, newItem)
+            () => saveItem(store)(id, newItem),
           ),
-          TE.mapLeft((_) => new FsmStoreSaveError())
-        )
-      )
+          TE.mapLeft((_) => new FsmStoreSaveError()),
+        ),
+      ),
     );
   };
 }
 
 function override(
   id: ItemType["id"],
-  item: ItemType
+  item: ItemType,
+  preserveModifiedAt = false,
 ): ReaderTaskEither<LifecycleStore, Error, ItemType> {
   return (store) =>
     pipe(
@@ -471,12 +475,12 @@ function override(
           // else, if no item is found we just assume it's ok
           O.getOrElseW(() => E.right(void 0)),
           E.mapLeft(
-            flow(readableReport, (msg) => new FsmItemValidationError(msg))
+            flow(readableReport, (msg) => new FsmItemValidationError(msg)),
           ),
-          TE.fromEither
-        )
+          TE.fromEither,
+        ),
       ),
-      TE.chain((_) => saveItem(store)(id, item))
+      TE.chain((_) => saveItem(store)(id, item, preserveModifiedAt)),
     );
 }
 
@@ -486,27 +490,35 @@ export const getAutoPublish = (service: ItemType): boolean =>
 // method to save a "normalized" item in the store
 const saveItem =
   (store: LifecycleStore) =>
-  (id: NonEmptyString, item: ItemType): TE.TaskEither<Error, ItemType> =>
-    store.save(id, {
-      ...item,
-      data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
-    });
+  (
+    id: NonEmptyString,
+    item: ItemType,
+    preserveModifiedAt = false,
+  ): TE.TaskEither<Error, ItemType> =>
+    store.save(
+      id,
+      {
+        ...item,
+        data: { ...item.data, name: item.data.name.trim() as NonEmptyString },
+      },
+      preserveModifiedAt,
+    );
 
 const getFsmClient = (store: LifecycleStore) => ({
-  getStore: () => store,
-  create: (id: ServiceId, args: { data: Service }) =>
-    apply("create", id, args)(store),
-  edit: (id: ServiceId, args: { data: Service }) =>
-    apply("edit", id, args)(store),
-  submit: (id: ServiceId, args: { autoPublish: boolean }) =>
-    apply("submit", id, args)(store),
   approve: (id: ServiceId, args: { approvalDate: string }) =>
     apply("approve", id, args)(store),
+  create: (id: ServiceId, args: { data: Service }) =>
+    apply("create", id, args)(store),
+  delete: (id: ServiceId) => apply("delete", id)(store),
+  edit: (id: ServiceId, args: { data: Service }) =>
+    apply("edit", id, args)(store),
+  fetch: (id: ServiceId) => store.fetch(id),
+  getStore: () => store,
+  override: (...args: Parameters<typeof override>) => override(...args)(store),
   reject: (id: ServiceId, args: { reason: string }) =>
     apply("reject", id, args)(store),
-  delete: (id: ServiceId) => apply("delete", id)(store),
-  override: (...args: Parameters<typeof override>) => override(...args)(store),
-  fetch: (id: ServiceId) => store.fetch(id),
+  submit: (id: ServiceId, args: { autoPublish: boolean }) =>
+    apply("submit", id, args)(store),
 });
 type FsmClient = ReturnType<typeof getFsmClient>;
 
@@ -516,7 +528,7 @@ const ItemType = t.union(States.types);
 type CosmosResource = t.TypeOf<typeof CosmosResource>;
 const CosmosResource = t.intersection([
   ItemType,
-  t.type({ _ts: t.Integer, _etag: NonEmptyString }),
+  t.type({ _etag: NonEmptyString, _ts: t.Integer }),
 ]);
 
 export * as definitions from "./definitions";

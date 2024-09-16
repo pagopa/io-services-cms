@@ -1,5 +1,5 @@
 import { AzureSearchClient } from "./client";
 
-export type AzureSearchClientDependency<T> = {
+export interface AzureSearchClientDependency<T> {
   readonly searchClient: AzureSearchClient<T>;
-};
+}

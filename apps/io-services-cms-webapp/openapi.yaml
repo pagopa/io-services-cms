@@ -59,6 +59,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
       requestBody:
         description: A service body payload
         content:
@@ -95,6 +97,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: limit
           in: query
           description: The number of services to return
@@ -164,6 +168,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -199,6 +205,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -243,6 +251,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -275,6 +285,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -316,6 +328,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -375,6 +389,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -411,6 +427,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -455,6 +473,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -495,6 +515,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -538,6 +560,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -571,6 +595,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -606,6 +632,8 @@ paths:
         - $ref: '#/components/parameters/UserID'
         - $ref: '#/components/parameters/SubscriptionID'
         - $ref: '#/components/parameters/XForwardedFor'
+        - $ref: '#/components/parameters/UserGroupsSelc'
+        - $ref: '#/components/parameters/Channel'
         - name: serviceId
           in: path
           description: ID of the service
@@ -654,6 +682,18 @@ components:
     XForwardedFor:
       in: header
       name: X-Forwarded-For
+      required: true
+      schema:
+        type: string
+    UserGroupsSelc:
+      in: header
+      name: x-user-groups-selc
+      required: false
+      schema:
+        type: string
+    Channel:
+      in: header
+      name: x-channel
       required: true
       schema:
         type: string

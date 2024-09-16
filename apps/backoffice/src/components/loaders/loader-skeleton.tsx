@@ -1,17 +1,17 @@
 import { Skeleton, SkeletonProps } from "@mui/material";
 import { ReactNode } from "react";
 
-export type LoaderSkeletonProps = {
+export interface LoaderSkeletonProps {
+  children: ReactNode;
   loading: boolean;
   style?: SkeletonProps;
-  children: ReactNode;
-};
+}
 
 /** This loader render a MUI `<Skeleton/>` UI structure while loading */
 export const LoaderSkeleton = ({
+  children,
   loading,
   style,
-  children
 }: LoaderSkeletonProps) => {
   if (loading)
     return (

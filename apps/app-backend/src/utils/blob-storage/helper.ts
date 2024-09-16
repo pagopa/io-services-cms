@@ -17,8 +17,8 @@ export const getBlobAsObject = <A, O, I>(
   type: t.Type<A, O, I>,
   blobServiceClient: BlobServiceClient,
   containerName: string,
-  blobName: string
-): TE.TaskEither<RestError | Error, O.Option<A>> =>
+  blobName: string,
+): TE.TaskEither<Error | RestError, O.Option<A>> =>
   pipe(
     TE.tryCatch(
       () =>
@@ -31,15 +31,15 @@ export const getBlobAsObject = <A, O, I>(
           error instanceof RestError,
           B.fold(
             () => error as RestError,
-            () => E.toError(error)
-          )
-        )
+            () => E.toError(error),
+          ),
+        ),
     ),
     TE.chainW((buffer) =>
       pipe(
         E.tryCatch(() => buffer.toString(), E.toError),
-        TE.fromEither
-      )
+        TE.fromEither,
+      ),
     ),
     TE.chainW((blobContent) =>
       pipe(
@@ -47,17 +47,17 @@ export const getBlobAsObject = <A, O, I>(
         E.fold(
           (errors) =>
             TE.left(new Error(`Cannot decode blob content: ${errors}`)),
-          (result) => TE.right(O.some(result))
-        )
-      )
+          (result) => TE.right(O.some(result)),
+        ),
+      ),
     ),
     TE.orElseW((error) =>
       pipe(
         error instanceof RestError && error.statusCode === 404,
         B.fold(
           () => TE.left(E.toError(error)),
-          () => TE.right(O.none)
-        )
-      )
-    )
+          () => TE.right(O.none),
+        ),
+      ),
+    ),
   );

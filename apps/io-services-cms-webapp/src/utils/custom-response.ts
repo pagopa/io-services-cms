@@ -19,7 +19,7 @@ export interface IResponseJsonWithStatus<T>
  */
 export const ResponseJsonWithStatus = <T>(
   o: T,
-  statusCode: HttpStatusCodeEnum
+  statusCode: HttpStatusCodeEnum,
 ): IResponseJsonWithStatus<T> => {
   const kindlessObject = Object.assign(Object.assign({}, o), {
     kind: undefined,

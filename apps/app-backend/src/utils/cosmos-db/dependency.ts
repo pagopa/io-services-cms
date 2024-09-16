@@ -1,5 +1,5 @@
 import { Container } from "@azure/cosmos";
 
-export type ServiceDetailsContainerDependency = {
+export interface ServiceDetailsContainerDependency {
   readonly serviceDetailsContainer: Container;
-};
+}

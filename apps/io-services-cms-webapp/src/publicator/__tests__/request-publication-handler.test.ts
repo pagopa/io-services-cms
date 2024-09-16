@@ -1,10 +1,6 @@
 /* eslint-disable no-console */
 import { Context } from "@azure/functions";
-import {
-  FsmItemNotFoundError,
-  ServiceLifecycle,
-  ServicePublication,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
@@ -47,15 +43,25 @@ describe("Service Publication Handler", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
-  it("handleQueueItem should return an Error if queueItem is invalid", async () => {
+  it("handleQueueItem should not throw when permanent error occours", async () => {
     const context = createContext();
 
-    const mockFsmPublicationClient =
-      {} as unknown as ServicePublication.FsmClient;
+    const mockFsmPublicationClient = {
+      release: vi.fn(() =>
+        TE.right({
+          ...aService,
+          fsm: { state: "published" },
+        })
+      ),
+    } as unknown as ServicePublication.FsmClient;
 
-    await expect(() =>
-      handleQueueItem(context, anInvalidQueueItem, mockFsmPublicationClient)()
-    ).rejects.toThrowError("Error while parsing incoming message");
+    await handleQueueItem(
+      context,
+      anInvalidQueueItem,
+      mockFsmPublicationClient
+    )();
+
+    expect(mockFsmPublicationClient.release).not.toHaveBeenCalled();
   });
 
   it("handleQueueItem should release and publish when autoPublish true", async () => {

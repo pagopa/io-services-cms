@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { Queue, ServiceHistory } from "@io-services-cms/models";
+import { DateUtils, Queue, ServiceHistory } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { Json } from "io-ts-types";
@@ -14,9 +14,9 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
-const atimestamp = 1685529694747;
+const atimestamp = DateUtils.unixTimestamp();
 const aGenericItemType = {
   id: "aServiceId",
   data: {
@@ -40,7 +40,7 @@ const aGenericItemType = {
   fsm: {
     state: "published",
   },
-  last_update: new Date(atimestamp).toISOString(),
+  modified_at: atimestamp,
 } as unknown as Queue.RequestHistoricizationItem;
 
 const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
@@ -68,9 +68,9 @@ describe("Service Historicization Handler", () => {
       await handleQueueItem(context, item)();
 
       expect(context.bindings.serviceHistoryDocument).toBe(
-        JSON.stringify(toServiceHistory(expected))
+        JSON.stringify(toServiceHistory(expected)),
       );
-    }
+    },
   );
 
   it("[buildDocument] should build document starting from a service", async () => {

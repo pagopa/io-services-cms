@@ -1,5 +1,40 @@
 # io-services-cms-backoffice
 
+## 1.11.8
+
+### Patch Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+- Updated dependencies [f41b5ae]
+  - @io-services-cms/models@1.20.0
+
+## 1.11.7
+
+### Patch Changes
+
+- 260da22: set new CMS headers needed for handling Selfcare Groups
+
+## 1.11.6
+
+### Patch Changes
+
+- 5ab8065: filter only ACTIVE user's institutions retrieved from selfcare API
+
+## 1.11.5
+
+### Patch Changes
+
+- c9dc730: Tests for MarkdownView component
+- 3d79a49: Tests for Notification component
+
+## 1.11.4
+
+### Patch Changes
+
+- 9172805: replace getInstitutionsUsingGET with getUserInstitutionUsingGET selfcare API
+- Updated dependencies [9172805]
+  - @io-services-cms/models@1.19.6
+
 ## 1.11.3
 
 ### Patch Changes

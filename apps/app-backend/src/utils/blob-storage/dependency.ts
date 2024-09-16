@@ -1,5 +1,5 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 
-export type BlobServiceClientDependency = {
+export interface BlobServiceClientDependency {
   readonly blobServiceClient: BlobServiceClient;
-};
+}

@@ -1,9 +1,9 @@
 export * from "./types";
 
-import { createMemoryStore } from "./store.memory";
 import { createCosmosStore } from "./store.cosmos";
+import { createMemoryStore } from "./store.memory";
 
 export const stores = {
-  createMemoryStore,
   createCosmosStore,
+  createMemoryStore,
 };

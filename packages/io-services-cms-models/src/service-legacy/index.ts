@@ -10,3 +10,12 @@ export const LegacyService = t.intersection([
 ]);
 
 export type LegacyService = t.TypeOf<typeof LegacyService>;
+
+export const LegacyServiceCosmosResource = t.intersection([
+  LegacyService,
+  t.type({ _ts: t.Integer }),
+]);
+
+export type LegacyServiceCosmosResource = t.TypeOf<
+  typeof LegacyServiceCosmosResource
+>;

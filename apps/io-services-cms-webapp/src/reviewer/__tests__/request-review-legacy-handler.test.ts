@@ -1,5 +1,5 @@
 import { Context } from "@azure/functions";
-import { ServiceLifecycle } from "@io-services-cms/models";
+import { DateUtils, ServiceLifecycle } from "@io-services-cms/models";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
@@ -32,7 +32,7 @@ const aBaseQueueMessage = {
 };
 const aBaseServiceLifecycle = {
   id: "aServiceId",
-  last_update: "aServiceLastUpdate",
+  modified_at: DateUtils.unixTimestamp(),
   data: {
     name: "aServiceName",
     description: "aServiceDescription",
@@ -240,7 +240,7 @@ describe("Request Review Legacy Handler", () => {
     expect(mainMockServiceReviewDao.insert).not.toHaveBeenCalled();
   });
 
-  it("should fail on bad queue items", async () => {
+  it("should not throw when permanent error occours", async () => {
     const aServiceId = "s2";
 
     const aQueueMessage = {
@@ -265,9 +265,9 @@ describe("Request Review Legacy Handler", () => {
       mockConfig
     );
     const context = createContext();
-    await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage))
-    ).rejects.toThrowError();
+    await handler(context, JSON.stringify(aQueueMessage));
+
+    expect(mockFsmLifecycleClient.fetch).not.toHaveBeenCalled();
   });
 
   it("should fail on not found service", async () => {

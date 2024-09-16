@@ -1,44 +1,44 @@
+import { DefaultAzureCredential } from "@azure/identity";
 import {
   AzureKeyCredential,
   SearchClient,
   SearchIterator,
 } from "@azure/search-documents";
-import { DefaultAzureCredential } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-export type SearchMappedResult<T> = {
-  resources: ReadonlyArray<T>;
+export interface SearchMappedResult<T> {
   count: number;
-};
+  resources: readonly T[];
+}
 
-export type FullTextSearchParam = {
-  readonly searchText?: string;
+export interface FullTextSearchParam {
+  readonly filter?: string;
+  readonly orderBy?: string[];
+  readonly scoringParameters?: string[];
+  readonly scoringProfile?: string;
   readonly searchParams?: string[];
+  readonly searchText?: string;
   readonly skip?: number;
   readonly top?: number;
-  readonly filter?: string;
-  readonly scoringProfile?: string;
-  readonly scoringParameters?: string[];
-  readonly orderBy?: string[];
-};
+}
 
-export type AzureSearchClient<T> = {
+export interface AzureSearchClient<T> {
   fullTextSearch: ({
-    searchText,
+    filter,
+    orderBy,
+    scoringParameters,
+    scoringProfile,
     searchParams,
+    searchText,
     skip,
     top,
-    filter,
-    scoringProfile,
-    scoringParameters,
-    orderBy,
   }: FullTextSearchParam) => TE.TaskEither<Error, SearchMappedResult<T>>;
-};
+}
 
 /**
  * Create an Azure Search client
@@ -53,7 +53,7 @@ export const makeAzureSearchClient = <T>(
   endpoint: string,
   serviceVersion: string,
   indexName: string,
-  apiKey?: string
+  apiKey?: string,
 ): AzureSearchClient<T> => {
   const searchClient = new SearchClient(
     endpoint,
@@ -61,33 +61,33 @@ export const makeAzureSearchClient = <T>(
     apiKey ? new AzureKeyCredential(apiKey) : new DefaultAzureCredential(),
     {
       serviceVersion,
-    }
+    },
   );
 
   const fullTextSearch = ({
-    searchText,
+    filter,
+    orderBy,
+    scoringParameters,
+    scoringProfile,
     searchParams,
+    searchText,
     skip,
     top,
-    filter,
-    scoringProfile,
-    scoringParameters,
-    orderBy,
   }: FullTextSearchParam): TE.TaskEither<Error, SearchMappedResult<T>> =>
     pipe(
       TE.tryCatch(
         () =>
           searchClient.search(searchText, {
-            searchFields: searchParams,
             filter,
             includeTotalCount: true,
+            orderBy,
             scoringParameters,
             scoringProfile,
+            searchFields: searchParams,
             skip,
             top,
-            orderBy,
           }),
-        E.toError
+        E.toError,
       ),
       TE.chainW((response) =>
         pipe(
@@ -101,12 +101,12 @@ export const makeAzureSearchClient = <T>(
                 resultsToMappedList(codec),
                 TE.map(
                   (resources) =>
-                    ({ count: r.count, resources } as SearchMappedResult<T>)
-                )
-              )
-          )
-        )
-      )
+                    ({ count: r.count, resources }) as SearchMappedResult<T>,
+                ),
+              ),
+          ),
+        ),
+      ),
     );
   return { fullTextSearch };
 };
@@ -114,8 +114,8 @@ export const makeAzureSearchClient = <T>(
 const resultsToMappedList =
   <T>(codec: t.Type<T>) =>
   (
-    results: SearchIterator<object, string>
-  ): TE.TaskEither<Error, ReadonlyArray<T>> =>
+    results: SearchIterator<object, string>,
+  ): TE.TaskEither<Error, readonly T[]> =>
     pipe(
       TE.tryCatch(async () => {
         const extractedResult = new Array<T>();
@@ -123,12 +123,11 @@ const resultsToMappedList =
         for await (const result of results) {
           const decoded = codec.decode(result.document);
           if (E.isRight(decoded)) {
-            // eslint-disable-next-line functional/immutable-data
             extractedResult.push(decoded.right);
           } else {
             throw new Error(readableReport(decoded.left));
           }
         }
         return extractedResult;
-      }, E.toError)
+      }, E.toError),
     );

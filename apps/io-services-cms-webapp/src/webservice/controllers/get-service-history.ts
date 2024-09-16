@@ -16,6 +16,7 @@ import {
   ClientIpMiddleware,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
+import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
@@ -26,21 +27,20 @@ import {
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
+  IWithinRangeIntegerTag,
+  IntegerFromString,
+  WithinRangeInteger,
+} from "@pagopa/ts-commons/lib/numbers";
+import {
   IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-
-import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
-import {
-  IWithinRangeIntegerTag,
-  IntegerFromString,
-  WithinRangeInteger,
-} from "@pagopa/ts-commons/lib/numbers";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
+
 import { IConfig } from "../../config";
 import { ServiceHistory as ServiceResponsePayload } from "../../generated/api/ServiceHistory";
 import { ServiceHistoryItem } from "../../generated/api/ServiceHistoryItem";
@@ -58,37 +58,37 @@ import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 const logPrefix = "GetServiceHistoryHandler";
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<ServiceResponsePayload>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<ServiceResponsePayload>;
 
 type GetServiceHistoryHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
-  requestParams: RequestParameters
+  requestParams: RequestParameters,
 ) => Promise<HandlerResponseTypes>;
 
-type RequestParameters = {
-  serviceId: ServiceLifecycle.definitions.ServiceId;
-  order: O.Option<OrderParam>;
-  limit: O.Option<number>;
+interface RequestParameters {
   continuationToken: O.Option<NonEmptyString>;
-};
+  limit: O.Option<number>;
+  order: O.Option<OrderParam>;
+  serviceId: ServiceLifecycle.definitions.ServiceId;
+}
 
-type Dependencies = {
-  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>;
+interface Dependencies {
   apimService: ApimUtils.ApimService;
-  telemetryClient: TelemetryClient;
   config: IConfig;
-};
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>;
+  telemetryClient: TelemetryClient;
+}
 
 export const makeGetServiceHistoryHandler =
   ({
-    serviceHistoryPagedHelper,
     apimService,
-    telemetryClient,
     config,
+    serviceHistoryPagedHelper,
+    telemetryClient,
   }: Dependencies): GetServiceHistoryHandler =>
   (context, auth, __, ___, requestParams) =>
     pipe(
@@ -96,7 +96,7 @@ export const makeGetServiceHistoryHandler =
         apimService,
         requestParams.serviceId,
         auth.subscriptionId,
-        auth.userId
+        auth.userId,
       ),
       TE.chainW((_) =>
         pipe(
@@ -104,18 +104,18 @@ export const makeGetServiceHistoryHandler =
             requestParams.serviceId,
             pipe(
               requestParams.order,
-              O.getOrElse(() => "DESC" as OrderParam)
+              O.getOrElse(() => "DESC" as OrderParam),
             ),
             O.toUndefined(requestParams.limit),
-            O.toUndefined(requestParams.continuationToken)
+            O.toUndefined(requestParams.continuationToken),
           ),
           TE.chainW(
             O.foldW(
               () =>
                 TE.right(
                   ResponseSuccessJson({
-                    items: [] as ReadonlyArray<ServiceHistoryItem>,
-                  })
+                    items: [] as readonly ServiceHistoryItem[],
+                  }),
                 ),
               ({ continuationToken, resources }) =>
                 pipe(
@@ -125,31 +125,31 @@ export const makeGetServiceHistoryHandler =
                     ResponseSuccessJson({
                       continuationToken,
                       items: mapped,
-                    })
-                  )
-                )
-            )
+                    }),
+                  ),
+                ),
+            ),
           ),
-          TE.mapLeft((err) => ResponseErrorInternal(err.message))
-        )
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+        ),
       ),
       TE.map(
         trackEventOnResponseOK(
           telemetryClient,
           EventNameEnum.GetServiceHistory,
           {
-            userSubscriptionId: auth.subscriptionId,
             requestParams,
-          }
-        )
+            userSubscriptionId: auth.subscriptionId,
+          },
+        ),
       ),
       TE.mapLeft((err) =>
         getLogger(context, logPrefix).logErrorResponse(err, {
-          userSubscriptionId: auth.subscriptionId,
           requestParams,
-        })
+          userSubscriptionId: auth.subscriptionId,
+        }),
       ),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 const fetchHistory =
@@ -158,22 +158,22 @@ const fetchHistory =
     serviceId: NonEmptyString,
     order: OrderParam,
     limit?: number,
-    continuationToken?: string
+    continuationToken?: string,
   ) =>
     serviceHistoryPagedHelper.pageFetch(
       {
-        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
+        order,
+        orderBy: "id",
         parameters: [
           {
             name: "@serviceId",
             value: serviceId,
           },
         ],
-        order,
-        orderBy: "id",
+        query: `SELECT * FROM c WHERE c.serviceId = @serviceId`,
       },
       limit,
-      continuationToken
+      continuationToken,
     );
 
 export const applyRequestMiddelwares =
@@ -189,7 +189,7 @@ export const applyRequestMiddelwares =
       // check manage key
       AzureUserAttributesManageMiddlewareWrapper(
         subscriptionCIDRsModel,
-        config
+        config,
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
@@ -203,11 +203,11 @@ export const applyRequestMiddelwares =
             1,
             typeof config.PAGINATION_MAX_LIMIT,
             IWithinRangeIntegerTag<1, typeof config.PAGINATION_MAX_LIMIT>
-          >(1, config.PAGINATION_MAX_LIMIT)
-        )
+          >(1, config.PAGINATION_MAX_LIMIT),
+        ),
       ),
       // extract order from query params
-      OptionalQueryParamMiddleware("continuationToken", NonEmptyString)
+      OptionalQueryParamMiddleware("continuationToken", NonEmptyString),
     );
     return wrapRequestHandler(
       middlewaresWrap(
@@ -219,16 +219,16 @@ export const applyRequestMiddelwares =
           serviceId,
           order,
           limit,
-          continuationToken
+          continuationToken,
         ) =>
           checkSourceIpForHandler(handler, (_, __, clientIp, attrs) =>
-            ipTuple(clientIp, attrs)
+            ipTuple(clientIp, attrs),
           )(context, auth, clientIp, attrs, {
-            serviceId,
-            order,
-            limit,
             continuationToken,
-          })
-      )
+            limit,
+            order,
+            serviceId,
+          }),
+      ),
     );
   };

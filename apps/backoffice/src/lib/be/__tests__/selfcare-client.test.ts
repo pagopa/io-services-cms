@@ -1,19 +1,22 @@
 import * as E from "fp-ts/lib/Either";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Institution } from "../../../types/selfcare/Institution";
-import { InstitutionResource } from "../../../types/selfcare/InstitutionResource";
-import { InstitutionResources } from "../../../types/selfcare/InstitutionResources";
-import { getSelfcareClient, resetInstance } from "../selfcare-client";
+import { Institution } from "../../../generated/selfcare/Institution";
+import { UserInstitutionResponse } from "../../../generated/selfcare/UserInstitutionResponse";
+import {
+  getSelfcareClient,
+  resetInstance,
+  UserInstitutions
+} from "../selfcare-client";
 
 const mocks: {
   institution: Institution;
-  institutions: InstitutionResources;
+  userInstitutions: UserInstitutions;
   aSelfcareUserId: string;
 } = {
   institution: { id: "institutionId" } as Institution,
-  institutions: [
-    { id: "institutionId1" } as InstitutionResource,
-    { id: "institutionId2" } as InstitutionResource
+  userInstitutions: [
+    { institutionId: "institutionId1" } as UserInstitutionResponse,
+    { institutionId: "institutionId2" } as UserInstitutionResponse
   ],
   aSelfcareUserId: "aSelfcareUserId"
 };
@@ -59,7 +62,7 @@ describe("Selfcare Client", () => {
   describe("getUserAuthorizedInstitutions", () => {
     it("should return the institutions found", async () => {
       const get = vi.fn(() =>
-        Promise.resolve({ status: 200, data: mocks.institutions })
+        Promise.resolve({ status: 200, data: mocks.userInstitutions })
       );
 
       create.mockReturnValueOnce({
@@ -73,15 +76,17 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userIdForAuth: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000
         }
       });
       expect(isAxiosError).not.toHaveBeenCalled();
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
-        expect(result.right).toEqual(mocks.institutions);
+        expect(result.right).toEqual(mocks.userInstitutions);
       }
     });
 
@@ -105,9 +110,11 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userIdForAuth: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000
         }
       });
       expect(isAxiosError).toHaveBeenCalled();
@@ -128,9 +135,11 @@ describe("Selfcare Client", () => {
         mocks.aSelfcareUserId
       )();
 
-      expect(get).toHaveBeenCalledWith("/institutions", {
+      expect(get).toHaveBeenCalledWith("/users", {
         params: {
-          userIdForAuth: mocks.aSelfcareUserId
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000
         }
       });
       expect(isAxiosError).not.toHaveBeenCalled();

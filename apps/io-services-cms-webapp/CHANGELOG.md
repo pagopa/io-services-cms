@@ -1,5 +1,77 @@
 # io-services-cms-webapp
 
+## 1.33.2
+
+### Patch Changes
+
+- 14be0d0: fix regenerate service keys on deleted services
+
+## 1.33.1
+
+### Patch Changes
+
+- afce2d2: Get ServiceKey will now return 404 when invoked for deleted services
+
+## 1.33.0
+
+### Minor Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+
+### Patch Changes
+
+- Updated dependencies [f41b5ae]
+  - @io-services-cms/models@1.20.0
+
+## 1.32.6
+
+### Patch Changes
+
+- 8c7f468: fix BACKOFFICE_INTERNAL_SUBNET_CIDRS type
+
+## 1.32.5
+
+### Patch Changes
+
+- 223832c: remove getUserEmail calls
+
+## 1.32.4
+
+### Patch Changes
+
+- 48df3fd: revert remove getUserByEmail calls
+
+## 1.32.3
+
+### Patch Changes
+
+- 14cf65c: refactor: remove useless getUserByEmail calls
+
+## 1.32.2
+
+### Patch Changes
+
+- 8be5cfc: Handle permanent errors in QueueTrigger Functions in order to avoid unnecessary retries
+
+## 1.32.1
+
+### Patch Changes
+
+- a73733f: Update Extension bundle queueTrigger
+
+## 1.32.0
+
+### Minor Changes
+
+- c1d3e91: Update ExtensionBundle and CosmosDBTrigger to v4
+
+## 1.31.12
+
+### Patch Changes
+
+- Updated dependencies [9172805]
+  - @io-services-cms/models@1.19.6
+
 ## 1.31.11
 
 ### Patch Changes

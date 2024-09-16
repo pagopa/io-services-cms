@@ -20,16 +20,16 @@ import { ServiceTopicDao } from "../../utils/service-topic-dao";
 const logPrefix = "GetServiceTopicsHandler";
 
 type HandlerResponseTypes =
-  | IResponseSuccessJson<ServiceTopicList>
-  | ErrorResponseTypes;
+  | ErrorResponseTypes
+  | IResponseSuccessJson<ServiceTopicList>;
 
 type GetServiceTopicsHandler = (
-  context: Context
+  context: Context,
 ) => Promise<HandlerResponseTypes>;
 
-type Dependencies = {
+interface Dependencies {
   serviceTopicDao: ServiceTopicDao;
-};
+}
 
 export const makeGetServiceTopicsHandler =
   ({ serviceTopicDao }: Dependencies): GetServiceTopicsHandler =>
@@ -40,29 +40,29 @@ export const makeGetServiceTopicsHandler =
         flow(
           O.fold(
             () => ResponseSuccessJson({ topics: [] }),
-            (topics) => ResponseSuccessJson({ topics })
-          )
-        )
+            (topics) => ResponseSuccessJson({ topics }),
+          ),
+        ),
       ),
       TE.mapLeft((err) => {
         getLogger(context, logPrefix).log(
           "error",
-          `An Error has occurred while retrieving serviceTopics, reason => ${err.message}, stack => ${err.stack}`
+          `An Error has occurred while retrieving serviceTopics, reason => ${err.message}, stack => ${err.stack}`,
         );
         return ResponseErrorInternal("An error occurred while fetching topics");
       }),
-      TE.toUnion
+      TE.toUnion,
     )();
 
 export const applyRequestMiddelwares = (handler: GetServiceTopicsHandler) => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
-    ContextMiddleware()
+    ContextMiddleware(),
   );
   return wrapRequestHandler(
     middlewaresWrap(
       // eslint-disable-next-line max-params
-      handler
-    )
+      handler,
+    ),
   );
 };
