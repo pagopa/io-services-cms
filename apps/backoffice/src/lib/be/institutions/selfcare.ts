@@ -1,5 +1,6 @@
 import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
 import { Institution } from "@/generated/selfcare/Institution";
+import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import {
   InstitutionNotFoundError,
   ManagedInternalError,
@@ -41,6 +42,27 @@ export const getInstitutionById = async (id: string): Promise<Institution> => {
 
     throw new ManagedInternalError(
       "Error calling selfcare getInstitution API",
+      apiResult.left,
+    );
+  }
+
+  return apiResult.right;
+};
+
+export const getInstitutionGroups = async (
+  institutionId: string,
+  limit?: number,
+  offset?: number,
+): Promise<PageOfUserGroupResource> => {
+  const apiResult = await getSelfcareClient().getInstitutionGroups(
+    institutionId,
+    offset,
+    limit,
+  )();
+
+  if (E.isLeft(apiResult)) {
+    throw new ManagedInternalError(
+      "Error calling selfcare getUserGroups API",
       apiResult.left,
     );
   }

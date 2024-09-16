@@ -10,3 +10,6 @@ export const HTTP_STATUS_NOT_FOUND = 404;
 export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
 export const HTTP_STATUS_SERVICE_UNAVAILABLE = 503;
 export const HTTP_STATUS_GATEWAY_TIMEOUT = 504;
+export const HTTP_TITLE_BAD_REQUEST = "Bad Request";
+export const HTTP_TITLE_UNAUTHORIZED = "Unauthorized";
+export const HTTP_TITLE_FORBIDDEN = "Forbidden";

@@ -1,9 +1,15 @@
+import { GroupPagination } from "@/generated/api/GroupPagination";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
 
-import { getInstitutionById, getUserAuthorizedInstitutions } from "./selfcare";
+import { ManagedInternalError } from "../errors";
+import {
+  getInstitutionById,
+  getInstitutionGroups,
+  getUserAuthorizedInstitutions,
+} from "./selfcare";
 
 // Type utility to extract the resolved type of a Promise
 type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to an Utils monorepo package
@@ -22,6 +28,15 @@ export const retrieveInstitution = async (
   institutionId: string,
 ): Promise<BackofficeInstitution> =>
   toBackofficeInstitution(await getInstitutionById(institutionId));
+
+export const retrieveInstitutionGroups = async (
+  institutionId: string,
+  limit?: number,
+  offset?: number,
+): Promise<GroupPagination> => {
+  const apiResult = await getInstitutionGroups(institutionId, limit, offset);
+  return toGroupPagination(apiResult);
+};
 
 const toBackofficeInstitution = (
   institution: SelfcareInstitution,
@@ -49,3 +64,33 @@ const toUserAuthorizedInstitution = (
   name: usesrInstitution.institutionDescription,
   role: usesrInstitution.products?.at(0)?.productRole,
 });
+
+const toGroupPagination = (
+  pageOfUserGroupResource: PromiseValue<
+    ReturnType<typeof getInstitutionGroups>
+  >,
+): GroupPagination => ({
+  pagination: {
+    count: pageOfUserGroupResource.totalElements ?? 0,
+    limit: pageOfUserGroupResource.size ?? 0,
+    offset: pageOfUserGroupResource.number ?? 0,
+  },
+  value: toGroups(pageOfUserGroupResource.content ?? []),
+});
+
+const toGroups = (
+  userGroupResources: Exclude<
+    PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
+    undefined
+  >,
+): GroupPagination["value"] =>
+  userGroupResources?.map((userGroupResource) => {
+    if (userGroupResource.id && userGroupResource.name !== undefined) {
+      return { id: userGroupResource.id, name: userGroupResource.name };
+    } else {
+      throw new ManagedInternalError(
+        "Error toGroups mapping",
+        "group ID or group name are not defined",
+      );
+    }
+  });

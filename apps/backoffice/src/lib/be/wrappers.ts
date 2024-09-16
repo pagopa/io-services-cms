@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 import { BackOfficeUser } from "../../../types/next-auth";
+import { handleUnauthorizedErrorResponse } from "./errors";
 
 export const withJWTAuthHandler =
   (
@@ -22,14 +23,7 @@ export const withJWTAuthHandler =
     const authenticationDetails = await getToken({ req: nextRequest });
 
     if (!authenticationDetails) {
-      return NextResponse.json(
-        {
-          detail: "No Authentication provided",
-          status: 401,
-          title: "User Unauthorized",
-        },
-        { status: 401 },
-      );
+      return handleUnauthorizedErrorResponse("No Authentication provided");
     }
     // chiamo l'handler finale "iniettando" il payload contenuto nel token
     return handler(nextRequest, {
