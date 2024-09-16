@@ -13,14 +13,14 @@ const backofficeUserMock = {
     id: "institutionId",
     name: faker.company.name(),
     fiscalCode: faker.string.numeric(),
-    role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
+    role: SelfcareRoles.admin,
     logo_url: faker.image.url()
   },
   authorizedInstitutions: [
     {
       id: faker.string.uuid(),
       name: faker.company.name(),
-      role: faker.helpers.arrayElement(Object.values(SelfcareRoles.admin)),
+      role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
       logo_url: faker.image.url()
     }
   ],
@@ -35,7 +35,7 @@ const backofficeUserMock = {
 };
 
 const differentBackofficeOperatorUserMock = {...backofficeUserMock , institution:{id:"differentInstitutionId", name:faker.company.name(), fiscalCode: faker.string.numeric(),
-    role: faker.helpers.arrayElement(Object.values(SelfcareRoles.operator)),
+    role: SelfcareRoles.operator,
     logo_url: faker.image.url()}}
 
 const institutionId = "institutionId"
