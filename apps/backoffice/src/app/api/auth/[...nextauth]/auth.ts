@@ -9,7 +9,6 @@ import {
   extractTryCatchError,
 } from "@/lib/be/errors";
 import { getInstitutionById } from "@/lib/be/institutions/selfcare";
-import { upsertSubscriptionAuthorizedCIDRs } from "@/lib/be/keys/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -267,18 +266,7 @@ const retrieveOrCreateUserSubscriptionManage =
       TE.chain(
         flow(
           O.fold(
-            () =>
-              pipe(
-                apimUser,
-                createSubscriptionManage(config),
-                TE.chain((manageSub) =>
-                  pipe(
-                    manageSub.name as NonEmptyString,
-                    createEmptyManageCidrs,
-                    TE.map((_) => manageSub),
-                  ),
-                ),
-              ),
+            () => pipe(apimUser, createSubscriptionManage(config)),
             TE.right,
           ),
         ),
@@ -291,17 +279,6 @@ const retrieveOrCreateUserSubscriptionManage =
         ),
       ),
     );
-
-const createEmptyManageCidrs = (
-  subscriptionId: NonEmptyString,
-): TE.TaskEither<Error | ManagedInternalError, void> =>
-  pipe(
-    TE.tryCatch(
-      () => upsertSubscriptionAuthorizedCIDRs(subscriptionId, []),
-      extractTryCatchError,
-    ),
-    TE.map((_) => void 0),
-  );
 
 const getUserSubscriptionManage = (
   apimUser: ApimUser,
