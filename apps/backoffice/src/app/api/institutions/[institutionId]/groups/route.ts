@@ -1,11 +1,12 @@
 import {
   isBackofficeUserAdmin,
-  isInstitutionIdSameAsCaller,
+  isInstitutionIdSameAsCaller
 } from "@/lib/be/authz";
 import {
+  handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
-  handlerErrorLog,
+  handlerErrorLog
 } from "@/lib/be/errors";
 import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
@@ -24,8 +25,8 @@ export const GET = withJWTAuthHandler(
     request: NextRequest,
     {
       backofficeUser,
-      params,
-    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
+      params
+    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } }
   ) => {
     if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
       return handleForbiddenErrorResponse("Unauthorized institutionId");
@@ -35,31 +36,39 @@ export const GET = withJWTAuthHandler(
     }
     const size = getQueryParam(request, "size", 20);
     const page = getQueryParam(request, "page", 0);
+    if (E.isLeft(size)) {
+      return handleBadRequestErrorResponse("Size is not a number");
+    }
+    if (E.isLeft(page)) {
+      return handleBadRequestErrorResponse("Page is not a number");
+    }
     try {
       const institutionResponse = await retrieveInstitutionGroups(
         params.institutionId,
-        size,
-        page,
+        size.right,
+        page.right
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
       handlerErrorLog(
         `An Error has occurred while searching groups for institutionId: ${params.institutionId}`,
-        error,
+        error
       );
 
       return handleInternalErrorResponse("InstitutionGroupsError", error);
     }
-  },
+  }
 );
 
 const getQueryParam = (
   request: NextRequest,
   param: string,
-  defaultValue: number,
-): number => {
-  const rawParam = NumberFromString.decode(
-    request.nextUrl.searchParams.get(param),
-  );
-  return E.isRight(rawParam) ? rawParam.right : defaultValue;
+  defaultValue: number
+) => {
+  const rawParam = request.nextUrl.searchParams.get(param);
+  if (rawParam === null) {
+    return E.right(defaultValue);
+  } else {
+    return NumberFromString.decode(request.nextUrl.searchParams.get(param));
+  }
 };
