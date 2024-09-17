@@ -1,12 +1,12 @@
 import {
   isBackofficeUserAdmin,
-  isInstitutionIdSameAsCaller
+  isInstitutionIdSameAsCaller,
 } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
-  handlerErrorLog
+  handlerErrorLog,
 } from "@/lib/be/errors";
 import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
@@ -25,8 +25,8 @@ export const GET = withJWTAuthHandler(
     request: NextRequest,
     {
       backofficeUser,
-      params
-    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } }
+      params,
+    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
   ) => {
     if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
       return handleForbiddenErrorResponse("Unauthorized institutionId");
@@ -46,24 +46,24 @@ export const GET = withJWTAuthHandler(
       const institutionResponse = await retrieveInstitutionGroups(
         params.institutionId,
         size.right,
-        page.right
+        page.right,
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
       handlerErrorLog(
         `An Error has occurred while searching groups for institutionId: ${params.institutionId}`,
-        error
+        error,
       );
 
       return handleInternalErrorResponse("InstitutionGroupsError", error);
     }
-  }
+  },
 );
 
 const getQueryParam = (
   request: NextRequest,
   param: string,
-  defaultValue: number
+  defaultValue: number,
 ) => {
   const rawParam = request.nextUrl.searchParams.get(param);
   if (rawParam === null) {
