@@ -1334,7 +1334,7 @@ components:
           items:
             $ref: '#/components/schemas/Group'
         pagination:
-          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+          $ref: '#/components/schemas/SelfcarePagination'
       required:
         - value
         - pagination
@@ -1348,6 +1348,22 @@ components:
       required:
         - id
         - name
+    SelfcarePagination:
+      type: object
+      properties:
+        number:
+          type: number
+        size:
+          type: number
+        totalElements:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - number
+        - size
+        - totalElements
+        - totalPages
   securitySchemes:
     cookieAuth:
       type: apiKey
