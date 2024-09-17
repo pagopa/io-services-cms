@@ -1334,7 +1334,7 @@ components:
           items:
             $ref: '#/components/schemas/Group'
         pagination:
-          $ref: '#/components/schemas/SelfcarePagination'
+          $ref: '#/components/schemas/PaginationResult'
       required:
         - value
         - pagination
@@ -1348,7 +1348,7 @@ components:
       required:
         - id
         - name
-    SelfcarePagination:
+    PaginationResult:
       type: object
       properties:
         number:
