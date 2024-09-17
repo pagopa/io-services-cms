@@ -3,7 +3,6 @@ import {
   isInstitutionIdSameAsCaller,
 } from "@/lib/be/authz";
 import {
-  handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
@@ -11,7 +10,8 @@ import {
 import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import * as t from "io-ts";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../../../types/next-auth";
@@ -33,23 +33,13 @@ export const GET = withJWTAuthHandler(
     if (!isBackofficeUserAdmin(backofficeUser)) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
-    const maybeLimit = t.number.decode(
-      request.nextUrl.searchParams.get("size"),
-    );
-    if (maybeLimit._tag === "Left") {
-      return handleBadRequestErrorResponse("Size is not a number");
-    }
-    const maybeOffset = t.number.decode(
-      request.nextUrl.searchParams.get("number"),
-    );
-    if (maybeOffset._tag === "Left") {
-      return handleBadRequestErrorResponse("Number is not a number");
-    }
+    const size = getQueryParam(request, "size", 20);
+    const page = getQueryParam(request, "page", 0);
     try {
       const institutionResponse = await retrieveInstitutionGroups(
         params.institutionId,
-        maybeLimit.right,
-        maybeOffset.right,
+        size,
+        page,
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
@@ -62,3 +52,14 @@ export const GET = withJWTAuthHandler(
     }
   },
 );
+
+const getQueryParam = (
+  request: NextRequest,
+  param: string,
+  defaultValue: number,
+): number => {
+  const rawParam = NumberFromString.decode(
+    request.nextUrl.searchParams.get(param),
+  );
+  return E.isRight(rawParam) ? rawParam.right : defaultValue;
+};

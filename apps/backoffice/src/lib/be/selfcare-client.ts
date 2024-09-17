@@ -29,8 +29,8 @@ export interface SelfcareClient {
   ) => TE.TaskEither<AxiosError | Error, Institution>;
   getInstitutionGroups: (
     institutionId: string,
-    limit?: number,
-    offset?: number,
+    size?: number,
+    page?: number,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getUserAuthorizedInstitutions: (
     userId: string,
@@ -147,8 +147,8 @@ const buildSelfcareClient = (): SelfcareClient => {
 
   const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
     institutionId: string,
-    limit?: number,
-    offset?: number,
+    size?: number,
+    page?: number,
   ) =>
     pipe(
       TE.tryCatch(
@@ -156,8 +156,8 @@ const buildSelfcareClient = (): SelfcareClient => {
           axiosInstance.get(`${groupsApi}`, {
             params: {
               institutionId,
-              page: offset,
-              size: limit,
+              page,
+              size,
               status: "ACTIVE",
             },
           }),

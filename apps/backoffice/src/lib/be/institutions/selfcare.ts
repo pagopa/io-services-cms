@@ -51,13 +51,13 @@ export const getInstitutionById = async (id: string): Promise<Institution> => {
 
 export const getInstitutionGroups = async (
   institutionId: string,
-  limit?: number,
-  offset?: number,
+  size?: number,
+  page?: number,
 ): Promise<PageOfUserGroupResource> => {
   const apiResult = await getSelfcareClient().getInstitutionGroups(
     institutionId,
-    offset,
-    limit,
+    size,
+    page,
   )();
 
   if (E.isLeft(apiResult)) {
