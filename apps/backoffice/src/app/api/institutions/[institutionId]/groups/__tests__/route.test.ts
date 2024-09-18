@@ -119,9 +119,11 @@ describe("Retrieve Institutions Groups API", () => {
     const nextRequest = new NextRequest(url);
 
     const result = await GET(nextRequest, {params: { institutionId: "institutionId" }});
+    const jsonBody = await result.json();
 
     expect(result.status).toBe(400);
     expect(retrieveInstitutionGroupsMock).not.toHaveBeenCalled();
+    expect(jsonBody.detail).toEqual("Size is not a number")
   });
 
   it("should return a bad request if page is not number", async () => {
@@ -136,8 +138,10 @@ describe("Retrieve Institutions Groups API", () => {
     const nextRequest = new NextRequest(url);
 
     const result = await GET(nextRequest, {params: { institutionId: "institutionId" }});
+    const jsonBody = await result.json();
 
     expect(result.status).toBe(400);
     expect(retrieveInstitutionGroupsMock).not.toHaveBeenCalled();
+    expect(jsonBody.detail).toEqual("Page is not a number")
   });
 });
