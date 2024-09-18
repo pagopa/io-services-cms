@@ -8,7 +8,7 @@ import {
   ServiceInfo,
   ServiceLogo,
   fromServiceLifecycleToService,
-  fromServicePublicationToService
+  fromServicePublicationToService,
 } from "@/components/services";
 import { ServiceHistory } from "@/generated/api/ServiceHistory";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
@@ -21,9 +21,9 @@ import { Service } from "@/types/service";
 import logToMixpanel from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
+import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
@@ -41,13 +41,14 @@ export default function ServiceDetails() {
   const [showHistory, setShowHistory] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
 
-  const { data: shData, loading: shLoading, fetchData: shFetchData } = useFetch<
-    ServiceHistory
-  >();
+  const {
+    data: shData,
+    fetchData: shFetchData,
+    loading: shLoading,
+  } = useFetch<ServiceHistory>();
   const { data: slData, fetchData: slFetchData } = useFetch<ServiceLifecycle>();
-  const { data: spData, fetchData: spFetchData } = useFetch<
-    ServicePublication
-  >();
+  const { data: spData, fetchData: spFetchData } =
+    useFetch<ServicePublication>();
   const { data: skData, fetchData: skFetchData } = useFetch<SubscriptionKeys>();
   const { fetchData: noContentFetchData } = useFetch<unknown>();
 
@@ -56,7 +57,7 @@ export default function ServiceDetails() {
     release
       ? setCurrentService(fromServicePublicationToService(spData))
       : setCurrentService(
-          fromServiceLifecycleToService(slData, spData?.status)
+          fromServiceLifecycleToService(slData, spData?.status),
         );
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
@@ -65,28 +66,28 @@ export default function ServiceDetails() {
       { keyType, serviceId },
       SubscriptionKeys,
       {
-        notify: "all"
-      }
+        notify: "all",
+      },
     );
   };
 
   const handlePublish = async () => {
     await noContentFetchData("releaseService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
     fetchServicePublication(); // reload ServicePublication
   };
 
   const handleUnpublish = async () => {
     await noContentFetchData("unpublishService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
     fetchServicePublication(); // reload ServicePublication
   };
 
   const handleDelete = async () => {
     await noContentFetchData("deleteService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
     router.push("/services"); // redirect to parent services page
   };
@@ -97,8 +98,8 @@ export default function ServiceDetails() {
       { body: { auto_publish }, serviceId },
       tt.unknown,
       {
-        notify: "all"
-      }
+        notify: "all",
+      },
     );
     fetchServiceLifecycle(); // reload ServiceLifecycle
   };
@@ -110,11 +111,11 @@ export default function ServiceDetails() {
     });
     shFetchData(
       "getServiceHistory",
-      { serviceId, continuationToken },
+      { continuationToken, serviceId },
       ServiceHistory,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
   };
 
@@ -141,7 +142,7 @@ export default function ServiceDetails() {
 
   const fetchServiceLifecycle = () =>
     slFetchData("getService", { serviceId }, ServiceLifecycle, {
-      notify: "errors"
+      notify: "errors",
     });
 
   const fetchServicePublication = () =>
@@ -151,7 +152,7 @@ export default function ServiceDetails() {
     fetchServiceLifecycle();
     fetchServicePublication();
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
-      notify: "errors"
+      notify: "errors",
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,13 +169,12 @@ export default function ServiceDetails() {
 
   return (
     <>
-      <Grid container spacing={2} alignItems="center" marginBottom={2}>
-        <Grid item xs={12} sm={12} md={7} lg={7} xl={7}>
+      <Grid alignItems="center" container marginBottom={2} spacing={2}>
+        <Grid item lg={7} md={7} sm={12} xl={7} xs={12}>
           <PageHeader title={slData?.name} />
         </Grid>
-        <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
+        <Grid item lg={5} md={5} sm={12} xl={5} xs={12}>
           <ServiceContextMenu
-            releaseMode={release}
             lifecycleStatus={slData?.status}
             publicationStatus={spData?.status}
             onPublishClick={handlePublish}
@@ -184,52 +184,53 @@ export default function ServiceDetails() {
             onPreviewClick={handlePreview}
             onEditClick={handleEdit}
             onDeleteClick={handleDelete}
+            releaseMode={release}
           />
         </Grid>
       </Grid>
       <ServiceAlerts
+        onServiceLifecycleClick={navigateToServicePublication}
+        onServicePublicationClick={navigateToServiceLifecycle}
         releaseMode={release}
         serviceLifecycleStatus={slData?.status}
         servicePublicationStatus={spData?.status}
-        onServiceLifecycleClick={navigateToServicePublication}
-        onServicePublicationClick={navigateToServiceLifecycle}
       />
       <ServiceHistoryComponent
         historyData={shData}
-        showHistory={showHistory}
         loading={shLoading}
-        onLoadMoreClick={handleHistory}
         onClose={() => setShowHistory(false)}
+        onLoadMoreClick={handleHistory}
+        showHistory={showHistory}
       />
       <AppPreview
-        itemToPreview={currentService}
-        showPreview={showPreview}
         // hide edit shortcut in release mode
         editUrl={release ? undefined : `/services/${serviceId}/edit-service`}
+        itemToPreview={currentService}
         onClose={() => setShowPreview(false)}
+        showPreview={showPreview}
       />
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+        <Grid item lg={8} md={8} sm={12} xl={8} xs={12}>
           <ServiceInfo data={currentService} />
         </Grid>
-        <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+        <Grid item lg={4} md={4} sm={12} xl={4} xs={12}>
           <ServiceLogo serviceId={serviceId} />
         </Grid>
         <Grid item xs={12}>
           <ApiKeys
-            title={t("routes.service.keys.title")}
             description={t("routes.service.keys.description")}
             keys={skData}
             onRotateKey={handleRotateKey}
             page="service"
+            title={t("routes.service.keys.title")}
           />
         </Grid>
         <Grid item xs={12}>
           <AuthorizedCidrs
-            cidrs={(slData?.authorized_cidrs as unknown) as string[]}
+            cidrs={slData?.authorized_cidrs as unknown as string[]}
             description="routes.service.authorizedCidrs.description"
             editable={false}
-            onSaveClick={e => console.log(e)}
+            onSaveClick={(e) => console.log(e)}
           />
         </Grid>
       </Grid>
@@ -240,8 +241,8 @@ export default function ServiceDetails() {
 export async function getServerSideProps({ locale }: any) {
   return {
     props: {
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

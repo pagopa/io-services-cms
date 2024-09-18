@@ -1,4 +1,4 @@
-import { Queue, ServicePublication } from "@io-services-cms/models";
+import { DateUtils, Queue, ServicePublication } from "@io-services-cms/models";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -17,12 +17,13 @@ const noAction = {};
 
 const onDetailPublicationHandler = ({
   _ts,
+  modified_at,
   ...item
 }: ServicePublication.CosmosResource): RequestDetailPublicationAction => ({
   requestDetailPublication: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_last_update_ts: _ts,
+    cms_last_update_ts: modified_at ?? DateUtils.unixSecondsToMillis(_ts),
     kind: "publication",
   },
 });

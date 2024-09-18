@@ -9,50 +9,51 @@ import {
   TableContainer,
   TableHead,
   TablePagination,
-  TableRow
+  TableRow,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactElement, useEffect, useState } from "react";
+
 import { LoaderSkeleton } from "../loaders";
 import { TableRowMenu, TableRowMenuAction } from "./table-row-menu";
 
 const BG_COLOR = "#EEEEEE";
 
 /** Describe a column _(layout and content)_ of `<TableView/>` component */
-export type TableViewColumn<T> = {
+export interface TableViewColumn<T> {
+  /** column text alignment */
+  alignment: "center" | "left" | "right";
+  /** if specified, uses the custom component defined for displaying a value of the T-type object */
+  cellTemplate?: (value: T) => ReactElement;
   /** table header text */
   label: string;
   /** property of **T** type object that will be displayed */
   name: keyof T;
-  /** column text alignment */
-  alignment: "left" | "center" | "right";
-  /** if specified, uses the custom component defined for displaying a value of the T-type object */
-  cellTemplate?: (value: T) => ReactElement;
-};
+}
 
-export type TableViewPagination = {
-  offset: number;
-  limit: number;
+export interface TableViewPagination {
   count: number;
-};
+  limit: number;
+  offset: number;
+}
 
-export type TableViewProps<T> = {
+export interface TableViewProps<T> {
   /** describe the list of columns to be displayed */
   columns: TableViewColumn<T>[];
-  /** table data source of T-type objects */
-  rows?: T[];
-  /** given the T-type object relating to a table row, it defines the menu of the row itself \
-   * _(shown at the end of the row with the symbol of the 3 dots aligned vertically)_ */
-  rowMenu: (value: T) => TableRowMenuAction[];
-  /** define the page offset, limit and total count for `TablePagination` component at the bottom of `Table` */
-  pagination: TableViewPagination;
   /** if true, shows a loading circle state in `Table` body */
   loading?: boolean;
   /** Callback fired when the page is changed. */
   onPageChange: (pageIndex: number) => void;
   /** Callback fired when the number of rows per page is changed. */
   onRowsPerPageChange: (pageSize: number) => void;
-};
+  /** define the page offset, limit and total count for `TablePagination` component at the bottom of `Table` */
+  pagination: TableViewPagination;
+  /** given the T-type object relating to a table row, it defines the menu of the row itself \
+   * _(shown at the end of the row with the symbol of the 3 dots aligned vertically)_ */
+  rowMenu: (value: T) => TableRowMenuAction[];
+  /** table data source of T-type objects */
+  rows?: T[];
+}
 
 /** Renders a a MUI `Table` with some customizable properties */
 export function TableView<T>({ ...props }: TableViewProps<T>) {
@@ -65,7 +66,7 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
   };
 
   const handleRowsPerPageChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
@@ -79,9 +80,9 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
    * @returns
    */
   const customLabelDisplayedRows = ({
+    count,
     from,
     to,
-    count
   }: LabelDisplayedRowsArgs) =>
     `${from}–${to} ${t("table.pagination.labelDisplayedRows.of")} ${
       count !== -1
@@ -96,13 +97,13 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
   }, [props.pagination]);
 
   return (
-    <Box paddingX={3} paddingY={3} bgcolor={BG_COLOR}>
+    <Box bgcolor={BG_COLOR} paddingX={3} paddingY={3}>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="table-view" size="small">
+        <Table aria-label="table-view" size="small" sx={{ minWidth: 650 }}>
           <TableHead style={{ backgroundColor: BG_COLOR }}>
             <TableRow>
               {props.columns.map((col, thColIndex) => (
-                <TableCell key={`th-col-${thColIndex}`} align={col.alignment}>
+                <TableCell align={col.alignment} key={`th-col-${thColIndex}`}>
                   {t(col.label)}
                 </TableCell>
               ))}
@@ -117,16 +118,16 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
                   <TableRow
                     key={`tb-row-${tbRowIndex}`}
                     sx={{
+                      "&:hover": { backgroundColor: "action.hover" },
                       "&:last-child td, &:last-child th": {
-                        border: 0
+                        border: 0,
                       },
-                      "&:hover": { backgroundColor: "action.hover" }
                     }}
                   >
                     {props.columns.map((col, tbColIndex) => (
                       <TableCell
-                        key={`tb-row-${tbRowIndex}-col-${tbColIndex}`}
                         align={col.alignment}
+                        key={`tb-row-${tbRowIndex}-col-${tbColIndex}`}
                       >
                         <LoaderSkeleton
                           loading={props.loading ?? false}
@@ -148,9 +149,9 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
             ) : (
               <TableRow>
                 <TableCell
-                  sx={{ padding: 5 }}
                   align="center"
                   colSpan={props.columns.length + 1}
+                  sx={{ padding: 5 }}
                 >
                   <CircularProgress />
                 </TableCell>
@@ -161,18 +162,18 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
       </TableContainer>
       {props.rows ? (
         <TablePagination
-          sx={{ bgcolor: "background.paper" }}
-          rowsPerPageOptions={[10, 20, 50, 100]}
           component="div"
           count={props.rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          showFirstButton
-          showLastButton
           labelDisplayedRows={customLabelDisplayedRows}
           labelRowsPerPage={t("table.pagination.labelRowsPerPage")}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          rowsPerPageOptions={[10, 20, 50, 100]}
+          showFirstButton
+          showLastButton
+          sx={{ bgcolor: "background.paper" }}
         />
       ) : null}
     </Box>

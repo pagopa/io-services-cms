@@ -5,24 +5,25 @@ import {
   Card,
   CardContent,
   Grid,
-  Typography
+  Typography,
 } from "@mui/material";
 import { GetStaticPaths } from "next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 /** This is a mock page, for development purpose only */
 export default function SelfcareDashboard() {
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const institutionId = router.query.institutionId as string;
 
   return (
     <Grid
+      alignItems="center"
       container
       direction="column"
       justifyContent="center"
-      alignItems="center"
     >
       <Grid item padding={5}>
         <Typography textAlign="center" variant="h3">
@@ -35,7 +36,7 @@ export default function SelfcareDashboard() {
       <Grid item padding={5}>
         <Card raised sx={{ width: 300 }}>
           <CardContent sx={{ textAlign: "center" }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography gutterBottom variant="h6">
               App IO
             </Typography>
             <Typography variant="body2">
@@ -43,7 +44,7 @@ export default function SelfcareDashboard() {
             </Typography>
             <Box marginTop={3}>
               <NextLink href={`/`} passHref>
-                <Button variant="outlined" endIcon={<ArrowForward />}>
+                <Button endIcon={<ArrowForward />} variant="outlined">
                   Vai al BackOffice IO
                 </Button>
               </NextLink>
@@ -57,12 +58,10 @@ export default function SelfcareDashboard() {
 
 export const getStaticPaths: GetStaticPaths<{
   institutionId: string;
-}> = async () => {
-  return {
-    paths: [], //indicates that no page needs be created at build time
-    fallback: "blocking" //indicates the type of fallback
-  };
-};
+}> = async () => ({
+  fallback: "blocking", //indicates the type of fallback
+  paths: [], //indicates that no page needs be created at build time
+});
 
 export async function getStaticProps({ locale }: any) {
   // ! return a not found error in prod environemnt
@@ -72,8 +71,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

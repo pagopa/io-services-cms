@@ -1,5 +1,6 @@
 import { Context } from "@azure/functions";
 import {
+  DateUtils,
   Queue,
   ServiceHistory,
   ServiceLifecycle,
@@ -20,22 +21,25 @@ import { parseIncomingMessage } from "../utils/queue-utils";
 export const buildRequestHistoricizationQueueMessage = ({
   _etag,
   _ts,
+  modified_at,
   ...otherProps
 }:
   | ServiceLifecycle.CosmosResource
   | ServicePublication.CosmosResource): Queue.RequestHistoricizationItem => ({
   ...otherProps,
   // eslint-disable-next-line no-underscore-dangle
-  last_update: new Date(_ts * 1000).toISOString() as NonEmptyString, // last_update on service-history record corresponds to the _ts on the service-lifecycle/service-publication record
+  modified_at: modified_at ?? DateUtils.unixSecondsToMillis(_ts), // when the service-lifecycle/service-publication record lack of modified_at, the _ts value is used
   // eslint-disable-next-line no-underscore-dangle
   version: _etag as NonEmptyString, // version on service-history record corresponds to the _etag on the service-lifecycle/service-publication record
 });
 
-export const toServiceHistory = (
-  service: Queue.RequestHistoricizationItem,
-): ServiceHistory => ({
+export const toServiceHistory = ({
+  modified_at,
+  ...service
+}: Queue.RequestHistoricizationItem): ServiceHistory => ({
   ...service,
-  id: new Date(service.last_update).getTime().toString() as NonEmptyString, // last_update contains the service-lifecycle/service-publication _ts value
+  id: modified_at.toString() as NonEmptyString, // id contains the service-lifecycle/service-publication modified_at/_ts value
+  last_update: DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString, // last_update contains the service-lifecycle/service-publication  modified_at/_ts ISO String rapresentation
   serviceId: service.id,
 });
 
@@ -44,7 +48,6 @@ export const handleQueueItem = (context: Context, queueItem: Json) =>
     queueItem,
     parseIncomingMessage(Queue.RequestHistoricizationItem),
     TE.fromEither,
-    TE.mapLeft((_) => new Error("Error while parsing incoming message")), // TODO: map as _permanent_ error
     TE.map((service) => {
       context.bindings.serviceHistoryDocument = JSON.stringify(
         toServiceHistory(service),

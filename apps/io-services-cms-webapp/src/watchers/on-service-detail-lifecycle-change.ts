@@ -1,4 +1,4 @@
-import { Queue, ServiceLifecycle } from "@io-services-cms/models";
+import { DateUtils, Queue, ServiceLifecycle } from "@io-services-cms/models";
 import * as B from "fp-ts/boolean";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -18,12 +18,13 @@ const noAction = {};
 
 const onDetailLifecycleHandler = ({
   _ts,
+  modified_at,
   ...item
 }: ServiceLifecycle.CosmosResource): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
     // eslint-disable-next-line no-underscore-dangle
-    cms_last_update_ts: _ts,
+    cms_last_update_ts: modified_at ?? DateUtils.unixSecondsToMillis(_ts),
     kind: "lifecycle",
   },
 });

@@ -38,6 +38,7 @@ import {
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
@@ -57,11 +58,16 @@ type GetServiceKeysHandler = (
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
 }
 
 export const makeGetServiceKeysHandler =
-  ({ apimService, telemetryClient }: Dependencies): GetServiceKeysHandler =>
+  ({
+    apimService,
+    fsmLifecycleClient,
+    telemetryClient,
+  }: Dependencies): GetServiceKeysHandler =>
   (context, auth, __, ___, serviceId) =>
     pipe(
       serviceOwnerCheckManageTask(
@@ -70,6 +76,7 @@ export const makeGetServiceKeysHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.chainW(checkService(fsmLifecycleClient)),
       TE.chainW(() =>
         pipe(
           apimService.listSecrets(serviceId),

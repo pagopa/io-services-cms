@@ -10,17 +10,17 @@ export * from "./button-with-loader";
 export * from "./button-with-tooltip";
 export * from "./icon-button-close";
 
-export type ButtonBaseProps = {
-  /** The system prop that allows defining system overrides as well as additional CSS styles. */
-  sx?: SxProps<Theme>;
-  /** Element placed before the children. */
-  startIcon?: ReactNode;
-  /** Element placed after the children. */
-  endIcon?: ReactNode;
+export interface ButtonBaseProps {
   /** If `true`, the component is disabled.
    *
    * @default false */
   disabled?: boolean;
+  /** Element placed after the children. */
+  endIcon?: ReactNode;
   /** Event triggered on element click */
   onClick: () => void;
-};
+  /** Element placed before the children. */
+  startIcon?: ReactNode;
+  /** The system prop that allows defining system overrides as well as additional CSS styles. */
+  sx?: SxProps<Theme>;
+}

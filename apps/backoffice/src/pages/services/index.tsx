@@ -36,10 +36,10 @@ import {
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
-import { useTranslation } from "next-i18next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
@@ -52,8 +52,8 @@ const TEXT_SECONDARY_COLOR_STYLE = { color: "text.secondary" };
 // used to fill TableView rows and simulate a complete pagination
 const servicePlaceholder = {
   id: "id",
-  name: "name",
   last_update: "last_update",
+  name: "name",
   status: {
     value: "value"
   }
@@ -80,6 +80,7 @@ const getTypographyDefaultColor = (
 ) =>
   isServiceStatusValueDeleted(serviceStatusValue) ? "text.disabled" : "inherit";
 
+// eslint-disable-next-line max-lines-per-function
 export default function Services() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -88,92 +89,92 @@ export default function Services() {
   /** MUI `Table` columns definition */
   const tableViewColumns: TableViewColumn<ServiceListItem>[] = [
     {
-      label: "routes.services.tableHeader.name",
       alignment: "left",
-      name: "name",
       cellTemplate: service => (
         <Button
-          variant="naked"
-          size="large"
-          startIcon={
-            hasTwoDifferentVersions(service) ? (
-              <CallSplit fontSize="small" color="primary" />
-            ) : null
-          }
-          sx={{ fontWeight: 700, textAlign: "left" }}
           disabled={isServiceStatusValueDeleted(service.status.value)}
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
               : router.push(`/services/${service.id}`)
           }
+          size="large"
+          startIcon={
+            hasTwoDifferentVersions(service) ? (
+              <CallSplit color="primary" fontSize="small" />
+            ) : null
+          }
+          sx={{ fontWeight: 700, textAlign: "left" }}
+          variant="naked"
         >
           {service.name}
         </Button>
-      )
+      ),
+      label: "routes.services.tableHeader.name",
+      name: "name"
     },
     {
-      label: "routes.services.tableHeader.lastUpdate",
       alignment: "left",
-      name: "last_update",
       cellTemplate: service => (
         <Typography
-          variant="body2"
           color={getTypographyDefaultColor(service.status.value)}
+          variant="body2"
         >
           {new Date(service.last_update).toLocaleString()}
         </Typography>
-      )
+      ),
+      label: "routes.services.tableHeader.lastUpdate",
+      name: "last_update"
     },
     {
-      label: "routes.services.tableHeader.id",
       alignment: "left",
-      name: "id",
       cellTemplate: service => (
         <Typography
-          variant="monospaced"
           color={getTypographyDefaultColor(service.status.value)}
+          variant="monospaced"
         >
           {service.id}
         </Typography>
-      )
+      ),
+      label: "routes.services.tableHeader.id",
+      name: "id"
     },
     {
-      label: "routes.services.tableHeader.status",
       alignment: "left",
-      name: "status",
-      cellTemplate: service => <ServiceStatus status={service.status} />
+      cellTemplate: service => <ServiceStatus status={service.status} />,
+      label: "routes.services.tableHeader.status",
+      name: "status"
     },
     {
-      label: "routes.services.tableHeader.visibility",
       alignment: "center",
-      name: "visibility",
       cellTemplate: service => (
-        <Stack direction="row" justifyContent="center" alignItems="center">
+        <Stack alignItems="center" direction="row" justifyContent="center">
           {service.visibility === VisibilityEnum.published ? (
             <Check fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
           ) : service.visibility === VisibilityEnum.unpublished ? (
             <Close fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
           ) : (
-            <Block fontSize="small" color="disabled" />
+            <Block color="disabled" fontSize="small" />
           )}
         </Stack>
-      )
+      ),
+      label: "routes.services.tableHeader.visibility",
+      name: "visibility"
     }
   ];
 
   const {
     data: servicesData,
-    loading: servicesLoading,
-    fetchData: servicesFetchData
+    fetchData: servicesFetchData,
+    loading: servicesLoading
   } = useFetch<ServiceList>();
   const { fetchData: noContentFetchData } = useFetch<unknown>();
 
-  const [services, setServices] = useState<Array<ServiceListItem>>();
+  const [services, setServices] = useState<ServiceListItem[]>();
   const [pagination, setPagination] = useState({
-    offset: 0,
+    count: 0,
     limit: DEFAULT_PAGE_LIMIT,
-    count: 0
+    offset: 0
   });
   const [noService, setNoService] = useState(false);
   const [currentSearchByServiceId, setCurrentSearchByServiceId] = useState<
@@ -203,9 +204,9 @@ export default function Services() {
 
   const handlePageChange = (pageIndex: number) =>
     setPagination({
+      count: pagination.count,
       limit: pagination.limit,
-      offset: pagination.limit * pageIndex,
-      count: pagination.count
+      offset: pagination.limit * pageIndex
     });
 
   const handleRowsPerPageChange = (pageSize: number) =>
@@ -230,14 +231,14 @@ export default function Services() {
    */
   const addRowMenuItem = (options: {
     action: ServiceContextMenuActions;
-    icon: ReactNode;
-    serviceId: string;
     danger?: boolean;
+    icon: ReactNode;
     onClickFn?: () => void;
+    serviceId: string;
   }): TableRowMenuAction => ({
-    label: `service.actions.${options.action}`,
-    icon: options.icon,
     danger: options.danger,
+    icon: options.icon,
+    label: `service.actions.${options.action}`,
     onClick: options.onClickFn ?? (() => handleConfirmationModal(options))
   });
 
@@ -260,9 +261,9 @@ export default function Services() {
   const deleteRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.delete,
+      danger: true,
       icon: <Delete color="error" fontSize="inherit" />,
-      serviceId: service.id,
-      danger: true
+      serviceId: service.id
     });
   /** Returns a `publish` `TableRowMenuAction` */
   const publishRowMenuItem = (service: ServiceListItem) =>
@@ -281,7 +282,7 @@ export default function Services() {
 
   /** Returns a list of `TableRowMenuAction` depending on service status and visibility */
   const getServiceMenu = (service: ServiceListItem): TableRowMenuAction[] => {
-    let result: TableRowMenuAction[] = [];
+    const result: TableRowMenuAction[] = [];
 
     // Lifecycle actions
     switch (service.status.value) {
@@ -321,13 +322,13 @@ export default function Services() {
   /** handle actions click: open confirmation modal and on confirm click, perform b4f call action */
   const handleConfirmationModal = async (options: {
     action: ServiceContextMenuActions;
-    serviceId: string;
     danger?: boolean;
+    serviceId: string;
   }) => {
     const raiseClickEvent = await showDialog({
-      title: t(`service.${options.action}.modal.title`),
+      confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
-      confirmButtonLabel: t(`service.${options.action}.modal.button`)
+      title: t(`service.${options.action}.modal.title`)
     });
     if (raiseClickEvent) {
       switch (options.action) {
@@ -383,13 +384,15 @@ export default function Services() {
     );
   };
 
+  //TODO: id not used, is it a leftover?
+  /*eslint-disable @typescript-eslint/no-unused-vars */
   const getServices = (id?: string) => {
     servicesFetchData(
       "getServiceList",
       {
+        id: currentSearchByServiceId,
         limit: pagination.limit,
-        offset: pagination.offset,
-        id: currentSearchByServiceId
+        offset: pagination.offset
       },
       ServiceList,
       {
@@ -452,11 +455,11 @@ export default function Services() {
 
   return (
     <>
-      <Grid container spacing={0} paddingRight={3}>
+      <Grid container paddingRight={3} spacing={0}>
         <Grid item xs>
           <PageHeader
-            title={pageTitleLocaleKey}
             description={pageDescriptionLocaleKey}
+            title={pageTitleLocaleKey}
           />
         </Grid>
         <Grid item xs="auto">
@@ -482,33 +485,33 @@ export default function Services() {
       </Grid>
       {noService ? (
         <EmptyState
-          emptyStateLabel="routes.services.empty"
           ctaLabel="service.actions.create"
           ctaRoute={CREATE_SERVICE_ROUTE}
+          emptyStateLabel="routes.services.empty"
           requiredPermissions={["ApiServiceWrite"]}
         />
       ) : (
         <>
           <ServiceSearchById
-            onSearchClick={handleSearchByServiceIdClick}
             onEmptySearch={resetSearchByServiceId}
+            onSearchClick={handleSearchByServiceIdClick}
           />
           <TableView
             columns={tableViewColumns}
-            rows={services}
-            rowMenu={getServiceMenu}
-            pagination={pagination}
             loading={servicesLoading}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
+            pagination={pagination}
+            rowMenu={getServiceMenu}
+            rows={services}
           />
         </>
       )}
       <ServiceVersionSwitcher
-        service={serviceForVersionSwitcher}
         isOpen={isVersionSwitcherOpen}
         onChange={setIsVersionSwitcherOpen}
         onVersionSelected={handleSelectedServiceVersion}
+        service={serviceForVersionSwitcher}
       />
     </>
   );

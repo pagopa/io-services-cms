@@ -18,11 +18,9 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { WebServerDependencies, createWebServer } from "../../index";
 
 vi.mock("../../lib/clients/apim-client", async () => {
@@ -38,7 +36,7 @@ vi.mock("../../lib/clients/apim-client", async () => {
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -54,7 +52,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -67,7 +65,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
@@ -96,7 +94,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -111,29 +109,6 @@ const containerMock = {
 } as unknown as Container;
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
-
-const aServicePub = {
-  id: "aServiceId",
-  last_update: "aServiceLastUpdate",
-  data: {
-    name: "aServiceName",
-    description: "aServiceDescription",
-    authorized_recipients: [],
-    max_allowed_payment_amount: 123,
-    metadata: {
-      address: "via tal dei tali 123",
-      email: "service@email.it",
-      pec: "service@pec.it",
-      scope: "LOCAL",
-      topic_id: 1,
-    },
-    organization: {
-      name: "anOrganizationName",
-      fiscal_code: "12345678901",
-    },
-    require_secure_channel: false,
-  },
-} as unknown as ServicePublication.ItemType;
 
 const mockAppinsights = {
   trackEvent: vi.fn(),
@@ -177,7 +152,7 @@ describe("getServicePublication", () => {
   it("should retrieve the service topics list", async () => {
     const mockServiceTopicDao = {
       findAllNotDeletedTopics: vi.fn(() =>
-        TE.right(O.some([{ id: 1, name: "aTopicName" }]))
+        TE.right(O.some([{ id: 1, name: "aTopicName" }])),
       ),
     } as any;
 

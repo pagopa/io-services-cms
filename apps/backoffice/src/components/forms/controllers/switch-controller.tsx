@@ -3,30 +3,30 @@ import {
   FormControlLabel,
   Switch,
   SwitchProps,
-  Typography
+  Typography,
 } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 
 export type SwitchControllerProps = {
-  name: string;
-  label: string;
   helperText?: string;
+  label: string;
+  name: string;
 } & SwitchProps;
 
 /** Controller for MUI `Switch` component.\
  * Switches toggle the state of a single setting on or off. */
 export function SwitchController({
-  name,
-  label,
   helperText,
+  label,
+  name,
   ...props
 }: SwitchControllerProps) {
-  const { register, control } = useFormContext();
+  const { control, register } = useFormContext();
 
   return (
     <Controller
-      name={name}
       control={control}
+      name={name}
       render={({ field: { onChange, value } }) => (
         <Box padding={1}>
           <FormControlLabel
@@ -42,12 +42,12 @@ export function SwitchController({
           />
           <Typography
             color="text.secondary"
+            dangerouslySetInnerHTML={{
+              __html: helperText ?? "",
+            }}
             fontSize="12px"
             fontWeight={600}
             paddingX="14px"
-            dangerouslySetInnerHTML={{
-              __html: helperText ?? ""
-            }}
           ></Typography>
         </Box>
       )}

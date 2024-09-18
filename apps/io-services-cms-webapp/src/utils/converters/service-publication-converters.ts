@@ -1,4 +1,4 @@
-import { ServicePublication } from "@io-services-cms/models";
+import { DateUtils, ServicePublication } from "@io-services-cms/models";
 import {
   IResponseErrorInternal,
   ResponseErrorInternal,
@@ -26,7 +26,7 @@ export const itemToResponse =
     },
     fsm: { state },
     id,
-    last_update,
+    modified_at,
   }: ServicePublication.ItemType): TE.TaskEither<
     IResponseErrorInternal,
     ServiceResponsePayload
@@ -37,7 +37,9 @@ export const itemToResponse =
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
           id,
-          last_update: last_update ?? new Date().getTime().toString(),
+          last_update: modified_at
+            ? DateUtils.isoStringfromUnixMillis(modified_at)
+            : new Date().toISOString(),
           status: toServiceStatusType(state),
           ...data,
           metadata: {

@@ -9,9 +9,9 @@ import { ServiceCreateUpdatePayload } from "@/types/service";
 import logToMixpanel from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import { ReactElement } from "react";
 
@@ -25,17 +25,16 @@ export default function NewService() {
   const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
   const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
-    const maybeServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
-      service
-    );
+    const maybeServicePayload =
+      fromServiceCreateUpdatePayloadToApiServicePayload(service);
     if (E.isRight(maybeServicePayload)) {
       await serviceFetchData(
         "createService",
         {
-          body: maybeServicePayload.right
+          body: maybeServicePayload.right,
         },
         ServiceLifecycle,
-        { notify: "all" }
+        { notify: "all" },
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
         serviceId: "", // Missing New servie ID
@@ -44,10 +43,10 @@ export default function NewService() {
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
+          message: readableReport(maybeServicePayload.left),
           severity: "error",
           title: t("notifications.validationError"),
-          message: readableReport(maybeServicePayload.left)
-        })
+        }),
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
         serviceId: "Error",
@@ -61,23 +60,23 @@ export default function NewService() {
   return (
     <>
       <PageHeader
-        title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        showExit
         onExitClick={() => router.push("/services")}
+        showExit
+        title={pageTitleLocaleKey}
       />
       <ServiceCreateUpdate mode="create" onConfirm={handleConfirm} />
     </>
   );
 }
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

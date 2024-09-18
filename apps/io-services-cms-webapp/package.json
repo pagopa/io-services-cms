@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-webapp",
-  "version": "1.32.5",
+  "version": "1.33.4",
   "packageManager": "yarn@3.3.0",
   "files": [
     "**/function.json",
@@ -43,7 +43,7 @@
     "@azure/arm-apimanagement": "8.1.2",
     "@azure/cosmos": "^4.0.0",
     "@azure/functions": "^3.5.1",
-    "@azure/identity": "^3.1.4",
+    "@azure/identity": "^4.0.0",
     "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",

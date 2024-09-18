@@ -10,20 +10,22 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
+
 import { ApiKeyValue } from ".";
 
-export type ApiSingleKeyProps = {
+export interface ApiSingleKeyProps {
   keyType: SubscriptionKeyTypeEnum;
   keyValue?: string;
-  onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onHandleMixpanel?: () => void;
-};
+  onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
+}
 
 /** Single API Key component */
 export const ApiSingleKey = ({
   keyType,
   keyValue,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onRotateClick,
   onBlockClick,
   onHandleMixpanel
@@ -32,16 +34,16 @@ export const ApiSingleKey = ({
   const [isVisible, setIsVisible] = useState(false);
 
   return (
-    <Grid container rowSpacing={3} columnSpacing={4}>
+    <Grid columnSpacing={4} container rowSpacing={3}>
       <Grid item xs="auto">
         <Box>
-          <Typography variant="body2" fontWeight={600}>
+          <Typography fontWeight={600} variant="body2">
             {t(`keys.${keyType}.title`)}
             <IconButton
               aria-label="show-hide"
-              sx={{ margin: 1 }}
-              onClick={_ => setIsVisible(!isVisible)}
               color="primary"
+              onClick={_ => setIsVisible(!isVisible)}
+              sx={{ margin: 1 }}
             >
               {isVisible ? (
                 <VisibilityOff fontSize="small" />
@@ -58,24 +60,24 @@ export const ApiSingleKey = ({
         />
       </Grid>
       <Grid
-        item
-        xs={12}
-        sm={6}
         display="flex"
         flexDirection="column"
+        item
         justifyContent="end"
+        sm={6}
+        xs={12}
       >
         <Stack
+          alignItems="center"
           direction="row"
           justifyContent="flex-start"
-          alignItems="center"
           spacing={2}
         >
           <Button
-            variant="outlined"
+            onClick={() => onRotateClick(keyType)}
             size="small"
             startIcon={<Sync fontSize="inherit" />}
-            onClick={() => onRotateClick(keyType)}
+            variant="outlined"
           >
             {t("keys.rotate.button")}
           </Button>

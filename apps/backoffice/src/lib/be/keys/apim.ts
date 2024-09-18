@@ -1,5 +1,6 @@
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import * as E from "fp-ts/lib/Either";
+
 import { getApimService } from "../apim-service";
 import { ApiKeyNotFoundError } from "../errors";
 
@@ -10,11 +11,11 @@ export async function listSubscriptionSecrets(subscriptionId: string) {
     const error = result.left;
     if (error.statusCode === 404) {
       throw new ApiKeyNotFoundError(
-        `Subscription ${subscriptionId} not found in Api Management`
+        `Subscription ${subscriptionId} not found in Api Management`,
       );
     }
     throw new Error(
-      `Error obtaining the Api Management Subscription Secret, Api Management error status code: ${error.statusCode}`
+      `Error obtaining the Api Management Subscription Secret, Api Management error status code: ${error.statusCode}`,
     );
   }
 
@@ -23,17 +24,17 @@ export async function listSubscriptionSecrets(subscriptionId: string) {
 
 export async function regenerateSubscriptionKey(
   subscriptionId: string,
-  keyType: SubscriptionKeyType
+  keyType: SubscriptionKeyType,
 ) {
   const result = await getApimService().regenerateSubscriptionKey(
     subscriptionId,
-    keyType
+    keyType,
   )();
 
   if (E.isLeft(result)) {
     const error = result.left;
     throw new Error(
-      `Error regenerating the Api Management Subscription Secret, Api Management error status code: ${error.statusCode}`
+      `Error regenerating the Api Management Subscription Secret, Api Management error status code: ${error.statusCode}`,
     );
   }
 

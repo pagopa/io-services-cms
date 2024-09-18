@@ -35,6 +35,7 @@ import { SubscriptionKeyType } from "../../generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
 import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
@@ -55,12 +56,14 @@ type RegenerateServiceKeysHandler = (
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   telemetryClient: TelemetryClient;
 }
 
 export const makeRegenerateServiceKeysHandler =
   ({
     apimService,
+    fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): RegenerateServiceKeysHandler =>
   (context, auth, __, ___, serviceId, keyType) =>
@@ -71,6 +74,7 @@ export const makeRegenerateServiceKeysHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.chainW(checkService(fsmLifecycleClient)),
       TE.chainW(() =>
         pipe(
           apimService.regenerateSubscriptionKey(serviceId, keyType),

@@ -12,6 +12,7 @@ import logToMixpanel from "@/utils/mix-panel";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+
 import {
   ServiceBuilderStep1,
   getValidationSchema as getVs1
@@ -26,44 +27,44 @@ import {
 } from "./service-builder-step-3";
 
 const serviceDefaultData: ServiceCreateUpdatePayload = {
-  name: "",
-  description: "",
-  require_secure_channel: false,
   authorized_cidrs: [],
   authorized_recipients: [],
+  description: "",
   max_allowed_payment_amount: 0,
   metadata: {
-    web_url: "",
-    app_ios: "",
-    app_android: "",
-    tos_url: "",
-    privacy_url: "",
     address: "",
+    app_android: "",
+    app_ios: "",
     assistanceChannels: [{ type: "email", value: "" }],
+    category: "",
     cta: {
       text: "",
       url: ""
     },
-    token_name: "",
-    category: "",
     custom_special_flow: "",
+    privacy_url: "",
     scope: ScopeEnum.LOCAL,
-    topic_id: ""
-  }
+    token_name: "",
+    topic_id: "",
+    tos_url: "",
+    web_url: ""
+  },
+  name: "",
+  require_secure_channel: false
 };
 
-export type ServiceCreateUpdateProps = {
+export interface ServiceCreateUpdateProps {
   mode: CreateUpdateMode;
-  service?: ServiceCreateUpdatePayload;
   onConfirm: (value: ServiceCreateUpdatePayload) => void;
-};
+  service?: ServiceCreateUpdatePayload;
+}
 
 /** Service create/update process main component.\
  * Here are defined process steps (`BuilderStep[]`), service default data, and process mode. */
 export const ServiceCreateUpdate = ({
   mode,
-  service,
-  onConfirm
+  onConfirm,
+  service
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -74,8 +75,8 @@ export const ServiceCreateUpdate = ({
   const showDialog = useDialog();
   const handleCancel = async () => {
     const confirmed = await showDialog({
-      title: t("forms.cancel.title"),
-      message: t("forms.cancel.description")
+      message: t("forms.cancel.description"),
+      title: t("forms.cancel.title")
     });
     if (confirmed) {
       console.log("operation cancelled");
@@ -92,23 +93,23 @@ export const ServiceCreateUpdate = ({
 
   const serviceBuilderSteps: BuilderStep[] = [
     {
-      label: "forms.service.steps.step1.label",
+      content: <ServiceBuilderStep1 topics={topicsData?.topics as any} />,
       description: "forms.service.steps.step1.description",
+      label: "forms.service.steps.step1.label",
       moreInfoUrl: "https://docs.pagopa.it/manuale-servizi",
-      validationSchema: getVs1(t),
-      content: <ServiceBuilderStep1 topics={topicsData?.topics as any} />
+      validationSchema: getVs1(t)
     },
     {
-      label: "forms.service.steps.step2.label",
+      content: <ServiceBuilderStep2 />,
       description: "forms.service.steps.step2.description",
-      validationSchema: getVs2(t),
-      content: <ServiceBuilderStep2 />
+      label: "forms.service.steps.step2.label",
+      validationSchema: getVs2(t)
     },
     {
-      label: "forms.service.steps.step3.label",
+      content: <ServiceBuilderStep3 />,
       description: "forms.service.steps.step3.description",
-      validationSchema: getVs3(t),
-      content: <ServiceBuilderStep3 />
+      label: "forms.service.steps.step3.label",
+      validationSchema: getVs3(t)
     }
   ];
 
@@ -119,15 +120,15 @@ export const ServiceCreateUpdate = ({
 
   return (
     <CreateUpdateProcess
-      itemToCreateUpdate={service ?? serviceDefaultData}
-      mode={mode}
-      steps={serviceBuilderSteps}
       confirmButtonLabels={{
         create: "forms.service.buttons.create",
         update: "forms.service.buttons.update"
       }}
+      itemToCreateUpdate={service ?? serviceDefaultData}
+      mode={mode}
       onCancel={() => handleCancel()}
       onConfirm={value => onConfirm(value)}
+      steps={serviceBuilderSteps}
     />
   );
 };

@@ -65,7 +65,7 @@ export type RequestHistoricizationItem = t.TypeOf<
 export const RequestHistoricizationItem = t.intersection([
   t.union([LifecycleItemType, PublicationItemType]),
   t.type({
-    last_update: NonEmptyString, // last_update required
+    modified_at: t.Integer,
   }),
 ]);
 

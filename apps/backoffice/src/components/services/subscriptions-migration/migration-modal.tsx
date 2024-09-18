@@ -18,18 +18,19 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
+
 import { DelegateStatusPair, MigrationStatus } from "./migration-manager";
 
-export type MigrationModalProps = {
+export interface MigrationModalProps {
   isOpen: boolean;
   migrationStatusList?: DelegateStatusPair[];
-  onOpenChange: (isOpen: boolean) => void;
   onImportClick: (delegates: string[]) => void;
-};
+  onOpenChange: (isOpen: boolean) => void;
+}
 
 // porting from developer portal frontend
 export const computeMigrationStatus = (
-  migrationData?: MigrationData
+  migrationData?: MigrationData,
 ): MigrationStatus => {
   if (migrationData?.data?.failed) {
     return "failed";
@@ -48,8 +49,8 @@ export const computeMigrationStatus = (
 export const MigrationModal = ({
   isOpen,
   migrationStatusList,
+  onImportClick,
   onOpenChange,
-  onImportClick
 }: MigrationModalProps) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
@@ -86,7 +87,7 @@ export const MigrationModal = ({
   }, [isOpen]);
 
   return (
-    <Dialog open={isDialogOpen} onClose={handleClose} disableScrollLock>
+    <Dialog disableScrollLock onClose={handleClose} open={isDialogOpen}>
       <DialogTitle>{t("subscriptions.migration.action")}</DialogTitle>
       <DialogContent sx={{ width: "480px" }}>
         <Alert severity="info">
@@ -98,32 +99,32 @@ export const MigrationModal = ({
         <List>
           <LoaderSkeleton
             loading={migrationStatusList === undefined}
-            style={{ width: "100%", height: "50px" }}
+            style={{ height: "50px", width: "100%" }}
           >
             {migrationStatusList?.map((migrationItem, index) => {
               const labelId = `checkbox-list-label-${migrationItem.delegate?.sourceId}`;
               return (
                 <ListItem key={index} sx={{ padding: 0 }}>
                   <ListItemButton
-                    role={undefined}
-                    onClick={handleToggle(migrationItem.delegate.sourceId)}
                     dense
-                    sx={{ paddingY: 0 }}
                     disabled={
-                      !["todo", "failed"].includes(
-                        computeMigrationStatus(migrationItem.data)
+                      !["failed", "todo"].includes(
+                        computeMigrationStatus(migrationItem.data),
                       )
                     }
+                    onClick={handleToggle(migrationItem.delegate.sourceId)}
+                    role={undefined}
+                    sx={{ paddingY: 0 }}
                   >
                     <ListItemIcon>
                       <Checkbox
-                        edge="start"
                         checked={
                           checkedDelegates.indexOf(
-                            migrationItem.delegate.sourceId
+                            migrationItem.delegate.sourceId,
                           ) !== -1
                         }
                         disableRipple
+                        edge="start"
                         inputProps={{ "aria-labelledby": labelId }}
                       />
                     </ListItemIcon>
@@ -142,15 +143,15 @@ export const MigrationModal = ({
       <DialogActions sx={{ paddingX: 3, paddingY: 2 }}>
         <Grid container>
           <Grid item xs={6}>
-            <Button variant="outlined" onClick={handleClose}>
+            <Button onClick={handleClose} variant="outlined">
               {t("buttons.close")}
             </Button>
           </Grid>
-          <Grid item xs={6} textAlign="right">
+          <Grid item textAlign="right" xs={6}>
             <Button
-              variant="contained"
-              onClick={handleImport}
               disabled={checkedDelegates.length === 0}
+              onClick={handleImport}
+              variant="contained"
             >
               {t("buttons.import")}
             </Button>

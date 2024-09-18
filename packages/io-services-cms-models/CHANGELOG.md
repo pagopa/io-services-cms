@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.20.0
+
+### Minor Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+
 ## 1.19.6
 
 ### Patch Changes

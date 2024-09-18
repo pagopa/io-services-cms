@@ -8,15 +8,15 @@ const pagoPALink: RootLinkType = {
   ariaLabel: pagoPACompanyLabel,
   href: "https://www.pagopa.it/it/",
   label: pagoPACompanyLabel,
-  title: pagoPACompanyLabel
+  title: pagoPACompanyLabel,
 };
 
-export type TopBarProps = {
-  user: false | JwtUser | undefined;
+export interface TopBarProps {
   hideAssistance?: boolean;
-};
+  user: JwtUser | false | undefined;
+}
 
-export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
+export const TopBar = ({ hideAssistance, user }: TopBarProps) => {
   const router = useRouter();
 
   const handleDocumentationClick = () =>
@@ -26,20 +26,21 @@ export const TopBar = ({ user, hideAssistance }: TopBarProps) => {
     window.open(
       `${getConfiguration().SELFCARE_URL}/assistenza?productId=${
         getConfiguration().BACK_OFFICE_ID
-      }`, "_self"
+      }`,
+      "_self",
     );
 
   return (
     <HeaderAccount
-      rootLink={pagoPALink}
-      loggedUser={user}
       enableAssistanceButton={hideAssistance}
+      loggedUser={user}
       onAssistanceClick={handleAssistanceClick}
       onDocumentationClick={handleDocumentationClick}
       onLogin={() => {
         console.log("User login");
       }}
       onLogout={() => router.push("/auth/logout")}
+      rootLink={pagoPALink}
     />
   );
 };

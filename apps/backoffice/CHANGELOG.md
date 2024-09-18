@@ -1,5 +1,39 @@
 # io-services-cms-backoffice
 
+## 1.12.0
+
+### Minor Changes
+
+- 56eecc4: add new getInstitutionGroups API
+
+## 1.11.10
+
+### Patch Changes
+
+- 9ee67a8: set default empty cidrs when manage cidrs is not found on cosmos
+
+## 1.11.9
+
+### Patch Changes
+
+- 01c9789: [Renovate] Update @azure/identity to 4.x.x
+- Updated dependencies [01c9789]
+  - @io-services-cms/external-clients@1.1.5
+
+## 1.11.8
+
+### Patch Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+- Updated dependencies [f41b5ae]
+  - @io-services-cms/models@1.20.0
+
+## 1.11.7
+
+### Patch Changes
+
+- 260da22: set new CMS headers needed for handling Selfcare Groups
+
 ## 1.11.6
 
 ### Patch Changes

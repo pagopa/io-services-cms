@@ -15,19 +15,20 @@ declare module "notistack" {
   }
 }
 
-type AppProviderProps = {
+interface AppProviderProps {
   children: ReactNode;
-};
-
-mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
-  debug: true,
-  verbose: true,
-  track_pageview: false,
-  persistence: "localStorage",
-  ignore_dnt: true
-});
+}
 
 export const AppProvider = ({ children }: AppProviderProps) => {
+  //Mixpanel Initialization
+  mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
+    debug: true,
+    verbose: true,
+    track_pageview: false,
+    persistence: "localStorage",
+    ignore_dnt: true
+  });
+
   return (
     <ThemeProvider theme={appTheme}>
       <CssBaseline />

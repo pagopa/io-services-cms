@@ -4,26 +4,26 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode, createContext, useContext, useState } from "react";
 
-type DialogOptions = {
-  /** dialog title */
-  title: string;
-  /** dialog body message */
-  message?: string;
+interface DialogOptions {
   /** label for cancel button: if specified, overwrite default value */
   cancelButtonLabel?: string;
   /** label for confirm button: if specified, overwrite default value */
   confirmButtonLabel?: string;
-};
+  /** dialog body message */
+  message?: string;
+  /** dialog title */
+  title: string;
+}
 
-type PromiseInfo = {
-  resolve: (value: boolean | PromiseLike<boolean>) => void;
+interface PromiseInfo {
   reject: (reason?: any) => void;
-};
+  resolve: (value: PromiseLike<boolean> | boolean) => void;
+}
 
 type ShowDialogHandler = (options: DialogOptions) => Promise<boolean>;
 
@@ -40,15 +40,13 @@ const DialogProvider: React.FC<{
   const [options, setOptions] = useState<DialogOptions>({ title: "" });
   const [promiseInfo, setPromiseInfo] = useState<PromiseInfo>();
 
-  const showDialog: ShowDialogHandler = options => {
+  const showDialog: ShowDialogHandler = (options) =>
     // When the dialog is shown, keep the promise info so we can resolve later
-    return new Promise<boolean>((resolve, reject) => {
-      setPromiseInfo({ resolve, reject });
+    new Promise<boolean>((resolve, reject) => {
+      setPromiseInfo({ reject, resolve });
       setOptions(options);
       setOpen(true);
     });
-  };
-
   const handleConfirm = () => {
     // if the Confirm button gets clicked, resolve with `true`
     setOpen(false);
@@ -67,23 +65,23 @@ const DialogProvider: React.FC<{
     <>
       <Dialog
         data-testid="bo-io-dialog-provider"
-        open={open}
-        onClose={handleCancel}
         disableScrollLock
+        onClose={handleCancel}
+        open={open}
       >
         <DialogTitle>{options.title}</DialogTitle>
         <DialogContent sx={{ minWidth: "600px" }}>
           <Typography
             dangerouslySetInnerHTML={{
-              __html: options.message ?? ""
+              __html: options.message ?? "",
             }}
           ></Typography>
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
           <Button
             data-testid="bo-io-dialog-provider-cancel-button"
-            variant="outlined"
             onClick={handleCancel}
+            variant="outlined"
           >
             {options.cancelButtonLabel
               ? t(options.cancelButtonLabel)
@@ -91,8 +89,8 @@ const DialogProvider: React.FC<{
           </Button>
           <Button
             data-testid="bo-io-dialog-provider-confirm-button"
-            variant="contained"
             onClick={handleConfirm}
+            variant="contained"
           >
             {options.confirmButtonLabel
               ? t(options.confirmButtonLabel)
@@ -108,8 +106,6 @@ const DialogProvider: React.FC<{
 };
 
 // By calling `useDialog()` in a component we will be able to use the `showDialog()` function
-export const useDialog = () => {
-  return useContext(DialogContext);
-};
+export const useDialog = () => useContext(DialogContext);
 
 export default DialogProvider;

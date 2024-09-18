@@ -2,6 +2,8 @@ import { Service } from "@/types/service";
 import { Box, Stack } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
+
+import styles from "../app-preview.module.css";
 import {
   ServicePreviewCTAs,
   ServicePreviewDescriptionCard,
@@ -9,14 +11,12 @@ import {
   ServicePreviewInfoSection,
   ServicePreviewNotificationsSection,
   ServicePreviewTOSSection,
-  ServicePreviewTopbar
+  ServicePreviewTopbar,
 } from "./components/";
 
-import styles from "../app-preview.module.css";
-
-type ServicePreviewProps = {
+interface ServicePreviewProps {
   service?: Service;
-};
+}
 
 const ServicePreview = ({ service }: ServicePreviewProps) => {
   const { data: session } = useSession();
@@ -35,26 +35,26 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
   }, []);
 
   return (
-    <Stack flexGrow={1} flexDirection="column" width={360} height={650}>
+    <Stack flexDirection="column" flexGrow={1} height={650} width={360}>
       {service && (
         <>
           <ServicePreviewTopbar
-            serviceName={service.name}
             opacity={scrollBoxOpacity}
+            serviceName={service.name}
           />
           <Box
+            className={styles.scrollbar}
             display="flex"
             flexDirection="column"
-            sx={{
-              overflowY: "scroll"
-            }}
             ref={scrollBoxRef}
-            className={styles.scrollbar}
+            sx={{
+              overflowY: "scroll",
+            }}
           >
             <ServicePreviewHeader
-              serviceName={service.name}
               institutionName={session?.user?.institution.name ?? ""}
               serviceId={service.id}
+              serviceName={service.name}
             />
 
             <Stack gap={5}>
@@ -63,28 +63,28 @@ const ServicePreview = ({ service }: ServicePreviewProps) => {
               />
 
               <ServicePreviewTOSSection
-                tosLink={service.metadata.tos_url}
                 privacyLink={service.metadata.privacy_url}
+                tosLink={service.metadata.tos_url}
               />
 
               <ServicePreviewNotificationsSection />
 
               <ServicePreviewInfoSection
-                websiteLink={service.metadata.web_url}
+                address={service.metadata.address}
                 appStoreLink={
                   service.metadata.app_android
                     ? service.metadata.app_android
                     : service.metadata.app_ios
-                    ? service.metadata.app_ios
-                    : undefined
+                      ? service.metadata.app_ios
+                      : undefined
                 }
                 customerCareLink={service.metadata.support_url}
-                phoneNumber={service.metadata.phone}
                 email={service.metadata.email}
-                pec={service.metadata.pec}
                 fiscalCode={session?.user?.institution.fiscalCode}
-                address={service.metadata.address}
+                pec={service.metadata.pec}
+                phoneNumber={service.metadata.phone}
                 serviceId={service.id}
+                websiteLink={service.metadata.web_url}
               />
             </Stack>
           </Box>

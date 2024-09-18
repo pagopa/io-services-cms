@@ -1,6 +1,11 @@
 import {
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_UNAUTHORIZED,
+  HTTP_TITLE_BAD_REQUEST,
+  HTTP_TITLE_FORBIDDEN,
+  HTTP_TITLE_UNAUTHORIZED,
 } from "@/config/constants";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
@@ -36,8 +41,8 @@ export class ManagedInternalError extends Error {
 }
 
 export class HealthChecksError extends Error {
-  innerError: unknown;
   externalServiceName: string;
+  innerError: unknown;
   constructor(externalServiceName: string, innerError: unknown) {
     let message = "Undefined Error during health check";
     if (innerError instanceof Error) {
@@ -54,7 +59,7 @@ export class HealthChecksError extends Error {
 
 export const handleInternalErrorResponse = (
   title: string,
-  error: unknown
+  error: unknown,
 ): NextResponse => {
   let message = "Something went wrong";
   if (error instanceof ManagedInternalError) {
@@ -62,31 +67,48 @@ export const handleInternalErrorResponse = (
   }
   return NextResponse.json(
     {
+      detail: message,
+      status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
       title,
-      status: HTTP_STATUS_INTERNAL_SERVER_ERROR as any,
-      detail: message
     },
-    { status: HTTP_STATUS_INTERNAL_SERVER_ERROR }
+    { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
   );
 };
 
-export const handleBadRequestErrorResponse = (
-  title: string,
-  detail: string
-): NextResponse =>
+export const handleBadRequestErrorResponse = (detail: string): NextResponse =>
   NextResponse.json(
     {
-      title,
+      detail: detail,
       status: HTTP_STATUS_BAD_REQUEST,
-      detail: detail
+      title: HTTP_TITLE_BAD_REQUEST,
     },
-    { status: HTTP_STATUS_BAD_REQUEST }
+    { status: HTTP_STATUS_BAD_REQUEST },
+  );
+
+export const handleForbiddenErrorResponse = (detail: string): NextResponse =>
+  NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_FORBIDDEN,
+      title: HTTP_TITLE_FORBIDDEN,
+    },
+    { status: HTTP_STATUS_FORBIDDEN },
+  );
+
+export const handleUnauthorizedErrorResponse = (detail: string): NextResponse =>
+  NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_UNAUTHORIZED,
+      title: HTTP_TITLE_UNAUTHORIZED,
+    },
+    { status: HTTP_STATUS_UNAUTHORIZED },
   );
 
 export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
   if (e instanceof ManagedInternalError) {
     console.error(
-      `${logPrefix}, caused by: ${e.message} , additionalDetails: ${e.additionalDetails}`
+      `${logPrefix}, caused by: ${e.message} , additionalDetails: ${e.additionalDetails}`,
     );
     return;
   } else if (e instanceof Error) {
@@ -95,31 +117,30 @@ export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
   } else {
     console.error(
       `${logPrefix} , caused by: unknown error ,additionalDetails: ${JSON.stringify(
-        e
-      )}`
+        e,
+      )}`,
     );
   }
 };
 
 export const cosmosErrorsToManagedInternalError = (
   message: string,
-  errs: CosmosErrors
-): ManagedInternalError => {
-  return new ManagedInternalError(
+  errs: CosmosErrors,
+): ManagedInternalError =>
+  new ManagedInternalError(
     message,
     `${
       errs.kind === "COSMOS_EMPTY_RESPONSE" ||
       errs.kind === "COSMOS_CONFLICT_RESPONSE"
         ? errs.kind
         : errs.kind === "COSMOS_DECODING_ERROR"
-        ? errorsToReadableMessages(errs.error).join("/")
-        : JSON.stringify(errs.error)
-    }`
+          ? errorsToReadableMessages(errs.error).join("/")
+          : JSON.stringify(errs.error)
+    }`,
   );
-};
 
 export const extractTryCatchError = (
-  e: unknown
+  e: unknown,
 ): Error | ManagedInternalError => {
   if (e instanceof ManagedInternalError || e instanceof Error) {
     return e;
@@ -127,24 +148,23 @@ export const extractTryCatchError = (
   return new ManagedInternalError("Unknown Error", e);
 };
 
-type ApimErrorAdapter = {
-  name?: string;
+interface ApimErrorAdapter {
   code?: string;
-  statusCode: number;
   details?: unknown;
-};
+  name?: string;
+  statusCode: number;
+}
 
 // Remove extra fields from the error object
 export const minifyApimError = (fullError: ApimErrorAdapter) => ({
-  name: fullError.name,
   code: fullError.code,
+  details: fullError.details,
+  name: fullError.name,
   statusCode: fullError.statusCode,
-  details: fullError.details
 });
 
 export const apimErrorToManagedInternalError = (
   message: string,
-  err: ApimErrorAdapter
-): ManagedInternalError => {
-  return new ManagedInternalError(message, minifyApimError(err));
-};
+  err: ApimErrorAdapter,
+): ManagedInternalError =>
+  new ManagedInternalError(message, minifyApimError(err));

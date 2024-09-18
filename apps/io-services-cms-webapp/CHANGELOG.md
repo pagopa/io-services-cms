@@ -1,5 +1,48 @@
 # io-services-cms-webapp
 
+## 1.33.4
+
+### Patch Changes
+
+- 9ee67a8: set default empty cidrs when manage cidrs is not found on cosmos
+
+## 1.33.3
+
+### Patch Changes
+
+- 01c9789: [Renovate] Update @azure/identity to 4.x.x
+- Updated dependencies [01c9789]
+  - @io-services-cms/external-clients@1.1.5
+
+## 1.33.2
+
+### Patch Changes
+
+- 14be0d0: fix regenerate service keys on deleted services
+
+## 1.33.1
+
+### Patch Changes
+
+- afce2d2: Get ServiceKey will now return 404 when invoked for deleted services
+
+## 1.33.0
+
+### Minor Changes
+
+- f41b5ae: Add new modified_at field to keep track of a service modification date
+
+### Patch Changes
+
+- Updated dependencies [f41b5ae]
+  - @io-services-cms/models@1.20.0
+
+## 1.32.6
+
+### Patch Changes
+
+- 8c7f468: fix BACKOFFICE_INTERNAL_SUBNET_CIDRS type
+
 ## 1.32.5
 
 ### Patch Changes

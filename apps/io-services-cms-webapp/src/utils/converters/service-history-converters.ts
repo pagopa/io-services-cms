@@ -34,7 +34,7 @@ export const itemToResponse =
       toServiceTopic(dbConfig)(serviceId, topic_id),
       TE.bimap(E.toError, (topic) => ({
         id: serviceId,
-        last_update: last_update ?? new Date().getTime().toString(),
+        last_update: last_update ?? new Date().toISOString(),
         status: buildStatus(fsm),
         ...data,
         metadata: {

@@ -29,12 +29,12 @@ export default function Home() {
       { institutionId: session?.user?.institution.id as string },
       Institution,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
     if (
       hasRequiredAuthorizations(session, {
-        requiredPermissions: ["ApiServiceWrite"]
+        requiredPermissions: ["ApiServiceWrite"],
       })
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
@@ -46,62 +46,62 @@ export default function Home() {
   return (
     <>
       <PageHeader
-        title={pageTitleLocaleKey}
         description={pageDescriptionLocaleKey}
+        title={pageTitleLocaleKey}
       />
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={12} md={7} lg={7} xl={7}>
+        <Grid item lg={7} md={7} sm={12} xl={7} xs={12}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <CardDetails
-                title="institution.cardTitle"
                 rows={[
                   {
                     label: "institution.name",
-                    value: instData?.description
+                    value: instData?.description,
                   },
                   {
                     label: "institution.institutionType.label",
                     value: instData?.institutionType
                       ? t(
-                          `institution.institutionType.${instData.institutionType}`
+                          `institution.institutionType.${instData.institutionType}`,
                         )
-                      : undefined
+                      : undefined,
                   },
                   {
                     label: "institution.digitalAddress",
-                    value: instData?.digitalAddress
+                    value: instData?.digitalAddress,
                   },
                   {
                     label: "institution.fiscalCode",
-                    value: instData?.taxCode
+                    value: instData?.taxCode,
                   },
                   {
                     label: "institution.geographicArea",
                     value: instData?.geographicTaxonomies
                       ?.map((g: any) => g.desc)
-                      .join(", ")
-                  }
+                      .join(", "),
+                  },
                 ]}
+                title="institution.cardTitle"
               />
             </Grid>
             <Grid item xs={12}>
               <AccessControl requiredPermissions={["ApiServiceWrite"]}>
                 <CardDetails
-                  title="routes.keys.manage.title"
-                  cta={{ label: "routes.keys.manage.shortcut", href: "/keys" }}
+                  cta={{ href: "/keys", label: "routes.keys.manage.shortcut" }}
                   rows={[
                     {
+                      kind: "apikey",
                       label: "keys.primary.title",
                       value: mkData?.primary_key,
-                      kind: "apikey"
                     },
                     {
+                      kind: "apikey",
                       label: "keys.secondary.title",
                       value: mkData?.secondary_key,
-                      kind: "apikey"
-                    }
+                    },
                   ]}
+                  title="routes.keys.manage.title"
                 />
               </AccessControl>
             </Grid>
@@ -122,7 +122,7 @@ export default function Home() {
             />
           </AccessControl>
         </Grid> */}
-        <Grid item xs={12} sm={12} md={5} lg={5} xl={5}>
+        <Grid item lg={5} md={5} sm={12} xl={5} xs={12}>
           <AccessControl requiredPermissions={["ApiServiceWrite"]}>
             <MigrationManager />
           </AccessControl>
@@ -136,8 +136,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

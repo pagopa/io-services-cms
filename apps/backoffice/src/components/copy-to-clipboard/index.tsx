@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useTranslation } from "next-i18next";
-import { IconButton, Tooltip } from "@mui/material";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import { IconButton, Tooltip } from "@mui/material";
+import { useTranslation } from "next-i18next";
+import { useState } from "react";
 
-export type CopyToClipboardProps = {
+export interface CopyToClipboardProps {
   text: string;
   externalOnClick?: () => void;
-};
+}
 
 /**
  * _"Copy to clipboard"_ utility button icon.
@@ -40,13 +40,13 @@ export const CopyToClipboard = ({
   };
 
   return (
-    <Tooltip title={copyState.tooltip} placement="top">
+    <Tooltip placement="top" title={copyState.tooltip}>
       <IconButton
         aria-label={copyState.tooltip}
         color="primary"
+        onClick={copyToClipboard}
         size="small"
         sx={{ height: "22px", width: "22px" }}
-        onClick={copyToClipboard}
       >
         {copyState.copied ? (
           <CheckOutlinedIcon fontSize="inherit" />

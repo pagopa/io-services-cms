@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
-import { retrieveOwnershipClaimLatestStatus } from "@/lib/be/services/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { retrieveOwnershipClaimLatestStatus } from "@/lib/be/services/business";
+import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NextRequest } from "next/server";
+
+import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @description Retrieve latest service migration status, intended as a list of items containing delegate data, relative service migration status and last update date
@@ -11,11 +12,11 @@ import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser }
+    { backofficeUser }: { backofficeUser: BackOfficeUser },
   ) => {
     try {
       const response = await retrieveOwnershipClaimLatestStatus(
-        backofficeUser.institution.fiscalCode
+        backofficeUser.institution.fiscalCode,
       );
 
       return sanitizedNextResponseJson(response);
@@ -23,12 +24,12 @@ export const GET = withJWTAuthHandler(
       console.error(
         `An Error has occurred while retrieving latest Ownership claims for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error
+        error,
       );
       return handleInternalErrorResponse(
         "LatestOwnershipClaimsRequestError",
-        error
+        error,
       );
     }
-  }
+  },
 );

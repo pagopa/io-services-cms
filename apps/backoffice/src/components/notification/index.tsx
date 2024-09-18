@@ -3,12 +3,12 @@ import { CustomContentProps, SnackbarContent, useSnackbar } from "notistack";
 import { forwardRef, useCallback } from "react";
 
 export interface NotificationProps extends CustomContentProps {
+  /** Alert body message content */
+  message?: string;
   /** The severity of the alert. This defines the color and icon used.  */
   severity: AlertColor;
   /** Alert title */
   title?: string;
-  /** Alert body message content */
-  message?: string;
 }
 
 /** Custom `notistack` notification content */
@@ -26,15 +26,15 @@ export const Notification = forwardRef<HTMLDivElement, NotificationProps>(
           data-testid="bo-io-notification"
           onClose={handleDismiss}
           severity={props.severity}
-          variant="outlined"
           sx={{ width: "100%" }}
+          variant="outlined"
         >
           <Box width="400px">
             {props.title ? (
               <Typography
                 data-testid="bo-io-notification-title"
-                variant="body2"
                 fontWeight={600}
+                variant="body2"
               >
                 {props.title}
               </Typography>
@@ -44,24 +44,24 @@ export const Notification = forwardRef<HTMLDivElement, NotificationProps>(
         </Alert>
       </SnackbarContent>
     );
-  }
+  },
 );
 
 Notification.displayName = "Notification";
 
 /** Build snackbar object to enqueue with `enqueueSnackbar` of **notistack** */
 export const buildSnackbarItem = (data: {
+  message: string;
   severity: string;
   title: string;
-  message: string;
 }) =>
   ({
-    variant: "custom",
     anchorOrigin: {
+      horizontal: "right",
       vertical: "top",
-      horizontal: "right"
     },
+    message: data.message,
     severity: data.severity,
     title: data.title,
-    message: data.message
-  } as any);
+    variant: "custom",
+  }) as any;

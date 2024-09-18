@@ -4,23 +4,23 @@ import {
   Card,
   CardContent,
   CircularProgress,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
-export type LoaderFullscreenProps = {
-  title: string;
+export interface LoaderFullscreenProps {
   content: string;
   loading?: boolean;
-};
+  title: string;
+}
 
 /**
  * This loader render a fullscreen backdrop with a centered card, with text and loader icon
  */
 export const LoaderFullscreen = ({
-  title,
   content,
-  loading = true
+  loading = true,
+  title,
 }: LoaderFullscreenProps) => {
   const { t } = useTranslation();
 
@@ -28,17 +28,17 @@ export const LoaderFullscreen = ({
     <Backdrop open>
       <Card sx={{ width: 300 }}>
         <CardContent>
-          <Typography variant="h6" align="center" gutterBottom>
+          <Typography align="center" gutterBottom variant="h6">
             {t(title)}
           </Typography>
-          <Typography variant="body2" align="center">
+          <Typography align="center" variant="body2">
             {t(content)}
           </Typography>
           {loading ? (
             <Box
               data-testid="bo-io-loader-fullscreen"
-              textAlign="center"
               marginTop={2}
+              textAlign="center"
             >
               <CircularProgress />
             </Box>

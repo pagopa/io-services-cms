@@ -2,13 +2,12 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { Box, Divider, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
+
 import { useDialog } from "../dialog-provider";
 import { ApiSingleKey } from "./api-single-key";
 import logToMixpanel from "@/utils/mix-panel";
 
-export type ApiKeysProps = {
-  /** Main component card title */
-  title: string;
+export interface ApiKeysProps {
   /** Main component card description */
   description?: string;
   /** Api key values */
@@ -17,7 +16,9 @@ export type ApiKeysProps = {
   onRotateKey: (type: SubscriptionKeyTypeEnum) => void;
   /** Used to log the page where the event is triggered */
   page?: "manage" | "service";
-};
+  /** Main component card title */
+  title: string;
+}
 
 /** API Keys main component
  *
@@ -48,9 +49,9 @@ export const ApiKeys = (props: ApiKeysProps) => {
 
   const handleRotate = async (keyType: SubscriptionKeyTypeEnum) => {
     const makeKeyRotation = await showDialog({
-      title: t("keys.rotate.modal.title"),
+      confirmButtonLabel: t("keys.rotate.button"),
       message: t("keys.rotate.modal.description"),
-      confirmButtonLabel: t("keys.rotate.button")
+      title: t("keys.rotate.modal.title")
     });
     if (makeKeyRotation) {
       props.onRotateKey(keyType);
@@ -63,16 +64,16 @@ export const ApiKeys = (props: ApiKeysProps) => {
   return (
     <Box
       bgcolor="background.paper"
+      borderRadius={0.5}
       id="card-details"
       padding={3}
-      borderRadius={0.5}
     >
       <Typography variant="h6">{t(props.title)}</Typography>
       <Typography
-        variant="body2"
         color="text.secondary"
-        marginTop={1}
         marginBottom={3}
+        marginTop={1}
+        variant="body2"
       >
         {props.description ? t(props.description) : ""}
       </Typography>
@@ -82,8 +83,8 @@ export const ApiKeys = (props: ApiKeysProps) => {
         }}
         keyType={SubscriptionKeyTypeEnum.primary}
         keyValue={props.keys?.primary_key}
-        onRotateClick={handleRotate}
         onBlockClick={kt => console.log("onBlockClick:", kt)}
+        onRotateClick={handleRotate}
       />
       <Divider sx={{ marginTop: 3 }} />
       <ApiSingleKey
@@ -92,8 +93,8 @@ export const ApiKeys = (props: ApiKeysProps) => {
         }}
         keyType={SubscriptionKeyTypeEnum.secondary}
         keyValue={props.keys?.secondary_key}
-        onRotateClick={handleRotate}
         onBlockClick={kt => console.log("onBlockClick:", kt)}
+        onRotateClick={handleRotate}
       />
     </Box>
   );
