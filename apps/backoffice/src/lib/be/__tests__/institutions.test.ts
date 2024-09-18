@@ -214,9 +214,10 @@ describe("Institutions", () => {
           name: userGroupResources.name
         })),
         pagination: {
-          count: mocks.institutionGroups.totalElements,
-          limit: mocks.institutionGroups.size,
-          offset: mocks.institutionGroups.number
+          number: mocks.institutionGroups.number,
+          size: mocks.institutionGroups.size,
+          totalElements: mocks.institutionGroups.totalElements,
+          totalPages: mocks.institutionGroups.totalPages
         }
       });
     });

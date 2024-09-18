@@ -31,10 +31,10 @@ export const retrieveInstitution = async (
 
 export const retrieveInstitutionGroups = async (
   institutionId: string,
-  limit?: number,
-  offset?: number,
+  size?: number,
+  page?: number,
 ): Promise<GroupPagination> => {
-  const apiResult = await getInstitutionGroups(institutionId, limit, offset);
+  const apiResult = await getInstitutionGroups(institutionId, size, page);
   return toGroupPagination(apiResult);
 };
 
@@ -71,9 +71,10 @@ const toGroupPagination = (
   >,
 ): GroupPagination => ({
   pagination: {
-    count: pageOfUserGroupResource.totalElements ?? 0,
-    limit: pageOfUserGroupResource.size ?? 0,
-    offset: pageOfUserGroupResource.number ?? 0,
+    number: pageOfUserGroupResource.number ?? 0,
+    size: pageOfUserGroupResource.size ?? 0,
+    totalElements: pageOfUserGroupResource.totalElements ?? 0,
+    totalPages: pageOfUserGroupResource.totalPages ?? 0,
   },
   value: toGroups(pageOfUserGroupResource.content ?? []),
 });
