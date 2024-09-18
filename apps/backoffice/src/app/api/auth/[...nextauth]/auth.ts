@@ -17,7 +17,6 @@ import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
@@ -57,7 +56,7 @@ export const authorize =
         pipe(identityTokenPayload, retrieveOrCreateApimUser(config)),
       ),
       TE.bindW("subscriptionManage", ({ apimUser }) =>
-        pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config)),
+        pipe(apimUser, retrieveOrCreateUserSubscriptionManage),
       ),
       TE.bindW("institution", ({ identityTokenPayload }) =>
         TE.tryCatch(
@@ -255,30 +254,23 @@ const createUserGroup = (
     ),
   );
 
-const retrieveOrCreateUserSubscriptionManage =
-  (config: Configuration) =>
-  (
-    apimUser: ApimUser,
-  ): TE.TaskEither<Error | ManagedInternalError, Subscription> =>
-    pipe(
-      apimUser,
-      getUserSubscriptionManage,
-      TE.chain(
-        flow(
-          O.fold(
-            () => pipe(apimUser, createSubscriptionManage(config)),
-            TE.right,
-          ),
-        ),
+const retrieveOrCreateUserSubscriptionManage = (
+  apimUser: ApimUser,
+): TE.TaskEither<Error | ManagedInternalError, Subscription> =>
+  pipe(
+    apimUser,
+    getUserSubscriptionManage,
+    TE.chain(
+      flow(O.fold(() => pipe(apimUser, createSubscriptionManage), TE.right)),
+    ),
+    TE.chainW(
+      flow(
+        Subscription.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither,
       ),
-      TE.chainW(
-        flow(
-          Subscription.decode,
-          E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither,
-        ),
-      ),
-    );
+    ),
+  );
 
 const getUserSubscriptionManage = (
   apimUser: ApimUser,
@@ -310,62 +302,24 @@ const getUserSubscriptionManage = (
     ),
   );
 
-const createSubscriptionManage =
-  (config: Configuration) =>
-  (
-    apimUser: ApimUser,
-  ): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
-    pipe(getApimService(), (apimService) =>
-      pipe(
-        getProductId(config),
-        TE.chain((productId) =>
-          pipe(
-            apimService.upsertSubscription(
-              productId,
-              apimUser.id,
-              ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
-            ),
-            TE.mapLeft((err) =>
-              apimErrorToManagedInternalError(
-                `Failed to create subscription manage, code: ${err.statusCode}`,
-                err,
-              ),
-            ),
-          ),
-        ),
+const createSubscriptionManage = (
+  apimUser: ApimUser,
+): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
+  pipe(getApimService(), (apimService) =>
+    pipe(
+      apimService.upsertSubscription(
+        apimUser.id,
+        ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
       ),
-    );
-
-// TODO: refactor: move to common package (also used by services-cmsq, see create-service.ts)
-const getProductId = ({
-  AZURE_APIM_PRODUCT_NAME,
-}: Configuration): TE.TaskEither<ManagedInternalError, NonEmptyString> =>
-  pipe(
-    getApimService(),
-    (apimService) => apimService.getProductByName(AZURE_APIM_PRODUCT_NAME),
-    TE.mapLeft((err) =>
-      apimErrorToManagedInternalError(
-        `Failed to fetch product by its name, code: ${err.statusCode}`,
-        err,
+      TE.mapLeft((err) =>
+        "statusCode" in err
+          ? apimErrorToManagedInternalError(
+              `Failed to create subscription manage, code: ${err.statusCode}`,
+              err,
+            )
+          : err,
       ),
     ),
-    TE.chain(
-      TE.fromOption(() => new ManagedInternalError(`Cannot find product`)),
-    ),
-    TE.chain(pickId),
-  );
-
-// utility to extract a non-empty id from an object
-const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
-  pipe(
-    obj,
-    t.type({ id: NonEmptyString }).decode,
-    TE.fromEither,
-    TE.mapLeft(
-      (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-    ),
-    TE.map((_) => _.id),
   );
 
 const toUser = ({

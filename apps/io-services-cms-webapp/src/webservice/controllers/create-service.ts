@@ -24,16 +24,13 @@ import {
   clientIPAndCidrTuple as ipTuple,
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { ulidGenerator } from "@pagopa/io-functions-commons/dist/src/utils/strings";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   HttpStatusCodeEnum,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { sequenceS } from "fp-ts/lib/Apply";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -78,72 +75,21 @@ interface Dependencies {
   telemetryClient: TelemetryClient;
 }
 
-// TODO: refactor: move to common package (also used by backoffice, see auth.ts)
-// utility to extract a non-empty id from an object
-const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
-  pipe(
-    obj,
-    t.type({ id: NonEmptyString }).decode,
-    TE.fromEither,
-    TE.mapLeft(
-      (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-    ),
-    TE.map((_) => _.id),
-  );
-
-const createSubscriptionTask = (
+const createSubscription = (
   apimService: ApimUtils.ApimService,
   userId: NonEmptyString,
   subscriptionId: NonEmptyString,
-  config: IConfig,
-): TE.TaskEither<Error, SubscriptionContract> => {
-  const getUserId = pipe(
-    apimService.getUser(userId),
-    TE.mapLeft(
-      (err) => new Error(`Failed to fetch user, code: ${err.statusCode}`),
-    ),
-    TE.chain(pickId),
-  );
-
-  // TODO: refactor: move to common package (also used by backoffice, see auth.ts)
-  const getProductId = pipe(
-    apimService.getProductByName(config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME),
-    TE.mapLeft(
-      (err) =>
-        new Error(
-          `Failed to fetch product by its name, code: ${err.statusCode}`,
-        ),
-    ),
-    TE.chain(TE.fromOption(() => new Error(`Cannot find product`))),
-    TE.chain(pickId),
-  );
-
-  const createSubscription = ({
-    productId,
-    userId,
-  }: {
-    productId: NonEmptyString;
-    userId: NonEmptyString;
-  }) =>
-    pipe(
-      apimService.upsertSubscription(productId, userId, subscriptionId),
-      TE.mapLeft(
-        (err) =>
-          new Error(
+): TE.TaskEither<Error, SubscriptionContract> =>
+  pipe(
+    apimService.upsertSubscription(userId, subscriptionId),
+    TE.mapLeft((err) =>
+      "statusCode" in err
+        ? new Error(
             `Failed to fetch create subcription, code: ${err.statusCode}`,
-          ),
-      ),
-    );
-
-  return pipe(
-    sequenceS(TE.ApplicativePar)({
-      productId: getProductId,
-      userId: getUserId,
-    }),
-    TE.chain(createSubscription),
+          )
+        : err,
+    ),
   );
-};
 
 export const makeCreateServiceHandler =
   ({
@@ -157,7 +103,7 @@ export const makeCreateServiceHandler =
     const serviceId = ulidGenerator();
 
     const createSubscriptionStep = pipe(
-      createSubscriptionTask(apimService, auth.userId, serviceId, config),
+      createSubscription(apimService, auth.userId, serviceId),
       TE.mapLeft((err) => ResponseErrorInternal(err.message)),
     );
 

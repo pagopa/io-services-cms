@@ -8,37 +8,37 @@ const mocks: {
   anUserId: string;
 } = vi.hoisted(() => ({
   aServiceId: "aServiceId",
-  anUserId: "anUserId"
+  anUserId: "anUserId",
 }));
 
 const { create, isAxiosError } = vi.hoisted(() => ({
   create: vi.fn().mockReturnValue({
-    get: vi.fn()
+    get: vi.fn(),
   }),
-  isAxiosError: vi.fn().mockReturnValue(false)
+  isAxiosError: vi.fn().mockReturnValue(false),
 }));
 
 const { getAzureAccessToken } = vi.hoisted(() => ({
-  getAzureAccessToken: vi.fn().mockReturnValue(Promise.resolve("aToken"))
+  getAzureAccessToken: vi.fn().mockReturnValue(Promise.resolve("aToken")),
 }));
 
 vi.mock("axios", async () => {
   const actual = await vi.importActual("axios");
   return {
     ...(actual as any),
-    default: { create, isAxiosError }
+    default: { create, isAxiosError },
   };
 });
 
 vi.mock("@/lib/be/azure-access-token", () => ({
-  getAzureAccessToken
+  getAzureAccessToken,
 }));
 
 const { cacheMock } = vi.hoisted(() => ({
-  cacheMock: func => func
+  cacheMock: (func) => func,
 }));
 vi.mock("react", () => ({
-  cache: cacheMock
+  cache: cacheMock,
 }));
 
 vi.hoisted(() => {
@@ -57,31 +57,30 @@ vi.hoisted(() => {
     AZURE_APIM: "AZURE_APIM",
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL:
       "AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL",
-    API_APIM_MOCKING: "false"
+    API_APIM_MOCKING: "false",
   };
 });
 
 afterEach(() => {
-  vi.resetAllMocks();
-  vi.restoreAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("Apim Rest Client", () => {
   describe("getServiceList", () => {
     it("should return the list when response is OK", async () => {
       const get = vi.fn(() =>
-        Promise.resolve({ status: 200, data: { name: mocks.aServiceId } })
+        Promise.resolve({ status: 200, data: { name: mocks.aServiceId } }),
       );
 
       create.mockReturnValueOnce({
-        get
+        get,
       });
 
       const apimRestClient = await getApimRestClient();
       const result = await apimRestClient.getServiceList(
         mocks.anUserId,
         10,
-        10
+        10,
       )();
 
       expect(get).toHaveBeenCalledOnce();
@@ -99,11 +98,11 @@ describe("Apim Rest Client", () => {
         .fn()
         .mockReturnValueOnce(Promise.reject({ response: { status: 403 } }))
         .mockReturnValueOnce(
-          Promise.resolve({ status: 200, data: { name: mocks.aServiceId } })
+          Promise.resolve({ status: 200, data: { name: mocks.aServiceId } }),
         );
 
       create.mockReturnValue({
-        get
+        get,
       });
 
       isAxiosError.mockReturnValueOnce(true);
@@ -116,7 +115,7 @@ describe("Apim Rest Client", () => {
       const result = await apimRestClient.getServiceList(
         mocks.anUserId,
         10,
-        10
+        10,
       )();
 
       // Create should be called 2 times:
@@ -126,16 +125,16 @@ describe("Apim Rest Client", () => {
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: `Bearer ${anExpiredAzureAccessToken}`
-          })
-        })
+            Authorization: `Bearer ${anExpiredAzureAccessToken}`,
+          }),
+        }),
       );
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: `Bearer ${aNotExpiredAzureAccessToken}`
-          })
-        })
+            Authorization: `Bearer ${aNotExpiredAzureAccessToken}`,
+          }),
+        }),
       );
 
       // get should be called 2 times
@@ -154,11 +153,11 @@ describe("Apim Rest Client", () => {
         .mockReturnValueOnce(Promise.reject({ response: { status: 403 } }))
         .mockReturnValueOnce(Promise.reject({ response: { status: 403 } }))
         .mockReturnValueOnce(
-          Promise.resolve({ status: 200, data: { name: mocks.aServiceId } })
+          Promise.resolve({ status: 200, data: { name: mocks.aServiceId } }),
         );
 
       create.mockReturnValue({
-        get
+        get,
       });
 
       isAxiosError.mockReturnValue(true);
@@ -167,7 +166,7 @@ describe("Apim Rest Client", () => {
       const result = await apimRestClient.getServiceList(
         mocks.anUserId,
         10,
-        10
+        10,
       )();
 
       // Create should be called 2 times
@@ -186,7 +185,7 @@ describe("Apim Rest Client", () => {
         .mockReturnValueOnce(Promise.reject({ response: { status: 500 } }));
 
       create.mockReturnValue({
-        get
+        get,
       });
 
       isAxiosError.mockReturnValue(true);
@@ -195,7 +194,7 @@ describe("Apim Rest Client", () => {
       const result = await apimRestClient.getServiceList(
         mocks.anUserId,
         10,
-        10
+        10,
       )();
 
       expect(create).toHaveBeenCalledTimes(1);

@@ -80,6 +80,7 @@ const apimService = ApimUtils.getApimService(
   apimClient,
   config.AZURE_APIM_RESOURCE_GROUP,
   config.AZURE_APIM,
+  config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME,
 );
 
 // client to interact with cms cosmos db

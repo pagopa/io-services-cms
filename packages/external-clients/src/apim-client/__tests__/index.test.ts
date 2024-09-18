@@ -2,13 +2,13 @@ import { ApiManagementClient } from "@azure/arm-apimanagement";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import { describe, expect, it, vi } from "vitest";
-import {
-  getApimService,
-  parseOwnerIdFullPath,
-  subscriptionsExceptManageOneApimFilter,
-} from "..";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getApimService, parseOwnerIdFullPath } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
+
+afterEach(() => {
+  vi.resetAllMocks();
+});
 
 describe("ApimService Test", () => {
   const anUserId = "123";
@@ -28,6 +28,16 @@ describe("ApimService Test", () => {
 
   const anApimResourceGroup = "rg";
   const anApimServiceName = "apimService";
+  const anApimProductName = "productName" as NonEmptyString;
+
+  // create ApimService
+  const mockApimService = (mockApimClient: ApiManagementClient) =>
+    getApimService(
+      mockApimClient,
+      anApimResourceGroup,
+      anApimServiceName,
+      anApimProductName,
+    );
 
   describe("getUser", () => {
     it("should return a user", async () => {
@@ -38,17 +48,12 @@ describe("ApimService Test", () => {
             Promise.resolve({
               _etag: "_etag",
               userId,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
-      // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUser(anUserId)();
@@ -57,7 +62,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.user.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -76,17 +81,13 @@ describe("ApimService Test", () => {
           get: vi.fn(() =>
             Promise.reject({
               statusCode: 404,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUser(anUserId)();
@@ -95,7 +96,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.user.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -123,11 +124,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserByEmail(anUserEmail)();
@@ -138,7 +135,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `email eq '${anUserEmail}'`,
-        }
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -177,11 +174,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserByEmail(anUserEmail, true)();
@@ -193,7 +186,7 @@ describe("ApimService Test", () => {
         {
           filter: `email eq '${anUserEmail}'`,
           expandGroups: true,
-        }
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -226,11 +219,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserByEmail(anUserEmail)();
@@ -241,7 +230,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `email eq '${anUserEmail}'`,
-        }
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -260,11 +249,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserByEmail(anUserEmail)();
@@ -275,7 +260,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `email eq '${anUserEmail}'`,
-        }
+        },
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -303,11 +288,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserGroups(anUserId)();
@@ -316,7 +297,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.userGroup.list).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -340,11 +321,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserGroups(anUserId)();
@@ -353,7 +330,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.userGroup.list).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -376,11 +353,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserGroups(anUserId)();
@@ -389,7 +362,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.userGroup.list).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -410,17 +383,13 @@ describe("ApimService Test", () => {
             Promise.resolve({
               _etag: "_etag",
               id: serviceId,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getSubscription(aServiceId)();
@@ -429,7 +398,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -450,11 +419,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getSubscription(aServiceId)();
@@ -463,7 +428,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -485,17 +450,13 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               primaryKey: aPrimaryKey,
               secondaryKey: aSecondaryKey,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.listSecrets(aServiceId)();
@@ -504,7 +465,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.subscription.listSecrets).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -522,17 +483,13 @@ describe("ApimService Test", () => {
       const mockApimClient = {
         subscription: {
           listSecrets: vi.fn((_, __, userId) =>
-            Promise.reject({ statusCode: 503 })
+            Promise.reject({ statusCode: 503 }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.listSecrets(aServiceId)();
@@ -541,7 +498,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.subscription.listSecrets).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -554,33 +511,69 @@ describe("ApimService Test", () => {
   });
 
   describe("upsertSubscription", () => {
+    // mock ApimClient
+    const mockApimClient = {
+      subscription: {
+        createOrUpdate: vi.fn(),
+      },
+      product: {
+        listByService: vi.fn(),
+      },
+      user: {
+        get: vi.fn(),
+      },
+    };
     it("should return the upsert subscription", async () => {
-      // mock ApimClient
-      const mockApimClient = {
-        subscription: {
-          createOrUpdate: vi.fn(() =>
-            Promise.resolve({
-              _etag: "_etag",
-            })
-          ),
-        },
-      } as unknown as ApiManagementClient;
-
+      mockApimClient.product.listByService.mockImplementationOnce(() => [
+        Promise.resolve({
+          _etag: "_etag",
+          description: aProductDescription,
+          displayName: aProductName,
+          state: aProductState,
+          id: aProductId,
+        }),
+      ]);
+      mockApimClient.user.get.mockImplementationOnce((_, __, userId) =>
+        Promise.resolve({
+          _etag: "_etag",
+          userId,
+          id: anOwnerId,
+        }),
+      );
+      mockApimClient.subscription.createOrUpdate.mockResolvedValueOnce({
+        _etag: "_etag",
+      });
       // create ApimService
       const apimService = getApimService(
-        mockApimClient,
+        mockApimClient as unknown as ApiManagementClient,
         anApimResourceGroup,
-        anApimServiceName
+        anApimServiceName,
+        anApimProductName,
       );
 
       // call getUser
       const result = await apimService.upsertSubscription(
-        aProductId,
-        anOwnerId,
-        aServiceId
+        anUserId,
+        aServiceId,
       )();
 
       // expect result
+      expect(E.isRight(result)).toBeTruthy();
+
+      expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
+      expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        {
+          filter: `name eq '${anApimProductName}'`,
+        },
+      );
+      expect(mockApimClient.user.get).toHaveBeenCalledOnce();
+      expect(mockApimClient.user.get).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+      );
       expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
@@ -590,53 +583,188 @@ describe("ApimService Test", () => {
           ownerId: anOwnerId,
           scope: `/products/${aProductId}`,
           state: "active",
-        }
+        },
       );
-
-      expect(E.isRight(result)).toBeTruthy();
     });
 
-    it("should return an error when apim respond with an error", async () => {
+    it("should return an error when the product is not found", async () => {
       // mock ApimClient
-      const mockApimClient = {
-        subscription: {
-          createOrUpdate: vi.fn(() => Promise.reject({ statusCode: 503 })),
-        },
-      } as unknown as ApiManagementClient;
+      mockApimClient.product.listByService.mockImplementationOnce(() => []);
+      mockApimClient.user.get.mockImplementationOnce((_, __, userId) =>
+        Promise.resolve({
+          _etag: "_etag",
+          userId,
+          id: anOwnerId,
+        }),
+      );
+      mockApimClient.subscription.createOrUpdate.mockResolvedValueOnce({
+        _etag: "_etag",
+      });
 
       // create ApimService
       const apimService = getApimService(
-        mockApimClient,
+        mockApimClient as unknown as ApiManagementClient,
         anApimResourceGroup,
-        anApimServiceName
+        anApimServiceName,
+        anApimProductName,
       );
 
       // call getUser
       const result = await apimService.upsertSubscription(
-        aProductId,
         anOwnerId,
-        aServiceId
+        aServiceId,
       )();
 
       // expect result
-      expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledWith(
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toHaveProperty("message");
+        if ("message" in result.left) {
+          expect(result.left.message).toEqual(
+            `No product found with name '${anApimProductName}'`,
+          );
+        }
+      }
+
+      expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
+      expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId,
         {
-          displayName: aServiceId,
-          ownerId: anOwnerId,
-          scope: `/products/${aProductId}`,
-          state: "active",
-        }
+          filter: `name eq '${anApimProductName}'`,
+        },
+      );
+      expect(mockApimClient.user.get).not.toHaveBeenCalled();
+      expect(mockApimClient.subscription.createOrUpdate).not.toHaveBeenCalled();
+    });
+    it("should fail when cannot find apim user", async () => {
+      // mock ApimClient
+      mockApimClient.product.listByService.mockImplementationOnce(() => [
+        Promise.resolve({
+          _etag: "_etag",
+          description: aProductDescription,
+          displayName: aProductName,
+          state: aProductState,
+          id: aProductId,
+        }),
+      ]);
+      mockApimClient.user.get.mockRejectedValueOnce({
+        statusCode: 503,
+      });
+      mockApimClient.subscription.createOrUpdate.mockResolvedValueOnce({
+        _etag: "_etag",
+      });
+
+      // create ApimService
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
       );
 
+      // call getUser
+      const result = await apimService.upsertSubscription(
+        anOwnerId,
+        aServiceId,
+      )();
+
+      // expect result
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left).toEqual({
           statusCode: 503,
         });
       }
+
+      expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
+      expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        {
+          filter: `name eq '${anApimProductName}'`,
+        },
+      );
+      expect(mockApimClient.user.get).toHaveBeenCalledOnce();
+      expect(mockApimClient.user.get).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anOwnerId,
+      );
+      expect(mockApimClient.subscription.createOrUpdate).not.toHaveBeenCalled();
+    });
+
+    it("should return an error when apim respond with an error", async () => {
+      // mock ApimClient
+      mockApimClient.product.listByService.mockImplementationOnce(() => [
+        Promise.resolve({
+          _etag: "_etag",
+          description: aProductDescription,
+          displayName: aProductName,
+          state: aProductState,
+          id: aProductId,
+        }),
+      ]);
+      mockApimClient.user.get.mockImplementationOnce((_, __, userId) =>
+        Promise.resolve({
+          _etag: "_etag",
+          userId,
+          id: anOwnerId,
+        }),
+      );
+      mockApimClient.subscription.createOrUpdate.mockRejectedValueOnce({
+        statusCode: 503,
+      });
+
+      // create ApimService
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+
+      // call getUser
+      const result = await apimService.upsertSubscription(
+        anOwnerId,
+        aServiceId,
+      )();
+
+      // expect result
+      console.log(result);
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toEqual({
+          statusCode: 503,
+        });
+      }
+
+      expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
+      expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        {
+          filter: `name eq '${anApimProductName}'`,
+        },
+      );
+      expect(mockApimClient.user.get).toHaveBeenCalledOnce();
+      expect(mockApimClient.user.get).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anOwnerId,
+      );
+      expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledOnce();
+      expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        aServiceId,
+        {
+          displayName: aServiceId,
+          ownerId: anOwnerId,
+          scope: `/products/${aProductId}`,
+          state: "active",
+        },
+      );
     });
   });
 
@@ -657,14 +785,10 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getProductByName(
-        aProductName as unknown as NonEmptyString
+        aProductName as unknown as NonEmptyString,
       )();
 
       expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
@@ -672,7 +796,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `name eq '${aProductName}'`,
-        }
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -700,15 +824,11 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getProductByName(
-        aProductName as unknown as NonEmptyString
+        aProductName as unknown as NonEmptyString,
       )();
 
       // expect result
@@ -717,7 +837,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `name eq '${aProductName}'`,
-        }
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -736,15 +856,11 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getProductByName(
-        aProductName as unknown as NonEmptyString
+        aProductName as unknown as NonEmptyString,
       )();
 
       // expect result
@@ -753,7 +869,7 @@ describe("ApimService Test", () => {
         anApimServiceName,
         {
           filter: `name eq '${aProductName}'`,
-        }
+        },
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -766,6 +882,7 @@ describe("ApimService Test", () => {
   });
 
   describe("getUserSubscriptions", () => {
+    const NOT_MANAGE_FILTER = "not(startswith(name, 'MANAGE-'))";
     it("should return the user's subscriptions", async () => {
       // mock ApimClient
       const mockApimClient = {
@@ -784,11 +901,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getUserSubscriptions(anUserId)();
 
@@ -797,8 +910,8 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         {
-          filter: subscriptionsExceptManageOneApimFilter(),
-        }
+          filter: NOT_MANAGE_FILTER,
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -823,11 +936,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserSubscriptions(anUserId)();
@@ -838,8 +947,8 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         {
-          filter: subscriptionsExceptManageOneApimFilter(),
-        }
+          filter: NOT_MANAGE_FILTER,
+        },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -861,11 +970,7 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       // call getUser
       const result = await apimService.getUserSubscriptions(anUserId)();
@@ -876,8 +981,8 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         {
-          filter: subscriptionsExceptManageOneApimFilter(),
-        }
+          filter: NOT_MANAGE_FILTER,
+        },
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -908,39 +1013,35 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               primaryKey: update,
               secondaryKey: aSecondaryKey,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.regenerateSubscriptionKey(
         aServiceId,
-        SubscriptionKeyTypeEnum.primary
+        SubscriptionKeyTypeEnum.primary,
       )();
 
       expect(
-        mockApimClient.subscription.regeneratePrimaryKey
+        mockApimClient.subscription.regeneratePrimaryKey,
       ).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(
-        mockApimClient.subscription.regenerateSecondaryKey
+        mockApimClient.subscription.regenerateSecondaryKey,
       ).not.toHaveBeenCalled();
 
       expect(mockApimClient.subscription.listSecrets).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -971,39 +1072,35 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               primaryKey: aPrimaryKey,
               secondaryKey: update,
-            })
+            }),
           ),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.regenerateSubscriptionKey(
         aServiceId,
-        SubscriptionKeyTypeEnum.secondary
+        SubscriptionKeyTypeEnum.secondary,
       )();
 
       expect(
-        mockApimClient.subscription.regeneratePrimaryKey
+        mockApimClient.subscription.regeneratePrimaryKey,
       ).not.toHaveBeenCalled();
 
       expect(
-        mockApimClient.subscription.regenerateSecondaryKey
+        mockApimClient.subscription.regenerateSecondaryKey,
       ).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(mockApimClient.subscription.listSecrets).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -1021,34 +1118,30 @@ describe("ApimService Test", () => {
       const mockApimClient = {
         subscription: {
           regeneratePrimaryKey: vi.fn(() =>
-            Promise.reject({ statusCode: 500 })
+            Promise.reject({ statusCode: 500 }),
           ),
           regenerateSecondaryKey: vi.fn(),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.regenerateSubscriptionKey(
         aServiceId,
-        SubscriptionKeyTypeEnum.secondary
+        SubscriptionKeyTypeEnum.secondary,
       )();
 
       expect(
-        mockApimClient.subscription.regeneratePrimaryKey
+        mockApimClient.subscription.regeneratePrimaryKey,
       ).not.toHaveBeenCalled();
 
       expect(
-        mockApimClient.subscription.regenerateSecondaryKey
+        mockApimClient.subscription.regenerateSecondaryKey,
       ).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -1070,7 +1163,7 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               scope: `/products/${aProductId}`,
               ownerId: anOwnerId,
-            })
+            }),
           ),
         },
         user: {
@@ -1081,7 +1174,7 @@ describe("ApimService Test", () => {
               firstName: aFirstName,
               lastName: aLastName,
               email: anUserEmail,
-            })
+            }),
           ),
         },
         userGroup: {
@@ -1096,32 +1189,28 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getDelegateFromServiceId(
-        aServiceId as unknown as NonEmptyString
+        aServiceId as unknown as NonEmptyString,
       )();
 
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
 
       expect(mockApimClient.user.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(mockApimClient.userGroup.list).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -1142,7 +1231,7 @@ describe("ApimService Test", () => {
           get: vi.fn(() =>
             Promise.reject({
               statusCode: 502,
-            })
+            }),
           ),
         },
         user: {
@@ -1153,7 +1242,7 @@ describe("ApimService Test", () => {
               firstName: aFirstName,
               lastName: aLastName,
               email: anUserEmail,
-            })
+            }),
           ),
         },
         userGroup: {
@@ -1168,20 +1257,16 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getDelegateFromServiceId(
-        aServiceId as unknown as NonEmptyString
+        aServiceId as unknown as NonEmptyString,
       )();
 
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
       expect(mockApimClient.user.get).not.toHaveBeenCalled();
       expect(mockApimClient.userGroup.list).not.toHaveBeenCalled();
@@ -1203,14 +1288,14 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               scope: `/products/${aProductId}`,
               ownerId: anOwnerId,
-            })
+            }),
           ),
         },
         user: {
           get: vi.fn(() =>
             Promise.reject({
               statusCode: 503,
-            })
+            }),
           ),
         },
         userGroup: {
@@ -1225,25 +1310,21 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getDelegateFromServiceId(
-        aServiceId as unknown as NonEmptyString
+        aServiceId as unknown as NonEmptyString,
       )();
 
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
       expect(mockApimClient.user.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
       expect(mockApimClient.userGroup.list).not.toHaveBeenCalled();
 
@@ -1264,7 +1345,7 @@ describe("ApimService Test", () => {
               _etag: "_etag",
               scope: `/products/${aProductId}`,
               ownerId: anOwnerId,
-            })
+            }),
           ),
         },
         user: {
@@ -1275,7 +1356,7 @@ describe("ApimService Test", () => {
               firstName: aFirstName,
               lastName: aLastName,
               email: anUserEmail,
-            })
+            }),
           ),
         },
         userGroup: {
@@ -1288,30 +1369,26 @@ describe("ApimService Test", () => {
       } as unknown as ApiManagementClient;
 
       // create ApimService
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName
-      );
+      const apimService = mockApimService(mockApimClient);
 
       const result = await apimService.getDelegateFromServiceId(
-        aServiceId as unknown as NonEmptyString
+        aServiceId as unknown as NonEmptyString,
       )();
 
       expect(mockApimClient.subscription.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        aServiceId
+        aServiceId,
       );
       expect(mockApimClient.user.get).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
       expect(mockApimClient.userGroup.list).toHaveBeenCalledWith(
         anApimResourceGroup,
         anApimServiceName,
-        anUserId
+        anUserId,
       );
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -1326,7 +1403,7 @@ describe("ApimService Test", () => {
   describe("Get Owner Id from Full Path", () => {
     it("should retrieve the ID", () => {
       const res = parseOwnerIdFullPath(
-        "/subscriptions/subid/resourceGroups/{resourceGroup}/providers/Microsoft.ApiManagement/service/{apimService}/users/1234a75ae4bbd512a88c680x" as NonEmptyString
+        "/subscriptions/subid/resourceGroups/{resourceGroup}/providers/Microsoft.ApiManagement/service/{apimService}/users/1234a75ae4bbd512a88c680x" as NonEmptyString,
       );
       expect(res).toBe("1234a75ae4bbd512a88c680x");
     });

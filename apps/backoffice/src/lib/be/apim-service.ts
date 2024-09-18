@@ -21,7 +21,7 @@ import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export interface ApimRestClient {
-  getServiceList: (
+  readonly getServiceList: (
     userId: string,
     limit: number,
     offset: number,
@@ -79,6 +79,7 @@ const buildApimService: () => ApimUtils.ApimService = () => {
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM,
+    apimConfig.AZURE_APIM_PRODUCT_NAME,
   );
 };
 
@@ -119,13 +120,13 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
     axiosInstance = getAxiosInstance(azureAccessToken);
   };
 
-  const getServiceList = (
-    userId: string,
-    limit: number,
-    offset: number,
-    serviceId?: string,
+  const getServiceList: ApimRestClient["getServiceList"] = (
+    userId,
+    limit,
+    offset,
+    serviceId,
     isRetry = false,
-  ): TE.TaskEither<AxiosError | Error, SubscriptionCollection> =>
+  ) =>
     pipe(
       TE.tryCatch(
         () =>
