@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.12.1
+
+### Patch Changes
+
+- 7d09349: fix getInstitutionsGroups
+
 ## 1.12.0
 
 ### Minor Changes
