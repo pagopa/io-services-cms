@@ -224,7 +224,7 @@ describe("Authorize", () => {
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
-    ).rejects.toThrowError(`Failed to create apim user, code: ${statusCode}`);
+    ).rejects.toThrowError(`Failed to create apim user`);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledTimes(2);
@@ -257,7 +257,7 @@ describe("Authorize", () => {
     ).rejects.toThrowError(
       `Failed to create relationship between group (id = ${
         mockConfig.APIM_USER_GROUPS.split(",")[0]
-      }) and user (id = ${aValidApimUser.name}), code: ${statusCode}`,
+      }) and user (id = ${aValidApimUser.name})`,
     );
 
     const apimUserGroupsLength = mockConfig.APIM_USER_GROUPS.split(",").length;
@@ -299,9 +299,7 @@ describe("Authorize", () => {
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
-    ).rejects.toThrowError(
-      `Failed to fetch user by its email, code: ${statusCode}`,
-    );
+    ).rejects.toThrowError(`Failed to fetch user by its email`);
 
     const apimUserGroupsLength = mockConfig.APIM_USER_GROUPS.split(",").length;
     expect(jwtVerify).toHaveBeenCalledOnce();
@@ -349,7 +347,7 @@ describe("Authorize", () => {
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
     ).rejects.toThrowError(
-      `Failed to create relationship between group (id = ${missingUserGroup}) and user (id = ${aValidApimUser.name}), code: ${statusCode}`,
+      `Failed to create relationship between group (id = ${missingUserGroup}) and user (id = ${aValidApimUser.name})`,
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
@@ -391,9 +389,7 @@ describe("Authorize", () => {
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
-    ).rejects.toThrowError(
-      `Failed to fetch user by its email, code: ${statusCode}`,
-    );
+    ).rejects.toThrowError(`Failed to fetch user by its email`);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledTimes(3);
@@ -494,7 +490,7 @@ describe("Authorize", () => {
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
     ).rejects.toThrowError(
-      `Failed to fetch user subscription manage (MANAGE-${aValidApimUser.name}), apimStatuscode: ${statusCode}, apimErrorName: ${apimErrorName}, apimErrorCode: ${apimErrorCode}`,
+      `Failed to fetch user subscription manage (MANAGE-${aValidApimUser.name})`,
     );
 
     expect(jwtVerify).toHaveBeenCalledOnce();
@@ -525,9 +521,7 @@ describe("Authorize", () => {
 
     await expect(() =>
       authorize(mockConfig)({ identity_token: "identity_token" }, {}),
-    ).rejects.toThrowError(
-      `Failed to create subscription manage, code: ${statusCode}`,
-    );
+    ).rejects.toThrowError(`Failed to create subscription manage`);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
     expect(getApimService).toHaveBeenCalledTimes(3);

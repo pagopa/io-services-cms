@@ -7,6 +7,7 @@ import {
   ManagedInternalError,
   apimErrorToManagedInternalError,
   extractTryCatchError,
+  handlerErrorLog,
 } from "@/lib/be/errors";
 import { getInstitutionById } from "@/lib/be/institutions/selfcare";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -66,20 +67,8 @@ export const authorize =
       ),
       TE.map(toUser),
       TE.getOrElse((e) => {
-        let errorToThrow: Error;
-        if (e instanceof ManagedInternalError) {
-          console.error(
-            `An error has occurred when authorize user, ${e.message} additionalDetails => ${e.additionalDetails}`,
-          );
-          errorToThrow = new Error(e.message);
-        } else if (e instanceof Error) {
-          console.error(e);
-          errorToThrow = e;
-        } else {
-          console.error("unknown error", e);
-          errorToThrow = new Error("unknown error");
-        }
-        throw errorToThrow;
+        handlerErrorLog("An error has occurred when authorize user", e);
+        throw e;
       }),
     )();
 
@@ -197,10 +186,7 @@ const retrieveUserByEmail = (
     getApimService(),
     (apimService) => apimService.getUserByEmail(userEmail, true),
     TE.mapLeft((err) =>
-      apimErrorToManagedInternalError(
-        `Failed to fetch user by its email, code: ${err.statusCode}`,
-        err,
-      ),
+      apimErrorToManagedInternalError(`Failed to fetch user by its email`, err),
     ),
   );
 
@@ -221,10 +207,7 @@ const createApimUser =
           note: identityTokenPayload.organization.name,
         }),
       TE.mapLeft((err) =>
-        apimErrorToManagedInternalError(
-          `Failed to create apim user, code: ${err.statusCode}`,
-          err,
-        ),
+        apimErrorToManagedInternalError(`Failed to create apim user`, err),
       ),
       TE.chainW((apimUser) =>
         pipe(
@@ -248,7 +231,7 @@ const createUserGroup = (
       apimService.createGroupUser(groupId as NonEmptyString, apimUserId),
     TE.mapLeft((err) =>
       apimErrorToManagedInternalError(
-        `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`,
+        `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId})`,
         err,
       ),
     ),
@@ -290,9 +273,7 @@ const getUserSubscriptionManage = (
                 apimErrorToManagedInternalError(
                   `Failed to fetch user subscription manage (${
                     ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
-                  }), apimStatuscode: ${
-                    err.statusCode
-                  }, apimErrorName: ${err.name}, apimErrorCode: ${err.code}`,
+                  })`,
                   err,
                 ),
               ),
@@ -314,7 +295,7 @@ const createSubscriptionManage = (
       TE.mapLeft((err) =>
         "statusCode" in err
           ? apimErrorToManagedInternalError(
-              `Failed to create subscription manage, code: ${err.statusCode}`,
+              "Failed to create subscription manage",
               err,
             )
           : err,
