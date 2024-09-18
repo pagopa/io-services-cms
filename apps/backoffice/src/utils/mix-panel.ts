@@ -28,8 +28,8 @@ type MixPanelEventsStructure = {
   readonly IO_BO_SERVICE_DETAILS: { serviceId: string };
   readonly IO_BO_SERVICE_HISTORY: { serviceId: string };
   readonly IO_BO_SERVICE_PREVIEW: { serviceId: string };
-  readonly IO_BO_PRODUCT_SWITCH: { product_id: string };
-  readonly IO_BO_INSTITUTION_SWITCH: { institution_id: string };
+  readonly IO_BO_PRODUCT_SWITCH: { productId: string };
+  readonly IO_BO_INSTITUTION_SWITCH: { institutionId: string };
 };
 
 type MixPanelEvents<
