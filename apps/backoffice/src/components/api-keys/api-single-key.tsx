@@ -17,6 +17,7 @@ export type ApiSingleKeyProps = {
   keyValue?: string;
   onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
+  onHandleMixpanel?: () => void;
 };
 
 /** Single API Key component */
@@ -24,7 +25,8 @@ export const ApiSingleKey = ({
   keyType,
   keyValue,
   onRotateClick,
-  onBlockClick
+  onBlockClick,
+  onHandleMixpanel
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
@@ -49,7 +51,11 @@ export const ApiSingleKey = ({
             </IconButton>
           </Typography>
         </Box>
-        <ApiKeyValue keyValue={keyValue} isVisible={isVisible} />
+        <ApiKeyValue
+          handleMixpanel={onHandleMixpanel}
+          keyValue={keyValue}
+          isVisible={isVisible}
+        />
       </Grid>
       <Grid
         item

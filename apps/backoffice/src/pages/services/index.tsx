@@ -22,6 +22,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import logToMixpanel from "@/utils/mix-panel";
 import {
   Add,
   Block,
@@ -214,6 +215,14 @@ export default function Services() {
       offset: 0
     });
 
+  const handleEdit = (service: ServiceListItem) => {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", {
+      serviceId: service.id,
+      entryPoint: "Services List Page"
+    });
+    router.push(`/services/${service.id}/edit-service`);
+  };
+
   /**
    * Returns a single `TableRowMenuAction`
    * @param options configuration options
@@ -238,7 +247,7 @@ export default function Services() {
       action: ServiceContextMenuActions.edit,
       icon: <Edit color="primary" fontSize="inherit" />,
       serviceId: service.id,
-      onClickFn: () => router.push(`/services/${service.id}/edit-service`)
+      onClickFn: () => handleEdit(service)
     });
   /** Returns a `submitReview` `TableRowMenuAction` */
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
@@ -437,6 +446,10 @@ export default function Services() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [servicesData]);
 
+  useEffect(() => {
+    logToMixpanel("IO_BO_SERVICES_PAGE", {});
+  }, []);
+
   return (
     <>
       <Grid container spacing={0} paddingRight={3}>
@@ -453,7 +466,14 @@ export default function Services() {
               passHref
               style={{ textDecoration: "none" }}
             >
-              <Button size="medium" variant="contained" startIcon={<Add />}>
+              <Button
+                size="medium"
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => {
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {});
+                }}
+              >
                 {t("service.actions.create")}
               </Button>
             </NextLink>

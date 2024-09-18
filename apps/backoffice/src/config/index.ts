@@ -24,6 +24,7 @@ export type Configuration = {
   BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
   BACK_OFFICE_LOGIN_PATH: string;
   BACK_OFFICE_IN_APP_PREVIEW_ENABLED: boolean;
+  BACK_OFFICE_MIXPANEL_TOKEN: string;
 
   // Selfcare
   SELFCARE_ID: string;
@@ -98,8 +99,9 @@ export function getConfiguration(): Configuration {
     BACK_OFFICE_LOGIN_PATH: process.env
       .NEXT_PUBLIC_BACK_OFFICE_LOGIN_PATH as string,
     BACK_OFFICE_IN_APP_PREVIEW_ENABLED:
-      process.env.NEXT_PUBLIC_BACK_OFFICE_IN_APP_PREVIEW_ENABLED ===
-      "true",
+      process.env.NEXT_PUBLIC_BACK_OFFICE_IN_APP_PREVIEW_ENABLED === "true",
+    BACK_OFFICE_MIXPANEL_TOKEN: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_MIXPANEL_TOKEN as string,
 
     // Selfcare
     SELFCARE_ID: process.env.NEXT_PUBLIC_SELFCARE_ID as string,

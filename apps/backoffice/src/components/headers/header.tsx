@@ -1,6 +1,7 @@
 import { getConfiguration } from "@/config";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import useFetch from "@/hooks/use-fetch";
+import logToMixpanel from "@/utils/mix-panel";
 import { HeaderProduct, ProductSwitchItem } from "@pagopa/mui-italia";
 import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
 import { signOut, useSession } from "next-auth/react";
@@ -44,6 +45,7 @@ export const Header = () => {
     // otherwise navigate to product url (i.e.: SelfCare)
     setSelectedProductId(product.id);
     window.location.href = product.productUrl;
+    logToMixpanel("IO_BO_PRODUCT_SWITCH", { product_id: product.id });
   };
 
   const selectedPartyChange = (party: PartySwitchItem) => {
@@ -51,6 +53,7 @@ export const Header = () => {
     if (selectedPartyId === party.id) return;
     // otherwise perform next/auth logout and navigate to callbackUrl
     setSelectedPartyId(party.id);
+    logToMixpanel("IO_BO_INSTITUTION_SWITCH", { institution_id: party.id });
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +

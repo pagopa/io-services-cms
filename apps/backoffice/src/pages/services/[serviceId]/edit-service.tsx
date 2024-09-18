@@ -9,6 +9,7 @@ import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
+import logToMixpanel from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { useTranslation } from "next-i18next";
@@ -46,6 +47,10 @@ export default function EditService() {
         ServiceLifecycle,
         { notify: "all" }
       );
+      logToMixpanel("IO_BO_SERVICE_EDIT_END", {
+        serviceId: serviceId,
+        result: "success"
+      });
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -54,6 +59,10 @@ export default function EditService() {
           message: readableReport(maybeApiServicePayload.left)
         })
       );
+      logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        serviceId: serviceId,
+        result: readableReport(maybeApiServicePayload.left)
+      });
     }
     // redirect to service details in both cases
     router.push(`/services/${serviceId}`);

@@ -7,10 +7,15 @@ import { LoaderSkeleton } from "../loaders";
 export type ApiKeyValueProps = {
   isVisible: boolean;
   keyValue?: string;
+  handleMixpanel?: () => void;
 };
 
 /** API Key value component */
-export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
+export const ApiKeyValue = ({
+  isVisible,
+  keyValue,
+  handleMixpanel
+}: ApiKeyValueProps) => {
   const { t } = useTranslation();
 
   const renderKeyValue = (value: string) => (
@@ -20,11 +25,19 @@ export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
   );
 
   return (
-    <Box paddingY={1} paddingX={1.5} bgcolor="background.default" overflow="auto">
+    <Box
+      paddingY={1}
+      paddingX={1.5}
+      bgcolor="background.default"
+      overflow="auto"
+    >
       <Stack direction="row" alignItems={"center"} spacing={0.5}>
         <LoaderSkeleton loading={keyValue === undefined}>
           {renderKeyValue(keyValue ?? "--------------------------------")}
-          <CopyToClipboard text={keyValue ?? ""} />
+          <CopyToClipboard
+            externalOnClick={handleMixpanel}
+            text={keyValue ?? ""}
+          />
         </LoaderSkeleton>
       </Stack>
     </Box>

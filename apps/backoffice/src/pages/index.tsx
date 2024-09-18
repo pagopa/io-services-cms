@@ -7,6 +7,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
+import logToMixpanel from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -38,6 +39,7 @@ export default function Home() {
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
     }
+    logToMixpanel("IO_BO_OVERVIEW_PAGE", {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

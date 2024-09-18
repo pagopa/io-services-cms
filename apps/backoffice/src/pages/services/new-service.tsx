@@ -6,6 +6,7 @@ import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
+import logToMixpanel from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { useTranslation } from "next-i18next";
@@ -36,6 +37,10 @@ export default function NewService() {
         ServiceLifecycle,
         { notify: "all" }
       );
+      logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        serviceId: "", // Missing New servie ID
+        result: "success"
+      });
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -44,6 +49,10 @@ export default function NewService() {
           message: readableReport(maybeServicePayload.left)
         })
       );
+      logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        serviceId: "Error",
+        result: readableReport(maybeServicePayload.left)
+      });
     }
     // redirect to services list in both cases
     router.push("/services");

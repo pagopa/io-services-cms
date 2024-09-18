@@ -18,6 +18,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Service } from "@/types/service";
+import logToMixpanel from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
@@ -104,6 +105,9 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
+    logToMixpanel("IO_BO_SERVICE_HISTORY", {
+      serviceId: serviceId
+    });
     shFetchData(
       "getServiceHistory",
       { serviceId, continuationToken },
@@ -116,6 +120,17 @@ export default function ServiceDetails() {
 
   const handlePreview = () => {
     setShowPreview(true);
+    logToMixpanel("IO_BO_SERVICE_PREVIEW", {
+      serviceId: serviceId
+    });
+  };
+
+  const handleEdit = () => {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", {
+      serviceId: serviceId,
+      entryPoint: "Service Detail"
+    });
+    router.push(`/services/${serviceId}/edit-service`);
   };
 
   const navigateToServiceLifecycle = () =>
@@ -138,11 +153,16 @@ export default function ServiceDetails() {
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
       notify: "errors"
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     manageCurrentService();
+    logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", {
+      serviceId: serviceId,
+      serviceName: slData?.name as string
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);
 
@@ -162,9 +182,7 @@ export default function ServiceDetails() {
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
             onHistoryClick={() => handleHistory()}
             onPreviewClick={handlePreview}
-            onEditClick={() =>
-              router.push(`/services/${serviceId}/edit-service`)
-            }
+            onEditClick={handleEdit}
             onDeleteClick={handleDelete}
           />
         </Grid>
@@ -203,6 +221,7 @@ export default function ServiceDetails() {
             description={t("routes.service.keys.description")}
             keys={skData}
             onRotateKey={handleRotateKey}
+            page="service"
           />
         </Grid>
         <Grid item xs={12}>

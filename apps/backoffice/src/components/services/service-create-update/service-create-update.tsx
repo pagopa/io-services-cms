@@ -8,6 +8,7 @@ import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
+import logToMixpanel from "@/utils/mix-panel";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -78,6 +79,11 @@ export const ServiceCreateUpdate = ({
     });
     if (confirmed) {
       console.log("operation cancelled");
+      if (mode === "create") {
+        logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", {});
+      } else if (mode === "update") {
+        logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", {});
+      }
       router.back();
     } else {
       console.log("modal cancelled");

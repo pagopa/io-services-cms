@@ -6,12 +6,16 @@ import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 
 export type CopyToClipboardProps = {
   text: string;
+  externalOnClick?: () => void;
 };
 
 /**
  * _"Copy to clipboard"_ utility button icon.
  */
-export const CopyToClipboard = ({ text }: CopyToClipboardProps) => {
+export const CopyToClipboard = ({
+  text,
+  externalOnClick = () => {}
+}: CopyToClipboardProps) => {
   const { t } = useTranslation();
 
   const [copyState, setCopyState] = useState({
@@ -30,6 +34,7 @@ export const CopyToClipboard = ({ text }: CopyToClipboardProps) => {
         copied: false,
         tooltip: t("buttons.copyToClipboard")
       });
+      externalOnClick();
     }, 2000);
     return () => clearTimeout(timer);
   };

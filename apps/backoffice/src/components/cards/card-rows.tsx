@@ -6,6 +6,7 @@ import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 import { MarkdownView } from "../markdown-view";
+import logToMixpanel from "@/utils/mix-panel";
 
 export type CardRowType = {
   /** row label, shown on left */
@@ -33,6 +34,20 @@ export type CardRowsProps = {
 /** Used to show general-purpose information as label/value rows. */
 export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
+
+  const handleMixpanel = (label: string) => {
+    if ((label = "keys.primary.title")) {
+      logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
+        keyType: "primary",
+        entryPoint: "Overview page"
+      });
+    } else if ((label = "keys.secondary.title")) {
+      logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
+        keyType: "secondary",
+        entryPoint: "Overview page"
+      });
+    }
+  };
 
   const renderValue = (
     value: string | ReactNode | undefined,
@@ -72,7 +87,15 @@ export const CardRows = ({ rows }: CardRowsProps) => {
   const renderRowKind = (row: CardRowType) => {
     switch (row.kind) {
       case "apikey":
-        return <ApiKeyValue isVisible={false} keyValue={row.value as string} />;
+        return (
+          <ApiKeyValue
+            handleMixpanel={() => {
+              handleMixpanel(row.label as string);
+            }}
+            isVisible={false}
+            keyValue={row.value as string}
+          />
+        );
       case "datetime":
         return renderValue(row.value, renderTextValue(row));
       case "link":

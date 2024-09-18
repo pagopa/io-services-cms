@@ -5,6 +5,7 @@ import { useTranslation } from "next-i18next";
 import { ServiceInfoContent, ServiceStatus } from ".";
 import { CardDetails, CardRowType } from "../cards";
 import { useDrawer } from "../drawer-provider";
+import logToMixpanel from "@/utils/mix-panel";
 
 export type ServiceInfoProps = {
   data?: Service;
@@ -45,6 +46,9 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   };
 
   const openDetails = () => {
+    logToMixpanel("IO_BO_SERVICE_DETAILS", {
+      serviceId: data?.id as string
+    });
     openDrawer(<ServiceInfoContent data={data} />);
   };
 
