@@ -19,7 +19,11 @@ import { flow, pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
-import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
+import {
+  shouldSkipSync,
+  SKIP_SYNC_TO_LEGACY_PREFIX,
+  SYNC_FROM_LEGACY,
+} from "../utils/synchronizer";
 
 type Actions = "requestSyncLegacy";
 
@@ -121,8 +125,8 @@ const getSpecialFields = (
 const shouldServiceBeSynced =
   (fsmPublicationClient: ServicePublication.FsmClient) =>
   (itm: ServiceHistory) => {
-    // Already synced to legacy
-    if (itm.fsm.lastTransition === SYNC_FROM_LEGACY) {
+    // Already synced to legacy / Explicit Skip sync to legacy
+    if (shouldSkipSync(itm, [SYNC_FROM_LEGACY, SKIP_SYNC_TO_LEGACY_PREFIX])) {
       return TE.of(false);
     }
 
