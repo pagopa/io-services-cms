@@ -20,9 +20,9 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { isUserEnabledForCmsToLegacySync } from "../utils/feature-flag-handler";
 import {
-  shouldSkipSync,
   SKIP_SYNC_TO_LEGACY_PREFIX,
   SYNC_FROM_LEGACY,
+  shouldSkipSync,
 } from "../utils/synchronizer";
 
 type Actions = "requestSyncLegacy";
