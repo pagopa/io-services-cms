@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.33.5
+
+### Patch Changes
+
+- 57929ae: Add a new label for lastTransition in order to explicitly skip service sync to legacy
+
 ## 1.33.4
 
 ### Patch Changes
