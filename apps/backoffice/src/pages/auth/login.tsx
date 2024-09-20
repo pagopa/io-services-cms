@@ -1,6 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";

@@ -6,7 +6,7 @@ import { useTranslation } from "next-i18next";
 import { ServiceInfoContent, ServiceStatus } from ".";
 import { CardDetails, CardRowType } from "../cards";
 import { useDrawer } from "../drawer-provider";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 
 export interface ServiceInfoProps {
   data?: Service;
@@ -22,26 +22,26 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
     const rowsMin: CardRowType[] = [];
     rowsMin.push({
       label: "routes.service.status",
-      value: <ServiceStatus status={data?.status} />,
+      value: <ServiceStatus status={data?.status} />
     });
     if (data?.status.value === ServiceLifecycleStatusTypeEnum.approved) {
       rowsMin.push({
         label: "routes.service.visibility",
         value: data?.visibility
           ? t(`service.visibility.${data?.visibility}`)
-          : undefined,
+          : undefined
       });
     }
     rowsMin.push(
       {
         label: "routes.service.serviceId",
-        value: data?.id,
+        value: data?.id
       },
       {
         kind: "datetime",
         label: "routes.service.lastUpdate",
-        value: data?.lastUpdate,
-      },
+        value: data?.lastUpdate
+      }
     );
     return rowsMin;
   };
@@ -58,7 +58,7 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
       cta={{
         fn: openDetails,
         icon: <ReadMore style={{ fontSize: "24px" }} />,
-        label: "routes.service.viewDetails",
+        label: "routes.service.viewDetails"
       }}
       rows={buildRowsMin()}
       title="routes.service.information"

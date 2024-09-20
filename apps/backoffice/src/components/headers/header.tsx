@@ -1,7 +1,7 @@
 import { getConfiguration } from "@/config";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import useFetch from "@/hooks/use-fetch";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { HeaderProduct, ProductSwitchItem } from "@pagopa/mui-italia";
 import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
 import { signOut, useSession } from "next-auth/react";
@@ -11,8 +11,9 @@ import { useEffect, useState } from "react";
 export const Header = () => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { data: institutionsData, fetchData: institutionsFetchData } =
-    useFetch<UserAuthorizedInstitutions>();
+  const { data: institutionsData, fetchData: institutionsFetchData } = useFetch<
+    UserAuthorizedInstitutions
+  >();
 
   const getSelfcareInstitutionDashboardUrl = () =>
     `${getConfiguration().SELFCARE_URL}/dashboard/${
@@ -24,14 +25,14 @@ export const Header = () => {
       id: getConfiguration().BACK_OFFICE_ID,
       linkType: "internal",
       productUrl: "",
-      title: getConfiguration().BACK_OFFICE_TITLE,
+      title: getConfiguration().BACK_OFFICE_TITLE
     },
     {
       id: getConfiguration().SELFCARE_ID,
       linkType: "internal",
       productUrl: getSelfcareInstitutionDashboardUrl(),
-      title: getConfiguration().SELFCARE_TITLE,
-    },
+      title: getConfiguration().SELFCARE_TITLE
+    }
   ];
 
   const [parties, setParties] = useState(Array<PartySwitchItem>());
@@ -56,7 +57,7 @@ export const Header = () => {
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +
-        `?institutionId=${party.id}&productId=${products[0].id}`,
+        `?institutionId=${party.id}&productId=${products[0].id}`
     });
   };
 
@@ -71,7 +72,7 @@ export const Header = () => {
         id: session.user.institution.id,
         logoUrl: session.user.institution.logo_url,
         name: session.user.institution.name,
-        productRole: t(`roles.${session.user.institution.role}`),
+        productRole: t(`roles.${session.user.institution.role}`)
       };
       setParties([currentParty]);
       setSelectedPartyId(currentParty.id);
@@ -81,17 +82,16 @@ export const Header = () => {
   /** Build and set list of user authorized institutions _(useful for institution switch)_ */
   const buildPartyList = () => {
     if (session?.user && institutionsData?.authorizedInstitutions) {
-      const filteredInstitutions =
-        institutionsData.authorizedInstitutions.filter(
-          (institution) => institution.id !== session.user?.institution.id,
-        );
+      const filteredInstitutions = institutionsData.authorizedInstitutions.filter(
+        institution => institution.id !== session.user?.institution.id
+      );
       const otherParties: PartySwitchItem[] = filteredInstitutions.map(
-        (institution) => ({
+        institution => ({
           id: institution.id ?? "",
           logoUrl: institution.logo_url,
           name: institution.name ?? "",
-          productRole: t(`roles.${institution.role}`),
-        }),
+          productRole: t(`roles.${institution.role}`)
+        })
       );
       setParties([...parties, ...otherParties]);
     }
@@ -109,8 +109,8 @@ export const Header = () => {
       {},
       UserAuthorizedInstitutions,
       {
-        notify: "errors",
-      },
+        notify: "errors"
+      }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

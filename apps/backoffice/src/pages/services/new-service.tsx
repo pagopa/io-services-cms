@@ -6,7 +6,7 @@ import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { useRouter } from "next/router";
@@ -25,16 +25,17 @@ export default function NewService() {
   const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
   const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
-    const maybeServicePayload =
-      fromServiceCreateUpdatePayloadToApiServicePayload(service);
+    const maybeServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
+      service
+    );
     if (E.isRight(maybeServicePayload)) {
       await serviceFetchData(
         "createService",
         {
-          body: maybeServicePayload.right,
+          body: maybeServicePayload.right
         },
         ServiceLifecycle,
-        { notify: "all" },
+        { notify: "all" }
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
         serviceId: "", // Missing New servie ID
@@ -45,8 +46,8 @@ export default function NewService() {
         buildSnackbarItem({
           message: readableReport(maybeServicePayload.left),
           severity: "error",
-          title: t("notifications.validationError"),
-        }),
+          title: t("notifications.validationError")
+        })
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
         serviceId: "Error",
@@ -75,8 +76,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
+      ...(await serverSideTranslations(locale))
+    }
   };
 }
 

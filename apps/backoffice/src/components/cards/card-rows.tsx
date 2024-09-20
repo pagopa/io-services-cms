@@ -7,7 +7,7 @@ import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 import { MarkdownView } from "../markdown-view";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 
 export interface CardRowType {
   /** If true, a *""copy to clipboard"* icon is shown on right side of *value* */

@@ -8,7 +8,7 @@ import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";

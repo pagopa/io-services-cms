@@ -5,7 +5,7 @@ import { useTranslation } from "next-i18next";
 
 import { useDialog } from "../dialog-provider";
 import { ApiSingleKey } from "./api-single-key";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 
 export interface ApiKeysProps {
   /** Main component card description */

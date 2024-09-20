@@ -1,6 +1,6 @@
 import { LoaderSkeleton } from "@/components/loaders";
 import { MigrationData } from "@/generated/api/MigrationData";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import Button from "@mui/material/Button";
@@ -30,7 +30,7 @@ export interface MigrationModalProps {
 
 // porting from developer portal frontend
 export const computeMigrationStatus = (
-  migrationData?: MigrationData,
+  migrationData?: MigrationData
 ): MigrationStatus => {
   if (migrationData?.data?.failed) {
     return "failed";
@@ -50,7 +50,7 @@ export const MigrationModal = ({
   isOpen,
   migrationStatusList,
   onImportClick,
-  onOpenChange,
+  onOpenChange
 }: MigrationModalProps) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
@@ -109,7 +109,7 @@ export const MigrationModal = ({
                     dense
                     disabled={
                       !["failed", "todo"].includes(
-                        computeMigrationStatus(migrationItem.data),
+                        computeMigrationStatus(migrationItem.data)
                       )
                     }
                     onClick={handleToggle(migrationItem.delegate.sourceId)}
@@ -120,7 +120,7 @@ export const MigrationModal = ({
                       <Checkbox
                         checked={
                           checkedDelegates.indexOf(
-                            migrationItem.delegate.sourceId,
+                            migrationItem.delegate.sourceId
                           ) !== -1
                         }
                         disableRipple

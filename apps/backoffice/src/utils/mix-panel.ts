@@ -1,9 +1,10 @@
+import { getConfiguration } from "@/config";
 import mixpanel from "mixpanel-browser";
 
 type MixPanelEventsStructure = {
-  readonly IO_BO_LOGIN: {};
-  readonly IO_BO_OVERVIEW_PAGE: {};
-  readonly IO_BO_SERVICES_PAGE: {};
+  readonly IO_BO_LOGIN: {} | null | any | undefined;
+  readonly IO_BO_OVERVIEW_PAGE: {} | null | any | undefined;
+  readonly IO_BO_SERVICES_PAGE: {} | null | any | undefined;
   readonly IO_BO_SERVICE_DETAILS_PAGE: {
     serviceId: string;
     serviceName: string;
@@ -36,23 +37,33 @@ type MixPanelEvents<
   T extends keyof MixPanelEventsStructure
 > = MixPanelEventsStructure[T];
 
-type OperationId<Event extends MixPanelEventsStructure> = {
-  eventKey: Extract<keyof Event, string>;
+type EmptyObject = Record<string, never>;
+
+type IsEmptyObject<T> = T extends EmptyObject ? true : false;
+
+export const mixpanelSetup = () => {
+  mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
+    debug: true,
+    verbose: true,
+    track_pageview: false,
+    persistence: "localStorage",
+    ignore_dnt: true
+  });
 };
 
-const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
+export const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
-  mixpanelEventData: MixPanelEvents<T>
+  mixpanelEventData?: IsEmptyObject<MixPanelEvents<T>> extends true
+    ? undefined
+    : MixPanelEvents<T>
 ) => {
-  let currentEvent;
-  let currentEventData = {};
+  let currentEvent: T | undefined;
+  let currentEventData: MixPanelEvents<T> | undefined;
 
   // check to avoid multiple logs
-  if (currentEvent != operationId || currentEventData != mixpanelEventData) {
+  if (currentEvent !== operationId || currentEventData !== mixpanelEventData) {
     currentEvent = operationId;
     currentEventData = mixpanelEventData;
     mixpanel.track(operationId, mixpanelEventData);
   }
 };
-
-export default logToMixpanel;

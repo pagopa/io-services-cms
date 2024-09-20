@@ -22,7 +22,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import logToMixpanel from "@/utils/mix-panel";
+import { logToMixpanel } from "@/utils/mix-panel";
 import {
   Add,
   Block,
@@ -450,7 +450,7 @@ export default function Services() {
   }, [servicesData]);
 
   useEffect(() => {
-    logToMixpanel("IO_BO_SERVICES_PAGE", {});
+    logToMixpanel("IO_BO_SERVICES_PAGE");
   }, []);
 
   return (
@@ -474,7 +474,7 @@ export default function Services() {
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => {
-                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {});
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START");
                 }}
               >
                 {t("service.actions.create")}
