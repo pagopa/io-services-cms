@@ -19,15 +19,6 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  //Mixpanel Initialization
-  // mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
-  //   debug: true,
-  //   verbose: true,
-  //   track_pageview: false,
-  //   persistence: "localStorage",
-  //   ignore_dnt: true
-  // });
-
   mixpanelSetup();
 
   return (
