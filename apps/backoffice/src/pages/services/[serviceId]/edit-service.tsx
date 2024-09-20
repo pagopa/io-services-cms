@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/headers";
 import { buildSnackbarItem } from "@/components/notification";
 import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
-  fromServiceLifecycleToServiceCreateUpdatePayload
+  fromServiceLifecycleToServiceCreateUpdatePayload,
 } from "@/components/services";
 import { ServiceCreateUpdate } from "@/components/services/service-create-update";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
@@ -26,42 +26,39 @@ export default function EditService() {
   const router = useRouter();
   const serviceId = router.query.serviceId as string;
   const { enqueueSnackbar } = useSnackbar();
-  const { data: serviceData, fetchData: serviceFetchData } = useFetch<
-    ServiceLifecycle
-  >();
-  const [serviceCreateUpdatePayload, setServiceCreateUpdatePayload] = useState<
-    ServiceCreateUpdatePayload
-  >();
+  const { data: serviceData, fetchData: serviceFetchData } =
+    useFetch<ServiceLifecycle>();
+  const [serviceCreateUpdatePayload, setServiceCreateUpdatePayload] =
+    useState<ServiceCreateUpdatePayload>();
 
   const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
-    const maybeApiServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
-      service
-    );
+    const maybeApiServicePayload =
+      fromServiceCreateUpdatePayloadToApiServicePayload(service);
     if (E.isRight(maybeApiServicePayload)) {
       await serviceFetchData(
         "updateService",
         {
           body: maybeApiServicePayload.right,
-          serviceId
+          serviceId,
         },
         ServiceLifecycle,
-        { notify: "all" }
+        { notify: "all" },
       );
       logToMixpanel("IO_BO_SERVICE_EDIT_END", {
+        result: "success",
         serviceId: serviceId,
-        result: "success"
       });
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
           message: readableReport(maybeApiServicePayload.left),
           severity: "error",
-          title: t("notifications.validationError")
-        })
+          title: t("notifications.validationError"),
+        }),
       );
       logToMixpanel("IO_BO_SERVICE_EDIT_END", {
+        result: readableReport(maybeApiServicePayload.left),
         serviceId: serviceId,
-        result: readableReport(maybeApiServicePayload.left)
       });
     }
     // redirect to service details in both cases
@@ -71,7 +68,7 @@ export default function EditService() {
   useEffect(() => {
     serviceFetchData("getService", { serviceId }, ServiceLifecycle, {
       notify: "errors",
-      redirect: { href: "/services", on: "errors" }
+      redirect: { href: "/services", on: "errors" },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,7 +76,7 @@ export default function EditService() {
   useEffect(() => {
     if (serviceData)
       setServiceCreateUpdatePayload(
-        fromServiceLifecycleToServiceCreateUpdatePayload(serviceData)
+        fromServiceLifecycleToServiceCreateUpdatePayload(serviceData),
       );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceData]);
@@ -105,8 +102,8 @@ export default function EditService() {
 export async function getServerSideProps({ locale }: any) {
   return {
     props: {
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

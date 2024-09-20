@@ -28,7 +28,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         <DrawerProvider>
           <SnackbarProvider
             Components={{
-              custom: Notification
+              custom: Notification,
             }}
             maxSnack={5}
           >

@@ -1,11 +1,11 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { Box, Divider, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
 import { useDialog } from "../dialog-provider";
 import { ApiSingleKey } from "./api-single-key";
-import { logToMixpanel } from "@/utils/mix-panel";
 
 export interface ApiKeysProps {
   /** Main component card description */
@@ -39,8 +39,8 @@ export const ApiKeys = (props: ApiKeysProps) => {
   const handleCopyEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
     if (props.page === "manage") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
+        entryPoint: "Api Keys page",
         keyType: keyType,
-        entryPoint: "Api Keys page"
       });
     } else if (props.page === "service") {
       logToMixpanel("IO_BO_SERVICE_KEY_COPY", { keyType: keyType });
@@ -51,7 +51,7 @@ export const ApiKeys = (props: ApiKeysProps) => {
     const makeKeyRotation = await showDialog({
       confirmButtonLabel: t("keys.rotate.button"),
       message: t("keys.rotate.modal.description"),
-      title: t("keys.rotate.modal.title")
+      title: t("keys.rotate.modal.title"),
     });
     if (makeKeyRotation) {
       props.onRotateKey(keyType);
@@ -78,22 +78,22 @@ export const ApiKeys = (props: ApiKeysProps) => {
         {props.description ? t(props.description) : ""}
       </Typography>
       <ApiSingleKey
+        keyType={SubscriptionKeyTypeEnum.primary}
+        keyValue={props.keys?.primary_key}
+        onBlockClick={(kt) => console.log("onBlockClick:", kt)}
         onHandleMixpanel={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.primary);
         }}
-        keyType={SubscriptionKeyTypeEnum.primary}
-        keyValue={props.keys?.primary_key}
-        onBlockClick={kt => console.log("onBlockClick:", kt)}
         onRotateClick={handleRotate}
       />
       <Divider sx={{ marginTop: 3 }} />
       <ApiSingleKey
+        keyType={SubscriptionKeyTypeEnum.secondary}
+        keyValue={props.keys?.secondary_key}
+        onBlockClick={(kt) => console.log("onBlockClick:", kt)}
         onHandleMixpanel={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.secondary);
         }}
-        keyType={SubscriptionKeyTypeEnum.secondary}
-        keyValue={props.keys?.secondary_key}
-        onBlockClick={kt => console.log("onBlockClick:", kt)}
         onRotateClick={handleRotate}
       />
     </Box>

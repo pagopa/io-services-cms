@@ -5,16 +5,16 @@ import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 
 export interface ApiKeyValueProps {
+  handleMixpanel?: () => void;
   isVisible: boolean;
   keyValue?: string;
-  handleMixpanel?: () => void;
 }
 
 /** API Key value component */
 export const ApiKeyValue = ({
+  handleMixpanel,
   isVisible,
   keyValue,
-  handleMixpanel
 }: ApiKeyValueProps) => {
   const renderKeyValue = (value: string) => (
     <Typography noWrap variant="monospaced">

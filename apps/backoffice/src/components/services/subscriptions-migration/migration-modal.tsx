@@ -30,7 +30,7 @@ export interface MigrationModalProps {
 
 // porting from developer portal frontend
 export const computeMigrationStatus = (
-  migrationData?: MigrationData
+  migrationData?: MigrationData,
 ): MigrationStatus => {
   if (migrationData?.data?.failed) {
     return "failed";
@@ -50,7 +50,7 @@ export const MigrationModal = ({
   isOpen,
   migrationStatusList,
   onImportClick,
-  onOpenChange
+  onOpenChange,
 }: MigrationModalProps) => {
   const { t } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
@@ -66,7 +66,7 @@ export const MigrationModal = ({
     onOpenChange(false);
     setCheckedDelegates([]);
     logToMixpanel("IO_BO_SERVICES_IMPORT_START", {
-      delegates: checkedDelegates
+      delegates: checkedDelegates,
     });
   };
 
@@ -109,7 +109,7 @@ export const MigrationModal = ({
                     dense
                     disabled={
                       !["failed", "todo"].includes(
-                        computeMigrationStatus(migrationItem.data)
+                        computeMigrationStatus(migrationItem.data),
                       )
                     }
                     onClick={handleToggle(migrationItem.delegate.sourceId)}
@@ -120,7 +120,7 @@ export const MigrationModal = ({
                       <Checkbox
                         checked={
                           checkedDelegates.indexOf(
-                            migrationItem.delegate.sourceId
+                            migrationItem.delegate.sourceId,
                           ) !== -1
                         }
                         disableRipple

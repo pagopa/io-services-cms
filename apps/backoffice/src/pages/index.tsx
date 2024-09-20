@@ -29,12 +29,12 @@ export default function Home() {
       { institutionId: session?.user?.institution.id as string },
       Institution,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
     if (
       hasRequiredAuthorizations(session, {
-        requiredPermissions: ["ApiServiceWrite"]
+        requiredPermissions: ["ApiServiceWrite"],
       })
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
@@ -57,30 +57,30 @@ export default function Home() {
                 rows={[
                   {
                     label: "institution.name",
-                    value: instData?.description
+                    value: instData?.description,
                   },
                   {
                     label: "institution.institutionType.label",
                     value: instData?.institutionType
                       ? t(
-                          `institution.institutionType.${instData.institutionType}`
+                          `institution.institutionType.${instData.institutionType}`,
                         )
-                      : undefined
+                      : undefined,
                   },
                   {
                     label: "institution.digitalAddress",
-                    value: instData?.digitalAddress
+                    value: instData?.digitalAddress,
                   },
                   {
                     label: "institution.fiscalCode",
-                    value: instData?.taxCode
+                    value: instData?.taxCode,
                   },
                   {
                     label: "institution.geographicArea",
                     value: instData?.geographicTaxonomies
                       ?.map((g: any) => g.desc)
-                      .join(", ")
-                  }
+                      .join(", "),
+                  },
                 ]}
                 title="institution.cardTitle"
               />
@@ -93,13 +93,13 @@ export default function Home() {
                     {
                       kind: "apikey",
                       label: "keys.primary.title",
-                      value: mkData?.primary_key
+                      value: mkData?.primary_key,
                     },
                     {
                       kind: "apikey",
                       label: "keys.secondary.title",
-                      value: mkData?.secondary_key
-                    }
+                      value: mkData?.secondary_key,
+                    },
                   ]}
                   title="routes.keys.manage.title"
                 />
@@ -136,8 +136,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

@@ -7,18 +7,18 @@ import {
   ServiceSearchById,
   ServiceStatus,
   ServiceVersionSwitcher,
-  ServiceVersionSwitcherType
+  ServiceVersionSwitcherType,
 } from "@/components/services";
 import {
   TableRowMenuAction,
   TableView,
-  TableViewColumn
+  TableViewColumn,
 } from "@/components/table-view";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceList } from "@/generated/api/ServiceList";
 import {
   ServiceListItem,
-  VisibilityEnum
+  VisibilityEnum,
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
@@ -31,7 +31,7 @@ import {
   Close,
   Delete,
   Edit,
-  FactCheck
+  FactCheck,
 } from "@mui/icons-material";
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -55,8 +55,8 @@ const servicePlaceholder = {
   last_update: "last_update",
   name: "name",
   status: {
-    value: "value"
-  }
+    value: "value",
+  },
 };
 
 /** Check if a service has a previous approved version _(visibility !== undefined)_ \
@@ -68,7 +68,7 @@ const hasTwoDifferentVersions = (service: ServiceListItem) =>
 
 /** Simply check if service status value is `deleted` */
 const isServiceStatusValueDeleted = (
-  serviceStatusValue: ServiceLifecycleStatusTypeEnum
+  serviceStatusValue: ServiceLifecycleStatusTypeEnum,
 ) => serviceStatusValue === ServiceLifecycleStatusTypeEnum.deleted;
 
 /**
@@ -76,7 +76,7 @@ const isServiceStatusValueDeleted = (
  * @param serviceStatusValue
  * @returns `inherit` as default color, `text.disabled` if service status value is `deleted` */
 const getTypographyDefaultColor = (
-  serviceStatusValue: ServiceLifecycleStatusTypeEnum
+  serviceStatusValue: ServiceLifecycleStatusTypeEnum,
 ) =>
   isServiceStatusValueDeleted(serviceStatusValue) ? "text.disabled" : "inherit";
 
@@ -90,7 +90,7 @@ export default function Services() {
   const tableViewColumns: TableViewColumn<ServiceListItem>[] = [
     {
       alignment: "left",
-      cellTemplate: service => (
+      cellTemplate: (service) => (
         <Button
           disabled={isServiceStatusValueDeleted(service.status.value)}
           onClick={() =>
@@ -111,11 +111,11 @@ export default function Services() {
         </Button>
       ),
       label: "routes.services.tableHeader.name",
-      name: "name"
+      name: "name",
     },
     {
       alignment: "left",
-      cellTemplate: service => (
+      cellTemplate: (service) => (
         <Typography
           color={getTypographyDefaultColor(service.status.value)}
           variant="body2"
@@ -124,11 +124,11 @@ export default function Services() {
         </Typography>
       ),
       label: "routes.services.tableHeader.lastUpdate",
-      name: "last_update"
+      name: "last_update",
     },
     {
       alignment: "left",
-      cellTemplate: service => (
+      cellTemplate: (service) => (
         <Typography
           color={getTypographyDefaultColor(service.status.value)}
           variant="monospaced"
@@ -137,17 +137,17 @@ export default function Services() {
         </Typography>
       ),
       label: "routes.services.tableHeader.id",
-      name: "id"
+      name: "id",
     },
     {
       alignment: "left",
-      cellTemplate: service => <ServiceStatus status={service.status} />,
+      cellTemplate: (service) => <ServiceStatus status={service.status} />,
       label: "routes.services.tableHeader.status",
-      name: "status"
+      name: "status",
     },
     {
       alignment: "center",
-      cellTemplate: service => (
+      cellTemplate: (service) => (
         <Stack alignItems="center" direction="row" justifyContent="center">
           {service.visibility === VisibilityEnum.published ? (
             <Check fontSize="small" sx={TEXT_SECONDARY_COLOR_STYLE} />
@@ -159,14 +159,14 @@ export default function Services() {
         </Stack>
       ),
       label: "routes.services.tableHeader.visibility",
-      name: "visibility"
-    }
+      name: "visibility",
+    },
   ];
 
   const {
     data: servicesData,
     fetchData: servicesFetchData,
-    loading: servicesLoading
+    loading: servicesLoading,
   } = useFetch<ServiceList>();
   const { fetchData: noContentFetchData } = useFetch<unknown>();
 
@@ -174,17 +174,15 @@ export default function Services() {
   const [pagination, setPagination] = useState({
     count: 0,
     limit: DEFAULT_PAGE_LIMIT,
-    offset: 0
+    offset: 0,
   });
   const [noService, setNoService] = useState(false);
-  const [currentSearchByServiceId, setCurrentSearchByServiceId] = useState<
-    string
-  >();
+  const [currentSearchByServiceId, setCurrentSearchByServiceId] =
+    useState<string>();
 
   const [isVersionSwitcherOpen, setIsVersionSwitcherOpen] = useState(false);
-  const [serviceForVersionSwitcher, setServiceForVersionSwitcher] = useState<
-    ServiceListItem
-  >();
+  const [serviceForVersionSwitcher, setServiceForVersionSwitcher] =
+    useState<ServiceListItem>();
 
   const openServiceVersionSwitcher = (service: ServiceListItem) => {
     setServiceForVersionSwitcher(service);
@@ -193,12 +191,12 @@ export default function Services() {
 
   const handleSelectedServiceVersion = (
     serviceId: string,
-    version: ServiceVersionSwitcherType
+    version: ServiceVersionSwitcherType,
   ) => {
     router.push(
       `/services/${serviceId}${
         version === "publication" ? "?release=true" : ""
-      }`
+      }`,
     );
   };
 
@@ -206,20 +204,20 @@ export default function Services() {
     setPagination({
       count: pagination.count,
       limit: pagination.limit,
-      offset: pagination.limit * pageIndex
+      offset: pagination.limit * pageIndex,
     });
 
   const handleRowsPerPageChange = (pageSize: number) =>
     setPagination({
       count: pagination.count,
       limit: pageSize,
-      offset: 0
+      offset: 0,
     });
 
   const handleEdit = (service: ServiceListItem) => {
     logToMixpanel("IO_BO_SERVICE_EDIT_START", {
+      entryPoint: "Services List Page",
       serviceId: service.id,
-      entryPoint: "Services List Page"
     });
     router.push(`/services/${service.id}/edit-service`);
   };
@@ -239,7 +237,7 @@ export default function Services() {
     danger: options.danger,
     icon: options.icon,
     label: `service.actions.${options.action}`,
-    onClick: options.onClickFn ?? (() => handleConfirmationModal(options))
+    onClick: options.onClickFn ?? (() => handleConfirmationModal(options)),
   });
 
   /** Returns an `edit` `TableRowMenuAction` */
@@ -247,15 +245,15 @@ export default function Services() {
     addRowMenuItem({
       action: ServiceContextMenuActions.edit,
       icon: <Edit color="primary" fontSize="inherit" />,
+      onClickFn: () => handleEdit(service),
       serviceId: service.id,
-      onClickFn: () => handleEdit(service)
     });
   /** Returns a `submitReview` `TableRowMenuAction` */
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.submitReview,
       icon: <FactCheck color="primary" fontSize="inherit" />,
-      serviceId: service.id
+      serviceId: service.id,
     });
   /** Returns a `delete` `TableRowMenuAction` */
   const deleteRowMenuItem = (service: ServiceListItem) =>
@@ -263,21 +261,21 @@ export default function Services() {
       action: ServiceContextMenuActions.delete,
       danger: true,
       icon: <Delete color="error" fontSize="inherit" />,
-      serviceId: service.id
+      serviceId: service.id,
     });
   /** Returns a `publish` `TableRowMenuAction` */
   const publishRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.publish,
       icon: <Check color="primary" fontSize="inherit" />,
-      serviceId: service.id
+      serviceId: service.id,
     });
   /** Returns an `unpublish` `TableRowMenuAction` */
   const unpublishRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.unpublish,
       icon: <Close color="primary" fontSize="inherit" />,
-      serviceId: service.id
+      serviceId: service.id,
     });
 
   /** Returns a list of `TableRowMenuAction` depending on service status and visibility */
@@ -328,7 +326,7 @@ export default function Services() {
     const raiseClickEvent = await showDialog({
       confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
-      title: t(`service.${options.action}.modal.title`)
+      title: t(`service.${options.action}.modal.title`),
     });
     if (raiseClickEvent) {
       switch (options.action) {
@@ -354,33 +352,33 @@ export default function Services() {
 
   const handlePublish = async (serviceId: string) => {
     await noContentFetchData("releaseService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
   };
 
   const handleUnpublish = async (serviceId: string) => {
     await noContentFetchData("unpublishService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
   };
 
   const handleDelete = async (serviceId: string) => {
     await noContentFetchData("deleteService", { serviceId }, tt.unknown, {
-      notify: "all"
+      notify: "all",
     });
   };
 
   const handleSubmitReview = async (
     serviceId: string,
-    auto_publish: boolean
+    auto_publish: boolean,
   ) => {
     await noContentFetchData(
       "reviewService",
       { body: { auto_publish }, serviceId },
       tt.unknown,
       {
-        notify: "all"
-      }
+        notify: "all",
+      },
     );
   };
 
@@ -392,19 +390,19 @@ export default function Services() {
       {
         id: currentSearchByServiceId,
         limit: pagination.limit,
-        offset: pagination.offset
+        offset: pagination.offset,
       },
       ServiceList,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
   };
 
   const handleSearchByServiceIdClick = (id?: string) => {
     setPagination({
       ...pagination,
-      offset: 0
+      offset: 0,
     });
     setCurrentSearchByServiceId(id);
   };
@@ -436,12 +434,12 @@ export default function Services() {
         maybeServiceData.right.pagination.limit
       ) {
         const servicesPlaceholders = Array(
-          maybeServiceData.right.pagination.count
+          maybeServiceData.right.pagination.count,
         ).fill(servicePlaceholder);
         servicesPlaceholders.splice(
           maybeServiceData.right.pagination.offset,
           maybeServiceData.right.value.length,
-          ...maybeServiceData.right.value
+          ...maybeServiceData.right.value,
         );
         setServices(servicesPlaceholders);
       }
@@ -470,12 +468,12 @@ export default function Services() {
               style={{ textDecoration: "none" }}
             >
               <Button
-                size="medium"
-                variant="contained"
-                startIcon={<Add />}
                 onClick={() => {
                   logToMixpanel("IO_BO_SERVICE_CREATE_START");
                 }}
+                size="medium"
+                startIcon={<Add />}
+                variant="contained"
               >
                 {t("service.actions.create")}
               </Button>
@@ -521,8 +519,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

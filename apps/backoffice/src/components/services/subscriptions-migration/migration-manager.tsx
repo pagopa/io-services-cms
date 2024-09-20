@@ -52,19 +52,18 @@ export const MigrationManager = () => {
   const { t } = useTranslation();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importInProgress, setImportInProgress] = useState(false);
-  const [migrationStatusList, setMigrationStatusList] = useState<
-    DelegateStatusPair[]
-  >();
+  const [migrationStatusList, setMigrationStatusList] =
+    useState<DelegateStatusPair[]>();
 
   const {
     data: migrationItemsData,
     fetchData: migrationItemsFetchData,
-    loading: migrationItemsLoading
+    loading: migrationItemsLoading,
   } = useFetch<MigrationItemList>();
   const {
     data: migrationDelegatesData,
     fetchData: migrationDelegatesFetchData,
-    loading: migrationDelegatesLoading
+    loading: migrationDelegatesLoading,
   } = useFetch<MigrationDelegateList>();
 
   const handleOpenImportModal = () => {
@@ -81,7 +80,7 @@ export const MigrationManager = () => {
   const getDelegateMigrationStatus = async (delegateId: string) => {
     try {
       const { data, status } = await axios.get<MigrationData>(
-        getMigrationOwnershipClaimsUrl(delegateId)
+        getMigrationOwnershipClaimsUrl(delegateId),
       );
       return { data, status };
     } catch (error) {
@@ -98,7 +97,7 @@ export const MigrationManager = () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
       const { status } = await axios.post<void>(
-        getMigrationOwnershipClaimsUrl(delegateId)
+        getMigrationOwnershipClaimsUrl(delegateId),
       );
       return { status };
     } catch (error) {
@@ -111,15 +110,15 @@ export const MigrationManager = () => {
     try {
       if (migrationDelegatesData && migrationDelegatesData.delegates) {
         const promises = migrationDelegatesData.delegates.map(
-          async delegate => {
+          async (delegate) => {
             const result = await getDelegateMigrationStatus(delegate.sourceId);
             if (result.status === 200) {
               pairs.push({
                 data: result.data,
-                delegate
+                delegate,
               });
             }
-          }
+          },
         );
         await Promise.all(promises);
         setMigrationStatusList([...pairs]);
@@ -139,8 +138,8 @@ export const MigrationManager = () => {
         buildSnackbarItem({
           message: "",
           severity: "success",
-          title: t("notifications.success")
-        })
+          title: t("notifications.success"),
+        }),
       );
       logToMixpanel("IO_BO_SERVICES_IMPORT_END", { result: "success" });
     } catch (error) {
@@ -148,8 +147,8 @@ export const MigrationManager = () => {
         buildSnackbarItem({
           message: JSON.stringify(error),
           severity: "error",
-          title: t("notifications.exceptionError")
-        })
+          title: t("notifications.exceptionError"),
+        }),
       );
       logToMixpanel("IO_BO_SERVICES_IMPORT_END", { result: error as string });
     } finally {
@@ -163,7 +162,7 @@ export const MigrationManager = () => {
       "getServicesMigrationStatus",
       {},
       MigrationItemList,
-      { notify: "errors" }
+      { notify: "errors" },
     );
   };
 
@@ -180,7 +179,7 @@ export const MigrationManager = () => {
         "getServicesMigrationDelegates",
         {},
         MigrationDelegateList,
-        { notify: "errors" }
+        { notify: "errors" },
       );
     } else {
       // reset DelegateStatusPair list

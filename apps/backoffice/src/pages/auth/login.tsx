@@ -19,10 +19,10 @@ export default function Login() {
   };
 
   const mixpanelSuperProperties = {
-    organization_name: session?.user?.institution.name,
-    organization_fiscal_code: session?.user?.institution.fiscalCode,
     institution_id: session?.user?.institution.id,
-    user_role: session?.user?.institution.role
+    organization_fiscal_code: session?.user?.institution.fiscalCode,
+    organization_name: session?.user?.institution.name,
+    user_role: session?.user?.institution.role,
   };
 
   const manageMixpanelLogin = () => {
@@ -47,7 +47,7 @@ export default function Login() {
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
       callbackUrl: "/",
-      identity_token
+      identity_token,
       //redirect: false
     });
   };
@@ -71,8 +71,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 

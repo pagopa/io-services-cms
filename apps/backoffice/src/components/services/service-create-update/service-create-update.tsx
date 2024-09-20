@@ -1,7 +1,7 @@
 import {
   BuilderStep,
   CreateUpdateMode,
-  CreateUpdateProcess
+  CreateUpdateProcess,
 } from "@/components/create-update-process";
 import { useDialog } from "@/components/dialog-provider";
 import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
@@ -9,21 +9,21 @@ import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import { logToMixpanel } from "@/utils/mix-panel";
-import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 
 import {
   ServiceBuilderStep1,
-  getValidationSchema as getVs1
+  getValidationSchema as getVs1,
 } from "./service-builder-step-1";
 import {
   ServiceBuilderStep2,
-  getValidationSchema as getVs2
+  getValidationSchema as getVs2,
 } from "./service-builder-step-2";
 import {
   ServiceBuilderStep3,
-  getValidationSchema as getVs3
+  getValidationSchema as getVs3,
 } from "./service-builder-step-3";
 
 const serviceDefaultData: ServiceCreateUpdatePayload = {
@@ -39,7 +39,7 @@ const serviceDefaultData: ServiceCreateUpdatePayload = {
     category: "",
     cta: {
       text: "",
-      url: ""
+      url: "",
     },
     custom_special_flow: "",
     privacy_url: "",
@@ -47,10 +47,10 @@ const serviceDefaultData: ServiceCreateUpdatePayload = {
     token_name: "",
     topic_id: "",
     tos_url: "",
-    web_url: ""
+    web_url: "",
   },
   name: "",
-  require_secure_channel: false
+  require_secure_channel: false,
 };
 
 export interface ServiceCreateUpdateProps {
@@ -64,19 +64,18 @@ export interface ServiceCreateUpdateProps {
 export const ServiceCreateUpdate = ({
   mode,
   onConfirm,
-  service
+  service,
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { data: topicsData, fetchData: topicsFetchData } = useFetch<
-    ServiceTopicList
-  >();
+  const { data: topicsData, fetchData: topicsFetchData } =
+    useFetch<ServiceTopicList>();
 
   const showDialog = useDialog();
   const handleCancel = async () => {
     const confirmed = await showDialog({
       message: t("forms.cancel.description"),
-      title: t("forms.cancel.title")
+      title: t("forms.cancel.title"),
     });
     if (confirmed) {
       console.log("operation cancelled");
@@ -97,20 +96,20 @@ export const ServiceCreateUpdate = ({
       description: "forms.service.steps.step1.description",
       label: "forms.service.steps.step1.label",
       moreInfoUrl: "https://docs.pagopa.it/manuale-servizi",
-      validationSchema: getVs1(t)
+      validationSchema: getVs1(t),
     },
     {
       content: <ServiceBuilderStep2 />,
       description: "forms.service.steps.step2.description",
       label: "forms.service.steps.step2.label",
-      validationSchema: getVs2(t)
+      validationSchema: getVs2(t),
     },
     {
       content: <ServiceBuilderStep3 />,
       description: "forms.service.steps.step3.description",
       label: "forms.service.steps.step3.label",
-      validationSchema: getVs3(t)
-    }
+      validationSchema: getVs3(t),
+    },
   ];
 
   useEffect(() => {
@@ -122,12 +121,12 @@ export const ServiceCreateUpdate = ({
     <CreateUpdateProcess
       confirmButtonLabels={{
         create: "forms.service.buttons.create",
-        update: "forms.service.buttons.update"
+        update: "forms.service.buttons.update",
       }}
       itemToCreateUpdate={service ?? serviceDefaultData}
       mode={mode}
       onCancel={() => handleCancel()}
-      onConfirm={value => onConfirm(value)}
+      onConfirm={(value) => onConfirm(value)}
       steps={serviceBuilderSteps}
     />
   );

@@ -1,3 +1,4 @@
+import { logToMixpanel } from "@/utils/mix-panel";
 import { Grid, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useTranslation } from "next-i18next";
@@ -7,7 +8,6 @@ import { ApiKeyValue } from "../api-keys";
 import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 import { MarkdownView } from "../markdown-view";
-import { logToMixpanel } from "@/utils/mix-panel";
 
 export interface CardRowType {
   /** If true, a *""copy to clipboard"* icon is shown on right side of *value* */
@@ -37,22 +37,22 @@ export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
 
   const handleMixpanel = (label: string) => {
-    if (label == "keys.primary.title") {
+    if (label === "keys.primary.title") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
+        entryPoint: "Overview page",
         keyType: "primary",
-        entryPoint: "Overview page"
       });
-    } else if (label == "keys.secondary.title") {
+    } else if (label === "keys.secondary.title") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
+        entryPoint: "Overview page",
         keyType: "secondary",
-        entryPoint: "Overview page"
       });
     }
   };
 
   const renderValue = (
     value: ReactNode | string | undefined,
-    children: ReactNode
+    children: ReactNode,
   ) => (
     <LoaderSkeleton loading={value === undefined} style={{ width: "100%" }}>
       {children}
@@ -112,7 +112,7 @@ export const CardRows = ({ rows }: CardRowsProps) => {
             </NextLink>
           ) : (
             renderTextValue(row)
-          )
+          ),
         );
       case "markdown":
         return <MarkdownView>{(row.value as string) ?? ""}</MarkdownView>;
@@ -124,7 +124,7 @@ export const CardRows = ({ rows }: CardRowsProps) => {
             {row.copyableValue ? (
               <CopyToClipboard text={(row.value as string) ?? ""} />
             ) : null}
-          </>
+          </>,
         );
     }
   };

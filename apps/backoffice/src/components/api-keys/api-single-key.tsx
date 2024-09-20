@@ -6,7 +6,7 @@ import {
   Grid,
   IconButton,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
@@ -26,9 +26,9 @@ export const ApiSingleKey = ({
   keyType,
   keyValue,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onRotateClick,
   onBlockClick,
-  onHandleMixpanel
+  onHandleMixpanel,
+  onRotateClick,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
@@ -42,7 +42,7 @@ export const ApiSingleKey = ({
             <IconButton
               aria-label="show-hide"
               color="primary"
-              onClick={_ => setIsVisible(!isVisible)}
+              onClick={(_) => setIsVisible(!isVisible)}
               sx={{ margin: 1 }}
             >
               {isVisible ? (
@@ -55,8 +55,8 @@ export const ApiSingleKey = ({
         </Box>
         <ApiKeyValue
           handleMixpanel={onHandleMixpanel}
-          keyValue={keyValue}
           isVisible={isVisible}
+          keyValue={keyValue}
         />
       </Grid>
       <Grid

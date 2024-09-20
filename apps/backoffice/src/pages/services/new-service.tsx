@@ -25,33 +25,32 @@ export default function NewService() {
   const { fetchData: serviceFetchData } = useFetch<ServiceLifecycle>();
 
   const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
-    const maybeServicePayload = fromServiceCreateUpdatePayloadToApiServicePayload(
-      service
-    );
+    const maybeServicePayload =
+      fromServiceCreateUpdatePayloadToApiServicePayload(service);
     if (E.isRight(maybeServicePayload)) {
       await serviceFetchData(
         "createService",
         {
-          body: maybeServicePayload.right
+          body: maybeServicePayload.right,
         },
         ServiceLifecycle,
-        { notify: "all" }
+        { notify: "all" },
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        result: "success",
         serviceId: "", // Missing New servie ID
-        result: "success"
       });
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
           message: readableReport(maybeServicePayload.left),
           severity: "error",
-          title: t("notifications.validationError")
-        })
+          title: t("notifications.validationError"),
+        }),
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        result: readableReport(maybeServicePayload.left),
         serviceId: "Error",
-        result: readableReport(maybeServicePayload.left)
       });
     }
     // redirect to services list in both cases
@@ -76,8 +75,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale))
-    }
+      ...(await serverSideTranslations(locale)),
+    },
   };
 }
 
