@@ -33,6 +33,8 @@ tags:
     description: Institutions API specification
   - name: manage-keys
     description: Manage Keys API specification
+  - name: manage-subscriptions
+    description: Manage Subscriptions API specification
 paths:
   /info:
     get:
@@ -868,6 +870,7 @@ paths:
           description: Internal server error
   /keys/manage:
     get:
+      deprecated: true
       tags:
         - manage-keys
       summary: Retrieve manage keys
@@ -894,6 +897,7 @@ paths:
           description: Internal server error
   /keys/manage/{keyType}:
     put:
+      deprecated: true
       tags:
         - manage-keys
       summary: Regenerate manage key
@@ -929,6 +933,7 @@ paths:
           description: Internal server error
   /keys/manage/cidrs:
     get:
+      deprecated: true
       tags:
         - manage-keys
       summary: Retrieve manage key authorized CIDRs
@@ -954,6 +959,7 @@ paths:
         '500':
           description: Internal server error
     put:
+      deprecated: true
       tags:
         - manage-keys
       summary: Update manage key authorized CIDRs
@@ -971,6 +977,210 @@ paths:
       responses:
         '200':
           description: Manage key Authorized CIDRs successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageKeyCIDRs'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /subscriptions:
+    get:
+      tags:
+        - manage-subscriptions
+      summary: Retrieve manage subscriptions
+      description: Retrieve all user authorized manage subscriptions
+      operationId: getManageSubscriptions
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Manage keys fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - manage-subscriptions
+      summary: Upsert manage-group subscription
+      description: Upsert manage subscription related to a group
+      operationId: upsertManageGroupSubscription
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: An Authorized CIDRs body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateManageGroupSubscription'
+        required: true
+      responses:
+        '200':
+          description: Manage key Authorized CIDRs successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /subscriptions/{subscriptionId}/keys:
+    get:
+      tags:
+        - manage-subscriptions
+      summary: Retrieve manage subscription keys
+      description: Retrieve the provided manage subscription keys
+      operationId: getManageSubscriptionKeys
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: ID of the subscription
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Manage keys fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionKeys'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /subscriptions/{subscriptionId}/keys/{keyType}:
+    put:
+      tags:
+        - manage-subscriptions
+      summary: Regenerate manage subscription key
+      description: Regenerate manage subscription key by key type
+      operationId: regenerateManageSubscriptionKey
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: ID of the subscription
+          required: true
+          schema:
+            type: string
+        - name: keyType
+          in: path
+          description: Key type
+          required: true
+          schema:
+            $ref: '#/components/schemas/SubscriptionKeyType'
+      responses:
+        '200':
+          description: Manage key regenerated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionKeys'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /subscriptions/{subscriptionId}/cidrs:
+    get:
+      tags:
+        - manage-subscriptions
+      summary: Retrieve manage subscription key authorized CIDRs
+      description: Retrieve manage subscription key authorized CIDRs
+      operationId: getManageSubscriptionAuthorizedCidrs
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: ID of the subscription
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Manage subscription authorized CIDRs fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageKeyCIDRs'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - manage-subscriptions
+      summary: Update manage subscription key authorized CIDRs
+      description: Update manage subscription key authorized CIDRs
+      operationId: updateManageSubscriptionAuthorizedCidrs
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: ID of the subscription
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: An Authorized CIDRs body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageKeyCIDRs'
+        required: true
+      responses:
+        '200':
+          description: Manage subscription Authorized CIDRs successfully updated
           content:
             application/json:
               schema:
@@ -1119,7 +1329,21 @@ components:
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
     ManageKeyCIDRs:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/ManageKeyCIDRs'
+      type: object
+      description: Service basic data
+      properties:
+        cidrs:
+          description: >-
+            List of Allowed source IPs or CIDRs associated to the Manage key.
+            When empty, every IP address it's authorized for this Manage Keys.
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
+      required:
+        - cidrs
+        - description
+        - organization
+        - metadata
     MigrationItemList:
       type: object
       properties:
@@ -1304,7 +1528,12 @@ components:
         logo_url:
           type: string
     SelfCareIdentity:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/backoffice-schemas.yaml#/SelfCareIdentity'
+      type: object
+      properties:
+        identity_token:
+          type: string
+      required:
+        - identity_token
     ServiceList:
       type: object
       properties:
@@ -1364,6 +1593,23 @@ components:
         - size
         - totalElements
         - totalPages
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+    CreateManageGroupSubscription:
+      type: object
+      properties:
+        groupId:
+          type: string
+      required:
+        - groupId
   securitySchemes:
     cookieAuth:
       type: apiKey

@@ -124,7 +124,6 @@ const { getApimService } = vi.hoisted(() => ({
   getApimService: vi.fn().mockReturnValue({
     getUserByEmail,
     getSubscription,
-    upsertSubscription,
     createOrUpdateUser,
     createGroupUser,
   }),
@@ -132,6 +131,7 @@ const { getApimService } = vi.hoisted(() => ({
 
 vi.mock("@/lib/be/apim-service", () => ({
   getApimService,
+  upsertSubscription,
 }));
 
 const { jwtVerify } = vi.hoisted(() => ({
@@ -524,7 +524,7 @@ describe("Authorize", () => {
     ).rejects.toThrowError(`Failed to create subscription manage`);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledTimes(3);
+    expect(getApimService).toHaveBeenCalledTimes(2);
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -536,8 +536,8 @@ describe("Authorize", () => {
     );
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
+      "MANAGE",
       aValidApimUser.id,
-      `MANAGE-${aValidApimUser.name}`,
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
@@ -560,7 +560,7 @@ describe("Authorize", () => {
     ).rejects.toThrowError(/is not a valid/);
 
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledTimes(3);
+    expect(getApimService).toHaveBeenCalledTimes(2);
     expect(getUserByEmail).toHaveBeenCalledOnce();
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -572,8 +572,8 @@ describe("Authorize", () => {
     );
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
+      "MANAGE",
       aValidApimUser.id,
-      `MANAGE-${aValidApimUser.name}`,
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
@@ -679,7 +679,7 @@ describe("Authorize", () => {
 
     const apimUserGroupsLength = mockConfig.APIM_USER_GROUPS.split(",").length;
     expect(jwtVerify).toHaveBeenCalledOnce();
-    expect(getApimService).toHaveBeenCalledTimes(5 + apimUserGroupsLength);
+    expect(getApimService).toHaveBeenCalledTimes(4 + apimUserGroupsLength);
     expect(getUserByEmail).toHaveBeenCalledTimes(2);
     expect(getUserByEmail).toHaveBeenCalledWith(
       getExpectedUserEmailReqParam(aValidJwtPayload.organization),
@@ -703,8 +703,8 @@ describe("Authorize", () => {
     );
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
+      "MANAGE",
       aValidApimUser.id,
-      `MANAGE-${aValidApimUser.name}`,
     );
     expect(getInstitutionById).toHaveBeenCalledOnce();
     expect(getInstitutionById).toHaveBeenCalledWith(

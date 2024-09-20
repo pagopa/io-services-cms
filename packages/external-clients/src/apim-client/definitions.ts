@@ -10,11 +10,4 @@ export type AzureClientSecretCredential = t.TypeOf<
   typeof AzureClientSecretCredential
 >;
 
-/**
- * Utilities to handle subscriptions api keys
- */
-export enum ApiKeyTypeEnum {
-  "MANAGE" = "MANAGE",
-}
-
-export const MANAGE_APIKEY_PREFIX = "MANAGE-";
+export type SubscriptionType = "MANAGE" | "MANAGE_GROUP";

@@ -191,3 +191,34 @@ export const getApimHealth: () => Promise<void> = async () => {
     throw new HealthChecksError("apim", e);
   }
 };
+
+export function upsertSubscription(
+  type: "MANAGE",
+  ownerId: string,
+): ReturnType<ApimUtils.ApimService["upsertSubscription"]>;
+export function upsertSubscription(
+  type: "MANAGE_GROUP",
+  ownerId: string,
+  groupId: string,
+): ReturnType<ApimUtils.ApimService["upsertSubscription"]>;
+export function upsertSubscription(
+  type: ApimUtils.definitions.SubscriptionType,
+  ownerId: string,
+  value?: string,
+): ReturnType<ApimUtils.ApimService["upsertSubscription"]> {
+  let subscriptionId: string;
+  switch (type) {
+    case "MANAGE":
+      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + ownerId;
+      break;
+    case "MANAGE_GROUP":
+      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + value;
+      break;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = type;
+      throw new Error("Invalid type");
+  }
+
+  return getApimService().upsertSubscription(ownerId, subscriptionId);
+}

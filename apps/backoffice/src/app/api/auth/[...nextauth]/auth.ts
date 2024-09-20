@@ -2,7 +2,7 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { Institution } from "@/generated/selfcare/Institution";
-import { getApimService } from "@/lib/be/apim-service";
+import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import {
   ManagedInternalError,
   apimErrorToManagedInternalError,
@@ -262,7 +262,7 @@ const getUserSubscriptionManage = (
     getApimService(),
     (apimService) =>
       apimService.getSubscription(
-        ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
+        ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + apimUser.name,
       ),
     TE.foldW(
       flow(
@@ -272,7 +272,7 @@ const getUserSubscriptionManage = (
             : E.left(
                 apimErrorToManagedInternalError(
                   `Failed to fetch user subscription manage (${
-                    ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
+                    ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + apimUser.name
                   })`,
                   err,
                 ),
@@ -286,20 +286,15 @@ const getUserSubscriptionManage = (
 const createSubscriptionManage = (
   apimUser: ApimUser,
 ): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
-  pipe(getApimService(), (apimService) =>
-    pipe(
-      apimService.upsertSubscription(
-        apimUser.id,
-        ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
-      ),
-      TE.mapLeft((err) =>
-        "statusCode" in err
-          ? apimErrorToManagedInternalError(
-              "Failed to create subscription manage",
-              err,
-            )
-          : err,
-      ),
+  pipe(
+    upsertSubscription("MANAGE", apimUser.id),
+    TE.mapLeft((err) =>
+      "statusCode" in err
+        ? apimErrorToManagedInternalError(
+            "Failed to create subscription manage",
+            err,
+          )
+        : err,
     ),
   );
 

@@ -36,10 +36,7 @@ import {
   FilterSupportedFunctionsEnum,
   buildApimFilter,
 } from "./apim-filters";
-import {
-  AzureClientSecretCredential,
-  MANAGE_APIKEY_PREFIX,
-} from "./definitions";
+import { AzureClientSecretCredential } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -54,6 +51,9 @@ export const ApimRestError = t.intersection([
   }),
 ]);
 export type ApimRestError = t.TypeOf<typeof ApimRestError>;
+
+export const SUBSCRIPTION_MANAGE_PREFIX = "MANAGE-";
+export const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
 
 export const mapApimRestError =
   (resource: string) =>
@@ -666,7 +666,7 @@ const subscriptionsExceptManageOneApimFilter = () =>
       field: FilterFieldEnum.name,
       filterType: FilterSupportedFunctionsEnum.startswith,
       inverse: true,
-      value: MANAGE_APIKEY_PREFIX,
+      value: SUBSCRIPTION_MANAGE_PREFIX,
     }),
     O.getOrElse(() => ""),
   );

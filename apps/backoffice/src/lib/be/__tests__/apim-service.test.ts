@@ -1,14 +1,18 @@
-import * as E from "fp-ts/lib/Either";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { getApimRestClient } from "../apim-service";
 import { faker } from "@faker-js/faker";
+import * as E from "fp-ts/lib/Either";
+import { afterEach, describe, expect, it, Mock, vi } from "vitest";
+import { getApimRestClient, upsertSubscription } from "../apim-service";
 
 const mocks: {
   aServiceId: string;
   anUserId: string;
+  aGroupId: string;
+  upsertSubscription: Mock;
 } = vi.hoisted(() => ({
   aServiceId: "aServiceId",
   anUserId: "anUserId",
+  aGroupId: "aGroupId",
+  upsertSubscription: vi.fn(),
 }));
 
 const { create, isAxiosError } = vi.hoisted(() => ({
@@ -60,6 +64,39 @@ vi.hoisted(() => {
     API_APIM_MOCKING: "false",
   };
 });
+
+const ApimUtils = vi.hoisted(() => {
+  const apimClientMock = { foo: "foo" };
+  return {
+    getApimClient: vi.fn((clientSecretCreds, subscriptionId) => {
+      expect(clientSecretCreds).containSubset({
+        AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID:
+          "AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID",
+        AZURE_CLIENT_SECRET_CREDENTIAL_SECRET:
+          "AZURE_CLIENT_SECRET_CREDENTIAL_SECRET",
+        AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID:
+          "AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID",
+      });
+      expect(subscriptionId).toEqual("AZURE_SUBSCRIPTION_ID");
+      return apimClientMock;
+    }),
+    getApimService: vi.fn((apimClient, resourceGroup, apim, productName) => {
+      expect(apimClient).toStrictEqual(apimClientMock);
+      expect(resourceGroup).toEqual("AZURE_APIM_RESOURCE_GROUP");
+      expect(apim).toEqual("AZURE_APIM");
+      expect(productName).toEqual("AZURE_APIM_PRODUCT_NAME");
+      return {
+        upsertSubscription: mocks.upsertSubscription,
+      };
+    }),
+    SUBSCRIPTION_MANAGE_PREFIX: "MANAGE-",
+    SUBSCRIPTION_MANAGE_GROUP_PREFIX: "MANAGE-GROUP-",
+  };
+});
+
+vi.mock("@io-services-cms/external-clients", () => ({
+  ApimUtils,
+}));
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -204,4 +241,36 @@ describe("Apim Rest Client", () => {
       expect(E.isLeft(result)).toBeTruthy();
     });
   });
+});
+
+describe("upsertSubscription", () => {
+  it("should throw Error when provided a bad type", () => {
+    expect(() => upsertSubscription("bad type" as any, "ownerId")).toThrowError(
+      "Invalid type",
+    );
+  });
+
+  it.each`
+    type              | ownerId           | value             | expectedSubId
+    ${"MANAGE"}       | ${mocks.anUserId} | ${undefined}      | ${"MANAGE-" + mocks.anUserId}
+    ${"MANAGE_GROUP"} | ${mocks.anUserId} | ${mocks.aGroupId} | ${"MANAGE-GROUP-" + mocks.aGroupId}
+  `(
+    "should call upsertSubscription with proper subscriptionId when type is $type",
+    ({ type, ownerId, value, expectedSubId }) => {
+      const upsertSubscriptionResultMock = { bar: "bar" };
+      mocks.upsertSubscription.mockReturnValueOnce(
+        upsertSubscriptionResultMock,
+      );
+
+      const res = upsertSubscription(type, ownerId, value);
+
+      expect(res).toStrictEqual(upsertSubscriptionResultMock);
+
+      expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
+      expect(mocks.upsertSubscription).toHaveBeenCalledWith(
+        ownerId,
+        expectedSubId,
+      );
+    },
+  );
 });
