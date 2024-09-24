@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable  @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { getConfiguration } from "@/config";
 import mixpanel from "mixpanel-browser";
@@ -41,27 +41,27 @@ export const mixpanelSetup = () => {
     ignore_dnt: true,
     persistence: "localStorage",
     track_pageview: false,
-    verbose: true
+    verbose: true,
   });
 };
 
-type MixPanelEvents<
-  T extends keyof MixPanelEventsStructure
-> = MixPanelEventsStructure[T];
+type MixPanelEvents<T extends keyof MixPanelEventsStructure> =
+  MixPanelEventsStructure[T];
 
-type OperationId<Event extends MixPanelEventsStructure> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface OperationId<Event extends MixPanelEventsStructure> {
   eventKey: Extract<keyof Event, string>;
-};
+}
 
 export const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
-  mixpanelEventData: MixPanelEvents<T>
+  mixpanelEventData: MixPanelEvents<T>,
 ) => {
   let currentEvent;
-  let currentEventData = {};
+  let currentEventData;
 
   // check to avoid multiple logs
-  if (currentEvent != operationId || currentEventData != mixpanelEventData) {
+  if (currentEvent !== operationId || currentEventData !== mixpanelEventData) {
     currentEvent = operationId;
     currentEventData = mixpanelEventData;
     mixpanel.track(operationId, mixpanelEventData);

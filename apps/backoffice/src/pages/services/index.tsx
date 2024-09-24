@@ -448,7 +448,7 @@ export default function Services() {
   }, [servicesData]);
 
   useEffect(() => {
-    logToMixpanel("IO_BO_SERVICES_PAGE");
+    logToMixpanel("IO_BO_SERVICES_PAGE", {});
   }, []);
 
   return (
