@@ -469,7 +469,7 @@ export default function Services() {
             >
               <Button
                 onClick={() => {
-                  logToMixpanel("IO_BO_SERVICE_CREATE_START");
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {});
                 }}
                 size="medium"
                 startIcon={<Add />}
