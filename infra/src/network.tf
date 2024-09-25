@@ -3,7 +3,7 @@
 #
 
 module "app_snet" {
-  source               = "github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v7.45.0"
+  source               = "github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v8.44.2"
   name                 = "${local.project}-${local.application_basename}-snet"
   address_prefixes     = var.subnets_cidrs.api
   resource_group_name  = var.io_common.resource_group_name
@@ -31,7 +31,7 @@ module "app_snet" {
 # Postgres Flexible Server subnet
 #
 module "postgres_flexible_snet" {
-  source                                    = "github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v7.45.0"
+  source                                    = "github.com/pagopa/terraform-azurerm-v3.git//subnet?ref=v8.44.2"
   name                                      = "${local.project}-${local.application_basename}-pgres-flexible-snet"
   address_prefixes                          = var.subnets_cidrs.postgres
   resource_group_name                       = var.io_common.resource_group_name

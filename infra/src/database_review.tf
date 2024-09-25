@@ -1,6 +1,6 @@
 # https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-compare-single-server-flexible-server
 module "postgres_flexible_server_private" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v7.45.0"
+  source = "github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server?ref=v8.44.2"
 
   name                = "${local.project}-${local.application_basename}-private-pgflex"
   location            = azurerm_resource_group.rg.location
