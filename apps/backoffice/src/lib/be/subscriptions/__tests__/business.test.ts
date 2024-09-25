@@ -50,7 +50,7 @@ describe("upsertManageSubscription", () => {
     ${"MANAGE"}       | ${undefined}
     ${"MANAGE_GROUP"} | ${mocks.aGroupId}
   `(
-    "should return the new ${subType} Subscription",
+    "should return the new $subType Subscription",
     async ({ subType, groupId }) => {
       const ownerId = mocks.anOwnerId;
       mocks.upsertSubscription.mockReturnValueOnce(
