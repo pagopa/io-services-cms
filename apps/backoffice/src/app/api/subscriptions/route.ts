@@ -1,6 +1,11 @@
 import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroupSubscription";
-import { handleInternalErrorResponse, handlerErrorLog } from "@/lib/be/errors";
+import { isBackofficeUserAdmin } from "@/lib/be/authz";
+import {
+  handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+  handlerErrorLog,
+} from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { upsertManageSubscription } from "@/lib/be/subscriptions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
@@ -19,6 +24,10 @@ export const PUT = withJWTAuthHandler(
     request: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse> => {
+    if (!isBackofficeUserAdmin(backofficeUser)) {
+      return handleForbiddenErrorResponse("Role not authorized");
+    }
+
     let jsonBody;
     try {
       jsonBody = await request.json();
@@ -26,9 +35,8 @@ export const PUT = withJWTAuthHandler(
       return NextResponse.json(
         {
           detail: "invalid JSON body",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           status: HTTP_STATUS_BAD_REQUEST,
-          title: "validationError",
+          title: "ValidationError",
         },
         { status: HTTP_STATUS_BAD_REQUEST },
       );
@@ -40,7 +48,7 @@ export const PUT = withJWTAuthHandler(
         {
           detail: readableReport(decodedBody.left),
           status: HTTP_STATUS_BAD_REQUEST,
-          title: CreateManageGroupSubscription.name,
+          title: "ValidationError",
         },
         { status: HTTP_STATUS_BAD_REQUEST },
       );

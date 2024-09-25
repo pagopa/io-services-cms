@@ -192,20 +192,23 @@ export const getApimHealth: () => Promise<void> = async () => {
   }
 };
 
+type UpsertSubscriptionResult = ReturnType<
+  ApimUtils.ApimService["upsertSubscription"]
+>;
 export function upsertSubscription(
   type: "MANAGE",
   ownerId: string,
-): ReturnType<ApimUtils.ApimService["upsertSubscription"]>;
+): UpsertSubscriptionResult;
 export function upsertSubscription(
   type: "MANAGE_GROUP",
   ownerId: string,
   groupId: string,
-): ReturnType<ApimUtils.ApimService["upsertSubscription"]>;
+): UpsertSubscriptionResult;
 export function upsertSubscription(
   type: ApimUtils.definitions.SubscriptionType,
   ownerId: string,
   value?: string,
-): ReturnType<ApimUtils.ApimService["upsertSubscription"]> {
+): UpsertSubscriptionResult {
   let subscriptionId: string;
   switch (type) {
     case "MANAGE":
