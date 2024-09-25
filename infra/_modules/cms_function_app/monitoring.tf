@@ -153,59 +153,6 @@ resource "azurerm_monitor_autoscale_setting" "cms_fn" {
 # Alerts #
 ##########
 
-resource "azurerm_monitor_metric_alert" "cms_fn_health_check" {
-  name                = "${module.cms_fn.function_app.function_app.name}-health-check-failed"
-  resource_group_name = module.cms_fn.function_app.resource_group_name
-  scopes              = [module.cms_fn.function_app.function_app.id]
-  description         = "${module.cms_fn.function_app.function_app.name} health check failed"
-  severity            = 0
-  frequency           = "PT5M"
-  auto_mitigate       = true
-
-  criteria {
-    metric_namespace = "Microsoft.Web/sites"
-    metric_name      = "HealthCheckStatus"
-    aggregation      = "Average"
-    operator         = "LessThan"
-    threshold        = 50
-  }
-
-  action {
-    action_group_id = data.azurerm_monitor_action_group.error_action_group.id
-  }
-
-  tags = var.tags
-}
-
-resource "azurerm_monitor_metric_alert" "cms_fn_st_low_availability" {
-  name                = "[${module.cms_fn.storage_account.name}] Low Availability"
-  resource_group_name = module.cms_fn.function_app.resource_group_name
-  scopes              = [module.cms_fn.storage_account.id]
-  description         = "The average availability is less than 99.8%. Runbook: not needed."
-  severity            = 0
-  window_size         = "PT5M"
-  frequency           = "PT5M"
-  auto_mitigate       = true
-
-  # Metric info
-  # https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/metrics-supported#microsoftstoragestorageaccounts
-  criteria {
-    metric_namespace       = "Microsoft.Storage/storageAccounts"
-    metric_name            = "Availability"
-    aggregation            = "Average"
-    operator               = "LessThan"
-    threshold              = 99.8
-    skip_metric_validation = false
-  }
-
-  action {
-    action_group_id = data.azurerm_monitor_action_group.error_action_group.id
-  }
-
-  tags = var.tags
-}
-
-
 // Storage Account Alerts
 
 resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
