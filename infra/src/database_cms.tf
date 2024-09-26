@@ -26,7 +26,7 @@ module "cosmosdb_account" {
   additional_geo_locations = [{
     location          = "italynorth"
     failover_priority = 1
-    zone_redundant    = false
+    zone_redundant    = true
   }]
 
   consistency_policy = {
