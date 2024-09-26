@@ -10,4 +10,14 @@ locals {
     services_details      = "services"
   }
 }
-  
+
+# Region ITN
+locals {
+  project_itn        = "${var.prefix}-${var.env_short}-${local.itn_location_short}"
+  itn_location       = "italynorth"
+  itn_location_short = "itn"
+  common_project_itn = "${local.project}-${local.itn_location_short}"
+
+  vnet_common_name_itn                = "${local.common_project_itn}-common-vnet-01"
+  vnet_common_resource_group_name_itn = "${local.common_project_itn}-common-rg-01"
+}

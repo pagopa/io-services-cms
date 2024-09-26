@@ -24,9 +24,9 @@ module "cosmosdb_account" {
   enable_automatic_failover        = true
 
   additional_geo_locations = [{
-    location          = "northeurope"
+    location          = "italynorth"
     failover_priority = 1
-    zone_redundant    = false
+    zone_redundant    = true
   }]
 
   consistency_policy = {
