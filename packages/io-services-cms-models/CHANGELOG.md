@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.20.1
+
+### Patch Changes
+
+- d13a232: add create subscription managa group handler and business logic
+
 ## 1.20.0
 
 ### Minor Changes

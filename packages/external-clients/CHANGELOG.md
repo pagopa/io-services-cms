@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.6
+
+### Patch Changes
+
+- d13a232: add create subscription managa group handler and business logic
+
 ## 1.1.5
 
 ### Patch Changes
