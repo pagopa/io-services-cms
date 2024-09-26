@@ -1,4 +1,6 @@
 import { Subscription } from "@/generated/api/Subscription";
+import { ApimUtils } from "@io-services-cms/external-clients";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
 import { upsertSubscription } from "../apim-service";
@@ -43,5 +45,10 @@ export async function upsertManageSubscription(
     );
   }
 
-  return { id: maybeSubscription.right.id, name: maybeSubscription.right.name };
+  return {
+    id: ApimUtils.parseIdFromFullPath(
+      maybeSubscription.right.id as NonEmptyString,
+    ),
+    name: maybeSubscription.right.name,
+  };
 }

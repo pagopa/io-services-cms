@@ -52,14 +52,20 @@ describe("upsertManageSubscription", () => {
   `(
     "should return the new $subType Subscription",
     async ({ subType, groupId }) => {
+      const id = "id";
       const ownerId = mocks.anOwnerId;
       mocks.upsertSubscription.mockReturnValueOnce(
-        TE.right({ id: "id", name: "name", foo: "foo", bar: "bar" }),
+        TE.right({
+          id: `/full/path/${id}`,
+          name: "name",
+          foo: "foo",
+          bar: "bar",
+        }),
       );
 
       await expect(
         upsertManageSubscription(ownerId, groupId),
-      ).resolves.toStrictEqual({ id: "id", name: "name" });
+      ).resolves.toStrictEqual({ id, name: "name" });
 
       const params = groupId ? [subType, ownerId, groupId] : [subType, ownerId];
       expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
