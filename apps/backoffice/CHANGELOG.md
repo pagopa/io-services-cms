@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.13.0
+
+### Minor Changes
+
+- d13a232: add create subscription managa group handler and business logic
+
+### Patch Changes
+
+- Updated dependencies [d13a232]
+  - @io-services-cms/models@1.20.1
+  - @io-services-cms/external-clients@1.1.6
+
 ## 1.12.1
 
 ### Patch Changes
