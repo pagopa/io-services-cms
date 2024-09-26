@@ -40,7 +40,7 @@ const isServiceOwnerIncludedInList = (
     TE.map(({ ownerId }) =>
       pipe(
         ownerId as NonEmptyString,
-        ApimUtils.parseOwnerIdFullPath,
+        ApimUtils.parseIdFromFullPath,
         isElementAllowedOnList(inclusionList),
       ),
     ),
@@ -128,6 +128,6 @@ export const isUserEnabledForRequestReviewLegacy = (
 ): boolean =>
   pipe(
     apimUserId,
-    ApimUtils.parseOwnerIdFullPath,
+    ApimUtils.parseIdFromFullPath,
     isElementAllowedOnList(config.USERID_REQUEST_REVIEW_LEGACY_INCLUSION_LIST),
   );

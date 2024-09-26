@@ -3,7 +3,7 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getApimService, parseOwnerIdFullPath } from "..";
+import { getApimService, parseIdFromFullPath } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
 
 afterEach(() => {
@@ -1402,7 +1402,7 @@ describe("ApimService Test", () => {
 
   describe("Get Owner Id from Full Path", () => {
     it("should retrieve the ID", () => {
-      const res = parseOwnerIdFullPath(
+      const res = parseIdFromFullPath(
         "/subscriptions/subid/resourceGroups/{resourceGroup}/providers/Microsoft.ApiManagement/service/{apimService}/users/1234a75ae4bbd512a88c680x" as NonEmptyString,
       );
       expect(res).toBe("1234a75ae4bbd512a88c680x");
