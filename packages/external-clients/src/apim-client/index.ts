@@ -2,6 +2,7 @@ import {
   ApiManagementClient,
   GroupContract,
   ProductContract,
+  Resource,
   SubscriptionContract,
   SubscriptionListSecretsResponse,
   UserContract,
@@ -9,6 +10,7 @@ import {
   UserGetResponse,
 } from "@azure/arm-apimanagement";
 import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -34,10 +36,7 @@ import {
   FilterSupportedFunctionsEnum,
   buildApimFilter,
 } from "./apim-filters";
-import {
-  AzureClientSecretCredential,
-  MANAGE_APIKEY_PREFIX,
-} from "./definitions";
+import { AzureClientSecretCredential } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -52,6 +51,9 @@ export const ApimRestError = t.intersection([
   }),
 ]);
 export type ApimRestError = t.TypeOf<typeof ApimRestError>;
+
+export const SUBSCRIPTION_MANAGE_PREFIX = "MANAGE-";
+export const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
 
 export const mapApimRestError =
   (resource: string) =>
@@ -141,16 +143,16 @@ export interface ApimService {
     keyType: SubscriptionKeyType,
   ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
   readonly upsertSubscription: (
-    productId: string,
     ownerId: string,
     subscriptionId: string,
-  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
 }
 
 export const getApimService = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
+  apimProductName: NonEmptyString,
 ): ApimService => ({
   createGroupUser: (groupId, userId) =>
     createGroupUser(
@@ -215,14 +217,37 @@ export const getApimService = (
       serviceId,
       keyType,
     ),
-  upsertSubscription: (productId, ownerId, subscriptionId) =>
-    upsertSubscription(
-      apimClient,
-      apimResourceGroup,
-      apimServiceName,
-      productId,
-      ownerId,
-      subscriptionId,
+  upsertSubscription: (ownerId, subscriptionId) =>
+    pipe(
+      getProductByName(
+        apimClient,
+        apimResourceGroup,
+        apimServiceName,
+        apimProductName,
+      ),
+      TE.chainW(
+        TE.fromOption(
+          () => new Error(`No product found with name '${apimProductName}'`),
+        ),
+      ),
+      TE.chainW(pickId),
+      TE.bindTo("productId"),
+      TE.bind("userId", () =>
+        pipe(
+          getUser(apimClient, apimResourceGroup, apimServiceName, ownerId),
+          TE.chainW(pickId),
+        ),
+      ),
+      TE.chainW(({ productId, userId }) =>
+        upsertSubscription(
+          apimClient,
+          apimResourceGroup,
+          apimServiceName,
+          productId,
+          userId,
+          subscriptionId,
+        ),
+      ),
     ),
 });
 
@@ -634,14 +659,14 @@ const createGroupUser = (
  *
  * @returns API Management `$filter` property
  */
-export const subscriptionsExceptManageOneApimFilter = () =>
+const subscriptionsExceptManageOneApimFilter = () =>
   pipe(
     buildApimFilter({
       composeFilter: FilterCompositionEnum.none,
       field: FilterFieldEnum.name,
       filterType: FilterSupportedFunctionsEnum.startswith,
       inverse: true,
-      value: MANAGE_APIKEY_PREFIX,
+      value: SUBSCRIPTION_MANAGE_PREFIX,
     }),
     O.getOrElse(() => ""),
   );
@@ -667,6 +692,19 @@ interface Delegate {
   lastName?: string;
   permissions: (string | undefined)[];
 }
+
+// utility to extract a non-empty id from an object
+const pickId = (obj: Resource): TE.TaskEither<Error, NonEmptyString> =>
+  pipe(
+    obj,
+    t.type({ id: NonEmptyString }).decode,
+    TE.fromEither,
+    TE.mapLeft(
+      (err) =>
+        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
+    ),
+    TE.map((_) => _.id),
+  );
 
 export * as apim_filters from "./apim-filters";
 export * as definitions from "./definitions";

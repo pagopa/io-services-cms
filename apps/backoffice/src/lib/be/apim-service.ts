@@ -21,7 +21,7 @@ import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export interface ApimRestClient {
-  getServiceList: (
+  readonly getServiceList: (
     userId: string,
     limit: number,
     offset: number,
@@ -79,6 +79,7 @@ const buildApimService: () => ApimUtils.ApimService = () => {
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM,
+    apimConfig.AZURE_APIM_PRODUCT_NAME,
   );
 };
 
@@ -119,13 +120,13 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
     axiosInstance = getAxiosInstance(azureAccessToken);
   };
 
-  const getServiceList = (
-    userId: string,
-    limit: number,
-    offset: number,
-    serviceId?: string,
+  const getServiceList: ApimRestClient["getServiceList"] = (
+    userId,
+    limit,
+    offset,
+    serviceId,
     isRetry = false,
-  ): TE.TaskEither<AxiosError | Error, SubscriptionCollection> =>
+  ) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -190,3 +191,37 @@ export const getApimHealth: () => Promise<void> = async () => {
     throw new HealthChecksError("apim", e);
   }
 };
+
+type UpsertSubscriptionResult = ReturnType<
+  ApimUtils.ApimService["upsertSubscription"]
+>;
+export function upsertSubscription(
+  type: "MANAGE",
+  ownerId: string,
+): UpsertSubscriptionResult;
+export function upsertSubscription(
+  type: "MANAGE_GROUP",
+  ownerId: string,
+  groupId: string,
+): UpsertSubscriptionResult;
+export function upsertSubscription(
+  type: ApimUtils.definitions.SubscriptionType,
+  ownerId: string,
+  value?: string,
+): UpsertSubscriptionResult {
+  let subscriptionId: string;
+  switch (type) {
+    case "MANAGE":
+      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + ownerId;
+      break;
+    case "MANAGE_GROUP":
+      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + value;
+      break;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = type;
+      throw new Error("Invalid type");
+  }
+
+  return getApimService().upsertSubscription(ownerId, subscriptionId);
+}

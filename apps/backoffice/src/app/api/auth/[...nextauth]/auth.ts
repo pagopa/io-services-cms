@@ -2,11 +2,12 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { Institution } from "@/generated/selfcare/Institution";
-import { getApimService } from "@/lib/be/apim-service";
+import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import {
   ManagedInternalError,
   apimErrorToManagedInternalError,
   extractTryCatchError,
+  handlerErrorLog,
 } from "@/lib/be/errors";
 import { getInstitutionById } from "@/lib/be/institutions/selfcare";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -17,7 +18,6 @@ import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
@@ -57,7 +57,7 @@ export const authorize =
         pipe(identityTokenPayload, retrieveOrCreateApimUser(config)),
       ),
       TE.bindW("subscriptionManage", ({ apimUser }) =>
-        pipe(apimUser, retrieveOrCreateUserSubscriptionManage(config)),
+        pipe(apimUser, retrieveOrCreateUserSubscriptionManage),
       ),
       TE.bindW("institution", ({ identityTokenPayload }) =>
         TE.tryCatch(
@@ -67,20 +67,8 @@ export const authorize =
       ),
       TE.map(toUser),
       TE.getOrElse((e) => {
-        let errorToThrow: Error;
-        if (e instanceof ManagedInternalError) {
-          console.error(
-            `An error has occurred when authorize user, ${e.message} additionalDetails => ${e.additionalDetails}`,
-          );
-          errorToThrow = new Error(e.message);
-        } else if (e instanceof Error) {
-          console.error(e);
-          errorToThrow = e;
-        } else {
-          console.error("unknown error", e);
-          errorToThrow = new Error("unknown error");
-        }
-        throw errorToThrow;
+        handlerErrorLog("An error has occurred when authorize user", e);
+        throw e;
       }),
     )();
 
@@ -198,10 +186,7 @@ const retrieveUserByEmail = (
     getApimService(),
     (apimService) => apimService.getUserByEmail(userEmail, true),
     TE.mapLeft((err) =>
-      apimErrorToManagedInternalError(
-        `Failed to fetch user by its email, code: ${err.statusCode}`,
-        err,
-      ),
+      apimErrorToManagedInternalError(`Failed to fetch user by its email`, err),
     ),
   );
 
@@ -222,10 +207,7 @@ const createApimUser =
           note: identityTokenPayload.organization.name,
         }),
       TE.mapLeft((err) =>
-        apimErrorToManagedInternalError(
-          `Failed to create apim user, code: ${err.statusCode}`,
-          err,
-        ),
+        apimErrorToManagedInternalError(`Failed to create apim user`, err),
       ),
       TE.chainW((apimUser) =>
         pipe(
@@ -249,36 +231,29 @@ const createUserGroup = (
       apimService.createGroupUser(groupId as NonEmptyString, apimUserId),
     TE.mapLeft((err) =>
       apimErrorToManagedInternalError(
-        `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId}), code: ${err.statusCode}`,
+        `Failed to create relationship between group (id = ${groupId}) and user (id = ${apimUserId})`,
         err,
       ),
     ),
   );
 
-const retrieveOrCreateUserSubscriptionManage =
-  (config: Configuration) =>
-  (
-    apimUser: ApimUser,
-  ): TE.TaskEither<Error | ManagedInternalError, Subscription> =>
-    pipe(
-      apimUser,
-      getUserSubscriptionManage,
-      TE.chain(
-        flow(
-          O.fold(
-            () => pipe(apimUser, createSubscriptionManage(config)),
-            TE.right,
-          ),
-        ),
+const retrieveOrCreateUserSubscriptionManage = (
+  apimUser: ApimUser,
+): TE.TaskEither<Error | ManagedInternalError, Subscription> =>
+  pipe(
+    apimUser,
+    getUserSubscriptionManage,
+    TE.chain(
+      flow(O.fold(() => pipe(apimUser, createSubscriptionManage), TE.right)),
+    ),
+    TE.chainW(
+      flow(
+        Subscription.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither,
       ),
-      TE.chainW(
-        flow(
-          Subscription.decode,
-          E.mapLeft(flow(readableReport, E.toError)),
-          TE.fromEither,
-        ),
-      ),
-    );
+    ),
+  );
 
 const getUserSubscriptionManage = (
   apimUser: ApimUser,
@@ -287,7 +262,7 @@ const getUserSubscriptionManage = (
     getApimService(),
     (apimService) =>
       apimService.getSubscription(
-        ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
+        ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + apimUser.name,
       ),
     TE.foldW(
       flow(
@@ -297,10 +272,8 @@ const getUserSubscriptionManage = (
             : E.left(
                 apimErrorToManagedInternalError(
                   `Failed to fetch user subscription manage (${
-                    ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name
-                  }), apimStatuscode: ${
-                    err.statusCode
-                  }, apimErrorName: ${err.name}, apimErrorCode: ${err.code}`,
+                    ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + apimUser.name
+                  })`,
                   err,
                 ),
               ),
@@ -310,62 +283,19 @@ const getUserSubscriptionManage = (
     ),
   );
 
-const createSubscriptionManage =
-  (config: Configuration) =>
-  (
-    apimUser: ApimUser,
-  ): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
-    pipe(getApimService(), (apimService) =>
-      pipe(
-        getProductId(config),
-        TE.chain((productId) =>
-          pipe(
-            apimService.upsertSubscription(
-              productId,
-              apimUser.id,
-              ApimUtils.definitions.MANAGE_APIKEY_PREFIX + apimUser.name,
-            ),
-            TE.mapLeft((err) =>
-              apimErrorToManagedInternalError(
-                `Failed to create subscription manage, code: ${err.statusCode}`,
-                err,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-// TODO: refactor: move to common package (also used by services-cmsq, see create-service.ts)
-const getProductId = ({
-  AZURE_APIM_PRODUCT_NAME,
-}: Configuration): TE.TaskEither<ManagedInternalError, NonEmptyString> =>
+const createSubscriptionManage = (
+  apimUser: ApimUser,
+): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
   pipe(
-    getApimService(),
-    (apimService) => apimService.getProductByName(AZURE_APIM_PRODUCT_NAME),
+    upsertSubscription("MANAGE", apimUser.id),
     TE.mapLeft((err) =>
-      apimErrorToManagedInternalError(
-        `Failed to fetch product by its name, code: ${err.statusCode}`,
-        err,
-      ),
+      "statusCode" in err
+        ? apimErrorToManagedInternalError(
+            "Failed to create subscription manage",
+            err,
+          )
+        : err,
     ),
-    TE.chain(
-      TE.fromOption(() => new ManagedInternalError(`Cannot find product`)),
-    ),
-    TE.chain(pickId),
-  );
-
-// utility to extract a non-empty id from an object
-const pickId = (obj: unknown): TE.TaskEither<Error, NonEmptyString> =>
-  pipe(
-    obj,
-    t.type({ id: NonEmptyString }).decode,
-    TE.fromEither,
-    TE.mapLeft(
-      (err) =>
-        new Error(`Cannot decode object to get id, ${readableReport(err)}`),
-    ),
-    TE.map((_) => _.id),
   );
 
 const toUser = ({

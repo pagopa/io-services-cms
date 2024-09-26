@@ -23,7 +23,7 @@ type ErrorResponses =
   | IResponseErrorTooManyRequests;
 
 const isManageKey = (ownerSubscriptionId: NonEmptyString) =>
-  ownerSubscriptionId.startsWith(ApimUtils.definitions.MANAGE_APIKEY_PREFIX);
+  ownerSubscriptionId.startsWith(ApimUtils.SUBSCRIPTION_MANAGE_PREFIX);
 
 const extractOwnerId = (
   fullPath?: string,
