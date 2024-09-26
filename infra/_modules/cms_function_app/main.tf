@@ -26,6 +26,8 @@ module "cms_fn" {
     resource_group_name = var.virtual_network.resource_group_name
   }
 
+  action_group_id = data.azurerm_monitor_action_group.error_action_group.id
+
   # All async trigger shutdown initially
   app_settings = merge(
     local.cms.app_settings,
