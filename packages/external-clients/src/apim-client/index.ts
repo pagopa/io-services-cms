@@ -571,7 +571,7 @@ const getDelegateFromServiceId = (
   pipe(
     getSubscription(apimClient, apimResourceGroup, apimServiceName, serviceId),
     TE.map((subscription) =>
-      parseOwnerIdFullPath(subscription.ownerId as NonEmptyString),
+      parseIdFromFullPath(subscription.ownerId as NonEmptyString),
     ),
     TE.chain((ownerId) =>
       getUser(apimClient, apimResourceGroup, apimServiceName, ownerId),
@@ -671,14 +671,12 @@ const subscriptionsExceptManageOneApimFilter = () =>
     O.getOrElse(() => ""),
   );
 
-/*
- ** The right full path for ownerID is in this kind of format:
- ** "/subscriptions/subid/resourceGroups/{resourceGroup}/providers/Microsoft.ApiManagement/service/{apimService}/users/5931a75ae4bbd512a88c680b",
- ** resouce link: https://docs.microsoft.com/en-us/rest/api/apimanagement/current-ga/subscription/get
+/**
+ * Parse the ID from a "full path" ID format
+ * @param fullPath a full path ID in this kind of format: "/some/kind/of/prefix/id-value"
+ * @returns the parsed id value
  */
-export const parseOwnerIdFullPath = (
-  fullPath: NonEmptyString,
-): NonEmptyString =>
+export const parseIdFromFullPath = (fullPath: NonEmptyString): NonEmptyString =>
   pipe(
     fullPath,
     (f) => f.split("/"),

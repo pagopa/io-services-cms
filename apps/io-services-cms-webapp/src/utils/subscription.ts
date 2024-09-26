@@ -33,7 +33,7 @@ const extractOwnerId = (
     O.fromNullable,
     O.foldW(
       () => E.left(ResponseErrorNotFound("Not found", "ownerId not found")),
-      (f) => E.right(pipe(f as NonEmptyString, ApimUtils.parseOwnerIdFullPath)),
+      (f) => E.right(pipe(f as NonEmptyString, ApimUtils.parseIdFromFullPath)),
     ),
   );
 

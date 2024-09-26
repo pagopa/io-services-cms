@@ -68,7 +68,7 @@ const aServiceList = [
 // Apim service mock *******************************
 const mockApimService = {
   getUserSubscriptions: vi.fn((_) => TE.right(aSubscriptionCollection)),
-  parseOwnerIdFullPath: vi.fn((_) => "a-user-id"),
+  parseIdFromFullPath: vi.fn((_) => "a-user-id"),
 } as unknown as ApimUtils.ApimService;
 
 const mockConfig = {
@@ -79,7 +79,7 @@ const mockConfig = {
 
 // FSM client mock *******************************
 const aBulkFetchRightValue = TE.of(
-  aServiceList.map((service) => O.fromNullable(service))
+  aServiceList.map((service) => O.fromNullable(service)),
 );
 
 let mockFsmLifecycleClient = {
@@ -113,7 +113,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -213,7 +213,7 @@ describe("getServices", () => {
     expect(mockContext.log.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty(
       "limit",
-      mockConfig.PAGINATION_DEFAULT_LIMIT
+      mockConfig.PAGINATION_DEFAULT_LIMIT,
     );
   });
 
