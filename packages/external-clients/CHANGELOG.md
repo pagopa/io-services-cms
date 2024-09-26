@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.1.7
+
+### Patch Changes
+
+- 40d3a6c: return id instead of full path id
+
 ## 1.1.6
 
 ### Patch Changes

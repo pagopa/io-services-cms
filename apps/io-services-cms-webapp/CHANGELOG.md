@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.33.7
+
+### Patch Changes
+
+- 40d3a6c: return id instead of full path id
+- Updated dependencies [40d3a6c]
+  - @io-services-cms/external-clients@1.1.7
+
 ## 1.33.6
 
 ### Patch Changes

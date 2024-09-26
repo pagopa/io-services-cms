@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.13.1
+
+### Patch Changes
+
+- 40d3a6c: return id instead of full path id
+- Updated dependencies [40d3a6c]
+  - @io-services-cms/external-clients@1.1.7
+
 ## 1.13.0
 
 ### Minor Changes
