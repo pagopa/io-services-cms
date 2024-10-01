@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.2.0
+
+### Minor Changes
+
+- 2c5ab64: add Retrieve manage group subscriptions API
+
 ## 1.1.7
 
 ### Patch Changes
