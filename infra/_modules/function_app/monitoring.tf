@@ -156,7 +156,7 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           time_window        = "PT5M"
           time_aggregation   = "Average"
           operator           = "GreaterThan"
-          threshold          = 80
+          threshold          = 85
         }
         scale_action {
           direction = "Increase"
@@ -202,26 +202,6 @@ resource "azurerm_monitor_autoscale_setting" "app_be_fn" {
           divide_by_instance_count = false
         }
 
-        scale_action {
-          direction = "Decrease"
-          type      = "ChangeCount"
-          value     = "1"
-          cooldown  = "PT5M"
-        }
-      }
-
-      rule {
-        metric_trigger {
-          metric_name        = "MemoryPercentage"
-          metric_resource_id = module.app_be_fn.function_app.plan.id
-          metric_namespace   = "microsoft.web/serverfarms"
-          time_grain         = "PT1M"
-          statistic          = "Average"
-          time_window        = "PT7M"
-          time_aggregation   = "Average"
-          operator           = "LessThan"
-          threshold          = 30
-        }
         scale_action {
           direction = "Decrease"
           type      = "ChangeCount"
