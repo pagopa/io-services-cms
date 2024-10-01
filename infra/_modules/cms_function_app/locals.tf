@@ -4,8 +4,7 @@ locals {
     tier          = "standard"
     cosmosdb_name = "db-services-cms"
     app_settings = {
-      FUNCTIONS_WORKER_PROCESS_COUNT = "1"
-      NODE_ENV                       = "production"
+      NODE_ENV = "production"
 
       // TODO: after migration, update AI implementation and use connection string
       APPINSIGHTS_INSTRUMENTATIONKEY = var.ai_common_instrumentation_key
