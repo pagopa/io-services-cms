@@ -95,8 +95,21 @@ const fromLegacyToCmsService = (
     status === "published" || status === "unpublished"
       ? "PublicationItemType"
       : "LifecycleItemType",
-  modified_at: DateUtils.unixSecondsToMillis(service._ts),
+  modified_at: calculateModifiedAt(service._ts, status),
 });
+
+const calculateModifiedAt = (
+  ts: number,
+  status: Queue.RequestSyncCmsItem["fsm"]["state"],
+) => {
+  const modified_at = DateUtils.unixSecondsToMillis(ts);
+
+  // when syncronize a service isVisible=true, 2 record are created, 1 approved in service-lifecycle and 1 published in service-publication
+  // if we set the same modified_at for both records, the service-lifecycle record will be overwritten by the service-publication record in service-history
+  return status === "published" || status === "unpublished"
+    ? modified_at + 1
+    : modified_at;
+};
 
 const getDescription = (service: LegacyServiceCosmosResource) =>
   service.serviceMetadata?.description ?? ("-" as NonEmptyString);
