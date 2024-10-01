@@ -3,7 +3,11 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getApimService, parseIdFromFullPath } from "..";
+import {
+  getApimService,
+  manageGroupSubscriptionsFilter,
+  parseIdFromFullPath,
+} from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
 
 afterEach(() => {
@@ -1406,6 +1410,40 @@ describe("ApimService Test", () => {
         "/subscriptions/subid/resourceGroups/{resourceGroup}/providers/Microsoft.ApiManagement/service/{apimService}/users/1234a75ae4bbd512a88c680x" as NonEmptyString,
       );
       expect(res).toBe("1234a75ae4bbd512a88c680x");
+    });
+  });
+
+  describe("manageGroupSubscriptionsFilter", () => {
+    it("should return a MANAGE-GROUP- filter when no groups are provided", () => {
+      const res = manageGroupSubscriptionsFilter();
+
+      expect(res).toEqual("startswith(name, 'MANAGE-GROUP-')");
+    });
+
+    it("should return an empty filter when empty array is provided", () => {
+      const res = manageGroupSubscriptionsFilter([]);
+
+      expect(res).toEqual("");
+    });
+
+    it("should return a single MANAGE-GROUP- filter when a single group id provided", () => {
+      const groupId = "g1";
+      const res = manageGroupSubscriptionsFilter([groupId]);
+
+      expect(res).toEqual(`name eq 'MANAGE-GROUP-${groupId}'`);
+    });
+
+    it("should return a concat MANAGE-GROUP- filters based on the group ids provided", () => {
+      const groupids = new Array(3);
+      for (let index = 0; index < groupids.length; index++) {
+        groupids[index] = "id" + index;
+      }
+      const res = manageGroupSubscriptionsFilter(groupids);
+
+      const expectedRes = groupids
+        .map((groupId) => `name eq 'MANAGE-GROUP-${groupId}'`)
+        .join(" or ");
+      expect(res).toEqual(expectedRes);
     });
   });
 });
