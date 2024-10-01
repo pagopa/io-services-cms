@@ -1,22 +1,24 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { upsertManageSubscription } from "../business";
-import * as O from "fp-ts/lib/Option";
-import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
-import { InstitutionNotFoundError, ManagedInternalError } from "../../errors";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { getManageSubscriptions, upsertManageSubscription } from "../business";
 
-const { upsertSubscription } = vi.hoisted(() => ({
+const { upsertSubscription, getUserSubscriptions } = vi.hoisted(() => ({
   upsertSubscription: vi.fn(),
+  getUserSubscriptions: vi.fn(),
 }));
 
 vi.mock("../../apim-service", () => ({
   upsertSubscription,
+  getApimService: () => ({
+    getUserSubscriptions,
+  }),
 }));
 
 const mocks = {
   anOwnerId: "anOwnerId",
   aGroupId: "aGroupId",
   upsertSubscription,
+  getUserSubscriptions,
 };
 
 afterEach(() => {
@@ -72,4 +74,77 @@ describe("upsertManageSubscription", () => {
       expect(mocks.upsertSubscription).toHaveBeenCalledWith(...params);
     },
   );
+});
+
+describe("getManageSubscriptions", () => {
+  it("should throw an error when received an ApimRestError response", async () => {
+    const ownerId = mocks.anOwnerId;
+    const limit = 5;
+    const offset = 0;
+    mocks.getUserSubscriptions.mockReturnValueOnce(
+      TE.left({ statusCode: 500 }),
+    );
+
+    await expect(() =>
+      getManageSubscriptions(ownerId, limit, offset),
+    ).rejects.toThrowError("Error retrieving manage group subscriptions");
+
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+      ownerId,
+      offset,
+      limit,
+      "startswith(name, 'MANAGE-GROUP-')",
+    );
+  });
+
+  it("should return the group manage Subscriptions", async () => {
+    const name = "name";
+    const displayName = "displayName";
+    const ownerId = mocks.anOwnerId;
+    const limit = 5;
+    const offset = 0;
+    mocks.getUserSubscriptions.mockReturnValueOnce(
+      TE.right([
+        {
+          name,
+          displayName,
+          foo: "foo",
+          bar: "bar",
+        },
+      ]),
+    );
+
+    await expect(
+      getManageSubscriptions(ownerId, limit, offset),
+    ).resolves.toStrictEqual([{ id: name, name: displayName }]);
+
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+      ownerId,
+      offset,
+      limit,
+      "startswith(name, 'MANAGE-GROUP-')",
+    );
+  });
+
+  it("should return a filtered group manage Subscriptions", async () => {
+    const ownerId = mocks.anOwnerId;
+    const limit = 5;
+    const offset = 0;
+    const groupId = "gid1";
+    mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
+
+    await expect(
+      getManageSubscriptions(ownerId, limit, offset, [groupId]),
+    ).resolves.toStrictEqual([]);
+
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+    expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+      ownerId,
+      offset,
+      limit,
+      `name eq 'MANAGE-GROUP-${groupId}'`,
+    );
+  });
 });

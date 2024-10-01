@@ -1,13 +1,15 @@
 import { faker } from "@faker-js/faker/locale/it";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import { Subscription } from "../../../../generated/api/Subscription";
 import { ManagedInternalError } from "../../../../lib/be/errors";
+import { PositiveInteger } from "../../../../lib/be/types";
 
 import { BackOfficeUser } from "../../../../../types/next-auth";
 import { SelfcareRoles } from "../../../../types/auth";
-import { PUT } from "../route";
+import { GET, PUT } from "../route";
 
 const userMock = {
   authorizedInstitutions: [
@@ -36,10 +38,11 @@ const userMock = {
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
   },
-};
+} as BackOfficeUser;
 
 const mocks = vi.hoisted(() => ({
   upsertManageSubscription: vi.fn(),
+  getManageSubscriptions: vi.fn(),
   withJWTAuthHandler: vi.fn(
     (
       handler: (
@@ -57,6 +60,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
   upsertManageSubscription: mocks.upsertManageSubscription,
+  getManageSubscriptions: mocks.getManageSubscriptions,
 }));
 vi.mock("@/lib/be/wrappers", () => ({
   withJWTAuthHandler: mocks.withJWTAuthHandler,
@@ -74,7 +78,7 @@ describe("Upsert Subscription API", () => {
   it("should return a forbidden response when user is not an admin", async () => {
     // given
     userMock.institution.role = SelfcareRoles.operator;
-    const nextRequest = new NextRequest(new URL("http://localhost"));
+    const nextRequest = new NextRequest("http://localhost");
 
     // when
     const result = await PUT(nextRequest, {});
@@ -176,4 +180,101 @@ describe("Upsert Subscription API", () => {
       body.groupId,
     );
   });
+});
+
+describe("Retrieve manage subscriptions API", () => {
+  it("should return an error response when limit query param is not valid", async () => {
+    // given
+    const request = new NextRequest("http://localhost?limit=0");
+
+    // when
+    const result = await GET(request, {});
+
+    // then
+    expect(result.status).toBe(400);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("Bad Request");
+    expect(responseBody.detail).toEqual(
+      `'limit' query param is not a valid ${PositiveInteger.name}`,
+    );
+    expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
+  });
+
+  it("should return an error response when offset query param is not valid", async () => {
+    // given
+    const request = new NextRequest("http://localhost?offset=-1");
+
+    // when
+    const result = await GET(request, {});
+
+    // then
+    expect(result.status).toBe(400);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("Bad Request");
+    expect(responseBody.detail).toEqual(
+      `'offset' query param is not a valid ${NonNegativeInteger.name}`,
+    );
+    expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
+  });
+
+  it("should return an error response when getManageSubscriptions fails", async () => {
+    // given
+    const limit = 10;
+    const offset = 5;
+    const request = new NextRequest(
+      `http://localhost?limit=${limit}&offset=${offset}`,
+    );
+    const errorMessage = "error message";
+    mocks.getManageSubscriptions.mockRejectedValueOnce(
+      new ManagedInternalError(errorMessage),
+    );
+
+    // when
+    const result = await GET(request, {});
+
+    // then
+    expect(result.status).toBe(500);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("SubscriptionsRetrieveError");
+    expect(responseBody.detail).toEqual(errorMessage);
+    expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
+    expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
+      userMock.parameters.userId,
+      limit,
+      offset,
+      undefined,
+    );
+  });
+
+  it.each`
+    scenario                                 | userRole                  | selcGroups
+    ${"user is admin"}                       | ${SelfcareRoles.admin}    | ${undefined}
+    ${"user is not admin and has no groups"} | ${SelfcareRoles.operator} | ${undefined}
+    ${"user is not admin and has groups"}    | ${SelfcareRoles.operator} | ${["g1"]}
+  `(
+    "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
+    async ({ userRole, selcGroups }) => {
+      // given
+      const request = new NextRequest("http://localhost");
+      const expectedSubscriptions = [{ id: "id", name: "name" }];
+      mocks.getManageSubscriptions.mockResolvedValueOnce(expectedSubscriptions);
+      userMock.institution.role = userRole;
+      userMock.permissions.selcGroups = selcGroups;
+
+      // when
+      const result = await GET(request, {});
+
+      // then
+      expect(result.status).toBe(200);
+      const responseBody = await result.json();
+      expect(responseBody).toStrictEqual(expectedSubscriptions);
+      expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
+        userMock.parameters.userId,
+        20,
+        0,
+        userRole === SelfcareRoles.admin ? undefined : selcGroups,
+      );
+    },
+  );
 });
