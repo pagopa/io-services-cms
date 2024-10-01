@@ -1,8 +1,10 @@
 import { faker } from "@faker-js/faker/locale/it";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
+import { PositiveInteger } from "../../../../../../lib/be/types";
 import { SelfcareRoles } from "../../../../../../types/auth";
 import { GET } from "../route";
 
@@ -39,7 +41,7 @@ const { retrieveInstitutionGroupsMock, withJWTAuthHandlerMock } = vi.hoisted(
   () => ({
     retrieveInstitutionGroupsMock: vi.fn().mockReturnValue(
       Promise.resolve({
-        pagination: { number: 0, size: 0, totalElements: 0, totalPages:0},
+        pagination: { number: 0, size: 0, totalElements: 0, totalPages: 0 },
         value: [],
       }),
     ),
@@ -74,15 +76,13 @@ describe("Retrieve Institutions Groups API", () => {
   it("when no size and page queryParam are provided should call with the default", async () => {
     const nextRequest = new NextRequest(new URL("http://localhost"));
     const params = { institutionId: "institutionId" };
-    const result = await GET(nextRequest, {params} );
-    
+    const result = await GET(nextRequest, { params });
+
     expect(result.status).toBe(200);
-    expect(
-      retrieveInstitutionGroupsMock
-    ).toHaveBeenCalledWith(
+    expect(retrieveInstitutionGroupsMock).toHaveBeenCalledWith(
       backofficeUserMock.institution.id,
       20,
-      0
+      0,
     );
   });
 
@@ -97,17 +97,19 @@ describe("Retrieve Institutions Groups API", () => {
 
     const nextRequest = new NextRequest(url);
 
-    const result = await GET(nextRequest, {params: { institutionId: "institutionId" }});
+    const result = await GET(nextRequest, {
+      params: { institutionId: "institutionId" },
+    });
 
     expect(result.status).toBe(200);
     expect(retrieveInstitutionGroupsMock).toHaveBeenCalledWith(
       backofficeUserMock.institution.id,
       25,
-      5
+      5,
     );
   });
 
-    it("should return a bad request if size is not number", async () => {
+  it("should return a bad request if size is not number", async () => {
     const url = new URL("http://localhost");
 
     const queryParams = new URLSearchParams(url.search);
@@ -118,12 +120,16 @@ describe("Retrieve Institutions Groups API", () => {
 
     const nextRequest = new NextRequest(url);
 
-    const result = await GET(nextRequest, {params: { institutionId: "institutionId" }});
+    const result = await GET(nextRequest, {
+      params: { institutionId: "institutionId" },
+    });
     const jsonBody = await result.json();
 
     expect(result.status).toBe(400);
     expect(retrieveInstitutionGroupsMock).not.toHaveBeenCalled();
-    expect(jsonBody.detail).toEqual("Size is not a number")
+    expect(jsonBody.detail).toEqual(
+      `Size is not a valid ${PositiveInteger.name}`,
+    );
   });
 
   it("should return a bad request if page is not number", async () => {
@@ -137,11 +143,15 @@ describe("Retrieve Institutions Groups API", () => {
 
     const nextRequest = new NextRequest(url);
 
-    const result = await GET(nextRequest, {params: { institutionId: "institutionId" }});
+    const result = await GET(nextRequest, {
+      params: { institutionId: "institutionId" },
+    });
     const jsonBody = await result.json();
 
     expect(result.status).toBe(400);
     expect(retrieveInstitutionGroupsMock).not.toHaveBeenCalled();
-    expect(jsonBody.detail).toEqual("Page is not a number")
+    expect(jsonBody.detail).toEqual(
+      `Page is not a valid ${NonNegativeInteger.name}`,
+    );
   });
 });

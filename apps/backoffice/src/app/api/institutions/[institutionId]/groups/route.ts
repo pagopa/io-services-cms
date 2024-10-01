@@ -9,9 +9,14 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
+import { getQueryParam } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { PositiveInteger, PositiveIntegerFromString } from "@/lib/be/types";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NonNegativeIntegerFromString,
+} from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
 
@@ -34,13 +39,27 @@ export const GET = withJWTAuthHandler(
     if (!isBackofficeUserAdmin(backofficeUser)) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
-    const size = getQueryParam(request, "size", 20);
-    const page = getQueryParam(request, "page", 0);
+    const size = getQueryParam(
+      request,
+      "size",
+      PositiveIntegerFromString,
+      20 as PositiveInteger,
+    );
+    const page = getQueryParam(
+      request,
+      "page",
+      NonNegativeIntegerFromString,
+      0 as NonNegativeInteger,
+    );
     if (E.isLeft(size)) {
-      return handleBadRequestErrorResponse("Size is not a number");
+      return handleBadRequestErrorResponse(
+        `Size is not a valid ${PositiveInteger.name}`,
+      );
     }
     if (E.isLeft(page)) {
-      return handleBadRequestErrorResponse("Page is not a number");
+      return handleBadRequestErrorResponse(
+        `Page is not a valid ${NonNegativeInteger.name}`,
+      );
     }
     try {
       const institutionResponse = await retrieveInstitutionGroups(
@@ -59,16 +78,3 @@ export const GET = withJWTAuthHandler(
     }
   },
 );
-
-const getQueryParam = (
-  request: NextRequest,
-  param: string,
-  defaultValue: number,
-) => {
-  const rawParam = request.nextUrl.searchParams.get(param);
-  if (rawParam === null) {
-    return E.right(defaultValue);
-  } else {
-    return NumberFromString.decode(request.nextUrl.searchParams.get(param));
-  }
-};
