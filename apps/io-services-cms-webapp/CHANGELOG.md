@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.33.8
+
+### Patch Changes
+
+- 6192fe9: Avoid History overwrite on legacy sync
+
 ## 1.33.7
 
 ### Patch Changes
