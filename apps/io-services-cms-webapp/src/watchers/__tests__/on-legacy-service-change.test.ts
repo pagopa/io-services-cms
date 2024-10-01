@@ -276,7 +276,7 @@ describe("On Legacy Service Change Handler", () => {
           {
             ...aServicePublicationItem,
             kind: "PublicationItemType",
-            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts),
+            modified_at: DateUtils.unixSecondsToMillis(aLegacyService._ts) + 1,
           },
         ],
       });
