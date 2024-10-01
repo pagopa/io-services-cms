@@ -221,23 +221,8 @@ paths:
       security:
         - cookieAuth: []
       parameters:
-        - name: limit
-          in: query
-          description: The number of services to return
-          required: false
-          schema:
-            type: number
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          description: The number of services to skip before starting to collect the result set
-          required: false
-          schema:
-            type: number
-            minimum: 0
-            default: 0
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         '200':
           description: Services fetched successfully
@@ -263,23 +248,8 @@ paths:
       security:
         - cookieAuth: []
       parameters:
-        - name: limit
-          in: query
-          description: The number of services to return
-          required: false
-          schema:
-            type: number
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          description: The number of services to skip before starting to collect the result set
-          required: false
-          schema:
-            type: number
-            minimum: 0
-            default: 0
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
         - name: id
           in: query
           description: The serviceId to filter, when passed limit and offset will be ignored
@@ -1000,6 +970,9 @@ paths:
       operationId: getManageSubscriptions
       security:
         - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       responses:
         '200':
           description: Manage keys fetched successfully
@@ -1196,6 +1169,26 @@ paths:
         '500':
           description: Internal server error
 components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: The number of items to return
+      required: false
+      schema:
+        type: number
+        minimum: 1
+        maximum: 100
+        default: 20
+    offset:
+      name: offset
+      in: query
+      description: The number of items to skip before starting to collect the result set
+      required: false
+      schema:
+        type: number
+        minimum: 0
+        default: 0
   schemas:
     Info:
       type: object

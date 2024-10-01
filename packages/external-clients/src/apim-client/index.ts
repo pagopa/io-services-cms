@@ -21,6 +21,7 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import { parse } from "fp-ts/lib/Json";
 import * as O from "fp-ts/lib/Option";
+import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -34,6 +35,7 @@ import {
   FilterCompositionEnum,
   FilterFieldEnum,
   FilterSupportedFunctionsEnum,
+  FilterSupportedOperatorsEnum,
   buildApimFilter,
 } from "./apim-filters";
 import { AzureClientSecretCredential } from "./definitions";
@@ -134,6 +136,7 @@ export interface ApimService {
     userId: string,
     offset?: number,
     limit?: number,
+    filter?: string,
   ) => TE.TaskEither<ApimRestError, readonly SubscriptionContract[]>;
   readonly listSecrets: (
     serviceId: string,
@@ -198,12 +201,18 @@ export const getApimService = (
     ),
   getUserGroups: (userId) =>
     getUserGroups(apimClient, apimResourceGroup, apimServiceName, userId),
-  getUserSubscriptions: (userId, offset, limit) =>
+  getUserSubscriptions: (
+    userId,
+    offset,
+    limit,
+    filter = subscriptionsExceptManageOneApimFilter(),
+  ) =>
     getUserSubscriptions(
       apimClient,
       apimResourceGroup,
       apimServiceName,
       userId,
+      filter,
       offset,
       limit,
     ),
@@ -469,6 +478,7 @@ const getUserSubscriptions = (
   resourceGroupName: string,
   apimServiceName: string,
   userId: string,
+  filter: string,
   offset?: number,
   limit?: number,
 ): TE.TaskEither<ApimRestError, readonly SubscriptionContract[]> =>
@@ -479,7 +489,7 @@ const getUserSubscriptions = (
         apimServiceName,
         userId,
         {
-          filter: subscriptionsExceptManageOneApimFilter(),
+          filter,
           skip: offset,
           top: limit,
         },
@@ -702,6 +712,47 @@ const pickId = (obj: Resource): TE.TaskEither<Error, NonEmptyString> =>
         new Error(`Cannot decode object to get id, ${readableReport(err)}`),
     ),
     TE.map((_) => _.id),
+  );
+
+/**
+ * User Subscription list filtered by name startswith 'MANAGE-GROUP-'
+ *
+ * @returns API Management `$filter` property
+ */
+export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
+  pipe(
+    groupIds,
+    O.fromNullable,
+    O.map(
+      flow(
+        RA.mapWithIndex((i, groupId) =>
+          pipe(
+            buildApimFilter({
+              composeFilter:
+                i === 0 ? FilterCompositionEnum.none : FilterCompositionEnum.or,
+              field: FilterFieldEnum.name,
+              filterType: FilterSupportedOperatorsEnum.eq,
+              inverse: false,
+              value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId,
+            }),
+            O.getOrElse(() => ""),
+          ),
+        ),
+        (groupIdFilters) => groupIdFilters.join(" "),
+      ),
+    ),
+    O.getOrElse(() =>
+      pipe(
+        buildApimFilter({
+          composeFilter: FilterCompositionEnum.none,
+          field: FilterFieldEnum.name,
+          filterType: FilterSupportedFunctionsEnum.startswith,
+          inverse: false,
+          value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+        }),
+        O.getOrElse(() => ""),
+      ),
+    ),
   );
 
 export * as apim_filters from "./apim-filters";

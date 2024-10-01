@@ -3,7 +3,7 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
-import { upsertSubscription } from "../apim-service";
+import { getApimService, upsertSubscription } from "../apim-service";
 import {
   ManagedInternalError,
   apimErrorToManagedInternalError,
@@ -51,4 +51,30 @@ export async function upsertManageSubscription(
     ),
     name: maybeSubscription.right.name,
   };
+}
+
+export async function getManageSubscriptions(
+  apimUserId: string,
+  limit: number,
+  offset: number,
+  selcGroups?: string[],
+): Promise<Subscription[]> {
+  const maybeSubscriptions = await getApimService().getUserSubscriptions(
+    apimUserId,
+    offset,
+    limit,
+    ApimUtils.manageGroupSubscriptionsFilter(selcGroups),
+  )();
+
+  if (E.isLeft(maybeSubscriptions)) {
+    throw apimErrorToManagedInternalError(
+      "Error retrieving manage group subscriptions",
+      maybeSubscriptions.left,
+    );
+  }
+
+  return maybeSubscriptions.right.map((subContract) => ({
+    id: subContract.name ?? "",
+    name: subContract.displayName ?? "",
+  }));
 }
