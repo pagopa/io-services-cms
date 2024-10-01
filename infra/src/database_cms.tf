@@ -78,7 +78,7 @@ locals {
     {
       name               = "services"
       partition_key_path = "/id"
-      max_throughput     = 1000
+      max_throughput     = 2000
     },
   ]
 }
