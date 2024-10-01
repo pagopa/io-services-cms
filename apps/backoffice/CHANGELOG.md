@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.14.0
+
+### Minor Changes
+
+- 2c5ab64: add Retrieve manage group subscriptions API
+
+### Patch Changes
+
+- Updated dependencies [2c5ab64]
+  - @io-services-cms/external-clients@1.2.0
+
 ## 1.13.1
 
 ### Patch Changes
