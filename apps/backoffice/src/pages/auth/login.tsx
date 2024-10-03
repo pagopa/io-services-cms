@@ -18,17 +18,9 @@ export default function Login() {
     return parsedHash.get("token");
   };
 
-  const mixpanelSuperProperties = {
-    institution_id: session?.user?.institution.id,
-    organization_fiscal_code: session?.user?.institution.fiscalCode,
-    organization_name: session?.user?.institution.name,
-    user_role: session?.user?.institution.role,
-  };
-
   const manageMixpanelLogin = () => {
-    mixpanel.identify(session?.user?.id as string);
-    mixpanel.register(mixpanelSuperProperties);
-    logToMixpanel("IO_BO_LOGIN", {});
+    mixpanel.identify();
+    logToMixpanel("IO_BO_LOGIN", { eventCategory: "UX" });
   };
 
   /**
@@ -57,10 +49,11 @@ export default function Login() {
       // redirect to the return url or home page
       // router.push((router.query.returnUrl as string) || "/");
       router.push("/");
+      manageMixpanelLogin();
     } else {
       handleIdentity();
     }
-    manageMixpanelLogin();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 

@@ -30,20 +30,30 @@ export const ApiKeys = (props: ApiKeysProps) => {
 
   const handleRotateEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
     if (props.page === "manage") {
-      logToMixpanel("IO_BO_MANAGE_KEY_ROTATE", { keyType: keyType });
+      logToMixpanel("IO_BO_MANAGE_KEY_ROTATE", {
+        eventCategory: "UX",
+        keyType: keyType,
+      });
     } else if (props.page === "service") {
-      logToMixpanel("IO_BO_SERVICE_KEY_ROTATE", { keyType: keyType });
+      logToMixpanel("IO_BO_SERVICE_KEY_ROTATE", {
+        eventCategory: "UX",
+        keyType: keyType,
+      });
     }
   };
 
   const handleCopyEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
     if (props.page === "manage") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
-        entryPoint: "Api Keys page",
+        entryPoint: "apikey",
+        eventCategory: "UX",
         keyType: keyType,
       });
     } else if (props.page === "service") {
-      logToMixpanel("IO_BO_SERVICE_KEY_COPY", { keyType: keyType });
+      logToMixpanel("IO_BO_SERVICE_KEY_COPY", {
+        eventCategory: "UX",
+        keyType: keyType,
+      });
     }
   };
 

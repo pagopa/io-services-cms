@@ -17,6 +17,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useState } from "react";
+import React from "react";
 
 const pageTitleLocaleKey = "routes.edit-service.title";
 const pageDescriptionLocaleKey = "routes.edit-service.description";
@@ -45,6 +46,7 @@ export default function EditService() {
         { notify: "all" },
       );
       logToMixpanel("IO_BO_SERVICE_EDIT_END", {
+        eventCategory: "TECH",
         result: "success",
         serviceId: serviceId,
       });
@@ -57,6 +59,7 @@ export default function EditService() {
         }),
       );
       logToMixpanel("IO_BO_SERVICE_EDIT_END", {
+        eventCategory: "TECH",
         result: readableReport(maybeApiServicePayload.left),
         serviceId: serviceId,
       });

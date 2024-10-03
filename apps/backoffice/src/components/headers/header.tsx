@@ -44,7 +44,10 @@ export const Header = () => {
     // otherwise navigate to product url (i.e.: SelfCare)
     setSelectedProductId(product.id);
     window.location.href = product.productUrl;
-    logToMixpanel("IO_BO_PRODUCT_SWITCH", { productId: product.id });
+    logToMixpanel("IO_BO_PRODUCT_SWITCH", {
+      eventCategory: "UX",
+      productId: product.id,
+    });
   };
 
   const selectedPartyChange = (party: PartySwitchItem) => {
@@ -52,7 +55,10 @@ export const Header = () => {
     if (selectedPartyId === party.id) return;
     // otherwise perform next/auth logout and navigate to callbackUrl
     setSelectedPartyId(party.id);
-    logToMixpanel("IO_BO_INSTITUTION_SWITCH", { institutionId: party.id });
+    logToMixpanel("IO_BO_INSTITUTION_SWITCH", {
+      eventCategory: "UX",
+      institutionId: party.id,
+    });
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +

@@ -39,12 +39,14 @@ export const CardRows = ({ rows }: CardRowsProps) => {
   const handleMixpanel = (label: string) => {
     if (label === "keys.primary.title") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
-        entryPoint: "Overview page",
+        entryPoint: "overview",
+        eventCategory: "UX",
         keyType: "primary",
       });
     } else if (label === "keys.secondary.title") {
       logToMixpanel("IO_BO_MANAGE_KEY_COPY", {
-        entryPoint: "Overview page",
+        entryPoint: "overview",
+        eventCategory: "UX",
         keyType: "secondary",
       });
     }

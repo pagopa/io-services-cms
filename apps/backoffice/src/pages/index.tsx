@@ -9,9 +9,11 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { logToMixpanel } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
+import mixpanel from "mixpanel-browser";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.overview.title";
@@ -39,7 +41,14 @@ export default function Home() {
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
     }
-    logToMixpanel("IO_BO_OVERVIEW_PAGE", {});
+    const mixpanelSuperProperties = {
+      institution_id: session?.user?.institution.id,
+      organization_fiscal_code: session?.user?.institution.fiscalCode,
+      organization_name: session?.user?.institution.name,
+      user_role: session?.user?.institution.role,
+    };
+    mixpanel.register(mixpanelSuperProperties);
+    logToMixpanel("IO_BO_OVERVIEW_PAGE", { eventCategory: "UX" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -14,6 +14,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement } from "react";
+import React from "react";
 
 const pageTitleLocaleKey = "routes.new-service.title";
 const pageDescriptionLocaleKey = "routes.new-service.description";
@@ -37,6 +38,7 @@ export default function NewService() {
         { notify: "all" },
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        eventCategory: "TECH",
         result: "success",
         serviceId: "", // Missing New servie ID
       });
@@ -49,8 +51,9 @@ export default function NewService() {
         }),
       );
       logToMixpanel("IO_BO_SERVICE_CREATE_END", {
+        eventCategory: "TECH",
         result: readableReport(maybeServicePayload.left),
-        serviceId: "Error",
+        serviceId: "error",
       });
     }
     // redirect to services list in both cases

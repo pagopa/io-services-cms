@@ -67,6 +67,7 @@ export const MigrationModal = ({
     setCheckedDelegates([]);
     logToMixpanel("IO_BO_SERVICES_IMPORT_START", {
       delegates: checkedDelegates,
+      eventCategory: "UX",
     });
   };
 

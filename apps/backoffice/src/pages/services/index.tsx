@@ -41,6 +41,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
+import React from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -216,7 +217,8 @@ export default function Services() {
 
   const handleEdit = (service: ServiceListItem) => {
     logToMixpanel("IO_BO_SERVICE_EDIT_START", {
-      entryPoint: "Services List Page",
+      entryPoint: "services",
+      eventCategory: "UX",
       serviceId: service.id,
     });
     router.push(`/services/${service.id}/edit-service`);
@@ -448,7 +450,7 @@ export default function Services() {
   }, [servicesData]);
 
   useEffect(() => {
-    logToMixpanel("IO_BO_SERVICES_PAGE", {});
+    logToMixpanel("IO_BO_SERVICES_PAGE", { eventCategory: "UX" });
   }, []);
 
   return (
@@ -469,7 +471,9 @@ export default function Services() {
             >
               <Button
                 onClick={() => {
-                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {});
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {
+                    eventCategory: "UX",
+                  });
                 }}
                 size="medium"
                 startIcon={<Add />}

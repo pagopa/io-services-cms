@@ -25,6 +25,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, useEffect, useState } from "react";
+import React from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
 
@@ -108,6 +109,7 @@ export default function ServiceDetails() {
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
     logToMixpanel("IO_BO_SERVICE_HISTORY", {
+      eventCategory: "UX",
       serviceId: serviceId,
     });
     shFetchData(
@@ -123,13 +125,15 @@ export default function ServiceDetails() {
   const handlePreview = () => {
     setShowPreview(true);
     logToMixpanel("IO_BO_SERVICE_PREVIEW", {
+      eventCategory: "UX",
       serviceId: serviceId,
     });
   };
 
   const handleEdit = () => {
     logToMixpanel("IO_BO_SERVICE_EDIT_START", {
-      entryPoint: "Service Detail",
+      entryPoint: "serviceDetails",
+      eventCategory: "UX",
       serviceId: serviceId,
     });
     router.push(`/services/${serviceId}/edit-service`);
@@ -161,10 +165,13 @@ export default function ServiceDetails() {
 
   useEffect(() => {
     manageCurrentService();
-    logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", {
-      serviceId: serviceId,
-      serviceName: slData?.name as string,
-    });
+    if (serviceId && slData?.name) {
+      logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", {
+        eventCategory: "UX",
+        serviceId: serviceId,
+        serviceName: slData?.name as string,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);
 

@@ -68,7 +68,7 @@ export const MigrationManager = () => {
 
   const handleOpenImportModal = () => {
     setIsImportModalOpen(true);
-    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", {});
+    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", { eventCategory: "UX" });
   };
 
   const getMigrationOwnershipClaimsUrl = (delegateId: string) =>
@@ -141,7 +141,10 @@ export const MigrationManager = () => {
           title: t("notifications.success"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICES_IMPORT_END", { result: "success" });
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", {
+        eventCategory: "TECH",
+        result: "success",
+      });
     } catch (error) {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -150,7 +153,10 @@ export const MigrationManager = () => {
           title: t("notifications.exceptionError"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICES_IMPORT_END", { result: error as string });
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", {
+        eventCategory: "TECH",
+        result: error as string,
+      });
     } finally {
       setImportInProgress(false);
       fetchMigrationLatestData();

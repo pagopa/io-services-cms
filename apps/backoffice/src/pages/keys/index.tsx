@@ -10,6 +10,7 @@ import { logToMixpanel } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.keys.title";
@@ -40,7 +41,7 @@ export default function Keys() {
     acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
       notify: "errors",
     });
-    logToMixpanel("IO_BO_APIKEY_PAGE", {});
+    logToMixpanel("IO_BO_APIKEY_PAGE", { eventCategory: "UX" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
