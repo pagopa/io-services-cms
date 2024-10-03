@@ -60,6 +60,10 @@ const onApproveHandler =
       data: {
         ...item.data,
         max_allowed_payment_amount: MAX_ALLOWED_PAYMENT_AMOUNT,
+        metadata: {
+          ...item.data.metadata,
+          group_id: undefined, // we don't want to propagate group_id to the service-publication container
+        },
       },
       id: item.id,
     },
