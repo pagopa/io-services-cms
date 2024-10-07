@@ -4,11 +4,13 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NO_CONTENT,
 } from "@/config/constants";
+import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
+import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -19,6 +21,7 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest, NextResponse } from "next/server";
 
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
+import { retrieveInstitutionGroups } from "../institutions/business";
 import { getServiceList } from "./apim";
 import {
   IoServicesCmsClient,
@@ -176,9 +179,9 @@ export async function forwardIoServicesCmsRequest<
     // create the request payload
     const requestPayload = {
       ...pathParams,
-      "X-Forwarded-For":
-        nextRequest.headers.get("X-Forwarded-For") ?? undefined,
       body: requestBody,
+      "x-Forwarded-For":
+        nextRequest.headers.get("X-Forwarded-For") ?? undefined,
       "x-channel": "BO",
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
@@ -201,16 +204,53 @@ export async function forwardIoServicesCmsRequest<
       );
     }
 
-    const { status, value } = result.right;
     // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
-    if (status === HTTP_STATUS_NO_CONTENT || value === undefined) {
+    if (
+      result.right.status === HTTP_STATUS_NO_CONTENT ||
+      result.right.value === undefined
+    ) {
       return new Response(null, {
-        status,
+        status: result.right.status,
       });
     }
 
+    // manage group_id only with a success response that contains Service object(s)
+    let mappedValue = result.right.value;
+    if (
+      (result.right.status === 200 || result.right.status === 201) &&
+      ("value" in result.right.value || "metadata" in result.right.value)
+    ) {
+      const institutionGroupsResponse = await retrieveInstitutionGroups(
+        backofficeUser.institution.id,
+        1000, // FIXME: workaround to get all groups in a single call
+        0,
+      );
+      console.log("institutionGroupsResponse", institutionGroupsResponse);
+      const groupIdToNameMap = institutionGroupsResponse.value.reduce(
+        (map, group) => map.set(group.id, group),
+        new Map<Group["id"], Group>(),
+      );
+      if ("metadata" in result.right.value) {
+        mappedValue = {
+          ...result.right.value,
+          metadata: mapServiceGroup(
+            result.right.value.metadata,
+            groupIdToNameMap,
+          ),
+        };
+      } else {
+        mappedValue = {
+          pagination: result.right.value.pagination,
+          value: result.right.value.value?.map((item) => ({
+            ...item,
+            metadata: mapServiceGroup(item.metadata, groupIdToNameMap),
+          })),
+        };
+      }
+    }
+
     // return the sanitized response
-    return sanitizedNextResponseJson(value, status);
+    return sanitizedNextResponseJson(mappedValue, result.right.status);
   } catch (error) {
     console.error(
       `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
@@ -227,6 +267,14 @@ export async function forwardIoServicesCmsRequest<
     );
   }
 }
+
+const mapServiceGroup = (
+  { group_id, ...othersMetadata }: ServiceMetadata,
+  groupIdToNameMap: Map<Group["id"], Group>,
+) => ({
+  ...othersMetadata,
+  group: group_id ? groupIdToNameMap.get(group_id) : undefined,
+});
 
 export const retrieveServiceTopics = async (
   nextRequest: NextRequest,

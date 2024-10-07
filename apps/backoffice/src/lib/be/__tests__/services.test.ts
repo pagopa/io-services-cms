@@ -7,6 +7,7 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
+import { Group } from "../../../generated/api/Group";
 import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import { MigrationItem } from "../../../generated/api/MigrationItem";
@@ -15,7 +16,7 @@ import { ServiceTopicList } from "../../../generated/services-cms/ServiceTopicLi
 import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
-  retrieveServiceList
+  retrieveServiceList,
 } from "../services/business";
 
 const anUserEmail = "anEmail@email.it";
@@ -23,16 +24,17 @@ const anUserId = "anUserId";
 const aSubscriptionId = "aSubscriptionId";
 const aUserPermissions = {
   apimGroups: ["permission1", "permission2"],
-  selcGroups: ["g1", "g2"]
+  selcGroups: ["g1", "g2"],
 };
-const jwtMock = ({
+const jwtMock = {
   permissions: aUserPermissions,
   parameters: {
     userEmail: anUserEmail,
     userId: anUserId,
-    subscriptionId: aSubscriptionId
-  }
-} as unknown) as BackOfficeUser;
+    subscriptionId: aSubscriptionId,
+  },
+  institution: { id: "institutionId" },
+} as unknown as BackOfficeUser;
 
 const mocks: {
   statusOK: number;
@@ -46,6 +48,7 @@ const mocks: {
   migrationData: MigrationData;
   migrationDelegate: MigrationDelegate;
   aServiceTopicsListResponse: ServiceTopicList;
+  aGroup: Group;
 } = vi.hoisted(() => {
   const aModificationDate = new Date();
   return {
@@ -53,7 +56,7 @@ const mocks: {
     statusNoContent: 204,
     aSamplePayload: { test: "test" },
     aModificationDate,
-    aBaseServiceLifecycle: ({
+    aBaseServiceLifecycle: {
       id: "aServiceId",
       modified_at: aModificationDate.getTime(),
       data: {
@@ -66,63 +69,64 @@ const mocks: {
           address: "via tal dei tali 123",
           email: "service@email.it",
           pec: "service@pec.it",
-          scope: "LOCAL"
+          scope: "LOCAL",
         },
         organization: {
           name: "anOrganizationName",
-          fiscal_code: "12345678901"
+          fiscal_code: "12345678901",
         },
-        require_secure_channel: false
+        require_secure_channel: false,
       },
       fsm: {
-        state: "draft"
-      }
-    } as unknown) as ServiceLifecycle.ItemType,
+        state: "draft",
+      },
+    } as unknown as ServiceLifecycle.ItemType,
     anUserId: "anUserId",
     anInstitution: {
       id: "anInstitutionId",
       name: "anInstitutionName",
       fiscalCode: "12345678901",
-      role: "admin"
+      role: "admin",
     },
     migrationItem: {
       status: {
         completed: 99,
         failed: 7,
         initial: 63,
-        processing: 94
+        processing: 94,
       },
       delegate: {
         sourceId: "3ef50230-9c1f-4cf0-9f4d-af6c0dcf6288",
         sourceName: "Name",
         sourceSurname: "Surname",
-        sourceEmail: "test@email.test"
+        sourceEmail: "test@email.test",
       },
-      lastUpdate: "2023-05-05T14:25:49.277Z"
+      lastUpdate: "2023-05-05T14:25:49.277Z",
     } as MigrationItem,
     migrationData: {
       status: {
         completed: 31,
         failed: 64,
         initial: 31,
-        processing: 25
-      }
+        processing: 25,
+      },
     } as MigrationData,
     migrationDelegate: {
       sourceId: "c7fd5462-7fa2-4321-a4a4-237523445d1c",
       sourceName: "Name",
       sourceSurname: "Surname",
       sourceEmail: "test@test.test",
-      subscriptionCounter: 17
+      subscriptionCounter: 17,
     } as MigrationDelegate,
     aServiceTopicsListResponse: {
       topics: [
         {
           id: 1,
-          name: "Ambiente e animali"
-        }
-      ]
-    } as ServiceTopicList
+          name: "Ambiente e animali",
+        },
+      ],
+    } as ServiceTopicList,
+    aGroup: { id: "group_id", name: "group name" },
   };
 });
 
@@ -130,40 +134,42 @@ const { getIoServicesCmsClient, getTopicsProvider } = vi.hoisted(() => ({
   getIoServicesCmsClient: vi.fn().mockReturnValue({
     getServices: vi.fn(() =>
       Promise.resolve(
-        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
-      )
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
+      ),
     ),
     createService: vi.fn(() =>
       Promise.resolve(
-        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload })
-      )
+        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
+      ),
     ),
     reviewService: vi.fn(() =>
-      Promise.resolve(E.of({ status: mocks.statusNoContent, value: undefined }))
-    )
+      Promise.resolve(
+        E.of({ status: mocks.statusNoContent, value: undefined }),
+      ),
+    ),
   }),
   getTopicsProvider: vi.fn(() => ({
     getServiceTopics: vi.fn(() =>
-      Promise.resolve(mocks.aServiceTopicsListResponse)
-    )
-  }))
+      Promise.resolve(mocks.aServiceTopicsListResponse),
+    ),
+  })),
 }));
 
 const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
   getSubscriptionsMigrationClient: vi.fn().mockReturnValue({
     getLatestOwnershipClaimStatus: vi.fn(() =>
       TE.right({
-        items: [mocks.migrationItem]
-      })
+        items: [mocks.migrationItem],
+      }),
     ),
     getOwnershipClaimStatus: vi.fn(() => TE.right(mocks.migrationData)),
     claimOwnership: vi.fn(() => TE.right(void 0)),
     getDelegatesByOrganization: vi.fn(() =>
       TE.right({
-        delegates: [mocks.migrationDelegate]
-      })
-    )
-  })
+        delegates: [mocks.migrationDelegate],
+      }),
+    ),
+  }),
 }));
 
 const { getApimRestClient } = vi.hoisted(() => ({
@@ -172,49 +178,55 @@ const { getApimRestClient } = vi.hoisted(() => ({
       getServiceList: vi.fn(() =>
         TE.right({
           value: [],
-          count: 0
-        })
-      )
-    })
-  )
+          count: 0,
+        }),
+      ),
+    }),
+  ),
 }));
 
-const {
-  getServiceLifecycleCosmosStore,
-  getServicePublicationCosmosStore
-} = vi.hoisted(() => ({
-  getServiceLifecycleCosmosStore: vi.fn().mockReturnValue({
-    bulkFetch: vi.fn(() => TE.right([]))
-  }),
-  getServicePublicationCosmosStore: vi.fn().mockReturnValue({
-    bulkFetch: vi.fn(() => TE.right([]))
-  })
-}));
+const { getServiceLifecycleCosmosStore, getServicePublicationCosmosStore } =
+  vi.hoisted(() => ({
+    getServiceLifecycleCosmosStore: vi.fn().mockReturnValue({
+      bulkFetch: vi.fn(() => TE.right([])),
+    }),
+    getServicePublicationCosmosStore: vi.fn().mockReturnValue({
+      bulkFetch: vi.fn(() => TE.right([])),
+    }),
+  }));
 
 const { isAxiosError } = vi.hoisted(() => ({
-  isAxiosError: vi.fn().mockReturnValue(false)
+  isAxiosError: vi.fn().mockReturnValue(false),
+}));
+
+const { retrieveInstitutionGroups } = vi.hoisted(() => ({
+  retrieveInstitutionGroups: vi.fn(),
 }));
 
 vi.mock("axios", async () => ({
-  isAxiosError
+  isAxiosError,
 }));
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
-  getSubscriptionsMigrationClient
+  getSubscriptionsMigrationClient,
 }));
 
 vi.mock("@/lib/be/cms-client", () => ({
   getIoServicesCmsClient,
-  getTopicsProvider
+  getTopicsProvider,
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({
-  getApimRestClient
+  getApimRestClient,
 }));
 
 vi.mock("@/lib/be/cosmos-store", () => ({
   getServiceLifecycleCosmosStore,
-  getServicePublicationCosmosStore
+  getServicePublicationCosmosStore,
+}));
+
+vi.mock("@/lib/be/institutions/business", () => ({
+  retrieveInstitutionGroups,
 }));
 
 afterEach(() => {
@@ -225,10 +237,10 @@ describe("Services TEST", () => {
     it("request without body request and with response body", async () => {
       // Mock io-services-cms client
       const getServices = vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+        Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
       );
       getIoServicesCmsClient.mockReturnValueOnce({
-        getServices
+        getServices,
       });
 
       // Mock NextRequest
@@ -236,7 +248,7 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("getServices", {
         nextRequest: request,
-        backofficeUser: jwtMock
+        backofficeUser: jwtMock,
       });
 
       expect(getServices).toHaveBeenCalled();
@@ -247,40 +259,95 @@ describe("Services TEST", () => {
           "x-subscription-id": aSubscriptionId,
           "x-user-groups": aUserPermissions.apimGroups.join(","),
           "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
-          "x-channel": "BO"
-        })
+          "x-channel": "BO",
+        }),
       );
 
       expect(result.status).toBe(200);
       expect(result.body).not.toBe(null);
     });
 
+    it.each`
+      scenario                    | aResponseBody                                                                       | expectedResponseBody
+      ${"non paginated response"} | ${{ foo: "foo", metadata: { bar: "bar", group_id: mocks.aGroup.id } }}              | ${{ foo: "foo", metadata: { bar: "bar", group: mocks.aGroup } }}
+      ${"paginated response"}     | ${{ value: [{ foo: "foo", metadata: { bar: "bar", group_id: mocks.aGroup.id } }] }} | ${{ value: [{ foo: "foo", metadata: { bar: "bar", group: mocks.aGroup } }] }}
+    `(
+      "should map the $scenario group_id into a Group model",
+      async ({ aResponseBody, expectedResponseBody }) => {
+        // Mock io-services-cms client
+        const getServices = vi.fn(() =>
+          Promise.resolve(
+            E.of({
+              status: 200,
+              value: aResponseBody,
+            }),
+          ),
+        );
+        getIoServicesCmsClient.mockReturnValueOnce({
+          getServices,
+        });
+        retrieveInstitutionGroups.mockResolvedValueOnce({
+          value: [mocks.aGroup],
+        });
+
+        // Mock NextRequest
+        const request = new NextRequest(new URL("http://localhost"));
+
+        const result = await forwardIoServicesCmsRequest("getServices", {
+          nextRequest: request,
+          backofficeUser: jwtMock,
+        });
+
+        expect(getServices).toHaveBeenCalled();
+        expect(getServices).toHaveBeenCalledWith(
+          expect.objectContaining({
+            "x-user-email": anUserEmail,
+            "x-user-id": anUserId,
+            "x-subscription-id": aSubscriptionId,
+            "x-user-groups": aUserPermissions.apimGroups.join(","),
+            "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+            "x-channel": "BO",
+          }),
+        );
+        expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+          jwtMock.institution.id,
+          1000,
+          0,
+        );
+
+        expect(result.status).toBe(200);
+        const jsonBody = await result.json();
+        expect(jsonBody).toStrictEqual(expectedResponseBody);
+      },
+    );
+
     it("request with body request and with response body", async () => {
       // Mock io-services-cms client
       const createService = vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+        Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
       );
       getIoServicesCmsClient.mockReturnValueOnce({
-        createService
+        createService,
       });
 
       const aBodyPayload = {
         name: "test",
-        description: "test"
+        description: "test",
       };
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "POST",
-        body: JSON.stringify(aBodyPayload)
+        body: JSON.stringify(aBodyPayload),
       });
 
       const result = await forwardIoServicesCmsRequest("createService", {
         nextRequest: request,
         backofficeUser: jwtMock,
         pathParams: {
-          serviceId: "test"
-        }
+          serviceId: "test",
+        },
       });
 
       expect(createService).toHaveBeenCalled();
@@ -293,8 +360,8 @@ describe("Services TEST", () => {
           "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
-          serviceId: "test"
-        })
+          serviceId: "test",
+        }),
       );
 
       expect(result.status).toBe(200);
@@ -304,28 +371,28 @@ describe("Services TEST", () => {
     it("request without body response", async () => {
       // Mock io-services-cms client
       const reviewService = vi.fn(() =>
-        Promise.resolve(E.of({ status: 204, value: undefined }))
+        Promise.resolve(E.of({ status: 204, value: undefined })),
       );
       getIoServicesCmsClient.mockReturnValueOnce({
-        reviewService
+        reviewService,
       });
 
       const aBodyPayload = {
-        name: "test"
+        name: "test",
       };
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "POST",
-        body: JSON.stringify(aBodyPayload)
+        body: JSON.stringify(aBodyPayload),
       });
 
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
         backofficeUser: jwtMock,
         pathParams: {
-          serviceId: "test"
-        }
+          serviceId: "test",
+        },
       });
 
       expect(reviewService).toHaveBeenCalled();
@@ -338,8 +405,8 @@ describe("Services TEST", () => {
           "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
-          serviceId: "test"
-        })
+          serviceId: "test",
+        }),
       );
 
       expect(result.status).toBe(204);
@@ -349,22 +416,22 @@ describe("Services TEST", () => {
     it("fn call with explicitly body and expect response body", async () => {
       // Mock io-services-cms client
       const createService = vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } }))
+        Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
       );
       getIoServicesCmsClient.mockReturnValueOnce({
-        createService
+        createService,
       });
 
       // Mock request body
       const aBodyPayload = {
         name: "test",
-        description: "test"
+        description: "test",
       };
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "POST",
-        body: JSON.stringify(aBodyPayload)
+        body: JSON.stringify(aBodyPayload),
       });
 
       const result = await forwardIoServicesCmsRequest("createService", {
@@ -372,8 +439,8 @@ describe("Services TEST", () => {
         backofficeUser: jwtMock,
         jsonBody: aBodyPayload,
         pathParams: {
-          serviceId: "test"
-        }
+          serviceId: "test",
+        },
       });
 
       expect(createService).toHaveBeenCalled();
@@ -386,8 +453,8 @@ describe("Services TEST", () => {
           "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
-          serviceId: "test"
-        })
+          serviceId: "test",
+        }),
       );
 
       expect(result.status).toBe(200);
@@ -403,37 +470,37 @@ describe("Services TEST", () => {
               key: "test",
               type: "string",
               actual: "test",
-              message: "test"
-            }
+              message: "test",
+            },
           ],
-          message: "test"
-        } as any
+          message: "test",
+        } as any,
       ];
 
       // Mock io-services-cms client
       const reviewService = vi.fn(() =>
-        Promise.resolve(E.left(validationError))
+        Promise.resolve(E.left(validationError)),
       );
       getIoServicesCmsClient.mockReturnValueOnce({
-        reviewService
+        reviewService,
       });
 
       const aBodyPayload = {
-        name: "test"
+        name: "test",
       };
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "POST",
-        body: JSON.stringify(aBodyPayload)
+        body: JSON.stringify(aBodyPayload),
       });
 
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
         backofficeUser: jwtMock,
         pathParams: {
-          serviceId: "test"
-        }
+          serviceId: "test",
+        },
       });
 
       expect(reviewService).toHaveBeenCalled();
@@ -446,8 +513,8 @@ describe("Services TEST", () => {
           "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
-          serviceId: "test"
-        })
+          serviceId: "test",
+        }),
       );
 
       expect(result.status).toBe(400);
@@ -464,13 +531,13 @@ describe("Services TEST", () => {
         TE.right([
           O.some({
             ...mocks.aBaseServiceLifecycle,
-            id: aServiceinPublicationId
+            id: aServiceinPublicationId,
           }),
           O.some({
             ...mocks.aBaseServiceLifecycle,
-            id: aServiceNotInPublicationId
-          })
-        ])
+            id: aServiceNotInPublicationId,
+          }),
+        ]),
       );
       const bulkFetchPublicationMock = vi.fn(() =>
         TE.right([
@@ -478,37 +545,37 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             name: "aServiceName",
             fsm: {
-              state: "published"
-            }
-          })
-        ])
+              state: "published",
+            },
+          }),
+        ]),
       );
 
       const getServiceListMock = vi.fn(() =>
         TE.right({
           value: [
             {
-              name: aServiceinPublicationId
+              name: aServiceinPublicationId,
             },
             {
-              name: aServiceNotInPublicationId
-            }
+              name: aServiceNotInPublicationId,
+            },
           ],
-          count: 2
-        })
+          count: 2,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
@@ -519,22 +586,22 @@ describe("Services TEST", () => {
         mocks.anUserId,
         mocks.anInstitution,
         10,
-        0
+        0,
       );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
-        aServiceNotInPublicationId
+        aServiceNotInPublicationId,
       ]);
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
-        aServiceNotInPublicationId
+        aServiceNotInPublicationId,
       ]);
 
       expect(result).toEqual({
@@ -543,45 +610,47 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
+            last_update:
+              mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
               name: "anOrganizationName",
-              fiscal_code: "12345678901"
+              fiscal_code: "12345678901",
             },
             metadata: {
               address: "via tal dei tali 123",
               email: "service@email.it",
               pec: "service@pec.it",
               scope: "LOCAL",
-              category: "STANDARD"
+              category: "STANDARD",
             },
             authorized_recipients: [],
-            authorized_cidrs: []
+            authorized_cidrs: [],
           },
           {
             id: aServiceNotInPublicationId,
             status: { value: "draft" },
-            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
+            last_update:
+              mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
               name: "anOrganizationName",
-              fiscal_code: "12345678901"
+              fiscal_code: "12345678901",
             },
             metadata: {
               address: "via tal dei tali 123",
               email: "service@email.it",
               pec: "service@pec.it",
               scope: "LOCAL",
-              category: "STANDARD"
+              category: "STANDARD",
             },
             authorized_recipients: [],
-            authorized_cidrs: []
-          }
+            authorized_cidrs: [],
+          },
         ],
-        pagination: { count: 2, limit: 10, offset: 0 }
+        pagination: { count: 2, limit: 10, offset: 0 },
       });
     });
 
@@ -597,11 +666,11 @@ describe("Services TEST", () => {
               ...mocks.aBaseServiceLifecycle.data,
               metadata: {
                 ...mocks.aBaseServiceLifecycle.data.metadata,
-                topic_id: 1
-              }
-            }
-          })
-        ])
+                topic_id: 1,
+              },
+            },
+          }),
+        ]),
       );
       const bulkFetchPublicationMock = vi.fn(() =>
         TE.right([
@@ -609,34 +678,34 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             name: "aServiceName",
             fsm: {
-              state: "published"
-            }
-          })
-        ])
+              state: "published",
+            },
+          }),
+        ]),
       );
 
       const getServiceListMock = vi.fn(() =>
         TE.right({
           value: [
             {
-              name: aServiceinPublicationId
-            }
+              name: aServiceinPublicationId,
+            },
           ],
-          count: 1
-        })
+          count: 1,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
@@ -647,20 +716,20 @@ describe("Services TEST", () => {
         mocks.anUserId,
         mocks.anInstitution,
         10,
-        0
+        0,
       );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
-        aServiceinPublicationId
+        aServiceinPublicationId,
       ]);
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
-        aServiceinPublicationId
+        aServiceinPublicationId,
       ]);
 
       expect(result).toEqual({
@@ -669,12 +738,13 @@ describe("Services TEST", () => {
             id: aServiceinPublicationId,
             visibility: "published",
             status: { value: "draft" },
-            last_update: mocks.aModificationDate.toISOString() as NonEmptyString,
+            last_update:
+              mocks.aModificationDate.toISOString() as NonEmptyString,
             name: "aServiceName",
             description: "aServiceDescription",
             organization: {
               name: "anOrganizationName",
-              fiscal_code: "12345678901"
+              fiscal_code: "12345678901",
             },
             metadata: {
               address: "via tal dei tali 123",
@@ -684,14 +754,14 @@ describe("Services TEST", () => {
               category: "STANDARD",
               topic: {
                 id: 1,
-                name: "Ambiente e animali"
-              }
+                name: "Ambiente e animali",
+              },
             },
             authorized_recipients: [],
-            authorized_cidrs: []
-          }
+            authorized_cidrs: [],
+          },
         ],
-        pagination: { count: 1, limit: 10, offset: 0 }
+        pagination: { count: 1, limit: 10, offset: 0 },
       });
     });
 
@@ -702,21 +772,21 @@ describe("Services TEST", () => {
       const getServiceListMock = vi.fn(() =>
         TE.right({
           value: [],
-          count: 90
-        })
+          count: 90,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
@@ -727,21 +797,21 @@ describe("Services TEST", () => {
         mocks.anUserId,
         mocks.anInstitution,
         10,
-        90
+        90,
       );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         90,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
 
       expect(result).toStrictEqual({
         value: [],
-        pagination: { count: 90, limit: 10, offset: 90 }
+        pagination: { count: 90, limit: 10, offset: 90 },
       });
     });
 
@@ -752,21 +822,21 @@ describe("Services TEST", () => {
       const getServiceListMock = vi.fn(() =>
         TE.left({
           message: "Received 404 response",
-          response: { status: 404 }
-        })
+          response: { status: 404 },
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       isAxiosError.mockReturnValueOnce(true);
@@ -779,21 +849,21 @@ describe("Services TEST", () => {
         mocks.anUserId,
         mocks.anInstitution,
         10,
-        90
+        90,
       );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         90,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
 
       expect(result).toStrictEqual({
         value: [],
-        pagination: { count: 0, limit: 10, offset: 90 }
+        pagination: { count: 0, limit: 10, offset: 90 },
       });
     });
 
@@ -808,9 +878,9 @@ describe("Services TEST", () => {
         TE.right([
           O.some({
             ...mocks.aBaseServiceLifecycle,
-            id: aServiceInLifecycleId
-          })
-        ])
+            id: aServiceInLifecycleId,
+          }),
+        ]),
       );
       const bulkFetchPublicationMock = vi.fn(() =>
         TE.right([
@@ -818,38 +888,38 @@ describe("Services TEST", () => {
             id: aServiceInLifecycleId,
             name: "aServiceName",
             fsm: {
-              state: "published"
-            }
-          })
-        ])
+              state: "published",
+            },
+          }),
+        ]),
       );
 
       const getServiceListMock = vi.fn(() =>
         TE.right({
           value: [
             {
-              name: aServiceInLifecycleId
+              name: aServiceInLifecycleId,
             },
             {
               name: aServiceNotInLifecycleId,
-              createdDate: aServiceNotInLifecycleCreateDate
-            }
+              createdDate: aServiceNotInLifecycleCreateDate,
+            },
           ],
-          count: 2
-        })
+          count: 2,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
@@ -860,21 +930,21 @@ describe("Services TEST", () => {
         mocks.anUserId,
         mocks.anInstitution,
         10,
-        0
+        0,
       );
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
-        aServiceNotInLifecycleId
+        aServiceNotInLifecycleId,
       ]);
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
-        aServiceInLifecycleId
+        aServiceInLifecycleId,
       ]);
 
       expect(result).toEqual({
@@ -888,17 +958,17 @@ describe("Services TEST", () => {
             description: "aServiceDescription",
             organization: {
               name: "anOrganizationName",
-              fiscal_code: "12345678901"
+              fiscal_code: "12345678901",
             },
             metadata: {
               address: "via tal dei tali 123",
               email: "service@email.it",
               pec: "service@pec.it",
               scope: "LOCAL",
-              category: "STANDARD"
+              category: "STANDARD",
             },
             authorized_recipients: [],
-            authorized_cidrs: []
+            authorized_cidrs: [],
           },
           expect.objectContaining({
             description: "Descrizione non disponibile",
@@ -907,69 +977,75 @@ describe("Services TEST", () => {
             name: "Servizio non disponibile",
             organization: {
               fiscal_code: mocks.anInstitution.fiscalCode,
-              name: mocks.anInstitution.name
+              name: mocks.anInstitution.name,
             },
             status: {
-              value: ServiceLifecycleStatusTypeEnum.deleted
-            }
-          })
+              value: ServiceLifecycleStatusTypeEnum.deleted,
+            },
+          }),
         ],
-        pagination: { count: 2, limit: 10, offset: 0 }
+        pagination: { count: 2, limit: 10, offset: 0 },
       });
     });
 
     it("when service-publication bulk-fetch fails an error is returned", async () => {
       const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.right([O.some(mocks.aBaseServiceLifecycle)])
+        TE.right([O.some(mocks.aBaseServiceLifecycle)]),
       );
       const bulkFetchPublicationMock = vi.fn(() =>
         TE.left({
           kind: "COSMOS_ERROR_RESPONSE",
-          error: "error"
-        })
+          error: "error",
+        }),
       );
 
       const getServiceListMock = vi.fn(() =>
         TE.right({
           value: [
             {
-              name: mocks.aBaseServiceLifecycle.id
-            }
+              name: mocks.aBaseServiceLifecycle.id,
+            },
           ],
-          count: 1
-        })
+          count: 1,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(
+          request,
+          mocks.anUserId,
+          mocks.anInstitution,
+          10,
+          0,
+        ),
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
-        mocks.aBaseServiceLifecycle.id
+        mocks.aBaseServiceLifecycle.id,
       ]);
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
-        mocks.aBaseServiceLifecycle.id
+        mocks.aBaseServiceLifecycle.id,
       ]);
     });
 
@@ -977,8 +1053,8 @@ describe("Services TEST", () => {
       const bulkFetchLifecycleMock = vi.fn(() =>
         TE.left({
           kind: "COSMOS_ERROR_RESPONSE",
-          error: "error"
-        })
+          error: "error",
+        }),
       );
       const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
 
@@ -986,41 +1062,47 @@ describe("Services TEST", () => {
         TE.right({
           value: [
             {
-              name: mocks.aBaseServiceLifecycle.id
-            }
+              name: mocks.aBaseServiceLifecycle.id,
+            },
           ],
-          count: 1
-        })
+          count: 1,
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(
+          request,
+          mocks.anUserId,
+          mocks.anInstitution,
+          10,
+          0,
+        ),
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
-        mocks.aBaseServiceLifecycle.id
+        mocks.aBaseServiceLifecycle.id,
       ]);
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     });
@@ -1032,35 +1114,41 @@ describe("Services TEST", () => {
       const getServiceListMock = vi.fn(() =>
         TE.left({
           message: "Apim Failure",
-          response: { status: 500 }
-        })
+          response: { status: 500 },
+        }),
       );
 
       getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock
+        bulkFetch: bulkFetchLifecycleMock,
       });
       getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock
+        bulkFetch: bulkFetchPublicationMock,
       });
 
       getApimRestClient.mockReturnValueOnce(
         Promise.resolve({
-          getServiceList: getServiceListMock
-        })
+          getServiceList: getServiceListMock,
+        }),
       );
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(request, mocks.anUserId, mocks.anInstitution, 10, 0)
+        retrieveServiceList(
+          request,
+          mocks.anUserId,
+          mocks.anInstitution,
+          10,
+          0,
+        ),
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
-        undefined
+        undefined,
       );
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
@@ -1070,35 +1158,35 @@ describe("Services TEST", () => {
     it("should return a list of delegates", async () => {
       const getDelegatesByOrganization = vi.fn(() =>
         TE.right({
-          delegates: [mocks.migrationDelegate]
-        })
+          delegates: [mocks.migrationDelegate],
+        }),
       );
 
       getSubscriptionsMigrationClient.mockReturnValueOnce({
-        getDelegatesByOrganization
+        getDelegatesByOrganization,
       });
 
       const result = await retrieveOrganizationDelegates("anOrganizationId");
 
       expect(getDelegatesByOrganization).toBeCalledWith("anOrganizationId");
       expect(result).toStrictEqual({
-        delegates: [mocks.migrationDelegate]
+        delegates: [mocks.migrationDelegate],
       });
     });
 
     it("should propagate a not detailed error", async () => {
       const getDelegatesByOrganization = vi.fn(() =>
-        TE.left(new Error("Error calling subscriptions migration"))
+        TE.left(new Error("Error calling subscriptions migration")),
       );
 
       getSubscriptionsMigrationClient.mockReturnValueOnce({
-        getDelegatesByOrganization
+        getDelegatesByOrganization,
       });
 
       await expect(
-        retrieveOrganizationDelegates("anOrganizationId")
+        retrieveOrganizationDelegates("anOrganizationId"),
       ).rejects.toThrowError(
-        "Error calling subscriptions migration getDelegatesByOrganization API"
+        "Error calling subscriptions migration getDelegatesByOrganization API",
       );
 
       expect(getDelegatesByOrganization).toBeCalledWith("anOrganizationId");
