@@ -20,7 +20,7 @@ export const GET = withJWTAuthHandler(
         `An Error has occurred while retrieving service topics: ${backofficeUser.parameters.subscriptionId}, caused by: `,
         error,
       );
-      return handleInternalErrorResponse("ServiceListRetrieveError", error);
+      return handleInternalErrorResponse("TopicsRetrieveError", error);
     }
   },
 );
