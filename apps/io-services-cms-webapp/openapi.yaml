@@ -743,6 +743,10 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
     ServiceTopic:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
+    InternalServiceTopicList:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/InternalServiceTopicList'
+    InternalServiceTopic:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/InternalServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
