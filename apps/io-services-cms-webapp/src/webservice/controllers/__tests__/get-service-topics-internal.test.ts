@@ -41,14 +41,6 @@ const { getServiceTopicDao } = vi.hoisted(() => ({
   })),
 }));
 
-// const { getServiceTopicDao } = vi.hoisted(() => ({
-//   getServiceTopicDao: vi.fn(() => ({
-//     findById: vi.fn((id: number) =>
-//       TE.right(O.some({ id, name: "topic name" })),
-//     ),
-//   })),
-// }));
-
 vi.mock("../../../utils/service-topic-dao", () => ({
   getDao: getServiceTopicDao,
 }));
