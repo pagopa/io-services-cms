@@ -24,6 +24,15 @@ export const ServiceTopicRowDataTable = t.type({
   name: NonEmptyString,
 });
 
+export type AllServiceTopicRowDataTable = t.TypeOf<
+  typeof AllServiceTopicRowDataTable
+>;
+export const AllServiceTopicRowDataTable = t.type({
+  deleted: t.boolean,
+  id: t.number,
+  name: NonEmptyString,
+});
+
 const createExistsByIdSql = (
   { TOPIC_DB_SCHEMA, TOPIC_DB_TABLE }: TopicPostgreSqlConfig,
   id: number,
@@ -126,12 +135,48 @@ const findAllNotDeletedTopics =
       ),
     );
 
+const createSelectTopicsSql = ({
+  TOPIC_DB_SCHEMA,
+  TOPIC_DB_TABLE,
+}: TopicPostgreSqlConfig): string =>
+  knex.withSchema(TOPIC_DB_SCHEMA).table(TOPIC_DB_TABLE).select("*").toQuery();
+
+const findAllTopics =
+  (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
+  (): TE.TaskEither<
+    DatabaseError | Error,
+    O.Option<readonly AllServiceTopicRowDataTable[]>
+  > =>
+    pipe(
+      createSelectTopicsSql(dbConfig),
+      queryDataTable(pool),
+      TE.map(
+        flow(
+          O.fromPredicate((queryResult) => queryResult.rowCount > 0),
+          O.map((queryResult) => queryResult.rows),
+        ),
+      ),
+      TE.chain(
+        flow(
+          O.fold(
+            () => TE.right(O.none),
+            flow(
+              RA.traverse(E.Applicative)(AllServiceTopicRowDataTable.decode),
+              E.bimap(flow(readableReport, E.toError), O.some),
+              TE.fromEither,
+            ),
+          ),
+        ),
+      ),
+    );
+
 let dao: ServiceTopicDao;
 export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
   if (!dao) {
     dao = pipe(getPool(dbConfig), (pool) => ({
       existsById: existsById(pool, dbConfig),
       findAllNotDeletedTopics: findAllNotDeletedTopics(pool, dbConfig),
+      findAllTopics: findAllTopics(pool, dbConfig),
       findById: findById(pool, dbConfig),
     }));
   }
@@ -141,5 +186,6 @@ export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
 export interface ServiceTopicDao {
   existsById: ReturnType<typeof existsById>;
   findAllNotDeletedTopics: ReturnType<typeof findAllNotDeletedTopics>;
+  findAllTopics: ReturnType<typeof findAllTopics>;
   findById: ReturnType<typeof findById>;
 }
