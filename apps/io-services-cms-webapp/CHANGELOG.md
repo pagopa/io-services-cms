@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.34.0
+
+### Minor Changes
+
+- d9a513e: manage group_id
+
+### Patch Changes
+
+- Updated dependencies [d9a513e]
+  - @io-services-cms/models@1.21.0
+  - @io-services-cms/external-clients@1.3.0
+
 ## 1.33.9
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.21.0
+
+### Minor Changes
+
+- d9a513e: manage group_id
+
 ## 1.20.1
 
 ### Patch Changes
