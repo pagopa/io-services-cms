@@ -189,6 +189,9 @@ ServiceMetadata:
       properties:
         topic:
           $ref: '#/ServiceTopic'
+        group_id:
+          type: string
+          minLength: 1
 ServicePayloadMetadata:
   description: A set of service metadata properties on request payload
   allOf:
@@ -199,6 +202,9 @@ ServicePayloadMetadata:
           type: number
           description: The topic id
           example: 3
+        group_id:
+          type: string
+          minLength: 1
       required:
         - topic_id
 ServiceLifecycleStatus:

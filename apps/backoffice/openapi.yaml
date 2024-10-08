@@ -1228,19 +1228,17 @@ components:
           type: string
           description: the application health status
     ServiceHistory:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistory'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistory'
     ServiceHistoryItem:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItem'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItem'
     ServiceHistoryItemStatus:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItemStatus'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryItemStatus'
     ServiceHistoryStatusKind:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusKind'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusKind'
     ServiceHistoryStatusType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusType'
-    ServiceLifecycle:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusType'
     ServicePublication:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
     ServicePayload:
       type: object
       description: Service basic data
@@ -1272,35 +1270,33 @@ components:
           maximum: 9999999999
           default: 0
         metadata:
-          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
+          $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
       required:
         - name
         - description
         - metadata
     ServiceData:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
     ServiceBaseMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
     ServiceMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
     ServicePayloadMetadata:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
     ServiceLifecycleStatus:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
     ServiceLifecycleStatusType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatusType'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatusType'
     ServicePublicationStatusType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
-    ServicePagination:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePagination'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublicationStatusType'
     ServiceTopicList:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
     ServiceTopic:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization'
     OrganizationFiscalCode:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
     FiscalCode:
@@ -1308,17 +1304,17 @@ components:
     Logo:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Logo'
     SubscriptionKeys:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeys'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeys'
     SubscriptionKeyType:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType'
     Cidr:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
     ResponseError:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/ResponseError'
     Comment:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Comment'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Comment'
     ReviewRequest:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
     ManageKeyCIDRs:
@@ -1547,7 +1543,7 @@ components:
             visibility:
               type: string
               enum: [published, unpublished]
-        - $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycle'
+        - $ref: '#/components/schemas/ServiceLifecycle'
     GroupPagination:
       type: object
       properties:
@@ -1603,6 +1599,46 @@ components:
           type: string
       required:
         - groupId
+    ServiceLifecycleMetadata:
+      description: A set of service metadata properties
+      allOf:
+        - $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceBaseMetadata'
+        - type: object
+          properties:
+            topic:
+              $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
+            group:
+              $ref: '#/components/schemas/Group'
+    ServiceLifecycle:
+      description: Service Lifecycle model data
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+            status:
+              $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
+            version:
+              type: integer
+            last_update:
+              $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+            metadata:
+              $ref: '#/components/schemas/ServiceLifecycleMetadata'
+          required:
+            - id
+            - status
+            - last_update
+            - metadata
+        - $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
+    ServicePagination:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceLifecycle'
+        pagination:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
   securitySchemes:
     cookieAuth:
       type: apiKey
