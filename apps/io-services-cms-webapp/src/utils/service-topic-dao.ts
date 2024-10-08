@@ -6,6 +6,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { Decoder } from "io-ts";
 import knexBase from "knex";
 import { DatabaseError, Pool } from "pg";
 
@@ -106,49 +107,22 @@ const createSelectNotDeletedTopicsSql = ({
     .where("deleted", false)
     .toQuery();
 
-const findAllNotDeletedTopics =
-  (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
-  (): TE.TaskEither<
-    DatabaseError | Error,
-    O.Option<readonly ServiceTopicRowDataTable[]>
-  > =>
-    pipe(
-      createSelectNotDeletedTopicsSql(dbConfig),
-      queryDataTable(pool),
-      TE.map(
-        flow(
-          O.fromPredicate((queryResult) => queryResult.rowCount > 0),
-          O.map((queryResult) => queryResult.rows),
-        ),
-      ),
-      TE.chain(
-        flow(
-          O.fold(
-            () => TE.right(O.none),
-            flow(
-              RA.traverse(E.Applicative)(ServiceTopicRowDataTable.decode),
-              E.bimap(flow(readableReport, E.toError), O.some),
-              TE.fromEither,
-            ),
-          ),
-        ),
-      ),
-    );
-
 const createSelectTopicsSql = ({
   TOPIC_DB_SCHEMA,
   TOPIC_DB_TABLE,
 }: TopicPostgreSqlConfig): string =>
   knex.withSchema(TOPIC_DB_SCHEMA).table(TOPIC_DB_TABLE).select("*").toQuery();
 
-const findAllTopics =
-  (pool: Pool, dbConfig: TopicPostgreSqlConfig) =>
-  (): TE.TaskEither<
-    DatabaseError | Error,
-    O.Option<readonly AllServiceTopicRowDataTable[]>
-  > =>
+const findTopics =
+  <T>(
+    pool: Pool,
+    dbConfig: TopicPostgreSqlConfig,
+    codec: Decoder<unknown, T>,
+    query: (dbConfig: TopicPostgreSqlConfig) => string,
+  ) =>
+  (): TE.TaskEither<DatabaseError | Error, O.Option<readonly T[]>> =>
     pipe(
-      createSelectTopicsSql(dbConfig),
+      query(dbConfig),
       queryDataTable(pool),
       TE.map(
         flow(
@@ -161,7 +135,7 @@ const findAllTopics =
           O.fold(
             () => TE.right(O.none),
             flow(
-              RA.traverse(E.Applicative)(AllServiceTopicRowDataTable.decode),
+              RA.traverse(E.Applicative)(codec.decode),
               E.bimap(flow(readableReport, E.toError), O.some),
               TE.fromEither,
             ),
@@ -175,8 +149,18 @@ export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
   if (!dao) {
     dao = pipe(getPool(dbConfig), (pool) => ({
       existsById: existsById(pool, dbConfig),
-      findAllNotDeletedTopics: findAllNotDeletedTopics(pool, dbConfig),
-      findAllTopics: findAllTopics(pool, dbConfig),
+      findAllNotDeletedTopics: findTopics(
+        pool,
+        dbConfig,
+        ServiceTopicRowDataTable,
+        createSelectNotDeletedTopicsSql,
+      ),
+      findAllTopics: findTopics(
+        pool,
+        dbConfig,
+        AllServiceTopicRowDataTable,
+        createSelectTopicsSql,
+      ),
       findById: findById(pool, dbConfig),
     }));
   }
@@ -185,7 +169,9 @@ export const getDao = (dbConfig: TopicPostgreSqlConfig) => {
 
 export interface ServiceTopicDao {
   existsById: ReturnType<typeof existsById>;
-  findAllNotDeletedTopics: ReturnType<typeof findAllNotDeletedTopics>;
-  findAllTopics: ReturnType<typeof findAllTopics>;
+  findAllNotDeletedTopics: ReturnType<
+    typeof findTopics<ServiceTopicRowDataTable>
+  >;
+  findAllTopics: ReturnType<typeof findTopics<AllServiceTopicRowDataTable>>;
   findById: ReturnType<typeof findById>;
 }
