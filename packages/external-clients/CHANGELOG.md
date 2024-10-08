@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.3.0
+
+### Minor Changes
+
+- d9a513e: manage group_id
+
 ## 1.2.0
 
 ### Minor Changes
