@@ -61,6 +61,10 @@ import {
   makeGetServiceTopicsHandler,
 } from "./controllers/get-service-topics";
 import {
+  applyRequestMiddelwares as applyGetServiceTopicsInternalRequestMiddelwares,
+  makeGetServiceTopicsInternalHandler,
+} from "./controllers/get-service-topics-internal";
+import {
   applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
   makeGetServicesHandler,
 } from "./controllers/get-services";
@@ -158,6 +162,16 @@ export const createWebServer = ({
         serviceTopicDao,
       }),
       applyGetServiceTopicsRequestMiddelwares,
+    ),
+  );
+
+  router.get(
+    "/internal/services/topics",
+    pipe(
+      makeGetServiceTopicsInternalHandler({
+        serviceTopicDao,
+      }),
+      applyGetServiceTopicsInternalRequestMiddelwares,
     ),
   );
 
