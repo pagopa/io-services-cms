@@ -743,10 +743,6 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopicList'
     ServiceTopic:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceTopic'
-    InternalServiceTopicList:
-      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/InternalServiceTopicList'
-    InternalServiceTopic:
-      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/InternalServiceTopic'
     PaginationResultSet:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
     Organization:
@@ -771,3 +767,29 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+    InternalServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+        deleted:
+          type: boolean
+          description: if the topic is deleted
+          example: false
+      required:
+        - id
+        - name
+        - deleted
+    InternalServiceTopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalServiceTopic'
