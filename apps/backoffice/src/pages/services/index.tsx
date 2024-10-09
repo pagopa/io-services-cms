@@ -22,6 +22,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { logToMixpanel } from "@/utils/mix-panel";
 import {
   Add,
   Block,
@@ -40,6 +41,7 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
+import React from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -213,6 +215,14 @@ export default function Services() {
       offset: 0,
     });
 
+  const handleEdit = (service: ServiceListItem) => {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", "UX", {
+      entryPoint: "services",
+      serviceId: service.id,
+    });
+    router.push(`/services/${service.id}/edit-service`);
+  };
+
   /**
    * Returns a single `TableRowMenuAction`
    * @param options configuration options
@@ -236,7 +246,7 @@ export default function Services() {
     addRowMenuItem({
       action: ServiceContextMenuActions.edit,
       icon: <Edit color="primary" fontSize="inherit" />,
-      onClickFn: () => router.push(`/services/${service.id}/edit-service`),
+      onClickFn: () => handleEdit(service),
       serviceId: service.id,
     });
   /** Returns a `submitReview` `TableRowMenuAction` */
@@ -438,6 +448,10 @@ export default function Services() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [servicesData]);
 
+  useEffect(() => {
+    logToMixpanel("IO_BO_SERVICES_PAGE", "UX", {});
+  }, []);
+
   return (
     <>
       <Grid container paddingRight={3} spacing={0}>
@@ -454,7 +468,14 @@ export default function Services() {
               passHref
               style={{ textDecoration: "none" }}
             >
-              <Button size="medium" startIcon={<Add />} variant="contained">
+              <Button
+                onClick={() => {
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START", "UX", {});
+                }}
+                size="medium"
+                startIcon={<Add />}
+                variant="contained"
+              >
                 {t("service.actions.create")}
               </Button>
             </NextLink>

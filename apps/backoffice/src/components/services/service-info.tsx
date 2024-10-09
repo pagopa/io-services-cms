@@ -1,5 +1,6 @@
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { Service } from "@/types/service";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
 import { useTranslation } from "next-i18next";
 
@@ -46,6 +47,9 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   };
 
   const openDetails = () => {
+    logToMixpanel("IO_BO_SERVICE_DETAILS", "UX", {
+      serviceId: data?.id as string,
+    });
     openDrawer(<ServiceInfoContent data={data} />);
   };
 

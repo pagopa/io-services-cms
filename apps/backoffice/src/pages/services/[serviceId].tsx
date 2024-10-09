@@ -18,15 +18,18 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Service } from "@/types/service";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, useEffect, useState } from "react";
+import React from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
 
+/* eslint-disable max-lines-per-function*/
 export default function ServiceDetails() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -105,6 +108,9 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
+    logToMixpanel("IO_BO_SERVICE_HISTORY", "UX", {
+      serviceId: serviceId,
+    });
     shFetchData(
       "getServiceHistory",
       { continuationToken, serviceId },
@@ -117,6 +123,17 @@ export default function ServiceDetails() {
 
   const handlePreview = () => {
     setShowPreview(true);
+    logToMixpanel("IO_BO_SERVICE_PREVIEW", "UX", {
+      serviceId: serviceId,
+    });
+  };
+
+  const handleEdit = () => {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", "UX", {
+      entryPoint: "serviceDetails",
+      serviceId: serviceId,
+    });
+    router.push(`/services/${serviceId}/edit-service`);
   };
 
   const navigateToServiceLifecycle = () =>
@@ -139,11 +156,18 @@ export default function ServiceDetails() {
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
       notify: "errors",
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     manageCurrentService();
+    if (serviceId && slData?.name) {
+      logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", "UX", {
+        serviceId: serviceId,
+        serviceName: slData?.name as string,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);
 
@@ -157,9 +181,7 @@ export default function ServiceDetails() {
           <ServiceContextMenu
             lifecycleStatus={slData?.status}
             onDeleteClick={handleDelete}
-            onEditClick={() =>
-              router.push(`/services/${serviceId}/edit-service`)
-            }
+            onEditClick={handleEdit}
             onHistoryClick={() => handleHistory()}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
@@ -203,6 +225,7 @@ export default function ServiceDetails() {
             description={t("routes.service.keys.description")}
             keys={skData}
             onRotateKey={handleRotateKey}
+            page="service"
             title={t("routes.service.keys.title")}
           />
         </Grid>

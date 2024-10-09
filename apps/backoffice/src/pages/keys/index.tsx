@@ -6,9 +6,11 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.keys.title";
@@ -39,6 +41,7 @@ export default function Keys() {
     acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
       notify: "errors",
     });
+    logToMixpanel("IO_BO_APIKEY_PAGE", "UX", {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -54,6 +57,7 @@ export default function Keys() {
             description={t("routes.keys.manage.description")}
             keys={mkData}
             onRotateKey={handleRotateKey}
+            page="manage"
             title={t("routes.keys.manage.title")}
           />
         </Grid>
