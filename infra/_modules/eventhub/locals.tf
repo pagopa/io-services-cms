@@ -64,34 +64,34 @@ locals {
         ]
     }]
 
-    metric_alerts = [
-      {
+    metric_alerts = {
+      throttled_requests = {
         aggregation = "Count"
         metric_name = "ThrottledRequests"
-        description = "Alert for Too Many Throttled Requests"
+        description = "Too Many Throttled Requests"
         operator    = "GreaterThan"
         threshold   = 10 #TODO: FINE TUNING NEEDED
         frequency   = "PT5M"
         window_size = "PT15M"
       },
-      {
+      user_errors = {
         aggregation = "Count"
         metric_name = "UserErrors"
-        description = "Alert for Too Many User Errors"
+        description = "Too Many User Errors"
         operator    = "GreaterThan"
         threshold   = 1 #TODO: FINE TUNING NEEDED
         frequency   = "PT5M"
         window_size = "PT15M"
       },
-      {
+      high_cpu_usage = {
         aggregation = "Maximum"
         metric_name = "CPU"
-        description = "Alert for Too High CPU Usage"
+        description = "Too High CPU Usage"
         operator    = "GreaterThan"
         threshold   = 90 #TODO: FINE TUNING NEEDED
         frequency   = "PT5M"
         window_size = "PT15M"
       }
-    ]
+    }
   }
 }
