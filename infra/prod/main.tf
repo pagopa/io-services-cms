@@ -126,7 +126,7 @@ module "eventhub" {
   resource_group_name = azurerm_resource_group.rg.name
 
   # Cms Fn Name
-  cms_fn_name = module.cms_function_app.cmscms_fn_name
+  cms_fn_name = module.cms_function_app.cms_fn_name
 
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
