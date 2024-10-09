@@ -108,8 +108,7 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
-    logToMixpanel("IO_BO_SERVICE_HISTORY", {
-      eventCategory: "UX",
+    logToMixpanel("IO_BO_SERVICE_HISTORY", "UX", {
       serviceId: serviceId,
     });
     shFetchData(
@@ -124,16 +123,14 @@ export default function ServiceDetails() {
 
   const handlePreview = () => {
     setShowPreview(true);
-    logToMixpanel("IO_BO_SERVICE_PREVIEW", {
-      eventCategory: "UX",
+    logToMixpanel("IO_BO_SERVICE_PREVIEW", "UX", {
       serviceId: serviceId,
     });
   };
 
   const handleEdit = () => {
-    logToMixpanel("IO_BO_SERVICE_EDIT_START", {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", "UX", {
       entryPoint: "serviceDetails",
-      eventCategory: "UX",
       serviceId: serviceId,
     });
     router.push(`/services/${serviceId}/edit-service`);
@@ -166,8 +163,7 @@ export default function ServiceDetails() {
   useEffect(() => {
     manageCurrentService();
     if (serviceId && slData?.name) {
-      logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", {
-        eventCategory: "UX",
+      logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", "UX", {
         serviceId: serviceId,
         serviceName: slData?.name as string,
       });

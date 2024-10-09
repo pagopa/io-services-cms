@@ -68,7 +68,7 @@ export const MigrationManager = () => {
 
   const handleOpenImportModal = () => {
     setIsImportModalOpen(true);
-    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", { eventCategory: "UX" });
+    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", "UX", {});
   };
 
   const getMigrationOwnershipClaimsUrl = (delegateId: string) =>
@@ -141,8 +141,7 @@ export const MigrationManager = () => {
           title: t("notifications.success"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICES_IMPORT_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", "TECH", {
         result: "success",
       });
     } catch (error) {
@@ -153,8 +152,7 @@ export const MigrationManager = () => {
           title: t("notifications.exceptionError"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICES_IMPORT_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", "TECH", {
         result: error as string,
       });
     } finally {

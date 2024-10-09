@@ -20,7 +20,7 @@ export default function Login() {
 
   const manageMixpanelLogin = () => {
     mixpanel.identify();
-    logToMixpanel("IO_BO_LOGIN", { eventCategory: "UX" });
+    logToMixpanel("IO_BO_LOGIN", "UX", {});
   };
 
   /**
@@ -49,11 +49,10 @@ export default function Login() {
       // redirect to the return url or home page
       // router.push((router.query.returnUrl as string) || "/");
       router.push("/");
-      manageMixpanelLogin();
     } else {
       handleIdentity();
     }
-
+    manageMixpanelLogin();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 

@@ -45,8 +45,7 @@ export default function EditService() {
         ServiceLifecycle,
         { notify: "all" },
       );
-      logToMixpanel("IO_BO_SERVICE_EDIT_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICE_EDIT_END", "TECH", {
         result: "success",
         serviceId: serviceId,
       });
@@ -58,8 +57,7 @@ export default function EditService() {
           title: t("notifications.validationError"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICE_EDIT_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICE_EDIT_END", "TECH", {
         result: readableReport(maybeApiServicePayload.left),
         serviceId: serviceId,
       });

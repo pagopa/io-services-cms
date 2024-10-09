@@ -37,8 +37,7 @@ export default function NewService() {
         ServiceLifecycle,
         { notify: "all" },
       );
-      logToMixpanel("IO_BO_SERVICE_CREATE_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICE_CREATE_END", "TECH", {
         result: "success",
         serviceId: "", // Missing New servie ID
       });
@@ -50,8 +49,7 @@ export default function NewService() {
           title: t("notifications.validationError"),
         }),
       );
-      logToMixpanel("IO_BO_SERVICE_CREATE_END", {
-        eventCategory: "TECH",
+      logToMixpanel("IO_BO_SERVICE_CREATE_END", "TECH", {
         result: readableReport(maybeServicePayload.left),
         serviceId: "error",
       });

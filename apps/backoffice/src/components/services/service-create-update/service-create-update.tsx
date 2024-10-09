@@ -80,9 +80,9 @@ export const ServiceCreateUpdate = ({
     if (confirmed) {
       console.log("operation cancelled");
       if (mode === "create") {
-        logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", { eventCategory: "UX" });
+        logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", "UX", {});
       } else if (mode === "update") {
-        logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", { eventCategory: "UX" });
+        logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", "UX", {});
       }
       router.back();
     } else {

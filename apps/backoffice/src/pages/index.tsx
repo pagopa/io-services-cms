@@ -48,7 +48,7 @@ export default function Home() {
       user_role: session?.user?.institution.role,
     };
     mixpanel.register(mixpanelSuperProperties);
-    logToMixpanel("IO_BO_OVERVIEW_PAGE", { eventCategory: "UX" });
+    logToMixpanel("IO_BO_OVERVIEW_PAGE", "UX", {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -216,9 +216,8 @@ export default function Services() {
     });
 
   const handleEdit = (service: ServiceListItem) => {
-    logToMixpanel("IO_BO_SERVICE_EDIT_START", {
+    logToMixpanel("IO_BO_SERVICE_EDIT_START", "UX", {
       entryPoint: "services",
-      eventCategory: "UX",
       serviceId: service.id,
     });
     router.push(`/services/${service.id}/edit-service`);
@@ -450,7 +449,7 @@ export default function Services() {
   }, [servicesData]);
 
   useEffect(() => {
-    logToMixpanel("IO_BO_SERVICES_PAGE", { eventCategory: "UX" });
+    logToMixpanel("IO_BO_SERVICES_PAGE", "UX", {});
   }, []);
 
   return (
@@ -471,9 +470,7 @@ export default function Services() {
             >
               <Button
                 onClick={() => {
-                  logToMixpanel("IO_BO_SERVICE_CREATE_START", {
-                    eventCategory: "UX",
-                  });
+                  logToMixpanel("IO_BO_SERVICE_CREATE_START", "UX", {});
                 }}
                 size="medium"
                 startIcon={<Add />}
