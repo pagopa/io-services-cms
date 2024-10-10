@@ -25,11 +25,9 @@ export const POST = withJWTAuthHandler(
     try {
       jsonBody = await nextRequest.json();
     } catch (error) {
-      let errorMessage = "Failed to parse JSON body";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      return handleBadRequestErrorResponse(errorMessage);
+      return handleBadRequestErrorResponse(
+        error instanceof Error ? error.message : "Failed to parse JSON body",
+      );
     }
     const maybeServicePayload = ServicePayload.decode(jsonBody);
     if (maybeServicePayload._tag === "Left") {
@@ -39,29 +37,27 @@ export const POST = withJWTAuthHandler(
     }
     const servicePayload = maybeServicePayload.right;
     if (isBackofficeUserAdmin(backofficeUser)) {
-      if (servicePayload.metadata.group_id) {
-        if (
-          !(await existsGroup(
-            backofficeUser.institution.id,
-            servicePayload.metadata.group_id,
-          ))
-        ) {
-          return handleBadRequestErrorResponse(
-            "Provided group_id does not exists",
-          );
-        }
+      if (
+        servicePayload.metadata.group_id &&
+        !(await existsGroup(
+          backofficeUser.institution.id,
+          servicePayload.metadata.group_id,
+        ))
+      ) {
+        return handleBadRequestErrorResponse(
+          "Provided group_id does not exists",
+        );
       }
     } else {
-      if (servicePayload.metadata.group_id) {
-        if (
-          !backofficeUser.permissions.selcGroups?.includes(
-            servicePayload.metadata.group_id,
-          )
-        ) {
-          return handleForbiddenErrorResponse(
-            "Cannot set service group relationship",
-          );
-        } // otherwise there is no need to verify group existance...we trust on Selfcare IdentityToken data
+      if (
+        servicePayload.metadata.group_id &&
+        !backofficeUser.permissions.selcGroups?.includes(
+          servicePayload.metadata.group_id,
+        )
+      ) {
+        return handleForbiddenErrorResponse(
+          "Cannot set service group relationship",
+        );
       }
     }
     return forwardIoServicesCmsRequest("createService", {
