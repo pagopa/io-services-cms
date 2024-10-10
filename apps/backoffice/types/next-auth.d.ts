@@ -4,6 +4,7 @@
 import { DefaultUser } from "next-auth";
 
 declare module "next-auth" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface User extends BackOfficeUser {}
   interface Session {
     user?: User;
@@ -11,13 +12,14 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface JWT extends BackOfficeUser {}
 }
 
 interface BackOfficeUser extends DefaultUser {
   institution: Institution;
-  permissions: BackOfficeUserPermissions;
   parameters: BackOfficeUserParameters;
+  permissions: BackOfficeUserPermissions;
 }
 
 interface BackOfficeUserPermissions {
@@ -26,15 +28,15 @@ interface BackOfficeUserPermissions {
 }
 
 interface BackOfficeUserParameters {
-  userId: string;
-  userEmail: string;
   subscriptionId: string;
+  userEmail: string;
+  userId: string;
 }
 
 interface Institution {
-  id: string;
-  name: string;
   fiscalCode: string;
-  role: string;
+  id: string;
   logo_url?: string;
+  name: string;
+  role: string;
 }
