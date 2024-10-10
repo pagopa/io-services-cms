@@ -1,6 +1,6 @@
 import { HTTP_STATUS_BAD_REQUEST } from "@/config/constants";
 import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroupSubscription";
-import { isBackofficeUserAdmin } from "@/lib/be/authz";
+import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -34,7 +34,7 @@ export const PUT = withJWTAuthHandler(
     request: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse> => {
-    if (!isBackofficeUserAdmin(backofficeUser)) {
+    if (!isAdmin(backofficeUser)) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
 
@@ -114,7 +114,7 @@ export const GET = withJWTAuthHandler(
         backofficeUser.parameters.userId,
         maybeLimit.right,
         maybeOffset.right,
-        isBackofficeUserAdmin(backofficeUser)
+        isAdmin(backofficeUser)
           ? undefined
           : backofficeUser.permissions.selcGroups,
       );

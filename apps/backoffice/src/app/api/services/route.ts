@@ -1,5 +1,5 @@
 import { ServicePayload } from "@/generated/api/ServicePayload";
-import { isBackofficeUserAdmin } from "@/lib/be/authz";
+import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -36,7 +36,7 @@ export const POST = withJWTAuthHandler(
       );
     }
     const servicePayload = maybeServicePayload.right;
-    if (isBackofficeUserAdmin(backofficeUser)) {
+    if (isAdmin(backofficeUser)) {
       if (
         servicePayload.metadata.group_id &&
         !(await existsGroup(

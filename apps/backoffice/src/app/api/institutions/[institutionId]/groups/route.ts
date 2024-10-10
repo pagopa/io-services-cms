@@ -1,7 +1,4 @@
-import {
-  isBackofficeUserAdmin,
-  isInstitutionIdSameAsCaller,
-} from "@/lib/be/authz";
+import { isAdmin, isInstitutionIdSameAsCaller } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -36,7 +33,7 @@ export const GET = withJWTAuthHandler(
     if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
       return handleForbiddenErrorResponse("Unauthorized institutionId");
     }
-    if (!isBackofficeUserAdmin(backofficeUser)) {
+    if (!isAdmin(backofficeUser)) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
     const size = getQueryParam(
