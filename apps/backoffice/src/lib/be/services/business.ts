@@ -220,6 +220,7 @@ export async function forwardIoServicesCmsRequest<
       (result.right.status === 200 || result.right.status === 201) &&
       ("value" in result.right.value || "metadata" in result.right.value)
     ) {
+      // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
       const institutionGroupsResponse = await retrieveInstitutionGroups(
         backofficeUser.institution.id,
         1000, // FIXME: workaround to get all groups in a single call
