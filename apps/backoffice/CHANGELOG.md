@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.15.1
+
+### Patch Changes
+
+- 8215bc4: add authorization logic to create service handler
+
 ## 1.15.0
 
 ### Minor Changes
