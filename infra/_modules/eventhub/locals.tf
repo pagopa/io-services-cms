@@ -1,7 +1,7 @@
 
 locals {
   evhns = {
-    tier = "m" //TODO: is this correct?
+    tier = "s" //TODO: is this correct?
 
     eventhubs = [{
       name                   = "services-lifecycle"
@@ -10,7 +10,7 @@ locals {
       consumers              = []
       keys = [
         {
-          name   = var.cms_fn_name // GET FROM VARIABLE
+          name   = var.cms_fn_name
           listen = false
           send   = true
           manage = false
@@ -30,7 +30,7 @@ locals {
         consumers              = []
         keys = [
           {
-            name   = var.cms_fn_name // GET FROM VARIABLE
+            name   = var.cms_fn_name
             listen = false
             send   = true
             manage = false
@@ -50,7 +50,7 @@ locals {
         consumers              = []
         keys = [
           {
-            name   = var.cms_fn_name // GET FROM VARIABLE
+            name   = var.cms_fn_name
             listen = false
             send   = true
             manage = false
@@ -99,7 +99,6 @@ locals {
         "18.192.147.151", # PDND
         "18.159.227.69",  # PDND
         "3.126.198.129"   # PDND
-
       ]
     }
   }
