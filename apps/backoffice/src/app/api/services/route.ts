@@ -3,12 +3,13 @@ import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+  handlerErrorLog,
 } from "@/lib/be/errors";
-import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
+import { groupExists } from "@/lib/be/institutions/business";
+import { parseBody } from "@/lib/be/req-res-utils";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
@@ -21,31 +22,34 @@ export const POST = withJWTAuthHandler(
     nextRequest: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ) => {
-    let jsonBody;
+    let servicePayload;
     try {
-      jsonBody = await nextRequest.json();
-    } catch (error) {
-      return handleBadRequestErrorResponse(
-        error instanceof Error ? error.message : "Failed to parse JSON body",
-      );
+      servicePayload = await parseBody(nextRequest, ServicePayload);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      return handleBadRequestErrorResponse(error.message);
     }
-    const maybeServicePayload = ServicePayload.decode(jsonBody);
-    if (maybeServicePayload._tag === "Left") {
-      return handleBadRequestErrorResponse(
-        readableReport(maybeServicePayload.left),
-      );
-    }
-    const servicePayload = maybeServicePayload.right;
     if (isAdmin(backofficeUser)) {
-      if (
-        servicePayload.metadata.group_id &&
-        !(await existsGroup(
-          backofficeUser.institution.id,
-          servicePayload.metadata.group_id,
-        ))
-      ) {
-        return handleBadRequestErrorResponse(
-          "Provided group_id does not exists",
+      try {
+        if (
+          servicePayload.metadata.group_id &&
+          !(await groupExists(
+            backofficeUser.institution.id,
+            servicePayload.metadata.group_id,
+          ))
+        ) {
+          return handleBadRequestErrorResponse(
+            "Provided group_id does not exists",
+          );
+        }
+      } catch (error) {
+        handlerErrorLog(
+          `An Error has occurred while checking group existance: institutionId=${backofficeUser.institution.id} , groupId=${servicePayload.metadata.group_id}`,
+          error,
+        );
+        return handleInternalErrorResponse(
+          "CheckInstitutionGroupsError",
+          error,
         );
       }
     } else {
@@ -60,6 +64,7 @@ export const POST = withJWTAuthHandler(
         );
       }
     }
+
     return forwardIoServicesCmsRequest("createService", {
       backofficeUser,
       jsonBody: {
@@ -73,19 +78,6 @@ export const POST = withJWTAuthHandler(
     });
   },
 );
-
-const existsGroup = async (
-  institutionId: string,
-  groupId: NonEmptyString,
-): Promise<boolean> => {
-  // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-  const institutionGroupsResponse = await retrieveInstitutionGroups(
-    institutionId,
-    1000, // FIXME: workaround to get all groups in a single call
-    0,
-  );
-  return institutionGroupsResponse.value.some((group) => group.id === groupId);
-};
 
 /**
  * @description Retrieve all services owned by the calling user
