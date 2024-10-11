@@ -74,7 +74,6 @@ const { getSelfcareClient } = vi.hoisted(() => ({
       TE.right(mocks.userInstitutions),
     ),
     getInstitutionById: vi.fn(() => TE.right(mocks.institution)),
-    getInstitutionGroups: vi.fn(() => TE.right(mocks.institutionGroups)),
   }),
 }));
 
@@ -90,9 +89,14 @@ vi.mock("@/lib/be/selfcare-client", () => ({
   getSelfcareClient,
 }));
 
-vi.mock("@/lib/be/institutions/selfcare", () => ({
-  getInstitutionGroups,
-}));
+vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
+  const mod = await importOriginal();
+
+  return {
+    ...(mod as any),
+    getInstitutionGroups,
+  };
+});
 
 vi.mock("axios", () => ({
   isAxiosError,
@@ -209,12 +213,7 @@ describe("Institutions", () => {
   });
   describe("retrieveUserGroups", () => {
     it("should return the groups found for the institution", async () => {
-      const getInstitutionGroups = vi.fn(() =>
-        TE.right(mocks.institutionGroups),
-      );
-      getSelfcareClient.mockReturnValueOnce({
-        getInstitutionGroups,
-      });
+      getInstitutionGroups.mockResolvedValueOnce(mocks.institutionGroups);
 
       const result = await retrieveInstitutionGroups(
         mocks.institutionGroups.content[0].institutionId,
@@ -240,7 +239,8 @@ describe("Institutions", () => {
     });
 
     it("should rejects when getInstitutionGroups return an error response", async () => {
-      const getInstitutionGroups = vi.fn(() => TE.left({ message: "error" }));
+      const errorMessage = "errorMessage";
+      getInstitutionGroups.mockRejectedValueOnce(new Error(errorMessage));
       getSelfcareClient.mockReturnValueOnce({
         getInstitutionGroups,
       });
@@ -249,9 +249,7 @@ describe("Institutions", () => {
         retrieveInstitutionGroups(
           mocks.institutionGroups.content[0].institutionId,
         ),
-      ).rejects.toThrowError(
-        new ManagedInternalError("Error calling selfcare getUserGroups API"),
-      );
+      ).rejects.toThrowError(errorMessage);
 
       expect(getInstitutionGroups).toHaveBeenCalledWith(
         mocks.institutionGroups.content[0].institutionId,
@@ -260,39 +258,33 @@ describe("Institutions", () => {
       );
     });
     it("should rejects on error response if group ID or group Name is not present or undefined", async () => {
-      const getInstitutionGroups = vi.fn(() =>
-        TE.right({
-          content: [
-            {
-              description: "institutionGroups description",
-              id: "institutionGroupsID",
-              institutionId: "institutionGroupsInstID",
-              name: "institutionGroupsName",
-              productId: "institutionGroupsProdID",
-              status: "ACTIVE" as StatusEnum,
-            },
-            {
-              description: "institutionGroupsDescription2",
-              institutionId: "institutionGroupsInstID2",
-              name: "institutionGroupsName2",
-              productId: "institutionGroupsProdID2",
-              status: "ACTIVE" as StatusEnum,
-            },
-          ],
-          number: 0,
-          size: 0,
-          totalElements: 2,
-          totalPages: 0,
-        }),
-      );
-
-      getSelfcareClient.mockReturnValueOnce({
-        getInstitutionGroups,
+      getInstitutionGroups.mockResolvedValueOnce({
+        content: [
+          {
+            description: "institutionGroups description",
+            id: "institutionGroupsID",
+            institutionId: "institutionGroupsInstID",
+            name: "institutionGroupsName",
+            productId: "institutionGroupsProdID",
+            status: "ACTIVE" as StatusEnum,
+          },
+          {
+            description: "institutionGroupsDescription2",
+            institutionId: "institutionGroupsInstID2",
+            name: "institutionGroupsName2",
+            productId: "institutionGroupsProdID2",
+            status: "ACTIVE" as StatusEnum,
+          },
+        ],
+        number: 0,
+        size: 0,
+        totalElements: 2,
+        totalPages: 0,
       });
 
       isAxiosError.mockReturnValueOnce(true);
 
-      expect(
+      await expect(() =>
         retrieveInstitutionGroups("institutionGroupsInstID"),
       ).rejects.toThrowError(
         new ManagedInternalError("Error toGroups mapping"),
