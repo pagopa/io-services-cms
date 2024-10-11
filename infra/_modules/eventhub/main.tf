@@ -12,6 +12,8 @@ module "eventhub" {
 
   resource_group_name = var.resource_group_name
 
+  allowed_sources = local.allowed_sources
+
   subnet_pep_id                        = var.peps_snet_id
   private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
 
