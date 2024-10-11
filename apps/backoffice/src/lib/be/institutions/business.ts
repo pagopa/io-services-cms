@@ -3,13 +3,14 @@ import { Institution as BackofficeInstitution } from "@/generated/api/Institutio
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
-
-import { ManagedInternalError } from "../errors";
 import {
   getInstitutionById,
   getInstitutionGroups,
   getUserAuthorizedInstitutions,
-} from "./selfcare";
+} from "@/lib/be/institutions/selfcare";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+
+import { ManagedInternalError } from "../errors";
 
 // Type utility to extract the resolved type of a Promise
 type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to an Utils monorepo package
@@ -55,14 +56,14 @@ const toBackofficeInstitution = (
 });
 
 const toUserAuthorizedInstitution = (
-  usesrInstitution: ReadonlyArrayElementType<
+  userInstitution: ReadonlyArrayElementType<
     PromiseValue<ReturnType<typeof getUserAuthorizedInstitutions>>
   >,
 ): UserAuthorizedInstitution => ({
-  id: usesrInstitution.institutionId,
-  logo_url: `https://selfcare.pagopa.it/institutions/${usesrInstitution.institutionId}/logo.png`,
-  name: usesrInstitution.institutionDescription,
-  role: usesrInstitution.products?.at(0)?.productRole,
+  id: userInstitution.institutionId,
+  logo_url: `https://selfcare.pagopa.it/institutions/${userInstitution.institutionId}/logo.png`,
+  name: userInstitution.institutionDescription,
+  role: userInstitution.products?.at(0)?.productRole,
 });
 
 const toGroupPagination = (
@@ -95,3 +96,16 @@ const toGroups = (
       );
     }
   });
+
+export const groupExists = async (
+  institutionId: string,
+  groupId: NonEmptyString,
+): Promise<boolean> => {
+  // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
+  const institutionGroupsResponse = await retrieveInstitutionGroups(
+    institutionId,
+    1000, // FIXME: workaround to get all groups in a single call
+    0,
+  );
+  return institutionGroupsResponse.value.some((group) => group.id === groupId);
+};
