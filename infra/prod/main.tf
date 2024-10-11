@@ -129,7 +129,7 @@ module "eventhub" {
   cms_fn_name = module.cms_function_app.cms_fn_name
 
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
-  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+  private_dns_zone_resource_group_name = data.azurerm_resource_group.evt-rg.name
 
   tags = local.tags
 }
