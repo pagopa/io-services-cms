@@ -1,14 +1,15 @@
 import { ServicePayload } from "@/generated/api/ServicePayload";
-import { isBackofficeUserAdmin } from "@/lib/be/authz";
+import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+  handlerErrorLog,
 } from "@/lib/be/errors";
-import { retrieveInstitutionGroups } from "@/lib/be/institutions/business";
+import { groupExists } from "@/lib/be/institutions/business";
+import { parseBody } from "@/lib/be/req-res-utils";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
@@ -21,71 +22,58 @@ export const POST = withJWTAuthHandler(
     nextRequest: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ) => {
-    let jsonBody;
     try {
-      jsonBody = await nextRequest.json();
-    } catch (error) {
-      return handleBadRequestErrorResponse(
-        error instanceof Error ? error.message : "Failed to parse JSON body",
-      );
-    }
-    const maybeServicePayload = ServicePayload.decode(jsonBody);
-    if (maybeServicePayload._tag === "Left") {
-      return handleBadRequestErrorResponse(
-        readableReport(maybeServicePayload.left),
-      );
-    }
-    const servicePayload = maybeServicePayload.right;
-    if (isBackofficeUserAdmin(backofficeUser)) {
-      if (
-        servicePayload.metadata.group_id &&
-        !(await existsGroup(
-          backofficeUser.institution.id,
-          servicePayload.metadata.group_id,
-        ))
-      ) {
-        return handleBadRequestErrorResponse(
-          "Provided group_id does not exists",
-        );
+      let servicePayload;
+      try {
+        servicePayload = await parseBody(nextRequest, ServicePayload);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        return handleBadRequestErrorResponse(error.message);
       }
-    } else {
-      if (
-        servicePayload.metadata.group_id &&
-        !backofficeUser.permissions.selcGroups?.includes(
-          servicePayload.metadata.group_id,
-        )
-      ) {
-        return handleForbiddenErrorResponse(
-          "Cannot set service group relationship",
-        );
+      if (isAdmin(backofficeUser)) {
+        if (
+          servicePayload.metadata.group_id &&
+          !(await groupExists(
+            backofficeUser.institution.id,
+            servicePayload.metadata.group_id,
+          ))
+        ) {
+          return handleBadRequestErrorResponse(
+            "Provided group_id does not exists",
+          );
+        }
+      } else {
+        if (
+          servicePayload.metadata.group_id &&
+          !backofficeUser.permissions.selcGroups?.includes(
+            servicePayload.metadata.group_id,
+          )
+        ) {
+          return handleForbiddenErrorResponse(
+            "Cannot set service group relationship",
+          );
+        }
       }
-    }
-    return forwardIoServicesCmsRequest("createService", {
-      backofficeUser,
-      jsonBody: {
-        ...servicePayload,
-        organization: {
-          fiscal_code: backofficeUser.institution.fiscalCode,
-          name: backofficeUser.institution.name,
+      return forwardIoServicesCmsRequest("createService", {
+        backofficeUser,
+        jsonBody: {
+          ...servicePayload,
+          organization: {
+            fiscal_code: backofficeUser.institution.fiscalCode,
+            name: backofficeUser.institution.name,
+          },
         },
-      },
-      nextRequest,
-    });
+        nextRequest,
+      });
+    } catch (error) {
+      handlerErrorLog(
+        `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id}`,
+        error,
+      );
+      return handleInternalErrorResponse("CreateServiceError", error);
+    }
   },
 );
-
-const existsGroup = async (
-  institutionId: string,
-  groupId: NonEmptyString,
-): Promise<boolean> => {
-  // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-  const institutionGroupsResponse = await retrieveInstitutionGroups(
-    institutionId,
-    1000, // FIXME: workaround to get all groups in a single call
-    0,
-  );
-  return institutionGroupsResponse.value.some((group) => group.id === groupId);
-};
 
 /**
  * @description Retrieve all services owned by the calling user
