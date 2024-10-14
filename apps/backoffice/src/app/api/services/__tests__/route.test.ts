@@ -210,6 +210,34 @@ describe("Services API", () => {
       },
     );
 
+    it("should return an internal error when group is set but checking group fn fails ", async () => {
+      // given
+      const jsonBodyMock = {
+        ...aValidServicePayload,
+        metadata: {
+          ...aValidServicePayload.metadata,
+          group_id: "nonExistingGroupId",
+        },
+      };
+      parseBody.mockResolvedValueOnce(jsonBodyMock);
+      const errorMessage = "errorMessage";
+      groupExists.mockRejectedValueOnce(new ManagedInternalError(errorMessage));
+      backofficeUserMock.institution.role = SelfcareRoles.admin;
+      const request = new NextRequest(new URL("http://localhost"));
+
+      const result = await POST(request, {});
+
+      expect(result.status).toBe(500);
+      const responseBody = await result.json();
+      expect(responseBody.detail).toEqual("errorMessage");
+      expect(groupExists).toHaveBeenCalledOnce();
+      expect(groupExists).toHaveBeenCalledWith(
+        backofficeUserMock.institution.id,
+        jsonBodyMock.metadata.group_id,
+      );
+      expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
+    });
+
     it.each`
       scenario                                                           | userRole                  | selcGroups      | group_id      | mockGroupExists
       ${"user is operator and has no groups and group is not set"}       | ${SelfcareRoles.operator} | ${undefined}    | ${undefined}  | ${undefined}

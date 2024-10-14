@@ -91,7 +91,7 @@ afterEach(() => {
 });
 
 describe("Services API", () => {
-  describe("Update Service", () => {
+  describe("Edit Service", () => {
     it("should return a bad request when fails to parse request body", async () => {
       // given
       const errorMessage = "errorMessage";
@@ -160,7 +160,7 @@ describe("Services API", () => {
       backofficeUserMock.institution.role = SelfcareRoles.admin;
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await PUT(request, {});
+      const result = await PUT(request, { params: { serviceId: "serviceId" } });
 
       expect(result.status).toBe(500);
       const responseBody = await result.json();

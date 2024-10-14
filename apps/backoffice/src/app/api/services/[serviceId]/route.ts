@@ -43,15 +43,15 @@ export const PUT = withJWTAuthHandler(
       params,
     }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) => {
-    let servicePayload;
     try {
-      servicePayload = await parseBody(nextRequest, ServicePayload);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      return handleBadRequestErrorResponse(error.message);
-    }
-    if (isAdmin(backofficeUser)) {
+      let servicePayload;
       try {
+        servicePayload = await parseBody(nextRequest, ServicePayload);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        return handleBadRequestErrorResponse(error.message);
+      }
+      if (isAdmin(backofficeUser)) {
         if (
           servicePayload.metadata.group_id &&
           !(await groupExists(
@@ -63,34 +63,31 @@ export const PUT = withJWTAuthHandler(
             "Provided group_id does not exists",
           );
         }
-      } catch (error) {
-        handlerErrorLog(
-          `An Error has occurred while checking group existance: institutionId=${backofficeUser.institution.id} , groupId=${servicePayload.metadata.group_id}`,
-          error,
-        );
-        return handleInternalErrorResponse(
-          "CheckInstitutionGroupsError",
-          error,
+      } else {
+        return handleForbiddenErrorResponse(
+          "Cannot set service group relationship",
         );
       }
-    } else {
-      return handleForbiddenErrorResponse(
-        "Cannot set service group relationship",
-      );
-    }
 
-    return forwardIoServicesCmsRequest("updateService", {
-      backofficeUser,
-      jsonBody: {
-        ...servicePayload,
-        organization: {
-          fiscal_code: backofficeUser.institution.fiscalCode,
-          name: backofficeUser.institution.name,
+      return forwardIoServicesCmsRequest("updateService", {
+        backofficeUser,
+        jsonBody: {
+          ...servicePayload,
+          organization: {
+            fiscal_code: backofficeUser.institution.fiscalCode,
+            name: backofficeUser.institution.name,
+          },
         },
-      },
-      nextRequest,
-      pathParams: params,
-    });
+        nextRequest,
+        pathParams: params,
+      });
+    } catch (error) {
+      handlerErrorLog(
+        `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
+        error,
+      );
+      return handleInternalErrorResponse("EditServiceError", error);
+    }
   },
 );
 
