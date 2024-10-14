@@ -172,35 +172,20 @@ const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
   }),
 }));
 
-const { getApimRestClient } = vi.hoisted(() => ({
-  getApimRestClient: vi.fn().mockReturnValue(
-    Promise.resolve({
-      getServiceList: vi.fn(() =>
-        TE.right({
-          value: [],
-          count: 0,
-        }),
-      ),
-    }),
-  ),
+const {
+  getServiceListMock,
+  bulkFetchLifecycleMock,
+  bulkFetchPublicationMock,
+  retrieveInstitutionGroups,
+} = vi.hoisted(() => ({
+  getServiceListMock: vi.fn(),
+  bulkFetchLifecycleMock: vi.fn(),
+  bulkFetchPublicationMock: vi.fn(),
+  retrieveInstitutionGroups: vi.fn(),
 }));
-
-const { getServiceLifecycleCosmosStore, getServicePublicationCosmosStore } =
-  vi.hoisted(() => ({
-    getServiceLifecycleCosmosStore: vi.fn().mockReturnValue({
-      bulkFetch: vi.fn(() => TE.right([])),
-    }),
-    getServicePublicationCosmosStore: vi.fn().mockReturnValue({
-      bulkFetch: vi.fn(() => TE.right([])),
-    }),
-  }));
 
 const { isAxiosError } = vi.hoisted(() => ({
   isAxiosError: vi.fn().mockReturnValue(false),
-}));
-
-const { retrieveInstitutionGroups } = vi.hoisted(() => ({
-  retrieveInstitutionGroups: vi.fn(),
 }));
 
 vi.mock("axios", async () => ({
@@ -217,12 +202,17 @@ vi.mock("@/lib/be/cms-client", () => ({
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({
-  getApimRestClient,
+  getApimRestClient: () =>
+    Promise.resolve({
+      getServiceList: getServiceListMock,
+    }),
 }));
 
 vi.mock("@/lib/be/cosmos-store", () => ({
-  getServiceLifecycleCosmosStore,
-  getServicePublicationCosmosStore,
+  getServiceLifecycleCosmosStore: () => ({ bulkFetch: bulkFetchLifecycleMock }),
+  getServicePublicationCosmosStore: () => ({
+    bulkFetch: bulkFetchPublicationMock,
+  }),
 }));
 
 vi.mock("@/lib/be/institutions/business", () => ({
@@ -230,6 +220,7 @@ vi.mock("@/lib/be/institutions/business", () => ({
 }));
 
 afterEach(() => {
+  vi.clearAllMocks();
   vi.restoreAllMocks();
 });
 describe("Services TEST", () => {
@@ -527,31 +518,7 @@ describe("Services TEST", () => {
       const aServiceinPublicationId = "aServiceInPublicationId";
       const aServiceNotInPublicationId = "aServiceNotInPublicationId";
 
-      const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.right([
-          O.some({
-            ...mocks.aBaseServiceLifecycle,
-            id: aServiceinPublicationId,
-          }),
-          O.some({
-            ...mocks.aBaseServiceLifecycle,
-            id: aServiceNotInPublicationId,
-          }),
-        ]),
-      );
-      const bulkFetchPublicationMock = vi.fn(() =>
-        TE.right([
-          O.some({
-            id: aServiceinPublicationId,
-            name: "aServiceName",
-            fsm: {
-              state: "published",
-            },
-          }),
-        ]),
-      );
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -564,18 +531,31 @@ describe("Services TEST", () => {
           count: 2,
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
-        }),
+      bulkFetchLifecycleMock.mockReturnValueOnce(
+        TE.right([
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceinPublicationId,
+          }),
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceNotInPublicationId,
+          }),
+        ]),
+      );
+      bulkFetchPublicationMock.mockReturnValueOnce(
+        TE.right([
+          O.some({
+            id: aServiceinPublicationId,
+            name: "aServiceName",
+            fsm: {
+              state: "published",
+            },
+          }),
+        ]),
       );
 
       // Mock NextRequest
@@ -589,16 +569,25 @@ describe("Services TEST", () => {
         0,
       );
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId,
       ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId,
@@ -657,7 +646,20 @@ describe("Services TEST", () => {
     it("should return a list of services with visibility enriched with topic", async () => {
       const aServiceinPublicationId = "aServiceInPublicationId";
 
-      const bulkFetchLifecycleMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
+        TE.right({
+          value: [
+            {
+              name: aServiceinPublicationId,
+            },
+          ],
+          count: 1,
+        }),
+      );
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
+      });
+      bulkFetchLifecycleMock.mockReturnValueOnce(
         TE.right([
           O.some({
             ...mocks.aBaseServiceLifecycle,
@@ -672,7 +674,7 @@ describe("Services TEST", () => {
           }),
         ]),
       );
-      const bulkFetchPublicationMock = vi.fn(() =>
+      bulkFetchPublicationMock.mockReturnValueOnce(
         TE.right([
           O.some({
             id: aServiceinPublicationId,
@@ -682,30 +684,6 @@ describe("Services TEST", () => {
             },
           }),
         ]),
-      );
-
-      const getServiceListMock = vi.fn(() =>
-        TE.right({
-          value: [
-            {
-              name: aServiceinPublicationId,
-            },
-          ],
-          count: 1,
-        }),
-      );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
-      });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
-        }),
       );
 
       // Mock NextRequest
@@ -719,15 +697,24 @@ describe("Services TEST", () => {
         0,
       );
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
       ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
       ]);
@@ -766,28 +753,17 @@ describe("Services TEST", () => {
     });
 
     it("when no services are found on APIM neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
-      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
-      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.right({
           value: [],
           count: 90,
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
-        }),
-      );
+      bulkFetchLifecycleMock.mockReturnValueOnce(TE.right([]));
+      bulkFetchPublicationMock.mockReturnValueOnce(TE.right([]));
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -800,6 +776,13 @@ describe("Services TEST", () => {
         90,
       );
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
@@ -816,28 +799,15 @@ describe("Services TEST", () => {
     });
 
     it("when APIM returns 404 neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
-      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
-      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.left({
           message: "Received 404 response",
           response: { status: 404 },
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
-        }),
-      );
 
       isAxiosError.mockReturnValueOnce(true);
 
@@ -852,6 +822,13 @@ describe("Services TEST", () => {
         90,
       );
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
@@ -874,27 +851,7 @@ describe("Services TEST", () => {
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
       const aServiceNotInLifecycleCreateDate = new Date();
 
-      const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.right([
-          O.some({
-            ...mocks.aBaseServiceLifecycle,
-            id: aServiceInLifecycleId,
-          }),
-        ]),
-      );
-      const bulkFetchPublicationMock = vi.fn(() =>
-        TE.right([
-          O.some({
-            id: aServiceInLifecycleId,
-            name: "aServiceName",
-            fsm: {
-              state: "published",
-            },
-          }),
-        ]),
-      );
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -908,18 +865,27 @@ describe("Services TEST", () => {
           count: 2,
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
-        }),
+      bulkFetchLifecycleMock.mockReturnValueOnce(
+        TE.right([
+          O.some({
+            ...mocks.aBaseServiceLifecycle,
+            id: aServiceInLifecycleId,
+          }),
+        ]),
+      );
+      bulkFetchPublicationMock.mockReturnValueOnce(
+        TE.right([
+          O.some({
+            id: aServiceInLifecycleId,
+            name: "aServiceName",
+            fsm: {
+              state: "published",
+            },
+          }),
+        ]),
       );
 
       // Mock NextRequest
@@ -933,16 +899,25 @@ describe("Services TEST", () => {
         0,
       );
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
         aServiceNotInLifecycleId,
       ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
       ]);
@@ -989,17 +964,7 @@ describe("Services TEST", () => {
     });
 
     it("when service-publication bulk-fetch fails an error is returned", async () => {
-      const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.right([O.some(mocks.aBaseServiceLifecycle)]),
-      );
-      const bulkFetchPublicationMock = vi.fn(() =>
-        TE.left({
-          kind: "COSMOS_ERROR_RESPONSE",
-          error: "error",
-        }),
-      );
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -1009,19 +974,19 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
+      bulkFetchLifecycleMock.mockReturnValueOnce(
+        TE.right([O.some(mocks.aBaseServiceLifecycle)]),
+      );
+      bulkFetchPublicationMock.mockReturnValueOnce(
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: "error",
         }),
       );
+
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
@@ -1035,30 +1000,31 @@ describe("Services TEST", () => {
         ),
       ).rejects.toThrowError();
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id,
       ]);
+      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
       expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id,
       ]);
     });
 
     it("when service-lifecycle bulk-fetch fails an error is returned", async () => {
-      const bulkFetchLifecycleMock = vi.fn(() =>
-        TE.left({
-          kind: "COSMOS_ERROR_RESPONSE",
-          error: "error",
-        }),
-      );
-      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -1068,19 +1034,16 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
       });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
+      bulkFetchLifecycleMock.mockReturnValueOnce(
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: "error",
         }),
       );
+      bulkFetchPublicationMock.mockReturnValueOnce(TE.right([]));
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -1095,12 +1058,20 @@ describe("Services TEST", () => {
         ),
       ).rejects.toThrowError();
 
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        mocks.anInstitution.id,
+        1000,
+        0,
+      );
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
       expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id,
       ]);
@@ -1108,26 +1079,10 @@ describe("Services TEST", () => {
     });
 
     it("when apim rest call fails an error is returned", async () => {
-      const bulkFetchLifecycleMock = vi.fn(() => TE.right([]));
-      const bulkFetchPublicationMock = vi.fn(() => TE.right([]));
-
-      const getServiceListMock = vi.fn(() =>
+      getServiceListMock.mockReturnValueOnce(
         TE.left({
           message: "Apim Failure",
           response: { status: 500 },
-        }),
-      );
-
-      getServiceLifecycleCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchLifecycleMock,
-      });
-      getServicePublicationCosmosStore.mockReturnValueOnce({
-        bulkFetch: bulkFetchPublicationMock,
-      });
-
-      getApimRestClient.mockReturnValueOnce(
-        Promise.resolve({
-          getServiceList: getServiceListMock,
         }),
       );
 
@@ -1144,12 +1099,14 @@ describe("Services TEST", () => {
         ),
       ).rejects.toThrowError();
 
+      expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
         mocks.anUserId,
         10,
         0,
         undefined,
       );
+      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
       expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
       expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     });
