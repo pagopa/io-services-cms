@@ -9,7 +9,6 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   IntegerFromString,
   NonNegativeInteger,
@@ -260,13 +259,10 @@ export type KafkaBaseConfig = t.TypeOf<typeof KafkaBaseConfig>;
 export const KafkaBaseConfig = t.type({
   KAFKA_BROKER: NonEmptyString,
   KAFKA_CLIENT_ID: NonEmptyString,
-  KAFKA_IDEMPOTENT: withDefault(
-    BooleanFromString,
-    "true" as unknown as boolean,
-  ),
+  KAFKA_IDEMPOTENT: withDefault(NonEmptyString, "true" as NonEmptyString),
   KAFKA_MAX_INFLIGHT_REQUESTS: withDefault(
-    IntegerFromString,
-    "1" as unknown as number,
+    NonEmptyString,
+    "1" as NonEmptyString,
   ),
   KAFKA_SASL_MECHANISM: withDefault(
     SaslMechanism,
@@ -276,7 +272,7 @@ export const KafkaBaseConfig = t.type({
     NonEmptyString,
     "$ConnectionString" as NonEmptyString,
   ),
-  KAFKA_SSL: withDefault(BooleanFromString, "true" as unknown as boolean),
+  KAFKA_SSL: withDefault(NonEmptyString, "true" as NonEmptyString),
   KAFKA_TRANSACTIONAL_ID: NonEmptyString,
 });
 
