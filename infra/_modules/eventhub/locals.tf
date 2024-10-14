@@ -1,7 +1,7 @@
 
 locals {
   evhns = {
-    tier = "s" //TODO: is this correct?
+    tier = "m"
 
     eventhubs = [{
       name                   = "services-lifecycle"
@@ -70,7 +70,7 @@ locals {
         metric_name = "ThrottledRequests"
         description = "Too Many Throttled Requests"
         operator    = "GreaterThan"
-        threshold   = 10 #TODO: FINE TUNING NEEDED
+        threshold   = 20 #TODO: FINE TUNING NEEDED
         frequency   = "PT5M"
         window_size = "PT15M"
       },
@@ -79,16 +79,26 @@ locals {
         metric_name = "UserErrors"
         description = "Too Many User Errors"
         operator    = "GreaterThan"
-        threshold   = 1 #TODO: FINE TUNING NEEDED
+        threshold   = 0 #TODO: FINE TUNING NEEDED
         frequency   = "PT5M"
         window_size = "PT15M"
       },
+      # active_connections = {
+      #   aggregation = "Average"
+      #   metric_name = "ActiveConnections"
+      #   description = null
+      #   operator    = "LessThanOrEqual"
+      #   threshold   = 0
+      #   frequency   = "PT5M"
+      #   window_size = "PT15M"
+      #   dimension   = [],
+      # }, TODO: Enable when production ready
       high_cpu_usage = {
         aggregation = "Maximum"
         metric_name = "CPU"
         description = "Too High CPU Usage"
         operator    = "GreaterThan"
-        threshold   = 90 #TODO: FINE TUNING NEEDED
+        threshold   = 90
         frequency   = "PT5M"
         window_size = "PT15M"
       }
