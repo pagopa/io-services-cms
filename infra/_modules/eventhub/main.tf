@@ -6,7 +6,7 @@ module "eventhub" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "elt" //TODO: how to name this?
+    app_name        = "elt"
     instance_number = "01"
   }
 
@@ -25,4 +25,17 @@ module "eventhub" {
   tier = local.evhns.tier
 
   tags = var.tags
+}
+
+module "function_app" {
+  source       = "github.com/pagopa/dx//infra/modules/azure_role_assignments?ref=main"
+  principal_id = var.cms_fn_principal_id
+
+  event_hub = [
+    {
+      namespace_name      = module.eventhub.name
+      resource_group_name = var.resource_group_name
+      role                = "writer"
+    }
+  ]
 }

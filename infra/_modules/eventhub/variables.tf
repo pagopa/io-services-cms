@@ -61,3 +61,8 @@ variable "cms_fn_name" {
   type        = string
   description = "Name of the Services CMS Function App"
 }
+
+variable "cms_fn_principal_id" {
+  type        = string
+  description = "Principal ID of the Services CMS Function App"
+}
