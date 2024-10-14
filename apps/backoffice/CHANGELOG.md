@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.15.2
+
+### Patch Changes
+
+- fa890fc: Add authz logic related to service-group relationship
+
 ## 1.15.1
 
 ### Patch Changes
