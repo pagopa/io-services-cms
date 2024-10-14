@@ -93,15 +93,6 @@ locals {
       #   window_size = "PT15M"
       #   dimension   = [],
       # }, TODO: Enable when production ready
-      high_cpu_usage = {
-        aggregation = "Maximum"
-        metric_name = "CPU"
-        description = "Too High CPU Usage"
-        operator    = "GreaterThan"
-        threshold   = 90
-        frequency   = "PT5M"
-        window_size = "PT15M"
-      }
     }
 
     allowed_sources = {
