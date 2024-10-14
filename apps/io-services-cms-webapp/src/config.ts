@@ -9,6 +9,7 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   IntegerFromString,
   NonNegativeInteger,
@@ -245,6 +246,48 @@ const DefaultValues = t.type({
   ),
 });
 
+// Definizione del tipo per EVENT_HUB_KAFKA_SASL_MECHANISM
+const SaslMechanism = t.union([
+  t.literal("plain"),
+  t.literal("scram-sha-256"),
+  t.literal("scram-sha-512"),
+  t.literal("aws"),
+  t.literal("oauthbearer"),
+]);
+
+// Kafka Base Configuration
+export type KafkaBaseConfig = t.TypeOf<typeof KafkaBaseConfig>;
+export const KafkaBaseConfig = t.type({
+  KAFKA_BROKER: NonEmptyString,
+  KAFKA_CLIENT_ID: NonEmptyString,
+  KAFKA_IDEMPOTENT: withDefault(
+    BooleanFromString,
+    "true" as unknown as boolean,
+  ),
+  KAFKA_MAX_INFLIGHT_REQUESTS: withDefault(
+    IntegerFromString,
+    "1" as unknown as number,
+  ),
+  KAFKA_SASL_MECHANISM: withDefault(
+    SaslMechanism,
+    "plain" as t.TypeOf<typeof SaslMechanism>,
+  ),
+  KAFKA_SASL_USERNAME: withDefault(
+    NonEmptyString,
+    "$ConnectionString" as NonEmptyString,
+  ),
+  KAFKA_SSL: withDefault(BooleanFromString, "true" as unknown as boolean),
+  KAFKA_TRANSACTIONAL_ID: NonEmptyString,
+});
+
+export type ServicesPublicationEventHubConfig = t.TypeOf<
+  typeof ServicesPublicationEventHubConfig
+>;
+export const ServicesPublicationEventHubConfig = t.type({
+  SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_PUBLICATION_EVENT_HUB_NAME: NonEmptyString,
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -276,6 +319,7 @@ export const IConfig = t.intersection([
     ServiceValidationConfig,
     DefaultValues,
   ]),
+  t.intersection([KafkaBaseConfig, ServicesPublicationEventHubConfig]),
 ]);
 
 export const envConfig = {
