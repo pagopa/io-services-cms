@@ -156,6 +156,7 @@ export const processBatchOf =
  * @returns Either an error or all the results of the procedure applied the validated items,
  *          collected into an array
  */
+//TODO: ignoreMalformedItems is not used in all CosmosDBTriggered functions which are using processBatchOf, think about the possibility of reintroducing it
 export const processAllItems =
   <T, U>(itemShape: t.Type<T, U>) =>
   /**
@@ -184,7 +185,7 @@ export const processAllItems =
         return new Error(`Validation errors: ${JSON.stringify(errors)}`);
       }),
       E.map((elements) => {
-        log(context, `Processing ${elements} items`);
+        log(context, `Processing ${elements.length} items`);
         return elements;
       }),
       TE.fromEither,
