@@ -42,6 +42,7 @@
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",
     "@azure/cosmos": "^4.0.0",
+    "@azure/event-hubs": "^5.12.2",
     "@azure/functions": "^3.5.1",
     "@azure/identity": "^4.0.0",
     "@io-services-cms/external-clients": "workspace:^",
@@ -55,8 +56,6 @@
     "fp-ts": "^2.16.5",
     "io-ts": "^2.2.21",
     "io-ts-types": "^0.5.19",
-    "kafka-node": "^5.0.0",
-    "kafkajs": "^1.15.0",
     "knex": "^2.4.2",
     "lodash": "^4.17.21",
     "monocle-ts": "^2.3.13",

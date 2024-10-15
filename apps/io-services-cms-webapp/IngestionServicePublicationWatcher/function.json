@@ -1,0 +1,26 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "direction": "in",
+      "name": "documents",
+      "connection": "COSMOSDB_CONNECTIONSTRING",
+      "databaseName": "%COSMOSDB_NAME%",
+      "containerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
+      "leaseContainerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-lease-test-version",
+      "createLeaseContainerIfNotExists": false,
+      "startFromBeginning": false,
+      "maxItemsPerInvocation": 30
+    },
+    {
+      "queueName": "%SERVICES_PUBLICATION_INGESTION_ERROR_QUEUE%",
+      "connection": "TODO-AZURITE_STORAGE_CONNECTIONSTRING",
+      "name": "requestIngestionError",
+      "type": "queue",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onIngestionServicePublicationChangeEntryPoint"
+}

@@ -245,37 +245,6 @@ const DefaultValues = t.type({
   ),
 });
 
-// Definizione del tipo per EVENT_HUB_KAFKA_SASL_MECHANISM
-const SaslMechanism = t.union([
-  t.literal("plain"),
-  t.literal("scram-sha-256"),
-  t.literal("scram-sha-512"),
-  t.literal("aws"),
-  t.literal("oauthbearer"),
-]);
-
-// Kafka Base Configuration
-export type KafkaBaseConfig = t.TypeOf<typeof KafkaBaseConfig>;
-export const KafkaBaseConfig = t.type({
-  KAFKA_BROKER: NonEmptyString,
-  KAFKA_CLIENT_ID: NonEmptyString,
-  KAFKA_IDEMPOTENT: withDefault(NonEmptyString, "true" as NonEmptyString),
-  KAFKA_MAX_INFLIGHT_REQUESTS: withDefault(
-    NonEmptyString,
-    "1" as NonEmptyString,
-  ),
-  KAFKA_SASL_MECHANISM: withDefault(
-    SaslMechanism,
-    "plain" as t.TypeOf<typeof SaslMechanism>,
-  ),
-  KAFKA_SASL_USERNAME: withDefault(
-    NonEmptyString,
-    "$ConnectionString" as NonEmptyString,
-  ),
-  KAFKA_SSL: withDefault(NonEmptyString, "true" as NonEmptyString),
-  KAFKA_TRANSACTIONAL_ID: NonEmptyString,
-});
-
 export type ServicesPublicationEventHubConfig = t.TypeOf<
   typeof ServicesPublicationEventHubConfig
 >;
@@ -315,7 +284,7 @@ export const IConfig = t.intersection([
     ServiceValidationConfig,
     DefaultValues,
   ]),
-  t.intersection([KafkaBaseConfig, ServicesPublicationEventHubConfig]),
+  ServicesPublicationEventHubConfig,
 ]);
 
 export const envConfig = {

@@ -1,3 +1,4 @@
+import { EventHubProducerClient } from "@azure/event-hubs";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyServiceCosmosResource,
@@ -36,7 +37,7 @@ import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
 } from "./lib/azure/cosmos";
-import { processBatchOf, setBindings } from "./lib/azure/misc";
+import { processAllItems, processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
@@ -59,6 +60,7 @@ import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-se
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
+import { handler as onIngestionServicePublicationChangeHandler } from "./watchers/on-service-ingestion-publication-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
@@ -145,6 +147,12 @@ const legacyServicesContainer = cosmosdbClient
 const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
+
+// eventhub producer for ServicePublication
+const servicePublicationEventHubProducer = new EventHubProducerClient(
+  config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
+  config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+);
 
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
@@ -345,6 +353,24 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
     requestDetailLifecycle: pipe(
       results,
       RA.map(RR.lookup("requestDetailLifecycle")),
+      RA.filter(O.isSome),
+      RA.map((item) => pipe(item.value, JSON.stringify)),
+    ),
+  })),
+  toAzureFunctionHandler,
+);
+
+//Ingestion Service Publication
+//TODO: This can be generalized too.
+export const onIngestionServicePublicationChangeEntryPoint = pipe(
+  onIngestionServicePublicationChangeHandler(
+    servicePublicationEventHubProducer,
+  ),
+  processAllItems(ServicePublication.CosmosResource),
+  setBindings((results) => ({
+    requestIngestionError: pipe(
+      results,
+      RA.map(RR.lookup("ingestionError")),
       RA.filter(O.isSome),
       RA.map((item) => pipe(item.value, JSON.stringify)),
     ),

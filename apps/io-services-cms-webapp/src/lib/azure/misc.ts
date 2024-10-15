@@ -150,6 +150,48 @@ export const processBatchOf =
     );
 
 /**
+ * This utility function allows a list of items to be validated and mapped before being passed to the chosen processing function
+ *
+ * @param itemShape A io-ts codec defining the expected shape of an item
+ * @returns Either an error or all the results of the procedure applied the validated items,
+ *          collected into an array
+ */
+export const processAllItems =
+  <T, U>(itemShape: t.Type<T, U>) =>
+  /**
+   * @param processItems the function which will elaborates all items if all valid
+   * @returns Either an error or all the results of the procedure applied on every item,
+   *          collected into an array
+   */
+  <R>(
+    processItems: RTE.ReaderTaskEither<{ items: readonly T[] }, Error, R>,
+  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
+  ({ context, inputs: [items], ...rest }): TE.TaskEither<Error, R> =>
+    pipe(
+      typeof items === "undefined"
+        ? []
+        : Array.isArray(items)
+          ? items
+          : [items],
+      // Parse all elements to match the expected type
+      RA.traverse(E.Applicative)(itemShape.decode),
+      E.mapLeft((errors) => {
+        log(
+          context,
+          `Error Processing chunk: ${readableReport(errors)}`,
+          "error",
+        );
+        return new Error(`Validation errors: ${JSON.stringify(errors)}`);
+      }),
+      E.map((elements) => {
+        log(context, `Processing ${elements} items`);
+        return elements;
+      }),
+      TE.fromEither,
+      TE.chain((validItems) => processItems({ items: validItems, ...rest })),
+    );
+
+/**
  * A utility function that assigns a set of values to Azure Functions output bindings.
  * The aim of the utility is to allow a procedure to interact with bindings seamlessly,
  * without having to know the context of the Azure Function nor to deal with wiring code needed.
