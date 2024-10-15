@@ -17,6 +17,7 @@ export interface ApiSingleKeyProps {
   keyType: SubscriptionKeyTypeEnum;
   keyValue?: string;
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
+  onHandleMixpanel?: () => void;
   onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
 }
 
@@ -26,6 +27,7 @@ export const ApiSingleKey = ({
   keyValue,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBlockClick,
+  onHandleMixpanel,
   onRotateClick,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
@@ -51,7 +53,11 @@ export const ApiSingleKey = ({
             </IconButton>
           </Typography>
         </Box>
-        <ApiKeyValue isVisible={isVisible} keyValue={keyValue} />
+        <ApiKeyValue
+          handleMixpanel={onHandleMixpanel}
+          isVisible={isVisible}
+          keyValue={keyValue}
+        />
       </Grid>
       <Grid
         display="flex"
