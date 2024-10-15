@@ -332,6 +332,20 @@
         "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
         "shortcut": "Manage API keys"
       },
+      "new-group-api-key": {
+        "title": "Group's API Key",
+        "description": "Select the group for which you want to generate a group API Key.",
+        "card": {
+          "title": "Generate an API Key",
+          "description": "With the generation of the API Key, all users assigned to the selected group will be able to perform programmatic operations only on services they manage. (assigned to the same groups)",
+          "hint": "* Indicates a mandatory question",
+          "form": {
+            "title": "Select the group to make the API Key visible",
+            "placeholder": "Select the group",
+            "description": "We inherit the name of the group, if it will be changed it will be updated automatically"
+          }
+        }
+      },
       "authorizedCidrs": {
         "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys."
       }
