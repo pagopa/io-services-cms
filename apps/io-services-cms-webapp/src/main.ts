@@ -37,7 +37,7 @@ import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
 } from "./lib/azure/cosmos";
-import { processAllItems, processBatchOf, setBindings } from "./lib/azure/misc";
+import { processAllOf, processBatchOf, setBindings } from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
@@ -366,7 +366,7 @@ export const onIngestionServicePublicationChangeEntryPoint = pipe(
   onIngestionServicePublicationChangeHandler(
     servicePublicationEventHubProducer,
   ),
-  processAllItems(ServicePublication.CosmosResource),
+  processAllOf(ServicePublication.CosmosResource),
   setBindings((results) => ({
     requestIngestionError: pipe(
       results,

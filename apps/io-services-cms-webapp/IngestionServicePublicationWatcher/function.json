@@ -15,7 +15,7 @@
     },
     {
       "queueName": "%SERVICES_PUBLICATION_INGESTION_ERROR_QUEUE%",
-      "connection": "TODO-AZURITE_STORAGE_CONNECTIONSTRING",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "requestIngestionError",
       "type": "queue",
       "direction": "out"
