@@ -14,64 +14,28 @@ export type IngestionResults<S> = IngestionError<S> | IngestionSuccess;
 
 const noAction = {};
 
-export const mapToEvents = <S, R>(
+export const mapToEvents = <S>(
   items: readonly S[],
-  dataMapper: (item: S) => R,
-): EventData[] =>
-  items.map((item) => ({
-    body: dataMapper(item),
-    contentType: "application/json",
-  }));
-
-// export const genericIngestionHandler =
-//   <S, R>(producer: EventHubProducerClient, dataMapper: (item: S) => R) =>
-//   (items: readonly S[]): TE.TaskEither<never, IngestionResults<S>[]> =>
-//     pipe(
-//       mapToEvents(items, dataMapper),
-//       TE.right,
-//       TE.chainW((events) =>
-//         pipe(
-//           TE.tryCatch(() => producer.sendBatch(events), E.toError),
-//           TE.map(() => items.map(() => noAction)),
-//           TE.mapLeft((_) =>
-//             items.map((item) => ({
-//               ingestionError: item,
-//             })),
-//           ),
-//         ),
-//       ),
-//       TE.orElseW((_) =>
-//         pipe(
-//           items.map((item) => ({
-//             ingestionError: item,
-//           })),
-//           TE.right,
-//         ),
-//       ),
-//     );
+  dataMapper: (item: S) => EventData,
+): EventData[] => items.map((item) => dataMapper(item));
 
 export const genericIngestionHandler =
-  <S, R>(
+  <S>(
     producer: EventHubProducerClient,
-    dataMapper: (item: S) => R,
+    formatter: (item: S) => EventData,
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     never,
-    IngestionResults<R>[]
+    IngestionResults<S>[]
   > =>
   ({ items }) =>
     pipe(
-      mapToEvents(items, dataMapper),
+      mapToEvents(items, formatter),
       TE.right,
       TE.chainW((events) =>
         pipe(
           TE.tryCatch(() => producer.sendBatch(events), E.toError),
-          TE.map(() => items.map(() => noAction)),
-          TE.mapLeft((_) =>
-            items.map((item) => ({
-              ingestionError: item,
-            })),
-          ),
+          TE.map(() => [noAction]),
         ),
       ),
       TE.orElseW((_) =>

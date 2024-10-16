@@ -8,15 +8,15 @@
       "connection": "COSMOSDB_CONNECTIONSTRING",
       "databaseName": "%COSMOSDB_NAME%",
       "containerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
-      "leaseContainerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-lease-test-version",
-      "createLeaseContainerIfNotExists": false,
+      "leaseContainerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-ingestion-lease",
+      "createLeaseContainerIfNotExists": true,
       "startFromBeginning": false,
       "maxItemsPerInvocation": 30
     },
     {
       "queueName": "%SERVICES_PUBLICATION_INGESTION_ERROR_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
-      "name": "requestIngestionError",
+      "name": "ingestionError",
       "type": "queue",
       "direction": "out"
     }

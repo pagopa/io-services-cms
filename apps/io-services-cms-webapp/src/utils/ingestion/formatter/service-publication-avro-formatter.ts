@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+import { EventData } from "@azure/event-hubs";
 /* eslint-disable perfectionist/sort-objects */
 import { DateUtils, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -102,12 +103,13 @@ export const toAvroCategory = (
 
 export const avroServicePublicationFormatter = (
   item: ServicePublication.CosmosResource,
-) =>
-  avro.Type.forSchema(
+): EventData => ({
+  body: avro.Type.forSchema(
     avroServicePublication.schema as avro.Schema, // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
   ).toBuffer(
     Object.assign(
       new avroServicePublication(),
       buildAvroServicePublicationObject(item),
     ),
-  );
+  ),
+});
