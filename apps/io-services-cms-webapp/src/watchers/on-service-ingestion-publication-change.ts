@@ -1,23 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { ServicePublication } from "@io-services-cms/models";
 
-import { genericIngestionHandler } from "../utils/generic-ingestion-handler";
-
-//TODO: implement the mapping function according Avro Schema(think about using some generator from avro schema)
-const mapItem = (
-  item: ServicePublication.CosmosResource,
-): ServicePublication.ItemType => ({
-  data: item.data,
-  fsm: {
-    ...item.fsm,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    state: item.fsm.state as any,
-  },
-  id: item.id,
-  modified_at: item.modified_at,
-  version: item._etag,
-});
+import { avroServicePublicationFormatter } from "../utils/ingestion/formatter/service-publication-avro-formatter";
+import { genericIngestionHandler } from "../utils/ingestion/generic-ingestion-handler";
 
 export const handler = (producer: EventHubProducerClient) =>
-  genericIngestionHandler(producer, mapItem);
+  genericIngestionHandler(producer, avroServicePublicationFormatter);
