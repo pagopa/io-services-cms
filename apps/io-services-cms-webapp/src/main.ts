@@ -368,7 +368,7 @@ export const onIngestionServicePublicationChangeEntryPoint = pipe(
   ),
   processAllOf(ServicePublication.CosmosResource),
   setBindings((results) => ({
-    requestIngestionError: pipe(
+    ingestionError: pipe(
       results,
       RA.map(RR.lookup("ingestionError")),
       RA.filter(O.isSome),
