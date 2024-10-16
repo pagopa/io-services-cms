@@ -17,6 +17,11 @@
     "add": "Aggiungi indirizzo IP",
     "title": "Indirizzi IP autorizzati"
   },
+  "groupsApiKeys": {
+    "add": "Genera API Key",
+    "title": "API Key dei Gruppi",
+    "description": "Genera queste chiavi per i singoli gruppi, così che possano svolgere operazioni programmatiche solo sui servizi da loro gestiti."
+  },
   "buttons": {
     "back": "Indietro",
     "cancel": "Annulla",

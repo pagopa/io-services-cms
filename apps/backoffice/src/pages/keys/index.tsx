@@ -1,4 +1,5 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
+import GroupsApiKeys from "@/components/api-keys/groups-api-keys";
 import { PageHeader } from "@/components/headers";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
@@ -63,6 +64,14 @@ export default function Keys() {
             description="routes.keys.authorizedCidrs.description"
             editable={true}
             onSaveClick={handleUpdateCidrs}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <GroupsApiKeys
+          // cidrs={acData?.cidrs as unknown as string[]}
+          // description="routes.keys.authorizedCidrs.description"
+          // editable={true}
+          // onSaveClick={handleUpdateCidrs}
           />
         </Grid>
       </Grid>
