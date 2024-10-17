@@ -1,7 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it, vi } from "vitest";
-import { createIngestionCosmosDBTriggerHandler } from "../generic-ingestion-handlers";
+import { createIngestionCosmosDBTriggerHandler } from "../ingestion-handlers";
 
 interface Item {
   id: string;
