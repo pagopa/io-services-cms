@@ -37,20 +37,19 @@ export const genericIngestionHandler =
   ({ items }) =>
     pipe(
       items,
-      toEvents(formatter),
+      toEvents(formatter), // format service to the specified avro format
       TE.fromEither,
-      TE.chainW((events) =>
-        pipe(
-          TE.tryCatch(() => producer.sendBatch(events), E.toError),
-          TE.map(() => [noAction]),
-        ),
+      TE.chainW(
+        (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub
       ),
-      TE.orElseW((_) =>
-        pipe(
-          items.map((item) => ({
-            ingestionError: item,
-          })),
-          TE.right,
-        ),
+      TE.map(() => [noAction]), // return noAction if the sendBatch was successful
+      TE.orElseW(
+        (_) =>
+          pipe(
+            items.map((item) => ({
+              ingestionError: item,
+            })),
+            TE.right,
+          ), // return the items on IngestionError<S>, in order to be written in a DLQ and be reprocessed
       ),
     );
