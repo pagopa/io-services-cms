@@ -150,7 +150,6 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 // eventhub producer for ServicePublication
-// TODO: try ManagedIdentity instead of connection string
 const servicePublicationEventHubProducer = new EventHubProducerClient(
   config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,

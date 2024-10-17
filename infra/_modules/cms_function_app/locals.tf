@@ -113,7 +113,8 @@ locals {
       MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
 
       #EventHubConfing
-      SERVICES_PUBLICATION_EVENT_HUB_NAME = "io-p-itn-svc-elt-services-publication-01"
+      SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING = data.azurerm_key_vault_secret.services_publication_event_hub_connection_string.value
+      SERVICES_PUBLICATION_EVENT_HUB_NAME              = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
 
 
       # Fix Service Review Checker pg module
