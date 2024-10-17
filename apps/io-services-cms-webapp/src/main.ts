@@ -29,6 +29,7 @@ import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
+import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
 import {
   expressToAzureFunction,
   toAzureFunctionHandler,
@@ -149,6 +150,7 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 // eventhub producer for ServicePublication
+// TODO: try ManagedIdentity instead of connection string
 const servicePublicationEventHubProducer = new EventHubProducerClient(
   config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
@@ -377,3 +379,9 @@ export const onIngestionServicePublicationChangeEntryPoint = pipe(
   })),
   toAzureFunctionHandler,
 );
+
+//Ingestion Service Publication Retry DLQ
+export const createRequestServicesPublicationIngestionRetryEntryPoint =
+  createRequestServicesPublicationIngestionRetryHandler(
+    servicePublicationEventHubProducer,
+  );

@@ -1,7 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it, vi } from "vitest";
-import { genericIngestionCosmosDBTrigger } from "../generic-ingestion-handlers";
+import { createIngestionCosmosDBTriggerHandler } from "../generic-ingestion-handlers";
 
 interface Item {
   id: string;
@@ -40,7 +40,7 @@ describe("Generic Ingestion PDND CosmosmosDBTrigger Handler", () => {
   `(
     "should map an item to a $scenario action",
     async ({ items, producer, formatter, expected }) => {
-      const res = await genericIngestionCosmosDBTrigger(
+      const res = await createIngestionCosmosDBTriggerHandler(
         producer,
         aFormatter,
       )({ items })();

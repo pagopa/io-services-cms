@@ -14,7 +14,7 @@
       "maxItemsPerInvocation": 30
     },
     {
-      "queueName": "%SERVICES_PUBLICATION_INGESTION_ERROR_QUEUE%",
+      "queueName": "%REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "ingestionError",
       "type": "queue",

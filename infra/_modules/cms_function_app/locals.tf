@@ -77,15 +77,16 @@ locals {
 
       // Internal Storage Account Queues
       # Queues
-      REQUEST_REVIEW_QUEUE          = azurerm_storage_queue.request-review.name
-      REQUEST_PUBLICATION_QUEUE     = azurerm_storage_queue.request-publication.name
-      REQUEST_HISTORICIZATION_QUEUE = azurerm_storage_queue.request-historicization.name
-      REQUEST_SYNC_LEGACY_QUEUE     = azurerm_storage_queue.request-sync-legacy.name
-      REQUEST_SYNC_CMS_QUEUE        = azurerm_storage_queue.request-sync-cms.name
-      REQUEST_REVIEW_LEGACY_QUEUE   = azurerm_storage_queue.request-review-legacy.name
-      REQUEST_VALIDATION_QUEUE      = azurerm_storage_queue.request-validation.name
-      REQUEST_DELETION_QUEUE        = azurerm_storage_queue.request-deletion.name
-      REQUEST_DETAIL_QUEUE          = azurerm_storage_queue.request-detail.name
+      REQUEST_REVIEW_QUEUE                               = azurerm_storage_queue.request-review.name
+      REQUEST_PUBLICATION_QUEUE                          = azurerm_storage_queue.request-publication.name
+      REQUEST_HISTORICIZATION_QUEUE                      = azurerm_storage_queue.request-historicization.name
+      REQUEST_SYNC_LEGACY_QUEUE                          = azurerm_storage_queue.request-sync-legacy.name
+      REQUEST_SYNC_CMS_QUEUE                             = azurerm_storage_queue.request-sync-cms.name
+      REQUEST_REVIEW_LEGACY_QUEUE                        = azurerm_storage_queue.request-review-legacy.name
+      REQUEST_VALIDATION_QUEUE                           = azurerm_storage_queue.request-validation.name
+      REQUEST_DELETION_QUEUE                             = azurerm_storage_queue.request-deletion.name
+      REQUEST_DETAIL_QUEUE                               = azurerm_storage_queue.request-detail.name
+      REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
 
 
       # List of service ids for which quality control will be bypassed
@@ -110,6 +111,10 @@ locals {
 
       # Automatic service validation
       MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
+
+      #EventHubConfing
+      SERVICES_PUBLICATION_EVENT_HUB_NAME = "io-p-itn-svc-elt-services-publication-01"
+
 
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"
