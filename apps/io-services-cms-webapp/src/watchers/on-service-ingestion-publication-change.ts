@@ -2,7 +2,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 
 import { avroServicePublicationFormatter } from "../utils/ingestion/formatter/service-publication-avro-formatter";
-import { genericIngestionHandler } from "../utils/ingestion/generic-ingestion-handler";
+import { genericIngestionCosmosDBTrigger } from "../utils/ingestion/generic-ingestion-handlers";
 
 export const handler = (producer: EventHubProducerClient) =>
-  genericIngestionHandler(producer, avroServicePublicationFormatter);
+  genericIngestionCosmosDBTrigger(producer, avroServicePublicationFormatter);

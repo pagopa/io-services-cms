@@ -15,17 +15,13 @@ export type IngestionResults<S> = IngestionError<S> | IngestionSuccess;
 
 const noAction = {};
 
-// export const mapToEvents = <S>(
-//   items: readonly S[],
-//   dataMapper: (item: S) => EventData,
-// ): EventData[] => items.map((item) => dataMapper(item));
-
 export const toEvents =
   <S>(dataMapper: (item: S) => E.Either<Error, EventData>) =>
   (items: readonly S[]): E.Either<Error, EventData[]> =>
     pipe([...items], A.traverse(E.Applicative)(dataMapper));
 
-export const genericIngestionHandler =
+// CosmosDBTrigger
+export const genericIngestionCosmosDBTrigger =
   <S>(
     producer: EventHubProducerClient,
     formatter: (item: S) => E.Either<Error, EventData>,

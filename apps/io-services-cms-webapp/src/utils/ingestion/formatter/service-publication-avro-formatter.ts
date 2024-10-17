@@ -44,7 +44,7 @@ export const buildAvroServicePublicationObject = (
         scope: toAvroScope(servicePublicationCosmosRecord.data.metadata.scope),
         support_url: servicePublicationCosmosRecord.data.metadata.support_url,
         token_name: servicePublicationCosmosRecord.data.metadata.token_name,
-        topic_id: servicePublicationCosmosRecord.data.metadata.topic_id,
+        topic_id: servicePublicationCosmosRecord.data.metadata.topic_id ?? null,
         tos_url: servicePublicationCosmosRecord.data.metadata.tos_url,
         web_url: servicePublicationCosmosRecord.data.metadata.web_url,
       },

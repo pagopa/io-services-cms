@@ -166,7 +166,8 @@
                 },
                 {
                   "name": "topic_id",
-                  "type": ["null", "int"]
+                  "type": ["null", "int"],
+                  "default": null
                 }
               ]
             }

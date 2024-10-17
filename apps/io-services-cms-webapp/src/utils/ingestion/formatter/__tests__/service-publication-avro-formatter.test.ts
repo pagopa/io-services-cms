@@ -24,7 +24,6 @@ const aServicePublicationCosmosResource: ServicePublication.CosmosResource = {
       pec: "service@pec.it",
       scope: "LOCAL",
       category: "STANDARD",
-      topic_id: null, // Why undefined(omit this) doesn't work? and produce Error: invalid ["null","int"]: undefined
     },
     organization: {
       name: "anOrganizationName",
@@ -35,6 +34,7 @@ const aServicePublicationCosmosResource: ServicePublication.CosmosResource = {
   fsm: {
     state: "published",
   },
+  modified_at: DateUtils.unixTimestamp(),
   _ts: DateUtils.unixTimestampInSeconds(),
   _etag: "aServiceEtag",
 } as unknown as ServicePublication.CosmosResource;
@@ -50,6 +50,53 @@ describe("Service Publication Avro Formatter", () => {
     if (E.isRight(res)) {
       const rightVal = res.right;
       expect(rightVal).toHaveProperty("body");
+
+      // convert buffer
+      const body = avroType.fromBuffer(rightVal.body);
+
+      expect(body).toEqual({
+        id: "aServiceId",
+        data: {
+          authorized_cidrs: [],
+          authorized_recipients: [],
+          name: "aServiceName",
+          description: "aServiceDescription",
+          require_secure_channel: false,
+          max_allowed_payment_amount: 123,
+          institution_id: null,
+          organization: {
+            name: "anOrganizationName",
+            fiscal_code: "12345678901",
+            department_name: null,
+          },
+          metadata: {
+            scope: "LOCAL",
+            address: "via tal dei tali 123",
+            category: "STANDARD",
+            email: "service@email.it",
+            pec: "service@pec.it",
+            phone: null,
+            token_name: null,
+            privacy_url: null,
+            app_android: null,
+            app_ios: null,
+            cta: null,
+            custom_special_flow: null,
+            support_url: null,
+            tos_url: null,
+            web_url: null,
+            topic_id: null,
+          },
+        },
+        fsm: {
+          state: "published",
+        },
+
+        modified_at: aServicePublicationCosmosResource.modified_at,
+        version: "aServiceEtag",
+      });
+
+      //console.log(body);
     }
   });
 
@@ -57,7 +104,7 @@ describe("Service Publication Avro Formatter", () => {
     const aBadServicePublicationCosmosResource: ServicePublication.CosmosResource =
       {
         ...aServicePublicationCosmosResource,
-        id: undefined // this will make the formatter fail
+        id: undefined, // this will make the formatter fail
       } as unknown as ServicePublication.CosmosResource;
 
     const res = avroServicePublicationFormatter(
@@ -65,9 +112,5 @@ describe("Service Publication Avro Formatter", () => {
     );
 
     expect(E.isLeft(res)).toBeTruthy();
-
-    if (E.isLeft(res)) {
-      console.log(res.left);
-    }
   });
 });
