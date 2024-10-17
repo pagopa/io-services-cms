@@ -8,7 +8,7 @@ import { SelectController } from "../forms/controllers";
 
 interface GenerateApiKeyFormProp {
   groups: InstitutionGroup[];
-  onFormValidation: (isFormInvalid: boolean) => void;
+  onFormValidation: (isFormInvalid: boolean, formSelectedId: string) => void;
 }
 
 export default function GenerateApiKeyForm({
@@ -29,7 +29,7 @@ export default function GenerateApiKeyForm({
   const items = convertGroupsToSelectItems(groups);
 
   useEffect(() => {
-    onFormValidation(!NonEmptyString.is(watchedGroup));
+    onFormValidation(!NonEmptyString.is(watchedGroup), watchedGroup);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedGroup]);
 

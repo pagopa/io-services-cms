@@ -319,6 +319,12 @@ export const getMockInstitutionGroups = (institutionId?: string) =>
     name: faker.lorem.word(),
   }));
 
+export const getUpsertManageGroupSubscriptionResponse = (groupId?: object) => {
+  return {
+    groupId,
+  };
+};
+
 // **********************************************************************
 // Services import into SelfCare
 // **********************************************************************

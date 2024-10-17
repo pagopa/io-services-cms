@@ -19,6 +19,7 @@ import {
   getMockServicesMigrationDelegate,
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
+  getUpsertManageGroupSubscriptionResponse,
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import {
@@ -742,7 +743,9 @@ export const buildHandlers = () => {
       const { institutionId } = params;
       const resultArray = [
         new HttpResponse(
-          JSON.stringify(getMockInstitutionGroups(institutionId as string)),
+          JSON.stringify(
+            getInstitutionGroups200Response(institutionId as string),
+          ),
           {
             status: 200,
           },
@@ -758,6 +761,30 @@ export const buildHandlers = () => {
         }),
         new HttpResponse(null, {
           status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
+    http.put(`${baseURL}/subscriptions`, ({ params }) => {
+      const { groupId } = params;
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(
+            getUpsertManageGroupSubscription200Response(groupId as string),
+          ),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
         }),
         new HttpResponse(null, {
           status: 500,
@@ -875,4 +902,8 @@ export function getGetInstitution200Response() {
 
 export function getInstitutionGroups200Response(institutionId: string) {
   return getMockInstitutionGroups(institutionId);
+}
+
+export function getUpsertManageGroupSubscription200Response(groupId: string) {
+  return getUpsertManageGroupSubscriptionResponse(groupId);
 }

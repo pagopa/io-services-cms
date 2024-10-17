@@ -2,7 +2,9 @@ import { ButtonCancel, ButtonNext } from "@/components/buttons";
 import { useDialog } from "@/components/dialog-provider";
 import GenerateApiKeyForm from "@/components/groups-api-key/generate-api-key-form";
 import { PageHeader } from "@/components/headers";
+import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroupSubscription";
 import { Group } from "@/generated/api/Group";
+import { GroupPagination } from "@/generated/api/GroupPagination";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
@@ -24,18 +26,29 @@ export default function NewGroupApiKey() {
   const router = useRouter();
 
   const showDialog = useDialog();
-  const { data: groupsData, fetchData: groupsFetchData } = useFetch<Group>();
+  const { data: groupsData, fetchData: groupsFetchData } =
+    useFetch<GroupPagination>();
+
+  const { fetchData: subscriptionFetchData } =
+    useFetch<CreateManageGroupSubscription>();
 
   const [formStatus, setFormStatus] = useState<boolean>(true);
+  const [selectedId, setSelectedId] = useState<string>("");
 
-  const handleFormValidation = (isFormValid: boolean) => {
+  const handleFormValidation = (
+    isFormValid: boolean,
+    formSelectedId: string,
+  ) => {
     setFormStatus(isFormValid);
+    setSelectedId(formSelectedId);
   };
 
   const institutionId = session?.user?.institution.id as string;
+  const groupId = selectedId;
 
-  const fetchGroups = () =>
-    groupsFetchData("getInstitutionGroups", { institutionId }, Group);
+  const fetchGroups = () => {
+    groupsFetchData("getInstitutionGroups", { institutionId }, GroupPagination);
+  };
 
   useEffect(() => {
     fetchGroups();
@@ -44,7 +57,8 @@ export default function NewGroupApiKey() {
   }, []);
 
   useEffect(() => {
-    console.log(groupsData);
+    const groupList = groupsData?.value;
+    console.log(groupList);
   }, [groupsData]);
 
   const methods = useForm({
@@ -77,8 +91,13 @@ export default function NewGroupApiKey() {
     }
   };
 
-  const handleConfirm = () => {
-    //TODO new api logic
+  const handleConfirm = async () => {
+    await subscriptionFetchData(
+      "upsertManageGroupSubscription",
+      { body: { groupId } },
+      CreateManageGroupSubscription,
+      { notify: "all" },
+    );
     router.back();
   };
 
