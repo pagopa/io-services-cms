@@ -32,46 +32,50 @@ module "cms_fn" {
   app_settings = merge(
     local.cms.app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"            = "0"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"         = "0"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled"       = "0"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"            = "0"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"           = "0"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"        = "0"
-      "AzureWebJobs.OnRequestPublication.Disabled"            = "0"
-      "AzureWebJobs.OnRequestReview.Disabled"                 = "0"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"                = "0"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"             = "0"
-      "AzureWebJobs.OnRequestReviewLegacy.Disabled"           = "0"
-      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled"      = "0"
-      "AzureWebJobs.OnRequestValidation.Disabled"             = "0"
-      "AzureWebJobs.OnRequestDeletion.Disabled"               = "0"
-      "AzureWebJobs.OnRequestDetail.Disabled"                 = "0"
-      "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled"   = "0"
-      "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled" = "0"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"                       = "0"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"                    = "0"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"                  = "0"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"                       = "0"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"                      = "0"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"                   = "0"
+      "AzureWebJobs.OnRequestPublication.Disabled"                       = "0"
+      "AzureWebJobs.OnRequestReview.Disabled"                            = "0"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"                           = "0"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"                        = "0"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"                      = "0"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled"                 = "0"
+      "AzureWebJobs.OnRequestValidation.Disabled"                        = "0"
+      "AzureWebJobs.OnRequestDeletion.Disabled"                          = "0"
+      "AzureWebJobs.OnRequestDetail.Disabled"                            = "0"
+      "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled"              = "0"
+      "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"            = "0"
+      "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "1"
+      "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "1"
     }
   )
 
   slot_app_settings = merge(
     local.cms.app_settings,
     {
-      "AzureWebJobs.LegacyServiceWatcher.Disabled"            = "1"
-      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"         = "1"
-      "AzureWebJobs.ServicePublicationWatcher.Disabled"       = "1"
-      "AzureWebJobs.ServiceReviewChecker.Disabled"            = "1"
-      "AzureWebJobs.ServiceHistoryWatcher.Disabled"           = "1"
-      "AzureWebJobs.OnRequestHistoricization.Disabled"        = "1"
-      "AzureWebJobs.OnRequestPublication.Disabled"            = "1"
-      "AzureWebJobs.OnRequestReview.Disabled"                 = "1"
-      "AzureWebJobs.OnRequestSyncCms.Disabled"                = "1"
-      "AzureWebJobs.OnRequestSyncLegacy.Disabled"             = "1"
-      "AzureWebJobs.OnRequestReviewLegacy.Disabled"           = "1"
-      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled"      = "1"
-      "AzureWebJobs.OnRequestValidation.Disabled"             = "1"
-      "AzureWebJobs.OnRequestDeletion.Disabled"               = "1"
-      "AzureWebJobs.OnRequestDetail.Disabled"                 = "1"
-      "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled"   = "1"
-      "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled" = "1"
+      "AzureWebJobs.LegacyServiceWatcher.Disabled"                       = "1"
+      "AzureWebJobs.ServiceLifecycleWatcher.Disabled"                    = "1"
+      "AzureWebJobs.ServicePublicationWatcher.Disabled"                  = "1"
+      "AzureWebJobs.ServiceReviewChecker.Disabled"                       = "1"
+      "AzureWebJobs.ServiceHistoryWatcher.Disabled"                      = "1"
+      "AzureWebJobs.OnRequestHistoricization.Disabled"                   = "1"
+      "AzureWebJobs.OnRequestPublication.Disabled"                       = "1"
+      "AzureWebJobs.OnRequestReview.Disabled"                            = "1"
+      "AzureWebJobs.OnRequestSyncCms.Disabled"                           = "1"
+      "AzureWebJobs.OnRequestSyncLegacy.Disabled"                        = "1"
+      "AzureWebJobs.OnRequestReviewLegacy.Disabled"                      = "1"
+      "AzureWebJobs.ServiceReviewLegacyChecker.Disabled"                 = "1"
+      "AzureWebJobs.OnRequestValidation.Disabled"                        = "1"
+      "AzureWebJobs.OnRequestDeletion.Disabled"                          = "1"
+      "AzureWebJobs.OnRequestDetail.Disabled"                            = "1"
+      "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled"              = "1"
+      "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"            = "1"
+      "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "1"
+      "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "1"
     }
   )
 
@@ -92,7 +96,9 @@ module "cms_fn" {
     "AzureWebJobs.OnRequestDeletion.Disabled",
     "AzureWebJobs.OnRequestDetail.Disabled",
     "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled",
-    "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"
+    "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled",
+    "AzureWebJobs.IngestionServicePublicationWatcher.Disabled",
+    "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled"
   ]
 
   tier = local.cms.tier
