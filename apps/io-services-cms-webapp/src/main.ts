@@ -362,7 +362,6 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
 );
 
 //Ingestion Service Publication
-//TODO: This can be generalized too.
 export const onIngestionServicePublicationChangeEntryPoint = pipe(
   onIngestionServicePublicationChangeHandler(
     servicePublicationEventHubProducer,
