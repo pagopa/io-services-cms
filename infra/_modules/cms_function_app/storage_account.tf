@@ -109,3 +109,14 @@ resource "azurerm_storage_queue" "request-detail-poison" {
   name                 = "request-detail-poison"
   storage_account_name = module.cms_storage_account.name
 }
+
+
+resource "azurerm_storage_queue" "request-services-publication-ingestion-retry" {
+  name                 = "request-services-publication-ingestion-retry"
+  storage_account_name = module.cms_storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-services-publication-ingestion-retry-poison" {
+  name                 = "request-services-publication-ingestion-retry-poison"
+  storage_account_name = module.cms_storage_account.name
+}

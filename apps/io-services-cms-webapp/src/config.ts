@@ -245,6 +245,14 @@ const DefaultValues = t.type({
   ),
 });
 
+export type ServicesPublicationEventHubConfig = t.TypeOf<
+  typeof ServicesPublicationEventHubConfig
+>;
+export const ServicesPublicationEventHubConfig = t.type({
+  SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_PUBLICATION_EVENT_HUB_NAME: NonEmptyString,
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -276,6 +284,7 @@ export const IConfig = t.intersection([
     ServiceValidationConfig,
     DefaultValues,
   ]),
+  ServicesPublicationEventHubConfig,
 ]);
 
 export const envConfig = {
