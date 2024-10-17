@@ -120,3 +120,13 @@ resource "azurerm_storage_queue" "request-services-publication-ingestion-retry-p
   name                 = "request-services-publication-ingestion-retry-poison"
   storage_account_name = module.cms_storage_account.name
 }
+
+resource "azurerm_storage_queue" "request-services-lifecycle-ingestion-retry" {
+  name                 = "request-services-lifecycle-ingestion-retry"
+  storage_account_name = module.cms_storage_account.name
+}
+
+resource "azurerm_storage_queue" "request-services-lifecycle-ingestion-retry-poison" {
+  name                 = "request-services-lifecycle-ingestion-retry-poison"
+  storage_account_name = module.cms_storage_account.name
+}

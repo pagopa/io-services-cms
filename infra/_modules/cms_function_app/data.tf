@@ -83,6 +83,11 @@ data "azurerm_key_vault_secret" "services_publication_event_hub_connection_strin
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "services_lifecycle_event_hub_connection_string" {
+  name         = "SERVICES-LIFECYCLE-EVENT-HUB-CONNECTION-STRING"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
+
 ####################
 # Private DNS Zone #
 ####################
