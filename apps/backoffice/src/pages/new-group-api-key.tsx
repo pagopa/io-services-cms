@@ -1,32 +1,69 @@
 import { ButtonCancel, ButtonNext } from "@/components/buttons";
 import { useDialog } from "@/components/dialog-provider";
+import GenerateApiKeyForm from "@/components/groups-api-key/generate-api-key-form";
 import { PageHeader } from "@/components/headers";
+import { Group } from "@/generated/api/Group";
+import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  Select,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Grid, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import React from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
 const pageTitleLocaleKey = "routes.keys.new-group-api-key.title";
 const pageDescriptionLocaleKey = "routes.keys.new-group-api-key.description";
 
 export default function NewGroupApiKey() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const router = useRouter();
 
   const showDialog = useDialog();
+  const { data: groupsData, fetchData: groupsFetchData } = useFetch<Group>();
+
+  const [formStatus, setFormStatus] = useState<boolean>(true);
+
+  const handleFormValidation = (isFormValid: boolean) => {
+    setFormStatus(isFormValid);
+  };
+
+  const institutionId = session?.user?.institution.id as string;
+
+  const fetchGroups = () =>
+    groupsFetchData("getInstitutionGroups", { institutionId }, Group);
+
+  useEffect(() => {
+    fetchGroups();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    console.log(groupsData);
+  }, [groupsData]);
+
+  const methods = useForm({
+    defaultValues: {
+      group: "",
+    },
+  });
+
+  const placeholderGroups: Group[] = [
+    {
+      id: "value1",
+      name: "label1",
+    },
+    {
+      id: "value2",
+      name: "label2",
+    },
+  ];
+
   const handleCancel = async () => {
     const confirmed = await showDialog({
       message: t("forms.cancel.description"),
@@ -77,17 +114,12 @@ export default function NewGroupApiKey() {
               {t("routes.keys.new-group-api-key.card.form.title")}
             </Typography>
           </Stack>
-          <FormControl fullWidth required>
-            <InputLabel>
-              {t("routes.keys.new-group-api-key.card.form.placeholder")}
-            </InputLabel>
-            <Select
-              label={t("routes.keys.new-group-api-key.card.form.placeholder")}
-            ></Select>
-            <FormHelperText>
-              {t("routes.keys.new-group-api-key.card.form.description")}
-            </FormHelperText>
-          </FormControl>
+          <FormProvider {...methods}>
+            <GenerateApiKeyForm
+              groups={placeholderGroups}
+              onFormValidation={handleFormValidation}
+            />
+          </FormProvider>
         </Box>
       </Box>
       <Grid container marginTop={3} spacing={0}>
@@ -95,7 +127,7 @@ export default function NewGroupApiKey() {
           <ButtonCancel onClick={() => handleCancel()} />
         </Grid>
         <Grid item textAlign="right" xs={6}>
-          <ButtonNext onClick={() => handleConfirm()} />
+          <ButtonNext disabled={formStatus} onClick={() => handleConfirm()} />
         </Grid>
       </Grid>
     </>
