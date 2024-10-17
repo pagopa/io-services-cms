@@ -1,9 +1,9 @@
-/* eslint-disable prettier/prettier */
 import { EventData } from "@azure/event-hubs";
-/* eslint-disable perfectionist/sort-objects */
 import { DateUtils, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as avro from "avsc";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 
 import { PublicationCategoryEnum } from "../../../generated/avro/dto/PublicationCategoryEnumEnum";
 import { PublicationScopeEnum } from "../../../generated/avro/dto/PublicationScopeEnumEnum";
@@ -27,45 +27,45 @@ export const buildAvroServicePublicationObject = (
 
       max_allowed_payment_amount:
         servicePublicationCosmosRecord.data.max_allowed_payment_amount,
-      name: servicePublicationCosmosRecord.data.name,
-
-      require_secure_channel:
-        servicePublicationCosmosRecord.data.require_secure_channel,
-
-      organization: {
-        name: servicePublicationCosmosRecord.data.organization.name,
-        fiscal_code:
-          servicePublicationCosmosRecord.data.organization.fiscal_code,
-        department_name:
-          servicePublicationCosmosRecord.data.organization.department_name,
-      },
-
       metadata: {
-        scope: toAvroScope(servicePublicationCosmosRecord.data.metadata.scope),
         address: servicePublicationCosmosRecord.data.metadata.address,
+        app_android: servicePublicationCosmosRecord.data.metadata.app_android,
+        app_ios: servicePublicationCosmosRecord.data.metadata.app_ios,
         category: toAvroCategory(
           servicePublicationCosmosRecord.data.metadata.category,
         ),
-        email: servicePublicationCosmosRecord.data.metadata.email,
-        pec: servicePublicationCosmosRecord.data.metadata.pec,
-        phone: servicePublicationCosmosRecord.data.metadata.phone,
-        token_name: servicePublicationCosmosRecord.data.metadata.token_name,
-        privacy_url: servicePublicationCosmosRecord.data.metadata.privacy_url,
-        app_android: servicePublicationCosmosRecord.data.metadata.app_android,
-        app_ios: servicePublicationCosmosRecord.data.metadata.app_ios,
         cta: servicePublicationCosmosRecord.data.metadata.cta,
         custom_special_flow:
           servicePublicationCosmosRecord.data.metadata.custom_special_flow,
+        email: servicePublicationCosmosRecord.data.metadata.email,
+        pec: servicePublicationCosmosRecord.data.metadata.pec,
+        phone: servicePublicationCosmosRecord.data.metadata.phone,
+        privacy_url: servicePublicationCosmosRecord.data.metadata.privacy_url,
+        scope: toAvroScope(servicePublicationCosmosRecord.data.metadata.scope),
         support_url: servicePublicationCosmosRecord.data.metadata.support_url,
+        token_name: servicePublicationCosmosRecord.data.metadata.token_name,
+        topic_id: servicePublicationCosmosRecord.data.metadata.topic_id,
         tos_url: servicePublicationCosmosRecord.data.metadata.tos_url,
         web_url: servicePublicationCosmosRecord.data.metadata.web_url,
-        topic_id: servicePublicationCosmosRecord.data.metadata.topic_id,
       },
+
+      name: servicePublicationCosmosRecord.data.name,
+
+      organization: {
+        department_name:
+          servicePublicationCosmosRecord.data.organization.department_name,
+        fiscal_code:
+          servicePublicationCosmosRecord.data.organization.fiscal_code,
+        name: servicePublicationCosmosRecord.data.organization.name,
+      },
+
+      require_secure_channel:
+        servicePublicationCosmosRecord.data.require_secure_channel,
     },
-    id: servicePublicationCosmosRecord.id,
     fsm: {
       state: toAvroFsmState(servicePublicationCosmosRecord.fsm),
     },
+    id: servicePublicationCosmosRecord.id,
     modified_at:
       servicePublicationCosmosRecord.modified_at ??
       DateUtils.unixSecondsToMillis(servicePublicationCosmosRecord._ts),
@@ -101,7 +101,7 @@ export const toAvroCategory = (
   return PublicationCategoryEnum.STANDARD;
 };
 
-export const avroServicePublicationFormatter = (
+export const avroServicePublicationFormatterOld = (
   item: ServicePublication.CosmosResource,
 ): EventData => ({
   body: avro.Type.forSchema(
@@ -113,3 +113,24 @@ export const avroServicePublicationFormatter = (
     ),
   ),
 });
+
+export const avroServicePublicationFormatter = (
+  item: ServicePublication.CosmosResource,
+): E.Either<Error, EventData> =>
+  pipe(
+    Object.assign(
+      new avroServicePublication(),
+      buildAvroServicePublicationObject(item),
+    ),
+    E.right,
+    E.chain((avroObj) =>
+      E.tryCatch(
+        () =>
+          avro.Type.forSchema(
+            avroServicePublication.schema as avro.Schema, // cast due to tsc can not proper recognize object as avro.Schema (eg. if you use const schemaServices: avro.Type = JSON.parse(JSON.stringify(services.schema())); it will loose the object type and it will work fine)
+          ).toBuffer(avroObj),
+        E.toError,
+      ),
+    ),
+    E.map((avroBuffer) => ({ body: avroBuffer })),
+  );

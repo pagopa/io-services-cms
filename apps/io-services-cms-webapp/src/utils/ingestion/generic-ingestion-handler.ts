@@ -1,4 +1,5 @@
 import { EventData, EventHubProducerClient } from "@azure/event-hubs";
+import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -14,15 +15,20 @@ export type IngestionResults<S> = IngestionError<S> | IngestionSuccess;
 
 const noAction = {};
 
-export const mapToEvents = <S>(
-  items: readonly S[],
-  dataMapper: (item: S) => EventData,
-): EventData[] => items.map((item) => dataMapper(item));
+// export const mapToEvents = <S>(
+//   items: readonly S[],
+//   dataMapper: (item: S) => EventData,
+// ): EventData[] => items.map((item) => dataMapper(item));
+
+export const toEvents =
+  <S>(dataMapper: (item: S) => E.Either<Error, EventData>) =>
+  (items: readonly S[]): E.Either<Error, EventData[]> =>
+    pipe([...items], A.traverse(E.Applicative)(dataMapper));
 
 export const genericIngestionHandler =
   <S>(
     producer: EventHubProducerClient,
-    formatter: (item: S) => EventData,
+    formatter: (item: S) => E.Either<Error, EventData>,
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     never,
@@ -30,8 +36,9 @@ export const genericIngestionHandler =
   > =>
   ({ items }) =>
     pipe(
-      mapToEvents(items, formatter),
-      TE.right,
+      items,
+      toEvents(formatter),
+      TE.fromEither,
       TE.chainW((events) =>
         pipe(
           TE.tryCatch(() => producer.sendBatch(events), E.toError),
