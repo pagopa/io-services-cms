@@ -12,7 +12,7 @@ import {
   getOpenIdConfig,
   getProductListByServiceResponse,
   getSubscriptionResponse,
-  getUserResponse
+  getUserResponse,
 } from "../data/apim-data";
 import { aMockErrorResponse } from "../data/common-data";
 
@@ -25,15 +25,15 @@ export const buildHandlers = () => {
       () => {
         const resultArray = [
           HttpResponse.json(getOpenIdConfig(configuration) as any, {
-            status: 200
+            status: 200,
           }),
           HttpResponse.json(getWellKnown500Response(), {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `https://login.microsoftonline.com/common/discovery/instance`,
@@ -42,16 +42,16 @@ export const buildHandlers = () => {
           HttpResponse.json(
             getDiscoveryInstanceResponse(configuration) as any,
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           HttpResponse.json(getWellKnown500Response(), {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
@@ -62,7 +62,7 @@ export const buildHandlers = () => {
         let userEmail;
         if (filterSearchParam) {
           const matchedGroups = /email\seq\s'(?<email>.*)'/.exec(
-            filterSearchParam
+            filterSearchParam,
           )?.groups;
           if (matchedGroups) {
             userEmail = matchedGroups["email"];
@@ -76,66 +76,66 @@ export const buildHandlers = () => {
             isKnownUser
               ? (getListByServiceResponse({
                   ...configuration,
-                  userEmail
+                  userEmail,
                 }) as any)
               : (getListByServiceResponse({
                   ...configuration,
                   userEmail,
-                  groups: ["ApiServiceRead"]
+                  groups: ["ApiServiceRead"],
                 }) as any),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           HttpResponse.json(getWellKnown500Response() as any, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.post(
       `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
       () => {
         const resultArray = [
           HttpResponse.json(anOauth2TokenResponse, {
-            status: 200
+            status: 200,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.post(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId/listSecrets`,
       () => {
         const resultArray = [
           HttpResponse.json(aListSecretsResponse, {
-            status: 200
+            status: 200,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.put(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/:userId`,
@@ -145,25 +145,25 @@ export const buildHandlers = () => {
           HttpResponse.json(
             getUserResponse({
               ...configuration,
-              userId: userId as string
+              userId: userId as string,
             }),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.put(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/groups/:groupId/users/:userId`,
@@ -174,25 +174,25 @@ export const buildHandlers = () => {
             getUserResponse({
               ...configuration,
               userId: userId as string,
-              groups: ["ApiServiceRead"]
+              groups: ["ApiServiceRead"],
             }),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId`,
@@ -202,25 +202,25 @@ export const buildHandlers = () => {
           HttpResponse.json(
             getSubscriptionResponse({
               ...configuration,
-              subscriptionId: subscriptionId as string
+              subscriptionId: subscriptionId as string,
             }),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.put(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId`,
@@ -230,25 +230,25 @@ export const buildHandlers = () => {
           HttpResponse.json(
             getSubscriptionResponse({
               ...configuration,
-              subscriptionId: subscriptionId as string
+              subscriptionId: subscriptionId as string,
             }),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users/:userId/subscriptions`,
@@ -262,27 +262,27 @@ export const buildHandlers = () => {
               value: [
                 getSubscriptionResponse({
                   ...configuration,
-                  subscriptionId: subscriptionId as string
-                })
-              ]
+                  subscriptionId: subscriptionId as string,
+                }),
+              ],
             },
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/products`,
@@ -292,7 +292,7 @@ export const buildHandlers = () => {
         let productName;
         if (filterSearchParam) {
           const matchedGroups = /name\seq\s'(?<name>.*)'/.exec(
-            filterSearchParam
+            filterSearchParam,
           )?.groups;
           if (matchedGroups) {
             productName = matchedGroups["name"];
@@ -302,20 +302,20 @@ export const buildHandlers = () => {
           HttpResponse.json(
             getProductListByServiceResponse({
               ...configuration,
-              productName
+              productName,
             }) as any,
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           HttpResponse.json(getWellKnown500Response(), {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
-    )
+      },
+    ),
   ];
 };
 
