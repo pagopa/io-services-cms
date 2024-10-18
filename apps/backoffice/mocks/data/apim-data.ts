@@ -6,7 +6,7 @@ export const getOpenIdConfig = (configuration: Configuration) => ({
   token_endpoint_auth_methods_supported: [
     "client_secret_post",
     "private_key_jwt",
-    "client_secret_basic"
+    "client_secret_basic",
   ],
   jwks_uri: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/discovery/v2.0/keys`,
   response_modes_supported: ["query", "fragment", "form_post"],
@@ -16,7 +16,7 @@ export const getOpenIdConfig = (configuration: Configuration) => ({
     "code",
     "id_token",
     "code id_token",
-    "id_token token"
+    "id_token token",
   ],
   scopes_supported: ["openid", "profile", "email", "offline_access"],
   issuer: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0`,
@@ -46,14 +46,14 @@ export const getOpenIdConfig = (configuration: Configuration) => ({
     "ver",
     "at_hash",
     "c_hash",
-    "email"
+    "email",
   ],
   kerberos_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/kerberos`,
   tenant_region_scope: "EU",
   cloud_instance_name: "microsoftonline.com",
   cloud_graph_host_name: "graph.windows.net",
   msgraph_host: "graph.microsoft.com",
-  rbac_url: "https://pas.windows.net"
+  rbac_url: "https://pas.windows.net",
 });
 
 export const anOauth2TokenResponse = {
@@ -61,25 +61,25 @@ export const anOauth2TokenResponse = {
   token_type: "Bearer",
   expires_in: 3600,
   refresh_token: "IwOGYzYTlmM2YxOTQ5MGE3YmNmMDFkNTVk",
-  scope: "create"
+  scope: "create",
 };
 
 export const aListSecretsResponse = {
   primaryKey: faker.string.alphanumeric(32),
-  secondaryKey: faker.string.alphanumeric(32)
+  secondaryKey: faker.string.alphanumeric(32),
 };
 
 export const anEmptyListByServiceResponse = {
   value: [],
   count: 0,
-  nextLink: ""
+  nextLink: "",
 };
 
 export const getProductListByServiceResponse = ({
   AZURE_SUBSCRIPTION_ID,
   AZURE_APIM_RESOURCE_GROUP,
   AZURE_APIM,
-  productName = faker.string.uuid()
+  productName = faker.string.uuid(),
 }: {
   AZURE_SUBSCRIPTION_ID: string;
   AZURE_APIM_RESOURCE_GROUP: string;
@@ -89,18 +89,18 @@ export const getProductListByServiceResponse = ({
   value: [
     {
       id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/products/${productName}`,
-      name: productName
-    }
+      name: productName,
+    },
   ],
   count: 1,
-  nextLink: ""
+  nextLink: "",
 });
 
 export const getSubscriptionResponse = ({
   AZURE_SUBSCRIPTION_ID,
   AZURE_APIM_RESOURCE_GROUP,
   AZURE_APIM,
-  subscriptionId = faker.string.uuid()
+  subscriptionId = faker.string.uuid(),
 }: {
   AZURE_SUBSCRIPTION_ID: string;
   AZURE_APIM_RESOURCE_GROUP: string;
@@ -108,17 +108,17 @@ export const getSubscriptionResponse = ({
   subscriptionId?: string;
 }) => ({
   id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/subscriptions/${subscriptionId}`,
-  name: subscriptionId
+  name: subscriptionId,
 });
 
 export const getListByServiceResponse = (
-  params: Parameters<typeof getUser>[0]
+  params: Parameters<typeof getUser>[0],
 ) => {
   const users = [getUser(params)];
   return {
     value: users,
     count: users.length,
-    nextLink: ""
+    nextLink: "",
   };
 };
 export const getUserResponse = (params: Parameters<typeof getUser>[0]) =>
@@ -130,7 +130,7 @@ const getUser = ({
   AZURE_APIM,
   userId = faker.string.uuid(),
   userEmail = `org.${userId}@selfcare.io.pagopa.com`,
-  groups = ["Developer", "ApiServiceWrite"]
+  groups = ["Developer", "ApiServiceWrite"],
 }: {
   AZURE_SUBSCRIPTION_ID: string;
   AZURE_APIM_RESOURCE_GROUP: string;
@@ -150,13 +150,13 @@ const getUser = ({
   identities: [
     {
       provider: "Azure",
-      id: "admin@live.com"
-    }
+      id: "admin@live.com",
+    },
   ],
-  groups: groups.map(groupName => ({
+  groups: groups.map((groupName) => ({
     type: "custom",
-    name: groupName
-  }))
+    name: groupName,
+  })),
 });
 
 export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({
@@ -170,28 +170,28 @@ export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({
         "login.microsoftonline.com",
         "login.windows.net",
         "login.microsoft.com",
-        "sts.windows.net"
-      ]
+        "sts.windows.net",
+      ],
     },
     {
       preferred_network: "login.partner.microsoftonline.cn",
       preferred_cache: "login.partner.microsoftonline.cn",
-      aliases: ["login.partner.microsoftonline.cn", "login.chinacloudapi.cn"]
+      aliases: ["login.partner.microsoftonline.cn", "login.chinacloudapi.cn"],
     },
     {
       preferred_network: "login.microsoftonline.de",
       preferred_cache: "login.microsoftonline.de",
-      aliases: ["login.microsoftonline.de"]
+      aliases: ["login.microsoftonline.de"],
     },
     {
       preferred_network: "login.microsoftonline.us",
       preferred_cache: "login.microsoftonline.us",
-      aliases: ["login.microsoftonline.us", "login.usgovcloudapi.net"]
+      aliases: ["login.microsoftonline.us", "login.usgovcloudapi.net"],
     },
     {
       preferred_network: "login-us.microsoftonline.com",
       preferred_cache: "login-us.microsoftonline.com",
-      aliases: ["login-us.microsoftonline.com"]
-    }
-  ]
+      aliases: ["login-us.microsoftonline.com"],
+    },
+  ],
 });

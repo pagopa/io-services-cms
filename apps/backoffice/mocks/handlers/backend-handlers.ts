@@ -11,19 +11,21 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getMockInstitutionGroups,
   getMockServiceHistory,
   getMockServiceKeys,
   getMockServiceLifecycle,
   getMockServiceList,
   getMockServicesMigrationDelegate,
   getMockServicesMigrationLatestStatus,
-  getMockServicesMigrationStatusDetails
+  getMockServicesMigrationStatusDetails,
+  getUpsertManageGroupSubscriptionResponse,
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import {
   aMockCurrentUserAuthorizedInstitution,
   getMockInstitution,
-  getMockUserAuthorizedInstitution
+  getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
 
 const MAX_ARRAY_LENGTH = 20;
@@ -39,11 +41,11 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/info`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getInfo200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getInfo500Response()), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -53,21 +55,21 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getGetServicesMigrationStatus200Response()),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -77,21 +79,21 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getGetServicesMigrationDelegates200Response()),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -101,27 +103,27 @@ export const buildHandlers = () => {
       () => {
         const resultArray = [
           new HttpResponse(null, {
-            status: 201
+            status: 201,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 429
+            status: 429,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `${baseURL}/services/migrations/ownership-claims/:delegateId`,
@@ -130,49 +132,49 @@ export const buildHandlers = () => {
           new HttpResponse(
             JSON.stringify(getGetServicesMigrationDetails200Response()),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 429
+            status: 429,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.post(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getCreateService201Response()), {
-          status: 201
+          status: 201,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -180,20 +182,20 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServices200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -210,25 +212,25 @@ export const buildHandlers = () => {
             getGetServiceList200Response(
               limit as string,
               offset as string,
-              id as string
-            )
+              id as string,
+            ),
           ),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -236,20 +238,20 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -260,24 +262,24 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getGetService200Response(serviceId as string)),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -288,24 +290,24 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getUpdateService200Response(serviceId as string)),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -313,23 +315,23 @@ export const buildHandlers = () => {
     http.delete(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -337,26 +339,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/logo`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -377,53 +379,53 @@ export const buildHandlers = () => {
                 serviceId as string,
                 order as "ASC" | "DESC" | null,
                 limit,
-                continuationToken
-              )
+                continuationToken,
+              ),
             ),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 403
+            status: 403,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 429
+            status: 429,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -431,26 +433,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/keys/:keyType`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -458,26 +460,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -485,29 +487,29 @@ export const buildHandlers = () => {
     http.patch(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -515,26 +517,26 @@ export const buildHandlers = () => {
     http.post(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -542,23 +544,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetPublishedService200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -566,23 +568,23 @@ export const buildHandlers = () => {
     http.delete(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -592,21 +594,21 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getUserAuthorizedInstitutions200Response()),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -614,23 +616,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/institutions/:institutionId`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetInstitution200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -638,23 +640,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/keys/manage`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -662,23 +664,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/keys/manage/cidrs`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getManageKeysCIDRs200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -686,26 +688,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/keys/manage/cidrs`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getManageKeysCIDRs200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -713,30 +715,84 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/keys/manage/:keyType`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(null, {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(null, {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(null, {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(null, {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(null, {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(null, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
-    })
+    }),
+    http.get(`${baseURL}/institutions/:institutionId/groups`, ({ params }) => {
+      const { institutionId } = params;
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(
+            getInstitutionGroups200Response(institutionId as string),
+          ),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 404,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
+    http.put(`${baseURL}/subscriptions`, ({ params }) => {
+      const { groupId } = params;
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(
+            getUpsertManageGroupSubscription200Response(groupId as object),
+          ),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
   ];
 };
 
@@ -752,13 +808,13 @@ export function getGetServicesMigrationStatus200Response() {
   return {
     items: [
       ...Array.from(
-        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
-      )
-    ].map(_ => ({
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys(),
+      ),
+    ].map((_) => ({
       status: getMockServicesMigrationLatestStatus(),
       delegate: getMockServicesMigrationDelegate(),
-      lastUpdate: faker.date.recent({ days: 60 }).toISOString()
-    }))
+      lastUpdate: faker.date.recent({ days: 60 }).toISOString(),
+    })),
   };
 }
 
@@ -766,9 +822,9 @@ export function getGetServicesMigrationDelegates200Response() {
   return {
     delegates: [
       ...Array.from(
-        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys()
-      )
-    ].map(_ => getMockServicesMigrationDelegate())
+        Array(faker.number.int({ min: 0, max: MAX_ARRAY_LENGTH / 2 })).keys(),
+      ),
+    ].map((_) => getMockServicesMigrationDelegate()),
   };
 }
 
@@ -787,7 +843,7 @@ export function getGetServices200Response() {
 export function getGetServiceList200Response(
   limit: string,
   offset: string,
-  id: string
+  id: string,
 ) {
   return getMockServiceList(+limit, +offset, id);
 }
@@ -808,7 +864,7 @@ export function getGetServiceHistory200Response(
   serviceId: string,
   order: "ASC" | "DESC" | null,
   limit: string | null,
-  continuationToken: string | null
+  continuationToken: string | null,
 ) {
   return getMockServiceHistory(serviceId, order, limit, continuationToken);
 }
@@ -834,12 +890,20 @@ export function getUserAuthorizedInstitutions200Response() {
     authorizedInstitutions: [
       aMockCurrentUserAuthorizedInstitution,
       ...Array.from(
-        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys()
-      )
-    ].map(_ => getMockUserAuthorizedInstitution())
+        Array(faker.number.int({ min: 1, max: MAX_ARRAY_LENGTH })).keys(),
+      ),
+    ].map((_) => getMockUserAuthorizedInstitution()),
   };
 }
 
 export function getGetInstitution200Response() {
   return getMockInstitution();
+}
+
+export function getInstitutionGroups200Response(institutionId: string) {
+  return getMockInstitutionGroups(institutionId);
+}
+
+export function getUpsertManageGroupSubscription200Response(groupId: object) {
+  return getUpsertManageGroupSubscriptionResponse(groupId);
 }
