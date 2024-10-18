@@ -1,6 +1,7 @@
 import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
 import GroupsApiKeys from "@/components/api-keys/groups-api-keys";
 import { PageHeader } from "@/components/headers";
+import { getConfiguration } from "@/config";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
@@ -66,14 +67,11 @@ export default function Keys() {
             onSaveClick={handleUpdateCidrs}
           />
         </Grid>
-        <Grid item xs={12}>
-          <GroupsApiKeys
-          // cidrs={acData?.cidrs as unknown as string[]}
-          // description="routes.keys.authorizedCidrs.description"
-          // editable={true}
-          // onSaveClick={handleUpdateCidrs}
-          />
-        </Grid>
+        {getConfiguration().BACK_OFFICE_GROUP_API_KEY_CTA_ENABLED && (
+          <Grid item xs={12}>
+            <GroupsApiKeys />
+          </Grid>
+        )}
       </Grid>
     </>
   );

@@ -1,12 +1,10 @@
+import { Add } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useTranslation } from "next-i18next";
 import React from "react";
-import { Add } from "@mui/icons-material";
 
-interface GroupsApiKeyProps {}
-
-function GroupsApiKey({}: GroupsApiKeyProps) {
+function GroupsApiKey() {
   const { t } = useTranslation();
 
   const ADD_GROUPS_KEY_ROUTE = "/new-group-api-key";
