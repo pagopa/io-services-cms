@@ -904,6 +904,6 @@ export function getInstitutionGroups200Response(institutionId: string) {
   return getMockInstitutionGroups(institutionId);
 }
 
-export function getUpsertManageGroupSubscription200Response(groupId: string) {
+export function getUpsertManageGroupSubscription200Response(groupId: object) {
   return getUpsertManageGroupSubscriptionResponse(groupId);
 }
