@@ -19,7 +19,9 @@
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
     "start": "dotenv -e .env func start -- --javascript",
-    "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders"
+    "generate:avro": "rm -rf ./src/generated/avro && mkdir -p ./src/generated/avro && avro-to-typescript --compile ./avro ./src/generated/avro",
+    "generate:definitions": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders",
+    "generate": "yarn generate:definitions && yarn generate:avro"
   },
   "devDependencies": {
     "@pagopa/eslint-config": "^4.0.1",
@@ -42,13 +44,16 @@
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",
     "@azure/cosmos": "^4.0.0",
+    "@azure/event-hubs": "^5.12.2",
     "@azure/functions": "^3.5.1",
     "@azure/identity": "^4.0.0",
+    "@chasdevs/avro-to-typescript": "^1.4.0",
     "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/ts-commons": "^13.1.1",
+    "avsc": "^5.7.7",
     "body-parser": "^1.20.2",
     "dotenv-cli": "^7.2.1",
     "express": "^4.18.2",

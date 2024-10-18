@@ -3,7 +3,8 @@
   "tasks": {
     "generate": {
       "inputs": [
-        "./openapi.yaml"
+        "./openapi.yaml",
+        "./avro/**"
       ],
       "outputs": [
         "src/generated/**/*"

@@ -1,0 +1,204 @@
+{
+  "name": "servicePublication",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Schema for cosmos api container 'services-publication'",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "data",
+      "type": {
+        "type": "record",
+        "name": "Data",
+        "fields": [
+          {
+            "name": "authorized_cidrs",
+            "type": {
+              "type": "array",
+              "items": "string",
+              "default": []
+            }
+          },
+          {
+            "name": "authorized_recipients",
+            "type": {
+              "type": "array",
+              "items": "string",
+              "default": ["AAAAAA00A00A000A"]
+            }
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "require_secure_channel",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "name": "max_allowed_payment_amount",
+            "type": "double",
+            "default": 0
+          },
+          {
+            "name": "institution_id",
+            "type": ["null", "string"],
+            "default": null
+          },
+          {
+            "name": "organization",
+            "type": {
+              "type": "record",
+              "name": "Organization",
+              "fields": [
+                {
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "name": "fiscal_code",
+                  "type": "string"
+                },
+                {
+                  "name": "department_name",
+                  "type": ["null", "string"],
+                  "default": null
+                }
+              ]
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "type": "record",
+              "name": "Metadata",
+              "fields": [
+                {
+                  "name": "scope",
+                  "type": {
+                    "type": "enum",
+                    "name": "PublicationScopeEnum",
+                    "symbols": ["LOCAL", "NATIONAL"],
+                    "default": "LOCAL"
+                  }
+                },
+                {
+                  "name": "address",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "category",
+                  "type": {
+                    "type": "enum",
+                    "name": "PublicationCategoryEnum",
+                    "symbols": ["STANDARD", "SPECIAL"],
+                    "default": "STANDARD"
+                  }
+                },
+                {
+                  "name": "email",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "pec",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "phone",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "token_name",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "privacy_url",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "app_android",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "app_ios",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "cta",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "custom_special_flow",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "support_url",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "tos_url",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "web_url",
+                  "type": ["null", "string"],
+                  "default": null
+                },
+                {
+                  "name": "topic_id",
+                  "type": ["null", "int"],
+                  "default": null
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "fsm",
+      "type": {
+        "type": "record",
+        "name": "Fsm",
+        "fields": [
+          {
+            "name": "state",
+            "type": {
+              "type": "enum",
+              "name": "PublicationStateEnum",
+              "symbols": ["published", "unpublished"]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "modified_at",
+      "type": "long"
+    },
+    {
+      "name": "version",
+      "type": "string"
+    }
+  ]
+}
