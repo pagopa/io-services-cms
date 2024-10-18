@@ -24,20 +24,24 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { ErrorResponseTypes } from "../../utils/logger";
 
-const logPrefix = "GetServiceHandler";
+const logPrefix = "GetServicePublicationHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
   config: IConfig;
+  fsmLifecycleClient: ServiceLifecycle.FsmClient;
   fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
 }
@@ -52,23 +56,49 @@ type PublishServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
-export const makeGetServiceHandler =
+export const makeGetServicePublicationHandler =
   ({
     apimService,
     config,
+    fsmLifecycleClient,
     fsmPublicationClient,
     telemetryClient,
   }: Dependencies): PublishServiceHandler =>
-  (context, auth, __, ___, serviceId) =>
-    genericServiceRetrieveHandler(
-      fsmPublicationClient.getStore(),
-      apimService,
-      telemetryClient,
-      config,
-      itemToResponse,
-    )(context, auth, serviceId, logPrefix, EventNameEnum.GetServicePublication);
+  (context, auth, __, ___, serviceId, authzGroupIds) =>
+    pipe(
+      genericServiceRetrieveHandler(
+        fsmLifecycleClient.getStore(),
+        apimService,
+        telemetryClient,
+        (_) => TE.right(void 0),
+      )(
+        context,
+        auth,
+        serviceId,
+        logPrefix,
+        EventNameEnum.GetServiceLifecycle, // execute genericServiceRetrieveHandler on GetServiceLifecycle event to apply group authz check
+        authzGroupIds,
+      ),
+      TE.chain((_) =>
+        genericServiceRetrieveHandler(
+          fsmPublicationClient.getStore(),
+          apimService,
+          telemetryClient,
+          itemToResponse(config),
+        )(
+          context,
+          auth,
+          serviceId,
+          logPrefix,
+          EventNameEnum.GetServicePublication,
+          authzGroupIds,
+        ),
+      ),
+      TE.toUnion,
+    )();
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
@@ -87,6 +117,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

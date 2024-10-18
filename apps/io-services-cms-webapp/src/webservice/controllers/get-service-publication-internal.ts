@@ -14,6 +14,8 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
@@ -51,13 +53,22 @@ export const makeGetServicePublicationInternalHandler =
     telemetryClient,
   }: Dependencies): GetServicePublicationServiceInternalHandler =>
   (context, auth, serviceId) =>
-    genericServiceRetrieveHandler(
-      fsmPublicationClient.getStore(),
-      apimService,
-      telemetryClient,
-      config,
-      itemToResponse,
-    )(context, auth, serviceId, logPrefix, EventNameEnum.GetServicePublication);
+    pipe(
+      genericServiceRetrieveHandler(
+        fsmPublicationClient.getStore(),
+        apimService,
+        telemetryClient,
+        itemToResponse(config),
+      )(
+        context,
+        auth,
+        serviceId,
+        logPrefix,
+        EventNameEnum.GetServicePublication,
+        [],
+      ),
+      TE.toUnion,
+    )();
 
 export const applyRequestMiddelwares = (
   handler: GetServicePublicationServiceInternalHandler,
