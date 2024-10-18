@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.15.4
+
+### Patch Changes
+
+- 0fbc0b1: fix manage subscription creation
+
 ## 1.15.3
 
 ### Patch Changes
