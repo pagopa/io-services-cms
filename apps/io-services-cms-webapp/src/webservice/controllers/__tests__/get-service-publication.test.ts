@@ -137,6 +137,16 @@ const aService = {
   modified_at: DateUtils.unixTimestamp(),
 } as unknown as ServicePublication.ItemType;
 
+const aServicePublication = {
+  ...aService,
+  fsm: { state: "published" },
+} as unknown as ServicePublication.ItemType;
+
+const aServiceLifecycle = {
+  ...aService,
+  fsm: { state: "approved" },
+} as unknown as ServiceLifecycle.ItemType;
+
 const mockAppinsights = {
   trackEvent: vi.fn(),
   trackError: vi.fn(),
@@ -189,19 +199,28 @@ describe("getServicePublication", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  const asServicePublication = {
-    ...aService,
-    fsm: { state: "published" },
-  } as unknown as ServicePublication.ItemType;
+  it("should fail when user do not have group-based authz to retrieve requested service", async () => {
+    // given
+    await serviceLifecycleStore.save("s3", aServiceLifecycle)();
 
-  const asServiceLifecycle = {
-    ...aService,
-    fsm: { state: "approved" },
-  } as unknown as ServiceLifecycle.ItemType;
+    // when
+    const response = await request(app)
+      .get("/api/services/s3/release")
+      .send()
+      .set("x-user-email", "example@email.com")
+      .set("x-user-groups", UserGroup.ApiServiceWrite)
+      .set("x-user-groups-selc", "aGroupId")
+      .set("x-user-id", anUserId)
+      .set("x-subscription-id", aManageSubscriptionId);
+
+    // then
+    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(response.statusCode).toBe(403);
+  });
 
   it("should retrieve a service", async () => {
-    await serviceLifecycleStore.save("s3", asServiceLifecycle)();
-    await servicePublicationStore.save("s3", asServicePublication)();
+    await serviceLifecycleStore.save("s3", aServiceLifecycle)();
+    await servicePublicationStore.save("s3", aServicePublication)();
 
     const response = await request(app)
       .get("/api/services/s3/release")
@@ -213,7 +232,7 @@ describe("getServicePublication", () => {
 
     expect(response.body).toStrictEqual(
       await pipe(
-        getPublicationItemToResponse(mockConfig)(asServicePublication),
+        getPublicationItemToResponse(mockConfig)(aServicePublication),
         TE.toUnion,
       )(),
     );

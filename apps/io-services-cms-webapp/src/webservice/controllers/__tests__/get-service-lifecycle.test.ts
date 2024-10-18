@@ -160,6 +160,11 @@ describe("getServiceLifecycle", () => {
     modified_at: DateUtils.unixTimestamp(),
   } as unknown as ServiceLifecycle.ItemType;
 
+  const aServiceLifecycle = {
+    ...aService,
+    fsm: { state: "approved" },
+  } as unknown as ServiceLifecycle.ItemType;
+
   it("should fail when cannot find requested service", async () => {
     const response = await request(app)
       .get("/api/services/s12")
@@ -173,31 +178,82 @@ describe("getServiceLifecycle", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  const asServiceLifecycle = {
-    ...aService,
-    fsm: { state: "approved" },
-  } as unknown as ServiceLifecycle.ItemType;
+  it.each`
+    scenario                                            | userGroupSelc   | serviceGroupId
+    ${"user-group set but no service-group set"}        | ${"aGroupId"}   | ${undefined}
+    ${"user-group set but different service-group set"} | ${"aGroupId_1"} | ${"aGroupId_2"}
+  `(
+    "should fail when user do not have group-based authz to retrieve requested service: $scenario",
+    async ({ userGroupSelc, serviceGroupId }) => {
+      await serviceLifecycleStore.save("s12", {
+        ...aServiceLifecycle,
+        data: {
+          ...aServiceLifecycle.data,
+          metadata: {
+            ...aServiceLifecycle.data.metadata,
+            group_id: serviceGroupId,
+          },
+        },
+      })();
 
-  it("should retrieve a service", async () => {
-    await serviceLifecycleStore.save("s12", asServiceLifecycle)();
+      const response = await request(app)
+        .get("/api/services/s12")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-groups-selc", userGroupSelc)
+        .set("x-user-id", anUserId)
+        .set("x-subscription-id", aManageSubscriptionId);
 
-    const response = await request(app)
-      .get("/api/services/s12")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+      expect(mockContext.log.error).toHaveBeenCalledOnce();
+      expect(response.statusCode).toBe(403);
+    },
+  );
 
-    expect(response.body).toStrictEqual(
-      await pipe(
-        getLifecycleItemToResponse(mockConfig)(asServiceLifecycle),
-        TE.toUnion,
-      )(),
-    );
-    expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-  });
+  it.each`
+    scenario                                          | userGroupSelc | serviceGroupId
+    ${"user-group not set and service-group not set"} | ${undefined}  | ${undefined}
+    ${"user-group not set and service-group is set"}  | ${undefined}  | ${"aGroupId"}
+    ${"user-group is set and service-group is set"}   | ${"aGroupId"} | ${"aGroupId"}
+  `(
+    "should retrieve a service when $scenario",
+    async ({ userGroupSelc, serviceGroupId }) => {
+      const item = serviceGroupId
+        ? {
+            ...aServiceLifecycle,
+            data: {
+              ...aServiceLifecycle.data,
+              metadata: {
+                ...aServiceLifecycle.data.metadata,
+                group_id: serviceGroupId,
+              },
+            },
+          }
+        : aServiceLifecycle;
+      // given
+      await serviceLifecycleStore.save("s12", item)();
+
+      // when
+      const req = request(app)
+        .get("/api/services/s12")
+        .send()
+        .set("x-user-email", "example@email.com")
+        .set("x-user-groups", UserGroup.ApiServiceWrite)
+        .set("x-user-id", anUserId)
+        .set("x-subscription-id", aManageSubscriptionId);
+      if (userGroupSelc) {
+        req.set("x-user-groups-selc", userGroupSelc);
+      }
+      const response = await req;
+
+      // then
+      expect(response.body).toStrictEqual(
+        await pipe(getLifecycleItemToResponse(mockConfig)(item), TE.toUnion)(),
+      );
+      expect(mockContext.log.error).not.toHaveBeenCalled();
+      expect(response.statusCode).toBe(200);
+    },
+  );
 
   it("should not allow the operation without right group", async () => {
     const response = await request(app)
