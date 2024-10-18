@@ -774,7 +774,7 @@ export const buildHandlers = () => {
       const resultArray = [
         new HttpResponse(
           JSON.stringify(
-            getUpsertManageGroupSubscription200Response(groupId as string),
+            getUpsertManageGroupSubscription200Response(groupId as object),
           ),
           {
             status: 200,
