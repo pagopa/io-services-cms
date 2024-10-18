@@ -114,7 +114,7 @@ const containerMock = {
 
 const subscriptionCIDRsModel = new SubscriptionCIDRsModel(containerMock);
 
-const aServicePub = {
+const aService = {
   id: "aServiceId",
   data: {
     name: "aServiceName",
@@ -189,13 +189,19 @@ describe("getServicePublication", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  const asServiceWithStatus = {
-    ...aServicePub,
+  const asServicePublication = {
+    ...aService,
     fsm: { state: "published" },
   } as unknown as ServicePublication.ItemType;
 
+  const asServiceLifecycle = {
+    ...aService,
+    fsm: { state: "approved" },
+  } as unknown as ServiceLifecycle.ItemType;
+
   it("should retrieve a service", async () => {
-    await servicePublicationStore.save("s3", asServiceWithStatus)();
+    await serviceLifecycleStore.save("s3", asServiceLifecycle)();
+    await servicePublicationStore.save("s3", asServicePublication)();
 
     const response = await request(app)
       .get("/api/services/s3/release")
@@ -207,7 +213,7 @@ describe("getServicePublication", () => {
 
     expect(response.body).toStrictEqual(
       await pipe(
-        getPublicationItemToResponse(mockConfig)(asServiceWithStatus),
+        getPublicationItemToResponse(mockConfig)(asServicePublication),
         TE.toUnion,
       )(),
     );

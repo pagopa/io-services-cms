@@ -137,7 +137,7 @@ describe("getServiceLifecycle", () => {
 
   setAppContext(app, mockContext);
 
-  const aServiceLifecycle = {
+  const aService = {
     id: "aServiceId",
     data: {
       name: "aServiceName",
@@ -173,13 +173,13 @@ describe("getServiceLifecycle", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  const asServiceLifecycleWithStatus = {
-    ...aServiceLifecycle,
+  const asServiceLifecycle = {
+    ...aService,
     fsm: { state: "approved" },
   } as unknown as ServiceLifecycle.ItemType;
 
   it("should retrieve a service", async () => {
-    await serviceLifecycleStore.save("s12", asServiceLifecycleWithStatus)();
+    await serviceLifecycleStore.save("s12", asServiceLifecycle)();
 
     const response = await request(app)
       .get("/api/services/s12")
@@ -191,7 +191,7 @@ describe("getServiceLifecycle", () => {
 
     expect(response.body).toStrictEqual(
       await pipe(
-        getLifecycleItemToResponse(mockConfig)(asServiceLifecycleWithStatus),
+        getLifecycleItemToResponse(mockConfig)(asServiceLifecycle),
         TE.toUnion,
       )(),
     );
