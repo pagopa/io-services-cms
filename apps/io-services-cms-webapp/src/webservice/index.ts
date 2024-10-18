@@ -50,7 +50,7 @@ import {
 } from "./controllers/get-service-lifecycle-internal";
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
-  makeGetServicePublicationHandler as makeGetServicePublicationHandler,
+  makeGetServicePublicationHandler,
 } from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
