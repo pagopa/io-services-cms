@@ -287,7 +287,7 @@ const createSubscriptionManage = (
   apimUser: ApimUser,
 ): TE.TaskEither<ManagedInternalError, SubscriptionContract> =>
   pipe(
-    upsertSubscription("MANAGE", apimUser.id),
+    upsertSubscription("MANAGE", apimUser.name),
     TE.mapLeft((err) =>
       "statusCode" in err
         ? apimErrorToManagedInternalError(
