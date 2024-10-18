@@ -117,6 +117,52 @@ export const processBatchOf =
   ): RTE.ReaderTaskEither<AzureFunctionCall, Error, readonly R[]> =>
   ({ context, inputs: [items], ...rest }): TE.TaskEither<Error, readonly R[]> =>
     pipe(
+      validateAndMapInput(itemShape, { ignoreMalformedItems })(items, context),
+      TE.map(RA.map((item) => processSingleItem({ item, ...rest }))),
+      TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq)),
+    );
+
+/**
+ * This utility function allows a list of items to be validated and mapped before being passed to the chosen processing function
+ *
+ * @param itemShape A io-ts codec defining the expected shape of an item
+ * @returns Either an error or all the results of the procedure applied the validated items,
+ *          collected into an array
+ */
+export const processAllOf =
+  <T, U>(
+    itemShape: t.Type<T, U>,
+    {
+      ignoreMalformedItems = false,
+    }: {
+      ignoreMalformedItems?: boolean;
+    } = {},
+  ) =>
+  /**
+   * @param processItems the function which will elaborates all items if all valid
+   * @returns Either an error or all the results of the procedure applied on every item,
+   *          collected into an array
+   */
+  <R>(
+    processItems: RTE.ReaderTaskEither<{ items: readonly T[] }, Error, R>,
+  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
+  ({ context, inputs: [items], ...rest }): TE.TaskEither<Error, R> =>
+    pipe(
+      validateAndMapInput(itemShape, { ignoreMalformedItems })(items, context),
+      TE.chain((validItems) => processItems({ items: validItems, ...rest })),
+    );
+
+export const validateAndMapInput =
+  <T, U>(
+    itemShape: t.Type<T, U>,
+    {
+      ignoreMalformedItems = false,
+    }: {
+      ignoreMalformedItems?: boolean;
+    } = {},
+  ) =>
+  (items: unknown, context: Context): TE.TaskEither<Error, readonly T[]> =>
+    pipe(
       typeof items === "undefined"
         ? []
         : Array.isArray(items)
@@ -145,8 +191,6 @@ export const processBatchOf =
         log(context, msg, "error");
         return TE.left<Error, readonly T[]>(new Error());
       },
-      TE.map(RA.map((item) => processSingleItem({ item, ...rest }))),
-      TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq)),
     );
 
 /**
