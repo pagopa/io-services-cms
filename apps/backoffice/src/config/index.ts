@@ -22,6 +22,7 @@ export interface Configuration {
   AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   // Apim Configuration
   AZURE_SUBSCRIPTION_ID: string;
+  BACK_OFFICE_GROUP_API_KEY_CTA_ENABLED: boolean;
   // BackOffice settings
   BACK_OFFICE_ID: string;
   BACK_OFFICE_IN_APP_PREVIEW_ENABLED: boolean;
@@ -95,7 +96,10 @@ export function getConfiguration(): Configuration {
     AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
       .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString, //FIXME: fix cast
     AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string, //FIXME: fix cast
+
     // BackOffice settings
+    BACK_OFFICE_GROUP_API_KEY_CTA_ENABLED:
+      process.env.NEXT_PUBLIC_BACK_OFFICE_GROUP_API_KEY_CTA_ENABLED === "true",
     BACK_OFFICE_ID: process.env.NEXT_PUBLIC_BACK_OFFICE_ID as string,
     BACK_OFFICE_IN_APP_PREVIEW_ENABLED:
       process.env.NEXT_PUBLIC_BACK_OFFICE_IN_APP_PREVIEW_ENABLED === "true",

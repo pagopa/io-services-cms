@@ -17,6 +17,11 @@
     "add": "Add IP address",
     "title": "Authorized IP addresses"
   },
+  "groupsApiKeys": {
+    "add": "Generate API Key",
+    "title": "Groups API Key",
+    "description": "Generate these keys for individual groups so that they can perform programmatic operations only on the services they manage."
+  },
   "buttons": {
     "back": "Back",
     "cancel": "Cancel",
