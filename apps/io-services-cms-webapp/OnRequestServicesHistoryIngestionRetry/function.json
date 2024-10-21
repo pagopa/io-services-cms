@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "queueName": "%REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "requestServicesHistoryIngestionRetryItem",
+      "type": "queueTrigger",
+      "direction": "in"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "createRequestServicesHistoryIngestionRetryEntryPoint"
+}
