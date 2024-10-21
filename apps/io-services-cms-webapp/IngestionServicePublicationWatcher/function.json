@@ -10,7 +10,7 @@
       "containerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
       "leaseContainerName": "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-ingestion-lease",
       "createLeaseContainerIfNotExists": true,
-      "startFromBeginning": false,
+      "startFromBeginning": true,
       "maxItemsPerInvocation": 30
     },
     {
