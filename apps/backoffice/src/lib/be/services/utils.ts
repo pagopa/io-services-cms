@@ -1,3 +1,5 @@
+import { Group } from "@/generated/api/Group";
+import { GroupPagination } from "@/generated/api/GroupPagination";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -8,6 +10,7 @@ import {
 } from "@/generated/services-cms/ServiceBaseMetadata";
 import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
+import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
 import {
   DateUtils,
@@ -47,7 +50,10 @@ export const reducePublicationServicesList = (
   );
 
 export const toServiceListItem =
-  (topicsMap: Record<string, ServiceTopic>) =>
+  (
+    topicsMap: Record<string, ServiceTopic>,
+    groupsMap: Map<Group["id"], Group>,
+  ) =>
   ({
     data,
     fsm,
@@ -63,12 +69,15 @@ export const toServiceListItem =
       last_update: modified_at
         ? (DateUtils.isoStringfromUnixMillis(modified_at) as NonEmptyString)
         : new Date().toISOString(),
-      metadata: {
-        ...otherMetadata,
-        category: toCategoryType(otherMetadata.category),
-        scope: toScopeType(otherMetadata.scope),
-        topic: decodeServiceTopic(topic_id, topicsMap),
-      },
+      metadata: mapServiceGroup(
+        {
+          ...otherMetadata,
+          category: toCategoryType(otherMetadata.category),
+          scope: toScopeType(otherMetadata.scope),
+          topic: decodeServiceTopic(topic_id, topicsMap),
+        },
+        groupsMap,
+      ),
       name: data.name,
       organization: data.organization,
       status: toServiceStatus(fsm),
@@ -168,3 +177,17 @@ export const reduceServiceTopicsList = (
         {} as Record<string, ServiceTopic>,
       )
     : ({} as Record<string, ServiceTopic>);
+
+export const reduceGrops = (groups: GroupPagination): Map<Group["id"], Group> =>
+  groups.value.reduce(
+    (map, group) => map.set(group.id, group),
+    new Map<Group["id"], Group>(),
+  );
+
+export const mapServiceGroup = (
+  { group_id, ...othersMetadata }: ServiceMetadata,
+  groupIdToNameMap: Map<Group["id"], Group>,
+) => ({
+  ...othersMetadata,
+  group: group_id ? groupIdToNameMap.get(group_id) : undefined,
+});

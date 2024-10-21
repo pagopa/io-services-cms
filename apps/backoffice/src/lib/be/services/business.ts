@@ -4,13 +4,11 @@ import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NO_CONTENT,
 } from "@/config/constants";
-import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
-import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -40,6 +38,8 @@ import {
 } from "./subscription-migration";
 import {
   buildMissingService,
+  mapServiceGroup,
+  reduceGrops,
   reducePublicationServicesList,
   reduceServiceTopicsList,
   toServiceListItem,
@@ -79,17 +79,33 @@ export const retrieveServiceList = async (
         TE.map(({ topics }) => reduceServiceTopicsList(topics)),
       ),
     ),
-    // get services from services-lifecycle cosmos containee and map to ServiceListItem
-    TE.bind("lifecycleServices", ({ apimServices, serviceTopicsMap }) =>
+    TE.bind("groupsMap", (_) =>
       pipe(
-        apimServices.value
-          ? apimServices.value.map(
-              (subscription) => subscription.name as NonEmptyString,
-            )
-          : [],
-        retrieveLifecycleServices,
-        TE.map(RA.map(toServiceListItem(serviceTopicsMap))),
+        TE.tryCatch(
+          () =>
+            retrieveInstitutionGroups(
+              institution.id,
+              1000, // FIXME: workaround to get all groups in a single call
+              0,
+            ),
+          E.toError,
+        ),
+        TE.map(reduceGrops),
       ),
+    ),
+    // get services from services-lifecycle cosmos containee and map to ServiceListItem
+    TE.bind(
+      "lifecycleServices",
+      ({ apimServices, groupsMap, serviceTopicsMap }) =>
+        pipe(
+          apimServices.value
+            ? apimServices.value.map(
+                (subscription) => subscription.name as NonEmptyString,
+              )
+            : [],
+          retrieveLifecycleServices,
+          TE.map(RA.map(toServiceListItem(serviceTopicsMap, groupsMap))),
+        ),
     ),
     // get services from services-publication cosmos container
     // create a Record list which contains the service id and its visibility
@@ -226,12 +242,10 @@ export async function forwardIoServicesCmsRequest<
         1000, // FIXME: workaround to get all groups in a single call
         0,
       );
-      console.log("institutionGroupsResponse", institutionGroupsResponse);
-      const groupIdToNameMap = institutionGroupsResponse.value.reduce(
-        (map, group) => map.set(group.id, group),
-        new Map<Group["id"], Group>(),
-      );
+      const groupIdToNameMap = reduceGrops(institutionGroupsResponse);
+
       if ("metadata" in result.right.value) {
+        // case single service
         mappedValue = {
           ...result.right.value,
           metadata: mapServiceGroup(
@@ -240,6 +254,7 @@ export async function forwardIoServicesCmsRequest<
           ),
         };
       } else {
+        // case paginated services
         mappedValue = {
           pagination: result.right.value.pagination,
           value: result.right.value.value?.map((item) => ({
@@ -268,14 +283,6 @@ export async function forwardIoServicesCmsRequest<
     );
   }
 }
-
-const mapServiceGroup = (
-  { group_id, ...othersMetadata }: ServiceMetadata,
-  groupIdToNameMap: Map<Group["id"], Group>,
-) => ({
-  ...othersMetadata,
-  group: group_id ? groupIdToNameMap.get(group_id) : undefined,
-});
 
 export const retrieveServiceTopics = async (
   nextRequest: NextRequest,

@@ -537,7 +537,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       "MANAGE",
-      aValidApimUser.id,
+      aValidApimUser.name,
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
@@ -573,7 +573,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       "MANAGE",
-      aValidApimUser.id,
+      aValidApimUser.name,
     );
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
@@ -704,7 +704,7 @@ describe("Authorize", () => {
     expect(upsertSubscription).toHaveBeenCalledOnce();
     expect(upsertSubscription).toHaveBeenCalledWith(
       "MANAGE",
-      aValidApimUser.id,
+      aValidApimUser.name,
     );
     expect(getInstitutionById).toHaveBeenCalledOnce();
     expect(getInstitutionById).toHaveBeenCalledWith(
