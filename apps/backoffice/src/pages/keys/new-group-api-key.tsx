@@ -106,17 +106,17 @@ export default function NewGroupApiKey() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push("/services")}
+        onExitClick={() => router.push("/keys")}
         showExit
         title={pageTitleLocaleKey}
         titleVariant="h2"
       />
       <Box bgcolor="background.paper" borderRadius="4px" padding="24px">
         <Typography marginBottom={2} variant="h6">
-          {t("routes.keys.new-group-api-key.card.title")}
+          {t("routes.keys.new-group-api-key.cardTitle")}
         </Typography>
         <Typography marginBottom={2} variant="body2">
-          {t("routes.keys.new-group-api-key.card.description")}
+          {t("routes.keys.new-group-api-key.cardDescription")}
         </Typography>
         <Typography
           color={"error"}
@@ -124,13 +124,13 @@ export default function NewGroupApiKey() {
           marginBottom={2}
           variant="body2"
         >
-          {t("routes.keys.new-group-api-key.card.hint")}
+          {t("routes.keys.new-group-api-key.cardHint")}
         </Typography>
         <Box>
           <Stack alignItems="center" direction="row" gap={1} marginBottom={2}>
             <SupervisedUserCircleIcon />
             <Typography variant="sidenav">
-              {t("routes.keys.new-group-api-key.card.form.title")}
+              {t("routes.keys.new-group-api-key.form.title")}
             </Typography>
           </Stack>
           <FormProvider {...methods}>

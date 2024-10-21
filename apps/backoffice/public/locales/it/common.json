@@ -335,15 +335,13 @@
       "new-group-api-key": {
         "title": "API Key dei Gruppi",
         "description": "Seleziona il gruppo per il quale vuoi generare un API Key di gruppo.",
-        "card": {
-          "title": "Genera una API Key",
-          "description": "Con la generazione della API Key, tutti gli utenti assegnati al gruppo selezionato potranno effettuare operazione programmatiche solo sui servizi da loro gestiti. (assegnati agli stessi gruppi)",
-          "hint": "* Indica una domanda obbligatoria",
-          "form": {
-            "title": "Seleziona il gruppo a cui rendere visibile l’API Key",
-            "placeholder": "Seleziona il gruppo",
-            "description": "Ereditiamo il nome del gruppo, se subirà modifiche sarà aggiornato automaticamente"
-          }
+        "cardTitle": "Genera una API Key",
+        "cardDescription": "Con la generazione della API Key, tutti gli utenti assegnati al gruppo selezionato potranno effettuare operazione programmatiche solo sui servizi da loro gestiti. (assegnati agli stessi gruppi)",
+        "cardHint": "* Indica una domanda obbligatoria",
+        "form": {
+          "title": "Seleziona il gruppo a cui rendere visibile l’API Key",
+          "placeholder": "Seleziona il gruppo",
+          "description": "Ereditiamo il nome del gruppo, se subirà modifiche sarà aggiornato automaticamente"
         }
       },
       "authorizedCidrs": {

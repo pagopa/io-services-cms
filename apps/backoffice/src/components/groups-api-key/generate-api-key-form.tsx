@@ -35,11 +35,11 @@ export default function GenerateApiKeyForm({
 
   return (
     <SelectController
-      helperText={t("routes.keys.new-group-api-key.card.form.description")}
+      helperText={t("routes.keys.new-group-api-key.form.description")}
       items={items}
-      label={t("routes.keys.new-group-api-key.card.form.placeholder")}
+      label={t("routes.keys.new-group-api-key.form.placeholder")}
       name="group"
-      placeholder={t("routes.keys.new-group-api-key.card.form.placeholder")}
+      placeholder={t("routes.keys.new-group-api-key.form.placeholder")}
     />
   );
 }
