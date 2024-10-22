@@ -50,7 +50,7 @@ import {
 } from "./controllers/get-service-lifecycle-internal";
 import {
   applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
-  makeGetServiceHandler,
+  makeGetServicePublicationHandler,
 } from "./controllers/get-service-publication";
 import {
   applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
@@ -269,9 +269,10 @@ export const createWebServer = ({
   router.get(
     servicePublicationPath,
     pipe(
-      makeGetServiceHandler({
+      makeGetServicePublicationHandler({
         apimService,
         config,
+        fsmLifecycleClient,
         fsmPublicationClient,
         telemetryClient,
       }),

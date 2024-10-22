@@ -3,6 +3,7 @@ import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmos
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorConflict,
+  IResponseErrorForbiddenNoAuthorizationGroups,
   IResponseErrorForbiddenNotAuthorized,
   IResponseErrorInternal,
   IResponseErrorNotFound,
@@ -13,6 +14,7 @@ import { Errors } from "io-ts";
 
 export type ErrorResponseTypes =
   | IResponseErrorConflict
+  | IResponseErrorForbiddenNoAuthorizationGroups
   | IResponseErrorForbiddenNotAuthorized
   | IResponseErrorInternal
   | IResponseErrorNotFound
