@@ -63,7 +63,7 @@ export async function getManageSubscriptions(
     apimUserId,
     offset,
     limit,
-    ApimUtils.manageGroupSubscriptionsFilter(selcGroups),
+    ApimUtils.apim_filters.manageGroupSubscriptionsFilter(selcGroups),
   )();
 
   if (E.isLeft(maybeSubscriptions)) {

@@ -2,9 +2,14 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
+import * as RA from "fp-ts/lib/ReadonlyArray";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { SUBSCRIPTION_MANAGE_PREFIX } from ".";
+
+import {
+  SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+  SUBSCRIPTION_MANAGE_PREFIX,
+} from ".";
 
 export enum FilterCompositionEnum {
   and = "and ",
@@ -209,6 +214,47 @@ export const subscriptionsExceptManageOneApimFilter = () =>
       value: SUBSCRIPTION_MANAGE_PREFIX,
     }),
     O.getOrElse(() => ""),
+  );
+
+/**
+ * User Subscription list filtered by name startswith 'MANAGE-GROUP-'
+ *
+ * @returns API Management `$filter` property
+ */
+export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
+  pipe(
+    groupIds,
+    O.fromNullable,
+    O.map(
+      flow(
+        RA.mapWithIndex((i, groupId) =>
+          pipe(
+            buildApimFilter({
+              composeFilter:
+                i === 0 ? FilterCompositionEnum.none : FilterCompositionEnum.or,
+              field: FilterFieldEnum.name,
+              filterType: FilterSupportedOperatorsEnum.eq,
+              inverse: false,
+              value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId,
+            }),
+            O.getOrElse(() => ""),
+          ),
+        ),
+        (groupIdFilters) => groupIdFilters.join(" "),
+      ),
+    ),
+    O.getOrElse(() =>
+      pipe(
+        buildApimFilter({
+          composeFilter: FilterCompositionEnum.none,
+          field: FilterFieldEnum.name,
+          filterType: FilterSupportedFunctionsEnum.startswith,
+          inverse: false,
+          value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+        }),
+        O.getOrElse(() => ""),
+      ),
+    ),
   );
 
 /**
