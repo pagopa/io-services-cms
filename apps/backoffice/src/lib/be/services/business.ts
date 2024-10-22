@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getConfiguration } from "@/config";
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
@@ -14,7 +15,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
-import { getConfiguration } from "@/config";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import {
   ManagedInternalError,

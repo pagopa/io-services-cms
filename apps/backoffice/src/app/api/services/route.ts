@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { ServicePayload } from "@/generated/api/ServicePayload";
 import { isAdmin } from "@/lib/be/authz";
 import {
@@ -12,7 +13,6 @@ import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 
-import { getConfiguration } from "@/config";
 import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**

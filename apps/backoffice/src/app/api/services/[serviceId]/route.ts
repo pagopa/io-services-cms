@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { ServicePayload } from "@/generated/api/ServicePayload";
 import { isAdmin } from "@/lib/be/authz";
 import {
@@ -13,7 +14,6 @@ import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../../types/next-auth";
-import { getConfiguration } from "@/config";
 
 /**
  * @description Retrieve a service by ID
