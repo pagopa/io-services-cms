@@ -205,10 +205,10 @@ export async function forwardIoServicesCmsRequest<
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
       "x-user-groups-selc": getConfiguration().GROUP_AUTHZ_ENABLED
-        ? backofficeUser.permissions.selcGroups?.join(",")
-        : undefined,
+        ? (backofficeUser.permissions.selcGroups?.join(",") ?? "")
+        : "",
       "x-user-id": backofficeUser.parameters.userId,
-    } as any;
+    };
 
     // call the io-services-cms API and return the response
     const result = await callIoServicesCms(operationId, requestPayload);
