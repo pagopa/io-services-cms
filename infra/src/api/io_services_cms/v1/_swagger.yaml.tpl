@@ -120,6 +120,30 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /internal/services/topics:
+    get:
+      tags:
+        - service-topics
+      summary: Retrieve all topics
+      description: Retrieve all services topics
+      operationId: getServiceTopicsInternal
+      parameters:
+        - $ref: '#/components/parameters/XForwardedFor'
+      responses:
+        '200':
+          description: Service topics fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServiceTopicList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /services/{serviceId}:
     get:
       tags:
@@ -748,6 +772,32 @@ components:
       required:
         - id
         - name
+    InternalServiceTopic:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The topic id
+          example: 3
+        name:
+          type: string
+          description: The topic name
+          example: 'Benessere sociale'
+        deleted:
+          type: boolean
+          description: if the topic is deleted
+          example: false
+      required:
+        - id
+        - name
+        - deleted
+    InternalServiceTopicList:
+      type: object
+      properties:
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalServiceTopic'
     ServiceHistory:
       type: object
       description: Service basic data
