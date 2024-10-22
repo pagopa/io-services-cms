@@ -7,7 +7,7 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { SelfcareRoles } from "../../../../../types/auth";
 import { GET } from "../route";
 
-const backofficeUserMock = {
+const backofficeUserMock: BackOfficeUser = {
   id: faker.string.uuid(),
   name: faker.person.fullName(),
   email: faker.internet.email(),
@@ -16,25 +16,17 @@ const backofficeUserMock = {
     name: faker.company.name(),
     fiscalCode: faker.string.numeric(),
     role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
-    logo_url: faker.image.url()
+    logo_url: faker.image.url(),
   },
-  authorizedInstitutions: [
-    {
-      id: faker.string.uuid(),
-      name: faker.company.name(),
-      role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
-      logo_url: faker.image.url()
-    }
-  ],
-  permissions: faker.helpers.multiple(faker.string.alpha),
+  permissions: { apimGroups: faker.helpers.multiple(faker.string.alpha) },
   parameters: {
     userId: faker.string.uuid(),
     userEmail: faker.internet.email(),
-    subscriptionId: faker.string.uuid()
-  }
+    subscriptionId: faker.string.uuid(),
+  },
 };
 
-const aBaseServiceLifecycle = ({
+const aBaseServiceLifecycle = {
   id: "aServiceId",
   last_update: "aServiceLastUpdate",
   data: {
@@ -46,46 +38,47 @@ const aBaseServiceLifecycle = ({
       address: "via tal dei tali 123",
       email: "service@email.it",
       pec: "service@pec.it",
-      scope: "LOCAL"
+      scope: "LOCAL",
     },
     organization: {
       name: "anOrganizationName",
-      fiscal_code: "12345678901"
+      fiscal_code: "12345678901",
     },
-    require_secure_channel: false
+    require_secure_channel: false,
   },
   fsm: {
-    state: "draft"
-  }
-} as unknown) as ServiceLifecycle.ItemType;
+    state: "draft",
+  },
+} as unknown as ServiceLifecycle.ItemType;
 
 const { retrieveServiceListMock, withJWTAuthHandlerMock } = vi.hoisted(() => ({
   retrieveServiceListMock: vi.fn().mockReturnValue(
     Promise.resolve({
       value: [],
-      pagination: { offset: 0, limit: 0, count: 1 }
-    })
+      pagination: { offset: 0, limit: 0, count: 1 },
+    }),
   ),
   withJWTAuthHandlerMock: vi.fn(
     (
       handler: (
         nextRequest: NextRequest,
-        context: { params: any; backofficeUser: BackOfficeUser }
-      ) => Promise<NextResponse> | Promise<Response>
-    ) => async (nextRequest: NextRequest, { params }: { params: {} }) => {
-      return handler(nextRequest, {
-        params,
-        backofficeUser: backofficeUserMock
-      });
-    }
-  )
+        context: { params: any; backofficeUser: BackOfficeUser },
+      ) => Promise<NextResponse> | Promise<Response>,
+    ) =>
+      async (nextRequest: NextRequest, { params }: { params: {} }) => {
+        return handler(nextRequest, {
+          params,
+          backofficeUser: backofficeUserMock,
+        });
+      },
+  ),
 }));
 
 vi.mock("@/lib/be/services/business", () => ({
-  retrieveServiceList: retrieveServiceListMock
+  retrieveServiceList: retrieveServiceListMock,
 }));
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock
+  withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 
 describe("Retrieve Services List API", () => {
@@ -96,11 +89,10 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       nextRequest,
-      backofficeUserMock.parameters.userId,
-      backofficeUserMock.institution,
+      backofficeUserMock,
       100,
       0,
-      undefined
+      undefined,
     );
   });
 
@@ -120,11 +112,10 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       nextRequest,
-      backofficeUserMock.parameters.userId,
-      backofficeUserMock.institution,
+      backofficeUserMock,
       20,
       5,
-      undefined
+      undefined,
     );
   });
 
@@ -145,11 +136,10 @@ describe("Retrieve Services List API", () => {
     expect(result.status).toBe(200);
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       nextRequest,
-      backofficeUserMock.parameters.userId,
-      backofficeUserMock.institution,
+      backofficeUserMock,
       1,
       0,
-      "aServiceId"
+      "aServiceId",
     );
   });
 });

@@ -19,23 +19,6 @@ import {
   retrieveServiceList,
 } from "../services/business";
 
-const anUserEmail = "anEmail@email.it";
-const anUserId = "anUserId";
-const aSubscriptionId = "aSubscriptionId";
-const aUserPermissions = {
-  apimGroups: ["permission1", "permission2"],
-  selcGroups: ["g1", "g2"],
-};
-const jwtMock = {
-  permissions: aUserPermissions,
-  parameters: {
-    userEmail: anUserEmail,
-    userId: anUserId,
-    subscriptionId: aSubscriptionId,
-  },
-  institution: { id: "institutionId" },
-} as unknown as BackOfficeUser;
-
 const mocks: {
   statusOK: number;
   statusNoContent: number;
@@ -129,6 +112,19 @@ const mocks: {
     aGroup: { id: "group_id", name: "group name" },
   };
 });
+
+const aBackofficeUser = {
+  permissions: {
+    apimGroups: ["permission1", "permission2"],
+    selcGroups: ["g1", "g2"],
+  },
+  parameters: {
+    userEmail: "anEmail@email.it",
+    userId: mocks.anUserId,
+    subscriptionId: "aSubscriptionId",
+  },
+  institution: mocks.anInstitution,
+} as unknown as BackOfficeUser;
 
 vi.hoisted(() => {
   const originalEnv = process.env;
@@ -247,17 +243,18 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("getServices", {
         nextRequest: request,
-        backofficeUser: jwtMock,
+        backofficeUser: aBackofficeUser,
       });
 
       expect(getServices).toHaveBeenCalled();
       expect(getServices).toHaveBeenCalledWith(
         expect.objectContaining({
-          "x-user-email": anUserEmail,
-          "x-user-id": anUserId,
-          "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.apimGroups.join(","),
-          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-user-email": aBackofficeUser.parameters.userEmail,
+          "x-user-id": aBackofficeUser.parameters.userId,
+          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+          "x-user-groups-selc":
+            aBackofficeUser.permissions.selcGroups?.join(","),
           "x-channel": "BO",
         }),
       );
@@ -294,23 +291,24 @@ describe("Services TEST", () => {
 
         const result = await forwardIoServicesCmsRequest("getServices", {
           nextRequest: request,
-          backofficeUser: jwtMock,
+          backofficeUser: aBackofficeUser,
         });
 
         expect(getServices).toHaveBeenCalled();
         expect(getServices).toHaveBeenCalledWith(
           expect.objectContaining({
-            "x-user-email": anUserEmail,
-            "x-user-id": anUserId,
-            "x-subscription-id": aSubscriptionId,
-            "x-user-groups": aUserPermissions.apimGroups.join(","),
-            "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+            "x-user-email": aBackofficeUser.parameters.userEmail,
+            "x-user-id": aBackofficeUser.parameters.userId,
+            "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+            "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+            "x-user-groups-selc":
+              aBackofficeUser.permissions.selcGroups?.join(","),
             "x-channel": "BO",
           }),
         );
         expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
         expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-          jwtMock.institution.id,
+          aBackofficeUser.institution.id,
           1000,
           0,
         );
@@ -343,7 +341,7 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("createService", {
         nextRequest: request,
-        backofficeUser: jwtMock,
+        backofficeUser: aBackofficeUser,
         pathParams: {
           serviceId: "test",
         },
@@ -352,11 +350,12 @@ describe("Services TEST", () => {
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
         expect.objectContaining({
-          "x-user-email": anUserEmail,
-          "x-user-id": anUserId,
-          "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.apimGroups.join(","),
-          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-user-email": aBackofficeUser.parameters.userEmail,
+          "x-user-id": aBackofficeUser.parameters.userId,
+          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+          "x-user-groups-selc":
+            aBackofficeUser.permissions.selcGroups?.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -388,7 +387,7 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
-        backofficeUser: jwtMock,
+        backofficeUser: aBackofficeUser,
         pathParams: {
           serviceId: "test",
         },
@@ -397,11 +396,12 @@ describe("Services TEST", () => {
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
         expect.objectContaining({
-          "x-user-email": anUserEmail,
-          "x-user-id": anUserId,
-          "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.apimGroups.join(","),
-          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-user-email": aBackofficeUser.parameters.userEmail,
+          "x-user-id": aBackofficeUser.parameters.userId,
+          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+          "x-user-groups-selc":
+            aBackofficeUser.permissions.selcGroups?.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -435,7 +435,7 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("createService", {
         nextRequest: request,
-        backofficeUser: jwtMock,
+        backofficeUser: aBackofficeUser,
         jsonBody: aBodyPayload,
         pathParams: {
           serviceId: "test",
@@ -445,11 +445,12 @@ describe("Services TEST", () => {
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
         expect.objectContaining({
-          "x-user-email": anUserEmail,
-          "x-user-id": anUserId,
-          "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.apimGroups.join(","),
-          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-user-email": aBackofficeUser.parameters.userEmail,
+          "x-user-id": aBackofficeUser.parameters.userId,
+          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+          "x-user-groups-selc":
+            aBackofficeUser.permissions.selcGroups?.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -496,7 +497,7 @@ describe("Services TEST", () => {
 
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
-        backofficeUser: jwtMock,
+        backofficeUser: aBackofficeUser,
         pathParams: {
           serviceId: "test",
         },
@@ -505,11 +506,12 @@ describe("Services TEST", () => {
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
         expect.objectContaining({
-          "x-user-email": anUserEmail,
-          "x-user-id": anUserId,
-          "x-subscription-id": aSubscriptionId,
-          "x-user-groups": aUserPermissions.apimGroups.join(","),
-          "x-user-groups-selc": aUserPermissions.selcGroups.join(","),
+          "x-user-email": aBackofficeUser.parameters.userEmail,
+          "x-user-id": aBackofficeUser.parameters.userId,
+          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
+          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
+          "x-user-groups-selc":
+            aBackofficeUser.permissions.selcGroups?.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -569,23 +571,17 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await retrieveServiceList(
-        request,
-        mocks.anUserId,
-        mocks.anInstitution,
-        10,
-        0,
-      );
+      const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
@@ -697,23 +693,17 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await retrieveServiceList(
-        request,
-        mocks.anUserId,
-        mocks.anInstitution,
-        10,
-        0,
-      );
+      const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
@@ -778,21 +768,20 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(
         request,
-        mocks.anUserId,
-        mocks.anInstitution,
+        aBackofficeUser,
         10,
         90,
       );
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         90,
         undefined,
@@ -824,21 +813,20 @@ describe("Services TEST", () => {
 
       const result = await retrieveServiceList(
         request,
-        mocks.anUserId,
-        mocks.anInstitution,
+        aBackofficeUser,
         10,
         90,
       );
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         90,
         undefined,
@@ -899,23 +887,17 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await retrieveServiceList(
-        request,
-        mocks.anUserId,
-        mocks.anInstitution,
-        10,
-        0,
-      );
+      const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
@@ -959,8 +941,8 @@ describe("Services TEST", () => {
             last_update: aServiceNotInLifecycleCreateDate.toISOString(),
             name: "Servizio non disponibile",
             organization: {
-              fiscal_code: mocks.anInstitution.fiscalCode,
-              name: mocks.anInstitution.name,
+              fiscal_code: aBackofficeUser.institution.fiscalCode,
+              name: aBackofficeUser.institution.name,
             },
             status: {
               value: ServiceLifecycleStatusTypeEnum.deleted,
@@ -999,24 +981,18 @@ describe("Services TEST", () => {
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(
-          request,
-          mocks.anUserId,
-          mocks.anInstitution,
-          10,
-          0,
-        ),
+        retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
@@ -1057,24 +1033,18 @@ describe("Services TEST", () => {
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(
-          request,
-          mocks.anUserId,
-          mocks.anInstitution,
-          10,
-          0,
-        ),
+        retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
 
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        mocks.anInstitution.id,
+        aBackofficeUser.institution.id,
         1000,
         0,
       );
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
@@ -1098,18 +1068,12 @@ describe("Services TEST", () => {
       const request = new NextRequest(new URL("http://localhost"));
 
       await expect(
-        retrieveServiceList(
-          request,
-          mocks.anUserId,
-          mocks.anInstitution,
-          10,
-          0,
-        ),
+        retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
 
       expect(getServiceListMock).toHaveBeenCalledOnce();
       expect(getServiceListMock).toHaveBeenCalledWith(
-        mocks.anUserId,
+        aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
