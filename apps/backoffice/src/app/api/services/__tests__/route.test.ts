@@ -39,6 +39,14 @@ const aValidServicePayload: ServicePayload = {
 };
 const aGroup = { id: "group_id", name: "group name" };
 
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    GROUP_AUTHZ_ENABLED: "true",
+  };
+});
+
 const { forwardIoServicesCmsRequestMock, withJWTAuthHandlerMock } = vi.hoisted(
   () => ({
     forwardIoServicesCmsRequestMock: vi.fn(),

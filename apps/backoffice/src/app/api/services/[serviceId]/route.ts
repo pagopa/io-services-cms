@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { ServicePayload } from "@/generated/api/ServicePayload";
 import { isAdmin } from "@/lib/be/authz";
 import {
@@ -51,22 +52,26 @@ export const PUT = withJWTAuthHandler(
       } catch (error: any) {
         return handleBadRequestErrorResponse(error.message);
       }
-      if (isAdmin(backofficeUser)) {
-        if (
-          servicePayload.metadata.group_id &&
-          !(await groupExists(
-            backofficeUser.institution.id,
-            servicePayload.metadata.group_id,
-          ))
-        ) {
-          return handleBadRequestErrorResponse(
-            "Provided group_id does not exists",
+
+      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
+        if (isAdmin(backofficeUser)) {
+          if (
+            servicePayload.metadata.group_id &&
+            !(await groupExists(
+              backofficeUser.institution.id,
+              servicePayload.metadata.group_id,
+            ))
+          ) {
+            return handleBadRequestErrorResponse(
+              "Provided group_id does not exists",
+            );
+          }
+        } else {
+          // TODO: manage edit request without group_id changes
+          return handleForbiddenErrorResponse(
+            "Cannot set service group relationship",
           );
         }
-      } else {
-        return handleForbiddenErrorResponse(
-          "Cannot set service group relationship",
-        );
       }
 
       return forwardIoServicesCmsRequest("updateService", {

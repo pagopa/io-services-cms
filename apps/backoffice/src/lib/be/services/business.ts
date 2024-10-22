@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_NO_CONTENT,
-} from "@/config/constants";
+import { getConfiguration } from "@/config";
+import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -16,9 +13,14 @@ import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
+import {
+  ManagedInternalError,
+  handleBadRequestErrorResponse,
+  handleInternalErrorResponse,
+} from "../errors";
 import { retrieveInstitutionGroups } from "../institutions/business";
 import { getServiceList } from "./apim";
 import {
@@ -202,7 +204,9 @@ export async function forwardIoServicesCmsRequest<
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc": backofficeUser.permissions.selcGroups?.join(","),
+      "x-user-groups-selc": getConfiguration().GROUP_AUTHZ_ENABLED
+        ? backofficeUser.permissions.selcGroups?.join(",")
+        : undefined,
       "x-user-id": backofficeUser.parameters.userId,
     } as any;
 
@@ -210,14 +214,7 @@ export async function forwardIoServicesCmsRequest<
     const result = await callIoServicesCms(operationId, requestPayload);
 
     if (E.isLeft(result)) {
-      return NextResponse.json(
-        {
-          detail: readableReport(result.left),
-          status: HTTP_STATUS_BAD_REQUEST as any,
-          title: "validationError",
-        },
-        { status: HTTP_STATUS_BAD_REQUEST },
-      );
+      return handleBadRequestErrorResponse(readableReport(result.left));
     }
 
     // NextResponse.json() does not support empty responses https://github.com/vercel/next.js/discussions/51475
@@ -268,18 +265,14 @@ export async function forwardIoServicesCmsRequest<
     // return the sanitized response
     return sanitizedNextResponseJson(mappedValue, result.right.status);
   } catch (error) {
+    // FIXME: raise a Manage Exception to let manage log and "error response" by controller handler
     console.error(
       `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
       error,
     );
-
-    return NextResponse.json(
-      {
-        detail: "Error forwarding io-services-cms request",
-        status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
-        title: "InternalError",
-      },
-      { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
+    return handleInternalErrorResponse(
+      "InternalError",
+      new ManagedInternalError("Error forwarding io-services-cms request"),
     );
   }
 }
