@@ -7,6 +7,7 @@ import {
   FilterFieldEnum,
   FilterSupportedFunctionsEnum,
   FilterSupportedOperatorsEnum,
+  subscriptionsByIdsApimFilter,
 } from "../apim-filters";
 
 const testError = "Expected some value, received other";
@@ -140,5 +141,19 @@ describe("APIM $filter builder", () => {
   it("should return a None result, based on 'anInvalidApimFilter' configuration", () => {
     const filter = buildApimFilter(anInvalidApimFilter as any);
     expect(O.isNone(filter)).toBe(true);
+  });
+
+  it.each`
+    scenario                           | ids
+    ${"ids is empty"}                  | ${[]}
+    ${"ids is a single array element"} | ${["id_1"]}
+    ${"ids is a multi array element"}  | ${["id_1", "id_2", "id_3"]}
+  `("should return the filter string when $scenario", ({ ids }) => {
+    const filter = subscriptionsByIdsApimFilter(ids);
+    expect(filter).toStrictEqual(
+      ids
+        .map((id, idx) => (idx > 0 ? "or " : "") + `name eq '${id}'`)
+        .join(" "),
+    );
   });
 });

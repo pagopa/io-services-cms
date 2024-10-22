@@ -192,3 +192,25 @@ export const buildApimFilter = (apimFilter: ApimFilterType): O.Option<string> =>
     fnBuildFilterManipulation,
     fnBuildFilterResult,
   );
+
+/**
+ * User Subscription list filtered by a list of Subscription id'
+ *
+ * @returns API Management `$filter` property
+ */
+export const subscriptionsByIdsApimFilter = (ids: readonly string[]): string =>
+  ids
+    .map((id, idx) =>
+      pipe(
+        buildApimFilter({
+          composeFilter:
+            idx === 0 ? FilterCompositionEnum.none : FilterCompositionEnum.or,
+          field: FilterFieldEnum.name,
+          filterType: FilterSupportedOperatorsEnum.eq,
+          inverse: false,
+          value: id,
+        }),
+        O.getOrElse(() => ""),
+      ),
+    )
+    .join(" ");
