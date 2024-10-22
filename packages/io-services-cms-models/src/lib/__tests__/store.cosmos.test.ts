@@ -469,4 +469,64 @@ describe("store cosmos tests", () => {
     expect(deleteMock).toBeCalledTimes(1);
     expect(E.isLeft(result)).toBeTruthy();
   });
+
+  describe("getServiceIdsByGroupIds", () => {
+    it("should return an error when query fail", async () => {
+      const error = {
+        code: 500,
+        message: "unknown error",
+      };
+      const fetchAll = vi.fn().mockRejectedValueOnce(error);
+      const query = vi.fn().mockReturnValueOnce({ fetchAll });
+      const containerMock = {
+        items: { query },
+      } as unknown as Container;
+      const store = createCosmosStore(
+        containerMock,
+        ServicePublication.ItemType,
+      );
+      const aGroupIds = [];
+
+      const result = await store.getServiceIdsByGroupIds(aGroupIds)();
+
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left.message).toStrictEqual(
+          `Error fetching services from database with groupIds=${aGroupIds}, ${
+            E.toError(error).message
+          }`,
+        );
+      }
+      expect(query).toHaveBeenCalledOnce();
+      expect(fetchAll).toHaveBeenCalledOnce();
+    });
+
+    it("should return the services id when query do not fail", async () => {
+      const expectedResult = { resources: ["sid_1", "sid_2"] };
+      const fetchAll = vi.fn().mockResolvedValueOnce(expectedResult);
+      const query = vi.fn().mockReturnValueOnce({ fetchAll });
+      const containerMock = {
+        items: { query },
+      } as unknown as Container;
+      const store = createCosmosStore(
+        containerMock,
+        ServicePublication.ItemType,
+      );
+      const aGroupIds = ["gid_1", "gid_2", "gid_3"];
+
+      const result = await store.getServiceIdsByGroupIds(aGroupIds)();
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toStrictEqual(expectedResult.resources);
+      }
+      expect(query).toHaveBeenCalledOnce();
+      expect(query).toHaveBeenCalledWith({
+        parameters: [{ name: "@groupIds", value: aGroupIds }],
+        query:
+          "SELECT VALUE c.id FROM c WHERE ARRAY_CONTAINS(@groupIds, c.data.metadata.group_id)",
+      });
+      expect(fetchAll).toHaveBeenCalledOnce();
+    });
+  });
 });

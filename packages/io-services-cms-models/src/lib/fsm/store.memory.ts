@@ -12,7 +12,10 @@ type MemoryStore<T extends WithState<string, Record<string, unknown>>> = {
 } & FSMStore<T>;
 
 export const createMemoryStore = <
-  T extends WithState<string, Record<string, unknown>>,
+  T extends {
+    data: { metadata?: { group_id?: string } };
+    id: string;
+  } & WithState<string, Record<string, unknown>>,
 >(): MemoryStore<T> => {
   const m = new Map<string, T>();
 
@@ -34,6 +37,17 @@ export const createMemoryStore = <
         () => Promise.resolve(m.get(id)),
         T.map(O.fromNullable),
         TE.fromTask,
+      ),
+    getServiceIdsByGroupIds: (
+      groupIds: readonly string[],
+    ): TE.TaskEither<Error, string[]> =>
+      pipe(
+        Array.from(m.values()),
+        (values) =>
+          values.filter((value) =>
+            groupIds.includes(value.data.metadata?.group_id ?? ""),
+          ),
+        (values) => TE.of(values.map((value) => value.id)),
       ),
     // for testing
     inspect: () => m,
