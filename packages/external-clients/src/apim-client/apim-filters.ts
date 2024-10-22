@@ -4,6 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { SUBSCRIPTION_MANAGE_PREFIX } from ".";
 
 export enum FilterCompositionEnum {
   and = "and ",
@@ -191,6 +192,23 @@ export const buildApimFilter = (apimFilter: ApimFilterType): O.Option<string> =>
     ApimFilterType.decode,
     fnBuildFilterManipulation,
     fnBuildFilterResult,
+  );
+
+/**
+ * User Subscription list filtered by name not startswith 'MANAGE-'
+ *
+ * @returns API Management `$filter` property
+ */
+export const subscriptionsExceptManageOneApimFilter = () =>
+  pipe(
+    buildApimFilter({
+      composeFilter: FilterCompositionEnum.none,
+      field: FilterFieldEnum.name,
+      filterType: FilterSupportedFunctionsEnum.startswith,
+      inverse: true,
+      value: SUBSCRIPTION_MANAGE_PREFIX,
+    }),
+    O.getOrElse(() => ""),
   );
 
 /**

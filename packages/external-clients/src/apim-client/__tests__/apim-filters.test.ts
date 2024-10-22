@@ -8,6 +8,7 @@ import {
   FilterSupportedFunctionsEnum,
   FilterSupportedOperatorsEnum,
   subscriptionsByIdsApimFilter,
+  subscriptionsExceptManageOneApimFilter,
 } from "../apim-filters";
 
 const testError = "Expected some value, received other";
@@ -142,18 +143,33 @@ describe("APIM $filter builder", () => {
     const filter = buildApimFilter(anInvalidApimFilter as any);
     expect(O.isNone(filter)).toBe(true);
   });
+});
 
+describe("subscriptionsByIdsApimFilter", () => {
   it.each`
     scenario                           | ids
     ${"ids is empty"}                  | ${[]}
     ${"ids is a single array element"} | ${["id_1"]}
     ${"ids is a multi array element"}  | ${["id_1", "id_2", "id_3"]}
   `("should return the filter string when $scenario", ({ ids }) => {
+    // when
     const filter = subscriptionsByIdsApimFilter(ids);
+
+    // then
     expect(filter).toStrictEqual(
       ids
         .map((id, idx) => (idx > 0 ? "or " : "") + `name eq '${id}'`)
         .join(" "),
     );
+  });
+});
+
+describe("subscriptionsExceptManageOneApimFilter", () => {
+  it("should return the filter string to exclude manage subscriptions", () => {
+    // when
+    const filter = subscriptionsExceptManageOneApimFilter();
+
+    // then
+    expect(filter).toStrictEqual("not(startswith(name, 'MANAGE-'))");
   });
 });

@@ -37,6 +37,7 @@ import {
   FilterSupportedFunctionsEnum,
   FilterSupportedOperatorsEnum,
   buildApimFilter,
+  subscriptionsExceptManageOneApimFilter,
 } from "./apim-filters";
 import { AzureClientSecretCredential } from "./definitions";
 
@@ -662,23 +663,6 @@ const createGroupUser = (
       identity,
     ),
     chainApimMappedError,
-  );
-
-/**
- * User Subscription list filtered by name not startswith 'MANAGE-'
- *
- * @returns API Management `$filter` property
- */
-const subscriptionsExceptManageOneApimFilter = () =>
-  pipe(
-    buildApimFilter({
-      composeFilter: FilterCompositionEnum.none,
-      field: FilterFieldEnum.name,
-      filterType: FilterSupportedFunctionsEnum.startswith,
-      inverse: true,
-      value: SUBSCRIPTION_MANAGE_PREFIX,
-    }),
-    O.getOrElse(() => ""),
   );
 
 /**
