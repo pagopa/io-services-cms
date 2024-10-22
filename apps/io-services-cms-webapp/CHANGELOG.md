@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.36.0
+
+### Minor Changes
+
+- 84f55ad: add group authz check on retrieve service
+
 ## 1.35.0
 
 ### Minor Changes
