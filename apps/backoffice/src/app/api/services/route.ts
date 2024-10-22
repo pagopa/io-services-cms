@@ -30,28 +30,30 @@ export const POST = withJWTAuthHandler(
       } catch (error: any) {
         return handleBadRequestErrorResponse(error.message);
       }
-      if (isAdmin(backofficeUser)) {
-        if (
-          servicePayload.metadata.group_id &&
-          !(await groupExists(
-            backofficeUser.institution.id,
-            servicePayload.metadata.group_id,
-          ))
-        ) {
-          return handleBadRequestErrorResponse(
-            "Provided group_id does not exists",
-          );
-        }
-      } else {
-        if (
-          servicePayload.metadata.group_id &&
-          !backofficeUser.permissions.selcGroups?.includes(
-            servicePayload.metadata.group_id,
-          )
-        ) {
-          return handleForbiddenErrorResponse(
-            "Cannot set service group relationship",
-          );
+      if (process.env.GROUP_AUTHZ_ENABLED?.toLowerCase()) {
+        if (isAdmin(backofficeUser)) {
+          if (
+            servicePayload.metadata.group_id &&
+            !(await groupExists(
+              backofficeUser.institution.id,
+              servicePayload.metadata.group_id,
+            ))
+          ) {
+            return handleBadRequestErrorResponse(
+              "Provided group_id does not exists",
+            );
+          }
+        } else {
+          if (
+            servicePayload.metadata.group_id &&
+            !backofficeUser.permissions.selcGroups?.includes(
+              servicePayload.metadata.group_id,
+            )
+          ) {
+            return handleForbiddenErrorResponse(
+              "Cannot set service group relationship",
+            );
+          }
         }
       }
       return forwardIoServicesCmsRequest("createService", {
