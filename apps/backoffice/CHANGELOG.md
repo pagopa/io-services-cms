@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.15.5
+
+### Patch Changes
+
+- a56865a: enable selfcare group-based authz by a feature flag
+
 ## 1.15.4
 
 ### Patch Changes
