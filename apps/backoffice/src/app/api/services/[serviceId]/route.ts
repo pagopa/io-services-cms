@@ -13,6 +13,7 @@ import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { getConfiguration } from "@/config";
 
 /**
  * @description Retrieve a service by ID
@@ -52,7 +53,7 @@ export const PUT = withJWTAuthHandler(
         return handleBadRequestErrorResponse(error.message);
       }
 
-      if (process.env.GROUP_AUTHZ_ENABLED?.toLowerCase() === "true") {
+      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
         if (isAdmin(backofficeUser)) {
           if (
             servicePayload.metadata.group_id &&

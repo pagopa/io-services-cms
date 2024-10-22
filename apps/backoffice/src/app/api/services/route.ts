@@ -12,6 +12,7 @@ import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
 
+import { getConfiguration } from "@/config";
 import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
@@ -30,7 +31,7 @@ export const POST = withJWTAuthHandler(
       } catch (error: any) {
         return handleBadRequestErrorResponse(error.message);
       }
-      if (process.env.GROUP_AUTHZ_ENABLED?.toLowerCase()) {
+      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
         if (isAdmin(backofficeUser)) {
           if (
             servicePayload.metadata.group_id &&

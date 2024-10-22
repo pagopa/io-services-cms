@@ -14,6 +14,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
+import { getConfiguration } from "@/config";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
 import {
   ManagedInternalError,
@@ -203,7 +204,7 @@ export async function forwardIoServicesCmsRequest<
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc": process.env.GROUP_AUTHZ_ENABLED?.toLowerCase()
+      "x-user-groups-selc": getConfiguration().GROUP_AUTHZ_ENABLED
         ? backofficeUser.permissions.selcGroups?.join(",")
         : undefined,
       "x-user-id": backofficeUser.parameters.userId,
