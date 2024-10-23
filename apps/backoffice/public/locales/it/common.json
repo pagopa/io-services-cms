@@ -338,6 +338,7 @@
         "cardTitle": "Genera una API Key",
         "cardDescription": "Con la generazione della API Key, tutti gli utenti assegnati al gruppo selezionato potranno effettuare operazione programmatiche solo sui servizi da loro gestiti. (assegnati agli stessi gruppi)",
         "cardHint": "* Indica una domanda obbligatoria",
+        "buttonConfirm": "Continua",
         "form": {
           "title": "Seleziona il gruppo a cui rendere visibile l’API Key",
           "placeholder": "Seleziona il gruppo",

@@ -313,17 +313,30 @@ export const getMockServiceHistory = (
   };
 };
 
-export const getMockInstitutionGroups = (institutionId?: string) =>
-  Array.from({ length: 3 }, () => ({
+export const getMockInstitutionGroups = (institutionId?: string) => {
+  // const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
+  // const purifiedOffset =
+  //   (offset && offset > 0 && offset < 99) ??
+  //   faker.number.int({ max: 99, min: 0 });
+
+  const groups = Array.from({ length: 3 }, () => ({
     id: faker.string.uuid(),
     name: faker.lorem.word(),
   }));
 
-export const getUpsertManageGroupSubscriptionResponse = (groupId?: object) => {
   return {
-    groupId,
+    pagination: {
+      number: 3,
+      size: 4,
+      totalElements: 3,
+      totalPages: 2,
+    },
+    value: groups,
   };
 };
+
+export const getUpsertManageGroupSubscriptionResponse = (groupId?: object) =>
+  groupId;
 
 // **********************************************************************
 // Services import into SelfCare

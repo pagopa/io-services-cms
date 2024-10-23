@@ -338,6 +338,7 @@
         "cardTitle": "Generate an API Key",
         "cardDescription": "With the generation of the API Key, all users assigned to the selected group will be able to perform programmatic operations only on services they manage. (assigned to the same groups)",
         "cardHint": "* Indicates a mandatory question",
+        "buttonConfirm": "Next",
         "form": {
           "title": "Select the group to make the API Key visible",
           "placeholder": "Select the group",
