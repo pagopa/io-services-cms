@@ -1,13 +1,15 @@
+import { ApimUtils } from "@io-services-cms/external-clients";
+import { AxiosError, AxiosResponse } from "axios";
 import * as E from "fp-ts/Either";
 import * as TE from "fp-ts/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getSubscriptions } from "../apim";
-import { AxiosError, AxiosResponse } from "axios";
 
-const { getApimRestClientMock, getServiceListMock } = vi.hoisted(() => ({
-  getApimRestClientMock: vi.fn(),
-  getServiceListMock: vi.fn(),
-}));
+const { getApimRestClientMock, getServiceListMock: getUserSubscriptionsMock } =
+  vi.hoisted(() => ({
+    getApimRestClientMock: vi.fn(),
+    getServiceListMock: vi.fn(),
+  }));
 
 const anUserId = "anUserId";
 
@@ -21,6 +23,11 @@ afterEach(() => {
 });
 
 describe("getSubscriptions", () => {
+  const getExpectedFilter = (serviceId?: string) =>
+    serviceId
+      ? ApimUtils.apim_filters.subscriptionsByIdsApimFilter(serviceId)
+      : ApimUtils.apim_filters.subscriptionsExceptManageOneApimFilter();
+
   it("should return Error when getApimRestClient fail", async () => {
     // given
     const errorMessage = "error message";
@@ -36,7 +43,7 @@ describe("getSubscriptions", () => {
     }
     expect(getApimRestClientMock).toHaveBeenCalledOnce();
     expect(getApimRestClientMock).toHaveBeenCalledWith();
-    expect(getServiceListMock).not.toHaveBeenCalled();
+    expect(getUserSubscriptionsMock).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -44,13 +51,13 @@ describe("getSubscriptions", () => {
     ${"a generic error"}              | ${new Error("message")}
     ${"an non-not found axios error"} | ${new AxiosError("message")}
   `(
-    "should return Error when getServiceList return $scenario",
+    "should return Error when getUserSubscriptions return $scenario",
     async ({ error }) => {
       // given
       getApimRestClientMock.mockResolvedValueOnce({
-        getServiceList: getServiceListMock,
+        getUserSubscriptions: getUserSubscriptionsMock,
       });
-      getServiceListMock.mockReturnValueOnce(TE.left(error));
+      getUserSubscriptionsMock.mockReturnValueOnce(TE.left(error));
       const limit = 1;
       const offset = 0;
       const serviceId = undefined;
@@ -65,22 +72,22 @@ describe("getSubscriptions", () => {
       }
       expect(getApimRestClientMock).toHaveBeenCalledOnce();
       expect(getApimRestClientMock).toHaveBeenCalledWith();
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
         anUserId,
         limit,
         offset,
-        serviceId,
+        getExpectedFilter(serviceId),
       );
     },
   );
 
-  it("should return am empty subscriptions list when getServiceList return n not found axios error", async () => {
+  it("should return am empty subscriptions list when getUserSubscriptions return n not found axios error", async () => {
     // given
     getApimRestClientMock.mockResolvedValueOnce({
-      getServiceList: getServiceListMock,
+      getUserSubscriptions: getUserSubscriptionsMock,
     });
-    getServiceListMock.mockReturnValueOnce(
+    getUserSubscriptionsMock.mockReturnValueOnce(
       TE.left(
         new AxiosError(undefined, undefined, undefined, undefined, {
           status: 404,
@@ -104,19 +111,19 @@ describe("getSubscriptions", () => {
     }
     expect(getApimRestClientMock).toHaveBeenCalledOnce();
     expect(getApimRestClientMock).toHaveBeenCalledWith();
-    expect(getServiceListMock).toHaveBeenCalledOnce();
-    expect(getServiceListMock).toHaveBeenCalledWith(
+    expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
+    expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
       anUserId,
       limit,
       offset,
-      serviceId,
+      getExpectedFilter(serviceId),
     );
   });
 
   it("should return the subscriptions list", async () => {
     // given
     getApimRestClientMock.mockResolvedValueOnce({
-      getServiceList: getServiceListMock,
+      getUserSubscriptions: getUserSubscriptionsMock,
     });
     const expectedRes = {
       value: [
@@ -126,7 +133,7 @@ describe("getSubscriptions", () => {
       ],
       count: 1,
     };
-    getServiceListMock.mockReturnValueOnce(TE.right(expectedRes));
+    getUserSubscriptionsMock.mockReturnValueOnce(TE.right(expectedRes));
     const limit = 1;
     const offset = 0;
     const serviceId = undefined;
@@ -141,12 +148,12 @@ describe("getSubscriptions", () => {
     }
     expect(getApimRestClientMock).toHaveBeenCalledOnce();
     expect(getApimRestClientMock).toHaveBeenCalledWith();
-    expect(getServiceListMock).toHaveBeenCalledOnce();
-    expect(getServiceListMock).toHaveBeenCalledWith(
+    expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
+    expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
       anUserId,
       limit,
       offset,
-      serviceId,
+      getExpectedFilter(serviceId),
     );
   });
 });
