@@ -22,7 +22,7 @@ import {
   handleInternalErrorResponse,
 } from "../errors";
 import { retrieveInstitutionGroups } from "../institutions/business";
-import { getServiceList } from "./apim";
+import { getSubscriptions } from "./apim";
 import {
   IoServicesCmsClient,
   callIoServicesCms,
@@ -72,7 +72,12 @@ export const retrieveServiceList = async (
   serviceId?: string,
 ): Promise<ServiceList> =>
   pipe(
-    getServiceList(backofficeUser.parameters.userId, limit, offset, serviceId),
+    getSubscriptions(
+      backofficeUser.parameters.userId,
+      limit,
+      offset,
+      serviceId,
+    ),
     TE.bindTo("apimServices"),
     TE.bind("serviceTopicsMap", (_) =>
       pipe(

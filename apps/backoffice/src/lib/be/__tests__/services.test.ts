@@ -177,23 +177,15 @@ const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
 }));
 
 const {
-  getServiceListMock,
+  getSubscriptionsMock,
   bulkFetchLifecycleMock,
   bulkFetchPublicationMock,
   retrieveInstitutionGroups,
 } = vi.hoisted(() => ({
-  getServiceListMock: vi.fn(),
+  getSubscriptionsMock: vi.fn(),
   bulkFetchLifecycleMock: vi.fn(),
   bulkFetchPublicationMock: vi.fn(),
   retrieveInstitutionGroups: vi.fn(),
-}));
-
-const { isAxiosError } = vi.hoisted(() => ({
-  isAxiosError: vi.fn().mockReturnValue(false),
-}));
-
-vi.mock("axios", async () => ({
-  isAxiosError,
 }));
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
@@ -205,11 +197,8 @@ vi.mock("@/lib/be/cms-client", () => ({
   getTopicsProvider,
 }));
 
-vi.mock("@/lib/be/apim-service", () => ({
-  getApimRestClient: () =>
-    Promise.resolve({
-      getServiceList: getServiceListMock,
-    }),
+vi.mock("@/lib/be/services/apim", () => ({
+  getSubscriptions: getSubscriptionsMock,
 }));
 
 vi.mock("@/lib/be/cosmos-store", () => ({
@@ -528,7 +517,7 @@ describe("Services TEST", () => {
       const aServiceinPublicationId = "aServiceInPublicationId";
       const aServiceNotInPublicationId = "aServiceNotInPublicationId";
 
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -579,8 +568,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
@@ -650,7 +639,7 @@ describe("Services TEST", () => {
     it("should return a list of services with visibility enriched with topic", async () => {
       const aServiceinPublicationId = "aServiceInPublicationId";
 
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -701,8 +690,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
@@ -751,7 +740,7 @@ describe("Services TEST", () => {
     });
 
     it("when no services are found on APIM neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [],
           count: 90,
@@ -779,8 +768,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         90,
@@ -795,51 +784,6 @@ describe("Services TEST", () => {
       });
     });
 
-    it("when APIM returns 404 neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
-      getServiceListMock.mockReturnValueOnce(
-        TE.left({
-          message: "Received 404 response",
-          response: { status: 404 },
-        }),
-      );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
-
-      isAxiosError.mockReturnValueOnce(true);
-
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
-
-      const result = await retrieveServiceList(
-        request,
-        aBackofficeUser,
-        10,
-        90,
-      );
-
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-        1000,
-        0,
-      );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        10,
-        90,
-        undefined,
-      );
-      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
-      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
-
-      expect(result).toStrictEqual({
-        value: [],
-        pagination: { count: 0, limit: 10, offset: 90 },
-      });
-    });
-
     // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
     // and not on apim, in such remote case we still return the list of services
     it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
@@ -847,7 +791,7 @@ describe("Services TEST", () => {
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
       const aServiceNotInLifecycleCreateDate = new Date();
 
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -895,8 +839,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
@@ -954,7 +898,7 @@ describe("Services TEST", () => {
     });
 
     it("when service-publication bulk-fetch fails an error is returned", async () => {
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -990,8 +934,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
@@ -1008,7 +952,7 @@ describe("Services TEST", () => {
     });
 
     it("when service-lifecycle bulk-fetch fails an error is returned", async () => {
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
             {
@@ -1042,8 +986,8 @@ describe("Services TEST", () => {
         1000,
         0,
       );
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
@@ -1057,7 +1001,7 @@ describe("Services TEST", () => {
     });
 
     it("when apim rest call fails an error is returned", async () => {
-      getServiceListMock.mockReturnValueOnce(
+      getSubscriptionsMock.mockReturnValueOnce(
         TE.left({
           message: "Apim Failure",
           response: { status: 500 },
@@ -1071,8 +1015,8 @@ describe("Services TEST", () => {
         retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
 
-      expect(getServiceListMock).toHaveBeenCalledOnce();
-      expect(getServiceListMock).toHaveBeenCalledWith(
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,

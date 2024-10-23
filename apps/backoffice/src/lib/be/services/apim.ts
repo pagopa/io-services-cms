@@ -7,7 +7,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import { getApimRestClient } from "../apim-service";
 
-export const getServiceList = (
+export const getSubscriptions = (
   userId: string,
   limit: number,
   offset: number,
