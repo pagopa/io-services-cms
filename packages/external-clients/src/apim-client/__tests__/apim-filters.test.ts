@@ -148,17 +148,18 @@ describe("APIM $filter builder", () => {
 
 describe("subscriptionsByIdsApimFilter", () => {
   it.each`
-    scenario                           | ids
-    ${"ids is empty"}                  | ${[]}
-    ${"ids is a single array element"} | ${["id_1"]}
-    ${"ids is a multi array element"}  | ${["id_1", "id_2", "id_3"]}
-  `("should return the filter string when $scenario", ({ ids }) => {
+    scenario                             | value
+    ${"value is empty"}                  | ${[]}
+    ${"value is not an array"}           | ${"id_1"}
+    ${"value is a single array element"} | ${["id_1"]}
+    ${"value is a multi array element"}  | ${["id_1", "id_2", "id_3"]}
+  `("should return the filter string when $scenario", ({ value }) => {
     // when
-    const filter = subscriptionsByIdsApimFilter(ids);
+    const filter = subscriptionsByIdsApimFilter(value);
 
     // then
     expect(filter).toStrictEqual(
-      ids
+      (Array.isArray(value) ? value : [value])
         .map((id, idx) => (idx > 0 ? "or " : "") + `name eq '${id}'`)
         .join(" "),
     );

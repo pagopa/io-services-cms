@@ -258,12 +258,15 @@ export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
   );
 
 /**
- * User Subscription list filtered by a list of Subscription id'
+ * User Subscription list filtered by a Subscription id'
  *
+ * @param value a single id or an array of ids to filter by
  * @returns API Management `$filter` property
  */
-export const subscriptionsByIdsApimFilter = (ids: readonly string[]): string =>
-  ids
+export const subscriptionsByIdsApimFilter = (
+  value: readonly string[] | string,
+): string =>
+  (Array.isArray(value) ? value : [value])
     .map((id, idx) =>
       pipe(
         buildApimFilter({
