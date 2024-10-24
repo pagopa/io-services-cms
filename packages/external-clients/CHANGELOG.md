@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.4.0
+
+### Minor Changes
+
+- c0f4f6b: handle services list visibility based on authzGroups
+
 ## 1.3.0
 
 ### Minor Changes

@@ -88,6 +88,7 @@ locals {
       REQUEST_DETAIL_QUEUE                               = azurerm_storage_queue.request-detail.name
       REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
+      REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
 
 
       # List of service ids for which quality control will be bypassed
@@ -118,6 +119,8 @@ locals {
       SERVICES_PUBLICATION_EVENT_HUB_NAME              = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
       SERVICES_LIFECYCLE_EVENT_HUB_NAME                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-lifecycle-01"
       SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING   = data.azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string.value
+      SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
+      SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
 
 
       # Fix Service Review Checker pg module

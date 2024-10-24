@@ -24,9 +24,12 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
@@ -45,6 +48,7 @@ type GetServiceLifecycleHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
@@ -61,14 +65,23 @@ export const makeGetServiceLifecycleHandler =
     fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): GetServiceLifecycleHandler =>
-  (context, auth, __, ___, serviceId) =>
-    genericServiceRetrieveHandler(
-      fsmLifecycleClient.getStore(),
-      apimService,
-      telemetryClient,
-      config,
-      itemToResponse,
-    )(context, auth, serviceId, logPrefix, EventNameEnum.GetServiceLifecycle);
+  (context, auth, __, ___, serviceId, authzGroupIds) =>
+    pipe(
+      genericServiceRetrieveHandler(
+        fsmLifecycleClient.getStore(),
+        apimService,
+        telemetryClient,
+        itemToResponse(config),
+      )(
+        context,
+        auth,
+        serviceId,
+        logPrefix,
+        EventNameEnum.GetServiceLifecycle,
+        authzGroupIds,
+      ),
+      TE.toUnion,
+    )();
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
@@ -87,6 +100,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

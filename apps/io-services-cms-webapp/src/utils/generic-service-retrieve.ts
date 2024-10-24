@@ -1,47 +1,45 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { FSMStore } from "@io-services-cms/models";
 import { IAzureApiAuthorization } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import {
   IResponseErrorInternal,
+  IResponseSuccessJson,
   ResponseErrorInternal,
   ResponseErrorNotFound,
   ResponseSuccessJson,
+  getResponseErrorForbiddenNoAuthorizationGroups,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { flow, identity, pipe } from "fp-ts/lib/function";
 
-import { IConfig } from "../config";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "./applicationinsight";
-import { getLogger } from "./logger";
+import { ErrorResponseTypes, getLogger } from "./logger";
 import { serviceOwnerCheckManageTask } from "./subscription";
 
-interface GenericStore<T> {
-  fetch: (id: NonEmptyString) => TE.TaskEither<Error, O.Option<T>>;
-}
-
-type GenericItemToResponse<T, V> = (
-  dbConfig: IConfig,
-) => (item: T) => TE.TaskEither<IResponseErrorInternal, V>;
+export type GenericItemToResponse<T, V> = (
+  item: T,
+) => TE.TaskEither<IResponseErrorInternal, V>;
 
 export const genericServiceRetrieveHandler =
   <
     T extends {
+      data: { metadata?: { group_id?: NonEmptyString } };
       fsm: {
         lastTransition?: string | undefined;
-      } & { state: string } & Record<string, unknown>;
-    } & Record<string, unknown>,
+        state: string;
+      };
+    },
     V,
   >(
-    store: GenericStore<T>,
+    store: FSMStore<T>,
     apimService: ApimUtils.ApimService,
     telemetryClient: TelemetryClient,
-    config: IConfig,
     itemToResponse: GenericItemToResponse<T, V>,
   ) =>
   (
@@ -50,7 +48,8 @@ export const genericServiceRetrieveHandler =
     serviceId: NonEmptyString,
     logPrefix: string,
     event: EventNameEnum,
-  ) =>
+    authzGroupIds: readonly NonEmptyString[],
+  ): TE.TaskEither<ErrorResponseTypes, IResponseSuccessJson<V>> =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -62,12 +61,19 @@ export const genericServiceRetrieveHandler =
         flow(
           store.fetch,
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-          TE.chainW(
+          TE.chain(
             flow(
               TE.fromOption(() =>
                 ResponseErrorNotFound("Not found", `${serviceId} not found`),
               ),
-              TE.chainW(itemToResponse(config)),
+              flow(
+                event === EventNameEnum.GetServiceLifecycle // group authz check is applied only to ServiceLifecycle entity
+                  ? TE.filterOrElseW(isAuthorized(authzGroupIds), (_) =>
+                      getResponseErrorForbiddenNoAuthorizationGroups(),
+                    )
+                  : identity,
+              ),
+              TE.chainW(itemToResponse),
               TE.map(ResponseSuccessJson<V>),
             ),
           ),
@@ -85,5 +91,11 @@ export const genericServiceRetrieveHandler =
           userSubscriptionId: auth.subscriptionId,
         }),
       ),
-      TE.toUnion,
-    )();
+    );
+
+const isAuthorized =
+  (authzGroupIds: readonly NonEmptyString[]) =>
+  (service: { data: { metadata?: { group_id?: NonEmptyString } } }) =>
+    authzGroupIds.length === 0 ||
+    (!!service.data.metadata?.group_id &&
+      authzGroupIds.includes(service.data.metadata.group_id));

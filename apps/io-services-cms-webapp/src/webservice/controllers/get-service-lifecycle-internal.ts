@@ -14,6 +14,8 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
@@ -52,13 +54,22 @@ export const makeGetServiceLifecycleInternalHandler =
     telemetryClient,
   }: Dependencies): GetServiceLifecycleInternalHandler =>
   (context, auth, serviceId) =>
-    genericServiceRetrieveHandler(
-      fsmLifecycleClient.getStore(),
-      apimService,
-      telemetryClient,
-      config,
-      itemToResponse,
-    )(context, auth, serviceId, logPrefix, EventNameEnum.GetServiceLifecycle);
+    pipe(
+      genericServiceRetrieveHandler(
+        fsmLifecycleClient.getStore(),
+        apimService,
+        telemetryClient,
+        itemToResponse(config),
+      )(
+        context,
+        auth,
+        serviceId,
+        logPrefix,
+        EventNameEnum.GetServiceLifecycle,
+        [],
+      ),
+      TE.toUnion,
+    )();
 
 export const applyRequestMiddelwares = (
   handler: GetServiceLifecycleInternalHandler,

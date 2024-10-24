@@ -8,6 +8,14 @@ import { Institution } from "../../../../../generated/selfcare/Institution";
 import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    GROUP_AUTHZ_ENABLED: "true",
+  };
+});
+
 const mockConfig = {
   SELFCARE_JWKS_URL: "http://localhost:7075/.well-known/jwks.json",
   APIM_USER_GROUPS: faker.helpers.multiple(faker.string.alpha).join(","),
