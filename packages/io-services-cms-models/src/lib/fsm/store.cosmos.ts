@@ -158,5 +158,34 @@ export const createCosmosStore = <
       }),
     );
 
-  return { bulkFetch, delete: deleteItem, fetch, save };
+  const getServiceIdsByGroupIds = (
+    groupIds: readonly string[],
+  ): TE.TaskEither<Error, string[]> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          container.items
+            .query<string>({
+              parameters: [{ name: "@groupIds", value: groupIds }],
+              query:
+                "SELECT VALUE c.id FROM c WHERE ARRAY_CONTAINS(@groupIds, c.data.metadata.group_id)",
+            })
+            .fetchAll(),
+        (err) =>
+          new Error(
+            `Error fetching services from database with groupIds=${groupIds}, ${
+              E.toError(err).message
+            }`,
+          ),
+      ),
+      TE.map(({ resources }) => resources),
+    );
+
+  return {
+    bulkFetch,
+    delete: deleteItem,
+    fetch,
+    getServiceIdsByGroupIds,
+    save,
+  };
 };

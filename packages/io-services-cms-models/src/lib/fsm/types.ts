@@ -48,6 +48,9 @@ export interface FSMStore<
   bulkFetch: (id: string[]) => TE.TaskEither<Error, O.Option<TT>[]>;
   delete: (id: string) => TE.TaskEither<Error, void>;
   fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
+  getServiceIdsByGroupIds: (
+    groupIds: readonly string[],
+  ) => TE.TaskEither<Error, readonly string[]>;
   save: (
     id: string,
     data: TT,

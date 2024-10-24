@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import * as O from "fp-ts/lib/Option";
+import { describe, expect, it } from "vitest";
 import {
   ApimFilterType,
   buildApimFilter,
@@ -7,6 +7,9 @@ import {
   FilterFieldEnum,
   FilterSupportedFunctionsEnum,
   FilterSupportedOperatorsEnum,
+  manageGroupSubscriptionsFilter,
+  subscriptionsByIdsApimFilter,
+  subscriptionsExceptManageOneApimFilter,
 } from "../apim-filters";
 
 const testError = "Expected some value, received other";
@@ -140,5 +143,69 @@ describe("APIM $filter builder", () => {
   it("should return a None result, based on 'anInvalidApimFilter' configuration", () => {
     const filter = buildApimFilter(anInvalidApimFilter as any);
     expect(O.isNone(filter)).toBe(true);
+  });
+});
+
+describe("subscriptionsByIdsApimFilter", () => {
+  it.each`
+    scenario                             | value
+    ${"value is empty"}                  | ${[]}
+    ${"value is not an array"}           | ${"id_1"}
+    ${"value is a single array element"} | ${["id_1"]}
+    ${"value is a multi array element"}  | ${["id_1", "id_2", "id_3"]}
+  `("should return the filter string when $scenario", ({ value }) => {
+    // when
+    const filter = subscriptionsByIdsApimFilter(value);
+
+    // then
+    expect(filter).toStrictEqual(
+      (Array.isArray(value) ? value : [value])
+        .map((id, idx) => (idx > 0 ? "or " : "") + `name eq '${id}'`)
+        .join(" "),
+    );
+  });
+});
+
+describe("subscriptionsExceptManageOneApimFilter", () => {
+  it("should return the filter string to exclude manage subscriptions", () => {
+    // when
+    const filter = subscriptionsExceptManageOneApimFilter();
+
+    // then
+    expect(filter).toStrictEqual("not(startswith(name, 'MANAGE-'))");
+  });
+});
+
+describe("manageGroupSubscriptionsFilter", () => {
+  it("should return a MANAGE-GROUP- filter when no groups are provided", () => {
+    const res = manageGroupSubscriptionsFilter();
+
+    expect(res).toEqual("startswith(name, 'MANAGE-GROUP-')");
+  });
+
+  it("should return an empty filter when empty array is provided", () => {
+    const res = manageGroupSubscriptionsFilter([]);
+
+    expect(res).toEqual("");
+  });
+
+  it("should return a single MANAGE-GROUP- filter when a single group id provided", () => {
+    const groupId = "g1";
+    const res = manageGroupSubscriptionsFilter([groupId]);
+
+    expect(res).toEqual(`name eq 'MANAGE-GROUP-${groupId}'`);
+  });
+
+  it("should return a concat MANAGE-GROUP- filters based on the group ids provided", () => {
+    const groupids = new Array(3);
+    for (let index = 0; index < groupids.length; index++) {
+      groupids[index] = "id" + index;
+    }
+    const res = manageGroupSubscriptionsFilter(groupids);
+
+    const expectedRes = groupids
+      .map((groupId) => `name eq 'MANAGE-GROUP-${groupId}'`)
+      .join(" or ");
+    expect(res).toEqual(expectedRes);
   });
 });

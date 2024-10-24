@@ -328,6 +328,8 @@ const toUser = ({
     apimGroups: apimUser.groups
       .filter((group) => group.type === "custom")
       .map((group) => group.name),
-    selcGroups: identityTokenPayload.organization.groups,
+    selcGroups: getConfiguration().GROUP_AUTHZ_ENABLED
+      ? identityTokenPayload.organization.groups
+      : undefined,
   },
 });

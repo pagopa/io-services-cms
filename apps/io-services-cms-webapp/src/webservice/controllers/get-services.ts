@@ -44,6 +44,7 @@ import { flow, pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePagination } from "../../generated/api/ServicePagination";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -66,6 +67,7 @@ type GetServicesHandler = (
   attrs: IAzureUserAttributesManage,
   limit: O.Option<number>,
   offset: O.Option<number>,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
@@ -164,6 +166,41 @@ export const buildServiceSubscriptionPairs = (
         typeof _.service !== "undefined",
     );
 
+const getAuthorizedSubscriptions =
+  (
+    fsmLifecycleClient: ServiceLifecycle.FsmClient,
+    apimService: ApimUtils.ApimService,
+  ) =>
+  (
+    authzGroupIds: readonly NonEmptyString[],
+    userId: NonEmptyString,
+    offset: number,
+    limit: number,
+  ): TE.TaskEither<Error, readonly SubscriptionContract[]> =>
+    pipe(
+      authzGroupIds.length > 0
+        ? pipe(
+            fsmLifecycleClient.getStore(),
+            (store) => store.getServiceIdsByGroupIds(authzGroupIds),
+            TE.chainW((authzServiceIds) =>
+              authzServiceIds.length > 0
+                ? apimService.getUserSubscriptions(
+                    userId,
+                    offset,
+                    limit,
+                    ApimUtils.apim_filters.subscriptionsByIdsApimFilter(
+                      authzServiceIds,
+                    ),
+                  )
+                : TE.of([]),
+            ),
+          )
+        : apimService.getUserSubscriptions(userId, offset, limit),
+      TE.mapLeft((e) =>
+        "statusCode" in e ? new Error(`Apim ${e.statusCode} error`) : e,
+      ),
+    );
+
 export const makeGetServicesHandler =
   ({
     apimService,
@@ -171,14 +208,14 @@ export const makeGetServicesHandler =
     fsmLifecycleClient,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
-  (context, auth, __, ___, limit, offset) =>
+  (context, auth, __, ___, limit, offset, authzGroupIds) =>
     pipe(
-      apimService.getUserSubscriptions(
+      getAuthorizedSubscriptions(fsmLifecycleClient, apimService)(
+        authzGroupIds,
         auth.userId,
         getOffset(offset),
         getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
       ),
-      TE.mapLeft((e) => new Error(`Apim ${e.statusCode} error`)),
       TE.chain((subscriptions) =>
         pipe(
           getServices(config)(fsmLifecycleClient, subscriptions),
@@ -247,6 +284,7 @@ export const applyRequestMiddelwares =
         "offset",
         IntegerFromString.pipe(NonNegativeInteger),
       ),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
