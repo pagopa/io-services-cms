@@ -108,7 +108,7 @@ module "cms_fn" {
     "AzureWebJobs.IngestionServicePublicationWatcher.Disabled",
     "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled",
     "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled",
-    "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"
+    "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled",
     "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled",
     "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"
   ]
