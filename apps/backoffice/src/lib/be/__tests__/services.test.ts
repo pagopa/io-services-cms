@@ -125,14 +125,6 @@ const aBackofficeUser: BackOfficeUser = {
   institution: mocks.anInstitution,
 };
 
-vi.hoisted(() => {
-  const originalEnv = process.env;
-  process.env = {
-    ...originalEnv,
-    GROUP_AUTHZ_ENABLED: "true",
-  };
-});
-
 const { getIoServicesCmsClient, getTopicsProvider } = vi.hoisted(() => ({
   getIoServicesCmsClient: vi.fn().mockReturnValue({
     getServices: vi.fn(() =>
