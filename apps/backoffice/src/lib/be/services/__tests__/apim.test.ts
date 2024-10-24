@@ -28,10 +28,29 @@ describe("getSubscriptions", () => {
       ? ApimUtils.apim_filters.subscriptionsByIdsApimFilter(serviceId)
       : ApimUtils.apim_filters.subscriptionsExceptManageOneApimFilter();
 
+  it("should return an empty response when serviceIdFilter is an empty array", async () => {
+    // given
+    const serviceIdFilter = [];
+
+    // when
+    const res = await getSubscriptions(anUserId, 1, 0, serviceIdFilter)();
+
+    // then
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toStrictEqual({
+        count: 0,
+        value: [],
+      });
+    }
+    expect(getApimRestClientMock).not.toHaveBeenCalled();
+    expect(getUserSubscriptionsMock).not.toHaveBeenCalled();
+  });
+
   it("should return Error when getApimRestClient fail", async () => {
     // given
-    const errorMessage = "error message";
-    getApimRestClientMock.mockRejectedValueOnce(new Error(errorMessage));
+    const error = new Error("error message");
+    getApimRestClientMock.mockRejectedValueOnce(error);
 
     // when
     const res = await getSubscriptions(anUserId, 1, 0)();
@@ -39,7 +58,7 @@ describe("getSubscriptions", () => {
     // then
     expect(E.isLeft(res)).toBeTruthy();
     if (E.isLeft(res)) {
-      expect(res.left.message).toStrictEqual(errorMessage);
+      expect(res.left).toStrictEqual(error);
     }
     expect(getApimRestClientMock).toHaveBeenCalledOnce();
     expect(getApimRestClientMock).toHaveBeenCalledWith();
@@ -60,10 +79,15 @@ describe("getSubscriptions", () => {
       getUserSubscriptionsMock.mockReturnValueOnce(TE.left(error));
       const limit = 1;
       const offset = 0;
-      const serviceId = undefined;
+      const serviceIdFilter = undefined;
 
       // when
-      const res = await getSubscriptions(anUserId, limit, offset, serviceId)();
+      const res = await getSubscriptions(
+        anUserId,
+        limit,
+        offset,
+        serviceIdFilter,
+      )();
 
       // then
       expect(E.isLeft(res)).toBeTruthy();
@@ -77,7 +101,7 @@ describe("getSubscriptions", () => {
         anUserId,
         limit,
         offset,
-        getExpectedFilter(serviceId),
+        getExpectedFilter(serviceIdFilter),
       );
     },
   );
@@ -96,10 +120,15 @@ describe("getSubscriptions", () => {
     );
     const limit = 1;
     const offset = 0;
-    const serviceId = undefined;
+    const serviceIdFilter = undefined;
 
     // when
-    const res = await getSubscriptions(anUserId, limit, offset, serviceId)();
+    const res = await getSubscriptions(
+      anUserId,
+      limit,
+      offset,
+      serviceIdFilter,
+    )();
 
     // then
     expect(E.isRight(res)).toBeTruthy();
@@ -116,44 +145,56 @@ describe("getSubscriptions", () => {
       anUserId,
       limit,
       offset,
-      getExpectedFilter(serviceId),
+      getExpectedFilter(serviceIdFilter),
     );
   });
 
-  it("should return the subscriptions list", async () => {
-    // given
-    getApimRestClientMock.mockResolvedValueOnce({
-      getUserSubscriptions: getUserSubscriptionsMock,
-    });
-    const expectedRes = {
-      value: [
-        {
-          name: "aSubscriptionName",
-        },
-      ],
-      count: 1,
-    };
-    getUserSubscriptionsMock.mockReturnValueOnce(TE.right(expectedRes));
-    const limit = 1;
-    const offset = 0;
-    const serviceId = undefined;
+  it.each`
+    scenario                                   | serviceIdFilter
+    ${"serviceIdFilter is undefined"}          | ${undefined}
+    ${"serviceIdFilter is a string"}           | ${"id"}
+    ${"serviceIdFilter is an array of string"} | ${["id1", "id2"]}
+  `(
+    "should return the subscriptions list when $scenario",
+    async ({ serviceIdFilter }) => {
+      // given
+      getApimRestClientMock.mockResolvedValueOnce({
+        getUserSubscriptions: getUserSubscriptionsMock,
+      });
+      const expectedRes = {
+        value: [
+          {
+            name: "aSubscriptionName",
+          },
+        ],
+        count: 1,
+      };
+      getUserSubscriptionsMock.mockReturnValueOnce(TE.right(expectedRes));
+      const limit = 1;
+      const offset = 0;
 
-    // when
-    const res = await getSubscriptions(anUserId, limit, offset, serviceId)();
+      // when
+      const res = await getSubscriptions(
+        anUserId,
+        limit,
+        offset,
+        serviceIdFilter,
+      )();
 
-    // then
-    expect(E.isRight(res)).toBeTruthy();
-    if (E.isRight(res)) {
-      expect(res.right).toStrictEqual(expectedRes);
-    }
-    expect(getApimRestClientMock).toHaveBeenCalledOnce();
-    expect(getApimRestClientMock).toHaveBeenCalledWith();
-    expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
-    expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
-      anUserId,
-      limit,
-      offset,
-      getExpectedFilter(serviceId),
-    );
-  });
+      // then
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual(expectedRes);
+      }
+      expect(getApimRestClientMock).toHaveBeenCalledOnce();
+      expect(getApimRestClientMock).toHaveBeenCalledWith();
+      expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
+        anUserId,
+        limit,
+        offset,
+        getExpectedFilter(serviceIdFilter),
+      );
+    },
+  );
 });

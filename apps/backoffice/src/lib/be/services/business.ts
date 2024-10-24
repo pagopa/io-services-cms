@@ -7,6 +7,7 @@ import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ServiceList } from "@/generated/api/ServiceList";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -29,6 +30,7 @@ import {
   getServiceTopics,
 } from "./cms";
 import {
+  retrieveAuthorizedServiceIds,
   retrieveLifecycleServices,
   retrievePublicationServices,
 } from "./cosmos";
@@ -56,6 +58,35 @@ interface PathParameters {
   serviceId?: string;
 }
 
+const retrieveSubscriptions = (
+  backofficeUser: BackOfficeUser,
+  limit: number,
+  offset: number,
+  serviceId?: string,
+): TE.TaskEither<Error, SubscriptionCollection> =>
+  backofficeUser.permissions.selcGroups &&
+  backofficeUser.permissions.selcGroups.length > 0
+    ? pipe(
+        backofficeUser.permissions.selcGroups,
+        retrieveAuthorizedServiceIds,
+        TE.chain((authzServiceIds) =>
+          getSubscriptions(
+            backofficeUser.parameters.userId,
+            limit,
+            offset,
+            authzServiceIds.filter(
+              (authzServiceId) => !serviceId || authzServiceId === serviceId,
+            ),
+          ),
+        ),
+      )
+    : getSubscriptions(
+        backofficeUser.parameters.userId,
+        limit,
+        offset,
+        serviceId,
+      );
+
 /**
  * @description This method Will retrieve the specified list of services partition for the given user
  *
@@ -72,12 +103,7 @@ export const retrieveServiceList = async (
   serviceId?: string,
 ): Promise<ServiceList> =>
   pipe(
-    getSubscriptions(
-      backofficeUser.parameters.userId,
-      limit,
-      offset,
-      serviceId,
-    ),
+    retrieveSubscriptions(backofficeUser, limit, offset, serviceId),
     TE.bindTo("apimServices"),
     TE.bind("serviceTopicsMap", (_) =>
       pipe(

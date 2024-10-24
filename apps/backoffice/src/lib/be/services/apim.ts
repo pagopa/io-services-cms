@@ -8,36 +8,39 @@ import { pipe } from "fp-ts/lib/function";
 
 import { getApimRestClient } from "../apim-service";
 
+const emptySubscriptions: SubscriptionCollection = {
+  count: 0,
+  value: [],
+};
+
 export const getSubscriptions = (
   userId: string,
   limit: number,
   offset: number,
-  serviceId?: string,
+  serviceIdFilter?: readonly string[] | string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
-  pipe(
-    TE.tryCatch(() => getApimRestClient(), E.toError),
-    TE.chainW((apimRestClient) =>
-      pipe(
-        apimRestClient.getUserSubscriptions(
-          userId,
-          limit,
-          offset,
-          serviceId
-            ? ApimUtils.apim_filters.subscriptionsByIdsApimFilter(serviceId)
-            : ApimUtils.apim_filters.subscriptionsExceptManageOneApimFilter(),
+  Array.isArray(serviceIdFilter) && serviceIdFilter.length === 0
+    ? TE.right(emptySubscriptions)
+    : pipe(
+        TE.tryCatch(() => getApimRestClient(), E.toError),
+        TE.chainW((apimRestClient) =>
+          pipe(
+            apimRestClient.getUserSubscriptions(
+              userId,
+              limit,
+              offset,
+              serviceIdFilter
+                ? ApimUtils.apim_filters.subscriptionsByIdsApimFilter(
+                    serviceIdFilter,
+                  )
+                : ApimUtils.apim_filters.subscriptionsExceptManageOneApimFilter(),
+            ),
+            TE.orElse((error) =>
+              isAxiosError(error) &&
+              error.response?.status === HTTP_STATUS_NOT_FOUND
+                ? TE.right(emptySubscriptions)
+                : TE.left(error),
+            ),
+          ),
         ),
-        TE.orElse((error) => {
-          if (
-            isAxiosError(error) &&
-            error.response?.status === HTTP_STATUS_NOT_FOUND
-          ) {
-            return TE.right({
-              count: 0,
-              value: [],
-            });
-          }
-          return TE.left(error);
-        }),
-      ),
-    ),
-  );
+      );

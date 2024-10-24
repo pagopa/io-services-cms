@@ -34,3 +34,15 @@ export const retrievePublicationServices = (subscriptions: string[]) =>
         ),
     ),
   );
+
+export const retrieveAuthorizedServiceIds = (
+  authzGroupIds: readonly string[],
+): TE.TaskEither<Error, readonly string[]> =>
+  pipe(
+    authzGroupIds.length > 0,
+    B.match(
+      () => TE.of([]),
+      () =>
+        getServiceLifecycleCosmosStore().getServiceIdsByGroupIds(authzGroupIds),
+    ),
+  );

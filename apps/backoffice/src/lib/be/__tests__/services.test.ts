@@ -1,7 +1,6 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
-import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
@@ -113,10 +112,10 @@ const mocks: {
   };
 });
 
-const aBackofficeUser = {
+const aBackofficeUser: BackOfficeUser = {
+  id: "selcUserId",
   permissions: {
     apimGroups: ["permission1", "permission2"],
-    selcGroups: ["g1", "g2"],
   },
   parameters: {
     userEmail: "anEmail@email.it",
@@ -124,7 +123,7 @@ const aBackofficeUser = {
     subscriptionId: "aSubscriptionId",
   },
   institution: mocks.anInstitution,
-} as unknown as BackOfficeUser;
+};
 
 vi.hoisted(() => {
   const originalEnv = process.env;
@@ -178,14 +177,16 @@ const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
 
 const {
   getSubscriptionsMock,
-  bulkFetchLifecycleMock,
-  bulkFetchPublicationMock,
+  retrieveLifecycleServicesMock,
+  retrievePublicationServicesMock,
   retrieveInstitutionGroups,
+  retrieveAuthorizedServiceIdsMock,
 } = vi.hoisted(() => ({
   getSubscriptionsMock: vi.fn(),
-  bulkFetchLifecycleMock: vi.fn(),
-  bulkFetchPublicationMock: vi.fn(),
+  retrieveLifecycleServicesMock: vi.fn(),
+  retrievePublicationServicesMock: vi.fn(),
   retrieveInstitutionGroups: vi.fn(),
+  retrieveAuthorizedServiceIdsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
@@ -201,11 +202,10 @@ vi.mock("@/lib/be/services/apim", () => ({
   getSubscriptions: getSubscriptionsMock,
 }));
 
-vi.mock("@/lib/be/cosmos-store", () => ({
-  getServiceLifecycleCosmosStore: () => ({ bulkFetch: bulkFetchLifecycleMock }),
-  getServicePublicationCosmosStore: () => ({
-    bulkFetch: bulkFetchPublicationMock,
-  }),
+vi.mock("@/lib/be/services/cosmos", () => ({
+  retrieveLifecycleServices: retrieveLifecycleServicesMock,
+  retrievePublicationServices: retrievePublicationServicesMock,
+  retrieveAuthorizedServiceIds: retrieveAuthorizedServiceIdsMock,
 }));
 
 vi.mock("@/lib/be/institutions/business", () => ({
@@ -243,7 +243,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(","),
+            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
           "x-channel": "BO",
         }),
       );
@@ -291,7 +291,7 @@ describe("Services TEST", () => {
             "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
             "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
             "x-user-groups-selc":
-              aBackofficeUser.permissions.selcGroups?.join(","),
+              aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
             "x-channel": "BO",
           }),
         );
@@ -344,7 +344,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(","),
+            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -390,7 +390,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(","),
+            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -439,7 +439,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(","),
+            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -500,7 +500,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(","),
+            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -533,28 +533,26 @@ describe("Services TEST", () => {
       retrieveInstitutionGroups.mockResolvedValueOnce({
         value: [mocks.aGroup],
       });
-      bulkFetchLifecycleMock.mockReturnValueOnce(
-        TE.right([
-          O.some({
+      retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
+        TE.right(
+          ids.map((id) => ({
             ...mocks.aBaseServiceLifecycle,
-            id: aServiceinPublicationId,
-          }),
-          O.some({
-            ...mocks.aBaseServiceLifecycle,
-            id: aServiceNotInPublicationId,
-          }),
-        ]),
+            id,
+          })),
+        ),
       );
-      bulkFetchPublicationMock.mockReturnValueOnce(
-        TE.right([
-          O.some({
-            id: aServiceinPublicationId,
-            name: "aServiceName",
-            fsm: {
-              state: "published",
-            },
-          }),
-        ]),
+      retrievePublicationServicesMock.mockImplementationOnce((ids: string[]) =>
+        TE.right(
+          ids
+            .filter((id) => id === aServiceinPublicationId)
+            .map((id) => ({
+              id,
+              name: "aServiceName",
+              fsm: {
+                state: "published",
+              },
+            })),
+        ),
       );
 
       // Mock NextRequest
@@ -575,13 +573,13 @@ describe("Services TEST", () => {
         0,
         undefined,
       );
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId,
       ]);
-      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
-      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+      expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
+      expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
         aServiceNotInPublicationId,
       ]);
@@ -652,11 +650,11 @@ describe("Services TEST", () => {
       retrieveInstitutionGroups.mockResolvedValueOnce({
         value: [mocks.aGroup],
       });
-      bulkFetchLifecycleMock.mockReturnValueOnce(
-        TE.right([
-          O.some({
+      retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
+        TE.right(
+          ids.map((id) => ({
             ...mocks.aBaseServiceLifecycle,
-            id: aServiceinPublicationId,
+            id,
             data: {
               ...mocks.aBaseServiceLifecycle.data,
               metadata: {
@@ -664,19 +662,21 @@ describe("Services TEST", () => {
                 topic_id: 1,
               },
             },
-          }),
-        ]),
+          })),
+        ),
       );
-      bulkFetchPublicationMock.mockReturnValueOnce(
-        TE.right([
-          O.some({
-            id: aServiceinPublicationId,
-            name: "aServiceName",
-            fsm: {
-              state: "published",
-            },
-          }),
-        ]),
+      retrievePublicationServicesMock.mockImplementationOnce((ids: string[]) =>
+        TE.right(
+          ids
+            .filter((id) => id === aServiceinPublicationId)
+            .map((id) => ({
+              id,
+              name: "aServiceName",
+              fsm: {
+                state: "published",
+              },
+            })),
+        ),
       );
 
       // Mock NextRequest
@@ -697,12 +697,12 @@ describe("Services TEST", () => {
         0,
         undefined,
       );
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
       ]);
-      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
-      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+      expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
+      expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
         aServiceinPublicationId,
       ]);
 
@@ -739,51 +739,6 @@ describe("Services TEST", () => {
       });
     });
 
-    it("when no services are found on APIM neither service-lifecycle or service-publication bulkFetch method should be called", async () => {
-      getSubscriptionsMock.mockReturnValueOnce(
-        TE.right({
-          value: [],
-          count: 90,
-        }),
-      );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
-      bulkFetchLifecycleMock.mockReturnValueOnce(TE.right([]));
-      bulkFetchPublicationMock.mockReturnValueOnce(TE.right([]));
-
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
-
-      const result = await retrieveServiceList(
-        request,
-        aBackofficeUser,
-        10,
-        90,
-      );
-
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-        1000,
-        0,
-      );
-      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getSubscriptionsMock).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        10,
-        90,
-        undefined,
-      );
-      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
-      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
-
-      expect(result).toStrictEqual({
-        value: [],
-        pagination: { count: 90, limit: 10, offset: 90 },
-      });
-    });
-
     // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
     // and not on apim, in such remote case we still return the list of services
     it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
@@ -808,23 +763,23 @@ describe("Services TEST", () => {
       retrieveInstitutionGroups.mockResolvedValueOnce({
         value: [mocks.aGroup],
       });
-      bulkFetchLifecycleMock.mockReturnValueOnce(
+      retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.right([
-          O.some({
+          {
             ...mocks.aBaseServiceLifecycle,
             id: aServiceInLifecycleId,
-          }),
+          },
         ]),
       );
-      bulkFetchPublicationMock.mockReturnValueOnce(
+      retrievePublicationServicesMock.mockReturnValueOnce(
         TE.right([
-          O.some({
+          {
             id: aServiceInLifecycleId,
             name: "aServiceName",
             fsm: {
               state: "published",
             },
-          }),
+          },
         ]),
       );
 
@@ -846,13 +801,13 @@ describe("Services TEST", () => {
         0,
         undefined,
       );
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
         aServiceNotInLifecycleId,
       ]);
-      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
-      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
+      expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
+      expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
         aServiceInLifecycleId,
       ]);
 
@@ -897,7 +852,8 @@ describe("Services TEST", () => {
       });
     });
 
-    it("when service-publication bulk-fetch fails an error is returned", async () => {
+    it("when retrievePublicationServices fails an error is returned", async () => {
+      // given
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
@@ -911,10 +867,62 @@ describe("Services TEST", () => {
       retrieveInstitutionGroups.mockResolvedValueOnce({
         value: [mocks.aGroup],
       });
-      bulkFetchLifecycleMock.mockReturnValueOnce(
-        TE.right([O.some(mocks.aBaseServiceLifecycle)]),
+      retrieveLifecycleServicesMock.mockReturnValueOnce(
+        TE.right([mocks.aBaseServiceLifecycle]),
       );
-      bulkFetchPublicationMock.mockReturnValueOnce(
+      retrievePublicationServicesMock.mockReturnValueOnce(
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: "error",
+        }),
+      );
+
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"));
+
+      // when and then
+      await expect(
+        retrieveServiceList(request, aBackofficeUser, 10, 0),
+      ).rejects.toThrowError();
+
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        aBackofficeUser.institution.id,
+        1000,
+        0,
+      );
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
+        aBackofficeUser.parameters.userId,
+        10,
+        0,
+        undefined,
+      );
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
+        mocks.aBaseServiceLifecycle.id,
+      ]);
+      expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
+      expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
+        mocks.aBaseServiceLifecycle.id,
+      ]);
+    });
+
+    it("when retrieveLifecycleServices fails an error is returned", async () => {
+      getSubscriptionsMock.mockReturnValueOnce(
+        TE.right({
+          value: [
+            {
+              name: mocks.aBaseServiceLifecycle.id,
+            },
+          ],
+          count: 1,
+        }),
+      );
+      retrieveInstitutionGroups.mockResolvedValueOnce({
+        value: [mocks.aGroup],
+      });
+      retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.left({
           kind: "COSMOS_ERROR_RESPONSE",
           error: "error",
@@ -941,91 +949,112 @@ describe("Services TEST", () => {
         0,
         undefined,
       );
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
         mocks.aBaseServiceLifecycle.id,
       ]);
-      expect(bulkFetchPublicationMock).toHaveBeenCalledOnce();
-      expect(bulkFetchPublicationMock).toHaveBeenCalledWith([
-        mocks.aBaseServiceLifecycle.id,
-      ]);
+      expect(retrievePublicationServicesMock).not.toHaveBeenCalled();
     });
 
-    it("when service-lifecycle bulk-fetch fails an error is returned", async () => {
-      getSubscriptionsMock.mockReturnValueOnce(
-        TE.right({
-          value: [
-            {
-              name: mocks.aBaseServiceLifecycle.id,
-            },
-          ],
-          count: 1,
-        }),
-      );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
-      bulkFetchLifecycleMock.mockReturnValueOnce(
-        TE.left({
-          kind: "COSMOS_ERROR_RESPONSE",
-          error: "error",
-        }),
-      );
-      bulkFetchPublicationMock.mockReturnValueOnce(TE.right([]));
-
-      // Mock NextRequest
+    it("should return an error when selcGroups has at leas one element but retrieveAuthorizedServiceIds fails", async () => {
+      // given
+      const error = new Error("message");
+      retrieveAuthorizedServiceIdsMock.mockReturnValueOnce(TE.left(error));
       const request = new NextRequest(new URL("http://localhost"));
+      const backofficeUser = {
+        ...aBackofficeUser,
+        permissions: {
+          ...aBackofficeUser.permissions,
+          selcGroups: ["g1", "g2"],
+        },
+      };
 
+      // when and then
       await expect(
-        retrieveServiceList(request, aBackofficeUser, 10, 0),
-      ).rejects.toThrowError();
-
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-        1000,
-        0,
+        retrieveServiceList(request, backofficeUser, 10, 0),
+      ).rejects.toThrowError(error);
+      expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
+      expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
+        backofficeUser.permissions.selcGroups,
       );
-      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getSubscriptionsMock).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        10,
-        0,
-        undefined,
-      );
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledOnce();
-      expect(bulkFetchLifecycleMock).toHaveBeenCalledWith([
-        mocks.aBaseServiceLifecycle.id,
-      ]);
-      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
-    });
-
-    it("when apim rest call fails an error is returned", async () => {
-      getSubscriptionsMock.mockReturnValueOnce(
-        TE.left({
-          message: "Apim Failure",
-          response: { status: 500 },
-        }),
-      );
-
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
-
-      await expect(
-        retrieveServiceList(request, aBackofficeUser, 10, 0),
-      ).rejects.toThrowError();
-
-      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getSubscriptionsMock).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        10,
-        0,
-        undefined,
-      );
+      expect(getSubscriptionsMock).not.toHaveBeenCalled();
       expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
-      expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
-      expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+      expect(retrieveLifecycleServicesMock).not.toHaveBeenCalled();
+      expect(retrievePublicationServicesMock).not.toHaveBeenCalled();
     });
+
+    const getExpectedGetSubscriptionsFilter = (
+      authzServiceIds: string[],
+      selcGroups?: string[],
+      serviceId?: string,
+    ) =>
+      selcGroups && selcGroups.length > 0
+        ? authzServiceIds.length > 0
+          ? serviceId
+            ? authzServiceIds.includes(serviceId)
+              ? serviceId
+              : []
+            : authzServiceIds
+          : []
+        : serviceId;
+
+    it.each`
+      scenario                                                                                          | selcGroups     | serviceId      | authzServiceIds
+      ${"selcGroups is undefined, serviceId is undefined (authzServiceIds doesn't matters)"}            | ${undefined}   | ${undefined}   | ${undefined}
+      ${"selcGroups has no elements, serviceId is undefined (authzServiceIds doesn't matters)"}         | ${[]}          | ${undefined}   | ${undefined}
+      ${"selcGroups is undefined, serviceId is defined (authzServiceIds doesn't matters)"}              | ${undefined}   | ${"serviceId"} | ${undefined}
+      ${"selcGroups has no elements, serviceId is defined (authzServiceIds doesn't matters)"}           | ${[]}          | ${"serviceId"} | ${undefined}
+      ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is empty"}     | ${["groupId"]} | ${undefined}   | ${[]}
+      ${"selcGroups has at least one element, serviceId is defined and authzServiceIds is empty"}       | ${["groupId"]} | ${"serviceId"} | ${[]}
+      ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is not empty"} | ${["groupId"]} | ${undefined}   | ${["authzServiceId"]}
+      ${"selcGroups has at least one element, serviceId is defined and authzServiceIds is not empty"}   | ${["groupId"]} | ${"serviceId"} | ${["authzServiceId"]}
+    `(
+      "should return an error when $scenario, but getSubscriptions fails",
+      async ({ selcGroups, serviceId, authzServiceIds }) => {
+        // given
+        const error = new Error("message");
+        getSubscriptionsMock.mockReturnValueOnce(TE.left(error));
+        const request = new NextRequest(new URL("http://localhost"));
+        const backofficeUser = {
+          ...aBackofficeUser,
+          permissions: {
+            ...aBackofficeUser.permissions,
+            selcGroups,
+          },
+        };
+        if (selcGroups && selcGroups.length > 0) {
+          retrieveAuthorizedServiceIdsMock.mockReturnValueOnce(
+            TE.right(authzServiceIds),
+          );
+        }
+
+        await expect(
+          retrieveServiceList(request, backofficeUser, 10, 0, serviceId),
+        ).rejects.toThrowError(error);
+        if (selcGroups && selcGroups.length > 0) {
+          expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
+          expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
+            backofficeUser.permissions.selcGroups,
+          );
+        } else {
+          expect(retrieveAuthorizedServiceIdsMock).not.toHaveBeenCalled();
+        }
+        expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+        expect(getSubscriptionsMock).toHaveBeenCalledWith(
+          backofficeUser.parameters.userId,
+          10,
+          0,
+          getExpectedGetSubscriptionsFilter(
+            authzServiceIds,
+            selcGroups,
+            serviceId,
+          ),
+        );
+        expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
+        expect(retrieveLifecycleServicesMock).not.toHaveBeenCalled();
+        expect(retrievePublicationServicesMock).not.toHaveBeenCalled();
+      },
+    );
   });
   describe("subscriptions migration", () => {
     it("should return a list of delegates", async () => {
