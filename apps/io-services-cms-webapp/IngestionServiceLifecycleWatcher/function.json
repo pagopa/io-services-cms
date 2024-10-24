@@ -1,0 +1,26 @@
+{
+    "bindings": [
+      {
+        "authLevel": "function",
+        "type": "cosmosDBTrigger",
+        "direction": "in",
+        "name": "documents",
+        "connection": "COSMOSDB_CONNECTIONSTRING",
+        "databaseName": "%COSMOSDB_NAME%",
+        "containerName": "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
+        "leaseContainerName": "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-ingestion-lease",
+        "createLeaseContainerIfNotExists": true,
+        "startFromBeginning": false,
+        "maxItemsPerInvocation": 30
+      },
+      {
+        "queueName": "%REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE%",
+        "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+        "name": "ingestionError",
+        "type": "queue",
+        "direction": "out"
+      }
+    ],
+    "scriptFile": "../dist/main.js",
+    "entryPoint": "onIngestionServiceLifecycleChangeEntryPoint"
+  }

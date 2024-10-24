@@ -51,6 +51,8 @@ module "cms_fn" {
       "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"            = "0"
       "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "1"
       "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "1"
+      "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled"           = "1"
+      "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "1"
       "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "1"
       "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "1"
     }
@@ -78,6 +80,8 @@ module "cms_fn" {
       "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"            = "1"
       "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "1"
       "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "1"
+      "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled"           = "1"
+      "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "1"
       "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "1"
       "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "1"
     }
@@ -103,6 +107,8 @@ module "cms_fn" {
     "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled",
     "AzureWebJobs.IngestionServicePublicationWatcher.Disabled",
     "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled",
+    "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled",
+    "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled",
     "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled",
     "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"
   ]

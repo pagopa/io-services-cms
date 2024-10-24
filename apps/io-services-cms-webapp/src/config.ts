@@ -253,6 +253,13 @@ export const ServicesPublicationEventHubConfig = t.type({
   SERVICES_PUBLICATION_EVENT_HUB_NAME: NonEmptyString,
 });
 
+export type ServicesLifecycleEventHubConfig = t.TypeOf<
+  typeof ServicesLifecycleEventHubConfig
+>;
+export const ServicesLifecycleEventHubConfig = t.type({
+  SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_LIFECYCLE_EVENT_HUB_NAME: NonEmptyString,
+});
 export type ServicesHistoryEventHubConfig = t.TypeOf<
   typeof ServicesHistoryEventHubConfig
 >;
@@ -294,6 +301,7 @@ export const IConfig = t.intersection([
   ]),
   t.intersection([
     ServicesPublicationEventHubConfig,
+    ServicesLifecycleEventHubConfig,
     ServicesHistoryEventHubConfig,
   ]),
 ]);
