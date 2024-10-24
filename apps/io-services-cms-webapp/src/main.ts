@@ -30,6 +30,7 @@ import { createRequestDeletionHandler } from "./deletor/request-deletion-handler
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
+import { createServiceTopicIngestorHandler } from "./ingestion/service-topic-ingestor-handler";
 import {
   expressToAzureFunction,
   toAzureFunctionHandler,
@@ -153,6 +154,12 @@ const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 const servicePublicationEventHubProducer = new EventHubProducerClient(
   config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+);
+
+// eventhub producer for ServiceTopics
+const serviceTopicsEventHubProducer = new EventHubProducerClient(
+  config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
+  config.SERVICES_TOPICS_EVENT_HUB_NAME,
 );
 
 // entrypoint for all http functions
@@ -383,3 +390,8 @@ export const createRequestServicesPublicationIngestionRetryEntryPoint =
   createRequestServicesPublicationIngestionRetryHandler(
     servicePublicationEventHubProducer,
   );
+
+export const serviceTopicIngestorEntryPoint = createServiceTopicIngestorHandler(
+  getServiceTopicDao(config),
+  serviceTopicsEventHubProducer,
+);
