@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.38.0
+
+### Minor Changes
+
+- beb7fe5: ingestion service history
+- 1deaefc: ingestion service lifecycle
+
 ## 1.37.0
 
 ### Minor Changes
