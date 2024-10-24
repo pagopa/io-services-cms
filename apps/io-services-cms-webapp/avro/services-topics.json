@@ -1,0 +1,21 @@
+{
+  "name": "serviceTopics",
+  "type": "record",
+  "namespace": "dto",
+  "doc": "Schema api 'services-topics'",
+  "fields": [
+    {
+      "name": "id",
+      "type": "int"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "deleted",
+      "type": "boolean",
+      "default": false
+    }
+  ]
+}
