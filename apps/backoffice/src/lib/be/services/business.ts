@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getConfiguration } from "@/config";
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
