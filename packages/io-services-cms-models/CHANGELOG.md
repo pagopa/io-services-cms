@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.22.0
+
+### Minor Changes
+
+- c0f4f6b: handle services list visibility based on authzGroups
+
 ## 1.21.0
 
 ### Minor Changes
