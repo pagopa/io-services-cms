@@ -7,7 +7,7 @@ const nextConfig = {
   i18n,
   output: "standalone",
   experimental: {
-    instrumentationHook: true
+    instrumentationHook: true,
   },
   // https://github.com/mswjs/msw/issues/1801
   // Setting `resolve.alias` to `false` will tell webpack to ignore a module.
@@ -17,17 +17,17 @@ const nextConfig = {
     if (isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
-        "msw/browser": false
+        "msw/browser": false,
       };
     } else {
       config.resolve.alias = {
         ...config.resolve.alias,
-        "msw/node": false
+        "msw/node": false,
       };
     }
     config.module.rules.push({
       test: /\.svg$/,
-      use: ["@svgr/webpack"]
+      use: ["@svgr/webpack"],
     });
 
     return config;
@@ -39,12 +39,12 @@ const nextConfig = {
         headers: [
           {
             key: "X-Frame-Options",
-            value: "DENY"
-          }
-        ]
-      }
+            value: "DENY",
+          },
+        ],
+      },
     ];
-  }
+  },
 };
 
 module.exports = nextConfig;

@@ -23,6 +23,7 @@ import { MigrationDelegate } from "@/generated/api/MigrationDelegate";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import useFetch from "@/hooks/use-fetch";
+import { logToMixpanel } from "@/utils/mix-panel";
 import { Upload } from "@mui/icons-material";
 import { Alert, AlertTitle, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
@@ -67,6 +68,7 @@ export const MigrationManager = () => {
 
   const handleOpenImportModal = () => {
     setIsImportModalOpen(true);
+    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", "UX", {});
   };
 
   const getMigrationOwnershipClaimsUrl = (delegateId: string) =>
@@ -139,6 +141,9 @@ export const MigrationManager = () => {
           title: t("notifications.success"),
         }),
       );
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", "TECH", {
+        result: "success",
+      });
     } catch (error) {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -147,6 +152,9 @@ export const MigrationManager = () => {
           title: t("notifications.exceptionError"),
         }),
       );
+      logToMixpanel("IO_BO_SERVICES_IMPORT_END", "TECH", {
+        result: error as string,
+      });
     } finally {
       setImportInProgress(false);
       fetchMigrationLatestData();

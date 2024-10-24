@@ -1,5 +1,7 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { logToMixpanel } from "@/utils/mix-panel";
+import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -14,6 +16,11 @@ export default function Login() {
     const hash = router.asPath.split("#")[1];
     const parsedHash = new URLSearchParams(hash);
     return parsedHash.get("token");
+  };
+
+  const manageMixpanelLogin = () => {
+    mixpanel.identify();
+    logToMixpanel("IO_BO_LOGIN", "UX", {});
   };
 
   /**
@@ -45,6 +52,7 @@ export default function Login() {
     } else {
       handleIdentity();
     }
+    manageMixpanelLogin();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 

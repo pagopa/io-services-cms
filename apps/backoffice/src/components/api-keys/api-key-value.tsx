@@ -5,14 +5,17 @@ import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 
 export interface ApiKeyValueProps {
+  handleMixpanel?: () => void;
   isVisible: boolean;
   keyValue?: string;
 }
 
 /** API Key value component */
-export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
-  //TODO: removed useTranslation() because it's not used, is it needed?
-
+export const ApiKeyValue = ({
+  handleMixpanel,
+  isVisible,
+  keyValue,
+}: ApiKeyValueProps) => {
   const renderKeyValue = (value: string) => (
     <Typography noWrap variant="monospaced">
       {isVisible ? value : obscure(value)}
@@ -29,7 +32,10 @@ export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
       <Stack alignItems={"center"} direction="row" spacing={0.5}>
         <LoaderSkeleton loading={keyValue === undefined}>
           {renderKeyValue(keyValue ?? "--------------------------------")}
-          <CopyToClipboard text={keyValue ?? ""} />
+          <CopyToClipboard
+            externalOnClick={handleMixpanel}
+            text={keyValue ?? ""}
+          />
         </LoaderSkeleton>
       </Stack>
     </Box>
