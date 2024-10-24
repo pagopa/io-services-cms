@@ -29,8 +29,8 @@ import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
-import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesHistoryIngestionRetryHandler } from "./ingestion/request-services-history-ingestion-retry-handler";
+import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
 import {
   expressToAzureFunction,
@@ -63,8 +63,8 @@ import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-se
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
-import { handler as onIngestionServiceLifecycleChangeHandler } from "./watchers/on-service-ingestion-lifecycle-change";
 import { handler as onIngestionServiceHistoryChangeHandler } from "./watchers/on-service-ingestion-history-change";
+import { handler as onIngestionServiceLifecycleChangeHandler } from "./watchers/on-service-ingestion-lifecycle-change";
 import { handler as onIngestionServicePublicationChangeHandler } from "./watchers/on-service-ingestion-publication-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
@@ -163,7 +163,7 @@ const servicePublicationEventHubProducer = new EventHubProducerClient(
 const serviceLifecycleEventHubProducer = new EventHubProducerClient(
   config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
-)
+);
 // eventhub producer for ServiceHistory
 const serviceHistoryEventHubProducer = new EventHubProducerClient(
   config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
@@ -432,9 +432,9 @@ export const onIngestionServiceHistoryChangeEntryPoint = pipe(
 export const createRequestServicesLifecycleIngestionRetryEntryPoint =
   createRequestServicesLifecycleIngestionRetryHandler(
     serviceLifecycleEventHubProducer,
-);
-//Ingestion Service Publication Retry DLQ
+  );
+//Ingestion Service History Retry DLQ
 export const createRequestServicesHistoryIngestionRetryEntryPoint =
   createRequestServicesHistoryIngestionRetryHandler(
     serviceHistoryEventHubProducer,
-);
+  );
