@@ -65,9 +65,14 @@ export const MigrationModal = ({
     onImportClick(checkedDelegates);
     onOpenChange(false);
     setCheckedDelegates([]);
-    logToMixpanel("IO_BO_SERVICES_IMPORT_START", "UX", {
-      delegates: checkedDelegates,
-    });
+    logToMixpanel(
+      "IO_BO_SERVICES_IMPORT_START",
+      "UX",
+      {
+        delegates: checkedDelegates,
+      },
+      "action",
+    );
   };
 
   const handleToggle = (delegateId: string) => () => {

@@ -41,7 +41,7 @@ export default function Keys() {
     acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
       notify: "errors",
     });
-    logToMixpanel("IO_BO_APIKEY_PAGE", "UX", {});
+    logToMixpanel("IO_BO_APIKEY_PAGE", "UX", {}, "screen_view");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

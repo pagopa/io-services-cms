@@ -68,7 +68,7 @@ export const MigrationManager = () => {
 
   const handleOpenImportModal = () => {
     setIsImportModalOpen(true);
-    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", "UX", {});
+    logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", "UX", {}, "action");
   };
 
   const getMigrationOwnershipClaimsUrl = (delegateId: string) =>

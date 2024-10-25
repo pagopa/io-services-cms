@@ -20,7 +20,7 @@ export default function Login() {
 
   const manageMixpanelLogin = () => {
     mixpanel.identify();
-    logToMixpanel("IO_BO_LOGIN", "UX", {});
+    logToMixpanel("IO_BO_LOGIN", "UX", {}, "screen_view");
   };
 
   /**

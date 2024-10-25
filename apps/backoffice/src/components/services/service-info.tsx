@@ -47,9 +47,14 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   };
 
   const openDetails = () => {
-    logToMixpanel("IO_BO_SERVICE_DETAILS", "UX", {
-      serviceId: data?.id as string,
-    });
+    logToMixpanel(
+      "IO_BO_SERVICE_DETAILS",
+      "UX",
+      {
+        serviceId: data?.id as string,
+      },
+      "action",
+    );
     openDrawer(<ServiceInfoContent data={data} />);
   };
 

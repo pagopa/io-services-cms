@@ -108,9 +108,14 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
-    logToMixpanel("IO_BO_SERVICE_HISTORY", "UX", {
-      serviceId: serviceId,
-    });
+    logToMixpanel(
+      "IO_BO_SERVICE_HISTORY",
+      "UX",
+      {
+        serviceId: serviceId,
+      },
+      "action",
+    );
     shFetchData(
       "getServiceHistory",
       { continuationToken, serviceId },
@@ -123,16 +128,26 @@ export default function ServiceDetails() {
 
   const handlePreview = () => {
     setShowPreview(true);
-    logToMixpanel("IO_BO_SERVICE_PREVIEW", "UX", {
-      serviceId: serviceId,
-    });
+    logToMixpanel(
+      "IO_BO_SERVICE_PREVIEW",
+      "UX",
+      {
+        serviceId: serviceId,
+      },
+      "action",
+    );
   };
 
   const handleEdit = () => {
-    logToMixpanel("IO_BO_SERVICE_EDIT_START", "UX", {
-      entryPoint: "serviceDetails",
-      serviceId: serviceId,
-    });
+    logToMixpanel(
+      "IO_BO_SERVICE_EDIT_START",
+      "UX",
+      {
+        entryPoint: "serviceDetails",
+        serviceId: serviceId,
+      },
+      "action",
+    );
     router.push(`/services/${serviceId}/edit-service`);
   };
 
@@ -163,10 +178,15 @@ export default function ServiceDetails() {
   useEffect(() => {
     manageCurrentService();
     if (serviceId && slData?.name) {
-      logToMixpanel("IO_BO_SERVICE_DETAILS_PAGE", "UX", {
-        serviceId: serviceId,
-        serviceName: slData?.name as string,
-      });
+      logToMixpanel(
+        "IO_BO_SERVICE_DETAILS_PAGE",
+        "UX",
+        {
+          serviceId: serviceId,
+          serviceName: slData?.name as string,
+        },
+        "screen_view",
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);

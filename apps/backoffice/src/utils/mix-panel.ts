@@ -58,7 +58,7 @@ interface MixPanelEventsStructure {
 
 export const mixpanelSetup = () => {
   mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
-    debug: false,
+    debug: true,
     ignore_dnt: true,
     persistence: "localStorage",
     track_pageview: false,
@@ -78,6 +78,7 @@ export const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
   eventCategory: "TECH" | "UX",
   mixpanelEventData: MixPanelEvents<T>,
+  eventType?: "action" | "screen_view",
 ) => {
   let currentEvent;
   let currentEventData;
@@ -86,7 +87,11 @@ export const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   if (currentEvent !== operationId || currentEventData !== mixpanelEventData) {
     currentEvent = operationId;
     currentEventData = mixpanelEventData;
-    const categorizedEventData = { eventCategory, ...mixpanelEventData };
+    const categorizedEventData = {
+      eventCategory,
+      eventType,
+      ...mixpanelEventData,
+    };
 
     mixpanel.track(operationId, categorizedEventData);
   }
