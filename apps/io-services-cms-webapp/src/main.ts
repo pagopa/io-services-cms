@@ -160,7 +160,6 @@ const servicePublicationEventHubProducer = new EventHubProducerClient(
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
 );
 
-
 // eventhub producer for ServiceTopics
 const serviceTopicsEventHubProducer = new EventHubProducerClient(
   config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
@@ -452,4 +451,3 @@ export const createRequestServicesHistoryIngestionRetryEntryPoint =
   createRequestServicesHistoryIngestionRetryHandler(
     serviceHistoryEventHubProducer,
   );
-
