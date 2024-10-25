@@ -7,6 +7,7 @@ import * as O from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Decoder } from "io-ts";
+import { date } from "io-ts-types";
 import knexBase from "knex";
 import { DatabaseError, Pool } from "pg";
 
@@ -31,6 +32,7 @@ export type AllServiceTopicRowDataTable = t.TypeOf<
 export const AllServiceTopicRowDataTable = t.type({
   deleted: t.boolean,
   id: t.number,
+  modified_at: date,
   name: NonEmptyString,
 });
 
@@ -120,26 +122,16 @@ const findTopics =
     codec: Decoder<unknown, T>,
     query: (dbConfig: TopicPostgreSqlConfig) => string,
   ) =>
-  (): TE.TaskEither<DatabaseError | Error, O.Option<T[]>> =>
+  (): TE.TaskEither<DatabaseError | Error, T[]> =>
     pipe(
       query(dbConfig),
       queryDataTable(pool),
-      TE.map(
-        flow(
-          O.fromPredicate((queryResult) => queryResult.rowCount > 0),
-          O.map((queryResult) => queryResult.rows),
-        ),
-      ),
+      TE.map((queryResult) => queryResult.rows),
       TE.chain(
         flow(
-          O.fold(
-            () => TE.right(O.none),
-            flow(
-              A.traverse(E.Applicative)(codec.decode),
-              E.bimap(flow(readableReport, E.toError), O.some),
-              TE.fromEither,
-            ),
-          ),
+          A.traverse(E.Applicative)(codec.decode),
+          E.mapLeft(flow(readableReport, E.toError)),
+          TE.fromEither,
         ),
       ),
     );

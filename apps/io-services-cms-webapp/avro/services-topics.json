@@ -16,6 +16,10 @@
       "name": "deleted",
       "type": "boolean",
       "default": false
+    },
+    {
+      "name": "modified_at",
+      "type": "long"
     }
   ]
 }

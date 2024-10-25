@@ -1,9 +1,8 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { Context } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 import {
   AllServiceTopics,
@@ -48,14 +47,7 @@ export const createServiceTopicIngestorHandler =
     );
     return await pipe(
       serviceTopicDao.findAllTopics(),
-      TE.map(
-        flow(
-          O.fold(
-            () => writeTopicsOnEventHub([], producer, context),
-            (topics) => writeTopicsOnEventHub(topics, producer, context),
-          ),
-        ),
-      ),
+      TE.map((topics) => writeTopicsOnEventHub(topics, producer, context)),
       TE.flatten,
       TE.getOrElse((err) => {
         logger.logError(err, "An error occurred while ingesting topics");
