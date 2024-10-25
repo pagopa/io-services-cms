@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.16.0
+
+### Minor Changes
+
+- c0f4f6b: handle services list visibility based on authzGroups
+
+### Patch Changes
+
+- Updated dependencies [c0f4f6b]
+  - @io-services-cms/models@1.22.0
+  - @io-services-cms/external-clients@1.4.0
+
 ## 1.15.5
 
 ### Patch Changes

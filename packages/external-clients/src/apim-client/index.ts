@@ -21,7 +21,6 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import { parse } from "fp-ts/lib/Json";
 import * as O from "fp-ts/lib/Option";
-import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -31,13 +30,7 @@ import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
-import {
-  FilterCompositionEnum,
-  FilterFieldEnum,
-  FilterSupportedFunctionsEnum,
-  FilterSupportedOperatorsEnum,
-  buildApimFilter,
-} from "./apim-filters";
+import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 import { AzureClientSecretCredential } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
@@ -665,23 +658,6 @@ const createGroupUser = (
   );
 
 /**
- * User Subscription list filtered by name not startswith 'MANAGE-'
- *
- * @returns API Management `$filter` property
- */
-const subscriptionsExceptManageOneApimFilter = () =>
-  pipe(
-    buildApimFilter({
-      composeFilter: FilterCompositionEnum.none,
-      field: FilterFieldEnum.name,
-      filterType: FilterSupportedFunctionsEnum.startswith,
-      inverse: true,
-      value: SUBSCRIPTION_MANAGE_PREFIX,
-    }),
-    O.getOrElse(() => ""),
-  );
-
-/**
  * Parse the ID from a "full path" ID format
  * @param fullPath a full path ID in this kind of format: "/some/kind/of/prefix/id-value"
  * @returns the parsed id value
@@ -712,47 +688,6 @@ const pickId = (obj: Resource): TE.TaskEither<Error, NonEmptyString> =>
         new Error(`Cannot decode object to get id, ${readableReport(err)}`),
     ),
     TE.map((_) => _.id),
-  );
-
-/**
- * User Subscription list filtered by name startswith 'MANAGE-GROUP-'
- *
- * @returns API Management `$filter` property
- */
-export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
-  pipe(
-    groupIds,
-    O.fromNullable,
-    O.map(
-      flow(
-        RA.mapWithIndex((i, groupId) =>
-          pipe(
-            buildApimFilter({
-              composeFilter:
-                i === 0 ? FilterCompositionEnum.none : FilterCompositionEnum.or,
-              field: FilterFieldEnum.name,
-              filterType: FilterSupportedOperatorsEnum.eq,
-              inverse: false,
-              value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId,
-            }),
-            O.getOrElse(() => ""),
-          ),
-        ),
-        (groupIdFilters) => groupIdFilters.join(" "),
-      ),
-    ),
-    O.getOrElse(() =>
-      pipe(
-        buildApimFilter({
-          composeFilter: FilterCompositionEnum.none,
-          field: FilterFieldEnum.name,
-          filterType: FilterSupportedFunctionsEnum.startswith,
-          inverse: false,
-          value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
-        }),
-        O.getOrElse(() => ""),
-      ),
-    ),
   );
 
 export * as apim_filters from "./apim-filters";

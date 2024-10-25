@@ -261,6 +261,22 @@ export const ServicesTopicsEventHubConfig = t.type({
   SERVICES_TOPICS_EVENT_HUB_NAME: NonEmptyString,
 });
 
+export type ServicesLifecycleEventHubConfig = t.TypeOf<
+  typeof ServicesLifecycleEventHubConfig
+>;
+export const ServicesLifecycleEventHubConfig = t.type({
+  SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_LIFECYCLE_EVENT_HUB_NAME: NonEmptyString,
+});
+
+export type ServicesHistoryEventHubConfig = t.TypeOf<
+  typeof ServicesHistoryEventHubConfig
+>;
+export const ServicesHistoryEventHubConfig = t.type({
+  SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_HISTORY_EVENT_HUB_NAME: NonEmptyString,
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -295,6 +311,8 @@ export const IConfig = t.intersection([
   t.intersection([
     ServicesPublicationEventHubConfig,
     ServicesTopicsEventHubConfig,
+    ServicesLifecycleEventHubConfig,
+    ServicesHistoryEventHubConfig,
   ]),
 ]);
 

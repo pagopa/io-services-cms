@@ -21,11 +21,11 @@ import { identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export interface ApimRestClient {
-  readonly getServiceList: (
+  readonly getUserSubscriptions: (
     userId: string,
     limit: number,
     offset: number,
-    serviceId?: string,
+    filter: string,
     isRetry?: boolean,
   ) => TE.TaskEither<AxiosError | Error, SubscriptionCollection>;
 }
@@ -120,11 +120,11 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
     axiosInstance = getAxiosInstance(azureAccessToken);
   };
 
-  const getServiceList: ApimRestClient["getServiceList"] = (
+  const getUserSubscriptions: ApimRestClient["getUserSubscriptions"] = (
     userId,
     limit,
     offset,
-    serviceId,
+    filter,
     isRetry = false,
   ) =>
     pipe(
@@ -134,9 +134,7 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
             `${apimConfig.AZURE_SUBSCRIPTION_ID}/resourceGroups/${apimConfig.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${apimConfig.AZURE_APIM}/users/${userId}/subscriptions`,
             {
               params: {
-                $filter: serviceId
-                  ? `name eq '${serviceId}' and not startswith(name, 'MANAGE-')`
-                  : `not startswith(name, 'MANAGE-')`,
+                $filter: filter,
                 $skip: offset,
                 $top: limit,
                 "api-version": "2022-08-01",
@@ -157,7 +155,7 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
             return pipe(
               TE.fromIO(() => refreshClient()),
               TE.chain(() =>
-                getServiceList(userId, limit, offset, serviceId, true),
+                getUserSubscriptions(userId, limit, offset, filter, true),
               ),
             );
           }
@@ -171,7 +169,7 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
 
   // ritono client
   return {
-    getServiceList,
+    getUserSubscriptions,
   };
 };
 
