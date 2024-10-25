@@ -152,7 +152,7 @@ describe("getServicePublication", () => {
   it("should retrieve the service topics list", async () => {
     const mockServiceTopicDao = {
       findAllNotDeletedTopics: vi.fn(() =>
-        TE.right(O.some([{ id: 1, name: "aTopicName" }])),
+        TE.right([{ id: 1, name: "aTopicName" }]),
       ),
     } as any;
 
@@ -175,7 +175,7 @@ describe("getServicePublication", () => {
 
   it("handle no topics found", async () => {
     const mockServiceTopicDao = {
-      findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+      findAllNotDeletedTopics: vi.fn(() => TE.right([])),
     } as any;
 
     const app = mockWebServer(mockServiceTopicDao);

@@ -9,23 +9,11 @@ import {
 
 const avroType = avro.Type.forSchema(avroServiceTopics.schema as avro.Schema);
 
-const aServiceTopicArray = [
-  {
-    id: 1,
-    name: "topic1",
-    deleted: false,
-  },
-  {
-    id: 2,
-    name: "topic2",
-    deleted: true,
-  },
-];
-
 const aServiceTopicItem = {
   id: 1,
   name: "topic1",
   deleted: false,
+  modified_at: new Date(),
 } as AllServiceTopics;
 
 describe("Service Publication Avro Formatter", () => {
@@ -42,12 +30,9 @@ describe("Service Publication Avro Formatter", () => {
       const body = avroType.fromBuffer(rightVal.body);
 
       expect(body).toEqual({
-        id: 1,
-        name: "topic1",
-        deleted: false,
+        ...aServiceTopicItem,
+        modified_at: aServiceTopicItem.modified_at.getTime(),
       });
-
-      //console.log(body);
     }
   });
 

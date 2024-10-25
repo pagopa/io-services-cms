@@ -101,7 +101,7 @@ const mockBlobService = {
 } as any;
 
 const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
 const aValidLogoPayload = {

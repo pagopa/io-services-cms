@@ -22,6 +22,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { right } from "fp-ts/lib/Separated";
 
 const { validateServiceTopicRequest } = vi.hoisted(() => ({
   validateServiceTopicRequest: vi.fn(),
@@ -136,7 +137,7 @@ const mockBlobService = {
 } as any;
 
 const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
 afterEach(() => {
