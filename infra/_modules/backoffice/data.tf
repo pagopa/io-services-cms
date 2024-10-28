@@ -68,6 +68,6 @@ data "azurerm_key_vault_secret" "subscription_migration_api_key" {
 }
 
 data "azurerm_key_vault_secret" "mixpanel_token" {
-  name         = MIXPANEL-TOKEN
+  name         = var.MIXPANEL-TOKEN
   key_vault_id = var.key_vault_id
 }
