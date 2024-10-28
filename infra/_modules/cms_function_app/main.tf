@@ -55,6 +55,7 @@ module "cms_fn" {
       "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "1"
       "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "1"
       "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "1"
+      "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "1"
     }
   )
 
@@ -84,6 +85,7 @@ module "cms_fn" {
       "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "1"
       "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "1"
       "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "1"
+      "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "1"
     }
   )
 
@@ -110,7 +112,8 @@ module "cms_fn" {
     "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled",
     "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled",
     "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled",
-    "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"
+    "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled",
+    "AzureWebJobs.ServiceTopicsIngestor.Disabled",
   ]
 
   tier = local.cms.tier
