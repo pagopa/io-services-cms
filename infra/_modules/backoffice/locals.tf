@@ -69,7 +69,7 @@ locals {
       FETCH_KEEPALIVE_TIMEOUT             = "60000"
 
       # Backoffice
-      BACK_OFFICE_MIXPANEL_TOKEN=data.azurerm_key_vault_secret.mixpanel_token.value
+      BACK_OFFICE_MIXPANEL_TOKEN = data.azurerm_key_vault_secret.mixpanel_token.value
     }
 
     prod_app_setting = {
