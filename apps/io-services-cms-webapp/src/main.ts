@@ -32,6 +32,7 @@ import { createRequestHistoricizationHandler } from "./historicizer/request-hist
 import { createRequestServicesHistoryIngestionRetryHandler } from "./ingestion/request-services-history-ingestion-retry-handler";
 import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
+import { createServiceTopicIngestorHandler } from "./ingestion/service-topic-ingestor-handler";
 import {
   expressToAzureFunction,
   toAzureFunctionHandler,
@@ -159,11 +160,18 @@ const servicePublicationEventHubProducer = new EventHubProducerClient(
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
 );
 
+// eventhub producer for ServiceTopics
+const serviceTopicsEventHubProducer = new EventHubProducerClient(
+  config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
+  config.SERVICES_TOPICS_EVENT_HUB_NAME,
+);
+
 // eventhub producer for ServiceLifecycle
 const serviceLifecycleEventHubProducer = new EventHubProducerClient(
   config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
 );
+
 // eventhub producer for ServiceHistory
 const serviceHistoryEventHubProducer = new EventHubProducerClient(
   config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
@@ -398,6 +406,11 @@ export const createRequestServicesPublicationIngestionRetryEntryPoint =
   createRequestServicesPublicationIngestionRetryHandler(
     servicePublicationEventHubProducer,
   );
+
+export const serviceTopicIngestorEntryPoint = createServiceTopicIngestorHandler(
+  getServiceTopicDao(config),
+  serviceTopicsEventHubProducer,
+);
 
 export const onIngestionServiceLifecycleChangeEntryPoint = pipe(
   onIngestionServiceLifecycleChangeHandler(serviceLifecycleEventHubProducer),

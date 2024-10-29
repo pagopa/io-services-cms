@@ -117,6 +117,8 @@ locals {
       #EventHubConfing
       SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING = data.azurerm_key_vault_secret.services_publication_event_hub_connection_string.value
       SERVICES_PUBLICATION_EVENT_HUB_NAME              = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
+      SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING      = data.azurerm_key_vault_secret.services_topics_event_hub_connection_string.value
+      SERVICES_TOPICS_EVENT_HUB_NAME                   = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-topic-01"
       SERVICES_LIFECYCLE_EVENT_HUB_NAME                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-lifecycle-01"
       SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING   = data.azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value

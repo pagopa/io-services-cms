@@ -34,7 +34,7 @@ vi.mock("../../../utils/service-topic-validator", () => ({
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -50,7 +50,7 @@ const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -62,7 +62,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -88,7 +88,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -121,7 +121,7 @@ const mockBlobService = {
 } as any;
 
 const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right(O.none)),
+  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
 afterEach(() => {
@@ -305,7 +305,7 @@ describe("editService", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -338,7 +338,7 @@ describe("editService", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -371,7 +371,7 @@ describe("editService", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -406,7 +406,7 @@ describe("editService", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)

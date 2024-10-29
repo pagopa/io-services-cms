@@ -9,9 +9,8 @@ import {
   ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 
 import { ServiceTopicList } from "../../generated/api/ServiceTopicList";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
@@ -36,14 +35,7 @@ export const makeGetServiceTopicsHandler =
   (context) =>
     pipe(
       serviceTopicDao.findAllNotDeletedTopics(),
-      TE.map(
-        flow(
-          O.fold(
-            () => ResponseSuccessJson({ topics: [] }),
-            (topics) => ResponseSuccessJson({ topics }),
-          ),
-        ),
-      ),
+      TE.map((topics) => ResponseSuccessJson({ topics })),
       TE.mapLeft((err) => {
         getLogger(context, logPrefix).log(
           "error",
