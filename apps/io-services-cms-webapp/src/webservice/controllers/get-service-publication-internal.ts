@@ -55,7 +55,7 @@ export const makeGetServicePublicationInternalHandler =
   (context, auth, serviceId) =>
     pipe(
       genericServiceRetrieveHandler(
-        fsmPublicationClient.getStore(),
+        fsmPublicationClient.fetch,
         apimService,
         telemetryClient,
         itemToResponse(config),

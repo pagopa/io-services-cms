@@ -31,12 +31,14 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
@@ -45,6 +47,7 @@ const logPrefix = "UnpublishServiceHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
 }
@@ -57,15 +60,17 @@ type UnPublishServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 export const makeUnpublishServiceHandler =
   ({
     apimService,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     telemetryClient,
   }: Dependencies): UnPublishServiceHandler =>
-  (context, auth, __, ___, serviceId) =>
+  (context, auth, __, ___, serviceId, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -73,6 +78,7 @@ export const makeUnpublishServiceHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.tap(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW(
         flow(
           fsmPublicationClient.unpublish,
@@ -115,6 +121,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

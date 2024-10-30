@@ -34,6 +34,7 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -54,7 +55,7 @@ const logPrefix = "EditServiceHandler";
 interface Dependencies {
   apimService: ApimUtils.ApimService;
   config: IConfig;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -69,16 +70,17 @@ type EditServiceHandler = (
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: ServiceRequestPayload,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 export const makeEditServiceHandler =
   ({
     apimService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): EditServiceHandler =>
-  (context, auth, __, ___, serviceId, servicePayload) =>
+  (context, auth, __, ___, serviceId, servicePayload, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -95,7 +97,7 @@ export const makeEditServiceHandler =
       ),
       TE.chainW((sId) =>
         pipe(
-          fsmLifecycleClient.edit(sId, {
+          fsmLifecycleClientCreator(authzGroupIds).edit(sId, {
             data: payloadToItem(
               serviceId,
               servicePayload,
@@ -141,13 +143,37 @@ export const applyRequestMiddelwares =
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(ServiceRequestPayload),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
-      middlewaresWrap(
-        // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
+      middlewaresWrap((_, __, c, u, ___, servicePayload, authzGroupIds) =>
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u))(
+          _,
+          __,
+          c,
+          u,
+          ___,
+          authzGroupIds.length < 0 // FIXME
+            ? removeGroupId(servicePayload)
+            : servicePayload,
+          authzGroupIds,
         ),
       ),
     );
   };
+
+/**
+ * Remove group_id property.
+ *
+ * Notice: if a property is not present, it can't be overriden!
+ *
+ * @param servicePayload the request body payload
+ * @returns the request body payload except group_id property
+ */
+const removeGroupId = ({
+  metadata: { group_id: _, ...metadata },
+  ...servicePayload
+}: ServiceRequestPayload): ServiceRequestPayload => ({
+  ...servicePayload,
+  metadata: { ...metadata },
+});

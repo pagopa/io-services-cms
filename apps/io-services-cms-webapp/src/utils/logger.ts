@@ -57,11 +57,15 @@ export const getLogger = (context: Context, logPrefix: string, step = "-") => ({
     errorResponse: ErrorResponseTypes,
     addititionalInfo?: unknown,
   ) => {
-    context.log.error(
-      `${logPrefix}|${step}|${handleErrorResponseType(errorResponse)}|${
-        addititionalInfo ? JSON.stringify(addititionalInfo) : ""
-      }`,
-    );
+    const errorMessage = `${logPrefix}|${step}|${handleErrorResponseType(errorResponse)}|${addititionalInfo ? JSON.stringify(addititionalInfo) : ""}`;
+    switch (errorResponse.kind) {
+      case "IResponseErrorInternal":
+        context.log.error(errorMessage);
+        break;
+      default:
+        context.log.warn(errorMessage);
+        break;
+    }
     return errorResponse;
   },
   logErrors: (errs: Errors): void =>

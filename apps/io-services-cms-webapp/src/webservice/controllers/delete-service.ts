@@ -31,6 +31,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -45,7 +46,7 @@ const logPrefix = "DeleteServiceHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -57,15 +58,16 @@ type DeleteServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 export const makeDeleteServiceHandler =
   ({
     apimService,
-    fsmLifecycleClient: fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): DeleteServiceHandler =>
-  (context, auth, _, __, serviceId) =>
+  (context, auth, _, __, serviceId, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -75,7 +77,7 @@ export const makeDeleteServiceHandler =
       ),
       TE.chainW(
         flow(
-          fsmLifecycleClient.delete,
+          fsmLifecycleClientCreator(authzGroupIds).delete,
           TE.map(ResponseSuccessNoContent),
           TE.mapLeft(fsmToApiError),
         ),
@@ -112,6 +114,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

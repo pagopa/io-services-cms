@@ -34,12 +34,14 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
@@ -48,6 +50,7 @@ const logPrefix = "PublishServiceHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
 }
@@ -60,6 +63,7 @@ type PublishServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 const retrieveServicePublicationTask =
@@ -88,10 +92,11 @@ const retrieveServicePublicationTask =
 export const makePublishServiceHandler =
   ({
     apimService,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     telemetryClient,
   }: Dependencies): PublishServiceHandler =>
-  (context, auth, __, ___, serviceId) =>
+  (context, auth, __, ___, serviceId, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -99,6 +104,8 @@ export const makePublishServiceHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      (Z) => Z,
+      TE.tap(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW(retrieveServicePublicationTask(fsmPublicationClient)),
       TE.chainW(
         flow(
@@ -139,6 +146,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

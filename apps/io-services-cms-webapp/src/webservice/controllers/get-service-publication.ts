@@ -32,6 +32,7 @@ import { ServicePublication as ServiceResponsePayload } from "../../generated/ap
 import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import { EventNameEnum, TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
 import { ErrorResponseTypes } from "../../utils/logger";
@@ -41,7 +42,7 @@ const logPrefix = "GetServicePublicationHandler";
 interface Dependencies {
   apimService: ApimUtils.ApimService;
   config: IConfig;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   fsmPublicationClient: ServicePublication.FsmClient;
   telemetryClient: TelemetryClient;
 }
@@ -63,28 +64,17 @@ export const makeGetServicePublicationHandler =
   ({
     apimService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     telemetryClient,
   }: Dependencies): PublishServiceHandler =>
   (context, auth, __, ___, serviceId, authzGroupIds) =>
     pipe(
-      genericServiceRetrieveHandler(
-        fsmLifecycleClient.getStore(),
-        apimService,
-        telemetryClient,
-        (_) => TE.right(void 0),
-      )(
-        context,
-        auth,
-        serviceId,
-        logPrefix,
-        EventNameEnum.GetServiceLifecycle, // execute genericServiceRetrieveHandler on GetServiceLifecycle event to apply group authz check
-        authzGroupIds,
-      ),
+      serviceId,
+      checkService(fsmLifecycleClientCreator(authzGroupIds)),
       TE.chain((_) =>
         genericServiceRetrieveHandler(
-          fsmPublicationClient.getStore(),
+          fsmPublicationClient.fetch,
           apimService,
           telemetryClient,
           itemToResponse(config),

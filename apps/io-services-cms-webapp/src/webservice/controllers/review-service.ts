@@ -33,6 +33,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { ReviewRequest as ReviewRequestPayload } from "../../generated/api/ReviewRequest";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
@@ -43,7 +44,7 @@ const logPrefix = "ReviewServiceHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -56,15 +57,16 @@ type ReviewServiceHandler = (
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: ReviewRequestPayload,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 export const makeReviewServiceHandler =
   ({
     apimService,
-    fsmLifecycleClient: fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): ReviewServiceHandler =>
-  (context, auth, __, ___, serviceId, body) =>
+  (context, auth, __, ___, serviceId, body, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -74,7 +76,7 @@ export const makeReviewServiceHandler =
       ),
       TE.chainW((sId) =>
         pipe(
-          fsmLifecycleClient.submit(sId, {
+          fsmLifecycleClientCreator(authzGroupIds).submit(sId, {
             autoPublish: body.auto_publish ?? false,
           }),
           TE.map(ResponseSuccessNoContent),
@@ -121,13 +123,12 @@ export const applyRequestMiddelwares =
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // extract and validate the request body
       RequiredBodyPayloadMiddleware(ReviewRequestPayload),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
       ),
     );
   };

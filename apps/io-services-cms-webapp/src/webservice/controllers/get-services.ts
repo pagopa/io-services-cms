@@ -75,8 +75,7 @@ interface Dependencies {
   apimService: ApimUtils.ApimService;
   // The app configuration
   config: IConfig;
-  // An instance of ServiceLifecycle client
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -205,12 +204,15 @@ export const makeGetServicesHandler =
   ({
     apimService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
   (context, auth, __, ___, limit, offset, authzGroupIds) =>
     pipe(
-      getAuthorizedSubscriptions(fsmLifecycleClient, apimService)(
+      getAuthorizedSubscriptions(
+        fsmLifecycleClientCreator(authzGroupIds),
+        apimService,
+      )(
         authzGroupIds,
         auth.userId,
         getOffset(offset),
@@ -218,7 +220,10 @@ export const makeGetServicesHandler =
       ),
       TE.chain((subscriptions) =>
         pipe(
-          getServices(config)(fsmLifecycleClient, subscriptions),
+          getServices(config)(
+            fsmLifecycleClientCreator(authzGroupIds),
+            subscriptions,
+          ),
           TE.map((services) =>
             buildServiceSubscriptionPairs(subscriptions, services),
           ),
@@ -289,9 +294,7 @@ export const applyRequestMiddelwares =
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
       ),
     );
   };
