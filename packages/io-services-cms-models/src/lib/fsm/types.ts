@@ -156,3 +156,11 @@ export class FsmItemValidationError extends Error {
     this.name = "FsmItemValidationError";
   }
 }
+
+export class FsmAuthorizationError extends Error {
+  public kind = "AuthorizationError";
+  constructor() {
+    super("Unauthorized access");
+    this.name = "AuthorizationError";
+  }
+}
