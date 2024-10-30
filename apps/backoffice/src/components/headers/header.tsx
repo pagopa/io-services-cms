@@ -39,11 +39,6 @@ export const Header = () => {
   const [selectedProductId, setSelectedProductId] = useState(products[0].id);
 
   const selectedProductChange = (product: ProductSwitchItem) => {
-    // no action if user click on current product (i.e.: BackOffice IO)
-    if (selectedProductId === product.id) return;
-    // otherwise navigate to product url (i.e.: SelfCare)
-    setSelectedProductId(product.id);
-    window.location.href = product.productUrl;
     logToMixpanel(
       "IO_BO_PRODUCT_SWITCH",
       "UX",
@@ -52,6 +47,11 @@ export const Header = () => {
       },
       "action",
     );
+    // no action if user click on current product (i.e.: BackOffice IO)
+    if (selectedProductId === product.id) return;
+    // otherwise navigate to product url (i.e.: SelfCare)
+    setSelectedProductId(product.id);
+    window.location.href = product.productUrl;
   };
 
   const selectedPartyChange = (party: PartySwitchItem) => {
@@ -63,7 +63,7 @@ export const Header = () => {
       "IO_BO_INSTITUTION_SWITCH",
       "UX",
       {
-        institutionId: party.id,
+        switchToInstitutionId: party.id,
       },
       "action",
     );

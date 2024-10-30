@@ -171,23 +171,22 @@ export default function ServiceDetails() {
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
       notify: "errors",
     });
+    logToMixpanel(
+      "IO_BO_SERVICE_DETAILS_PAGE",
+      "UX",
+      {
+        serviceId: serviceId,
+        serviceName: slData?.name as string,
+      },
+      "screen_view",
+    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     manageCurrentService();
-    if (serviceId && slData?.name) {
-      logToMixpanel(
-        "IO_BO_SERVICE_DETAILS_PAGE",
-        "UX",
-        {
-          serviceId: serviceId,
-          serviceName: slData?.name as string,
-        },
-        "screen_view",
-      );
-    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slData, spData, release]);
 

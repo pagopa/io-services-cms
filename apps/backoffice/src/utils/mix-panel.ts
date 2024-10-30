@@ -6,7 +6,7 @@ import mixpanel from "mixpanel-browser";
 interface MixPanelEventsStructure {
   readonly IO_BO_APIKEY_PAGE: {};
   readonly IO_BO_INSTITUTION_SWITCH: {
-    institutionId: string;
+    switchToInstitutionId: string;
   };
   readonly IO_BO_LOGIN: {};
   readonly IO_BO_MANAGE_KEY_COPY: {
