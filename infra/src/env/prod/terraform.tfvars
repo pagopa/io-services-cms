@@ -29,7 +29,7 @@ subnets_cidrs = {
   backoffice = ["10.0.135.128/26"]
 }
 
-cosmos_private_endpoint_enabled      = true
+cosmos_private_endpoint_enabled      = false
 cosmos_public_network_access_enabled = false
 
 ## Apim

@@ -60,7 +60,6 @@ data "azurerm_subnet" "private_endpoints_subnet_itn" {
   resource_group_name  = local.vnet_common_resource_group_name_itn
 }
 
-
 resource "azurerm_private_endpoint" "cosmos_db" {
   name                = "${local.project_itn}-svc-cosno-pep-01"
   location            = "italynorth"
@@ -72,5 +71,12 @@ resource "azurerm_private_endpoint" "cosmos_db" {
     private_connection_resource_id = module.cosmosdb_account.id
     is_manual_connection           = false
     subresource_names              = ["Sql"]
+  }
+
+  private_dns_zone_group {
+    name = "private-dns-zone-group"
+    private_dns_zone_ids = [
+      data.azurerm_private_dns_zone.privatelink_documents_azure_com[0].id
+    ]
   }
 }
