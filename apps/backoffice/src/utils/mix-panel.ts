@@ -58,7 +58,7 @@ interface MixPanelEventsStructure {
 
 export const mixpanelSetup = () => {
   mixpanel.init(getConfiguration().BACK_OFFICE_MIXPANEL_TOKEN, {
-    debug: true,
+    debug: false,
     ignore_dnt: true,
     persistence: "localStorage",
     track_pageview: false,

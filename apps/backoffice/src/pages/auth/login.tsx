@@ -42,6 +42,7 @@ export default function Login() {
       identity_token,
       //redirect: false
     });
+    manageMixpanelLogin();
   };
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function Login() {
     } else {
       handleIdentity();
     }
-    manageMixpanelLogin();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 
