@@ -42,13 +42,13 @@ export default function Login() {
       identity_token,
       //redirect: false
     });
-    manageMixpanelLogin();
   };
 
   useEffect(() => {
     if (session && router.isReady) {
       // redirect to the return url or home page
       // router.push((router.query.returnUrl as string) || "/");
+      manageMixpanelLogin();
       router.push("/");
     } else {
       handleIdentity();
