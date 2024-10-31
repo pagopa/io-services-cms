@@ -44,7 +44,9 @@ const anApimResource = {
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
@@ -128,8 +130,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -141,16 +144,16 @@ const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
-describe("getServiceKeys", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
+describe("getServiceKeys", () => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -170,7 +173,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(mockApimService.listSecrets).not.toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(mockContext.log.warn).toHaveBeenCalled();
     expect(response.statusCode).toBe(404);
   });
 
@@ -190,7 +193,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(mockApimService.listSecrets).not.toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(mockContext.log.warn).toHaveBeenCalled();
     expect(response.statusCode).toBe(404);
   });
 
@@ -234,7 +237,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(mockApimService.listSecrets).toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -316,7 +319,7 @@ describe("getServiceKeys", () => {
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
     expect(mockApimService.listSecrets).not.toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 });

@@ -35,7 +35,7 @@ import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-us
 import { checkService } from "../../utils/check-service";
 import { itemToResponse } from "../../utils/converters/service-publication-converters";
 import { genericServiceRetrieveHandler } from "../../utils/generic-service-retrieve";
-import { ErrorResponseTypes } from "../../utils/logger";
+import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 
 const logPrefix = "GetServicePublicationHandler";
 
@@ -72,6 +72,12 @@ export const makeGetServicePublicationHandler =
     pipe(
       serviceId,
       checkService(fsmLifecycleClientCreator(authzGroupIds)),
+      TE.mapLeft((err) =>
+        getLogger(context, logPrefix).logErrorResponse(err, {
+          serviceId,
+          userSubscriptionId: auth.subscriptionId,
+        }),
+      ),
       TE.chain((_) =>
         genericServiceRetrieveHandler(
           fsmPublicationClient.fetch,

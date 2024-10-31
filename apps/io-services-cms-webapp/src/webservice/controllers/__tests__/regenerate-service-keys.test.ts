@@ -22,6 +22,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { ResponseErrorNotFound } from "@pagopa/ts-commons/lib/responses";
 
 const apiBasePath = "/api/services/aServiceId/keys/";
 const apiDeletedServiceKeys = "/api/services/aDeletedServiceId/keys/";
@@ -44,12 +45,14 @@ const anApimResource = {
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const mockApimService = {
@@ -57,7 +60,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
@@ -108,7 +111,7 @@ const aServiceLifecycle = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -131,8 +134,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -144,16 +148,24 @@ const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
-describe("regenerateSubscriptionKeys", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+const { checkServiceMock } = vi.hoisted(() => ({
+  checkServiceMock: vi.fn<any[], any>(() => TE.right(undefined)),
+}));
 
+vi.mock("../../../utils/check-service", () => ({
+  checkService: vi.fn(() => checkServiceMock),
+}));
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("regenerateSubscriptionKeys", () => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -186,7 +198,7 @@ describe("regenerateSubscriptionKeys", () => {
       JSON.stringify({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
-      })
+      }),
     );
   });
 
@@ -213,16 +225,19 @@ describe("regenerateSubscriptionKeys", () => {
       JSON.stringify({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
-      })
+      }),
     );
   });
 
   it("should return 404 when service is deleted", async () => {
-    await serviceLifecycleStore.save("aDeletedServiceId", {
-      ...aServiceLifecycle,
-      id: "s1" as NonEmptyString,
-      fsm: { state: "deleted" },
-    })();
+    checkServiceMock.mockReturnValueOnce(
+      TE.left(
+        ResponseErrorNotFound(
+          "Not found",
+          `no item with id ${"aDeletedServiceId"} found`,
+        ),
+      ),
+    );
 
     const response = await request(app)
       .put(apiDeletedServiceKeysFullPath)
@@ -233,7 +248,7 @@ describe("regenerateSubscriptionKeys", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalled();
+    expect(mockContext.log.warn).toHaveBeenCalled();
     expect(response.statusCode).toBe(404);
   });
 
@@ -253,7 +268,7 @@ describe("regenerateSubscriptionKeys", () => {
 
   it("should fail with a not found error when cannot find requested service subscription", async () => {
     vi.mocked(mockApimService.regenerateSubscriptionKey).mockImplementationOnce(
-      () => TE.left({ statusCode: 404 })
+      () => TE.left({ statusCode: 404 }),
     );
 
     const response = await request(app)
@@ -266,13 +281,13 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(mockApimService.getSubscription).toHaveBeenCalledTimes(1);
     expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
   it("should fail with a generic error if regenerate key returns an error", async () => {
     vi.mocked(mockApimService.regenerateSubscriptionKey).mockImplementationOnce(
-      () => TE.left({ statusCode: 500 })
+      () => TE.left({ statusCode: 500 }),
     );
 
     const response = await request(app)
@@ -292,7 +307,7 @@ describe("regenerateSubscriptionKeys", () => {
   it("should fail with a generic error if manage subscription returns an error", async () => {
     // first getSubscription for manage key middleware
     vi.mocked(mockApimService.getSubscription).mockImplementationOnce(() =>
-      TE.left({ statusCode: 500 })
+      TE.left({ statusCode: 500 }),
     );
 
     const response = await request(app)
@@ -353,7 +368,7 @@ describe("regenerateSubscriptionKeys", () => {
 
     expect(mockApimService.getSubscription).toHaveBeenCalledTimes(1);
     expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 });

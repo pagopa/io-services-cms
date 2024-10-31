@@ -25,7 +25,7 @@ import { WebServerDependencies, createWebServer } from "../../index";
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -72,7 +72,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -99,7 +99,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -122,8 +122,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -132,13 +133,14 @@ const mockServiceTopicDao = {
 } as any;
 
 const mockWebServer = (
-  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>
+  serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>,
 ) => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
     subscriptionCIDRsModel,
+    fsmLifecycleClientCreator: vi.fn(),
     serviceTopicDao: mockServiceTopicDao,
     telemetryClient: mockAppinsights,
     serviceHistoryPagedHelper,
@@ -149,11 +151,23 @@ const mockWebServer = (
   return app;
 };
 
-describe("getServiceHistory", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+const { checkServiceMock } = vi.hoisted(() => ({
+  checkServiceMock: vi.fn<any[], any>(() => TE.right(undefined)),
+}));
 
+vi.mock("../../../utils/check-service", () => ({
+  checkService: vi.fn(() => checkServiceMock),
+}));
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("getServiceHistory", () => {
   it("Should Use default parameters", async () => {
     const serviceHistoryList = [aServiceHistoryItem];
 
@@ -163,8 +177,8 @@ describe("getServiceHistory", () => {
           O.some({
             resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -189,12 +203,11 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       undefined,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -219,8 +232,8 @@ describe("getServiceHistory", () => {
           O.some({
             resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -245,12 +258,11 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       undefined,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -275,8 +287,8 @@ describe("getServiceHistory", () => {
           O.some({
             resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
@@ -301,12 +313,11 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       aLimit,
-      undefined
+      undefined,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -331,14 +342,14 @@ describe("getServiceHistory", () => {
           O.some({
             continuationToken: aContinuationToken,
             resources: serviceHistoryList,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 
     const response = await request(mockWebServer(mockServiceHistoryPagedHelper))
       .get(
-        `/api/services/${aServiceId}/history?continuationToken=${anotherContinuationToken}`
+        `/api/services/${aServiceId}/history?continuationToken=${anotherContinuationToken}`,
       )
       .send()
       .set("x-user-email", "example@email.com")
@@ -359,12 +370,11 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       undefined,
-      anotherContinuationToken
+      anotherContinuationToken,
     );
 
-    const expectedItemList = await itemsToResponse(mockConfig)(
-      serviceHistoryList
-    )();
+    const expectedItemList =
+      await itemsToResponse(mockConfig)(serviceHistoryList)();
 
     if (E.isLeft(expectedItemList)) {
       throw new Error("Test error Expected Right");
@@ -405,7 +415,7 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       undefined,
-      undefined
+      undefined,
     );
 
     expect(response.body).toEqual({
@@ -442,7 +452,7 @@ describe("getServiceHistory", () => {
         orderBy: "id",
       },
       undefined,
-      undefined
+      undefined,
     );
 
     expect(response.body.detail).toEqual("COSMOS ERROR RETURNED");
@@ -459,8 +469,8 @@ describe("getServiceHistory", () => {
           O.some({
             resources: serviceHistoryList,
             continuationToken: aContinuationToken,
-          })
-        )
+          }),
+        ),
       ),
     } as unknown as CosmosPagedHelper<ServiceHistoryCosmosType>;
 

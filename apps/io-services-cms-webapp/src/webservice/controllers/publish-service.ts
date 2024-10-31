@@ -104,7 +104,6 @@ export const makePublishServiceHandler =
         auth.subscriptionId,
         auth.userId,
       ),
-      (Z) => Z,
       TE.tap(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW(retrieveServicePublicationTask(fsmPublicationClient)),
       TE.chainW(
