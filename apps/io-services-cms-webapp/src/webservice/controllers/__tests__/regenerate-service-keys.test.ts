@@ -37,7 +37,7 @@ const anApimResource = {
 const fsmLifecycleClientMock = {};
 const fsmLifecycleClientCreatorMock = vi.fn(() => fsmLifecycleClientMock);
 
-const mockApimService = {
+const apimServiceMock = {
   regenerateSubscriptionKey: vi.fn<any[], any>((_) => TE.right(anApimResource)),
 };
 
@@ -137,7 +137,7 @@ beforeEach(() => {
 describe("regenerateSubscriptionKeys", () => {
   const app = createWebServer({
     basePath: "api",
-    apimService: mockApimService as unknown as ApimUtils.ApimService,
+    apimService: apimServiceMock as unknown as ApimUtils.ApimService,
     config: mockConfig,
     fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
     fsmPublicationClient: vi.fn(),
@@ -170,7 +170,7 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -183,8 +183,8 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(checkServiceMock).toHaveBeenCalledOnce();
     expect(checkServiceMock).toHaveBeenCalledWith(serviceId);
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledWith(
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledWith(
       serviceId,
       keyType,
     );
@@ -216,7 +216,7 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -229,8 +229,8 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(checkServiceMock).toHaveBeenCalledOnce();
     expect(checkServiceMock).toHaveBeenCalledWith(serviceId);
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledWith(
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledWith(
       serviceId,
       keyType,
     );
@@ -261,7 +261,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(response.statusCode).toBe(404);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -274,7 +274,7 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(checkServiceMock).toHaveBeenCalledOnce();
     expect(checkServiceMock).toHaveBeenCalledWith(serviceId);
-    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(apimServiceMock.regenerateSubscriptionKey).not.toHaveBeenCalled();
     expect(getLoggerMock).toHaveBeenCalledOnce();
     expect(getLoggerMock).toHaveBeenCalledWith(mockContext, logPrefix);
     expect(logErrorResponseMock).toHaveBeenCalledOnce();
@@ -304,7 +304,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();
     expect(checkServiceMock).not.toHaveBeenCalled();
-    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(apimServiceMock.regenerateSubscriptionKey).not.toHaveBeenCalled();
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
     expect(getLoggerMock).not.toHaveBeenCalled();
@@ -315,7 +315,7 @@ describe("regenerateSubscriptionKeys", () => {
     const serviceId = "aServiceId";
     const keyType = "primary";
     const apimServiceError = { statusCode: 404 };
-    mockApimService.regenerateSubscriptionKey.mockImplementationOnce(() =>
+    apimServiceMock.regenerateSubscriptionKey.mockImplementationOnce(() =>
       TE.left(apimServiceError),
     );
     const error = ResponseErrorNotFound("title", "detail");
@@ -332,7 +332,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(response.statusCode).toBe(404);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -345,8 +345,8 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(checkServiceMock).toHaveBeenCalledOnce();
     expect(checkServiceMock).toHaveBeenCalledWith(serviceId);
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledWith(
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledWith(
       serviceId,
       keyType,
     );
@@ -368,7 +368,7 @@ describe("regenerateSubscriptionKeys", () => {
     const serviceId = "aServiceId";
     const keyType = "primary";
     const apimServiceError = { statusCode: 500 };
-    mockApimService.regenerateSubscriptionKey.mockImplementationOnce(() =>
+    apimServiceMock.regenerateSubscriptionKey.mockImplementationOnce(() =>
       TE.left(apimServiceError),
     );
     const error = ResponseErrorInternal("detail");
@@ -385,7 +385,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(response.statusCode).toBe(500);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -398,8 +398,8 @@ describe("regenerateSubscriptionKeys", () => {
     );
     expect(checkServiceMock).toHaveBeenCalledOnce();
     expect(checkServiceMock).toHaveBeenCalledWith(serviceId);
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-    expect(mockApimService.regenerateSubscriptionKey).toHaveBeenCalledWith(
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+    expect(apimServiceMock.regenerateSubscriptionKey).toHaveBeenCalledWith(
       serviceId,
       keyType,
     );
@@ -434,7 +434,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(response.statusCode).toBe(500);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
-      mockApimService,
+      apimServiceMock,
       serviceId,
       aManageSubscriptionId,
       userId,
@@ -454,7 +454,7 @@ describe("regenerateSubscriptionKeys", () => {
       userSubscriptionId: aManageSubscriptionId,
     });
     expect(checkServiceMock).not.toHaveBeenCalled();
-    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(apimServiceMock.regenerateSubscriptionKey).not.toHaveBeenCalled();
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
   });
@@ -476,7 +476,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();
     expect(checkServiceMock).not.toHaveBeenCalled();
-    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(apimServiceMock.regenerateSubscriptionKey).not.toHaveBeenCalled();
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
     expect(getLoggerMock).not.toHaveBeenCalled();
@@ -501,7 +501,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();
     expect(checkServiceMock).not.toHaveBeenCalled();
-    expect(mockApimService.regenerateSubscriptionKey).not.toHaveBeenCalled();
+    expect(apimServiceMock.regenerateSubscriptionKey).not.toHaveBeenCalled();
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
     expect(getLoggerMock).not.toHaveBeenCalled();

@@ -91,24 +91,11 @@ const createSubscription = (
     ),
   );
 
-export const makeCreateServiceHandler =
-  ({
-    apimService,
-    config,
-    fsmLifecycleClientCreator,
-    telemetryClient,
-  }: Dependencies): ICreateServiceHandler =>
-  (context, auth, _, __, servicePayload, authzGroupIds) => {
-    const logger = getLogger(context, logPrefix);
-    const serviceId = ulidGenerator();
-
-    const createSubscriptionStep = pipe(
-      createSubscription(apimService, auth.userId, serviceId),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-    );
-
-    const createServiceStep = pipe(
-      fsmLifecycleClientCreator(authzGroupIds).create(serviceId, {
+const createServiceStep =
+  (config: IConfig, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
+  (serviceId: NonEmptyString, servicePayload: ServiceRequestPayload) =>
+    pipe(
+      fsmLifecycleClient.create(serviceId, {
         data: payloadToItem(
           serviceId,
           servicePayload,
@@ -122,11 +109,42 @@ export const makeCreateServiceHandler =
       ),
     );
 
+export const makeCreateServiceHandler =
+  ({
+    apimService,
+    config,
+    fsmLifecycleClientCreator,
+    telemetryClient,
+  }: Dependencies): ICreateServiceHandler =>
+  (context, auth, _, __, servicePayload, authzGroupIds) => {
+    const logger = getLogger(context, logPrefix);
+    const serviceId = ulidGenerator();
+
     return pipe(
       servicePayload.metadata.topic_id,
       validateServiceTopicRequest(config),
-      TE.chainW(() => createSubscriptionStep),
-      TE.chainW((_) => createServiceStep),
+      TE.chainW(() =>
+        pipe(
+          createSubscription(apimService, auth.userId, serviceId),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+        ),
+      ),
+      TE.chainW((_) =>
+        pipe(
+          fsmLifecycleClientCreator(authzGroupIds).create(serviceId, {
+            data: payloadToItem(
+              serviceId,
+              servicePayload,
+              config.SANDBOX_FISCAL_CODE,
+            ),
+          }),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+        ),
+      ),
+      TE.chainW(itemToResponse(config)),
+      TE.map((result) =>
+        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201),
+      ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
           serviceId,
