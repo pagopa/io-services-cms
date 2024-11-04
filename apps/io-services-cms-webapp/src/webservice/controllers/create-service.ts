@@ -91,24 +91,6 @@ const createSubscription = (
     ),
   );
 
-const createServiceStep =
-  (config: IConfig, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
-  (serviceId: NonEmptyString, servicePayload: ServiceRequestPayload) =>
-    pipe(
-      fsmLifecycleClient.create(serviceId, {
-        data: payloadToItem(
-          serviceId,
-          servicePayload,
-          config.SANDBOX_FISCAL_CODE,
-        ),
-      }),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      TE.chain(itemToResponse(config)),
-      TE.map((result) =>
-        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201),
-      ),
-    );
-
 export const makeCreateServiceHandler =
   ({
     apimService,
