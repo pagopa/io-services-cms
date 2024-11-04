@@ -10,7 +10,7 @@ module "api_services_cms_itn" {
 
   path        = "api/v1/manage"
   protocols   = ["http", "https"]
-  product_ids = [data.azurerm_api_management_product.apim_v2_product_services.product_id]
+  product_ids = [data.azurerm_api_management_product.apim_itn_product_services.product_id]
 
   service_url = "https://${data.azurerm_linux_function_app.itn_webapp_functions_app.default_hostname}/api/v1"
 
