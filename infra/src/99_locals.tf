@@ -20,4 +20,7 @@ locals {
 
   vnet_common_name_itn                = "${local.common_project_itn}-common-vnet-01"
   vnet_common_resource_group_name_itn = "${local.common_project_itn}-common-rg-01"
+
+  apim_name_itn                = "${local.common_project_itn}-apim-01"
+  apim_resource_group_name_itn = "${local.common_project_itn}-common-rg-01"
 }

@@ -1,8 +1,3 @@
-data "azurerm_linux_function_app" "itn_webapp_functions_app" {
-  name                = "${local.project}-itn-svc-cms-func-01"
-  resource_group_name = "${local.project}-itn-svc-rg-01"
-}
-
 module "api_services_cms_v2" {
   source = "github.com/pagopa/terraform-azurerm-v3.git//api_management_api?ref=v8.44.2"
 
