@@ -26,6 +26,7 @@ import { IConfig } from "../../../config";
 import { itemToResponse as getPublicationItemToResponse } from "../../../utils/converters/service-publication-converters";
 import { WebServerDependencies, createWebServer } from "../../index";
 import { last } from "fp-ts/lib/ReadonlyArray";
+import { getResponseErrorForbiddenNoAuthorizationGroups } from "@pagopa/ts-commons/lib/responses";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -51,7 +52,9 @@ vi.mock("../../../utils/service-topic-dao", () => ({
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
@@ -154,8 +157,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -167,16 +171,24 @@ const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
-describe("getServicePublication", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+const { checkServiceMock } = vi.hoisted(() => ({
+  checkServiceMock: vi.fn<any[], any>(() => TE.right(undefined)),
+}));
 
+vi.mock("../../../utils/check-service", () => ({
+  checkService: vi.fn(() => checkServiceMock),
+}));
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("getServicePublication", () => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -195,13 +207,15 @@ describe("getServicePublication", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
   it("should fail when user do not have group-based authz to retrieve requested service", async () => {
     // given
-    await serviceLifecycleStore.save("s3", aServiceLifecycle)();
+    checkServiceMock.mockReturnValueOnce(
+      TE.left(getResponseErrorForbiddenNoAuthorizationGroups()),
+    );
 
     // when
     const response = await request(app)
@@ -214,7 +228,7 @@ describe("getServicePublication", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     // then
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 
@@ -267,7 +281,7 @@ describe("getServicePublication", () => {
     expect(response.text).toContain(
       "You do not have enough permission to complete the operation you requested",
     );
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 

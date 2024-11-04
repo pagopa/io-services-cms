@@ -54,7 +54,7 @@ type GetServiceLifecycleHandler = (
 interface Dependencies {
   apimService: ApimUtils.ApimService;
   config: IConfig;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -62,13 +62,13 @@ export const makeGetServiceLifecycleHandler =
   ({
     apimService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): GetServiceLifecycleHandler =>
   (context, auth, __, ___, serviceId, authzGroupIds) =>
     pipe(
       genericServiceRetrieveHandler(
-        fsmLifecycleClient.getStore(),
+        fsmLifecycleClientCreator(authzGroupIds).fetch,
         apimService,
         telemetryClient,
         itemToResponse(config),

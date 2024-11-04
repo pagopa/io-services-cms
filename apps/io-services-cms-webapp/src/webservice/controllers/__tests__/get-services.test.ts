@@ -87,6 +87,7 @@ let mockFsmLifecycleClient = {
     bulkFetch: vi.fn(() => aBulkFetchRightValue),
   })),
 } as any;
+const mockFsmLifecycleClientCreator = vi.fn(() => mockFsmLifecycleClient);
 
 const mockFsmPublicationClient = {
   getStore: vi.fn(() => ({})),
@@ -154,7 +155,7 @@ describe("getServices", () => {
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient: mockFsmLifecycleClient,
+    fsmLifecycleClientCreator: mockFsmLifecycleClientCreator,
     fsmPublicationClient: mockFsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,

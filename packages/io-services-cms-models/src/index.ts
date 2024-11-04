@@ -1,5 +1,6 @@
 export {
   FSMStore,
+  FsmAuthorizationError,
   FsmItemNotFoundError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,

@@ -39,12 +39,14 @@ import * as UPNG from "upng-js";
 import { IConfig } from "../../config";
 import { Logo as LogoPayload } from "../../generated/api/Logo";
 import { upsertBlobFromImageBuffer } from "../../lib/azure/blob-storage";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
@@ -59,6 +61,7 @@ type IUploadServiceLogoHandler = (
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   logoPayload: LogoPayload,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
@@ -66,6 +69,7 @@ interface Dependencies {
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
   blobService: BlobService;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -128,9 +132,10 @@ export const makeUploadServiceLogoHandler =
   ({
     apimService,
     blobService,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): IUploadServiceLogoHandler =>
-  (context, auth, _, __, serviceId, logoPayload) => {
+  (context, auth, _, __, serviceId, logoPayload, authzGroupIds) => {
     const lowerCaseServiceId = serviceId.toLowerCase();
     const bufferImage = Buffer.from(logoPayload.logo, "base64");
 
@@ -141,6 +146,7 @@ export const makeUploadServiceLogoHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.chainW(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW((_) =>
         pipe(
           bufferImage,
@@ -190,13 +196,12 @@ export const applyRequestMiddelwares =
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(LogoPayload),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___, ____) =>
-          ipTuple(c, u),
-        ),
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
       ),
     );
   };

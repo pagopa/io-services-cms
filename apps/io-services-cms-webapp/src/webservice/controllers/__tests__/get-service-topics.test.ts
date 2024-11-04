@@ -47,7 +47,9 @@ vi.mock("../../../utils/service-topic-dao", () => ({
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
@@ -131,7 +133,7 @@ const mockWebServer = (mockServiceTopicDao: any) => {
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -144,11 +146,11 @@ const mockWebServer = (mockServiceTopicDao: any) => {
   return app;
 };
 
-describe("getServicePublication", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
+describe("getServiceTopics", () => {
   it("should retrieve the service topics list", async () => {
     const mockServiceTopicDao = {
       findAllNotDeletedTopics: vi.fn(() =>

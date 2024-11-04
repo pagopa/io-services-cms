@@ -1,4 +1,5 @@
 import {
+  FsmAuthorizationError,
   FsmItemNotFoundError,
   FsmNoApplicableTransitionError,
   FsmNoTransitionMatchedError,
@@ -13,6 +14,7 @@ import {
   ResponseErrorConflict,
   ResponseErrorInternal,
   ResponseErrorNotFound,
+  getResponseErrorForbiddenNoAuthorizationGroups,
 } from "@pagopa/ts-commons/lib/responses";
 
 /**
@@ -34,6 +36,8 @@ export const fsmToApiError = (
       return ResponseErrorInternal(err.message);
     case FsmItemNotFoundError:
       return ResponseErrorNotFound("Not Found", err.message);
+    case FsmAuthorizationError:
+      return getResponseErrorForbiddenNoAuthorizationGroups();
     default:
       return ResponseErrorInternal(err.message);
   }

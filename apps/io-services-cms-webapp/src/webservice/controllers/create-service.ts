@@ -35,6 +35,7 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -64,14 +65,13 @@ type ICreateServiceHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   servicePayload: ServiceRequestPayload,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
-  // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   config: IConfig;
-  // An instance of ServiceLifecycle client
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
@@ -95,38 +95,38 @@ export const makeCreateServiceHandler =
   ({
     apimService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): ICreateServiceHandler =>
-  (context, auth, _, __, servicePayload) => {
+  (context, auth, _, __, servicePayload, authzGroupIds) => {
     const logger = getLogger(context, logPrefix);
     const serviceId = ulidGenerator();
-
-    const createSubscriptionStep = pipe(
-      createSubscription(apimService, auth.userId, serviceId),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-    );
-
-    const createServiceStep = pipe(
-      fsmLifecycleClient.create(serviceId, {
-        data: payloadToItem(
-          serviceId,
-          servicePayload,
-          config.SANDBOX_FISCAL_CODE,
-        ),
-      }),
-      TE.mapLeft((err) => ResponseErrorInternal(err.message)),
-      TE.chain(itemToResponse(config)),
-      TE.map((result) =>
-        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201),
-      ),
-    );
 
     return pipe(
       servicePayload.metadata.topic_id,
       validateServiceTopicRequest(config),
-      TE.chainW(() => createSubscriptionStep),
-      TE.chainW((_) => createServiceStep),
+      TE.chainW(() =>
+        pipe(
+          createSubscription(apimService, auth.userId, serviceId),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+        ),
+      ),
+      TE.chainW((_) =>
+        pipe(
+          fsmLifecycleClientCreator(authzGroupIds).create(serviceId, {
+            data: payloadToItem(
+              serviceId,
+              servicePayload,
+              config.SANDBOX_FISCAL_CODE,
+            ),
+          }),
+          TE.mapLeft((err) => ResponseErrorInternal(err.message)),
+        ),
+      ),
+      TE.chainW(itemToResponse(config)),
+      TE.map((result) =>
+        ResponseJsonWithStatus(result, HttpStatusCodeEnum.HTTP_STATUS_201),
+      ),
       TE.map(
         trackEventOnResponseOK(telemetryClient, EventNameEnum.CreateService, {
           serviceId,
@@ -160,11 +160,12 @@ export const applyRequestMiddelwares =
       ),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(ServiceRequestPayload),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
         // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u, ___) => ipTuple(c, u)),
+        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
       ),
     );
   };

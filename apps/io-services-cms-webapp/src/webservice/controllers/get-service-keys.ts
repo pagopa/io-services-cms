@@ -32,6 +32,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
@@ -54,21 +55,22 @@ type GetServiceKeysHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
 export const makeGetServiceKeysHandler =
   ({
     apimService,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): GetServiceKeysHandler =>
-  (context, auth, __, ___, serviceId) =>
+  (context, auth, __, ___, serviceId, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -76,7 +78,7 @@ export const makeGetServiceKeysHandler =
         auth.subscriptionId,
         auth.userId,
       ),
-      TE.chainW(checkService(fsmLifecycleClient)),
+      TE.chainW(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW(() =>
         pipe(
           apimService.listSecrets(serviceId),
@@ -121,6 +123,7 @@ export const applyRequestMiddelwares =
       ),
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
