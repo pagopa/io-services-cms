@@ -495,6 +495,11 @@ const saveItem =
     );
 
 const getFsmClient = (store: PublicationStore) => ({
+  fetch: (id: ServiceId) =>
+    pipe(
+      store.fetch(id),
+      TE.mapLeft((_) => new FsmStoreFetchError()),
+    ),
   getStore: () => store,
   override: (...args: Parameters<typeof override>) => override(...args)(store),
   publish: (id: ServiceId, args?: { data: Service }) =>

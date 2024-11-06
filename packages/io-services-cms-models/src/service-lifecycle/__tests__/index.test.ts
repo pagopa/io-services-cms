@@ -9,6 +9,7 @@ import { ExpectStatic, beforeEach, describe, expect, it, vi } from "vitest";
 import { FSM, ItemType, getFsmClient } from "..";
 import {
   FSMStore,
+  FsmAuthorizationError,
   FsmItemNotFoundError,
   FsmNoTransitionMatchedError,
   FsmStoreFetchError,
@@ -20,7 +21,8 @@ import {
 import { Service } from "../definitions";
 
 const store = stores.createMemoryStore();
-const fsmClient = getFsmClient(store as unknown as FSMStore<ItemType>);
+const fsmClientCreator = getFsmClient(store as unknown as FSMStore<ItemType>);
+const fsmClientWithoutAuthz = fsmClientCreator();
 
 beforeEach(() => {
   store.clear();
@@ -39,7 +41,7 @@ const expectSuccess = async ({
   const applyTask = pipe(
     actions,
     sequence(RTE.ApplicativeSeq),
-    RTE.map((a) => a[a.length - 1])
+    RTE.map((a) => a[a.length - 1]),
   );
 
   const result = await applyTask(void 0)();
@@ -80,7 +82,7 @@ const expectFailure = async ({
   const applyTask = pipe(
     actions,
     sequence(RTE.ApplicativeSeq),
-    RTE.map((a) => a[a.length - 1])
+    RTE.map((a) => a[a.length - 1]),
   );
 
   try {
@@ -125,7 +127,7 @@ const aService = pipe(
   Service.decode,
   E.getOrElseW((_) => {
     throw new Error(`Bad mock`);
-  })
+  }),
 );
 
 const changeName = ({ data, ...rest }: Service, name: string): Service => ({
@@ -142,6 +144,7 @@ const addDuplicatedCreateTransition = () => {
     exec: ({ args: { data: service } }) =>
       E.right({
         ...service,
+        hasChanges: true,
         fsm: { state: "draft", lastTransition: "apply create on *" },
       }),
   });
@@ -156,7 +159,9 @@ describe("apply", () => {
     {
       title: "on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.create(aServiceId, { data: aService })],
+      actions: [
+        () => fsmClientWithoutAuthz.create(aServiceId, { data: aService }),
+      ],
       expected: expect.objectContaining({
         ...aService,
         fsm: expect.objectContaining({ state: "draft" }),
@@ -166,12 +171,12 @@ describe("apply", () => {
       title: "a sequence on the same item",
       id: aServiceId,
       actions: [
-        () => fsmClient.create(aServiceId, { data: aService }),
+        () => fsmClientWithoutAuthz.create(aServiceId, { data: aService }),
         () =>
-          fsmClient.edit(aServiceId, {
+          fsmClientWithoutAuthz.edit(aServiceId, {
             data: changeName(aService, "new name"),
           }),
-        () => fsmClient.submit(aServiceId, { autoPublish: false }),
+        () => fsmClientWithoutAuthz.submit(aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...changeName(aService, "new name"),
@@ -185,7 +190,9 @@ describe("apply", () => {
     {
       title: "on invalid action on empty items",
       id: aServiceId,
-      actions: [() => fsmClient.submit(aServiceId, { autoPublish: false })],
+      actions: [
+        () => fsmClientWithoutAuthz.submit(aServiceId, { autoPublish: false }),
+      ],
       expected: undefined,
       errorType: FsmItemNotFoundError,
       additionalPreTestFn: undefined,
@@ -196,12 +203,12 @@ describe("apply", () => {
       id: aServiceId,
       actions: [
         /* last ok --> */ () =>
-          fsmClient.create(aServiceId, { data: aService }),
+          fsmClientWithoutAuthz.create(aServiceId, { data: aService }),
         /* this ko --> */ () =>
-          fsmClient.create(aServiceId, {
+          fsmClientWithoutAuthz.create(aServiceId, {
             data: changeName(aService, "new name"),
           }),
-        () => fsmClient.submit(aServiceId, { autoPublish: false }),
+        () => fsmClientWithoutAuthz.submit(aServiceId, { autoPublish: false }),
       ],
       expected: expect.objectContaining({
         ...aService, // we expect the first create to have succeeded
@@ -214,11 +221,39 @@ describe("apply", () => {
     {
       title: "on undeterministic call",
       id: aServiceId,
-      actions: [() => fsmClient.create(aServiceId, { data: aService })],
+      actions: [
+        () => fsmClientWithoutAuthz.create(aServiceId, { data: aService }),
+      ],
       expected: undefined,
       errorType: FsmTooManyTransitionsError,
       additionalPreTestFn: addDuplicatedCreateTransition,
       additionalPostTestFn: removeDuplicatedCreateTransition,
+    },
+    {
+      title: "on unauthorized item",
+      id: aServiceId,
+      actions: [
+        () =>
+          fsmClientCreator(["aGroupId" as NonEmptyString]).delete(aService.id),
+      ],
+      expected: expect.anything(),
+      errorType: FsmAuthorizationError,
+      additionalPreTestFn: async () => {
+        await store.save(aService.id, {
+          ...aService,
+          data: {
+            ...aService.data,
+            metadata: {
+              ...aService.data.metadata,
+              group_id: "aDifferentGroupId" as NonEmptyString,
+            },
+          },
+          fsm: {
+            state: "draft",
+          },
+        })();
+      },
+      additionalPostTestFn: undefined,
     },
   ])("should fail $title", expectFailure);
 
@@ -229,9 +264,11 @@ describe("apply", () => {
       }),
       save: vi.fn(),
     } as unknown as FSMStore<ItemType>;
-    const mockFsmClient = getFsmClient(mockStore);
+    const mockFsmClientCreator = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.create(aServiceId, { data: aService })();
+    const result = await mockFsmClientCreator().create(aServiceId, {
+      data: aService,
+    })();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);
@@ -249,9 +286,11 @@ describe("apply", () => {
         return TE.left(new Error());
       }),
     } as unknown as FSMStore<ItemType>;
-    const mockFsmClient = getFsmClient(mockStore);
+    const mockFsmClientCreator = getFsmClient(mockStore);
 
-    const result = await mockFsmClient.create(aServiceId, { data: aService })();
+    const result = await mockFsmClientCreator().create(aServiceId, {
+      data: aService,
+    })();
 
     if (E.isRight(result)) {
       throw new Error(`Expecting a failure`);
@@ -265,12 +304,9 @@ describe("override", () => {
   it("should fails when stored item is not valid", async () => {
     store
       .inspect()
-      .set(
-        aServiceId,
-        aService as unknown as WithState<string, Record<string, unknown>>
-      );
+      .set(aServiceId, aService as unknown as WithState<string, Service>);
     const item = {} as unknown as ItemType;
-    const result = await fsmClient.override(aServiceId, item)();
+    const result = await fsmClientWithoutAuthz.override(aServiceId, item)();
     expect(E.isLeft(result)).toBeTruthy();
     if (E.isLeft(result)) {
       expect(result.left.message).not.empty;
@@ -283,10 +319,9 @@ describe("override", () => {
       id,
       fsm: { state: "submitted" },
     } as WithState<"submitted", Service>;
-    const result = await fsmClient.override(id, item)();
+    const result = await fsmClientWithoutAuthz.override(id, item)();
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      console.log("result:", result.right);
       expect(store.inspect().get(id)).eq(result.right);
       expect(result.right.fsm.state).eq("submitted");
     }
@@ -297,7 +332,7 @@ describe("override", () => {
       ...aService,
       fsm: { state: "approved", autoPublish: true },
     } as WithState<"approved", Service>;
-    const result = await fsmClient.override(aServiceId, item)();
+    const result = await fsmClientWithoutAuthz.override(aServiceId, item)();
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(store.inspect().get(aServiceId)).eq(result.right);
@@ -316,7 +351,7 @@ describe("override", () => {
       ...aServiceWithSpaces,
       fsm: { state: "approved", autoPublish: true },
     } as WithState<"approved", Service>;
-    const result = await fsmClient.override(aServiceId, item)();
+    const result = await fsmClientWithoutAuthz.override(aServiceId, item)();
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
       expect(store.inspect().get(aServiceId)).eq(result.right);

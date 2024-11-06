@@ -56,7 +56,7 @@ export const makeGetServiceLifecycleInternalHandler =
   (context, auth, serviceId) =>
     pipe(
       genericServiceRetrieveHandler(
-        fsmLifecycleClient.getStore(),
+        fsmLifecycleClient.fetch,
         apimService,
         telemetryClient,
         itemToResponse(config),

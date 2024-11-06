@@ -1,11 +1,6 @@
 import { Container } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
-import {
   RetrievedSubscriptionCIDRs,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
@@ -16,70 +11,75 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
-import { right } from "fp-ts/lib/Separated";
 
-const { validateServiceTopicRequest } = vi.hoisted(() => ({
-  validateServiceTopicRequest: vi.fn(),
-}));
-
-vi.mock("../../../utils/service-topic-validator", () => ({
-  validateServiceTopicRequest: validateServiceTopicRequest,
-}));
-
-const { getServiceTopicDao } = vi.hoisted(() => ({
-  getServiceTopicDao: vi.fn(() => ({
-    findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" })),
-    ),
-  })),
-}));
-
-vi.mock("../../../utils/service-topic-dao", () => ({
-  getDao: getServiceTopicDao,
-}));
-
-vi.mock("../../../lib/clients/apim-client", async () => {
-  const anApimResource = { id: "any-id", name: "any-name" };
-
+const {
+  validateServiceTopicRequest,
+  payloadToItemMock,
+  payloadToItemResponseMock,
+  itemToResponseWrapperMock,
+  itemToResponseMock,
+  itemToResponseResponseMock,
+  logErrorResponseMock,
+  getLoggerMock,
+} = vi.hoisted(() => {
+  const payloadToItemResponseMock = "payloadToItemResponse";
+  const itemToResponseResponseMock = "itemToResponseResponse";
+  const itemToResponseMock = vi.fn(() => TE.right(itemToResponseResponseMock));
+  const logErrorResponseMock = vi.fn((err) => err);
   return {
-    getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-    getUser: vi.fn((_) => TE.right(anApimResource)),
-    upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
+    validateServiceTopicRequest: vi.fn(() => TE.right(void 0)),
+    payloadToItemMock: vi.fn(() => payloadToItemResponseMock),
+    payloadToItemResponseMock,
+    itemToResponseWrapperMock: vi.fn(() => itemToResponseMock),
+    itemToResponseMock,
+    itemToResponseResponseMock,
+    logErrorResponseMock,
+    getLoggerMock: vi.fn(() => ({ logErrorResponse: logErrorResponseMock })),
   };
 });
 
-const serviceLifecycleStore =
-  stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+vi.mock("../../../utils/service-topic-validator", () => ({
+  validateServiceTopicRequest: vi.fn(() => validateServiceTopicRequest),
+}));
 
-const servicePublicationStore =
-  stores.createMemoryStore<ServicePublication.ItemType>();
-const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
-);
+vi.mock("../../../utils/converters/service-lifecycle-converters", () => ({
+  itemToResponse: itemToResponseWrapperMock,
+  payloadToItem: payloadToItemMock,
+}));
+
+vi.mock("../../../utils/logger", () => ({
+  getLogger: getLoggerMock,
+}));
+
+const aNewService = {
+  name: "a service",
+  description: "a description",
+  organization: {
+    name: "org",
+    fiscal_code: "00000000000",
+  },
+  metadata: {
+    scope: "LOCAL",
+    topic_id: 1,
+  },
+  authorized_recipients: ["BBBBBB99C88D555I"],
+};
+const fsmLifecycleClientMock = { create: vi.fn(() => TE.right(aNewService)) };
+const fsmLifecycleClientCreatorMock = vi.fn(() => fsmLifecycleClientMock);
 
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
-const ownerId = `/an/owner/${anUserId}`;
 
-const anApimResource = { id: "any-id", name: "any-name" };
-const mockApimService = {
-  getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
-  getUser: vi.fn((_) => TE.right(anApimResource)),
-  upsertSubscription: vi.fn((_) => TE.right(anApimResource)),
-  getSubscription: vi.fn(() =>
-    TE.right({
-      _etag: "_etag",
-      ownerId: anUserId,
-    }),
+const apimServiceMock = {
+  upsertSubscription: vi.fn<any[], any>(() =>
+    TE.right({ id: "any-id", name: "any-name" }),
   ),
-} as unknown as ApimUtils.ApimService;
+};
 
 const mockConfig = {
   SANDBOX_FISCAL_CODE: "AAAAAA00A00A000A",
@@ -125,56 +125,31 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
-  },
-} as any;
+const mockContext = {} as any;
 
-const mockBlobService = {
-  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
-} as any;
-
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
-} as any;
-
-afterEach(() => {
-  vi.clearAllMocks();
+beforeEach(() => {
+  vi.restoreAllMocks();
 });
-describe("createService", () => {
-  validateServiceTopicRequest.mockReturnValue(() => TE.right(void 0));
 
+describe("createService", () => {
   const app = createWebServer({
     basePath: "api",
-    apimService: mockApimService,
+    apimService: apimServiceMock as unknown as ApimUtils.ApimService,
     config: mockConfig,
-    fsmLifecycleClient,
-    fsmPublicationClient,
+    fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
+    fsmPublicationClient: vi.fn(),
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
+    blobService: vi.fn(),
+    serviceTopicDao: vi.fn(),
   } as unknown as WebServerDependencies);
 
   setAppContext(app, mockContext);
 
-  const aNewService = {
-    name: "a service",
-    description: "a description",
-    organization: {
-      name: "org",
-      fiscal_code: "00000000000",
-    },
-    metadata: {
-      scope: "LOCAL",
-      topic_id: 1,
-    },
-    authorized_recipients: ["BBBBBB99C88D555I"],
-  };
+  const logPrefix = "CreateServiceHandler";
 
   it("should not accept invalid payloads", async () => {
+    // when
     const response = await request(app)
       .post("/api/services")
       .send({})
@@ -183,10 +158,18 @@ describe("createService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    // then
     expect(response.statusCode).toBe(400);
+    expect(validateServiceTopicRequest).not.toHaveBeenCalled();
+    expect(payloadToItemMock).not.toHaveBeenCalled();
+    expect(itemToResponseMock).not.toHaveBeenCalled();
+    expect(fsmLifecycleClientMock.create).not.toHaveBeenCalled();
+    expect(getLoggerMock).not.toHaveBeenCalled();
+    expect(logErrorResponseMock).not.toHaveBeenCalled();
   });
 
   it("should not allow the operation without right group", async () => {
+    // when
     const response = await request(app)
       .post("/api/services")
       .send({})
@@ -195,27 +178,54 @@ describe("createService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    // then
     expect(response.statusCode).toBe(403);
+    expect(validateServiceTopicRequest).not.toHaveBeenCalled();
+    expect(payloadToItemMock).not.toHaveBeenCalled();
+    expect(itemToResponseMock).not.toHaveBeenCalled();
+    expect(fsmLifecycleClientMock.create).not.toHaveBeenCalled();
+    expect(getLoggerMock).not.toHaveBeenCalled();
+    expect(logErrorResponseMock).not.toHaveBeenCalled();
   });
 
   it("should create a draft service", async () => {
+    // given
+    const servicePayload = aNewService;
+
+    // when
     const response = await request(app)
       .post("/api/services")
-      .send(aNewService)
+      .send(servicePayload)
       .set("x-user-email", "example@email.com")
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    // then
     expect(response.statusCode).toBe(201);
-    expect(response.body.status.value).toBe("draft");
-    expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.body.id).toEqual(expect.any(String));
+    expect(validateServiceTopicRequest).toHaveBeenCalledOnce();
+    expect(payloadToItemMock).toHaveBeenCalledOnce();
+    expect(payloadToItemMock).toHaveBeenCalledWith(
+      expect.any(String),
+      { ...servicePayload, max_allowed_payment_amount: 0 },
+      mockConfig.SANDBOX_FISCAL_CODE,
+    );
+    expect(itemToResponseMock).toHaveBeenCalledOnce();
+    expect(fsmLifecycleClientMock.create).toHaveBeenCalledOnce();
+    expect(fsmLifecycleClientMock.create).toHaveBeenCalledWith(
+      expect.any(String),
+      { data: payloadToItemResponseMock },
+    );
+    expect(getLoggerMock).toHaveBeenCalledOnce();
+    expect(getLoggerMock).toHaveBeenCalledWith(mockContext, logPrefix);
+    expect(logErrorResponseMock).not.toHaveBeenCalled();
   });
 
   it("should not allow the operation without manageKey", async () => {
+    // given
     const aNotManageSubscriptionId = "NOT-MANAGE-456";
 
+    // when
     const response = await request(app)
       .post("/api/services")
       .send(aNewService)
@@ -223,17 +233,23 @@ describe("createService", () => {
       .set("x-user-groups", UserGroup.ApiServiceWrite)
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aNotManageSubscriptionId);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+
+    // then
     expect(response.statusCode).toBe(403);
+    expect(validateServiceTopicRequest).not.toHaveBeenCalled();
+    expect(getLoggerMock).not.toHaveBeenCalled();
+    expect(logErrorResponseMock).not.toHaveBeenCalled();
+    expect(payloadToItemMock).not.toHaveBeenCalled();
+    expect(itemToResponseMock).not.toHaveBeenCalled();
+    expect(fsmLifecycleClientMock.create).not.toHaveBeenCalled();
   });
 
   it("should fail when cannot create subscription", async () => {
-    vi.mocked(mockApimService.upsertSubscription).mockImplementation(() =>
-      TE.left({ statusCode: 500 }),
-    );
+    const error = { statusCode: 500 };
+    // given
+    apimServiceMock.upsertSubscription.mockReturnValueOnce(TE.left(error));
 
-    const spied = vi.spyOn(serviceLifecycleStore, "save");
-
+    // when
     const response = await request(app)
       .post("/api/services")
       .send(aNewService)
@@ -242,8 +258,14 @@ describe("createService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
+    // then
     expect(response.statusCode).toBe(500);
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(spied).not.toHaveBeenCalled();
+    expect(validateServiceTopicRequest).toHaveBeenCalledOnce();
+    expect(getLoggerMock).toHaveBeenCalledOnce();
+    expect(getLoggerMock).toHaveBeenCalledWith(mockContext, logPrefix);
+    expect(logErrorResponseMock).toHaveBeenCalledOnce();
+    expect(fsmLifecycleClientMock.create).not.toHaveBeenCalled();
+    expect(payloadToItemMock).not.toHaveBeenCalled();
+    expect(itemToResponseMock).not.toHaveBeenCalled();
   });
 });

@@ -16,7 +16,6 @@ import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
-import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -25,12 +24,14 @@ import { WebServerDependencies, createWebServer } from "../../index";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -42,7 +43,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId: anUserId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -68,7 +69,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -91,8 +92,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -112,16 +114,24 @@ const anInvalidLogoPayload = {
   logo: "invalidBase64=",
 };
 
-describe("uploadServiceLogo", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+const { checkServiceMock } = vi.hoisted(() => ({
+  checkServiceMock: vi.fn(() => TE.right(undefined)),
+}));
 
+vi.mock("../../../utils/check-service", () => ({
+  checkService: vi.fn(() => checkServiceMock),
+}));
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("uploadServiceLogo", () => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -140,10 +150,10 @@ describe("uploadServiceLogo", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
     expect(response.body.detail).toBe(
-      "Fail decoding provided image, the reason is: The input is not a PNG file!"
+      "Fail decoding provided image, the reason is: The input is not a PNG file!",
     );
     expect(response.body.status).toBe(400);
     expect(response.body.title).toBe("Image not valid");
@@ -173,7 +183,7 @@ describe("uploadServiceLogo", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
   it("should not allow the operation without manageKey", async () => {
@@ -203,7 +213,7 @@ describe("uploadServiceLogo", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -230,7 +240,7 @@ describe("uploadServiceLogo", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -257,7 +267,7 @@ describe("uploadServiceLogo", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -287,7 +297,7 @@ describe("uploadServiceLogo", () => {
     mockFetchAll.mockImplementationOnce(() =>
       Promise.resolve({
         resources: [aNewRetrievedSubscriptionCIDRs],
-      })
+      }),
     );
 
     const response = await request(app)
@@ -304,7 +314,7 @@ describe("uploadServiceLogo", () => {
 
   it("should return an internal error response if blob write fails", async () => {
     mockBlobService.createBlockBlobFromText.mockImplementationOnce(
-      (_, __, ___, cb) => cb(new Error("any"), null)
+      (_, __, ___, cb) => cb(new Error("any"), null),
     );
 
     const response = await request(app)

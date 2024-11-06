@@ -1,5 +1,19 @@
 # io-services-cms-webapp
 
+## 1.38.0
+
+### Minor Changes
+
+- 2d3c568: service topic ingestion
+- d880ab6: add group-based authz logic to FSM
+- beb7fe5: ingestion service history
+- 1deaefc: ingestion service lifecycle
+
+### Patch Changes
+
+- Updated dependencies [d880ab6]
+  - @io-services-cms/models@1.23.0
+
 ## 1.37.0
 
 ### Minor Changes

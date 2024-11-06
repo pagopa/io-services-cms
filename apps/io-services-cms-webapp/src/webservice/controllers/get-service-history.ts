@@ -44,12 +44,14 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { ServiceHistory as ServiceResponsePayload } from "../../generated/api/ServiceHistory";
 import { ServiceHistoryItem } from "../../generated/api/ServiceHistoryItem";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkService } from "../../utils/check-service";
 import { itemsToResponse } from "../../utils/converters/service-history-converters";
 import { CosmosPagedHelper, OrderParam } from "../../utils/cosmos-helper";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
@@ -67,6 +69,7 @@ type GetServiceHistoryHandler = (
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
   requestParams: RequestParameters,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface RequestParameters {
@@ -79,6 +82,7 @@ interface RequestParameters {
 interface Dependencies {
   apimService: ApimUtils.ApimService;
   config: IConfig;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>;
   telemetryClient: TelemetryClient;
 }
@@ -87,10 +91,11 @@ export const makeGetServiceHistoryHandler =
   ({
     apimService,
     config,
+    fsmLifecycleClientCreator,
     serviceHistoryPagedHelper,
     telemetryClient,
   }: Dependencies): GetServiceHistoryHandler =>
-  (context, auth, __, ___, requestParams) =>
+  (context, auth, __, ___, requestParams, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -98,6 +103,7 @@ export const makeGetServiceHistoryHandler =
         auth.subscriptionId,
         auth.userId,
       ),
+      TE.tap(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW((_) =>
         pipe(
           fetchHistory(serviceHistoryPagedHelper)(
@@ -208,6 +214,7 @@ export const applyRequestMiddelwares =
       ),
       // extract order from query params
       OptionalQueryParamMiddleware("continuationToken", NonEmptyString),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(
@@ -220,15 +227,23 @@ export const applyRequestMiddelwares =
           order,
           limit,
           continuationToken,
+          authzGroupIds,
         ) =>
           checkSourceIpForHandler(handler, (_, __, clientIp, attrs) =>
             ipTuple(clientIp, attrs),
-          )(context, auth, clientIp, attrs, {
-            continuationToken,
-            limit,
-            order,
-            serviceId,
-          }),
+          )(
+            context,
+            auth,
+            clientIp,
+            attrs,
+            {
+              continuationToken,
+              limit,
+              order,
+              serviceId,
+            },
+            authzGroupIds,
+          ),
       ),
     );
   };
