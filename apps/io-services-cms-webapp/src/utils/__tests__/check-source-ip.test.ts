@@ -7,8 +7,8 @@ describe("checkSourceIp", () => {
   it.each`
     scenario                                                                              | ip                     | authzCidrs          | expectedErrorKind                         | expectedErrorDetailRegExp
     ${"provided ip is empty"}                                                             | ${O.none}              | ${new Set()}        | ${"IResponseErrorInternal"}               | ${/IP address cannot be extracted from the request$/}
-    ${"provided ip is not empty, but ip is not included in authz CIDRs (without prefix)"} | ${O.some("127.0.0.2")} | ${["127.0.0.1"]}    | ${"IResponseErrorForbiddenNotAuthorized"} | ${/.*$/}
-    ${"provided ip is not empty, but ip is not included in authz CIDRs (with prefix)"}    | ${O.some("127.0.0.2")} | ${["127.0.0.1/31"]} | ${"IResponseErrorForbiddenNotAuthorized"} | ${/.*$/}
+    ${"provided ip is not empty, but ip is not included in authz CIDRs (without prefix)"} | ${O.some("127.0.0.2")} | ${["127.0.0.1"]}    | ${"IResponseErrorForbiddenNotAuthorized"} | ${/^.*$/}
+    ${"provided ip is not empty, but ip is not included in authz CIDRs (with prefix)"}    | ${O.some("127.0.0.2")} | ${["127.0.0.1/31"]} | ${"IResponseErrorForbiddenNotAuthorized"} | ${/^.*$/}
   `(
     "should return an error response when $scenario",
     ({ ip, authzCidrs, expectedErrorKind, expectedErrorDetailRegExp }) => {
