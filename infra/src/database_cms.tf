@@ -23,7 +23,7 @@ module "cosmosdb_account" {
   additional_geo_locations = [{
     location          = "spaincentral"
     failover_priority = 1
-    zone_redundant    = true
+    zone_redundant    = false
   }]
 
   consistency_policy = {
