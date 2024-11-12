@@ -183,6 +183,52 @@ describe("apply", () => {
         fsm: expect.objectContaining({ state: "submitted" }),
       }),
     },
+    {
+      title:
+        "an item creation with group_id and then an edit that do not have to override group_id",
+      id: aServiceId,
+      actions: [
+        () =>
+          fsmClientWithoutAuthz.create(aServiceId, {
+            data: {
+              ...aService,
+              data: {
+                ...aService.data,
+                metadata: {
+                  ...aService.data.metadata,
+                  group_id: "foo" as NonEmptyString,
+                },
+              },
+            },
+          }),
+        () =>
+          fsmClientWithoutAuthz.edit(aServiceId, {
+            data: changeName(
+              {
+                ...aService,
+                data: {
+                  ...aService.data,
+                  metadata: {
+                    ...aService.data.metadata,
+                    group_id: "bar" as NonEmptyString,
+                  },
+                },
+              },
+              "new name",
+            ),
+          }),
+        () => fsmClientWithoutAuthz.submit(aServiceId, { autoPublish: false }),
+      ],
+      expected: expect.objectContaining({
+        ...aService,
+        data: {
+          ...aService.data,
+          name: "new name",
+          metadata: { ...aService.data.metadata, group_id: "foo" },
+        },
+        fsm: expect.objectContaining({ state: "submitted" }),
+      }),
+    },
   ])("should apply $title", expectSuccess);
 
   // invalid sequences

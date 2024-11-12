@@ -51,6 +51,26 @@ export const createMemoryStore = <
       ),
     // for testing
     inspect: () => m,
+    patch: (id: string, value) =>
+      pipe(
+        m.get(id),
+        O.fromNullable,
+        O.map((found) => ({
+          ...found,
+          data: {
+            ...found.data,
+            metadata: {
+              ...found.data.metadata,
+              group_id: value.data.metadata.group_id,
+            },
+          },
+        })),
+        O.map((item) => m.set(id, item)),
+        O.map((map) => map.get(id)),
+        O.chain(O.fromPredicate((item) => !!item)),
+        O.map((item) => item as T),
+        TE.fromOption(() => new Error("No item found with id " + id)),
+      ),
     save: (id: string, value) =>
       pipe(
         () => Promise.resolve(m.set(id, value)),

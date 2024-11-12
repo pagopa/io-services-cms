@@ -11,14 +11,14 @@ export const ServiceHistory = t.union([
     LifecycleItemType,
     t.type({
       last_update: NonEmptyString,
-      serviceId: Service.types[0].props.id,
+      serviceId: Service.type.types[0].props.id,
     }),
   ]),
   t.intersection([
     PublicationItemType,
     t.type({
       last_update: NonEmptyString,
-      serviceId: Service.types[0].props.id,
+      serviceId: Service.type.types[0].props.id,
     }),
   ]),
 ]);

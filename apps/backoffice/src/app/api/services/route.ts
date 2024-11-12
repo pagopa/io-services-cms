@@ -1,5 +1,5 @@
 import { getConfiguration } from "@/config";
-import { ServicePayload } from "@/generated/api/ServicePayload";
+import { CreateServicePayload } from "@/generated/api/CreateServicePayload";
 import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
@@ -26,10 +26,11 @@ export const POST = withJWTAuthHandler(
     try {
       let servicePayload;
       try {
-        servicePayload = await parseBody(nextRequest, ServicePayload);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        return handleBadRequestErrorResponse(error.message);
+        servicePayload = await parseBody(nextRequest, CreateServicePayload);
+      } catch (error) {
+        return handleBadRequestErrorResponse(
+          error instanceof Error ? error.message : "Failed to parse JSON body",
+        );
       }
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
         if (isAdmin(backofficeUser)) {
@@ -45,15 +46,23 @@ export const POST = withJWTAuthHandler(
             );
           }
         } else {
-          if (
-            servicePayload.metadata.group_id &&
-            !backofficeUser.permissions.selcGroups?.includes(
-              servicePayload.metadata.group_id,
-            )
-          ) {
-            return handleForbiddenErrorResponse(
-              "Cannot set service group relationship",
-            );
+          if (servicePayload.metadata.group_id) {
+            if (
+              !backofficeUser.permissions.selcGroups?.includes(
+                servicePayload.metadata.group_id,
+              )
+            ) {
+              return handleForbiddenErrorResponse(
+                "Provided group is out of your scope",
+              );
+            }
+          } else {
+            if (
+              backofficeUser.permissions.selcGroups &&
+              backofficeUser.permissions.selcGroups.length > 0
+            ) {
+              return handleBadRequestErrorResponse("group_id is required");
+            }
           }
         }
       }

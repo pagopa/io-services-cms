@@ -1,4 +1,3 @@
-import { IPString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it } from "vitest";
@@ -26,14 +25,12 @@ describe("checkSourceIp", () => {
   );
 
   it.each`
-    scenario                                                | authzCidrs
-    ${"authz CIDRs is empty"}                               | ${new Set()}
-    ${"ip is not included in authz CIDRs (without prefix)"} | ${["127.0.0.1"]}
-    ${"ip is not included in authz CIDRs (with prefix)"}    | ${["127.0.0.1/24"]}
-  `("should return the valid ip when $scenario", ({ authzCidrs }) => {
-    // given
-    const ip = "127.0.0.1" as IPString;
-
+    scenario                                                | ip                    | authzCidrs
+    ${"authz CIDRs is empty"}                               | ${"127.0.0.1"}        | ${new Set()}
+    ${"ip is not included in authz CIDRs (without prefix)"} | ${"127.0.0.1"}        | ${["127.0.0.1"]}
+    ${"ip is not included in authz CIDRs (with prefix)"}    | ${"::ffff:127.0.0.1"} | ${["127.0.0.1/24"]}
+    ${"ip is not included in authz CIDRs (with prefix)"}    | ${"::ffff:127.0.0.1"} | ${["0.0.0.0/0"]}
+  `("should return the valid ip when $scenario", ({ ip, authzCidrs }) => {
     // when
     const res = checkSourceIp(O.some(ip), authzCidrs);
 

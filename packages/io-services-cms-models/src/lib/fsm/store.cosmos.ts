@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import {
   BulkOperationType,
   Container,
@@ -18,13 +19,12 @@ import { FSMStore, WithState } from "./types";
 type CosmosStore<T extends WithState<string, Record<string, unknown>>> =
   FSMStore<T>;
 
-export const createCosmosStore = <
-  T extends WithState<string, Record<string, unknown>>,
->(
-  container: Container,
-  codec: t.Type<T>,
-): CosmosStore<T> => {
-  const fetch = (id: string) =>
+const fetch =
+  <T extends WithState<string, Record<string, unknown>>>(
+    container: Container,
+    codec: t.Type<T>,
+  ) =>
+  (id: string) =>
     pipe(
       // fetch the item by its id
       TE.tryCatch(
@@ -36,15 +36,14 @@ export const createCosmosStore = <
             }`,
           ),
       ),
-      TE.chain((rr) =>
+      TE.chainEitherK((rr) =>
         rr.statusCode === 404
           ? // if the item isn't found, it's ok
-            TE.right(O.none)
+            E.right(O.none)
           : // if present, try to decode in the expected shape
             pipe(
               {
                 ...rr.resource,
-                // eslint-disable-next-line no-underscore-dangle
                 modified_at:
                   rr.resource?.modified_at ??
                   (rr.resource?._ts
@@ -54,8 +53,7 @@ export const createCosmosStore = <
               },
               codec.decode,
               E.map(O.some),
-              TE.fromEither,
-              TE.mapLeft(
+              E.mapLeft(
                 (err) =>
                   new Error(
                     `Unable to parse resorce from the database, ${readableReport(
@@ -67,14 +65,19 @@ export const createCosmosStore = <
       ),
     );
 
-  const buildReadOperations = (ids: string[]): ReadOperationInput[] =>
-    ids.map((id) => ({
-      id,
-      operationType: BulkOperationType.Read,
-      partitionKey: id,
-    }));
+const buildReadOperations = (ids: string[]): ReadOperationInput[] =>
+  ids.map((id) => ({
+    id,
+    operationType: BulkOperationType.Read,
+    partitionKey: id,
+  }));
 
-  const bulkFetch = (ids: string[]) =>
+const bulkFetch =
+  <T extends WithState<string, Record<string, unknown>>>(
+    container: Container,
+    codec: t.Type<T>,
+  ) =>
+  (ids: string[]) =>
     pipe(
       // bulk fetch of items by id
       TE.tryCatch(
@@ -112,7 +115,11 @@ export const createCosmosStore = <
       ),
     );
 
-  const save = (id: string, value: T, preserveModifiedAt = false) =>
+const save =
+  <T extends WithState<string, Record<string, unknown>>>(
+    container: Container,
+  ) =>
+  (id: string, value: T, preserveModifiedAt = false) =>
     pipe(
       value,
       // last_update is not part of the value to save
@@ -143,24 +150,76 @@ export const createCosmosStore = <
       })),
     );
 
-  // https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
-  // expected status code return are:
-  // - 204: The document was successfully deleted.
-  // - 404: The document was not found.
-  const deleteItem = (id: string): TE.TaskEither<Error, void> =>
+const patch =
+  <T extends WithState<string, Record<string, unknown>>>(
+    container: Container,
+    codec: t.Type<T>,
+  ) =>
+  (
+    id: string,
+    {
+      data: {
+        metadata: { group_id },
+      },
+    }: { data: { metadata: { group_id?: string } } },
+  ) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          container.item(id, id).patch<T>({
+            operations: [
+              {
+                op: group_id ? "add" : "remove",
+                path: "/data/metadata/group_id",
+                value: group_id,
+              },
+            ],
+          }),
+        (err) =>
+          new Error(
+            `Failed to save item id#${id} from database, ${
+              E.toError(err).message
+            }`,
+          ),
+      ),
+      TE.chainEitherK(
+        E.fromPredicate(
+          (response) => response.statusCode >= 200 && response.statusCode < 300,
+          (response) =>
+            new Error(`Patch failed with status code ${response.statusCode}`),
+        ),
+      ),
+      TE.chainEitherK((response) =>
+        pipe(
+          codec.decode(response.resource),
+          E.mapLeft(flow(readableReport, E.toError)),
+        ),
+      ),
+    );
+
+// https://learn.microsoft.com/en-us/rest/api/cosmos-db/delete-a-document
+// expected status code return are:
+// - 204: The document was successfully deleted.
+// - 404: The document was not found.
+const deleteItem =
+  (container: Container) =>
+  (id: string): TE.TaskEither<Error, void> =>
     pipe(
       TE.tryCatch(() => container.item(id, id).delete(), identity),
       TE.map(() => void 0),
-      TE.orElse((err) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const code = (err as any).code; // Extract code property
-        return code === 404 ? TE.right(void 0) : TE.left(E.toError(err));
-      }),
+      TE.orElse(
+        flow(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          E.fromPredicate((err) => (err as any).code === 404, E.toError),
+          E.map((_) => void 0),
+          TE.fromEither,
+        ),
+      ),
     );
 
-  const getServiceIdsByGroupIds = (
-    groupIds: readonly string[],
-  ): TE.TaskEither<Error, string[]> =>
+const getServiceIdsByGroupIds =
+  (container: Container) =>
+  (groupIds: readonly string[]): TE.TaskEither<Error, string[]> =>
     pipe(
       TE.tryCatch(
         () =>
@@ -181,11 +240,16 @@ export const createCosmosStore = <
       TE.map(({ resources }) => resources),
     );
 
-  return {
-    bulkFetch,
-    delete: deleteItem,
-    fetch,
-    getServiceIdsByGroupIds,
-    save,
-  };
-};
+export const createCosmosStore = <
+  T extends WithState<string, Record<string, unknown>>,
+>(
+  container: Container,
+  codec: t.Type<T>,
+): CosmosStore<T> => ({
+  bulkFetch: bulkFetch(container, codec),
+  delete: deleteItem(container),
+  fetch: fetch(container, codec),
+  getServiceIdsByGroupIds: getServiceIdsByGroupIds(container),
+  patch: patch(container, codec),
+  save: save(container),
+});

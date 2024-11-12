@@ -11,7 +11,12 @@ import * as E from "fp-ts/lib/Either";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as RS from "fp-ts/lib/ReadonlySet";
 import { pipe } from "fp-ts/lib/function";
-import { BlockList } from "net";
+import { BlockList, isIPv6 } from "net";
+
+/**
+ * ::ffff: is a subnet prefix for IPv4 (32 bit) addresses that are placed inside an IPv6 (128 bit) space.
+ */
+const IPv4ToIPv6SubnetPrefix = "::ffff:";
 
 /**
  * Checks if an IP address is contained within a list of CIDR ranges.
@@ -29,7 +34,12 @@ const isIpInCidrList = (ip: IPString, cidrList: ReadonlySet<CIDR>): boolean =>
       else blockList.addAddress(subnet);
       return blockList;
     }),
-    (blockList) => blockList.check(ip),
+    (blockList) =>
+      blockList.check(
+        isIPv6(ip) && ip.startsWith(IPv4ToIPv6SubnetPrefix)
+          ? ip.split(IPv4ToIPv6SubnetPrefix)[1]
+          : ip,
+      ),
   );
 
 /**
