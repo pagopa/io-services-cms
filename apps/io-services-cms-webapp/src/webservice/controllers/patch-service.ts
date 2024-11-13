@@ -1,7 +1,6 @@
 import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -17,6 +16,7 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseSuccessJson,
+  ResponseErrorInternal,
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -25,30 +25,20 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
-import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
-import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
-import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
+import { PatchServicePayload } from "../../generated/api/PatchServicePayload";
 import {
   EventNameEnum,
   TelemetryClient,
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
-import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { checkSourceIp } from "../../utils/check-source-ip";
-import { fsmToApiError } from "../../utils/converters/fsm-error-converters";
-import {
-  itemToResponse,
-  payloadToItem,
-} from "../../utils/converters/service-lifecycle-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
-import { validateServiceTopicRequest } from "../../utils/service-topic-validator";
 import { serviceOwnerCheckManageTask } from "../../utils/subscription";
 
-const logPrefix = "EditServiceHandler";
+const logPrefix = "PatchServiceHandler";
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
-  config: IConfig;
   fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
@@ -57,21 +47,16 @@ type EditServiceHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
-  servicePayload: ServiceRequestPayload,
-  authzGroupIds: readonly NonEmptyString[],
-) => TE.TaskEither<
-  ErrorResponseTypes,
-  IResponseSuccessJson<ServiceResponsePayload>
->;
+  servicePayload: PatchServicePayload,
+) => TE.TaskEither<ErrorResponseTypes, IResponseSuccessJson<unknown>>;
 
-export const makeEditServiceHandler =
+export const makePatchServiceHandler =
   ({
     apimService,
-    config,
     fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): EditServiceHandler =>
-  (context, auth, serviceId, servicePayload, authzGroupIds) =>
+  (context, auth, serviceId, servicePayload) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -79,24 +64,14 @@ export const makeEditServiceHandler =
         auth.subscriptionId,
         auth.userId,
       ),
-      TE.chainW((_) =>
-        pipe(
-          servicePayload.metadata.topic_id,
-          validateServiceTopicRequest(config),
-          TE.map(() => _),
-        ),
-      ),
       TE.chainW((sId) =>
         pipe(
-          fsmLifecycleClientCreator(authzGroupIds).edit(sId, {
-            data: payloadToItem(
-              serviceId,
-              servicePayload,
-              config.SANDBOX_FISCAL_CODE,
-            ),
-          }),
-          TE.mapLeft(fsmToApiError),
-          TE.chainW(itemToResponse(config)),
+          fsmLifecycleClientCreator()
+            .getStore()
+            .patch(sId, { data: { ...servicePayload } }),
+          TE.mapLeft((err) =>
+            ResponseErrorInternal("Failed to patch caused by: " + err.message),
+          ),
           TE.map(ResponseSuccessJson),
         ),
       ),
@@ -115,16 +90,10 @@ export const makeEditServiceHandler =
     );
 
 export const applyRequestMiddelwares =
-  (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: EditServiceHandler) => {
+  (config: IConfig) => (handler: EditServiceHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the client IP from the request
       ClientIpMiddleware,
-      // check manage key
-      AzureUserAttributesManageMiddlewareWrapper(
-        subscriptionCIDRsModel,
-        config,
-      ),
       // extract the Azure functions context
       ContextMiddleware(),
       // only allow requests by users belonging to certain groups
@@ -132,16 +101,18 @@ export const applyRequestMiddelwares =
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
-      RequiredBodyPayloadMiddleware(ServiceRequestPayload),
-      SelfcareUserGroupsMiddleware(),
+      RequiredBodyPayloadMiddleware(PatchServicePayload),
     );
     return wrapRequestHandler(
       middlewaresWrap((...args) =>
         pipe(
           args,
-          ([clientIp, userAttributesManage, ...rest]) =>
+          ([clientIp, ...rest]) =>
             pipe(
-              checkSourceIp(clientIp, userAttributesManage.authorizedCIDRs),
+              checkSourceIp(
+                clientIp,
+                new Set(config.BACKOFFICE_INTERNAL_SUBNET_CIDRS),
+              ),
               E.map((_) => rest),
             ),
           TE.fromEither,

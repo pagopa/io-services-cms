@@ -66,6 +66,10 @@ import {
 } from "./controllers/get-services";
 import { makeInfoHandler } from "./controllers/info";
 import {
+  applyRequestMiddelwares as applyPatchServiceRequestMiddelwares,
+  makePatchServiceHandler,
+} from "./controllers/patch-service";
+import {
   applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
   makePublishServiceHandler,
 } from "./controllers/publish-service";
@@ -214,6 +218,18 @@ export const createWebServer = ({
         telemetryClient,
       }),
       applyEditServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
+  );
+
+  router.patch(
+    serviceLifecyclePath,
+    pipe(
+      makePatchServiceHandler({
+        apimService,
+        fsmLifecycleClientCreator,
+        telemetryClient,
+      }),
+      applyPatchServiceRequestMiddelwares(config),
     ),
   );
 

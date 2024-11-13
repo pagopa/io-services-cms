@@ -92,20 +92,6 @@ interface FSM {
   ];
 }
 
-const authorize =
-  (authzGroupIds: readonly NonEmptyString[]) =>
-  <T extends Service>(current: T): E.Either<FsmAuthorizationError, T> =>
-    pipe(
-      current,
-      E.fromPredicate(
-        (item) =>
-          RA.isEmpty(authzGroupIds) ||
-          (!!item.data.metadata.group_id &&
-            authzGroupIds.includes(item.data.metadata.group_id)),
-        () => new FsmAuthorizationError(),
-      ),
-    );
-
 // implementation
 /**
  * WARNING: Service Lifecycle FSM implementation
@@ -140,6 +126,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on draft", state: "draft" },
           hasChanges: true,
         }),
@@ -256,6 +249,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on reject", state: "draft" },
           hasChanges: true,
         }),
@@ -269,6 +269,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on approved", state: "draft" },
           hasChanges: true,
         }),
@@ -278,6 +285,20 @@ const FSM: FSM = {
     },
   ],
 };
+
+const authorize =
+  (authzGroupIds: readonly NonEmptyString[]) =>
+  <T extends Service>(current: T): E.Either<FsmAuthorizationError, T> =>
+    pipe(
+      current,
+      E.fromPredicate(
+        (item) =>
+          RA.isEmpty(authzGroupIds) ||
+          (!!item.data.metadata.group_id &&
+            authzGroupIds.includes(item.data.metadata.group_id)),
+        () => new FsmAuthorizationError(),
+      ),
+    );
 
 type LifecycleStore = FSMStore<States[number]>;
 
@@ -434,26 +455,20 @@ function apply(
                                 | FsmTransitionExecutionError,
                                 { hasChanges: boolean } & AllResults
                               > =>
-                                RA.isEmpty(authzGroupIds) ||
-                                (!!current.data.metadata.group_id &&
-                                  authzGroupIds.includes(
-                                    current.data.metadata.group_id,
-                                  ))
-                                  ? tr.exec({
-                                      // FIXME: avoid this forcing
-                                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                      // @ts-ignore
-                                      args,
-                                      // FIXME: avoid this forcing
-                                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                      // @ts-ignore
-                                      authzGroupIds,
-                                      // FIXME: avoid this forcing
-                                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                      // @ts-ignore
-                                      current,
-                                    })
-                                  : E.left(new FsmAuthorizationError()),
+                                tr.exec({
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  args,
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  authzGroupIds,
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  current,
+                                }),
                           ),
                         ),
                       ),

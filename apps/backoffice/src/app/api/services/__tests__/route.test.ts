@@ -4,8 +4,8 @@ import { faker } from "@faker-js/faker/locale/it";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { CreateServicePayload } from "../../../../generated/api/CreateServicePayload";
 import { ScopeEnum } from "../../../../generated/api/ServiceBaseMetadata";
-import { ServicePayload } from "../../../../generated/api/ServicePayload";
 import { ManagedInternalError } from "../../../../lib/be/errors";
 import { SelfcareRoles } from "../../../../types/auth";
 import { POST } from "../route";
@@ -28,7 +28,7 @@ const backofficeUserMock: BackOfficeUser = {
     subscriptionId: faker.string.uuid(),
   },
 };
-const aValidServicePayload: ServicePayload = {
+const aValidServicePayload: CreateServicePayload = {
   name: "aServiceName" as NonEmptyString,
   description: "aServiceDescription" as NonEmptyString,
   metadata: {
@@ -112,24 +112,25 @@ describe("Services API", () => {
       const responseBody = await result.json();
       expect(responseBody.detail).toStrictEqual(errorMessage);
       expect(parseBody).toHaveBeenCalledOnce();
-      expect(parseBody).toHaveBeenCalledWith(request, ServicePayload);
+      expect(parseBody).toHaveBeenCalledWith(request, CreateServicePayload);
       expect(groupExists).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
     it.each`
-      scenario                  | selcGroups
-      ${"but he has no groups"} | ${undefined}
-      ${"he is not a member"}   | ${faker.helpers.multiple(faker.string.uuid)}
+      scenario                                  | group_id                              | selcGroups                                   | expectedStatusCode | expectedDetail
+      ${"set a group but but he has no groups"} | ${`different-${faker.string.uuid()}`} | ${undefined}                                 | ${403}             | ${"Provided group is out of your scope"}
+      ${"set a group who is not a member"}      | ${`different-${faker.string.uuid()}`} | ${faker.helpers.multiple(faker.string.uuid)} | ${403}             | ${"Provided group is out of your scope"}
+      ${"not set a group but he is has groups"} | ${undefined}                          | ${faker.helpers.multiple(faker.string.uuid)} | ${400}             | ${"group_id is required"}
     `(
-      "should return a forbidden response when user is not admin and try to set a group but $scenario",
-      async ({ selcGroups }) => {
+      "should return a forbidden response when user is not admin and $scenario",
+      async ({ group_id, selcGroups, expectedStatusCode, expectedDetail }) => {
         // given
         const jsonBodyMock = {
           ...aValidServicePayload,
           metadata: {
             ...aValidServicePayload.metadata,
-            group_id: `different-${faker.string.uuid()}`,
+            group_id,
           },
         };
         parseBody.mockResolvedValueOnce(jsonBodyMock);
@@ -141,13 +142,11 @@ describe("Services API", () => {
         const result = await POST(request, {});
 
         // then
-        expect(result.status).toBe(403);
+        expect(result.status).toBe(expectedStatusCode);
         const responseBody = await result.json();
-        expect(responseBody.detail).toEqual(
-          "Cannot set service group relationship",
-        );
+        expect(responseBody.detail).toEqual(expectedDetail);
         expect(parseBody).toHaveBeenCalledOnce();
-        expect(parseBody).toHaveBeenCalledWith(request, ServicePayload);
+        expect(parseBody).toHaveBeenCalledWith(request, CreateServicePayload);
         expect(groupExists).not.toHaveBeenCalled();
         expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
       },

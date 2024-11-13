@@ -1,0 +1,30 @@
+{
+  "extends": [
+    "//"
+  ],
+  "tasks": {
+    "generate:definitions": {
+      "inputs": [
+        "openapi.yaml",
+        "../../packages/io-services-cms-models/openapi/*.yaml"
+      ],
+      "outputs": [
+        "src/generated/api/**/*"
+      ]
+    },
+    "generate:avro": {
+      "inputs": [
+        "avro/**"
+      ],
+      "outputs": [
+        "src/generated/avro/**/*"
+      ]
+    },
+    "generate": {
+      "dependsOn": [
+        "generate:definitions",
+        "generate:avro"
+      ]
+    }
+  }
+}

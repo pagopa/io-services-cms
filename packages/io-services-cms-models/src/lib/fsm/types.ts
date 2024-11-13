@@ -4,6 +4,8 @@ import * as O from "fp-ts/Option";
 import * as TE from "fp-ts/TaskEither";
 import * as t from "io-ts";
 
+import { Patchable } from "../../service-lifecycle/definitions";
+
 /**
  * Metadata to be appended to an element to describe
  */
@@ -11,21 +13,23 @@ export type StateMetadata<S extends string> = t.TypeOf<
   ReturnType<typeof StateMetadata<S>>
 >;
 export const StateMetadata = <S extends string>(state: S) =>
-  t.type({
-    fsm: t.intersection([
-      t.type({
-        /* the current element state */
-        state: t.literal(state),
-      }),
-      // optional, free-form metadata values
-      t.record(t.string, t.unknown),
-      // optional, well-known metadata values
-      t.partial({
-        /* store the information of which transition provoked the state change */
-        lastTransition: t.string,
-      }),
-    ]),
-  });
+  t.exact(
+    t.type({
+      fsm: t.intersection([
+        t.type({
+          /* the current element state */
+          state: t.literal(state),
+        }),
+        // optional, free-form metadata values
+        t.record(t.string, t.unknown),
+        // optional, well-known metadata values
+        t.partial({
+          /* store the information of which transition provoked the state change */
+          lastTransition: t.string,
+        }),
+      ]),
+    }),
+  );
 
 export type WithState<S extends string, T> = t.TypeOf<
   ReturnType<typeof WithState<S, T>>
@@ -51,6 +55,7 @@ export interface FSMStore<
   getServiceIdsByGroupIds: (
     groupIds: readonly string[],
   ) => TE.TaskEither<Error, readonly string[]>;
+  patch: (id: string, data: Patchable) => TE.TaskEither<Error, TT>;
   save: (
     id: string,
     data: TT,
