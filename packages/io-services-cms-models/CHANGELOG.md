@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.24.0
+
+### Minor Changes
+
+- e83ab191: allow operator to edit service without overriding group
+
 ## 1.23.0
 
 ### Minor Changes

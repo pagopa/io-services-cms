@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.17.0
+
+### Minor Changes
+
+- e83ab191: allow operator to edit service without overriding group
+
+### Patch Changes
+
+- Updated dependencies [e83ab191]
+  - @io-services-cms/models@1.24.0
+
 ## 1.16.1
 
 ### Patch Changes
