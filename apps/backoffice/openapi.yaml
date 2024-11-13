@@ -1020,7 +1020,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Subscription'
+                $ref: '#/components/schemas/SubscriptionPagination'
         '401':
           description: Unauthorized
         '403':
@@ -1673,6 +1673,18 @@ components:
       required:
         - id
         - name
+    SubscriptionPagination:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        pagination:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+      required:
+        - value
+        - pagination
     CreateManageGroupSubscription:
       type: object
       properties:
