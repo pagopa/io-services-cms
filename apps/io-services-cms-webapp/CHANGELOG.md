@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.39.0
+
+### Minor Changes
+
+- e83ab191: allow operator to edit service without overriding group
+
+### Patch Changes
+
+- Updated dependencies [e83ab191]
+  - @io-services-cms/models@1.24.0
+
 ## 1.38.0
 
 ### Minor Changes
