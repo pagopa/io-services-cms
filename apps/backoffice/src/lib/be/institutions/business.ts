@@ -1,16 +1,19 @@
-import { GroupPagination } from "@/generated/api/GroupPagination";
+import { Group, StateEnum } from "@/generated/api/Group";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
+import { StatusEnum } from "@/generated/selfcare/UserGroupResource";
 import {
   getInstitutionById,
   getInstitutionGroups,
   getUserAuthorizedInstitutions,
 } from "@/lib/be/institutions/selfcare";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { ManagedInternalError } from "../errors";
+import { getManageSubscriptions } from "../subscriptions/business";
 
 // Type utility to extract the resolved type of a Promise
 type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to an Utils monorepo package
@@ -30,13 +33,44 @@ export const retrieveInstitution = async (
 ): Promise<BackofficeInstitution> =>
   toBackofficeInstitution(await getInstitutionById(institutionId));
 
+/**
+ * Fetch all group related to provided institution
+ * @param institutionId the institution id
+ * @returns all institution groups
+ */
 export const retrieveInstitutionGroups = async (
   institutionId: string,
-  size?: number,
-  page?: number,
-): Promise<GroupPagination> => {
-  const apiResult = await getInstitutionGroups(institutionId, size, page);
-  return toGroupPagination(apiResult);
+): Promise<Group[]> => {
+  const groups: Group[] = [];
+  let page = 0;
+  let hasMoreItems = false;
+  do {
+    const apiResult = await getInstitutionGroups(institutionId, 1000, page++);
+    groups.push(...toGroups(apiResult.content ?? []));
+    hasMoreItems = !!apiResult.totalPages && apiResult.totalPages >= page;
+  } while (hasMoreItems);
+  return groups;
+};
+
+export const retrieveUnboundInstitutionGroups = async (
+  apimUserId: string,
+  institutionId: string,
+): Promise<Group[]> => {
+  const results = await Promise.all([
+    getManageSubscriptions(apimUserId),
+    retrieveInstitutionGroups(institutionId),
+  ]);
+  const subscriptions = results[0];
+  const groups = results[1];
+  const groupIdsWithoutSubscriptions = subscriptions.reduce(
+    (acc, item) =>
+      acc.add(
+        item.id.substring(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length),
+      ),
+    new Set<Group["id"]>(),
+  );
+  groups.filter((group) => !groupIdsWithoutSubscriptions.has(group.id));
+  return groups;
 };
 
 const toBackofficeInstitution = (
@@ -66,29 +100,40 @@ const toUserAuthorizedInstitution = (
   role: userInstitution.products?.at(0)?.productRole,
 });
 
-const toGroupPagination = (
-  pageOfUserGroupResource: PromiseValue<
-    ReturnType<typeof getInstitutionGroups>
-  >,
-): GroupPagination => ({
-  pagination: {
-    number: pageOfUserGroupResource.number ?? 0,
-    size: pageOfUserGroupResource.size ?? 0,
-    totalElements: pageOfUserGroupResource.totalElements ?? 0,
-    totalPages: pageOfUserGroupResource.totalPages ?? 0,
-  },
-  value: toGroups(pageOfUserGroupResource.content ?? []),
-});
+const parseState = (state?: StatusEnum): StateEnum => {
+  switch (state) {
+    case StatusEnum.ACTIVE:
+      return StateEnum.ACTIVE;
+    case StatusEnum.SUSPENDED:
+      return StateEnum.SUSPENDED;
+    case StatusEnum.DELETED:
+      return StateEnum.DELETED;
+    case undefined:
+      return StateEnum.ACTIVE;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = state;
+      throw new Error(`Invalid state: ${state}`);
+  }
+};
 
 const toGroups = (
   userGroupResources: Exclude<
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
     undefined
   >,
-): GroupPagination["value"] =>
-  userGroupResources?.map((userGroupResource) => {
-    if (userGroupResource.id && userGroupResource.name !== undefined) {
-      return { id: userGroupResource.id, name: userGroupResource.name };
+): Group[] =>
+  userGroupResources.map((userGroupResource) => {
+    if (
+      userGroupResource.id &&
+      userGroupResource.name !== undefined &&
+      userGroupResource.status !== undefined
+    ) {
+      return {
+        id: userGroupResource.id,
+        name: userGroupResource.name,
+        state: parseState(userGroupResource.status),
+      };
     } else {
       throw new ManagedInternalError(
         "Error toGroups mapping",
@@ -102,10 +147,14 @@ export const groupExists = async (
   groupId: NonEmptyString,
 ): Promise<boolean> => {
   // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-  const institutionGroupsResponse = await retrieveInstitutionGroups(
-    institutionId,
-    1000, // FIXME: workaround to get all groups in a single call
-    0,
-  );
-  return institutionGroupsResponse.value.some((group) => group.id === groupId);
+  const institutionGroupsResponse =
+    await retrieveInstitutionGroups(institutionId);
+  return institutionGroupsResponse.some((group) => group.id === groupId);
+};
+
+export const checkInstitutionGroupsExistence = async (
+  institutionId: string,
+): Promise<boolean> => {
+  const apiResult = await getInstitutionGroups(institutionId, 1, 0);
+  return !!apiResult.totalElements;
 };

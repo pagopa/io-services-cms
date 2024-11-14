@@ -837,7 +837,7 @@ paths:
         - institutions
       summary: Retrieve all active unbound institution groups
       description: Retrieve all active groups without any API Key related to them for the given institution
-      operationId: getInstitutionUnboundGroups
+      operationId: getUnboundInstitutionGroups
       security:
         - cookieAuth: []
       parameters:

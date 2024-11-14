@@ -55,11 +55,14 @@ describe("upsertManageSubscription", () => {
     "should return the new $subType Subscription",
     async ({ subType, groupId }) => {
       const id = "id";
+      const name = "name";
+      const state = "active";
       const ownerId = mocks.anOwnerId;
       mocks.upsertSubscription.mockReturnValueOnce(
         TE.right({
           id: `/full/path/${id}`,
-          name: "name",
+          name,
+          state,
           foo: "foo",
           bar: "bar",
         }),
@@ -67,7 +70,7 @@ describe("upsertManageSubscription", () => {
 
       await expect(
         upsertManageSubscription(ownerId, groupId),
-      ).resolves.toStrictEqual({ id, name: "name" });
+      ).resolves.toStrictEqual({ id, name, state });
 
       const params = groupId ? [subType, ownerId, groupId] : [subType, ownerId];
       expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
@@ -101,6 +104,7 @@ describe("getManageSubscriptions", () => {
   it("should return the group manage Subscriptions", async () => {
     const name = "name";
     const displayName = "displayName";
+    const state = "suspended";
     const ownerId = mocks.anOwnerId;
     const limit = 5;
     const offset = 0;
@@ -109,6 +113,7 @@ describe("getManageSubscriptions", () => {
         {
           name,
           displayName,
+          state,
           foo: "foo",
           bar: "bar",
         },
@@ -117,7 +122,7 @@ describe("getManageSubscriptions", () => {
 
     await expect(
       getManageSubscriptions(ownerId, limit, offset),
-    ).resolves.toStrictEqual([{ id: name, name: displayName }]);
+    ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
     expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
     expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(

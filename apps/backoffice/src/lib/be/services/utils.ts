@@ -1,5 +1,4 @@
 import { Group } from "@/generated/api/Group";
-import { GroupPagination } from "@/generated/api/GroupPagination";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -178,8 +177,8 @@ export const reduceServiceTopicsList = (
       )
     : ({} as Record<string, ServiceTopic>);
 
-export const reduceGrops = (groups: GroupPagination): Map<Group["id"], Group> =>
-  groups.value.reduce(
+export const reduceGrops = (groups: Group[]): Map<Group["id"], Group> =>
+  groups.reduce(
     (map, group) => map.set(group.id, group),
     new Map<Group["id"], Group>(),
   );

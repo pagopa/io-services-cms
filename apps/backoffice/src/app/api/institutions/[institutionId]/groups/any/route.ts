@@ -4,16 +4,15 @@ import {
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { retrieveUnboundInstitutionGroups } from "@/lib/be/institutions/business";
-import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { checkInstitutionGroupsExistence } from "@/lib/be/institutions/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { BackOfficeUser } from "../../../../../../types/next-auth";
+import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
- * @operationId getUnboundInstitutionGroups
- * @description Retrieve groups for an Institution ID
+ * @operationId checkInstitutionGroupsExistence
+ * @description Check for resource existence
  */
 export const GET = withJWTAuthHandler(
   async (
@@ -30,18 +29,24 @@ export const GET = withJWTAuthHandler(
       return handleForbiddenErrorResponse("Role not authorized");
     }
     try {
-      const institutionResponse = await retrieveUnboundInstitutionGroups(
+      const existsAtLeastOneGroup = await checkInstitutionGroupsExistence(
         params.institutionId,
-        backofficeUser.parameters.userId,
       );
-      return sanitizedNextResponseJson({ groups: institutionResponse });
+      return new Response(null, { status: existsAtLeastOneGroup ? 200 : 204 });
+      return NextResponse.json(
+        {},
+        { status: existsAtLeastOneGroup ? 200 : 204 },
+      );
     } catch (error) {
       handlerErrorLog(
-        `An Error has occurred while searching groups for institutionId: ${params.institutionId}`,
+        `An Error has occurred while checking groups existance: ${params.institutionId}`,
         error,
       );
 
-      return handleInternalErrorResponse("InstitutionGroupsError", error);
+      return handleInternalErrorResponse(
+        "CheckInstitutionGroupsExistanceError",
+        error,
+      );
     }
   },
 );
