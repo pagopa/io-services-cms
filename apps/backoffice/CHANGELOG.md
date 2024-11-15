@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.17.1
+
+### Patch Changes
+
+- 6a350eb7: [BO] filter groups based on the relationship with subscription, in order to return only unbound groups
+- Updated dependencies [6a350eb7]
+  - @io-services-cms/external-clients@1.4.1
+
 ## 1.17.0
 
 ### Minor Changes
