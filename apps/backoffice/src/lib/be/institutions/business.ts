@@ -21,6 +21,11 @@ type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to 
 // Type utility to extract the resolved type of a ReadonlyArray of Promises
 type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
+/**
+ * Retrieve the institutions from which the user is authorized to operate
+ * @param selfCareUserId the user id
+ * @returns the authorized institutions
+ */
 export const retrieveUserAuthorizedInstitutions = async (
   selfCareUserId: string,
 ): Promise<UserAuthorizedInstitutions> => {
@@ -28,6 +33,11 @@ export const retrieveUserAuthorizedInstitutions = async (
   return { authorizedInstitutions: apiResult.map(toUserAuthorizedInstitution) };
 };
 
+/**
+ * Retrieve an institution by the provided id
+ * @param institutionId the institution id
+ * @returns the institution
+ */
 export const retrieveInstitution = async (
   institutionId: string,
 ): Promise<BackofficeInstitution> =>
@@ -52,25 +62,28 @@ export const retrieveInstitutionGroups = async (
   return groups;
 };
 
+/**
+ * Fetch both groups and subscription-group related to provided institution, then filter the groups in order to return only the unbound ones
+ * @param apimUserId the apim user id
+ * @param institutionId the institution id
+ * @returns the groups not related to any subscription
+ */
 export const retrieveUnboundInstitutionGroups = async (
   apimUserId: string,
   institutionId: string,
 ): Promise<Group[]> => {
-  const results = await Promise.all([
+  const [subscriptions, groups] = await Promise.all([
     getManageSubscriptions(apimUserId),
     retrieveInstitutionGroups(institutionId),
   ]);
-  const subscriptions = results[0];
-  const groups = results[1];
-  const groupIdsWithoutSubscriptions = subscriptions.reduce(
+  const subscriptionBoundGroupIds = subscriptions.reduce(
     (acc, item) =>
       acc.add(
         item.id.substring(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length),
       ),
     new Set<Group["id"]>(),
   );
-  groups.filter((group) => !groupIdsWithoutSubscriptions.has(group.id));
-  return groups;
+  return groups.filter((group) => !subscriptionBoundGroupIds.has(group.id));
 };
 
 const toBackofficeInstitution = (
@@ -142,6 +155,12 @@ const toGroups = (
     }
   });
 
+/**
+ * Check the existance of the provided groupId from the groups related to the provided institution
+ * @param institutionId the institution id
+ * @param groupId the group id to check
+ * @returns a boolean indicating whether or not the group exists
+ */
 export const groupExists = async (
   institutionId: string,
   groupId: NonEmptyString,
