@@ -6,10 +6,12 @@ import { UserInstitutions } from "../../../lib/be/selfcare-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
+import { ManagedInternalError } from "../errors";
 import {
   groupExists,
   retrieveInstitution,
   retrieveInstitutionGroups,
+  retrieveUnboundInstitutionGroups,
   retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
 
@@ -70,10 +72,12 @@ const {
   getUserAuthorizedInstitutionsMock,
   getInstitutionByIdMock,
   getInstitutionGroupsMock,
+  getManageSubscriptionsMock,
 } = vi.hoisted(() => ({
   getUserAuthorizedInstitutionsMock: vi.fn(),
   getInstitutionByIdMock: vi.fn(),
   getInstitutionGroupsMock: vi.fn(),
+  getManageSubscriptionsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
@@ -85,6 +89,10 @@ vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
     getInstitutionGroups: getInstitutionGroupsMock,
   };
 });
+
+vi.mock("@/lib/be/subscriptions/business", () => ({
+  getManageSubscriptions: getManageSubscriptionsMock,
+}));
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -202,65 +210,61 @@ describe("Institutions", () => {
       ]);
     });
 
-    // it("should rejects when getInstitutionGroups return an error response", async () => {
-    //   const errorMessage = "errorMessage";
-    //   getInstitutionGroups.mockRejectedValueOnce(new Error(errorMessage));
-    //   getSelfcareClient.mockReturnValueOnce({
-    //     getInstitutionGroups,
-    //   });
+    it("should rejects when getInstitutionGroups return an error response", async () => {
+      // given
+      const error = new Error("errorMessage");
+      getInstitutionGroupsMock.mockRejectedValueOnce(error);
 
-    //   expect(
-    //     retrieveInstitutionGroups(
-    //       (mocks.institutionGroups.content as any[])[0].institutionId,
-    //     ),
-    //   ).rejects.toThrowError(errorMessage);
+      // when and then
+      expect(
+        retrieveInstitutionGroups(
+          (mocks.institutionGroups.content as any[])[0].institutionId,
+        ),
+      ).rejects.toThrowError(error);
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        (mocks.institutionGroups.content as any[])[0].institutionId,
+        1000,
+        0,
+      );
+    });
 
-    //   expect(getInstitutionGroups).toHaveBeenCalledWith(
-    //     (mocks.institutionGroups.content as any[])[0].institutionId,
-    //     undefined,
-    //     undefined,
-    //   );
-    // });
+    it("should rejects on error response if group ID or group Name is not present or undefined", async () => {
+      getInstitutionGroupsMock.mockResolvedValueOnce({
+        content: [
+          {
+            description: "institutionGroups description",
+            id: "institutionGroupsID",
+            institutionId: "institutionGroupsInstID",
+            name: "institutionGroupsName",
+            productId: "institutionGroupsProdID",
+            status: "ACTIVE" as StatusEnum,
+          },
+          {
+            description: "institutionGroupsDescription2",
+            institutionId: "institutionGroupsInstID2",
+            name: "institutionGroupsName2",
+            productId: "institutionGroupsProdID2",
+            status: "ACTIVE" as StatusEnum,
+          },
+        ],
+        number: 0,
+        size: 0,
+        totalElements: 2,
+        totalPages: 0,
+      });
 
-    // it("should rejects on error response if group ID or group Name is not present or undefined", async () => {
-    //   getInstitutionGroups.mockResolvedValueOnce({
-    //     content: [
-    //       {
-    //         description: "institutionGroups description",
-    //         id: "institutionGroupsID",
-    //         institutionId: "institutionGroupsInstID",
-    //         name: "institutionGroupsName",
-    //         productId: "institutionGroupsProdID",
-    //         status: "ACTIVE" as StatusEnum,
-    //       },
-    //       {
-    //         description: "institutionGroupsDescription2",
-    //         institutionId: "institutionGroupsInstID2",
-    //         name: "institutionGroupsName2",
-    //         productId: "institutionGroupsProdID2",
-    //         status: "ACTIVE" as StatusEnum,
-    //       },
-    //     ],
-    //     number: 0,
-    //     size: 0,
-    //     totalElements: 2,
-    //     totalPages: 0,
-    //   });
+      await expect(() =>
+        retrieveInstitutionGroups("institutionGroupsInstID"),
+      ).rejects.toThrowError(
+        new ManagedInternalError("Error toGroups mapping"),
+      );
 
-    //   isAxiosError.mockReturnValueOnce(true);
-
-    //   await expect(() =>
-    //     retrieveInstitutionGroups("institutionGroupsInstID"),
-    //   ).rejects.toThrowError(
-    //     new ManagedInternalError("Error toGroups mapping"),
-    //   );
-
-    //   expect(getInstitutionGroups).toHaveBeenCalledWith(
-    //     mocks.institutionGroups.content[0].institutionId,
-    //     undefined,
-    //     undefined,
-    //   );
-    // });
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        (mocks.institutionGroups.content as any[])[0].institutionId,
+        1000,
+        0,
+      );
+    });
   });
 
   describe("groupExists", () => {
@@ -305,6 +309,74 @@ describe("Institutions", () => {
 
       // when and then
       expect(groupExists(institutionId, groupId)).resolves.toStrictEqual(true);
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1000,
+        0,
+      );
+    });
+  });
+
+  describe("retrieveUnboundInstitutionGroups", () => {
+    it.each`
+      scenario
+      ${"getManageSubscriptions"}
+      ${"getInstitutionGroups"}
+    `("should reject when $scenario rejects", async ({ scenario }) => {
+      // given
+      const apimUserId = "apimUserId";
+      const institutionId = "institutionId";
+      const error = new Error();
+      if (scenario === "getManageSubscriptions") {
+        getManageSubscriptionsMock.mockRejectedValueOnce(error);
+        getInstitutionGroupsMock.mockResolvedValueOnce({});
+      } else {
+        getManageSubscriptionsMock.mockResolvedValueOnce({});
+        getInstitutionGroupsMock.mockRejectedValueOnce(error);
+      }
+
+      // when and then
+      await expect(() =>
+        retrieveUnboundInstitutionGroups(apimUserId, institutionId),
+      ).rejects.toThrowError(error);
+      expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(apimUserId);
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1000,
+        0,
+      );
+    });
+
+    it("should filter the selfcare groups based on subscriptions group", async () => {
+      // given
+      const apimUserId = "apimUserId";
+      const institutionId = "institutionId";
+      getManageSubscriptionsMock.mockResolvedValueOnce([
+        {
+          id: `MANAGE-GROUP-${(mocks.institutionGroups.content as any[])[1].id}`,
+          name: "name",
+          state: "active",
+        },
+      ]);
+      getInstitutionGroupsMock.mockResolvedValueOnce(mocks.institutionGroups);
+
+      // when and then
+      const res = await retrieveUnboundInstitutionGroups(
+        apimUserId,
+        institutionId,
+      );
+      expect(res).toStrictEqual([
+        {
+          id: (mocks.institutionGroups.content as any[])[0].id,
+          name: (mocks.institutionGroups.content as any[])[0].name,
+          state: (mocks.institutionGroups.content as any[])[0].status,
+        },
+      ]);
+      expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(apimUserId);
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
         institutionId,
