@@ -499,7 +499,7 @@ const getUserSubscriptions = (
            * FIXME: PagedAsyncIterableIterator returns:
            * - first filtered page (what we are filtering)
            * - all pages (starting from first value)
-           * For this reason the `break` below is used to get only the first page.
+           * For this reason the `break` below is used to get only the first page in case the pagination is required (whether the offset or limit is defined).
            * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
            * seems not to work, so we downgrade package to 8.x.x version.
            */
