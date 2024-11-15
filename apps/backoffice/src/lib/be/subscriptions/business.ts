@@ -1,4 +1,5 @@
-import { Subscription } from "@/generated/api/Subscription";
+import { StateEnum, Subscription } from "@/generated/api/Subscription";
+import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -8,6 +9,29 @@ import {
   ManagedInternalError,
   apimErrorToManagedInternalError,
 } from "../errors";
+
+const parseState = (state?: SubscriptionState): StateEnum => {
+  switch (state) {
+    case "active":
+      return StateEnum.active;
+    case "cancelled":
+      return StateEnum.cancelled;
+    case "expired":
+      return StateEnum.expired;
+    case "rejected":
+      return StateEnum.rejected;
+    case "submitted":
+      return StateEnum.submitted;
+    case "suspended":
+      return StateEnum.suspended;
+    case undefined:
+      return StateEnum.active;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = state;
+      throw new Error(`Invalid state: ${state}`);
+  }
+};
 
 export async function upsertManageSubscription(
   ownerId: string,
@@ -50,13 +74,14 @@ export async function upsertManageSubscription(
       maybeSubscription.right.id as NonEmptyString,
     ),
     name: maybeSubscription.right.name,
+    state: parseState(maybeSubscription.right.state),
   };
 }
 
 export async function getManageSubscriptions(
   apimUserId: string,
-  limit: number,
-  offset: number,
+  limit?: number,
+  offset?: number,
   selcGroups?: string[],
 ): Promise<Subscription[]> {
   const maybeSubscriptions = await getApimService().getUserSubscriptions(
@@ -76,5 +101,6 @@ export async function getManageSubscriptions(
   return maybeSubscriptions.right.map((subContract) => ({
     id: subContract.name ?? "",
     name: subContract.displayName ?? "",
+    state: parseState(subContract.state),
   }));
 }

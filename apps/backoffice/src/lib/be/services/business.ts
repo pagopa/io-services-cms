@@ -113,12 +113,7 @@ export const retrieveServiceList = async (
     TE.bind("groupsMap", (_) =>
       pipe(
         TE.tryCatch(
-          () =>
-            retrieveInstitutionGroups(
-              backofficeUser.institution.id,
-              1000, // FIXME: workaround to get all groups in a single call
-              0,
-            ),
+          () => retrieveInstitutionGroups(backofficeUser.institution.id),
           E.toError,
         ),
         TE.map(reduceGrops),
@@ -264,8 +259,6 @@ export async function forwardIoServicesCmsRequest<
       // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
       const institutionGroupsResponse = await retrieveInstitutionGroups(
         backofficeUser.institution.id,
-        1000, // FIXME: workaround to get all groups in a single call
-        0,
       );
       const groupIdToNameMap = reduceGrops(institutionGroupsResponse);
 

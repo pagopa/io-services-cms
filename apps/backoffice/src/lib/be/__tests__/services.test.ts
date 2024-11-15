@@ -6,7 +6,7 @@ import { ValidationError } from "io-ts";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser, Institution } from "../../../../types/next-auth";
-import { Group } from "../../../generated/api/Group";
+import { Group, StateEnum } from "../../../generated/api/Group";
 import { MigrationData } from "../../../generated/api/MigrationData";
 import { MigrationDelegate } from "../../../generated/api/MigrationDelegate";
 import { MigrationItem } from "../../../generated/api/MigrationItem";
@@ -108,7 +108,11 @@ const mocks: {
         },
       ],
     } as ServiceTopicList,
-    aGroup: { id: "group_id", name: "group name" },
+    aGroup: {
+      id: "group_id",
+      name: "group name",
+      state: "ACTIVE" as StateEnum,
+    },
   };
 });
 
@@ -263,9 +267,7 @@ describe("Services TEST", () => {
         getIoServicesCmsClient.mockReturnValueOnce({
           getServices,
         });
-        retrieveInstitutionGroups.mockResolvedValueOnce({
-          value: [mocks.aGroup],
-        });
+        retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
 
         // Mock NextRequest
         const request = new NextRequest(new URL("http://localhost"));
@@ -290,8 +292,6 @@ describe("Services TEST", () => {
         expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
         expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
           aBackofficeUser.institution.id,
-          1000,
-          0,
         );
 
         expect(result.status).toBe(200);
@@ -522,9 +522,7 @@ describe("Services TEST", () => {
           count: 2,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
         TE.right(
           ids.map((id) => ({
@@ -555,8 +553,6 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
-        1000,
-        0,
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -639,9 +635,7 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
         TE.right(
           ids.map((id) => ({
@@ -679,8 +673,6 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
-        1000,
-        0,
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -752,9 +744,7 @@ describe("Services TEST", () => {
           count: 2,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.right([
           {
@@ -783,8 +773,6 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
-        1000,
-        0,
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -856,9 +844,7 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.right([mocks.aBaseServiceLifecycle]),
       );
@@ -880,8 +866,6 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
-        1000,
-        0,
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -911,9 +895,7 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce({
-        value: [mocks.aGroup],
-      });
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.left({
           kind: "COSMOS_ERROR_RESPONSE",
@@ -931,8 +913,6 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
-        1000,
-        0,
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
