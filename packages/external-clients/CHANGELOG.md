@@ -1,5 +1,15 @@
 # @io-services-cms/external-clients
 
+## 1.5.0
+
+### Minor Changes
+
+- 185ccffc: add regenerateManageSubscriptionKey route handler
+
+### Patch Changes
+
+- 82b44297: fix listSecrets return type
+
 ## 1.4.1
 
 ### Patch Changes

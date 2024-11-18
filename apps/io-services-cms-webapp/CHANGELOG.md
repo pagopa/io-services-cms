@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.39.2
+
+### Patch Changes
+
+- 82b44297: fix listSecrets return type
+- Updated dependencies [82b44297]
+- Updated dependencies [185ccffc]
+  - @io-services-cms/external-clients@1.5.0
+
 ## 1.39.1
 
 ### Patch Changes
