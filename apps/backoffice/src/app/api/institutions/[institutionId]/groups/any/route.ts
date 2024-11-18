@@ -16,7 +16,7 @@ import { BackOfficeUser } from "../../../../../../../types/next-auth";
  */
 export const GET = withJWTAuthHandler(
   async (
-    request: NextRequest,
+    _: NextRequest,
     {
       backofficeUser,
       params,
