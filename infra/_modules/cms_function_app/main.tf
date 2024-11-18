@@ -49,13 +49,13 @@ module "cms_fn" {
       "AzureWebJobs.OnRequestDetail.Disabled"                            = "0"
       "AzureWebJobs.ServiceDetailLifecycleWatcher.Disabled"              = "0"
       "AzureWebJobs.ServiceDetailPublicationWatcher.Disabled"            = "0"
-      "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "1"
-      "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "1"
-      "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled"           = "1"
-      "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "1"
-      "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "1"
-      "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "1"
-      "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "1"
+      "AzureWebJobs.IngestionServicePublicationWatcher.Disabled"         = "0"
+      "AzureWebJobs.OnRequestServicesPublicationIngestionRetry.Disabled" = "0"
+      "AzureWebJobs.IngestionServiceLifecycleWatcher.Disabled"           = "0"
+      "AzureWebJobs.OnRequestServicesLifecycleIngestionRetry.Disabled"   = "0"
+      "AzureWebJobs.IngestionServiceHistoryWatcher.Disabled"             = "0"
+      "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "0"
+      "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "0"
     }
   )
 

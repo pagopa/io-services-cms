@@ -2,22 +2,16 @@ import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_STATUS_NOT_FOUND,
   HTTP_STATUS_UNAUTHORIZED,
   HTTP_TITLE_BAD_REQUEST,
   HTTP_TITLE_FORBIDDEN,
   HTTP_TITLE_UNAUTHORIZED,
 } from "@/config/constants";
+import { ResponseError } from "@/generated/api/ResponseError";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
-
-export class ApiKeyNotFoundError extends Error {
-  constructor(message: string) {
-    super("the API does not exists");
-    this.name = "ApiKeyNotFoundError";
-    this.message = message;
-  }
-}
 
 export class InstitutionNotFoundError extends Error {
   constructor(message: string) {
@@ -37,6 +31,13 @@ export class ManagedInternalError extends Error {
       typeof additionalDetails === "string"
         ? additionalDetails
         : JSON.stringify(additionalDetails);
+  }
+}
+
+export class ApiKeyNotFoundError extends ManagedInternalError {
+  constructor(additionalDetails?: string) {
+    super("the API does not exists", additionalDetails);
+    this.name = "ApiKeyNotFoundError";
   }
 }
 
@@ -60,7 +61,7 @@ export class HealthChecksError extends Error {
 export const handleInternalErrorResponse = (
   title: string,
   error: unknown,
-): NextResponse => {
+): NextResponse<ResponseError> => {
   let message = "Something went wrong";
   if (error instanceof ManagedInternalError) {
     message = error.message;
@@ -75,7 +76,9 @@ export const handleInternalErrorResponse = (
   );
 };
 
-export const handleBadRequestErrorResponse = (detail: string): NextResponse =>
+export const handleBadRequestErrorResponse = (
+  detail: string,
+): NextResponse<ResponseError> =>
   NextResponse.json(
     {
       detail: detail,
@@ -85,7 +88,9 @@ export const handleBadRequestErrorResponse = (detail: string): NextResponse =>
     { status: HTTP_STATUS_BAD_REQUEST },
   );
 
-export const handleForbiddenErrorResponse = (detail: string): NextResponse =>
+export const handleForbiddenErrorResponse = (
+  detail: string,
+): NextResponse<ResponseError> =>
   NextResponse.json(
     {
       detail: detail,
@@ -95,7 +100,9 @@ export const handleForbiddenErrorResponse = (detail: string): NextResponse =>
     { status: HTTP_STATUS_FORBIDDEN },
   );
 
-export const handleUnauthorizedErrorResponse = (detail: string): NextResponse =>
+export const handleUnauthorizedErrorResponse = (
+  detail: string,
+): NextResponse<ResponseError> =>
   NextResponse.json(
     {
       detail: detail,
@@ -104,6 +111,24 @@ export const handleUnauthorizedErrorResponse = (detail: string): NextResponse =>
     },
     { status: HTTP_STATUS_UNAUTHORIZED },
   );
+
+export const handleNotFoundErrorResponse = (
+  title: string,
+  error: unknown,
+): NextResponse<ResponseError> => {
+  let detail = "Something went wrong";
+  if (error instanceof ManagedInternalError) {
+    detail = error.message;
+  }
+  return NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_NOT_FOUND,
+      title,
+    },
+    { status: HTTP_STATUS_NOT_FOUND },
+  );
+};
 
 export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
   if (e instanceof ManagedInternalError) {

@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { PatchServicePayload } from "@/generated/api/PatchServicePayload";
 import { ServicePayload } from "@/generated/api/ServicePayload";
 import { isAdmin } from "@/lib/be/authz";
 import {
@@ -48,30 +49,10 @@ export const PUT = withJWTAuthHandler(
       let servicePayload;
       try {
         servicePayload = await parseBody(nextRequest, ServicePayload);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        return handleBadRequestErrorResponse(error.message);
-      }
-
-      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        if (isAdmin(backofficeUser)) {
-          if (
-            servicePayload.metadata.group_id &&
-            !(await groupExists(
-              backofficeUser.institution.id,
-              servicePayload.metadata.group_id,
-            ))
-          ) {
-            return handleBadRequestErrorResponse(
-              "Provided group_id does not exists",
-            );
-          }
-        } else {
-          // TODO: manage edit request without group_id changes
-          return handleForbiddenErrorResponse(
-            "Cannot set service group relationship",
-          );
-        }
+      } catch (error) {
+        return handleBadRequestErrorResponse(
+          error instanceof Error ? error.message : "Failed to parse JSON body",
+        );
       }
 
       return forwardIoServicesCmsRequest("updateService", {
@@ -83,6 +64,61 @@ export const PUT = withJWTAuthHandler(
             name: backofficeUser.institution.name,
           },
         },
+        nextRequest,
+        pathParams: params,
+      });
+    } catch (error) {
+      handlerErrorLog(
+        `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
+        error,
+      );
+      return handleInternalErrorResponse("EditServiceError", error);
+    }
+  },
+);
+
+/**
+ * @description Patch an existing service by ID
+ */
+export const PATCH = withJWTAuthHandler(
+  async (
+    nextRequest: NextRequest,
+    {
+      backofficeUser,
+      params,
+    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+  ) => {
+    try {
+      let patchServicePayload;
+      try {
+        patchServicePayload = await parseBody(nextRequest, PatchServicePayload);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        return handleBadRequestErrorResponse(error.message);
+      }
+
+      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
+        if (isAdmin(backofficeUser)) {
+          if (
+            patchServicePayload.metadata.group_id &&
+            !(await groupExists(
+              backofficeUser.institution.id,
+              patchServicePayload.metadata.group_id,
+            ))
+          ) {
+            return handleBadRequestErrorResponse(
+              "Provided group_id does not exists",
+            );
+          }
+        } else {
+          return handleForbiddenErrorResponse(
+            "Only admin users can patch a service",
+          );
+        }
+      }
+
+      return forwardIoServicesCmsRequest("patchService", {
+        backofficeUser,
         nextRequest,
         pathParams: params,
       });

@@ -94,6 +94,28 @@ ServicePayload:
       required:
         - metadata
     - $ref: '#/ServiceData'
+CreateServicePayload:
+  description: A payload used to create a service.
+  allOf:
+    - type: object
+      properties:
+        metadata:
+          $ref: '#/CreateServicePayloadMetadata'
+      required:
+        - metadata
+    - $ref: '#/ServiceData'
+PatchServicePayload:
+  description: A payload used to patch a service.
+  type: object
+  properties:
+    metadata:
+      type: object
+      properties:
+        group_id:
+          type: string
+          minLength: 1
+  required:
+    - metadata
 ServiceData:
   type: object
   description: Service basic data
@@ -194,6 +216,18 @@ ServiceMetadata:
           minLength: 1
 ServicePayloadMetadata:
   description: A set of service metadata properties on request payload
+  allOf:
+    - $ref: '#/ServiceBaseMetadata'
+    - type: object
+      properties:
+        topic_id:
+          type: number
+          description: The topic id
+          example: 3
+      required:
+        - topic_id
+CreateServicePayloadMetadata:
+  description: A set of service metadata properties on create request payload
   allOf:
     - $ref: '#/ServiceBaseMetadata'
     - type: object

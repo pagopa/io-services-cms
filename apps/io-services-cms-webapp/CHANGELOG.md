@@ -1,5 +1,47 @@
 # io-services-cms-webapp
 
+## 1.39.2
+
+### Patch Changes
+
+- 82b44297: fix listSecrets return type
+- Updated dependencies [82b44297]
+- Updated dependencies [185ccffc]
+  - @io-services-cms/external-clients@1.5.0
+
+## 1.39.1
+
+### Patch Changes
+
+- 6a350eb7: [BO] filter groups based on the relationship with subscription, in order to return only unbound groups
+- Updated dependencies [6a350eb7]
+  - @io-services-cms/external-clients@1.4.1
+
+## 1.39.0
+
+### Minor Changes
+
+- e83ab191: allow operator to edit service without overriding group
+
+### Patch Changes
+
+- Updated dependencies [e83ab191]
+  - @io-services-cms/models@1.24.0
+
+## 1.38.0
+
+### Minor Changes
+
+- 2d3c568: service topic ingestion
+- d880ab6: add group-based authz logic to FSM
+- beb7fe5: ingestion service history
+- 1deaefc: ingestion service lifecycle
+
+### Patch Changes
+
+- Updated dependencies [d880ab6]
+  - @io-services-cms/models@1.23.0
+
 ## 1.37.0
 
 ### Minor Changes

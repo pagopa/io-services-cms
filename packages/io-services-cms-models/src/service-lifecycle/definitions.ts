@@ -178,19 +178,21 @@ export type ServiceId = t.TypeOf<typeof ServiceId>;
 export const ServiceId = NonEmptyString;
 
 export type Service = t.TypeOf<typeof Service>;
-export const Service = t.intersection([
-  t.type({
-    data: t.intersection([
-      ServiceData,
-      t.type({ metadata: ServiceMetadata, organization: OrganizationData }),
-    ]),
-    id: ServiceId,
-  }),
-  t.partial({
-    modified_at: t.Integer,
-    version: NonEmptyString,
-  }),
-]);
+export const Service = t.exact(
+  t.intersection([
+    t.type({
+      data: t.intersection([
+        ServiceData,
+        t.type({ metadata: ServiceMetadata, organization: OrganizationData }),
+      ]),
+      id: ServiceId,
+    }),
+    t.partial({
+      modified_at: t.Integer,
+      version: NonEmptyString,
+    }),
+  ]),
+);
 
 export type ServiceStrict = t.TypeOf<typeof ServiceStrict>;
 export const ServiceStrict = t.intersection([
@@ -223,3 +225,7 @@ export const ServiceQualityStrict = t.intersection([
     ]),
   }),
 ]);
+
+export interface Patchable {
+  data: { metadata: { group_id?: string } };
+}

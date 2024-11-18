@@ -193,7 +193,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServicePayload'
+              $ref: '#/components/schemas/CreateServicePayload'
         required: true
       responses:
         '201':
@@ -349,6 +349,47 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ServicePayload'
+        required: true
+      responses:
+        '200':
+          description: Service updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceLifecycle'
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    patch:
+      tags:
+        - services
+      summary: Patch service
+      description: Update a subset of properties of an existing service
+      operationId: patchService
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: serviceId
+          in: path
+          description: ID of the service
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Patch service payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchServicePayload'
         required: true
       responses:
         '200':
@@ -794,9 +835,9 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all active institution groups
-      description: Retrieve all active groups for the given institution
-      operationId: getInstitutionGroups
+      summary: Retrieve all active unbound institution groups
+      description: Retrieve all active groups without any API Key related to them for the given institution
+      operationId: getUnboundInstitutionGroups
       security:
         - cookieAuth: []
       parameters:
@@ -806,30 +847,42 @@ paths:
           required: true
           schema:
             type: string
-        - name: limit
-          in: query
-          description: The number of groups to return
-          required: false
-          schema:
-            type: number
-            minimum: 1
-            maximum: 100
-            default: 20
-        - name: offset
-          in: query
-          description: The number of groups to skip before starting to collect the result set
-          required: false
-          schema:
-            type: number
-            minimum: 0
-            default: 0
       responses:
         '200':
           description: Groups fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupPagination'
+                $ref: '#/components/schemas/Groups'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /institutions/{institutionId}/groups/any:
+    get:
+      tags:
+        - institutions
+      summary: Return the information if there is at least one active group or not
+      description: Check for resource existence
+      operationId: checkInstitutionGroupsExistence
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: institutionId
+          in: path
+          description: ID of the institution
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: At least one active Group exists
+        '204':
+          description: There is no active Group
         '401':
           description: Unauthorized
         '403':
@@ -979,7 +1032,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Subscription'
+                $ref: '#/components/schemas/SubscriptionPagination'
         '401':
           description: Unauthorized
         '403':
@@ -1239,6 +1292,8 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceHistoryStatusType'
     ServicePublication:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
+    PatchServicePayload:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/PatchServicePayload'
     ServicePayload:
       type: object
       description: Service basic data
@@ -1275,6 +1330,42 @@ components:
         - name
         - description
         - metadata
+    CreateServicePayload:
+      type: object
+      description: Create Service data
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+        require_secure_channel:
+          type: boolean
+        authorized_recipients:
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+        authorized_cidrs:
+          description: >-
+            Allowed source IPs or CIDRs for this service.
+            When empty, every IP address it's authorized to call the IO API on
+            behalf of the service.
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
+        max_allowed_payment_amount:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 9999999999
+          default: 0
+        metadata:
+          $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/CreateServicePayloadMetadata'
+      required:
+        - name
+        - description
+        - metadata
     ServiceData:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceData'
     ServiceBaseMetadata:
@@ -1283,6 +1374,8 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata'
     ServicePayloadMetadata:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
+    CreateServicePayloadMetadata:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/CreateServicePayloadMetadata'
     ServiceLifecycleStatus:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceLifecycleStatus'
     ServiceLifecycleStatusType:
@@ -1330,9 +1423,6 @@ components:
             $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
       required:
         - cidrs
-        - description
-        - organization
-        - metadata
     MigrationItemList:
       type: object
       properties:
@@ -1544,18 +1634,6 @@ components:
               type: string
               enum: [published, unpublished]
         - $ref: '#/components/schemas/ServiceLifecycle'
-    GroupPagination:
-      type: object
-      properties:
-        value:
-          type: array
-          items:
-            $ref: '#/components/schemas/Group'
-        pagination:
-          $ref: '#/components/schemas/PaginationResult'
-      required:
-        - value
-        - pagination
     Group:
       type: object
       properties:
@@ -1563,9 +1641,22 @@ components:
           type: string
         name:
           type: string
+        state:
+          type: string
+          enum: [ACTIVE, SUSPENDED, DELETED]
       required:
         - id
         - name
+        - state
+    Groups:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Group'
+      required:
+        - groups
     PaginationResult:
       type: object
       properties:
@@ -1589,9 +1680,25 @@ components:
           type: string
         name:
           type: string
+        state:
+          type: string
+          enum: [suspended, active, expired, submitted, rejected, cancelled]
       required:
         - id
         - name
+        - state
+    SubscriptionPagination:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        pagination:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
+      required:
+        - value
+        - pagination
     CreateManageGroupSubscription:
       type: object
       properties:

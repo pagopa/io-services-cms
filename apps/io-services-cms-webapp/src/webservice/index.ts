@@ -66,6 +66,10 @@ import {
 } from "./controllers/get-services";
 import { makeInfoHandler } from "./controllers/info";
 import {
+  applyRequestMiddelwares as applyPatchServiceRequestMiddelwares,
+  makePatchServiceHandler,
+} from "./controllers/patch-service";
+import {
   applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
   makePublishServiceHandler,
 } from "./controllers/publish-service";
@@ -94,7 +98,7 @@ export interface WebServerDependencies {
   basePath: string;
   blobService: BlobService;
   config: IConfig;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   fsmPublicationClient: ServicePublication.FsmClient;
   serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistory>;
   serviceLifecycleCosmosHelper: CosmosHelper;
@@ -110,7 +114,7 @@ export const createWebServer = ({
   basePath,
   blobService,
   config,
-  fsmLifecycleClient,
+  fsmLifecycleClientCreator,
   fsmPublicationClient,
   serviceHistoryPagedHelper,
   serviceLifecycleCosmosHelper,
@@ -131,7 +135,7 @@ export const createWebServer = ({
       makeCreateServiceHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyCreateServiceRequestMiddelwares(config, subscriptionCIDRsModel),
@@ -144,7 +148,7 @@ export const createWebServer = ({
       makeGetServicesHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyGetServicesRequestMiddelwares(config, subscriptionCIDRsModel),
@@ -181,7 +185,7 @@ export const createWebServer = ({
       makeGetServiceLifecycleInternalHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClient: fsmLifecycleClientCreator(),
         telemetryClient,
       }),
       applyGetServiceLifecycleInternalRequestMiddelwares,
@@ -194,7 +198,7 @@ export const createWebServer = ({
       makeGetServiceLifecycleHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyGetServiceLifecycleRequestMiddelwares(
@@ -210,10 +214,22 @@ export const createWebServer = ({
       makeEditServiceHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyEditServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
+  );
+
+  router.patch(
+    serviceLifecyclePath,
+    pipe(
+      makePatchServiceHandler({
+        apimService,
+        fsmLifecycleClientCreator,
+        telemetryClient,
+      }),
+      applyPatchServiceRequestMiddelwares(config),
     ),
   );
 
@@ -222,7 +238,7 @@ export const createWebServer = ({
     pipe(
       makeDeleteServiceHandler({
         apimService,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel),
@@ -235,6 +251,7 @@ export const createWebServer = ({
       makeGetServiceHistoryHandler({
         apimService,
         config,
+        fsmLifecycleClientCreator,
         serviceHistoryPagedHelper,
         telemetryClient,
       }),
@@ -247,7 +264,7 @@ export const createWebServer = ({
     pipe(
       makeReviewServiceHandler({
         apimService,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyReviewServiceRequestMiddelwares(config, subscriptionCIDRsModel),
@@ -259,6 +276,7 @@ export const createWebServer = ({
     pipe(
       makePublishServiceHandler({
         apimService,
+        fsmLifecycleClientCreator,
         fsmPublicationClient,
         telemetryClient,
       }),
@@ -272,7 +290,7 @@ export const createWebServer = ({
       makeGetServicePublicationHandler({
         apimService,
         config,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         fsmPublicationClient,
         telemetryClient,
       }),
@@ -301,6 +319,7 @@ export const createWebServer = ({
     pipe(
       makeUnpublishServiceHandler({
         apimService,
+        fsmLifecycleClientCreator,
         fsmPublicationClient,
         telemetryClient,
       }),
@@ -313,7 +332,7 @@ export const createWebServer = ({
     pipe(
       makeGetServiceKeysHandler({
         apimService,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyGetServiceKeysRequestMiddelwares(config, subscriptionCIDRsModel),
@@ -325,7 +344,7 @@ export const createWebServer = ({
     pipe(
       makeRegenerateServiceKeysHandler({
         apimService,
-        fsmLifecycleClient,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyRegenerateServiceKeysRequestMiddelwares(
@@ -341,6 +360,7 @@ export const createWebServer = ({
       makeUploadServiceLogoHandler({
         apimService,
         blobService,
+        fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyUploadServiceLogoRequestMiddelwares(config, subscriptionCIDRsModel),

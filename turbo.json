@@ -4,7 +4,7 @@
     "generate": {
       "inputs": [
         "./openapi.yaml",
-        "./avro/**"
+        "./openapi/*.yaml"
       ],
       "outputs": [
         "src/generated/**/*"

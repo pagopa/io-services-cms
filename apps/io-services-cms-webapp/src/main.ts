@@ -134,7 +134,9 @@ const subscriptionCIDRsModel = new SubscriptionCIDRsModel(
 );
 
 // Get an instance of ServiceLifecycle client
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 // Get an instance of ServicePublication client
 const fsmPublicationClient = ServicePublication.getFsmClient(
@@ -185,7 +187,7 @@ export const httpEntryPoint = pipe(
     basePath: BASE_PATH,
     blobService,
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     serviceHistoryPagedHelper,
     serviceLifecycleCosmosHelper,
@@ -202,7 +204,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getServiceReviewDao(config),
   jiraProxy(jiraClient(config), config),
   apimService,
-  fsmLifecycleClient,
+  fsmLifecycleClientCreator(),
   fsmPublicationClient,
   config,
 );
@@ -210,7 +212,7 @@ export const createRequestReviewEntryPoint = createRequestReviewHandler(
 export const onRequestValidationEntryPoint = pipe(
   createServiceValidationHandler({
     config,
-    fsmLifecycleClient,
+    fsmLifecycleClient: fsmLifecycleClientCreator(),
     fsmPublicationClient,
     serviceLifecycleCosmosHelper,
     servicePublicationCosmosHelper,
@@ -237,7 +239,7 @@ export const createRequestDeletionEntryPoint =
   createRequestDeletionHandler(fsmPublicationClient);
 
 export const onRequestSyncCmsEntryPoint = createRequestSyncCmsHandler(
-  fsmLifecycleClient,
+  fsmLifecycleClientCreator(),
   fsmPublicationClient,
   config,
 );
@@ -255,12 +257,12 @@ export const createRequestDetailEntryPoint = createRequestDetailHandler(
 export const serviceReviewCheckerEntryPoint = createReviewCheckerHandler(
   getServiceReviewDao(config),
   jiraProxy(jiraClient(config), config),
-  fsmLifecycleClient,
+  fsmLifecycleClientCreator(),
 );
 
 export const createRequestReviewLegacyEntryPoint =
   createRequestReviewLegacyHandler(
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator(),
     getServiceReviewDao({
       ...config,
       REVIEWER_DB_TABLE: `${config.REVIEWER_DB_TABLE}_legacy` as NonEmptyString,
@@ -278,7 +280,7 @@ export const serviceReviewLegacyCheckerEntryPoint =
       jiraClient({ ...config, JIRA_PROJECT_NAME: "IES" as NonEmptyString }),
       config,
     ),
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator(),
   );
 
 export const onServiceLifecycleChangeEntryPoint = pipe(

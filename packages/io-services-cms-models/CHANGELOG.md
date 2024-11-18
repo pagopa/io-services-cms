@@ -1,5 +1,17 @@
 # io-services-cms-models
 
+## 1.24.0
+
+### Minor Changes
+
+- e83ab191: allow operator to edit service without overriding group
+
+## 1.23.0
+
+### Minor Changes
+
+- d880ab6: add group-based authz logic to FSM
+
 ## 1.22.0
 
 ### Minor Changes

@@ -1,11 +1,18 @@
 import { faker } from "@faker-js/faker/locale/it";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NonNegativeIntegerFromString,
+} from "@pagopa/ts-commons/lib/numbers";
+import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import { Subscription } from "../../../../generated/api/Subscription";
 import { ManagedInternalError } from "../../../../lib/be/errors";
-import { PositiveInteger } from "../../../../lib/be/types";
+import {
+  PositiveInteger,
+  PositiveIntegerFromString,
+} from "../../../../lib/be/types";
 
 import { BackOfficeUser } from "../../../../../types/next-auth";
 import { SelfcareRoles } from "../../../../types/auth";
@@ -43,6 +50,8 @@ const userMock = {
 const mocks = vi.hoisted(() => ({
   upsertManageSubscription: vi.fn(),
   getManageSubscriptions: vi.fn(),
+  parseBody: vi.fn(),
+  getQueryParam: vi.fn(),
   withJWTAuthHandler: vi.fn(
     (
       handler: (
@@ -58,6 +67,11 @@ const mocks = vi.hoisted(() => ({
   ),
 }));
 
+vi.mock("@/lib/be/req-res-utils", () => ({
+  parseBody: mocks.parseBody,
+  getQueryParam: mocks.getQueryParam,
+}));
+
 vi.mock("@/lib/be/subscriptions/business", () => ({
   upsertManageSubscription: mocks.upsertManageSubscription,
   getManageSubscriptions: mocks.getManageSubscriptions,
@@ -67,7 +81,7 @@ vi.mock("@/lib/be/wrappers", () => ({
 }));
 
 afterEach(() => {
-  vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("Upsert Subscription API", () => {
@@ -87,44 +101,29 @@ describe("Upsert Subscription API", () => {
     expect(result.status).toBe(403);
     const jsonBody = await result.json();
     expect(jsonBody.detail).toEqual("Role not authorized");
+    expect(mocks.parseBody).not.toHaveBeenCalled();
     expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
   });
 
-  it("should fails when there is no request body", async () => {
+  it("should return a bad request when fails to parse request body", async () => {
     // given
     userMock.institution.role = SelfcareRoles.admin;
-    const nextRequest = new NextRequest("http://localhost");
+    const errorMessage = "errorMessage";
+    mocks.parseBody.mockRejectedValueOnce(new Error(errorMessage));
+    const request = new NextRequest(new URL("http://localhost"));
 
     // when
-    const result = await PUT(nextRequest, {});
+    const result = await PUT(request, {});
 
     // then
     expect(result.status).toBe(400);
     const responseBody = await result.json();
-    expect(responseBody.title).toEqual("ValidationError");
-    expect(responseBody.detail).toEqual("invalid JSON body");
-    expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
-  });
-
-  it("should fails when request body is not a valid CreateManageGroupSubscription object", async () => {
-    // given
-    userMock.institution.role = SelfcareRoles.admin;
-    const badBody = JSON.stringify({
-      foo: "foo",
-    });
-    const nextRequest = new NextRequest("http://localhost", {
-      method: "PUT",
-      body: badBody,
-    });
-
-    // when
-    const result = await PUT(nextRequest, {});
-
-    // then
-    expect(result.status).toBe(400);
-    const responseBody = await result.json();
-    expect(responseBody.title).toEqual("ValidationError");
-    expect(responseBody.detail).toMatch(/is not a valid/);
+    expect(responseBody.detail).toStrictEqual(errorMessage);
+    expect(mocks.parseBody).toHaveBeenCalledOnce();
+    expect(mocks.parseBody).toHaveBeenCalledWith(
+      request,
+      CreateManageGroupSubscription,
+    );
     expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
   });
 
@@ -132,6 +131,7 @@ describe("Upsert Subscription API", () => {
     // given
     userMock.institution.role = SelfcareRoles.admin;
     const body = aCorrectRequestBody;
+    mocks.parseBody.mockResolvedValueOnce(body);
     const errorMessage = "error message";
     mocks.upsertManageSubscription.mockRejectedValueOnce(
       new ManagedInternalError(errorMessage),
@@ -160,6 +160,7 @@ describe("Upsert Subscription API", () => {
     // given
     userMock.institution.role = SelfcareRoles.admin;
     const body = aCorrectRequestBody;
+    mocks.parseBody.mockResolvedValueOnce(body);
     const aSubscription: Subscription = { id: "id", name: "name" };
     mocks.upsertManageSubscription.mockResolvedValueOnce(aSubscription);
     const nextRequest = new NextRequest("http://localhost", {
@@ -185,6 +186,7 @@ describe("Upsert Subscription API", () => {
 describe("Retrieve manage subscriptions API", () => {
   it("should return an error response when limit query param is not valid", async () => {
     // given
+    mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
     const request = new NextRequest("http://localhost?limit=0");
 
     // when
@@ -197,11 +199,22 @@ describe("Retrieve manage subscriptions API", () => {
     expect(responseBody.detail).toEqual(
       `'limit' query param is not a valid ${PositiveInteger.name}`,
     );
+    expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+    expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      request,
+      "limit",
+      PositiveIntegerFromString,
+      20,
+    );
     expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
   });
 
   it("should return an error response when offset query param is not valid", async () => {
     // given
+    const limit = 10;
+    mocks.getQueryParam.mockImplementation((_, param) =>
+      param === "limit" ? E.right(limit) : E.left(void 0),
+    );
     const request = new NextRequest("http://localhost?offset=-1");
 
     // when
@@ -214,6 +227,13 @@ describe("Retrieve manage subscriptions API", () => {
     expect(responseBody.detail).toEqual(
       `'offset' query param is not a valid ${NonNegativeInteger.name}`,
     );
+    expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
+    expect(mocks.getQueryParam).toHaveBeenLastCalledWith(
+      request,
+      "offset",
+      NonNegativeIntegerFromString,
+      0,
+    );
     expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
   });
 
@@ -223,6 +243,9 @@ describe("Retrieve manage subscriptions API", () => {
     const offset = 5;
     const request = new NextRequest(
       `http://localhost?limit=${limit}&offset=${offset}`,
+    );
+    mocks.getQueryParam.mockImplementation((_, param) =>
+      E.right(param === "limit" ? limit : offset),
     );
     const errorMessage = "error message";
     mocks.getManageSubscriptions.mockRejectedValueOnce(
@@ -237,6 +260,7 @@ describe("Retrieve manage subscriptions API", () => {
     const responseBody = await result.json();
     expect(responseBody.title).toEqual("SubscriptionsRetrieveError");
     expect(responseBody.detail).toEqual(errorMessage);
+    expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
     expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
     expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
       userMock.parameters.userId,
@@ -255,7 +279,12 @@ describe("Retrieve manage subscriptions API", () => {
     "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
     async ({ userRole, selcGroups }) => {
       // given
+      const limit = 10;
+      const offset = 5;
       const request = new NextRequest("http://localhost");
+      mocks.getQueryParam.mockImplementation((_, param) =>
+        E.right(param === "limit" ? limit : offset),
+      );
       const expectedSubscriptions = [{ id: "id", name: "name" }];
       mocks.getManageSubscriptions.mockResolvedValueOnce(expectedSubscriptions);
       userMock.institution.role = userRole;
@@ -267,12 +296,19 @@ describe("Retrieve manage subscriptions API", () => {
       // then
       expect(result.status).toBe(200);
       const responseBody = await result.json();
-      expect(responseBody).toStrictEqual(expectedSubscriptions);
+      expect(responseBody).toStrictEqual({
+        value: expectedSubscriptions,
+        pagination: {
+          count: expectedSubscriptions.length,
+          limit,
+          offset,
+        },
+      });
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
         userMock.parameters.userId,
-        20,
-        0,
+        limit,
+        offset,
         userRole === SelfcareRoles.admin ? undefined : selcGroups,
       );
     },

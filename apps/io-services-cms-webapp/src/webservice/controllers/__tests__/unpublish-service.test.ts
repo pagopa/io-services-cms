@@ -25,12 +25,14 @@ import { WebServerDependencies, createWebServer } from "../../index";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
-const fsmLifecycleClient = ServiceLifecycle.getFsmClient(serviceLifecycleStore);
+const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
+  serviceLifecycleStore,
+);
 
 const servicePublicationStore =
   stores.createMemoryStore<ServicePublication.ItemType>();
 const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore
+  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -43,7 +45,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
   getProductByName: vi.fn((_) => TE.right(O.some(anApimResource))),
   getUserByEmail: vi.fn((_) => TE.right(O.some(anApimResource))),
@@ -94,7 +96,7 @@ const aRetrievedSubscriptionCIDRs: RetrievedSubscriptionCIDRs = {
 const mockFetchAll = vi.fn(() =>
   Promise.resolve({
     resources: [aRetrievedSubscriptionCIDRs],
-  })
+  }),
 );
 const containerMock = {
   items: {
@@ -117,8 +119,9 @@ const mockAppinsights = {
 
 const mockContext = {
   log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
 } as any;
 
@@ -130,16 +133,24 @@ const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
-describe("UnPublishService", () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+const { checkServiceMock } = vi.hoisted(() => ({
+  checkServiceMock: vi.fn(() => TE.right(undefined)),
+}));
 
+vi.mock("../../../utils/check-service", () => ({
+  checkService: vi.fn(() => checkServiceMock),
+}));
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("UnPublishService", () => {
   const app = createWebServer({
     basePath: "api",
     apimService: mockApimService,
     config: mockConfig,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
@@ -159,7 +170,7 @@ describe("UnPublishService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     console.log(response.body);
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -222,7 +233,7 @@ describe("UnPublishService", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
   it("should not allow the operation without manageKey", async () => {

@@ -4,6 +4,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import * as RA from "fp-ts/ReadonlyArray";
+import * as RNEA from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
 import * as B from "fp-ts/boolean";
 import { flow, pipe } from "fp-ts/function";
@@ -13,6 +14,7 @@ import * as t from "io-ts";
 import {
   EmptyState,
   FSMStore,
+  FsmAuthorizationError,
   FsmItemNotFoundError,
   FsmItemValidationError,
   FsmNoApplicableTransitionError,
@@ -38,7 +40,8 @@ type ToRecord<Q> = Q extends []
 // commodity aliases
 type AllStateNames = keyof FSM["states"];
 type AllResults = States[number];
-export type AllFsmErrors =
+type AllFsmErrors =
+  | FsmAuthorizationError
   | FsmItemNotFoundError
   | FsmNoApplicableTransitionError
   | FsmNoTransitionMatchedError
@@ -123,6 +126,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on draft", state: "draft" },
           hasChanges: true,
         }),
@@ -239,6 +249,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on reject", state: "draft" },
           hasChanges: true,
         }),
@@ -252,6 +269,13 @@ const FSM: FSM = {
         E.right({
           ...current,
           ...data,
+          data: {
+            ...data.data,
+            metadata: {
+              ...data.data.metadata,
+              group_id: current.data.metadata.group_id,
+            },
+          },
           fsm: { lastTransition: "apply edit on approved", state: "draft" },
           hasChanges: true,
         }),
@@ -261,6 +285,20 @@ const FSM: FSM = {
     },
   ],
 };
+
+const authorize =
+  (authzGroupIds: readonly NonEmptyString[]) =>
+  <T extends Service>(current: T): E.Either<FsmAuthorizationError, T> =>
+    pipe(
+      current,
+      E.fromPredicate(
+        (item) =>
+          RA.isEmpty(authzGroupIds) ||
+          (!!item.data.metadata.group_id &&
+            authzGroupIds.includes(item.data.metadata.group_id)),
+        () => new FsmAuthorizationError(),
+      ),
+    );
 
 type LifecycleStore = FSMStore<States[number]>;
 
@@ -283,11 +321,13 @@ type LifecycleStore = FSMStore<States[number]>;
 function apply(
   appliedAction: "create" | "edit",
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
   args: { data: Service },
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, WithState<"draft", Service>>;
 function apply(
   appliedAction: "submit",
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
   args: { autoPublish: boolean },
 ): ReaderTaskEither<
   LifecycleStore,
@@ -297,6 +337,7 @@ function apply(
 function apply(
   appliedAction: "approve",
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
   args: { approvalDate: string },
 ): ReaderTaskEither<
   LifecycleStore,
@@ -306,6 +347,7 @@ function apply(
 function apply(
   appliedAction: "reject",
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
   args: { reason: string },
 ): ReaderTaskEither<
   LifecycleStore,
@@ -315,6 +357,7 @@ function apply(
 function apply(
   appliedAction: "delete",
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
 ): ReaderTaskEither<
   LifecycleStore,
   AllFsmErrors,
@@ -323,113 +366,126 @@ function apply(
 function apply(
   appliedAction: FSM["transitions"][number]["action"],
   id: ServiceId,
+  authzGroupIds: readonly NonEmptyString[],
   args?: Parameters<FSM["transitions"][number]["exec"]>[number]["args"],
 ): ReaderTaskEither<LifecycleStore, AllFsmErrors, AllResults> {
-  return (store) => {
-    // check transitions for the action to apply
-    const applicableTransitions = FSM.transitions.filter(
-      ({ action }) => action === appliedAction,
-    );
-    if (!applicableTransitions.length) {
-      return TE.left(new FsmNoApplicableTransitionError(appliedAction));
-    }
-    return pipe(
-      // fetch the item from the store by its id
-      store.fetch(id),
-      TE.mapLeft((_) => new FsmStoreFetchError()),
-      // filter transitions that can be applied to the current item status
-      TE.chain(
-        flow(
-          // We can either find the element in the store or not
-          //   we have a O.Some(item) or a O.none respectively
-          //
-          // These two scenarios differ on how they match applicable transitions:
-          //    + on found item -> we must select transitions which have as "from" state
-          //                         the very same value of the one in the item.
-          //                       We also must decode the incoming item in order to provide
-          //                         the value to the exec() function.
-          //    + on no item    -> we must match only transitions starting from the empty state
-          O.fold(
-            () =>
-              pipe(
-                applicableTransitions,
-                // this filter is also a type guard to narrow possible from states to EmptyState only
-                RA.filter(
-                  <T extends FSM["transitions"][number]>(
-                    tr: T,
-                  ): tr is { from: "*" } & T => tr.from === EmptyState,
-                ),
-                E.fromPredicate(
-                  // we must have matched at least ONE transition
-                  (matchedTransitions) => matchedTransitions.length > 0,
-                  (_) => new FsmItemNotFoundError(id),
-                ),
-                // bind all data into a lazy implementation of exec
-                E.map(
-                  RA.map(
-                    (tr) =>
-                      (): E.Either<
-                        FsmTransitionExecutionError,
-                        { hasChanges: boolean } & AllResults
-                      > =>
-                        // FIXME: avoid this forcing
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        tr.exec({ args }),
-                  ),
-                ),
-                TE.fromEither,
-              ),
-            (item) =>
-              pipe(
-                applicableTransitions,
-                // this filter is also a type guard to narrow possible from states to any state but EmptyState
-                RA.filter(
-                  <T extends FSM["transitions"][number]>(
-                    tr: T,
-                  ): tr is { from: AllStateNames } & T =>
-                    tr.from !== EmptyState,
-                ),
-                RA.map((tr) =>
+  return (store) =>
+    pipe(
+      // check transitions for the action to apply
+      FSM.transitions.filter(({ action }) => action === appliedAction),
+      TE.fromPredicate(
+        RA.isNonEmpty,
+        (_) => new FsmNoApplicableTransitionError(appliedAction),
+      ),
+      TE.chain((applicableTransitions) =>
+        pipe(
+          // fetch the item from the store by its id
+          store.fetch(id),
+          TE.mapLeft((_) => new FsmStoreFetchError()),
+          // filter transitions that can be applied to the current item status
+          TE.chainEitherK(
+            flow(
+              // We can either find the element in the store or not
+              //   we have a O.Some(item) or a O.none respectively
+              //
+              // These two scenarios differ on how they match applicable transitions:
+              //    + on found item -> we must select transitions which have as "from" state
+              //                         the very same value of the one in the item.
+              //                       We also must decode the incoming item in order to provide
+              //                         the value to the exec() function.
+              //    + on no item    -> we must match only transitions starting from the empty state
+              O.fold(
+                () =>
                   pipe(
-                    // build the codec that will match an element in the "from" state
-                    t.intersection([
-                      FSM.states[tr.from],
-                      StateMetadata(tr.from),
-                    ]),
-                    // match&decode
-                    (codec) => codec.decode(item),
-                    // for those transitions whose from state has been matched,
-                    //  bind all data into a lazy implementation of exec
+                    applicableTransitions,
+                    // this filter is also a type guard to narrow possible from states to EmptyState only
+                    RA.filter(
+                      <T extends FSM["transitions"][number]>(
+                        tr: T,
+                      ): tr is { from: "*" } & T => tr.from === EmptyState,
+                    ),
+                    E.fromPredicate(
+                      // we must have matched at least ONE transition
+                      // (matchedTransitions) => matchedTransitions.length > 0,
+                      RA.isNonEmpty,
+                      (_) => new FsmItemNotFoundError(id),
+                    ),
+                    // bind all data into a lazy implementation of exec
                     E.map(
-                      (current) =>
-                        (): E.Either<
-                          FsmTransitionExecutionError,
-                          { hasChanges: boolean } & AllResults
-                        > =>
-                          tr.exec({
+                      RNEA.map(
+                        (tr) =>
+                          (): E.Either<
+                            FsmTransitionExecutionError,
+                            { hasChanges: boolean } & AllResults
+                          > =>
                             // FIXME: avoid this forcing
                             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                             // @ts-ignore
-                            args,
-                            // FIXME: avoid this forcing
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            current,
-                          }),
+                            tr.exec({ args, authzGroupIds }),
+                      ),
+                    ),
+                  ),
+                flow(
+                  authorize(authzGroupIds),
+                  E.chain((authzItem) =>
+                    pipe(
+                      applicableTransitions,
+                      // this filter is also a type guard to narrow possible from states to any state but EmptyState
+                      RA.filter(
+                        <T extends FSM["transitions"][number]>(
+                          tr: T,
+                        ): tr is { from: AllStateNames } & T =>
+                          tr.from !== EmptyState,
+                      ),
+                      RA.map((tr) =>
+                        pipe(
+                          // build the codec that will match an element in the "from" state
+                          t.intersection([
+                            FSM.states[tr.from],
+                            StateMetadata(tr.from),
+                          ]),
+                          // match&decode
+                          (codec) => codec.decode(authzItem),
+                          // for those transitions whose from state has been matched,
+                          //  bind all data into a lazy implementation of exec
+                          E.map(
+                            (current) =>
+                              (): E.Either<
+                                | FsmAuthorizationError
+                                | FsmTransitionExecutionError,
+                                { hasChanges: boolean } & AllResults
+                              > =>
+                                tr.exec({
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  args,
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  authzGroupIds,
+                                  // FIXME: avoid this forcing
+                                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                  // @ts-ignore
+                                  current,
+                                }),
+                          ),
+                        ),
+                      ),
+                      // skip unmatched transitions
+                      RA.filter(E.isRight),
+                      RA.map((matchedTransitions) => matchedTransitions.right),
+                      E.fromPredicate(
+                        // we must have matched at least ONE transition
+                        // (matchedTransitions) => matchedTransitions.length > 0,
+                        RA.isNonEmpty,
+                        (_) => new FsmNoTransitionMatchedError(),
+                      ),
                     ),
                   ),
                 ),
-                // skip unmatched transitions
-                RA.filter(E.isRight),
-                RA.map((matchedTransitions) => matchedTransitions.right),
-                E.fromPredicate(
-                  // we must have matched at least ONE transition
-                  (matchedTransitions) => matchedTransitions.length > 0,
-                  (_) => new FsmNoTransitionMatchedError(),
-                ),
-                TE.fromEither,
               ),
+            ),
           ),
         ),
       ),
@@ -457,7 +513,6 @@ function apply(
         ),
       ),
     );
-  };
 }
 
 function override(
@@ -484,7 +539,7 @@ function override(
     );
 }
 
-export const getAutoPublish = (service: ItemType): boolean =>
+const getAutoPublish = (service: ItemType): boolean =>
   (service.fsm.autoPublish as boolean) ?? false;
 
 // method to save a "normalized" item in the store
@@ -504,23 +559,49 @@ const saveItem =
       preserveModifiedAt,
     );
 
-const getFsmClient = (store: LifecycleStore) => ({
-  approve: (id: ServiceId, args: { approvalDate: string }) =>
-    apply("approve", id, args)(store),
-  create: (id: ServiceId, args: { data: Service }) =>
-    apply("create", id, args)(store),
-  delete: (id: ServiceId) => apply("delete", id)(store),
-  edit: (id: ServiceId, args: { data: Service }) =>
-    apply("edit", id, args)(store),
-  fetch: (id: ServiceId) => store.fetch(id),
-  getStore: () => store,
-  override: (...args: Parameters<typeof override>) => override(...args)(store),
-  reject: (id: ServiceId, args: { reason: string }) =>
-    apply("reject", id, args)(store),
-  submit: (id: ServiceId, args: { autoPublish: boolean }) =>
-    apply("submit", id, args)(store),
-});
-type FsmClient = ReturnType<typeof getFsmClient>;
+/**
+ *
+ * @param store a LifecycleStore
+ * @returns A FSM Client constructor
+ */
+const getFsmClient =
+  (store: LifecycleStore) =>
+  /**
+   * A FSM Client constructor
+   * @param authzGroupIds an empty array or an undefined value means no apply authtorization
+   * @returns a FsmClient
+   */ (authzGroupIds: readonly NonEmptyString[] = []) => ({
+    approve: (id: ServiceId, args: { approvalDate: string }) =>
+      apply("approve", id, authzGroupIds, args)(store),
+    create: (id: ServiceId, args: { data: Service }) =>
+      apply("create", id, authzGroupIds, args)(store),
+    delete: (id: ServiceId) => apply("delete", id, authzGroupIds)(store),
+    edit: (id: ServiceId, args: { data: Service }) =>
+      apply("edit", id, authzGroupIds, args)(store),
+    fetch: (id: ServiceId) =>
+      pipe(
+        store.fetch(id),
+        TE.mapLeft((_) => new FsmStoreFetchError()),
+        TE.chainEitherKW(
+          flow(
+            O.fold(
+              () => E.right(O.none),
+              flow(authorize(authzGroupIds), E.map(O.some)),
+            ),
+          ),
+        ),
+      ),
+    getStore: () => store,
+    override: (...args: Parameters<typeof override>) =>
+      override(...args)(store),
+    reject: (id: ServiceId, args: { reason: string }) =>
+      apply("reject", id, authzGroupIds, args)(store),
+    submit: (id: ServiceId, args: { autoPublish: boolean }) =>
+      apply("submit", id, authzGroupIds, args)(store),
+  });
+
+type FsmClientCreator = ReturnType<typeof getFsmClient>;
+type FsmClient = ReturnType<FsmClientCreator>;
 
 type ItemType = t.TypeOf<typeof ItemType>;
 const ItemType = t.union(States.types);
@@ -532,4 +613,13 @@ const CosmosResource = t.intersection([
 ]);
 
 export * as definitions from "./definitions";
-export { CosmosResource, FSM, FsmClient, ItemType, getFsmClient };
+export {
+  AllFsmErrors,
+  CosmosResource,
+  FSM,
+  FsmClient,
+  FsmClientCreator,
+  ItemType,
+  getAutoPublish,
+  getFsmClient,
+};

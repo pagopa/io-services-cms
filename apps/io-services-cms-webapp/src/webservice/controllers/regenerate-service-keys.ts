@@ -33,6 +33,7 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../../config";
 import { SubscriptionKeyType } from "../../generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "../../generated/api/SubscriptionKeys";
+import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import { TelemetryClient } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
 import { checkService } from "../../utils/check-service";
@@ -52,21 +53,22 @@ type RegenerateServiceKeysHandler = (
   attrs: IAzureUserAttributesManage,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   keyType: SubscriptionKeyType,
+  authzGroupIds: readonly NonEmptyString[],
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
   apimService: ApimUtils.ApimService;
-  fsmLifecycleClient: ServiceLifecycle.FsmClient;
+  fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
 
 export const makeRegenerateServiceKeysHandler =
   ({
     apimService,
-    fsmLifecycleClient,
+    fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): RegenerateServiceKeysHandler =>
-  (context, auth, __, ___, serviceId, keyType) =>
+  (context, auth, __, ___, serviceId, keyType, authzGroupIds) =>
     pipe(
       serviceOwnerCheckManageTask(
         apimService,
@@ -74,7 +76,7 @@ export const makeRegenerateServiceKeysHandler =
         auth.subscriptionId,
         auth.userId,
       ),
-      TE.chainW(checkService(fsmLifecycleClient)),
+      TE.chainW(checkService(fsmLifecycleClientCreator(authzGroupIds))),
       TE.chainW(() =>
         pipe(
           apimService.regenerateSubscriptionKey(serviceId, keyType),
@@ -127,6 +129,7 @@ export const applyRequestMiddelwares =
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // extract the key type from the path variables
       RequiredParamMiddleware("keyType", SubscriptionKeyType),
+      SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
       middlewaresWrap(

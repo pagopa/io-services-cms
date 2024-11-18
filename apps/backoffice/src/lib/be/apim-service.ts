@@ -148,9 +148,10 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
         if (axios.isAxiosError(e)) {
           if (
             !isRetry &&
-            [HTTP_STATUS_FORBIDDEN, HTTP_STATUS_UNAUTHORIZED].includes(
-              e.response?.status ?? 0,
-            )
+            [
+              HTTP_STATUS_FORBIDDEN as number,
+              HTTP_STATUS_UNAUTHORIZED as number,
+            ].includes(e.response?.status ?? 0)
           ) {
             return pipe(
               TE.fromIO(() => refreshClient()),

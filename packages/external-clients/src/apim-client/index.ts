@@ -4,6 +4,7 @@ import {
   ProductContract,
   Resource,
   SubscriptionContract,
+  SubscriptionKeysContract,
   SubscriptionListSecretsResponse,
   UserContract,
   UserCreateParameters,
@@ -113,7 +114,7 @@ export interface ApimService {
     productName: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, O.Option<ProductContract>>;
   readonly getSubscription: (
-    serviceId: string,
+    subscriptionId: string,
   ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
   readonly getUser: (
     userId: string,
@@ -132,10 +133,10 @@ export interface ApimService {
     filter?: string,
   ) => TE.TaskEither<ApimRestError, readonly SubscriptionContract[]>;
   readonly listSecrets: (
-    serviceId: string,
-  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+    subscriptionId: string,
+  ) => TE.TaskEither<ApimRestError, SubscriptionKeysContract>;
   readonly regenerateSubscriptionKey: (
-    serviceId: string,
+    subscriptionId: string,
     keyType: SubscriptionKeyType,
   ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
   readonly upsertSubscription: (
@@ -180,8 +181,13 @@ export const getApimService = (
       apimServiceName,
       productName,
     ),
-  getSubscription: (serviceId) =>
-    getSubscription(apimClient, apimResourceGroup, apimServiceName, serviceId),
+  getSubscription: (subscriptionId) =>
+    getSubscription(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      subscriptionId,
+    ),
   getUser: (userId) =>
     getUser(apimClient, apimResourceGroup, apimServiceName, userId),
   getUserByEmail: (userEmail, fetchGroups) =>
@@ -209,14 +215,14 @@ export const getApimService = (
       offset,
       limit,
     ),
-  listSecrets: (serviceId) =>
-    listSecrets(apimClient, apimResourceGroup, apimServiceName, serviceId),
-  regenerateSubscriptionKey: (serviceId, keyType) =>
+  listSecrets: (subscriptionId) =>
+    listSecrets(apimClient, apimResourceGroup, apimServiceName, subscriptionId),
+  regenerateSubscriptionKey: (subscriptionId, keyType) =>
     regenerateSubscriptionKey(
       apimClient,
       apimResourceGroup,
       apimServiceName,
-      serviceId,
+      subscriptionId,
       keyType,
     ),
   upsertSubscription: (ownerId, subscriptionId) =>
@@ -337,14 +343,14 @@ const getUserGroups = (
  * @param apimClient
  * @param apimResourceGroup
  * @param apimServiceName
- * @param serviceId
+ * @param subscriptionId
  * @returns
  */
 const getSubscription = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
-  serviceId: string,
+  subscriptionId: string,
 ) =>
   pipe(
     TE.tryCatch(
@@ -352,7 +358,7 @@ const getSubscription = (
         apimClient.subscription.get(
           apimResourceGroup,
           apimServiceName,
-          serviceId,
+          subscriptionId,
         ),
       identity,
     ),
@@ -365,14 +371,14 @@ const getSubscription = (
  * @param apimClient
  * @param apimResourceGroup
  * @param apimServiceName
- * @param serviceId
+ * @param subscriptionId
  * @returns
  */
 const listSecrets = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
-  serviceId: string,
+  subscriptionId: string,
 ) =>
   pipe(
     TE.tryCatch(
@@ -380,7 +386,7 @@ const listSecrets = (
         apimClient.subscription.listSecrets(
           apimResourceGroup,
           apimServiceName,
-          serviceId,
+          subscriptionId,
         ),
       identity,
     ),
@@ -493,18 +499,18 @@ const getUserSubscriptions = (
       for await (const page of subscriptionListResponse.byPage({
         maxPageSize: limit,
       })) {
-        for (const subscription of page) {
-          subscriptionList.push(subscription);
+        subscriptionList.push(...page);
+        if (limit !== undefined || offset !== undefined) {
+          /**
+           * FIXME: PagedAsyncIterableIterator returns:
+           * - first filtered page (what we are filtering)
+           * - all pages (starting from first value)
+           * For this reason the `break` below is used to get only the first page in case the pagination is required (whether the offset or limit is defined).
+           * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
+           * seems not to work, so we downgrade package to 8.x.x version.
+           */
+          break;
         }
-        /**
-         * FIXME: PagedAsyncIterableIterator returns:
-         * - first filtered page (what we are filtering)
-         * - all pages (starting from first value)
-         * For this reason the `break` below is used to get only the first page.
-         * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
-         * seems not to work, so we downgrade package to 8.x.x version.
-         */
-        break;
       }
 
       return subscriptionList;
@@ -518,7 +524,7 @@ const getUserSubscriptions = (
  * @param apimClient
  * @param apimResourceGroup
  * @param apimServiceName
- * @param serviceId
+ * @param subscriptionId
  * @param keyType
  * @returns updated subscription
  */
@@ -526,7 +532,7 @@ const regenerateSubscriptionKey = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
-  serviceId: string,
+  subscriptionId: string,
   keyType: SubscriptionKeyType,
 ): TE.TaskEither<ApimRestError, SubscriptionListSecretsResponse> =>
   pipe(
@@ -536,13 +542,13 @@ const regenerateSubscriptionKey = (
           return apimClient.subscription.regeneratePrimaryKey(
             apimResourceGroup,
             apimServiceName,
-            serviceId,
+            subscriptionId,
           );
         case SubscriptionKeyTypeEnum.secondary:
           return apimClient.subscription.regenerateSecondaryKey(
             apimResourceGroup,
             apimServiceName,
-            serviceId,
+            subscriptionId,
           );
         default:
           // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
@@ -557,7 +563,7 @@ const regenerateSubscriptionKey = (
           apimClient.subscription.listSecrets(
             apimResourceGroup,
             apimServiceName,
-            serviceId,
+            subscriptionId,
           ),
         E.toError,
       ),
