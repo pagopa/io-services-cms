@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 1.18.0
+
+### Minor Changes
+
+- 82b44297: add getManageSubscriptionKeys route handler
+- 185ccffc: add regenerateManageSubscriptionKey route handler
+
+### Patch Changes
+
+- Updated dependencies [82b44297]
+- Updated dependencies [185ccffc]
+  - @io-services-cms/external-clients@1.5.0
+
 ## 1.17.1
 
 ### Patch Changes
