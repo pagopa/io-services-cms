@@ -4,6 +4,7 @@ import {
   ProductContract,
   Resource,
   SubscriptionContract,
+  SubscriptionKeysContract,
   SubscriptionListSecretsResponse,
   UserContract,
   UserCreateParameters,
@@ -133,7 +134,7 @@ export interface ApimService {
   ) => TE.TaskEither<ApimRestError, readonly SubscriptionContract[]>;
   readonly listSecrets: (
     serviceId: string,
-  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  ) => TE.TaskEither<ApimRestError, SubscriptionKeysContract>;
   readonly regenerateSubscriptionKey: (
     serviceId: string,
     keyType: SubscriptionKeyType,
