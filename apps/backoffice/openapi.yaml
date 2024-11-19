@@ -1024,6 +1024,12 @@ paths:
       security:
         - cookieAuth: []
       parameters:
+        - name: type
+          in: query
+          description: ID of the subscription
+          required: true
+          schema:
+            $ref: '#/components/schemas/SubscriptionType'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       responses:
@@ -1673,6 +1679,11 @@ components:
         - size
         - totalElements
         - totalPages
+    SubscriptionType:
+      type: string
+      enum:
+        - MANAGE_ROOT
+        - MANAGE_GROUP
     Subscription:
       type: object
       properties:
