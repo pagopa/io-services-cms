@@ -1,4 +1,8 @@
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
+import {
+  SubscriptionType,
+  SubscriptionTypeEnum,
+} from "@/generated/api/SubscriptionType";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -79,16 +83,35 @@ export async function upsertManageSubscription(
 }
 
 export async function getManageSubscriptions(
+  subscriptionType: SubscriptionType,
   apimUserId: string,
   limit?: number,
   offset?: number,
   selcGroups?: string[],
 ): Promise<Subscription[]> {
+  let filter;
+  switch (subscriptionType) {
+    case SubscriptionTypeEnum.MANAGE_ROOT:
+      if (selcGroups && selcGroups.length > 0) {
+        // Non-admin users who have at least one group are not allowed to retrieve "ROOT MANAGE" subscription
+        return Promise.resolve([]);
+      }
+      filter = ApimUtils.apim_filters.manageRootSubscriptionsFilter(apimUserId);
+      break;
+    case SubscriptionTypeEnum.MANAGE_GROUP:
+      filter =
+        ApimUtils.apim_filters.manageGroupSubscriptionsFilter(selcGroups);
+      break;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = subscriptionType;
+      throw new Error(`Invalid subscriptionType: '${subscriptionType}'`);
+  }
   const maybeSubscriptions = await getApimService().getUserSubscriptions(
     apimUserId,
     offset,
     limit,
-    ApimUtils.apim_filters.manageGroupSubscriptionsFilter(selcGroups),
+    filter,
   )();
 
   if (E.isLeft(maybeSubscriptions)) {

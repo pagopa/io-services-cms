@@ -2,6 +2,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { ResponseError } from "@/generated/api/ResponseError";
 import { Subscription } from "@/generated/api/Subscription";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
+import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
@@ -72,6 +73,12 @@ export const GET = withJWTAuthHandler(
     request,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse<ResponseError | SubscriptionPagination>> => {
+    const maybeKind = getQueryParam(request, "kind", SubscriptionType);
+    if (E.isLeft(maybeKind)) {
+      return handleBadRequestErrorResponse(
+        `'kind' query param is not a valid ${SubscriptionType.name}`,
+      );
+    }
     const maybeLimit = getQueryParam(
       request,
       "limit",
@@ -96,6 +103,7 @@ export const GET = withJWTAuthHandler(
     }
     try {
       const response = await getManageSubscriptions(
+        maybeKind.right,
         backofficeUser.parameters.userId,
         maybeLimit.right,
         maybeOffset.right,

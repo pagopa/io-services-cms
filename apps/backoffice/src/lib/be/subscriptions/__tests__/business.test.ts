@@ -1,6 +1,7 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getManageSubscriptions, upsertManageSubscription } from "../business";
+import { getDisplayName } from "next/dist/shared/lib/utils";
 
 const { upsertSubscription, getUserSubscriptions } = vi.hoisted(() => ({
   upsertSubscription: vi.fn(),
@@ -17,6 +18,11 @@ vi.mock("../../apim-service", () => ({
 const mocks = {
   anOwnerId: "anOwnerId",
   aGroupId: "aGroupId",
+  aSubscriptionContract: {
+    name: "name",
+    displayName: "displayName",
+    state: "active",
+  },
   upsertSubscription,
   getUserSubscriptions,
 };
@@ -80,6 +86,7 @@ describe("upsertManageSubscription", () => {
 });
 
 describe("getManageSubscriptions", () => {
+  const subscriptionType = "MANAGE_GROUP";
   it("should throw an error when received an ApimRestError response", async () => {
     const ownerId = mocks.anOwnerId;
     const limit = 5;
@@ -89,7 +96,7 @@ describe("getManageSubscriptions", () => {
     );
 
     await expect(() =>
-      getManageSubscriptions(ownerId, limit, offset),
+      getManageSubscriptions(subscriptionType, ownerId, limit, offset),
     ).rejects.toThrowError("Error retrieving manage group subscriptions");
 
     expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -121,7 +128,7 @@ describe("getManageSubscriptions", () => {
     );
 
     await expect(
-      getManageSubscriptions(ownerId, limit, offset),
+      getManageSubscriptions(subscriptionType, ownerId, limit, offset),
     ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
     expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -141,7 +148,9 @@ describe("getManageSubscriptions", () => {
     mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
 
     await expect(
-      getManageSubscriptions(ownerId, limit, offset, [groupId]),
+      getManageSubscriptions(subscriptionType, ownerId, limit, offset, [
+        groupId,
+      ]),
     ).resolves.toStrictEqual([]);
 
     expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -151,5 +160,69 @@ describe("getManageSubscriptions", () => {
       limit,
       `name eq 'MANAGE-GROUP-${groupId}'`,
     );
+  });
+
+  it.each`
+    scenario                       | selcGroups
+    ${"selcGroups is not defined"} | ${undefined}
+    ${"selcGroups is empty"}       | ${[]}
+  `(
+    "should return a single subscription when the root manage is requested and $scenario",
+    async ({ selcGroups }) => {
+      const subscriptionType = "MANAGE_ROOT";
+      const ownerId = mocks.anOwnerId;
+      const limit = 5;
+      const offset = 0;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract]),
+      );
+
+      await expect(
+        getManageSubscriptions(
+          subscriptionType,
+          ownerId,
+          limit,
+          offset,
+          selcGroups,
+        ),
+      ).resolves.toStrictEqual([
+        {
+          id: mocks.aSubscriptionContract.name,
+          name: mocks.aSubscriptionContract.displayName,
+          state: mocks.aSubscriptionContract.state,
+        },
+      ]);
+
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        offset,
+        limit,
+        `name eq 'MANAGE-${ownerId}'`,
+      );
+    },
+  );
+
+  it("should return an empty array when the root manage is requested and selcGroups contains at least one item", async () => {
+    const subscriptionType = "MANAGE_ROOT";
+    const ownerId = mocks.anOwnerId;
+    const limit = 5;
+    const offset = 0;
+    const selcGroups = ["item"];
+    mocks.getUserSubscriptions.mockReturnValueOnce(
+      TE.right([mocks.aSubscriptionContract]),
+    );
+
+    await expect(
+      getManageSubscriptions(
+        subscriptionType,
+        ownerId,
+        limit,
+        offset,
+        selcGroups,
+      ),
+    ).resolves.toStrictEqual([]);
+
+    expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
   });
 });

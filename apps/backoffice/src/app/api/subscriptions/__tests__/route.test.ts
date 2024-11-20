@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import { Subscription } from "../../../../generated/api/Subscription";
+import { SubscriptionType } from "../../../../generated/api/SubscriptionType";
 import { ManagedInternalError } from "../../../../lib/be/errors";
 import {
   PositiveInteger,
@@ -184,7 +185,7 @@ describe("Upsert Subscription API", () => {
 });
 
 describe("Retrieve manage subscriptions API", () => {
-  it("should return an error response when limit query param is not valid", async () => {
+  it("should return an error response when kind query param is not valid", async () => {
     // given
     mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
     const request = new NextRequest("http://localhost?limit=0");
@@ -197,10 +198,37 @@ describe("Retrieve manage subscriptions API", () => {
     const responseBody = await result.json();
     expect(responseBody.title).toEqual("Bad Request");
     expect(responseBody.detail).toEqual(
-      `'limit' query param is not a valid ${PositiveInteger.name}`,
+      `'kind' query param is not a valid ${SubscriptionType.name}`,
     );
     expect(mocks.getQueryParam).toHaveBeenCalledOnce();
     expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      request,
+      "kind",
+      SubscriptionType,
+    );
+    expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
+  });
+
+  it("should return an error response when limit query param is not valid", async () => {
+    // given
+    const kind = "MANAGE_ROOT";
+    mocks.getQueryParam.mockImplementation((_, param) =>
+      param === "kind" ? E.right(kind) : E.left(void 0),
+    );
+    const request = new NextRequest("http://localhost?limit=0");
+
+    // when
+    const result = await GET(request, {});
+
+    // then
+    expect(result.status).toBe(400);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("Bad Request");
+    expect(responseBody.detail).toEqual(
+      `'limit' query param is not a valid ${PositiveInteger.name}`,
+    );
+    expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
+    expect(mocks.getQueryParam).toHaveBeenLastCalledWith(
       request,
       "limit",
       PositiveIntegerFromString,
@@ -211,9 +239,14 @@ describe("Retrieve manage subscriptions API", () => {
 
   it("should return an error response when offset query param is not valid", async () => {
     // given
+    const kind = "MANAGE_ROOT";
     const limit = 10;
     mocks.getQueryParam.mockImplementation((_, param) =>
-      param === "limit" ? E.right(limit) : E.left(void 0),
+      param === "kind"
+        ? E.right(kind)
+        : param === "limit"
+          ? E.right(limit)
+          : E.left(void 0),
     );
     const request = new NextRequest("http://localhost?offset=-1");
 
@@ -227,7 +260,7 @@ describe("Retrieve manage subscriptions API", () => {
     expect(responseBody.detail).toEqual(
       `'offset' query param is not a valid ${NonNegativeInteger.name}`,
     );
-    expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
+    expect(mocks.getQueryParam).toHaveBeenCalledTimes(3);
     expect(mocks.getQueryParam).toHaveBeenLastCalledWith(
       request,
       "offset",
@@ -239,13 +272,14 @@ describe("Retrieve manage subscriptions API", () => {
 
   it("should return an error response when getManageSubscriptions fails", async () => {
     // given
+    const kind = "MANAGE_ROOT";
     const limit = 10;
     const offset = 5;
     const request = new NextRequest(
       `http://localhost?limit=${limit}&offset=${offset}`,
     );
     mocks.getQueryParam.mockImplementation((_, param) =>
-      E.right(param === "limit" ? limit : offset),
+      E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
     );
     const errorMessage = "error message";
     mocks.getManageSubscriptions.mockRejectedValueOnce(
@@ -260,9 +294,10 @@ describe("Retrieve manage subscriptions API", () => {
     const responseBody = await result.json();
     expect(responseBody.title).toEqual("SubscriptionsRetrieveError");
     expect(responseBody.detail).toEqual(errorMessage);
-    expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
+    expect(mocks.getQueryParam).toHaveBeenCalledTimes(3);
     expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
     expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
+      kind,
       userMock.parameters.userId,
       limit,
       offset,
@@ -279,11 +314,12 @@ describe("Retrieve manage subscriptions API", () => {
     "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
     async ({ userRole, selcGroups }) => {
       // given
+      const kind = "MANAGE_ROOT";
       const limit = 10;
       const offset = 5;
       const request = new NextRequest("http://localhost");
       mocks.getQueryParam.mockImplementation((_, param) =>
-        E.right(param === "limit" ? limit : offset),
+        E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
       );
       const expectedSubscriptions = [{ id: "id", name: "name" }];
       mocks.getManageSubscriptions.mockResolvedValueOnce(expectedSubscriptions);
@@ -306,6 +342,7 @@ describe("Retrieve manage subscriptions API", () => {
       });
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
+        kind,
         userMock.parameters.userId,
         limit,
         offset,
