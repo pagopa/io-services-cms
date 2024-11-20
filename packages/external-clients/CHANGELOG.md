@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.5.1
+
+### Patch Changes
+
+- b15a28a1: retrieve subscriptions by a kind discriminator parameter
+
 ## 1.5.0
 
 ### Minor Changes

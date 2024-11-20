@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.18.1
+
+### Patch Changes
+
+- b15a28a1: retrieve subscriptions by a kind discriminator parameter
+- Updated dependencies [b15a28a1]
+  - @io-services-cms/external-clients@1.5.1
+
 ## 1.18.0
 
 ### Minor Changes
