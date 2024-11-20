@@ -36,6 +36,7 @@ export default function Login() {
       return;
     }
 
+    manageMixpanelLogin();
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
       callbackUrl: "/",
@@ -48,7 +49,7 @@ export default function Login() {
     if (session && router.isReady) {
       // redirect to the return url or home page
       // router.push((router.query.returnUrl as string) || "/");
-      manageMixpanelLogin();
+
       router.push("/");
     } else {
       handleIdentity();
