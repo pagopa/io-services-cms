@@ -1,5 +1,6 @@
 import { Group, StateEnum } from "@/generated/api/Group";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
+import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
@@ -73,7 +74,7 @@ export const retrieveUnboundInstitutionGroups = async (
   institutionId: string,
 ): Promise<Group[]> => {
   const [subscriptions, groups] = await Promise.all([
-    getManageSubscriptions(apimUserId),
+    getManageSubscriptions(SubscriptionTypeEnum.MANAGE_GROUP, apimUserId),
     retrieveInstitutionGroups(institutionId),
   ]);
   const subscriptionBoundGroupIds = subscriptions.reduce(

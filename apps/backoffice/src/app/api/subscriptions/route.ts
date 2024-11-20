@@ -24,6 +24,7 @@ import {
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 
+import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
@@ -72,6 +73,12 @@ export const GET = withJWTAuthHandler(
     request,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse<ResponseError | SubscriptionPagination>> => {
+    const maybeKind = getQueryParam(request, "kind", SubscriptionType);
+    if (E.isLeft(maybeKind)) {
+      return handleBadRequestErrorResponse(
+        `'kind' query param is not a valid ${SubscriptionType.name}`,
+      );
+    }
     const maybeLimit = getQueryParam(
       request,
       "limit",
@@ -96,6 +103,7 @@ export const GET = withJWTAuthHandler(
     }
     try {
       const response = await getManageSubscriptions(
+        maybeKind.right,
         backofficeUser.parameters.userId,
         maybeLimit.right,
         maybeOffset.right,

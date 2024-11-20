@@ -1024,7 +1024,7 @@ paths:
       security:
         - cookieAuth: []
       parameters:
-        - name: type
+        - name: kind
           in: query
           description: ID of the subscription
           required: true
