@@ -8,6 +8,7 @@ import {
   FilterSupportedFunctionsEnum,
   FilterSupportedOperatorsEnum,
   manageGroupSubscriptionsFilter,
+  manageRootSubscriptionsFilter,
   subscriptionsByIdsApimFilter,
   subscriptionsExceptManageOneApimFilter,
 } from "../apim-filters";
@@ -207,5 +208,14 @@ describe("manageGroupSubscriptionsFilter", () => {
       .map((groupId) => `name eq 'MANAGE-GROUP-${groupId}'`)
       .join(" or ");
     expect(res).toEqual(expectedRes);
+  });
+});
+
+describe("manageGroupSubscriptionsFilter", () => {
+  it("should return a single ROOT MANAGE filter", () => {
+    const userId = "userId";
+    const res = manageRootSubscriptionsFilter(userId);
+
+    expect(res).toEqual(`name eq 'MANAGE-${userId}'`);
   });
 });

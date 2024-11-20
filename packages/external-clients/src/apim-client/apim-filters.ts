@@ -258,6 +258,23 @@ export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
   );
 
 /**
+ * User Subscription list filtered by "ROOT" MANAGE name
+ * @param userId the APIM user ID
+ * @returns API Management `$filter` property
+ */
+export const manageRootSubscriptionsFilter = (userId: string): string =>
+  pipe(
+    buildApimFilter({
+      composeFilter: FilterCompositionEnum.none,
+      field: FilterFieldEnum.name,
+      filterType: FilterSupportedOperatorsEnum.eq,
+      inverse: false,
+      value: SUBSCRIPTION_MANAGE_PREFIX + userId,
+    }),
+    O.getOrElse(() => ""),
+  );
+
+/**
  * User Subscription list filtered by a Subscription id'
  *
  * @param value a single id or an array of ids to filter by
