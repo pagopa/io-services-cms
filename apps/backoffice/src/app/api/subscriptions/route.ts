@@ -2,6 +2,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { ResponseError } from "@/generated/api/ResponseError";
 import { Subscription } from "@/generated/api/Subscription";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
+import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { isAdmin } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
@@ -24,7 +25,6 @@ import {
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 
-import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
