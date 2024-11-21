@@ -37,7 +37,15 @@ describe("On Service Detail Lifecycle Change Handler", () => {
     ${"request-detail-lifecycle (lack of modified_at)"} | ${{ ...aService, fsm: { state: "draft" }, _ts: aCosmosResouceTs, modified_at: aModifiedAt }} | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle", cms_last_update_ts: aModifiedAt } }}
     ${"request-detail-lifecycle (lack of modified_at)"} | ${{ ...aService, fsm: { state: "draft" }, _ts: aCosmosResouceTs }}                           | ${{ requestDetailLifecycle: { ...aService, fsm: { state: "draft" }, kind: "lifecycle", cms_last_update_ts: DateUtils.unixSecondsToMillis(aCosmosResouceTs) } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
-    const res = await handler({ item })();
+    const res = await handler({
+      item: {
+        ...item,
+        data: {
+          ...item.data,
+          metadata: { ...item.data.metadata, group_id: "groupId" },
+        },
+      },
+    })();
     expect(E.isRight(res)).toBeTruthy();
     if (E.isRight(res)) {
       expect(res.right).toStrictEqual(expected);

@@ -18,13 +18,17 @@ const noAction = {};
 
 const onDetailLifecycleHandler = ({
   _ts,
+  data: {
+    metadata: { group_id: _, ...metadata },
+    ...data
+  },
   modified_at,
   ...item
 }: ServiceLifecycle.CosmosResource): RequestDetailLifecycleAction => ({
   requestDetailLifecycle: {
     ...item,
-    // eslint-disable-next-line no-underscore-dangle
     cms_last_update_ts: modified_at ?? DateUtils.unixSecondsToMillis(_ts),
+    data: { metadata: { ...metadata }, ...data },
     kind: "lifecycle",
   },
 });
