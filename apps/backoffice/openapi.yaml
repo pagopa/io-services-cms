@@ -1177,7 +1177,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManageKeyCIDRs'
+                $ref: '#/components/schemas/SubscriptionCIDRs'
         '401':
           description: Unauthorized
         '403':
@@ -1208,7 +1208,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ManageKeyCIDRs'
+              $ref: '#/components/schemas/SubscriptionCIDRs'
         required: true
       responses:
         '200':
@@ -1216,7 +1216,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManageKeyCIDRs'
+                $ref: '#/components/schemas/SubscriptionCIDRs'
         '401':
           description: Unauthorized
         '403':
@@ -1424,6 +1424,19 @@ components:
           description: >-
             List of Allowed source IPs or CIDRs associated to the Manage key.
             When empty, every IP address it's authorized for this Manage Keys.
+          type: array
+          items:
+            $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'
+      required:
+        - cidrs
+    SubscriptionCIDRs:
+      type: object
+      description: Subscription authorized CIDRs
+      properties:
+        cidrs:
+          description: >-
+            List of Allowed source IPs or CIDRs associated to the Subscription.
+            When empty, every IP address it's authorized for this Subscription.
           type: array
           items:
             $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Cidr'

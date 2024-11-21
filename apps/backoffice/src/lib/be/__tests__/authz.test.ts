@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SelfcareRoles } from "../../../types/auth";
-import { isAdmin, isInstitutionIdSameAsCaller } from "../authz";
+import { isAdmin, isInstitutionIdSameAsCaller, userAuthz } from "../authz";
+import { BackOfficeUser } from "../../../../types/next-auth";
 
 const backofficeUserMock = {
   id: faker.string.uuid(),
@@ -72,5 +73,28 @@ describe("isInstitutionSameAsCaller", () => {
         institutionId,
       ),
     ).toBe(false);
+  });
+});
+
+describe("userAuthz", () => {
+  describe("isGroupAllowed", () => {
+    it.each`
+      scenario                                                             | expectedResult | role                      | selcGroups     | groupId
+      ${"is admin"}                                                        | ${true}        | ${SelfcareRoles.admin}    | ${undefined}   | ${""}
+      ${"is not admin and selcGroups is not defined"}                      | ${true}        | ${SelfcareRoles.operator} | ${undefined}   | ${""}
+      ${"is not admin and selcGroups is empty"}                            | ${true}        | ${SelfcareRoles.operator} | ${[]}          | ${""}
+      ${"is not admin and provided groupId is included in selcGroups"}     | ${true}        | ${SelfcareRoles.operator} | ${["groupId"]} | ${"groupId"}
+      ${"is not admin and provided groupId is not included in selcGroups"} | ${false}       | ${SelfcareRoles.operator} | ${["groupId"]} | ${"different_groupId"}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, role, selcGroups, groupId }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isGroupAllowed(groupId),
+        ).toBe(expectedResult);
+      },
+    );
   });
 });
