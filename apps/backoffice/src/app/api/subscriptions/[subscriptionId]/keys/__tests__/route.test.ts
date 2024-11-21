@@ -8,11 +8,15 @@ import { GET } from "../route";
 const backofficeUserMock = { permissions: {} } as BackOfficeUser;
 
 const {
-  isAdminMock,
+  userAuthzMock,
+  isGroupAllowedMock,
   retrieveManageSubscriptionApiKeysMock,
   withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
-  isAdminMock: vi.fn(() => true),
+  isGroupAllowedMock: vi.fn(() => true),
+  userAuthzMock: vi.fn(() => ({
+    isGroupAllowed: isGroupAllowedMock,
+  })),
   retrieveManageSubscriptionApiKeysMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
     (
@@ -33,7 +37,7 @@ vi.mock("@/lib/be/wrappers", () => ({
   withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 vi.mock("@/lib/be/authz", () => ({
-  isAdmin: isAdminMock,
+  userAuthz: userAuthzMock,
 }));
 vi.mock("@/lib/be/keys/business", () => ({
   retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock,
@@ -44,71 +48,60 @@ afterEach(() => {
 });
 
 describe("getManageSubscriptionKeys", () => {
-  it.each`
-    scenario                                         | selcGroups
-    ${"selcGroups is not defined"}                   | ${undefined}
-    ${"has no groups"}                               | ${[]}
-    ${"requested subscription-group does not match"} | ${["anotherGroupId"]}
-  `(
-    "should return an unauthorized response when user is not admin and $scenario",
-    async ({ selcGroups }) => {
-      // given
-      const nextRequest = new NextRequest("http://localhost");
-      const subscriptionId = "MANAGE-GROUP-groupId";
-      isAdminMock.mockReturnValueOnce(false);
-      backofficeUserMock.permissions.selcGroups = selcGroups;
+  it("should return an unauthorized response when provided groupId is not allowed", async () => {
+    // given
+    const nextRequest = new NextRequest("http://localhost");
+    const groupId = "groupId";
+    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    isGroupAllowedMock.mockReturnValueOnce(false);
 
-      // when
-      const result = await GET(nextRequest, {
-        params: { subscriptionId },
-      });
+    // when
+    const result = await GET(nextRequest, {
+      params: { subscriptionId },
+    });
 
-      // then
-      const jsonBody = await result.json();
-      expect(result.status).toBe(403);
-      expect(jsonBody.detail).toEqual(
-        "Requested subscription is out of your scope",
-      );
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
-      expect(retrieveManageSubscriptionApiKeysMock).not.toHaveBeenCalled();
-    },
-  );
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(403);
+    expect(jsonBody.detail).toEqual(
+      "Requested subscription is out of your scope",
+    );
+    expect(userAuthzMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isGroupAllowedMock).toHaveBeenCalledOnce();
+    expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+    expect(retrieveManageSubscriptionApiKeysMock).not.toHaveBeenCalled();
+  });
 
-  it.each`
-    scenario                                                      | isAdmin  | selcGroups
-    ${"user id admin"}                                            | ${true}  | ${undefined}
-    ${"user id not admin but requested subscription-group match"} | ${false} | ${["groupId"]}
-  `(
-    "should return an unauthorized response when user is not admin and $scenario",
-    async ({ isAdmin, selcGroups }) => {
-      // given
-      const nextRequest = new NextRequest("http://localhost");
-      const subscriptionId = "MANAGE-GROUP-groupId";
-      isAdminMock.mockReturnValueOnce(isAdmin);
-      backofficeUserMock.permissions.selcGroups = selcGroups;
-      const expectedResponse = { foo: "bar" };
-      retrieveManageSubscriptionApiKeysMock.mockResolvedValueOnce(
-        expectedResponse,
-      );
+  it("should return OK when provided group id is allowed", async () => {
+    // given
+    const nextRequest = new NextRequest("http://localhost");
+    const groupId = "groupId";
+    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    isGroupAllowedMock.mockReturnValueOnce(true);
+    const expectedResponse = { foo: "bar" };
+    retrieveManageSubscriptionApiKeysMock.mockResolvedValueOnce(
+      expectedResponse,
+    );
 
-      // when
-      const result = await GET(nextRequest, {
-        params: { subscriptionId },
-      });
+    // when
+    const result = await GET(nextRequest, {
+      params: { subscriptionId },
+    });
 
-      // then
-      const jsonBody = await result.json();
-      expect(result.status).toBe(200);
-      expect(jsonBody).toStrictEqual(expectedResponse);
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
-      expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
-      expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
-        subscriptionId,
-      );
-    },
-  );
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(200);
+    expect(jsonBody).toStrictEqual(expectedResponse);
+    expect(userAuthzMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isGroupAllowedMock).toHaveBeenCalledOnce();
+    expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+    expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
+    expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
+      subscriptionId,
+    );
+  });
 
   it.each`
     scenario                 | expectedStatusCode | error                        | expectedTitle               | expectedDetail
@@ -119,8 +112,9 @@ describe("getManageSubscriptionKeys", () => {
     async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
       // given
       const nextRequest = new NextRequest("http://localhost");
-      const subscriptionId = "MANAGE-GROUP-groupId";
-      isAdminMock.mockReturnValueOnce(true);
+      const groupId = "groupId";
+      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      isGroupAllowedMock.mockReturnValueOnce(true);
       retrieveManageSubscriptionApiKeysMock.mockRejectedValueOnce(error);
 
       // when
@@ -133,8 +127,10 @@ describe("getManageSubscriptionKeys", () => {
       expect(result.status).toBe(expectedStatusCode);
       expect(jsonBody.title).toEqual(expectedTitle);
       expect(jsonBody.detail).toEqual(expectedDetail);
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(isGroupAllowedMock).toHaveBeenCalledOnce();
+      expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
         subscriptionId,

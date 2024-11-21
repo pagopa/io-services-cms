@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BackOfficeUser } from "../../../../types/next-auth";
 import { SelfcareRoles } from "../../../types/auth";
 import { isAdmin, isInstitutionIdSameAsCaller, userAuthz } from "../authz";
-import { BackOfficeUser } from "../../../../types/next-auth";
 
 const backofficeUserMock = {
   id: faker.string.uuid(),
@@ -77,6 +77,39 @@ describe("isInstitutionSameAsCaller", () => {
 });
 
 describe("userAuthz", () => {
+  describe("isAdmin", () => {
+    it.each`
+      expectedResult | role
+      ${true}        | ${SelfcareRoles.admin}
+    `(
+      'should return $expectedResult for "$role" user',
+      ({ expectedResult, role }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+          } as BackOfficeUser).isAdmin(),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
+  describe("isInstitutionAllowed", () => {
+    it.each`
+      scenario                                 | expectedResult | allowedInstitutionId | providedInstitutionId
+      ${"provided institution is allowed"}     | ${true}        | ${"institutionId"}   | ${"institutionId"}
+      ${"provided institution is not allowed"} | ${false}       | ${"institutionId"}   | ${"different_institutionId"}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, allowedInstitutionId, providedInstitutionId }) => {
+        expect(
+          userAuthz({
+            institution: { id: allowedInstitutionId },
+          } as BackOfficeUser).isInstitutionAllowed(providedInstitutionId),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
   describe("isGroupAllowed", () => {
     it.each`
       scenario                                                             | expectedResult | role                      | selcGroups     | groupId

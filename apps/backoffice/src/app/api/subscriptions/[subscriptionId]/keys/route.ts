@@ -1,6 +1,6 @@
 import { ResponseError } from "@/generated/api/ResponseError";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
-import { isAdmin } from "@/lib/be/authz";
+import { userAuthz } from "@/lib/be/authz";
 import {
   ApiKeyNotFoundError,
   handleForbiddenErrorResponse,
@@ -30,8 +30,7 @@ export const GET = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUser; params: { subscriptionId: string } },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
     if (
-      !isAdmin(backofficeUser) &&
-      !backofficeUser.permissions.selcGroups?.includes(
+      !userAuthz(backofficeUser).isGroupAllowed(
         params.subscriptionId.substring(
           ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
         ),
