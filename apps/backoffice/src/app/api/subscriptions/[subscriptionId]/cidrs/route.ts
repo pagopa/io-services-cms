@@ -1,4 +1,3 @@
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { ResponseError } from "@/generated/api/ResponseError";
 import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
 import { userAuthz } from "@/lib/be/authz";
@@ -90,7 +89,7 @@ export const PUT = withJWTAuthHandler(
     // TODO: add subscription ownerId check. To do that we need to fetch first the subscription in order to get its ownerId and then check equality with backofficeUser.parameters.userId
     let requestPayload;
     try {
-      requestPayload = await parseBody(request, ManageKeyCIDRs);
+      requestPayload = await parseBody(request, SubscriptionCIDRs);
     } catch (error) {
       return handleBadRequestErrorResponse(
         error instanceof Error ? error.message : "Failed to parse JSON body",

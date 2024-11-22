@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, Mock, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import { Cidr } from "../../../../../../generated/api/Cidr";
-import { ManageKeyCIDRs } from "../../../../../../generated/api/ManageKeyCIDRs";
+import { SubscriptionCIDRs } from "../../../../../../generated/api/SubscriptionCIDRs";
 import { GET, PUT } from "../route";
 
 const aBackofficeUser = { permissions: {} } as BackOfficeUser;
@@ -217,7 +217,10 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(mock.parseBody).toHaveBeenCalledOnce();
-      expect(mock.parseBody).toHaveBeenCalledWith(nextRequest, ManageKeyCIDRs);
+      expect(mock.parseBody).toHaveBeenCalledWith(
+        nextRequest,
+        SubscriptionCIDRs,
+      );
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs,
       ).not.toHaveBeenCalled();
@@ -251,7 +254,10 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(mock.parseBody).toHaveBeenCalledOnce();
-      expect(mock.parseBody).toHaveBeenCalledWith(nextRequest, ManageKeyCIDRs);
+      expect(mock.parseBody).toHaveBeenCalledWith(
+        nextRequest,
+        SubscriptionCIDRs,
+      );
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs,
       ).toHaveBeenCalledOnce();
@@ -289,7 +295,10 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(mock.parseBody).toHaveBeenCalledOnce();
-      expect(mock.parseBody).toHaveBeenCalledWith(nextRequest, ManageKeyCIDRs);
+      expect(mock.parseBody).toHaveBeenCalledWith(
+        nextRequest,
+        SubscriptionCIDRs,
+      );
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs,
       ).toHaveBeenCalledOnce();
