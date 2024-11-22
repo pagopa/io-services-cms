@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.39.4
+
+### Patch Changes
+
+- e0ef2c19: avoid group info propagation to app-backend
+
 ## 1.39.3
 
 ### Patch Changes

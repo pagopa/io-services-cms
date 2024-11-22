@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.18.2
+
+### Patch Changes
+
+- e8c50a2f: add missing getManageSubscriptionAuthorizedCidrs and updateManageSubscriptionAuthorizedCidrs handlers
+
 ## 1.18.1
 
 ### Patch Changes
