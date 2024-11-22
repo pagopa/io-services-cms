@@ -1,7 +1,7 @@
 import { ResponseError } from "@/generated/api/ResponseError";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
-import { isAdmin } from "@/lib/be/authz";
+import { userAuthz } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -34,8 +34,7 @@ export const PUT = withJWTAuthHandler(
     },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
     if (
-      !isAdmin(backofficeUser) &&
-      !backofficeUser.permissions.selcGroups?.includes(
+      !userAuthz(backofficeUser).isGroupAllowed(
         params.subscriptionId.substring(
           ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
         ),

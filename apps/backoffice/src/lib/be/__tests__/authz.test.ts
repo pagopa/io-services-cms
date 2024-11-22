@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BackOfficeUser } from "../../../../types/next-auth";
 import { SelfcareRoles } from "../../../types/auth";
-import { isAdmin, isInstitutionIdSameAsCaller } from "../authz";
+import { isAdmin, isInstitutionIdSameAsCaller, userAuthz } from "../authz";
 
 const backofficeUserMock = {
   id: faker.string.uuid(),
@@ -72,5 +73,61 @@ describe("isInstitutionSameAsCaller", () => {
         institutionId,
       ),
     ).toBe(false);
+  });
+});
+
+describe("userAuthz", () => {
+  describe("isAdmin", () => {
+    it.each`
+      expectedResult | role
+      ${true}        | ${SelfcareRoles.admin}
+    `(
+      'should return $expectedResult for "$role" user',
+      ({ expectedResult, role }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+          } as BackOfficeUser).isAdmin(),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
+  describe("isInstitutionAllowed", () => {
+    it.each`
+      scenario                                 | expectedResult | allowedInstitutionId | providedInstitutionId
+      ${"provided institution is allowed"}     | ${true}        | ${"institutionId"}   | ${"institutionId"}
+      ${"provided institution is not allowed"} | ${false}       | ${"institutionId"}   | ${"different_institutionId"}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, allowedInstitutionId, providedInstitutionId }) => {
+        expect(
+          userAuthz({
+            institution: { id: allowedInstitutionId },
+          } as BackOfficeUser).isInstitutionAllowed(providedInstitutionId),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
+  describe("isGroupAllowed", () => {
+    it.each`
+      scenario                                                             | expectedResult | role                      | selcGroups     | groupId
+      ${"is admin"}                                                        | ${true}        | ${SelfcareRoles.admin}    | ${undefined}   | ${""}
+      ${"is not admin and selcGroups is not defined"}                      | ${true}        | ${SelfcareRoles.operator} | ${undefined}   | ${""}
+      ${"is not admin and selcGroups is empty"}                            | ${true}        | ${SelfcareRoles.operator} | ${[]}          | ${""}
+      ${"is not admin and provided groupId is included in selcGroups"}     | ${true}        | ${SelfcareRoles.operator} | ${["groupId"]} | ${"groupId"}
+      ${"is not admin and provided groupId is not included in selcGroups"} | ${false}       | ${SelfcareRoles.operator} | ${["groupId"]} | ${"different_groupId"}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, role, selcGroups, groupId }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isGroupAllowed(groupId),
+        ).toBe(expectedResult);
+      },
+    );
   });
 });
