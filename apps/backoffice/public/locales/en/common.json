@@ -45,6 +45,22 @@
     }
   },
   "forms": {
+    "apiKey": {
+      "buttons": {
+        "create": "Generate API Key"
+      },
+      "group": {
+        "step": {
+          "title": "Generate a Group API Key",
+          "description": "By generating the API Key for groups, it will be possible to perform programmatic operations only on the services associated with the specific group."
+        },
+        "select": {
+          "helperText": "The group name is inherited from Reserved Area, if it changes it will be updated automatically",
+          "label": "Select the group to make the API Key visible to",
+          "placeholder": "Select group"
+        }
+      }
+    },
     "cancel": {
       "title": "Are you sure you want to cancel the procedure?",
       "description": "The action is irreversible."
@@ -327,6 +343,15 @@
     "keys": {
       "title": "API Keys",
       "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
+      "groups": {
+        "title": "Group API Keys",
+        "description": "Generate these keys for individual groups, so that they can perform programmatic operations only on the services they manage.",
+        "generate": "Generate API Key",
+        "noGroupModal": {
+          "description": "You have not yet created any groups to generate API Keys. <br/><br/>To proceed, go to the “Groups” section in the Reserved Area and create new groups. Once finished, you can generate API Keys and associate them with groups.",
+          "confirm": "Add group"
+        }
+      },
       "manage": {
         "title": "API Key Manage",
         "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
@@ -335,6 +360,10 @@
       "authorizedCidrs": {
         "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys."
       }
+    },
+    "new-group-api-key": {
+      "title": "Groups API Key",
+      "description": "Select the group for which you want to generate a group API Key."
     },
     "users": {
       "title": "Users",
