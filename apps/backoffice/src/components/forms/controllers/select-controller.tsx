@@ -8,7 +8,7 @@ import {
   SelectProps,
 } from "@mui/material";
 import { ReactNode } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, get, useFormContext } from "react-hook-form";
 
 export type SelectControllerProps = {
   helperText?: ReactNode;
@@ -27,8 +27,8 @@ export function SelectController({
   name,
   ...props
 }: SelectControllerProps) {
-  //TODO: removed useTranslation() because it's not used, is it needed?
-  const { control, register } = useFormContext();
+  const { control, formState, register } = useFormContext();
+  const error = get(formState.errors, name);
 
   if (items.length === 0) return; // avoid mui out-of-range error
   return (
@@ -37,11 +37,18 @@ export function SelectController({
       name={name}
       render={({ field: { onChange, value } }) => (
         <FormControl fullWidth margin="normal">
-          <InputLabel id={`${name}-label`}>{props.label}</InputLabel>
+          <InputLabel
+            error={!!error}
+            id={`${name}-label`}
+            required={props.required}
+          >
+            {props.label}
+          </InputLabel>
           <Select
             {...props}
             {...register(name)}
             MenuProps={{ disableScrollLock: true }}
+            error={!!error}
             fullWidth
             id={name}
             input={<OutlinedInput id="select-label" label={props.label} />}
@@ -55,7 +62,9 @@ export function SelectController({
               </MenuItem>
             ))}
           </Select>
-          <FormHelperText>{helperText}</FormHelperText>
+          <FormHelperText error={!!error}>
+            {error ? error.message : (helperText ?? null)}
+          </FormHelperText>
         </FormControl>
       )}
     />
