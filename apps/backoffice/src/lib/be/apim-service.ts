@@ -23,9 +23,9 @@ import * as t from "io-ts";
 export interface ApimRestClient {
   readonly getUserSubscriptions: (
     userId: string,
-    limit: number,
-    offset: number,
     filter: string,
+    limit?: number,
+    offset?: number,
     isRetry?: boolean,
   ) => TE.TaskEither<AxiosError | Error, SubscriptionCollection>;
 }
@@ -122,9 +122,9 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
 
   const getUserSubscriptions: ApimRestClient["getUserSubscriptions"] = (
     userId,
+    filter,
     limit,
     offset,
-    filter,
     isRetry = false,
   ) =>
     pipe(
@@ -156,7 +156,7 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
             return pipe(
               TE.fromIO(() => refreshClient()),
               TE.chain(() =>
-                getUserSubscriptions(userId, limit, offset, filter, true),
+                getUserSubscriptions(userId, filter, limit, offset, true),
               ),
             );
           }
