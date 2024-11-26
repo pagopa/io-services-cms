@@ -13,7 +13,7 @@ type MemoryStore<T extends WithState<string, Record<string, unknown>>> = {
 
 export const createMemoryStore = <
   T extends {
-    data: { metadata?: { group_id?: string } };
+    data: { metadata?: { group_id?: string }; name: string };
     id: string;
   } & WithState<string, Record<string, unknown>>,
 >(): MemoryStore<T> => {
@@ -37,6 +37,22 @@ export const createMemoryStore = <
         () => Promise.resolve(m.get(id)),
         T.map(O.fromNullable),
         TE.fromTask,
+      ),
+    getGroupUnboundedServicesByIds: (ids: readonly string[]) =>
+      pipe(
+        ids.map((id) => m.get(id)),
+        (values) =>
+          values.filter(
+            (item) =>
+              !!item && !!item.data.metadata && !item.data.metadata.group_id,
+          ),
+        (values) =>
+          TE.of(
+            values.map((value) => ({
+              id: value?.id ?? "",
+              name: value?.data.name ?? "",
+            })),
+          ),
       ),
     getServiceIdsByGroupIds: (
       groupIds: readonly string[],

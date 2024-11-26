@@ -529,4 +529,69 @@ describe("store cosmos tests", () => {
       expect(fetchAll).toHaveBeenCalledOnce();
     });
   });
+
+  describe("getGroupUnboundedServicesByIds", () => {
+    it("should return an error when query fail", async () => {
+      const error = {
+        code: 500,
+        message: "unknown error",
+      };
+      const fetchAll = vi.fn().mockRejectedValueOnce(error);
+      const query = vi.fn().mockReturnValueOnce({ fetchAll });
+      const containerMock = {
+        items: { query },
+      } as unknown as Container;
+      const store = createCosmosStore(
+        containerMock,
+        ServicePublication.ItemType,
+      );
+      const aServiceIds = [];
+
+      const result = await store.getGroupUnboundedServicesByIds(aServiceIds)();
+
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left.message).toStrictEqual(
+          `Error fetching group-unbouded services from database, ${
+            E.toError(error).message
+          }`,
+        );
+      }
+      expect(query).toHaveBeenCalledOnce();
+      expect(fetchAll).toHaveBeenCalledOnce();
+    });
+
+    it("should return the services when query do not fail", async () => {
+      const expectedResult = {
+        resources: [
+          { id: "sid_1", name: "name 1" },
+          { id: "sid_2", name: "name 2" },
+        ],
+      };
+      const fetchAll = vi.fn().mockResolvedValueOnce(expectedResult);
+      const query = vi.fn().mockReturnValueOnce({ fetchAll });
+      const containerMock = {
+        items: { query },
+      } as unknown as Container;
+      const store = createCosmosStore(
+        containerMock,
+        ServicePublication.ItemType,
+      );
+      const aServiceIds = ["sid_1", "sid_2", "sid_3"];
+
+      const result = await store.getGroupUnboundedServicesByIds(aServiceIds)();
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toStrictEqual(expectedResult.resources);
+      }
+      expect(query).toHaveBeenCalledOnce();
+      expect(query).toHaveBeenCalledWith({
+        parameters: [{ name: "@serviceIds", value: aServiceIds }],
+        query:
+          "SELECT c.id, c.data.name FROM c WHERE ARRAY_CONTAINS(@serviceIds, c.id) AND NOT IS_DEFINED(c.data.metadata.group_id)",
+      });
+      expect(fetchAll).toHaveBeenCalledOnce();
+    });
+  });
 });

@@ -240,6 +240,28 @@ const getServiceIdsByGroupIds =
       TE.map(({ resources }) => resources),
     );
 
+const getGroupUnboundedServicesByIds =
+  (container: Container) =>
+  (
+    serviceIds: readonly string[],
+  ): TE.TaskEither<Error, { id: string; name: string }[]> =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          container.items
+            .query<{ id: string; name: string }>({
+              parameters: [{ name: "@serviceIds", value: serviceIds }],
+              query: `SELECT c.id, c.data.name FROM c WHERE ARRAY_CONTAINS(@serviceIds, c.id) AND NOT IS_DEFINED(c.data.metadata.group_id)`,
+            })
+            .fetchAll(),
+        (err) =>
+          new Error(
+            `Error fetching group-unbouded services from database, ${E.toError(err).message}`,
+          ),
+      ),
+      TE.map(({ resources }) => resources),
+    );
+
 export const createCosmosStore = <
   T extends WithState<string, Record<string, unknown>>,
 >(
@@ -249,6 +271,7 @@ export const createCosmosStore = <
   bulkFetch: bulkFetch(container, codec),
   delete: deleteItem(container),
   fetch: fetch(container, codec),
+  getGroupUnboundedServicesByIds: getGroupUnboundedServicesByIds(container),
   getServiceIdsByGroupIds: getServiceIdsByGroupIds(container),
   patch: patch(container, codec),
   save: save(container),
