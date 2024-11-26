@@ -146,10 +146,12 @@ export function CreateUpdateProcess<T extends FieldValues>({
 
   return (
     <>
-      <StepsPipeline
-        activeStep={currentStepIndex}
-        steps={steps.map((step) => step.label)}
-      />
+      {steps.length > 1 && (
+        <StepsPipeline
+          activeStep={currentStepIndex}
+          steps={steps.map((step) => step.label)}
+        />
+      )}
       <Box bgcolor="background.paper" borderRadius="4px" padding="24px">
         <Typography variant="h5">{t(steps[currentStepIndex].label)}</Typography>
         {renderStepDescription()}
