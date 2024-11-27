@@ -271,6 +271,30 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /services/group-unbound:
+    get:
+      tags:
+        - services
+      summary: Retrieve all group-unbounded services
+      description: Retrieve all services owned by the calling user that are not related to any groups
+      operationId: getGroupUnboundedServices
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Services fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnboundedGroupServices'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /services/topics:
     get:
       tags:
@@ -1632,6 +1656,26 @@ components:
           type: string
       required:
         - identity_token
+    UnboundedGroupServices:
+      type: object
+      properties:
+        unboundedServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinifiedService'
+      required:
+        - value
+        - pagination
+    MinifiedService:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
     ServiceList:
       type: object
       properties:
