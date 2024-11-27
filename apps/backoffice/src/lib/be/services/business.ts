@@ -30,6 +30,7 @@ import {
 } from "./cms";
 import {
   retrieveAuthorizedServiceIds,
+  retrieveGroupUnboundedServices,
   retrieveLifecycleServices,
   retrievePublicationServices,
 } from "./cosmos";
@@ -59,8 +60,8 @@ interface PathParameters {
 
 const retrieveSubscriptions = (
   backofficeUser: BackOfficeUser,
-  limit: number,
-  offset: number,
+  limit?: number,
+  offset?: number,
   serviceId?: string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
   backofficeUser.permissions.selcGroups &&
@@ -186,6 +187,31 @@ export const retrieveServiceList = async (
           ),
         ],
       }),
+    ),
+    TE.getOrElse((error) => {
+      throw error;
+    }),
+  )();
+
+/**
+ * Retrive all the services that are not bound to any Group
+ * @param backofficeUser the logged user
+ * @returns the minified services
+ */
+export const retrieveUnboundedGroupServices = async (
+  backofficeUser: BackOfficeUser,
+): Promise<readonly { id: string; name: string }[]> =>
+  pipe(
+    retrieveSubscriptions(backofficeUser),
+    TE.chain((subscriptions) =>
+      pipe(
+        subscriptions.value
+          ? subscriptions.value.map(
+              (subscription) => subscription.name as NonEmptyString,
+            )
+          : [],
+        retrieveGroupUnboundedServices,
+      ),
     ),
     TE.getOrElse((error) => {
       throw error;

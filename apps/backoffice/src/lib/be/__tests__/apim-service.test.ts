@@ -123,9 +123,9 @@ describe("Apim Rest Client", () => {
       const apimRestClient = await getApimRestClient();
       const result = await apimRestClient.getUserSubscriptions(
         mocks.anUserId,
+        filter,
         limit,
         offset,
-        filter,
       )();
 
       // then
@@ -177,9 +177,9 @@ describe("Apim Rest Client", () => {
       const apimRestClient = await getApimRestClient();
       const result = await apimRestClient.getUserSubscriptions(
         mocks.anUserId,
+        filter,
         limit,
         offset,
-        filter,
       )();
 
       // then
@@ -247,9 +247,9 @@ describe("Apim Rest Client", () => {
       const apimRestClient = await getApimRestClient();
       const result = await apimRestClient.getUserSubscriptions(
         mocks.anUserId,
+        filter,
         limit,
         offset,
-        filter,
       )();
 
       // then
@@ -294,9 +294,9 @@ describe("Apim Rest Client", () => {
       const apimRestClient = await getApimRestClient();
       const result = await apimRestClient.getUserSubscriptions(
         mocks.anUserId,
+        filter,
         limit,
         offset,
-        filter,
       )();
 
       // then

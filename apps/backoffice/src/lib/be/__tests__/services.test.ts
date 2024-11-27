@@ -16,6 +16,7 @@ import {
   forwardIoServicesCmsRequest,
   retrieveOrganizationDelegates,
   retrieveServiceList,
+  retrieveUnboundedGroupServices,
 } from "../services/business";
 
 const mocks: {
@@ -177,12 +178,14 @@ const {
   retrievePublicationServicesMock,
   retrieveInstitutionGroups,
   retrieveAuthorizedServiceIdsMock,
+  retrieveGroupUnboundedServicesMock,
 } = vi.hoisted(() => ({
   getSubscriptionsMock: vi.fn(),
   retrieveLifecycleServicesMock: vi.fn(),
   retrievePublicationServicesMock: vi.fn(),
   retrieveInstitutionGroups: vi.fn(),
   retrieveAuthorizedServiceIdsMock: vi.fn(),
+  retrieveGroupUnboundedServicesMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
@@ -202,6 +205,7 @@ vi.mock("@/lib/be/services/cosmos", () => ({
   retrieveLifecycleServices: retrieveLifecycleServicesMock,
   retrievePublicationServices: retrievePublicationServicesMock,
   retrieveAuthorizedServiceIds: retrieveAuthorizedServiceIdsMock,
+  retrieveGroupUnboundedServices: retrieveGroupUnboundedServicesMock,
 }));
 
 vi.mock("@/lib/be/institutions/business", () => ({
@@ -1064,6 +1068,50 @@ describe("Services TEST", () => {
       );
 
       expect(getDelegatesByOrganization).toBeCalledWith("anOrganizationId");
+    });
+  });
+
+  describe("retrieveUnboundedGroupServices", () => {
+    it("should throw an error when getSubscriptions fails", async () => {
+      // given
+      const subscriptions = [
+        {
+          name: "sub_1",
+        },
+        {
+          name: "sub_2",
+        },
+      ];
+      const services = [
+        {
+          id: "id_1",
+          name: "name_1",
+        },
+      ];
+      getSubscriptionsMock.mockReturnValueOnce(
+        TE.right({
+          value: subscriptions,
+        }),
+      );
+      retrieveGroupUnboundedServicesMock.mockReturnValueOnce(
+        TE.right(services),
+      );
+
+      // when and then
+      await expect(
+        retrieveUnboundedGroupServices(aBackofficeUser),
+      ).resolves.toStrictEqual(services);
+      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getSubscriptionsMock).toHaveBeenCalledWith(
+        aBackofficeUser.parameters.userId,
+        undefined,
+        undefined,
+        undefined,
+      );
+      expect(retrieveGroupUnboundedServicesMock).toHaveBeenCalledOnce();
+      expect(retrieveGroupUnboundedServicesMock).toHaveBeenCalledWith(
+        subscriptions.map((sub) => sub.name),
+      );
     });
   });
 });

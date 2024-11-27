@@ -4,6 +4,7 @@ import * as TE from "fp-ts/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   retrieveAuthorizedServiceIds,
+  retrieveGroupUnboundedServices,
   retrieveLifecycleServices,
   retrievePublicationServices,
 } from "../cosmos";
@@ -12,16 +13,19 @@ const {
   bulkFetchLifecycleMock,
   bulkFetchPublicationMock,
   getServiceIdsByGroupIdsMock,
+  getGroupUnboundedServicesByIdsMock,
 } = vi.hoisted(() => ({
   bulkFetchLifecycleMock: vi.fn(),
   bulkFetchPublicationMock: vi.fn(),
   getServiceIdsByGroupIdsMock: vi.fn(),
+  getGroupUnboundedServicesByIdsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/cosmos-store", () => ({
   getServiceLifecycleCosmosStore: () => ({
     bulkFetch: bulkFetchLifecycleMock,
     getServiceIdsByGroupIds: getServiceIdsByGroupIdsMock,
+    getGroupUnboundedServicesByIds: getGroupUnboundedServicesByIdsMock,
   }),
   getServicePublicationCosmosStore: () => ({
     bulkFetch: bulkFetchPublicationMock,
@@ -76,6 +80,7 @@ describe("retrieveLifecycleServices", () => {
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return Error when bulkFetch fail", async () => {
@@ -96,6 +101,7 @@ describe("retrieveLifecycleServices", () => {
     expect(bulkFetchLifecycleMock).toHaveBeenCalledWith(input);
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return filtered services", async () => {
@@ -129,6 +135,7 @@ describe("retrieveLifecycleServices", () => {
     expect(bulkFetchLifecycleMock).toHaveBeenCalledWith(input);
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 });
 
@@ -148,6 +155,7 @@ describe("retrievePublicationServices", () => {
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return Error when bulkFetch fail", async () => {
@@ -168,6 +176,7 @@ describe("retrievePublicationServices", () => {
     expect(bulkFetchPublicationMock).toHaveBeenCalledWith(input);
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return filtered services", async () => {
@@ -201,6 +210,7 @@ describe("retrievePublicationServices", () => {
     expect(bulkFetchPublicationMock).toHaveBeenCalledWith(input);
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 });
 
@@ -220,6 +230,7 @@ describe("retrieveAuthorizedServiceIds", () => {
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
     expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return Error when getServiceIdsByGroupIds fail", async () => {
@@ -240,6 +251,7 @@ describe("retrieveAuthorizedServiceIds", () => {
     expect(getServiceIdsByGroupIdsMock).toHaveBeenCalledWith(input);
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
   });
 
   it("should return service ids", async () => {
@@ -260,5 +272,68 @@ describe("retrieveAuthorizedServiceIds", () => {
     expect(getServiceIdsByGroupIdsMock).toHaveBeenCalledWith(input);
     expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
     expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("retrieveGroupUnboundedServices", () => {
+  it("should return an empty response when input is an empty array", async () => {
+    // given
+    const input = [];
+
+    // when
+    const res = await retrieveGroupUnboundedServices(input)();
+
+    // then
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toStrictEqual(input);
+    }
+    expect(getGroupUnboundedServicesByIdsMock).not.toHaveBeenCalled();
+    expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+    expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+    expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+  });
+
+  it("should return Error when getGroupUnboundedServicesByIds fail", async () => {
+    // given
+    const input = ["id"];
+    const error = new Error("error message");
+    getGroupUnboundedServicesByIdsMock.mockReturnValueOnce(TE.left(error));
+
+    // when
+    const res = await retrieveGroupUnboundedServices(input)();
+
+    // then
+    expect(E.isLeft(res)).toBeTruthy();
+    if (E.isLeft(res)) {
+      expect(res.left).toStrictEqual(error);
+    }
+    expect(getGroupUnboundedServicesByIdsMock).toHaveBeenCalledOnce();
+    expect(getGroupUnboundedServicesByIdsMock).toHaveBeenCalledWith(input);
+    expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+    expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+    expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
+  });
+
+  it("should return service ids", async () => {
+    // given
+    const input = ["g_id_1", "g_id_2"];
+    const expected = ["s_id_1"];
+    getGroupUnboundedServicesByIdsMock.mockReturnValueOnce(TE.right(expected));
+
+    // when
+    const res = await retrieveGroupUnboundedServices(input)();
+
+    // then
+    expect(E.isRight(res)).toBeTruthy();
+    if (E.isRight(res)) {
+      expect(res.right).toStrictEqual(expected);
+    }
+    expect(getGroupUnboundedServicesByIdsMock).toHaveBeenCalledOnce();
+    expect(getGroupUnboundedServicesByIdsMock).toHaveBeenCalledWith(input);
+    expect(bulkFetchPublicationMock).not.toHaveBeenCalled();
+    expect(bulkFetchLifecycleMock).not.toHaveBeenCalled();
+    expect(getServiceIdsByGroupIdsMock).not.toHaveBeenCalled();
   });
 });

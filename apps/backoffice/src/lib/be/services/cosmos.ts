@@ -46,3 +46,17 @@ export const retrieveAuthorizedServiceIds = (
         getServiceLifecycleCosmosStore().getServiceIdsByGroupIds(authzGroupIds),
     ),
   );
+
+export const retrieveGroupUnboundedServices = (
+  serviceIds: readonly string[],
+): TE.TaskEither<Error, readonly { id: string; name: string }[]> =>
+  pipe(
+    serviceIds.length > 0,
+    B.match(
+      () => TE.of([]),
+      () =>
+        getServiceLifecycleCosmosStore().getGroupUnboundedServicesByIds(
+          serviceIds,
+        ),
+    ),
+  );

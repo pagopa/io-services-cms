@@ -99,9 +99,9 @@ describe("getSubscriptions", () => {
       expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
         anUserId,
+        getExpectedFilter(serviceIdFilter),
         limit,
         offset,
-        getExpectedFilter(serviceIdFilter),
       );
     },
   );
@@ -143,9 +143,9 @@ describe("getSubscriptions", () => {
     expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
     expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
       anUserId,
+      getExpectedFilter(serviceIdFilter),
       limit,
       offset,
-      getExpectedFilter(serviceIdFilter),
     );
   });
 
@@ -191,9 +191,9 @@ describe("getSubscriptions", () => {
       expect(getUserSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getUserSubscriptionsMock).toHaveBeenCalledWith(
         anUserId,
+        getExpectedFilter(serviceIdFilter),
         limit,
         offset,
-        getExpectedFilter(serviceIdFilter),
       );
     },
   );
