@@ -3,7 +3,6 @@ import { Box, Typography } from "@mui/material";
 import _ from "lodash";
 import { useTranslation } from "next-i18next";
 import { useSnackbar } from "notistack";
-import React from "react";
 import { ReactNode, useEffect, useState } from "react";
 import {
   DefaultValues,

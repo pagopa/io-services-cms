@@ -1,7 +1,10 @@
 import { getConfiguration } from "@/config";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
 import useFetch from "@/hooks/use-fetch";
-import { logToMixpanel } from "@/utils/mix-panel";
+import {
+  trackInstitutionSwitchEvent,
+  trackProductSwitchEvent,
+} from "@/utils/mix-panel";
 import { HeaderProduct, ProductSwitchItem } from "@pagopa/mui-italia";
 import { PartySwitchItem } from "@pagopa/mui-italia/dist/components/PartySwitch";
 import { signOut, useSession } from "next-auth/react";
@@ -39,14 +42,8 @@ export const Header = () => {
   const [selectedProductId, setSelectedProductId] = useState(products[0].id);
 
   const selectedProductChange = (product: ProductSwitchItem) => {
-    logToMixpanel(
-      "IO_BO_PRODUCT_SWITCH",
-      "UX",
-      {
-        productId: product.id,
-      },
-      "action",
-    );
+    trackProductSwitchEvent(product.id);
+
     // no action if user click on current product (i.e.: BackOffice IO)
     if (selectedProductId === product.id) return;
     // otherwise navigate to product url (i.e.: SelfCare)
@@ -59,14 +56,8 @@ export const Header = () => {
     if (selectedPartyId === party.id) return;
     // otherwise perform next/auth logout and navigate to callbackUrl
     setSelectedPartyId(party.id);
-    logToMixpanel(
-      "IO_BO_INSTITUTION_SWITCH",
-      "UX",
-      {
-        switchToInstitutionId: party.id,
-      },
-      "action",
-    );
+    trackInstitutionSwitchEvent(party.id);
+
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +

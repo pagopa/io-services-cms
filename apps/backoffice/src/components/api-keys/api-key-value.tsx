@@ -5,16 +5,16 @@ import { CopyToClipboard } from "../copy-to-clipboard";
 import { LoaderSkeleton } from "../loaders";
 
 export interface ApiKeyValueProps {
-  handleMixpanel?: () => void;
   isVisible: boolean;
   keyValue?: string;
+  onCopyToClipboardClick?: () => void;
 }
 
 /** API Key value component */
 export const ApiKeyValue = ({
-  handleMixpanel,
   isVisible,
   keyValue,
+  onCopyToClipboardClick,
 }: ApiKeyValueProps) => {
   const renderKeyValue = (value: string) => (
     <Typography noWrap variant="monospaced">
@@ -33,7 +33,7 @@ export const ApiKeyValue = ({
         <LoaderSkeleton loading={keyValue === undefined}>
           {renderKeyValue(keyValue ?? "--------------------------------")}
           <CopyToClipboard
-            externalOnClick={handleMixpanel}
+            onCopyClick={onCopyToClipboardClick}
             text={keyValue ?? ""}
           />
         </LoaderSkeleton>

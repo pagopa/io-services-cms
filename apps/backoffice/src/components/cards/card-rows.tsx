@@ -1,4 +1,4 @@
-import { logToMixpanel } from "@/utils/mix-panel";
+import { trackManageKeyCopyEvent } from "@/utils/mix-panel";
 import { Grid, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useTranslation } from "next-i18next";
@@ -36,29 +36,12 @@ export interface CardRowsProps {
 export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
 
-  const handleMixpanel = (label: string) => {
+  const handleMixpanel = (row: any, label: string) => {
+    console.log(row);
     if (label === "keys.primary.title") {
-      logToMixpanel(
-        "IO_BO_MANAGE_KEY_COPY",
-        "UX",
-        {
-          entryPoint: "overview",
-
-          keyType: "primary",
-        },
-        "action",
-      );
+      trackManageKeyCopyEvent("overview", "primary");
     } else if (label === "keys.secondary.title") {
-      logToMixpanel(
-        "IO_BO_MANAGE_KEY_COPY",
-        "UX",
-        {
-          entryPoint: "overview",
-
-          keyType: "secondary",
-        },
-        "action",
-      );
+      trackManageKeyCopyEvent("overview", "secondary");
     }
   };
 
@@ -102,11 +85,11 @@ export const CardRows = ({ rows }: CardRowsProps) => {
       case "apikey":
         return (
           <ApiKeyValue
-            handleMixpanel={() => {
-              handleMixpanel(row.label as string);
-            }}
             isVisible={false}
             keyValue={row.value as string}
+            onCopyToClipboardClick={() => {
+              handleMixpanel(row, row.label as string);
+            }}
           />
         );
       case "datetime":

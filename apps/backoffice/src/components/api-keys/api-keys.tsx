@@ -1,6 +1,11 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
-import { logToMixpanel } from "@/utils/mix-panel";
+import {
+  trackManageKeyCopyEvent,
+  trackManageKeyRotateEvent,
+  trackServiceKeyCopyEvent,
+  trackServiceKeyRotateEvent,
+} from "@/utils/mix-panel";
 import { Box, Divider, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
@@ -14,10 +19,10 @@ export interface ApiKeysProps {
   keys?: SubscriptionKeys;
   /** Event triggered when user click "Rotate" on confirmation modal */
   onRotateKey: (type: SubscriptionKeyTypeEnum) => void;
-  /** Used to log the page where the event is triggered */
-  page?: "manage" | "service";
   /** Main component card title */
   title: string;
+  /** Used to log the page where the event is triggered */
+  type: "manage" | "use";
 }
 
 /** API Keys main component
@@ -29,47 +34,18 @@ export const ApiKeys = (props: ApiKeysProps) => {
   const showDialog = useDialog();
 
   const handleRotateEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
-    if (props.page === "manage") {
-      logToMixpanel(
-        "IO_BO_MANAGE_KEY_ROTATE",
-        "UX",
-        {
-          keyType: keyType,
-        },
-        "action",
-      );
-    } else if (props.page === "service") {
-      logToMixpanel(
-        "IO_BO_SERVICE_KEY_ROTATE",
-        "UX",
-        {
-          keyType: keyType,
-        },
-        "action",
-      );
+    if (props.type === "manage") {
+      trackManageKeyRotateEvent(keyType);
+    } else if (props.type === "use") {
+      trackServiceKeyRotateEvent(keyType);
     }
   };
 
   const handleCopyEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
-    if (props.page === "manage") {
-      logToMixpanel(
-        "IO_BO_MANAGE_KEY_COPY",
-        "UX",
-        {
-          entryPoint: "apikey",
-          keyType: keyType,
-        },
-        "action",
-      );
-    } else if (props.page === "service") {
-      logToMixpanel(
-        "IO_BO_SERVICE_KEY_COPY",
-        "UX",
-        {
-          keyType: keyType,
-        },
-        "action",
-      );
+    if (props.type === "manage") {
+      trackManageKeyCopyEvent("apikey", keyType);
+    } else if (props.type === "use") {
+      trackServiceKeyCopyEvent(keyType);
     }
   };
 
@@ -107,7 +83,7 @@ export const ApiKeys = (props: ApiKeysProps) => {
         keyType={SubscriptionKeyTypeEnum.primary}
         keyValue={props.keys?.primary_key}
         onBlockClick={(kt) => console.log("onBlockClick:", kt)}
-        onHandleMixpanel={() => {
+        onCopyClick={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.primary);
         }}
         onRotateClick={handleRotate}
@@ -117,7 +93,7 @@ export const ApiKeys = (props: ApiKeysProps) => {
         keyType={SubscriptionKeyTypeEnum.secondary}
         keyValue={props.keys?.secondary_key}
         onBlockClick={(kt) => console.log("onBlockClick:", kt)}
-        onHandleMixpanel={() => {
+        onCopyClick={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.secondary);
         }}
         onRotateClick={handleRotate}

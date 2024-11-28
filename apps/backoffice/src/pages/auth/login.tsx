@@ -1,6 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
-import { logToMixpanel } from "@/utils/mix-panel";
+import { trackLoginEvent } from "@/utils/mix-panel";
 import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
@@ -20,7 +20,7 @@ export default function Login() {
 
   const manageMixpanelLogin = () => {
     mixpanel.identify();
-    logToMixpanel("IO_BO_LOGIN", "UX", {}, "screen_view");
+    trackLoginEvent();
   };
 
   /**

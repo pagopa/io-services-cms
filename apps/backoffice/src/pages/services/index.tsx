@@ -22,7 +22,11 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { logToMixpanel } from "@/utils/mix-panel";
+import {
+  trackServiceCreateStartEvent,
+  trackServiceEditStartEvent,
+  trackServicesPageEvent,
+} from "@/utils/mix-panel";
 import {
   Add,
   Block,
@@ -216,15 +220,8 @@ export default function Services() {
     });
 
   const handleEdit = (service: ServiceListItem) => {
-    logToMixpanel(
-      "IO_BO_SERVICE_EDIT_START",
-      "UX",
-      {
-        entryPoint: "services",
-        serviceId: service.id,
-      },
-      "action",
-    );
+    trackServiceEditStartEvent("services", service.id);
+
     router.push(`/services/${service.id}/edit-service`);
   };
 
@@ -454,7 +451,7 @@ export default function Services() {
   }, [servicesData]);
 
   useEffect(() => {
-    logToMixpanel("IO_BO_SERVICES_PAGE", "UX", {}, "screen_view");
+    trackServicesPageEvent();
   }, []);
 
   return (
@@ -475,12 +472,7 @@ export default function Services() {
             >
               <Button
                 onClick={() => {
-                  logToMixpanel(
-                    "IO_BO_SERVICE_CREATE_START",
-                    "UX",
-                    {},
-                    "action",
-                  );
+                  trackServiceCreateStartEvent();
                 }}
                 size="medium"
                 startIcon={<Add />}

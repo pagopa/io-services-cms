@@ -5,7 +5,7 @@ import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
 export interface CopyToClipboardProps {
-  externalOnClick?: () => void;
+  onCopyClick?: () => void;
   text: string;
 }
 
@@ -14,7 +14,7 @@ export interface CopyToClipboardProps {
  */
 export const CopyToClipboard = ({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  externalOnClick = () => {},
+  onCopyClick = () => {},
   text,
 }: CopyToClipboardProps) => {
   const { t } = useTranslation();
@@ -35,7 +35,7 @@ export const CopyToClipboard = ({
         copied: false,
         tooltip: t("buttons.copyToClipboard"),
       });
-      externalOnClick();
+      onCopyClick();
     }, 2000);
     return () => clearTimeout(timer);
   };

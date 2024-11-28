@@ -18,7 +18,12 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { Service } from "@/types/service";
-import { logToMixpanel } from "@/utils/mix-panel";
+import {
+  trackServiceDetailsPageEvent,
+  trackServiceEditStartEvent,
+  trackServiceHistoryEvent,
+  trackServicePreviewEvent,
+} from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
 import { useRouter } from "next/router";
@@ -108,14 +113,8 @@ export default function ServiceDetails() {
 
   const handleHistory = (continuationToken?: string) => {
     setShowHistory(true);
-    logToMixpanel(
-      "IO_BO_SERVICE_HISTORY",
-      "UX",
-      {
-        serviceId: serviceId,
-      },
-      "action",
-    );
+    trackServiceHistoryEvent(serviceId);
+
     shFetchData(
       "getServiceHistory",
       { continuationToken, serviceId },
@@ -128,26 +127,12 @@ export default function ServiceDetails() {
 
   const handlePreview = () => {
     setShowPreview(true);
-    logToMixpanel(
-      "IO_BO_SERVICE_PREVIEW",
-      "UX",
-      {
-        serviceId: serviceId,
-      },
-      "action",
-    );
+    trackServicePreviewEvent(serviceId);
   };
 
   const handleEdit = () => {
-    logToMixpanel(
-      "IO_BO_SERVICE_EDIT_START",
-      "UX",
-      {
-        entryPoint: "serviceDetails",
-        serviceId: serviceId,
-      },
-      "action",
-    );
+    trackServiceEditStartEvent("serviceDetails", serviceId);
+
     router.push(`/services/${serviceId}/edit-service`);
   };
 
@@ -171,15 +156,7 @@ export default function ServiceDetails() {
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
       notify: "errors",
     });
-    logToMixpanel(
-      "IO_BO_SERVICE_DETAILS_PAGE",
-      "UX",
-      {
-        serviceId: serviceId,
-        serviceName: slData?.name as string,
-      },
-      "screen_view",
-    );
+    trackServiceDetailsPageEvent(serviceId, slData?.name as string);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -244,8 +221,8 @@ export default function ServiceDetails() {
             description={t("routes.service.keys.description")}
             keys={skData}
             onRotateKey={handleRotateKey}
-            page="service"
             title={t("routes.service.keys.title")}
+            type="use"
           />
         </Grid>
         <Grid item xs={12}>

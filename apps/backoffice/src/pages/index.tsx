@@ -7,7 +7,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
-import { logToMixpanel } from "@/utils/mix-panel";
+import { trackOverviewPageEvent } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import mixpanel from "mixpanel-browser";
 import { useSession } from "next-auth/react";
@@ -48,7 +48,8 @@ export default function Home() {
       user_role: session?.user?.institution.role,
     };
     mixpanel.register(mixpanelSuperProperties);
-    logToMixpanel("IO_BO_OVERVIEW_PAGE", "UX", {}, "screen_view");
+    trackOverviewPageEvent();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
