@@ -112,7 +112,7 @@ locals {
       BACKOFFICE_INTERNAL_SUBNET_CIDRS = var.bo_snet_cidr
 
       # Automatic service validation
-      MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
+      MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code,data.metadata.scope"
 
       #EventHubConfing
       SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING = data.azurerm_key_vault_secret.services_publication_event_hub_connection_string.value
