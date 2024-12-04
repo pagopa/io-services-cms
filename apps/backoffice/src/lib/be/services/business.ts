@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
+import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
+import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -29,6 +31,7 @@ import {
   getServiceTopics,
 } from "./cms";
 import {
+  bulkPatch as bulkPatchCosmos,
   retrieveAuthorizedServiceIds,
   retrieveGroupUnboundedServices,
   retrieveLifecycleServices,
@@ -330,6 +333,27 @@ export const retrieveServiceTopics = async (
   await getServiceTopics(
     nextRequest.headers.get("X-Forwarded-For") ?? undefined,
   );
+
+export const bulkPatch = async (
+  bulkPatchServicePayload: BulkPatchServicePayload,
+): Promise<BulkPatchServiceResponse> =>
+  pipe(
+    bulkPatchCosmos(
+      bulkPatchServicePayload.map((bulkPatchService) => ({
+        data: { metadata: bulkPatchService.metadata },
+        id: bulkPatchService.id,
+      })),
+    ),
+    TE.map(
+      RA.mapWithIndex((i, opResponse) => ({
+        id: bulkPatchServicePayload[i].id,
+        statusCode: opResponse.statusCode,
+      })),
+    ),
+    TE.getOrElse((error) => {
+      throw error;
+    }),
+  )();
 
 /**
  * SUBSCRIPTIONS
