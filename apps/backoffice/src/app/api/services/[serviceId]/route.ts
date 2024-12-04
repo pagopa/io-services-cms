@@ -122,7 +122,7 @@ export const PATCH = withJWTAuthHandler(
         `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
         error,
       );
-      return handleInternalErrorResponse("EditServiceError", error);
+      return handleInternalErrorResponse("PatchServiceError", error);
     }
   },
 );
