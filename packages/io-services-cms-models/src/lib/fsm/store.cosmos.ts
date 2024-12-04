@@ -4,6 +4,7 @@ import {
   Container,
   ItemDefinition,
   ItemResponse,
+  PatchOperation,
   ReadOperationInput,
 } from "@azure/cosmos";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -23,10 +24,9 @@ const fetch =
   <T extends WithState<string, Record<string, unknown>>>(
     container: Container,
     codec: t.Type<T>,
-  ) =>
-  (id: string) =>
+  ): CosmosStore<T>["fetch"] =>
+  (id) =>
     pipe(
-      // fetch the item by its id
       TE.tryCatch(
         () => container.item(id, id).read(),
         (err) =>
@@ -76,10 +76,9 @@ const bulkFetch =
   <T extends WithState<string, Record<string, unknown>>>(
     container: Container,
     codec: t.Type<T>,
-  ) =>
-  (ids: string[]) =>
+  ): CosmosStore<T>["bulkFetch"] =>
+  (ids) =>
     pipe(
-      // bulk fetch of items by id
       TE.tryCatch(
         () =>
           container.items.bulk(buildReadOperations(ids), {
@@ -115,11 +114,52 @@ const bulkFetch =
       ),
     );
 
+const buildPatchOperations = ({
+  data: {
+    metadata: { group_id },
+  },
+}: {
+  data: { metadata: { group_id?: string } };
+}): PatchOperation[] => [
+  {
+    op: group_id ? "add" : "remove",
+    path: "/data/metadata/group_id",
+    value: group_id,
+  },
+];
+
+const bulkPatch =
+  (
+    container: Container,
+  ): CosmosStore<WithState<string, Record<string, unknown>>>["bulkPatch"] =>
+  (services) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          pipe(
+            services.map((service) => ({
+              id: service.id,
+              operationType: BulkOperationType.Patch,
+              partitionKey: service.id,
+              resourceBody: { operations: buildPatchOperations(service) },
+            })),
+            (operations) =>
+              container.items.bulk(operations, {
+                continueOnError: true,
+              }),
+          ),
+        (err) =>
+          new Error(
+            `Failed to bulk patch items from database, ${E.toError(err).message}`,
+          ),
+      ),
+    );
+
 const save =
   <T extends WithState<string, Record<string, unknown>>>(
     container: Container,
-  ) =>
-  (id: string, value: T, preserveModifiedAt = false) =>
+  ): CosmosStore<T>["save"] =>
+  (id, value, preserveModifiedAt = false) =>
     pipe(
       value,
       // last_update is not part of the value to save
@@ -154,26 +194,13 @@ const patch =
   <T extends WithState<string, Record<string, unknown>>>(
     container: Container,
     codec: t.Type<T>,
-  ) =>
-  (
-    id: string,
-    {
-      data: {
-        metadata: { group_id },
-      },
-    }: { data: { metadata: { group_id?: string } } },
-  ) =>
+  ): CosmosStore<T>["patch"] =>
+  (id, serviceData) =>
     pipe(
       TE.tryCatch(
         () =>
           container.item(id, id).patch<T>({
-            operations: [
-              {
-                op: group_id ? "add" : "remove",
-                path: "/data/metadata/group_id",
-                value: group_id,
-              },
-            ],
+            operations: buildPatchOperations(serviceData),
           }),
         (err) =>
           new Error(
@@ -202,8 +229,10 @@ const patch =
 // - 204: The document was successfully deleted.
 // - 404: The document was not found.
 const deleteItem =
-  (container: Container) =>
-  (id: string): TE.TaskEither<Error, void> =>
+  (
+    container: Container,
+  ): CosmosStore<WithState<string, Record<string, unknown>>>["delete"] =>
+  (id) =>
     pipe(
       TE.tryCatch(() => container.item(id, id).delete(), identity),
       TE.map(() => void 0),
@@ -218,8 +247,12 @@ const deleteItem =
     );
 
 const getServiceIdsByGroupIds =
-  (container: Container) =>
-  (groupIds: readonly string[]): TE.TaskEither<Error, string[]> =>
+  (
+    container: Container,
+  ): CosmosStore<
+    WithState<string, Record<string, unknown>>
+  >["getServiceIdsByGroupIds"] =>
+  (groupIds) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -241,10 +274,12 @@ const getServiceIdsByGroupIds =
     );
 
 const getGroupUnboundedServicesByIds =
-  (container: Container) =>
   (
-    serviceIds: readonly string[],
-  ): TE.TaskEither<Error, { id: string; name: string }[]> =>
+    container: Container,
+  ): CosmosStore<
+    WithState<string, Record<string, unknown>>
+  >["getGroupUnboundedServicesByIds"] =>
+  (serviceIds) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -269,6 +304,7 @@ export const createCosmosStore = <
   codec: t.Type<T>,
 ): CosmosStore<T> => ({
   bulkFetch: bulkFetch(container, codec),
+  bulkPatch: bulkPatch(container),
   delete: deleteItem(container),
   fetch: fetch(container, codec),
   getGroupUnboundedServicesByIds: getGroupUnboundedServicesByIds(container),
