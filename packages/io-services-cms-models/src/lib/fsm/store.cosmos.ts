@@ -126,6 +126,11 @@ const buildPatchOperations = ({
     path: "/data/metadata/group_id",
     value: group_id,
   },
+  {
+    op: "add",
+    path: "/data/modified_at",
+    value: unixTimestamp(),
+  },
 ];
 
 const bulkPatch =
