@@ -3,7 +3,7 @@ import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { CreateServicePayload } from "@/generated/api/CreateServicePayload";
 import { ResponseError } from "@/generated/api/ResponseError";
-import { isAdmin, userAuthz } from "@/lib/be/authz";
+import { userAuthz } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -39,7 +39,7 @@ export const POST = withJWTAuthHandler(
         );
       }
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        if (isAdmin(backofficeUser)) {
+        if (userAuthz(backofficeUser).isAdmin()) {
           if (
             servicePayload.metadata.group_id &&
             !(await groupExists(
