@@ -181,7 +181,7 @@ const convertAssistanceChannelsObjToArray = (
 
 const buildCtaString = (ctaObj: { text: string; url: string }) => {
   if (ctaObj.text !== "" && ctaObj.url !== "") {
-    return `"---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"iohandledlink://${ctaObj.url}\"\nen:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"iohandledlink://${ctaObj.url}\"\n---"`;
+    return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\nen:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\n---`;
   }
   return "";
 };
@@ -189,33 +189,23 @@ const buildCtaString = (ctaObj: { text: string; url: string }) => {
 const buildCtaObj = (ctaString?: string) => {
   if (NonEmptyString.is(ctaString)) {
     return {
-      text: getCtaTextFromCtaString(ctaString),
-      url: getCtaUrlFromCtaString(ctaString),
+      text: getCtaValueFromCtaString(ctaString, "text"),
+      url: getCtaValueFromCtaString(ctaString, "action"),
     };
   }
   return { text: "", url: "" };
 };
 
-const getCtaTextFromCtaString = (value: string) => {
+const getCtaValueFromCtaString = (
+  cta: string,
+  valueType: "action" | "text",
+) => {
   // Splits the string into lines
-  const lines = value.split("\n");
-  // Find the line containing 'text: "<text>"'
-  const textLine = lines.find((line) => line.includes("text:"));
-  // Extract the text between the quotes
-  const match = /\"(.+?)\"/.exec(textLine ?? "");
-  if (match) {
-    return match[1];
-  }
-  return "";
-};
-
-const getCtaUrlFromCtaString = (value: string) => {
-  // Splits the string into lines
-  const lines = value.split("\n");
-  // Find the line containing 'text: "<text>"'
-  const actionLine = lines.find((line) => line.includes("action:"));
-  // Extract the text between the quotes
-  const match = /iohandledlink:\/\/(.+?)\"/.exec(actionLine ?? "");
+  const lines = cta.split("\n");
+  // Find the line containing <valueType>: "<value>"
+  const valueLine = lines.find((line) => line.includes(`${valueType}:`));
+  // Extract the value between the quotes
+  const match = /\"(.+?)\"/.exec(valueLine ?? "");
   if (match) {
     return match[1];
   }
