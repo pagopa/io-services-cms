@@ -598,6 +598,17 @@ describe("store cosmos tests", () => {
   });
 
   describe("patch", () => {
+    const modifiedAtPatchOperationExpectation = {
+      op: "add",
+      path: "/modified_at",
+      value: expect.any(Number),
+    };
+    const buildGroupIdPatchOperationExpectation = (groupId?: string) => ({
+      op: groupId ? "add" : "remove",
+      path: "/data/metadata/group_id",
+      value: groupId,
+    });
+
     it("should fail when patch fail", async () => {
       // given
       const anItemId = "anItemId";
@@ -626,16 +637,10 @@ describe("store cosmos tests", () => {
       expect(patchMock).toHaveBeenCalledOnce();
       expect(patchMock).toHaveBeenCalledWith({
         operations: [
-          {
-            op: anItemToBePatched.data.metadata.group_id ? "add" : "remove",
-            path: "/data/metadata/group_id",
-            value: anItemToBePatched.data.metadata.group_id,
-          },
-          {
-            op: "add",
-            path: "/data/modified_at",
-            value: expect.any(Number),
-          },
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
         ],
       });
       expect(E.isLeft(result)).toBeTruthy();
@@ -681,16 +686,10 @@ describe("store cosmos tests", () => {
       expect(patchMock).toHaveBeenCalledOnce();
       expect(patchMock).toHaveBeenCalledWith({
         operations: [
-          {
-            op: anItemToBePatched.data.metadata.group_id ? "add" : "remove",
-            path: "/data/metadata/group_id",
-            value: anItemToBePatched.data.metadata.group_id,
-          },
-          {
-            op: "add",
-            path: "/data/modified_at",
-            value: expect.any(Number),
-          },
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
         ],
       });
       expect(E.isLeft(result)).toBeTruthy();
@@ -736,16 +735,10 @@ describe("store cosmos tests", () => {
       expect(patchMock).toHaveBeenCalledOnce();
       expect(patchMock).toHaveBeenCalledWith({
         operations: [
-          {
-            op: anItemToBePatched.data.metadata.group_id ? "add" : "remove",
-            path: "/data/metadata/group_id",
-            value: anItemToBePatched.data.metadata.group_id,
-          },
-          {
-            op: "add",
-            path: "/data/modified_at",
-            value: expect.any(Number),
-          },
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
         ],
       });
       expect(E.isLeft(result)).toBeTruthy();
@@ -794,16 +787,10 @@ describe("store cosmos tests", () => {
       expect(patchMock).toHaveBeenCalledOnce();
       expect(patchMock).toHaveBeenCalledWith({
         operations: [
-          {
-            op: anItemToBePatched.data.metadata.group_id ? "add" : "remove",
-            path: "/data/metadata/group_id",
-            value: anItemToBePatched.data.metadata.group_id,
-          },
-          {
-            op: "add",
-            path: "/data/modified_at",
-            value: expect.any(Number),
-          },
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
         ],
       });
       expect(E.isRight(result)).toBeTruthy();
@@ -814,6 +801,17 @@ describe("store cosmos tests", () => {
   });
 
   describe("bulkPatch", () => {
+    const modifiedAtPatchOperationExpectation = {
+      op: "add",
+      path: "/modified_at",
+      value: expect.any(Number),
+    };
+    const buildGroupIdPatchOperationExpectation = (groupId?: string) => ({
+      op: groupId ? "add" : "remove",
+      path: "/data/metadata/group_id",
+      value: groupId,
+    });
+
     it("should fail when patch fail", async () => {
       // given
       const anItemId = "anItemId";
@@ -848,16 +846,10 @@ describe("store cosmos tests", () => {
           partitionKey: item.id,
           resourceBody: {
             operations: [
-              {
-                op: item.data.metadata.group_id ? "add" : "remove",
-                path: "/data/metadata/group_id",
-                value: item.data.metadata.group_id,
-              },
-              {
-                op: "add",
-                path: "/data/modified_at",
-                value: expect.any(Number),
-              },
+              buildGroupIdPatchOperationExpectation(
+                item.data.metadata.group_id,
+              ),
+              modifiedAtPatchOperationExpectation,
             ],
           },
         })),
@@ -910,16 +902,10 @@ describe("store cosmos tests", () => {
           partitionKey: item.id,
           resourceBody: {
             operations: [
-              {
-                op: item.data.metadata.group_id ? "add" : "remove",
-                path: "/data/metadata/group_id",
-                value: item.data.metadata.group_id,
-              },
-              {
-                op: "add",
-                path: "/data/modified_at",
-                value: expect.any(Number),
-              },
+              buildGroupIdPatchOperationExpectation(
+                item.data.metadata.group_id,
+              ),
+              modifiedAtPatchOperationExpectation,
             ],
           },
         })),

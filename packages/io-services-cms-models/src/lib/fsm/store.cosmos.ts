@@ -128,7 +128,7 @@ const buildPatchOperations = ({
   },
   {
     op: "add",
-    path: "/data/modified_at",
+    path: "/modified_at",
     value: unixTimestamp(),
   },
 ];
