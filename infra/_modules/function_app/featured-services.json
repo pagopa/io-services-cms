@@ -1,12 +1,6 @@
 {
   "services": [
     {
-      "id": "01JE6PSBA1612HS15ZW22FFY7T",
-      "name": "Documenti su IO",
-      "organization_name": "IO - L'app dei servizi pubblici",
-      "version": 1733393392321
-    },
-    {
       "id": "01G40DWQGKY5GRWSNM4303VNRP",
       "name": "SEND - Notifiche digitali",
       "organization_name": "IO - L'app dei servizi pubblici",
@@ -17,6 +11,12 @@
       "name": "Prestazioni Sanitarie",
       "organization_name": "Regione Lombardia",
       "version": 1733303464047
+    },
+    {
+      "id": "01JE6PSBA1612HS15ZW22FFY7T",
+      "name": "Documenti su IO",
+      "organization_name": "IO - L'app dei servizi pubblici",
+      "version": 1733393392321
     },
     {
       "id": "01F0V4627SXZMVDSPD69GMXE53",
