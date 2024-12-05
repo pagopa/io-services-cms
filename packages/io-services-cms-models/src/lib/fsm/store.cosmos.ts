@@ -209,7 +209,7 @@ const patch =
           }),
         (err) =>
           new Error(
-            `Failed to save item id#${id} from database, ${
+            `Failed to patch item id#${id} from database, ${
               E.toError(err).message
             }`,
           ),
