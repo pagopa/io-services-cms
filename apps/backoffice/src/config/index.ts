@@ -35,7 +35,8 @@ export interface Configuration {
   BACKOFFICE_HOST: string;
 
   CDN_URL: string;
-  GROUP_AUTHZ_ENABLED: boolean;
+  GROUP_APIKEY_ENABLED: boolean; // frontend feature flag
+  GROUP_AUTHZ_ENABLED: boolean; // backend feature flag
   // window guards (useful to configure MSW to work in the browser or in Node environment)
   IS_BROWSER: boolean;
 
@@ -115,6 +116,9 @@ export function getConfiguration(): Configuration {
     BACKOFFICE_HOST: process.env.BACKOFFICE_HOST as string,
 
     CDN_URL: process.env.NEXT_PUBLIC_CDN_URL as string,
+    GROUP_APIKEY_ENABLED:
+      process.env.NEXT_PUBLIC_GROUP_APIKEY_ENABLED?.toLocaleLowerCase() ===
+      "true",
     GROUP_AUTHZ_ENABLED:
       process.env.GROUP_AUTHZ_ENABLED?.toLowerCase() === "true",
     // window guards (useful to configure MSW to work in the browser or in Node environment)

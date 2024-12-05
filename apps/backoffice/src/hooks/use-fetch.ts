@@ -5,7 +5,7 @@ import { Client, createClient } from "@/generated/api/client";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
+import * as iots from "io-ts";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -41,6 +41,8 @@ export interface UseFetchOptions {
      * `errors` redirect to `href` only fetchData error results */
     on: UseFetchOptionsResultType;
   };
+  /** Track fetch function execution reference ID _(useful for track operations on structured data as `arrays`, `recordsets`, etc.)_  */
+  referenceId?: string;
 }
 export type UseFetchOptionsResultType = "all" | "errors";
 
@@ -80,19 +82,28 @@ const manageHttpResponseStatusCode = (
   }
 };
 
-/** IO Services CMS generated Api Client */
-const generatedClient: Client = createClient({
+/**
+ * IO Services CMS generated Api Client
+ *
+ * Client without defaults: we need to create it inside `useFetch()`
+ * because a React Hook should not be called at the top level.
+ * React Hooks must be called in a React function component or a custom React Hook function. */
+export const client: Client = createClient({
   baseUrl: getConfiguration().API_BACKEND_BASE_URL,
   fetchApi: fetch as any as typeof fetch,
 });
 
 /** List of all client operations */
-type ClientOperations = typeof generatedClient;
+type ClientOperations = typeof client;
 
 /** Extract operation request parameters inferred by client operationId */
 type ExtractRequestParams<T extends keyof ClientOperations> = Parameters<
   ClientOperations[T]
 >[0];
+
+/** Interface for referenceId */
+const DataReference = iots.partial({ _referenceId: iots.string });
+export type DataReference = iots.TypeOf<typeof DataReference>;
 
 /**
  * Custom hook for client fetch API.
@@ -106,7 +117,7 @@ type ExtractRequestParams<T extends keyof ClientOperations> = Parameters<
  */
 const useFetch = <RC>() => {
   const { t } = useTranslation();
-  const [data, setData] = useState<RC>();
+  const [data, setData] = useState<DataReference & RC>();
   const [error, setError] = useState<UseFetchError>();
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState<UseFetchOptions>();
@@ -135,17 +146,6 @@ const useFetch = <RC>() => {
       message,
       status,
     });
-
-  /**
-   * IO Services CMS generated Api Client
-   *
-   * Client without defaults: we need to create it inside `useFetch()`
-   * because a React Hook should not be called at the top level.
-   * React Hooks must be called in a React function component or a custom React Hook function. */
-  const client: Client = createClient({
-    baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-    fetchApi: fetch as any as typeof fetch,
-  });
 
   const buildNotificationMessage = () =>
     error?.status
@@ -205,16 +205,17 @@ const useFetch = <RC>() => {
   const fetchData = async <T extends keyof ClientOperations>(
     operationId: T,
     requestParams: ExtractRequestParams<T>,
-    responseCodec: t.Type<RC>,
+    responseCodec: iots.Type<RC>,
     options?: UseFetchOptions,
   ) => {
     setOptions(options);
     setData(undefined); // reset data
     setLoading(true); // set loading state
     try {
+      const enhancedCodec = iots.intersection([responseCodec, DataReference]);
+
       const result = await client[operationId]({
         ...(requestParams as any),
-        bearerAuth: "session?.user?.accessToken", //TODO: update OpenAPI and remove this header (next-auth will automatically set the JWT session as cookie header for each request)
       });
 
       if (E.isLeft(result)) {
@@ -238,7 +239,10 @@ const useFetch = <RC>() => {
           case "successful":
             // 2XX successful response status code
             pipe(
-              responseCodec.decode(response.value),
+              enhancedCodec.decode({
+                ...response.value,
+                _referenceId: options?.referenceId,
+              }),
               E.fold(
                 (e) => setUseFetchError("validationError", readableReport(e)),
                 setData,
