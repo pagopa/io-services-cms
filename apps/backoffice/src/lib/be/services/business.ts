@@ -18,6 +18,7 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { userAuthz } from "../authz";
 import {
   ManagedInternalError,
   handleBadRequestErrorResponse,
@@ -67,6 +68,7 @@ const retrieveSubscriptions = (
   offset?: number,
   serviceId?: string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
+  !userAuthz(backofficeUser).isAdmin() &&
   backofficeUser.permissions.selcGroups &&
   backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
@@ -257,8 +259,9 @@ export async function forwardIoServicesCmsRequest<
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc":
-        backofficeUser.permissions.selcGroups?.join(",") ?? "",
+      "x-user-groups-selc": userAuthz(backofficeUser).isAdmin()
+        ? ""
+        : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
       "x-user-id": backofficeUser.parameters.userId,
     };
 
