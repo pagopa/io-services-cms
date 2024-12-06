@@ -119,7 +119,7 @@ export const PATCH = withJWTAuthHandler(
       });
     } catch (error) {
       handlerErrorLog(
-        `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
+        `An Error has occurred while patching service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
         error,
       );
       return handleInternalErrorResponse("PatchServiceError", error);
