@@ -18,7 +18,7 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     tos_url: "aTosUrl",
     privacy_url: "aPrivacyUrl",
     address: "anAddress",
-    cta: { text: "aCtaText", url: "aCtaUrl" },
+    cta: { text: "aCtaText", url: "iohandledlink://aCtaUrl" },
     scope: "LOCAL",
     assistanceChannels: [
       { type: "email", value: "aValidEmail" },
@@ -34,7 +34,7 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
 };
 
 const aCtaResult =
-  '"---\nit:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\nen:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\n---"';
+  '---\nit:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\nen:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\n---';
 
 const anApiServicePayloadResult = ({
   name: aValidServiceCreateUpdatePayload.name,
