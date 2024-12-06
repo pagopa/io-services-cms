@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.25.0
+
+### Minor Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+
 ## 1.24.0
 
 ### Minor Changes

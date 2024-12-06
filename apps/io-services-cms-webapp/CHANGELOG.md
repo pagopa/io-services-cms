@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.39.5
+
+### Patch Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+- Updated dependencies [7cbd2e9a]
+  - @io-services-cms/models@1.25.0
+
 ## 1.39.4
 
 ### Patch Changes
