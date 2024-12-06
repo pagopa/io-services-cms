@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.19.1
+
+### Patch Changes
+
+- b2b0e5ff: Mixpanel Integration
+
 ## 1.19.0
 
 ### Minor Changes
