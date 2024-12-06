@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.19.0
+
+### Minor Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+
+### Patch Changes
+
+- 883ed54e: Fix service cta in service create/update
+- Updated dependencies [7cbd2e9a]
+  - @io-services-cms/models@1.25.0
+
 ## 1.18.2
 
 ### Patch Changes
