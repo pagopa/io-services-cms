@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.19.2
+
+### Patch Changes
+
+- d8491487: Fixed mixpanel token
+
 ## 1.19.1
 
 ### Patch Changes
