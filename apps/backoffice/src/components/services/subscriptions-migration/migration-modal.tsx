@@ -1,5 +1,6 @@
 import { LoaderSkeleton } from "@/components/loaders";
 import { MigrationData } from "@/generated/api/MigrationData";
+import { trackServicesImportStartEvent } from "@/utils/mix-panel";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import Button from "@mui/material/Button";
@@ -64,6 +65,7 @@ export const MigrationModal = ({
     onImportClick(checkedDelegates);
     onOpenChange(false);
     setCheckedDelegates([]);
+    trackServicesImportStartEvent(checkedDelegates);
   };
 
   const handleToggle = (delegateId: string) => () => {

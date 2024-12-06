@@ -5,13 +5,18 @@ import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
 export interface CopyToClipboardProps {
+  onCopyClick?: () => void;
   text: string;
 }
 
 /**
  * _"Copy to clipboard"_ utility button icon.
  */
-export const CopyToClipboard = ({ text }: CopyToClipboardProps) => {
+export const CopyToClipboard = ({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  onCopyClick = () => {},
+  text,
+}: CopyToClipboardProps) => {
   const { t } = useTranslation();
 
   const [copyState, setCopyState] = useState({
@@ -30,6 +35,7 @@ export const CopyToClipboard = ({ text }: CopyToClipboardProps) => {
         copied: false,
         tooltip: t("buttons.copyToClipboard"),
       });
+      onCopyClick();
     }, 2000);
     return () => clearTimeout(timer);
   };

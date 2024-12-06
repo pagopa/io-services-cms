@@ -1,5 +1,6 @@
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { Service } from "@/types/service";
+import { trackServiceDetailsEvent } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
 import { useTranslation } from "next-i18next";
 
@@ -46,6 +47,8 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
   };
 
   const openDetails = () => {
+    trackServiceDetailsEvent(data?.id as string);
+
     openDrawer(<ServiceInfoContent data={data} />);
   };
 

@@ -1,3 +1,4 @@
+import { trackManageKeyCopyEvent } from "@/utils/mix-panel";
 import { Grid, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { useTranslation } from "next-i18next";
@@ -34,6 +35,15 @@ export interface CardRowsProps {
 /** Used to show general-purpose information as label/value rows. */
 export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
+
+  const handleMixpanel = (row: any, label: string) => {
+    console.log(row);
+    if (label === "keys.primary.title") {
+      trackManageKeyCopyEvent("overview", "primary");
+    } else if (label === "keys.secondary.title") {
+      trackManageKeyCopyEvent("overview", "secondary");
+    }
+  };
 
   const renderValue = (
     value: ReactNode | string | undefined,
@@ -73,7 +83,15 @@ export const CardRows = ({ rows }: CardRowsProps) => {
   const renderRowKind = (row: CardRowType) => {
     switch (row.kind) {
       case "apikey":
-        return <ApiKeyValue isVisible={false} keyValue={row.value as string} />;
+        return (
+          <ApiKeyValue
+            isVisible={false}
+            keyValue={row.value as string}
+            onCopyToClipboardClick={() => {
+              handleMixpanel(row, row.label as string);
+            }}
+          />
+        );
       case "datetime":
         return renderValue(row.value, renderTextValue(row));
       case "link":

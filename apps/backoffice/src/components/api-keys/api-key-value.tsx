@@ -7,12 +7,15 @@ import { LoaderSkeleton } from "../loaders";
 export interface ApiKeyValueProps {
   isVisible: boolean;
   keyValue?: string;
+  onCopyToClipboardClick?: () => void;
 }
 
 /** API Key value component */
-export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
-  //TODO: removed useTranslation() because it's not used, is it needed?
-
+export const ApiKeyValue = ({
+  isVisible,
+  keyValue,
+  onCopyToClipboardClick,
+}: ApiKeyValueProps) => {
   const renderKeyValue = (value: string) => (
     <Typography noWrap variant="monospaced">
       {isVisible ? value : obscure(value)}
@@ -29,7 +32,10 @@ export const ApiKeyValue = ({ isVisible, keyValue }: ApiKeyValueProps) => {
       <Stack alignItems={"center"} direction="row" spacing={0.5}>
         <LoaderSkeleton loading={keyValue === undefined}>
           {renderKeyValue(keyValue ?? "--------------------------------")}
-          <CopyToClipboard text={keyValue ?? ""} />
+          <CopyToClipboard
+            onCopyClick={onCopyToClipboardClick}
+            text={keyValue ?? ""}
+          />
         </LoaderSkeleton>
       </Stack>
     </Box>
