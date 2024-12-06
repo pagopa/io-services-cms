@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
+import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
+import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -16,6 +18,7 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { userAuthz } from "../authz";
 import {
   ManagedInternalError,
   handleBadRequestErrorResponse,
@@ -29,6 +32,7 @@ import {
   getServiceTopics,
 } from "./cms";
 import {
+  bulkPatch as bulkPatchCosmos,
   retrieveAuthorizedServiceIds,
   retrieveGroupUnboundedServices,
   retrieveLifecycleServices,
@@ -64,6 +68,7 @@ const retrieveSubscriptions = (
   offset?: number,
   serviceId?: string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
+  !userAuthz(backofficeUser).isAdmin() &&
   backofficeUser.permissions.selcGroups &&
   backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
@@ -254,8 +259,9 @@ export async function forwardIoServicesCmsRequest<
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc":
-        backofficeUser.permissions.selcGroups?.join(",") ?? "",
+      "x-user-groups-selc": userAuthz(backofficeUser).isAdmin()
+        ? ""
+        : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
       "x-user-id": backofficeUser.parameters.userId,
     };
 
@@ -330,6 +336,27 @@ export const retrieveServiceTopics = async (
   await getServiceTopics(
     nextRequest.headers.get("X-Forwarded-For") ?? undefined,
   );
+
+export const bulkPatch = async (
+  bulkPatchServicePayload: BulkPatchServicePayload,
+): Promise<BulkPatchServiceResponse> =>
+  pipe(
+    bulkPatchCosmos(
+      bulkPatchServicePayload.map((bulkPatchService) => ({
+        data: { metadata: bulkPatchService.metadata },
+        id: bulkPatchService.id,
+      })),
+    ),
+    TE.map(
+      RA.mapWithIndex((i, opResponse) => ({
+        id: bulkPatchServicePayload[i].id,
+        statusCode: opResponse.statusCode,
+      })),
+    ),
+    TE.getOrElse((error) => {
+      throw error;
+    }),
+  )();
 
 /**
  * SUBSCRIPTIONS

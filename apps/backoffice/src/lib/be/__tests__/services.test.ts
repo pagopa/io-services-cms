@@ -130,63 +130,67 @@ const aBackofficeUser: BackOfficeUser = {
   institution: mocks.anInstitution,
 };
 
-const { getIoServicesCmsClient, getTopicsProvider } = vi.hoisted(() => ({
-  getIoServicesCmsClient: vi.fn().mockReturnValue({
-    getServices: vi.fn(() =>
-      Promise.resolve(
-        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
-      ),
-    ),
-    createService: vi.fn(() =>
-      Promise.resolve(
-        E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
-      ),
-    ),
-    reviewService: vi.fn(() =>
-      Promise.resolve(
-        E.of({ status: mocks.statusNoContent, value: undefined }),
-      ),
-    ),
-  }),
-  getTopicsProvider: vi.fn(() => ({
-    getServiceTopics: vi.fn(() =>
-      Promise.resolve(mocks.aServiceTopicsListResponse),
-    ),
-  })),
-}));
-
-const { getSubscriptionsMigrationClient } = vi.hoisted(() => ({
-  getSubscriptionsMigrationClient: vi.fn().mockReturnValue({
-    getLatestOwnershipClaimStatus: vi.fn(() =>
-      TE.right({
-        items: [mocks.migrationItem],
-      }),
-    ),
-    getOwnershipClaimStatus: vi.fn(() => TE.right(mocks.migrationData)),
-    claimOwnership: vi.fn(() => TE.right(void 0)),
-    getDelegatesByOrganization: vi.fn(() =>
-      TE.right({
-        delegates: [mocks.migrationDelegate],
-      }),
-    ),
-  }),
-}));
-
 const {
+  getIoServicesCmsClient,
+  getTopicsProvider,
+  getSubscriptionsMigrationClient,
   getSubscriptionsMock,
   retrieveLifecycleServicesMock,
   retrievePublicationServicesMock,
   retrieveInstitutionGroups,
   retrieveAuthorizedServiceIdsMock,
   retrieveGroupUnboundedServicesMock,
-} = vi.hoisted(() => ({
-  getSubscriptionsMock: vi.fn(),
-  retrieveLifecycleServicesMock: vi.fn(),
-  retrievePublicationServicesMock: vi.fn(),
-  retrieveInstitutionGroups: vi.fn(),
-  retrieveAuthorizedServiceIdsMock: vi.fn(),
-  retrieveGroupUnboundedServicesMock: vi.fn(),
-}));
+  isAdminMock,
+  userAuthzMock,
+} = vi.hoisted(() => {
+  const isAdminMock = vi.fn(() => false);
+  return {
+    getIoServicesCmsClient: vi.fn().mockReturnValue({
+      getServices: vi.fn(() =>
+        Promise.resolve(
+          E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
+        ),
+      ),
+      createService: vi.fn(() =>
+        Promise.resolve(
+          E.of({ status: mocks.statusOK, value: mocks.aSamplePayload }),
+        ),
+      ),
+      reviewService: vi.fn(() =>
+        Promise.resolve(
+          E.of({ status: mocks.statusNoContent, value: undefined }),
+        ),
+      ),
+    }),
+    getTopicsProvider: vi.fn(() => ({
+      getServiceTopics: vi.fn(() =>
+        Promise.resolve(mocks.aServiceTopicsListResponse),
+      ),
+    })),
+    getSubscriptionsMigrationClient: vi.fn().mockReturnValue({
+      getLatestOwnershipClaimStatus: vi.fn(() =>
+        TE.right({
+          items: [mocks.migrationItem],
+        }),
+      ),
+      getOwnershipClaimStatus: vi.fn(() => TE.right(mocks.migrationData)),
+      claimOwnership: vi.fn(() => TE.right(void 0)),
+      getDelegatesByOrganization: vi.fn(() =>
+        TE.right({
+          delegates: [mocks.migrationDelegate],
+        }),
+      ),
+    }),
+    getSubscriptionsMock: vi.fn(),
+    retrieveLifecycleServicesMock: vi.fn(),
+    retrievePublicationServicesMock: vi.fn(),
+    retrieveInstitutionGroups: vi.fn(),
+    retrieveAuthorizedServiceIdsMock: vi.fn(),
+    retrieveGroupUnboundedServicesMock: vi.fn(),
+    isAdminMock,
+    userAuthzMock: vi.fn(() => ({ isAdmin: isAdminMock })),
+  };
+});
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
   getSubscriptionsMigrationClient,
@@ -212,45 +216,67 @@ vi.mock("@/lib/be/institutions/business", () => ({
   retrieveInstitutionGroups,
 }));
 
+vi.mock("@/lib/be/authz", () => ({
+  userAuthz: userAuthzMock,
+}));
+
 afterEach(() => {
   vi.clearAllMocks();
   vi.restoreAllMocks();
 });
 describe("Services TEST", () => {
   describe("forwardIoServicesCmsRequest", () => {
-    it("request without body request and with response body", async () => {
-      // Mock io-services-cms client
-      const getServices = vi.fn(() =>
-        Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
-      );
-      getIoServicesCmsClient.mockReturnValueOnce({
-        getServices,
-      });
+    it.each`
+      scenario                                | backofficeUser
+      ${"user is admin with groups"}          | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: ["id"] }, institution: { role: "admin" } }}
+      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: undefined }, institution: { role: "operator" } }}
+    `(
+      "request without body request and with response body when $scenario",
+      async ({ backofficeUser }) => {
+        // given
+        isAdminMock.mockReturnValueOnce(
+          backofficeUser.institution.role === "admin",
+        );
+        const getServices = vi.fn(() =>
+          Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
+        );
+        getIoServicesCmsClient.mockReturnValueOnce({
+          getServices,
+        });
 
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
+        // Mock NextRequest
+        const request = new NextRequest(new URL("http://localhost"));
 
-      const result = await forwardIoServicesCmsRequest("getServices", {
-        nextRequest: request,
-        backofficeUser: aBackofficeUser,
-      });
+        // when
+        const result = await forwardIoServicesCmsRequest("getServices", {
+          nextRequest: request,
+          backofficeUser,
+        });
 
-      expect(getServices).toHaveBeenCalled();
-      expect(getServices).toHaveBeenCalledWith(
-        expect.objectContaining({
-          "x-user-email": aBackofficeUser.parameters.userEmail,
-          "x-user-id": aBackofficeUser.parameters.userId,
-          "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
-          "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
-          "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
-          "x-channel": "BO",
-        }),
-      );
+        // then
+        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
+        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledWith();
+        expect(getServices).toHaveBeenCalled();
+        expect(getServices).toHaveBeenCalledWith(
+          expect.objectContaining({
+            "x-user-email": backofficeUser.parameters.userEmail,
+            "x-user-id": backofficeUser.parameters.userId,
+            "x-subscription-id": backofficeUser.parameters.subscriptionId,
+            "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
+            "x-user-groups-selc":
+              backofficeUser.institution.role === "admin"
+                ? ""
+                : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
+            "x-channel": "BO",
+          }),
+        );
 
-      expect(result.status).toBe(200);
-      expect(result.body).not.toBe(null);
-    });
+        expect(result.status).toBe(200);
+        expect(result.body).not.toBe(null);
+      },
+    );
 
     it.each`
       scenario                    | aResponseBody                                                                       | expectedResponseBody
@@ -259,7 +285,7 @@ describe("Services TEST", () => {
     `(
       "should map the $scenario group_id into a Group model",
       async ({ aResponseBody, expectedResponseBody }) => {
-        // Mock io-services-cms client
+        // given
         const getServices = vi.fn(() =>
           Promise.resolve(
             E.of({
@@ -276,11 +302,17 @@ describe("Services TEST", () => {
         // Mock NextRequest
         const request = new NextRequest(new URL("http://localhost"));
 
+        // when
         const result = await forwardIoServicesCmsRequest("getServices", {
           nextRequest: request,
           backofficeUser: aBackofficeUser,
         });
 
+        // then
+        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledWith();
         expect(getServices).toHaveBeenCalled();
         expect(getServices).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -305,7 +337,7 @@ describe("Services TEST", () => {
     );
 
     it("request with body request and with response body", async () => {
-      // Mock io-services-cms client
+      // given
       const createService = vi.fn(() =>
         Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
       );
@@ -324,6 +356,7 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload),
       });
 
+      // when
       const result = await forwardIoServicesCmsRequest("createService", {
         nextRequest: request,
         backofficeUser: aBackofficeUser,
@@ -332,6 +365,11 @@ describe("Services TEST", () => {
         },
       });
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -352,7 +390,7 @@ describe("Services TEST", () => {
     });
 
     it("request without body response", async () => {
-      // Mock io-services-cms client
+      // given
       const reviewService = vi.fn(() =>
         Promise.resolve(E.of({ status: 204, value: undefined })),
       );
@@ -370,6 +408,7 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload),
       });
 
+      // when
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
         backofficeUser: aBackofficeUser,
@@ -378,6 +417,11 @@ describe("Services TEST", () => {
         },
       });
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -398,7 +442,7 @@ describe("Services TEST", () => {
     });
 
     it("fn call with explicitly body and expect response body", async () => {
-      // Mock io-services-cms client
+      // given
       const createService = vi.fn(() =>
         Promise.resolve(E.of({ status: 200, value: { test: "test" } })),
       );
@@ -418,6 +462,7 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload),
       });
 
+      // when
       const result = await forwardIoServicesCmsRequest("createService", {
         nextRequest: request,
         backofficeUser: aBackofficeUser,
@@ -427,6 +472,11 @@ describe("Services TEST", () => {
         },
       });
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(createService).toHaveBeenCalled();
       expect(createService).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -447,6 +497,7 @@ describe("Services TEST", () => {
     });
 
     it("ValidationErrors occurs on request", async () => {
+      // given
       const validationError: ValidationError[] = [
         {
           value: "test",
@@ -480,6 +531,7 @@ describe("Services TEST", () => {
         body: JSON.stringify(aBodyPayload),
       });
 
+      // when
       const result = await forwardIoServicesCmsRequest("reviewService", {
         nextRequest: request,
         backofficeUser: aBackofficeUser,
@@ -488,6 +540,11 @@ describe("Services TEST", () => {
         },
       });
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(reviewService).toHaveBeenCalled();
       expect(reviewService).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -509,124 +566,148 @@ describe("Services TEST", () => {
   });
 
   describe("retrieveServiceList", () => {
-    it("should return a list of services with visibility", async () => {
-      const aServiceinPublicationId = "aServiceInPublicationId";
-      const aServiceNotInPublicationId = "aServiceNotInPublicationId";
+    it.each`
+      scenario                                | backofficeUser
+      ${"user is admin with groups"}          | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: ["id"] }, institution: { role: "admin" } }}
+      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: undefined }, institution: { role: "operator" } }}
+    `(
+      "should return a list of services with visibility when $scenario",
+      async ({ backofficeUser }) => {
+        // given
+        const aServiceinPublicationId = "aServiceInPublicationId";
+        const aServiceNotInPublicationId = "aServiceNotInPublicationId";
+        isAdminMock.mockReturnValueOnce(
+          backofficeUser.institution.role === "admin",
+        );
 
-      getSubscriptionsMock.mockReturnValueOnce(
-        TE.right({
+        getSubscriptionsMock.mockReturnValueOnce(
+          TE.right({
+            value: [
+              {
+                name: aServiceinPublicationId,
+              },
+              {
+                name: aServiceNotInPublicationId,
+              },
+            ],
+            count: 2,
+          }),
+        );
+        retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
+        retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
+          TE.right(
+            ids.map((id) => ({
+              ...mocks.aBaseServiceLifecycle,
+              id,
+            })),
+          ),
+        );
+        retrievePublicationServicesMock.mockImplementationOnce(
+          (ids: string[]) =>
+            TE.right(
+              ids
+                .filter((id) => id === aServiceinPublicationId)
+                .map((id) => ({
+                  id,
+                  name: "aServiceName",
+                  fsm: {
+                    state: "published",
+                  },
+                })),
+            ),
+        );
+
+        // Mock NextRequest
+        const request = new NextRequest(new URL("http://localhost"));
+
+        // when
+        const result = await retrieveServiceList(
+          request,
+          backofficeUser,
+          10,
+          0,
+        );
+
+        // then
+        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
+        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledWith();
+        expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+          backofficeUser.institution.id,
+        );
+        expect(getSubscriptionsMock).toHaveBeenCalledOnce();
+        expect(getSubscriptionsMock).toHaveBeenCalledWith(
+          backofficeUser.parameters.userId,
+          10,
+          0,
+          undefined,
+        );
+        expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
+        expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
+          aServiceinPublicationId,
+          aServiceNotInPublicationId,
+        ]);
+        expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
+        expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
+          aServiceinPublicationId,
+          aServiceNotInPublicationId,
+        ]);
+
+        expect(result).toEqual({
           value: [
             {
-              name: aServiceinPublicationId,
+              id: aServiceinPublicationId,
+              visibility: "published",
+              status: { value: "draft" },
+              last_update:
+                mocks.aModificationDate.toISOString() as NonEmptyString,
+              name: "aServiceName",
+              description: "aServiceDescription",
+              organization: {
+                name: "anOrganizationName",
+                fiscal_code: "12345678901",
+              },
+              metadata: {
+                address: "via tal dei tali 123",
+                email: "service@email.it",
+                pec: "service@pec.it",
+                scope: "LOCAL",
+                category: "STANDARD",
+              },
+              authorized_recipients: [],
+              authorized_cidrs: [],
             },
             {
-              name: aServiceNotInPublicationId,
+              id: aServiceNotInPublicationId,
+              status: { value: "draft" },
+              last_update:
+                mocks.aModificationDate.toISOString() as NonEmptyString,
+              name: "aServiceName",
+              description: "aServiceDescription",
+              organization: {
+                name: "anOrganizationName",
+                fiscal_code: "12345678901",
+              },
+              metadata: {
+                address: "via tal dei tali 123",
+                email: "service@email.it",
+                pec: "service@pec.it",
+                scope: "LOCAL",
+                category: "STANDARD",
+              },
+              authorized_recipients: [],
+              authorized_cidrs: [],
             },
           ],
-          count: 2,
-        }),
-      );
-      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
-      retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
-        TE.right(
-          ids.map((id) => ({
-            ...mocks.aBaseServiceLifecycle,
-            id,
-          })),
-        ),
-      );
-      retrievePublicationServicesMock.mockImplementationOnce((ids: string[]) =>
-        TE.right(
-          ids
-            .filter((id) => id === aServiceinPublicationId)
-            .map((id) => ({
-              id,
-              name: "aServiceName",
-              fsm: {
-                state: "published",
-              },
-            })),
-        ),
-      );
-
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
-
-      const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
-
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
-      expect(getSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getSubscriptionsMock).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        10,
-        0,
-        undefined,
-      );
-      expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
-      expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
-        aServiceinPublicationId,
-        aServiceNotInPublicationId,
-      ]);
-      expect(retrievePublicationServicesMock).toHaveBeenCalledOnce();
-      expect(retrievePublicationServicesMock).toHaveBeenCalledWith([
-        aServiceinPublicationId,
-        aServiceNotInPublicationId,
-      ]);
-
-      expect(result).toEqual({
-        value: [
-          {
-            id: aServiceinPublicationId,
-            visibility: "published",
-            status: { value: "draft" },
-            last_update:
-              mocks.aModificationDate.toISOString() as NonEmptyString,
-            name: "aServiceName",
-            description: "aServiceDescription",
-            organization: {
-              name: "anOrganizationName",
-              fiscal_code: "12345678901",
-            },
-            metadata: {
-              address: "via tal dei tali 123",
-              email: "service@email.it",
-              pec: "service@pec.it",
-              scope: "LOCAL",
-              category: "STANDARD",
-            },
-            authorized_recipients: [],
-            authorized_cidrs: [],
-          },
-          {
-            id: aServiceNotInPublicationId,
-            status: { value: "draft" },
-            last_update:
-              mocks.aModificationDate.toISOString() as NonEmptyString,
-            name: "aServiceName",
-            description: "aServiceDescription",
-            organization: {
-              name: "anOrganizationName",
-              fiscal_code: "12345678901",
-            },
-            metadata: {
-              address: "via tal dei tali 123",
-              email: "service@email.it",
-              pec: "service@pec.it",
-              scope: "LOCAL",
-              category: "STANDARD",
-            },
-            authorized_recipients: [],
-            authorized_cidrs: [],
-          },
-        ],
-        pagination: { count: 2, limit: 10, offset: 0 },
-      });
-    });
+          pagination: { count: 2, limit: 10, offset: 0 },
+        });
+      },
+    );
 
     it("should return a list of services with visibility enriched with topic", async () => {
+      // given
       const aServiceinPublicationId = "aServiceInPublicationId";
 
       getSubscriptionsMock.mockReturnValueOnce(
@@ -672,8 +753,14 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when
       const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
@@ -730,6 +817,7 @@ describe("Services TEST", () => {
     // This is a BORDER CASE, this can happen only if a service is manually deleted from services-lifecycle cosmos container
     // and not on apim, in such remote case we still return the list of services
     it("when a service is found on apim and not service-lifecycle a placeholder should be included in list", async () => {
+      // given
       const aServiceInLifecycleId = "aServiceInLifecycleId";
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
       const aServiceNotInLifecycleCreateDate = new Date();
@@ -772,8 +860,14 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when
       const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
+      // then
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
@@ -866,7 +960,10 @@ describe("Services TEST", () => {
       await expect(
         retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
-
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
@@ -889,6 +986,7 @@ describe("Services TEST", () => {
     });
 
     it("when retrieveLifecycleServices fails an error is returned", async () => {
+      // given
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
@@ -910,10 +1008,14 @@ describe("Services TEST", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when and then
       await expect(
         retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
-
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
@@ -949,6 +1051,10 @@ describe("Services TEST", () => {
       await expect(
         retrieveServiceList(request, backofficeUser, 10, 0),
       ).rejects.toThrowError(error);
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
       expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
         backofficeUser.permissions.selcGroups,
@@ -1004,9 +1110,14 @@ describe("Services TEST", () => {
           );
         }
 
+        // when and then
         await expect(
           retrieveServiceList(request, backofficeUser, 10, 0, serviceId),
         ).rejects.toThrowError(error);
+        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
+        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledWith();
         if (selcGroups && selcGroups.length > 0) {
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
