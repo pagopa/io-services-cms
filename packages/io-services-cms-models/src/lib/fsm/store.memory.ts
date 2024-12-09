@@ -1,3 +1,4 @@
+import { BulkOperationResponse } from "@azure/cosmos";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
@@ -25,6 +26,7 @@ export const createMemoryStore = <
         ids.map((id) => m.get(id)),
         (values) => TE.of(values.map((value) => O.fromNullable(value))),
       ),
+    bulkPatch: (_) => TE.right(undefined as unknown as BulkOperationResponse),
     clear: () => m.clear(),
     delete: (id: string) =>
       pipe(

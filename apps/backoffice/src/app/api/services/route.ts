@@ -1,6 +1,9 @@
 import { getConfiguration } from "@/config";
+import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
+import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { CreateServicePayload } from "@/generated/api/CreateServicePayload";
-import { isAdmin } from "@/lib/be/authz";
+import { ResponseError } from "@/generated/api/ResponseError";
+import { userAuthz } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -9,9 +12,12 @@ import {
 } from "@/lib/be/errors";
 import { groupExists } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
-import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
+import {
+  bulkPatch,
+  forwardIoServicesCmsRequest,
+} from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
 
@@ -33,7 +39,7 @@ export const POST = withJWTAuthHandler(
         );
       }
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        if (isAdmin(backofficeUser)) {
+        if (userAuthz(backofficeUser).isAdmin()) {
           if (
             servicePayload.metadata.group_id &&
             !(await groupExists(
@@ -106,5 +112,51 @@ export const GET = withJWTAuthHandler(
         offset: offset ?? undefined,
       },
     });
+  },
+);
+
+/**
+ * @operationId bulkPatchServices
+ * @description Bulk patch existing services by ID
+ */
+export const PATCH = withJWTAuthHandler(
+  async (
+    request: NextRequest,
+    { backofficeUser }: { backofficeUser: BackOfficeUser },
+  ): Promise<NextResponse<BulkPatchServiceResponse | ResponseError>> => {
+    try {
+      if (!userAuthz(backofficeUser).isAdmin()) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
+      let requestPayload;
+      try {
+        requestPayload = await parseBody(request, BulkPatchServicePayload);
+      } catch (error) {
+        return handleBadRequestErrorResponse(
+          error instanceof Error ? error.message : "Failed to parse JSON body",
+        );
+      }
+      for (const patchService of requestPayload) {
+        if (
+          patchService.metadata.group_id &&
+          !(await groupExists(
+            backofficeUser.institution.id,
+            patchService.metadata.group_id,
+          ))
+        ) {
+          return handleBadRequestErrorResponse(
+            `Provided group_id '${patchService.metadata.group_id}' does not exists`,
+          );
+        }
+      }
+      const response = await bulkPatch(requestPayload);
+      return NextResponse.json(response, { status: 207 });
+    } catch (error) {
+      handlerErrorLog(
+        `An Error has occurred while bulk patching services: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id}`,
+        error,
+      );
+      return handleInternalErrorResponse("BulkPatchServiceError", error);
+    }
   },
 );

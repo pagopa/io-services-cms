@@ -2,6 +2,8 @@ import {
   getServiceLifecycleCosmosStore,
   getServicePublicationCosmosStore,
 } from "@/lib/be/cosmos-store";
+import { BulkOperationResponse } from "@azure/cosmos";
+import { Patchable } from "@io-services-cms/models/service-lifecycle/definitions";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
@@ -58,5 +60,18 @@ export const retrieveGroupUnboundedServices = (
         getServiceLifecycleCosmosStore().getGroupUnboundedServicesByIds(
           serviceIds,
         ),
+    ),
+  );
+
+export const bulkPatch = (
+  services: readonly ({
+    id: string;
+  } & Patchable)[],
+): TE.TaskEither<Error, BulkOperationResponse> =>
+  pipe(
+    services.length > 0,
+    B.match(
+      () => TE.of([] as unknown as BulkOperationResponse),
+      () => getServiceLifecycleCosmosStore().bulkPatch(services),
     ),
   );
