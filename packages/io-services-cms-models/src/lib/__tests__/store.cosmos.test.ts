@@ -25,6 +25,8 @@ const anItem = {
     },
     authorized_recipients: ["AAAAAA00A00A000A"],
     authorized_cidrs: [],
+    max_allowed_payment_amount: 0,
+    require_secure_channel: false,
   },
   fsm: { state: "approved" },
 } as unknown as ServiceLifecycle.ItemType;
@@ -592,6 +594,329 @@ describe("store cosmos tests", () => {
           "SELECT c.id, c.data.name FROM c WHERE ARRAY_CONTAINS(@serviceIds, c.id) AND NOT IS_DEFINED(c.data.metadata.group_id)",
       });
       expect(fetchAll).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("patch", () => {
+    const modifiedAtPatchOperationExpectation = {
+      op: "add",
+      path: "/modified_at",
+      value: expect.any(Number),
+    };
+    const buildGroupIdPatchOperationExpectation = (groupId?: string) => ({
+      op: groupId ? "add" : "remove",
+      path: "/data/metadata/group_id",
+      value: groupId,
+    });
+
+    it("should fail when patch fail", async () => {
+      // given
+      const anItemId = "anItemId";
+      const anItemToBePatched = {
+        data: {
+          metadata: {
+            group_id: "aGroupId",
+          },
+        },
+      };
+      const patchMock = vi.fn(() => Promise.reject(new Error()));
+      const containerMock = {
+        item: vi.fn(() => ({
+          patch: patchMock,
+        })),
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.patch(anItemId, anItemToBePatched)();
+
+      // then
+      expect(containerMock.item).toBeCalledTimes(1);
+      expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+      expect(patchMock).toHaveBeenCalledOnce();
+      expect(patchMock).toHaveBeenCalledWith({
+        operations: [
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
+        ],
+      });
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(
+          result.left.message.startsWith(
+            `Failed to patch item id#${anItemId} from database`,
+          ),
+        ).toBeTruthy();
+      }
+    });
+
+    it("should fail when patch return en error status code", async () => {
+      // given
+      const anItemId = "anItemId";
+      const anItemToBePatched = {
+        data: {
+          metadata: {
+            group_id: "aGroupId",
+          },
+        },
+      };
+      const errorStatusCode = 500;
+      const patchMock = vi.fn(() =>
+        Promise.resolve({
+          statusCode: errorStatusCode,
+        }),
+      );
+      const containerMock = {
+        item: vi.fn(() => ({
+          patch: patchMock,
+        })),
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.patch(anItemId, anItemToBePatched)();
+
+      // then
+      expect(containerMock.item).toBeCalledTimes(1);
+      expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+      expect(patchMock).toHaveBeenCalledOnce();
+      expect(patchMock).toHaveBeenCalledWith({
+        operations: [
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
+        ],
+      });
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(
+          result.left.message.startsWith(
+            `Patch failed with status code ${errorStatusCode}`,
+          ),
+        ).toBeTruthy();
+      }
+    });
+
+    it("should fail when patched item is not valid", async () => {
+      // given
+      const anItemId = "anItemId";
+      const anItemToBePatched = {
+        data: {
+          metadata: {
+            group_id: "aGroupId",
+          },
+        },
+      };
+      const patchMock = vi.fn(() =>
+        Promise.resolve({
+          statusCode: 200,
+          resource: {},
+        }),
+      );
+      const containerMock = {
+        item: vi.fn(() => ({
+          patch: patchMock,
+        })),
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.patch(anItemId, anItemToBePatched)();
+
+      // then
+      expect(containerMock.item).toBeCalledTimes(1);
+      expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+      expect(patchMock).toHaveBeenCalledOnce();
+      expect(patchMock).toHaveBeenCalledWith({
+        operations: [
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
+        ],
+      });
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left.message).toMatch(/is not a valid/);
+      }
+    });
+
+    it.each`
+      scenario                     | group_id
+      ${"group_id is defined"}     | ${"aGroupId"}
+      ${"group_id is not defined"} | ${undefined}
+    `("should patch the item", async ({ group_id }) => {
+      // given
+      const anItemId = "anItemId";
+      const anItemToBePatched = {
+        data: {
+          metadata: {
+            group_id,
+          },
+        },
+      };
+      const patchedItem = {
+        ...anItem,
+      };
+      const patchMock = vi.fn(() =>
+        Promise.resolve({
+          statusCode: 200,
+          resource: patchedItem,
+        }),
+      );
+      const containerMock = {
+        item: vi.fn(() => ({
+          patch: patchMock,
+        })),
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.patch(anItemId, anItemToBePatched)();
+
+      // then
+      expect(containerMock.item).toBeCalledTimes(1);
+      expect(containerMock.item).toBeCalledWith(anItemId, anItemId);
+      expect(patchMock).toHaveBeenCalledOnce();
+      expect(patchMock).toHaveBeenCalledWith({
+        operations: [
+          buildGroupIdPatchOperationExpectation(
+            anItemToBePatched.data.metadata.group_id,
+          ),
+          modifiedAtPatchOperationExpectation,
+        ],
+      });
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toStrictEqual(patchedItem);
+      }
+    });
+  });
+
+  describe("bulkPatch", () => {
+    const modifiedAtPatchOperationExpectation = {
+      op: "add",
+      path: "/modified_at",
+      value: expect.any(Number),
+    };
+    const buildGroupIdPatchOperationExpectation = (groupId?: string) => ({
+      op: groupId ? "add" : "remove",
+      path: "/data/metadata/group_id",
+      value: groupId,
+    });
+
+    it("should fail when patch fail", async () => {
+      // given
+      const anItemId = "anItemId";
+      const anItemsToBePatched = [
+        {
+          id: "anId",
+          data: {
+            metadata: {
+              group_id: "aGroupId",
+            },
+          },
+        },
+      ];
+      const bulkMock = vi.fn(() => Promise.reject(new Error()));
+      const containerMock = {
+        items: {
+          bulk: bulkMock,
+        },
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.bulkPatch(anItemsToBePatched)();
+
+      // then
+      expect(bulkMock).toHaveBeenCalledOnce();
+      expect(bulkMock).toHaveBeenCalledWith(
+        anItemsToBePatched.map((item) => ({
+          id: item.id,
+          operationType: "Patch",
+          partitionKey: item.id,
+          resourceBody: {
+            operations: [
+              buildGroupIdPatchOperationExpectation(
+                item.data.metadata.group_id,
+              ),
+              modifiedAtPatchOperationExpectation,
+            ],
+          },
+        })),
+        {
+          continueOnError: true,
+        },
+      );
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(
+          result.left.message.startsWith(
+            `Failed to bulk patch items from database`,
+          ),
+        ).toBeTruthy();
+      }
+    });
+
+    it("should bulk patch items", async () => {
+      // given
+      const anItemId = "anItemId";
+      const anItemsToBePatched = [
+        {
+          id: "anId",
+          data: {
+            metadata: {
+              group_id: "aGroupId",
+            },
+          },
+        },
+      ];
+      const expectedResult = "resolved";
+      const bulkMock = vi.fn(() => Promise.resolve(expectedResult));
+      const containerMock = {
+        items: {
+          bulk: bulkMock,
+        },
+      } as unknown as Container;
+
+      const store = createCosmosStore(containerMock, ServiceLifecycle.ItemType);
+
+      // when
+      const result = await store.bulkPatch(anItemsToBePatched)();
+
+      // then
+      expect(bulkMock).toHaveBeenCalledOnce();
+      expect(bulkMock).toHaveBeenCalledWith(
+        anItemsToBePatched.map((item) => ({
+          id: item.id,
+          operationType: "Patch",
+          partitionKey: item.id,
+          resourceBody: {
+            operations: [
+              buildGroupIdPatchOperationExpectation(
+                item.data.metadata.group_id,
+              ),
+              modifiedAtPatchOperationExpectation,
+            ],
+          },
+        })),
+        {
+          continueOnError: true,
+        },
+      );
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toStrictEqual(expectedResult);
+      }
     });
   });
 });

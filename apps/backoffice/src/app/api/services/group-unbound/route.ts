@@ -1,5 +1,9 @@
 import { UnboundedGroupServices } from "@/generated/api/UnboundedGroupServices";
-import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { userAuthz } from "@/lib/be/authz";
+import {
+  handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+} from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveUnboundedGroupServices } from "@/lib/be/services/business";
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
@@ -16,6 +20,9 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse<UnboundedGroupServices>> => {
     try {
+      if (!userAuthz(backofficeUser).isAdmin()) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
       const result = await retrieveUnboundedGroupServices(backofficeUser);
 
       return sanitizedNextResponseJson({ unboundedServices: result });

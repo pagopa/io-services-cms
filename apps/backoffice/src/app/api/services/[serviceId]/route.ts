@@ -1,7 +1,6 @@
-import { getConfiguration } from "@/config";
 import { PatchServicePayload } from "@/generated/api/PatchServicePayload";
 import { ServicePayload } from "@/generated/api/ServicePayload";
-import { isAdmin } from "@/lib/be/authz";
+import { userAuthz } from "@/lib/be/authz";
 import {
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -78,6 +77,7 @@ export const PUT = withJWTAuthHandler(
 );
 
 /**
+ * @operationId patchService
  * @description Patch an existing service by ID
  */
 export const PATCH = withJWTAuthHandler(
@@ -89,45 +89,40 @@ export const PATCH = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
   ) => {
     try {
-      let patchServicePayload;
+      if (!userAuthz(backofficeUser).isAdmin()) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
+      let requestPayload;
       try {
-        patchServicePayload = await parseBody(nextRequest, PatchServicePayload);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        return handleBadRequestErrorResponse(error.message);
+        requestPayload = await parseBody(nextRequest, PatchServicePayload);
+      } catch (error) {
+        return handleBadRequestErrorResponse(
+          error instanceof Error ? error.message : "Failed to parse JSON body",
+        );
       }
-
-      if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        if (isAdmin(backofficeUser)) {
-          if (
-            patchServicePayload.metadata.group_id &&
-            !(await groupExists(
-              backofficeUser.institution.id,
-              patchServicePayload.metadata.group_id,
-            ))
-          ) {
-            return handleBadRequestErrorResponse(
-              "Provided group_id does not exists",
-            );
-          }
-        } else {
-          return handleForbiddenErrorResponse(
-            "Only admin users can patch a service",
-          );
-        }
+      if (
+        requestPayload.metadata.group_id &&
+        !(await groupExists(
+          backofficeUser.institution.id,
+          requestPayload.metadata.group_id,
+        ))
+      ) {
+        return handleBadRequestErrorResponse(
+          "Provided group_id does not exists",
+        );
       }
-
       return forwardIoServicesCmsRequest("patchService", {
         backofficeUser,
+        jsonBody: requestPayload,
         nextRequest,
         pathParams: params,
       });
     } catch (error) {
       handlerErrorLog(
-        `An Error has occurred while creating service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
+        `An Error has occurred while patching service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
         error,
       );
-      return handleInternalErrorResponse("EditServiceError", error);
+      return handleInternalErrorResponse("PatchServiceError", error);
     }
   },
 );
