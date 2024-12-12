@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.20.0
+
+### Minor Changes
+
+- f8ee3f02: add bulk patch service API
+
+### Patch Changes
+
+- Updated dependencies [f8ee3f02]
+  - @io-services-cms/models@1.26.0
+
 ## 1.19.2
 
 ### Patch Changes
