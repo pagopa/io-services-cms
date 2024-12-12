@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.26.0
+
+### Minor Changes
+
+- f8ee3f02: add bulk patch service API
+
 ## 1.25.0
 
 ### Minor Changes
