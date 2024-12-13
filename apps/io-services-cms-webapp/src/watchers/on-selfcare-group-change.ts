@@ -31,7 +31,8 @@ export const makeHandler: (
 ) => RTE.ReaderTaskEither<{ item: GroupChangeEvent }, Error, void> =
   ({ apimService, serviceLifecycleStore }) =>
   ({ item }) => {
-    throw new Error("TEST ERROR");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mapStateFromGroupToSubscription("foo" as any);
     return pipe(
       item.productId === "prod-io",
       B.fold(
