@@ -19,4 +19,6 @@ resource "azurerm_storage_blob" "featured_institutions" {
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
   source                 = "${path.module}/featured-institutions.json"
+  content_type           = "application/json"
+  content_md5            = "8fe14b8ccf355d5f491d9d4190cceb63"
 }
