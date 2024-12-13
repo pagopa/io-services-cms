@@ -99,6 +99,11 @@ data "azurerm_key_vault_secret" "services_history_event_hub_connection_string" {
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
+  name         = "EH-SC-CONNECTIONSTRING"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
+
 ####################
 # Private DNS Zone #
 ####################

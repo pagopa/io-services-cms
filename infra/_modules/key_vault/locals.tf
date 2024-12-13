@@ -15,7 +15,6 @@ locals {
       selfcare_api_key                         = "SELFCARE-API-KEY"
       serviceid_quality_check_exclusion_list   = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
       subscription_migration_api_key           = "SUBSCRIPTION-MIGRATION-API-KEY"
-      eh_sc_connectionstring                   = "EH-SC-CONNECTIONSTRING"
     }
   }
 }
