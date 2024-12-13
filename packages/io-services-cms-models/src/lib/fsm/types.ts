@@ -2,6 +2,7 @@
 import { BulkOperationResponse } from "@azure/cosmos";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import * as t from "io-ts";
 
@@ -57,6 +58,10 @@ export interface FSMStore<
     } & Patchable)[],
   ) => TE.TaskEither<Error, BulkOperationResponse>;
   delete: (id: string) => TE.TaskEither<Error, void>;
+  executeOnServicesFilteredByGroupId: (
+    groupId: string,
+    callback: RTE.ReaderTaskEither<readonly string[], Error, void>,
+  ) => TE.TaskEither<Error, void>;
   fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
   getGroupUnboundedServicesByIds: (
     ids: readonly string[],

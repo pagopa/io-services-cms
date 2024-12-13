@@ -278,6 +278,39 @@ const getServiceIdsByGroupIds =
       TE.map(({ resources }) => resources),
     );
 
+const executeOnServicesFilteredByGroupId =
+  (
+    container: Container,
+  ): CosmosStore<
+    WithState<string, Record<string, unknown>>
+  >["executeOnServicesFilteredByGroupId"] =>
+  (groupId, callback) =>
+    pipe(
+      TE.tryCatch(
+        async () => {
+          for await (const { resources: serviceIds } of container.items
+            .query<string>({
+              parameters: [{ name: "@groupId", value: groupId }],
+              query:
+                "SELECT VALUE c.id FROM c WHERE c.data.metadata.group_id = @groupId",
+            })
+            .getAsyncIterator()) {
+            const res = await pipe(serviceIds, callback)();
+            if (E.isLeft(res)) {
+              throw res.left;
+            }
+          }
+          return void 0;
+        },
+        (err) =>
+          new Error(
+            `Error execute on services from database with groupId=${groupId}, ${
+              E.toError(err).message
+            }`,
+          ),
+      ),
+    );
+
 const getGroupUnboundedServicesByIds =
   (
     container: Container,
@@ -311,6 +344,8 @@ export const createCosmosStore = <
   bulkFetch: bulkFetch(container, codec),
   bulkPatch: bulkPatch(container),
   delete: deleteItem(container),
+  executeOnServicesFilteredByGroupId:
+    executeOnServicesFilteredByGroupId(container),
   fetch: fetch(container, codec),
   getGroupUnboundedServicesByIds: getGroupUnboundedServicesByIds(container),
   getServiceIdsByGroupIds: getServiceIdsByGroupIds(container),
