@@ -6,8 +6,6 @@ import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { log } from "./misc";
-
 /**
  *
  * @param app
