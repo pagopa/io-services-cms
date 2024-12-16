@@ -1,5 +1,17 @@
 # io-services-cms-webapp
 
+## 1.40.0
+
+### Minor Changes
+
+- 692d63d8: add SelfcareGroupWatcher Az Fn
+
+### Patch Changes
+
+- Updated dependencies [692d63d8]
+  - @io-services-cms/models@1.27.0
+  - @io-services-cms/external-clients@1.6.0
+
 ## 1.39.6
 
 ### Patch Changes
