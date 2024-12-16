@@ -20,4 +20,6 @@ resource "azurerm_storage_blob" "featured_institutions" {
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
   source                 = "${path.module}/featured-institutions.json"
+  content_type           = "application/json"
+  content_md5            = filemd5("${path.module}/featured-institutions.json")
 }
