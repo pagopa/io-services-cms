@@ -11,6 +11,7 @@ resource "azurerm_storage_blob" "featured_services" {
   type                   = "Block"
   source                 = "${path.module}/featured-services.json"
   content_type           = "application/json"
+  content_md5            = filemd5("${path.module}/featured-services.json")
 }
 
 resource "azurerm_storage_blob" "featured_institutions" {
