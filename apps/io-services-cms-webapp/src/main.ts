@@ -61,6 +61,10 @@ import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
+import {
+  GroupChangeEvent,
+  makeHandler as makeOnSelfcareGroupChangeHandler,
+} from "./watchers/on-selfcare-group-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
@@ -383,6 +387,13 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
       RA.map((item) => pipe(item.value, JSON.stringify)),
     ),
   })),
+  toAzureFunctionHandler,
+);
+
+export const onSelfcareGroupChangeEntryPoint = pipe(
+  { apimService, serviceLifecycleStore },
+  makeOnSelfcareGroupChangeHandler,
+  processBatchOf(GroupChangeEvent),
   toAzureFunctionHandler,
 );
 

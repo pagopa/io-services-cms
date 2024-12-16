@@ -620,6 +620,7 @@ export {
   FsmClient,
   FsmClientCreator,
   ItemType,
+  LifecycleStore,
   getAutoPublish,
   getFsmClient,
 };

@@ -34,6 +34,22 @@ export const createMemoryStore = <
         T.map(() => undefined),
         TE.fromTask,
       ),
+    executeOnServicesFilteredByGroupId: (
+      groupId: string,
+      callback: (groupIds: readonly string[]) => void,
+    ): TE.TaskEither<Error, void> =>
+      pipe(
+        Array.from(m.values()),
+        (values) =>
+          values.filter((value) => value.data.metadata?.group_id === groupId),
+        (values) =>
+          TE.of(
+            pipe(
+              values.map((value) => value.id),
+              callback,
+            ),
+          ),
+      ),
     fetch: (id: string) =>
       pipe(
         () => Promise.resolve(m.get(id)),

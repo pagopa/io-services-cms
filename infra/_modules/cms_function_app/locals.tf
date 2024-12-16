@@ -124,9 +124,12 @@ locals {
       SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
 
-
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"
+
+      EH_SC_CONNECTIONSTRING         = data.azurerm_key_vault_secret.eh_sc_connectionstring.value
+      EH_SC_USERGROUP_NAME           = "sc-usergroups"
+      EH_SC_USERGROUP_CONSUMER_GROUP = "io-cms-sync"
     }
     autoscale_settings = {
       min     = 3

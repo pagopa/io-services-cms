@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "eventHubTrigger",
+      "direction": "in",
+      "name": "messages",
+      "connection": "EH_SC_CONNECTIONSTRING",
+      "eventHubName": "%EH_SC_USERGROUP_NAME%",
+      "consumerGroup": "%EH_SC_USERGROUP_CONSUMER_GROUP%",
+      "cardinality": "many",
+      "retry": {
+        "strategy": "fixedDelay",
+        "maxRetryCount": 3,
+        "delayInterval": "00:00:10"
+      },
+      "properties": {
+        "deadLetterQueue": true
+      }
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onSelfcareGroupChangeEntryPoint"
+}
