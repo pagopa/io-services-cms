@@ -50,7 +50,6 @@ export const toAzureFunctionHandler =
           f instanceof Error
             ? f
             : new UnhandledProcedureError(context, E.toError(f).message);
-        log(context, error.message, "error");
         throw error;
       }),
     )({ context, inputs })();
