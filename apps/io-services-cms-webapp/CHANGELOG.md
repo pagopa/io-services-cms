@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.1
+
+### Patch Changes
+
+- 7d6a3261: disable SelfcareGroupWatcher on slot
+
 ## 1.40.0
 
 ### Minor Changes
