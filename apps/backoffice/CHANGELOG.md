@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.20.1
+
+### Patch Changes
+
+- Updated dependencies [692d63d8]
+  - @io-services-cms/models@1.27.0
+  - @io-services-cms/external-clients@1.6.0
+
 ## 1.20.0
 
 ### Minor Changes
