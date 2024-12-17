@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.4
+
+### Patch Changes
+
+- a3d34206: log using context
+
 ## 1.40.3
 
 ### Patch Changes
