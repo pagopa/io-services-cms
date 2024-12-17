@@ -8,15 +8,7 @@
       "connection": "EH_SC_CONNECTIONSTRING",
       "eventHubName": "%EH_SC_USERGROUP_NAME%",
       "consumerGroup": "%EH_SC_USERGROUP_CONSUMER_GROUP%",
-      "cardinality": "many",
-      "retry": {
-        "strategy": "fixedDelay",
-        "maxRetryCount": 3,
-        "delayInterval": "00:00:10"
-      },
-      "properties": {
-        "deadLetterQueue": true
-      }
+      "cardinality": "many"
     }
   ],
   "scriptFile": "../dist/main.js",

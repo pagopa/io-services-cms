@@ -33,6 +33,15 @@
       "batchSize": 1,
       "maxDequeueCount": 5,
       "newBatchThreshold": 1
+    },
+    "eventHubs": {
+      "clientRetryOptions": {
+        "mode": "exponential",
+        "tryTimeout": "00:01:00",
+        "delay": "00:00:00.80",
+        "maximumDelay": "00:01:00",
+        "maximumRetries": 3
+      }
     }
   },
   "extensionBundle": {
