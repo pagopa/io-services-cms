@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.2
+
+### Patch Changes
+
+- 0f16b202: configure retry on host.json
+
 ## 1.40.1
 
 ### Patch Changes
