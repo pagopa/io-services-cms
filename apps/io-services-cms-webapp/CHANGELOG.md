@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.3
+
+### Patch Changes
+
+- 7d94f353: log eh trigger executions
+
 ## 1.40.2
 
 ### Patch Changes
