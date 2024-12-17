@@ -26,13 +26,16 @@ interface HandlerDependencies {
   serviceLifecycleStore: ServiceLifecycle.LifecycleStore;
 }
 
+let i = 0;
+
 export const makeHandler: (
   handlerDependencies: HandlerDependencies,
 ) => RTE.ReaderTaskEither<{ item: GroupChangeEvent }, Error, void> =
-  ({ apimService, serviceLifecycleStore }) =>
+  (handlerDependencies) =>
   ({ item }) => {
+    console.log("INVOCATION COUNTER", ++i);
     if (item.name.endsWith("fail")) {
-      throw new Error("TEST FAILURE");
+      throw new Error("TEST FAILURE: INVOCATION " + i);
     }
     return pipe(
       item.productId === "prod-io",
@@ -41,12 +44,24 @@ export const makeHandler: (
         () =>
           pipe(
             item,
-            syncSubscription(apimService),
-            TE.chain((_) => syncServices(serviceLifecycleStore)(item)),
+            ioGroupChangeHandler(handlerDependencies),
+            // TE.orElse((_) =>
+            //   pipe(item, ioGroupChangeHandler(handlerDependencies)),
+            // ),
           ),
       ),
     );
   };
+export const ioGroupChangeHandler: (
+  handlerDependencies: HandlerDependencies,
+) => RTE.ReaderTaskEither<GroupChangeEvent, Error, void> =
+  ({ apimService, serviceLifecycleStore }) =>
+  (group) =>
+    pipe(
+      group,
+      syncSubscription(apimService),
+      TE.chain((_) => syncServices(serviceLifecycleStore)(group)),
+    );
 
 const syncSubscription =
   (apimService: ApimUtils.ApimService) =>
