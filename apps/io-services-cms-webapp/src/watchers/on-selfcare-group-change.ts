@@ -1,4 +1,5 @@
 import { SubscriptionState } from "@azure/arm-apimanagement";
+import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -30,12 +31,16 @@ let i = 0;
 
 export const makeHandler: (
   handlerDependencies: HandlerDependencies,
-) => RTE.ReaderTaskEither<{ item: GroupChangeEvent }, Error, void> =
+) => RTE.ReaderTaskEither<
+  { context: Context; item: GroupChangeEvent },
+  Error,
+  void
+> =
   (handlerDependencies) =>
-  ({ item }) => {
-    console.log("INVOCATION COUNTER", ++i);
+  ({ context, item }) => {
+    context.log.info("INVOCATION COUNTER", ++i, "GROUP_ID", item.id);
     if (item.name.endsWith("fail")) {
-      throw new Error("TEST FAILURE: INVOCATION " + i);
+      throw new Error(`TEST FAILURE: INVOCATION ${i}, GROUP_ID ${item.id}`);
     }
     return pipe(
       item.productId === "prod-io",
