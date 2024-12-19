@@ -41,7 +41,12 @@ import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
 } from "./lib/azure/cosmos";
-import { processAllOf, processBatchOf, setBindings } from "./lib/azure/misc";
+import {
+  log,
+  processAllOf,
+  processBatchOf,
+  setBindings,
+} from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
@@ -74,6 +79,7 @@ import { handler as onIngestionServicePublicationChangeHandler } from "./watcher
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
+import { AzureFunction } from "@azure/functions";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -390,12 +396,48 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   toAzureFunctionHandler,
 );
 
-export const onSelfcareGroupChangeEntryPoint = pipe(
-  { apimService, serviceLifecycleStore },
-  makeOnSelfcareGroupChangeHandler,
-  processBatchOf(GroupChangeEvent),
-  toAzureFunctionHandler,
-);
+export const onSelfcareGroupChangeEntryPoint: AzureFunction = async (
+  context,
+  args,
+) => {
+  context.log.info(
+    "maxRetryCount",
+    context.executionContext.retryContext?.maxRetryCount,
+  );
+  context.log.info(
+    "retryCount",
+    context.executionContext.retryContext?.retryCount,
+  );
+  let maxRetry = 3;
+  while (true) {
+    try {
+      const handlerResult = await pipe(
+        { apimService, serviceLifecycleStore },
+        makeOnSelfcareGroupChangeHandler,
+        processBatchOf(GroupChangeEvent),
+        toAzureFunctionHandler,
+      )(context, args);
+      return handlerResult;
+    } catch (e) {
+      log(
+        context,
+        e instanceof Error ? e.message : "Something went wrong",
+        "warn",
+      );
+      if (maxRetry-- === 0) {
+        // TODO: add item to DLQ
+        throw e;
+      }
+      await sleep(1000);
+    }
+  }
+};
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(

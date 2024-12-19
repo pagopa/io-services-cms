@@ -27,8 +27,6 @@ interface HandlerDependencies {
   serviceLifecycleStore: ServiceLifecycle.LifecycleStore;
 }
 
-let i = 0;
-
 export const makeHandler: (
   handlerDependencies: HandlerDependencies,
 ) => RTE.ReaderTaskEither<
@@ -36,11 +34,10 @@ export const makeHandler: (
   Error,
   void
 > =
-  (handlerDependencies) =>
-  ({ context, item }) => {
-    context.log.info("INVOCATION COUNTER", ++i, "GROUP_ID", item.id);
+  ({ apimService, serviceLifecycleStore }) =>
+  ({ item }) => {
     if (item.name.endsWith("fail")) {
-      throw new Error(`TEST FAILURE: INVOCATION ${i}, GROUP_ID ${item.id}`);
+      throw new Error(`TEST FAILURE: GROUP_ID ${item.id}`);
     }
     return pipe(
       item.productId === "prod-io",
@@ -49,24 +46,12 @@ export const makeHandler: (
         () =>
           pipe(
             item,
-            ioGroupChangeHandler(handlerDependencies),
-            // TE.orElse((_) =>
-            //   pipe(item, ioGroupChangeHandler(handlerDependencies)),
-            // ),
+            syncSubscription(apimService),
+            TE.chain((_) => syncServices(serviceLifecycleStore)(item)),
           ),
       ),
     );
   };
-export const ioGroupChangeHandler: (
-  handlerDependencies: HandlerDependencies,
-) => RTE.ReaderTaskEither<GroupChangeEvent, Error, void> =
-  ({ apimService, serviceLifecycleStore }) =>
-  (group) =>
-    pipe(
-      group,
-      syncSubscription(apimService),
-      TE.chain((_) => syncServices(serviceLifecycleStore)(group)),
-    );
 
 const syncSubscription =
   (apimService: ApimUtils.ApimService) =>
