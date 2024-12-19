@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.5
+
+### Patch Changes
+
+- 70d33944: add selc eh trigger custom retry logic
+
 ## 1.40.4
 
 ### Patch Changes
