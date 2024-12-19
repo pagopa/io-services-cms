@@ -1,4 +1,5 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
+import { AzureFunction } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyServiceCosmosResource,
@@ -79,7 +80,6 @@ import { handler as onIngestionServicePublicationChangeHandler } from "./watcher
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
 import { createWebServer } from "./webservice";
-import { AzureFunction } from "@azure/functions";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
 const BASE_PATH = require("../host.json").extensions.http.routePrefix;
@@ -409,7 +409,7 @@ export const onSelfcareGroupChangeEntryPoint: AzureFunction = async (
     context.executionContext.retryContext?.retryCount,
   );
   let maxRetry = 3;
-  while (true) {
+  for (;;) {
     try {
       const handlerResult = await pipe(
         { apimService, serviceLifecycleStore },
