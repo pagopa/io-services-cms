@@ -138,6 +138,7 @@ const {
   retrieveLifecycleServicesMock,
   retrievePublicationServicesMock,
   retrieveInstitutionGroups,
+  getGroupMock,
   retrieveAuthorizedServiceIdsMock,
   retrieveGroupUnboundedServicesMock,
   isAdminMock,
@@ -185,6 +186,7 @@ const {
     retrieveLifecycleServicesMock: vi.fn(),
     retrievePublicationServicesMock: vi.fn(),
     retrieveInstitutionGroups: vi.fn(),
+    getGroupMock: vi.fn(),
     retrieveAuthorizedServiceIdsMock: vi.fn(),
     retrieveGroupUnboundedServicesMock: vi.fn(),
     isAdminMock,
@@ -214,6 +216,7 @@ vi.mock("@/lib/be/services/cosmos", () => ({
 
 vi.mock("@/lib/be/institutions/business", () => ({
   retrieveInstitutionGroups,
+  getGroup: getGroupMock,
 }));
 
 vi.mock("@/lib/be/authz", () => ({
@@ -221,9 +224,9 @@ vi.mock("@/lib/be/authz", () => ({
 }));
 
 afterEach(() => {
-  vi.clearAllMocks();
   vi.restoreAllMocks();
 });
+
 describe("Services TEST", () => {
   describe("forwardIoServicesCmsRequest", () => {
     it.each`
@@ -284,7 +287,7 @@ describe("Services TEST", () => {
       ${"paginated response"}     | ${{ value: [{ foo: "foo", metadata: { bar: "bar", group_id: mocks.aGroup.id } }] }} | ${{ value: [{ foo: "foo", metadata: { bar: "bar", group: mocks.aGroup } }] }}
     `(
       "should map the $scenario group_id into a Group model",
-      async ({ aResponseBody, expectedResponseBody }) => {
+      async ({ scenario, aResponseBody, expectedResponseBody }) => {
         // given
         const getServices = vi.fn(() =>
           Promise.resolve(
@@ -297,7 +300,11 @@ describe("Services TEST", () => {
         getIoServicesCmsClient.mockReturnValueOnce({
           getServices,
         });
-        retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
+        if (scenario === "paginated response") {
+          retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
+        } else {
+          getGroupMock.mockResolvedValueOnce(mocks.aGroup);
+        }
 
         // Mock NextRequest
         const request = new NextRequest(new URL("http://localhost"));
@@ -325,10 +332,18 @@ describe("Services TEST", () => {
             "x-channel": "BO",
           }),
         );
-        expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-          aBackofficeUser.institution.id,
-        );
+        if (scenario === "paginated response") {
+          expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+          expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+            aBackofficeUser.institution.id,
+          );
+        } else {
+          expect(getGroupMock).toHaveBeenCalledOnce();
+          expect(getGroupMock).toHaveBeenCalledWith(
+            aResponseBody.metadata.group_id,
+            aBackofficeUser.institution.id,
+          );
+        }
 
         expect(result.status).toBe(200);
         const jsonBody = await result.json();

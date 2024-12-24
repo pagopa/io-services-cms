@@ -3,17 +3,18 @@ import { Institution as BackofficeInstitution } from "@/generated/api/Institutio
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
-import { Institution as SelfcareInstitution } from "@/generated/selfcare/Institution";
+import { InstitutionResponse as SelfcareInstitution } from "@/generated/selfcare/InstitutionResponse";
 import { StatusEnum } from "@/generated/selfcare/UserGroupResource";
 import {
   getInstitutionById,
   getInstitutionGroups,
+  getGroup as getSelfcareGroup,
   getUserAuthorizedInstitutions,
 } from "@/lib/be/institutions/selfcare";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { ManagedInternalError } from "../errors";
+import { GroupNotFoundError } from "../errors";
 import { getManageSubscriptions } from "../subscriptions/business";
 
 // Type utility to extract the resolved type of a Promise
@@ -57,8 +58,8 @@ export const retrieveInstitutionGroups = async (
   let hasMoreItems = false;
   do {
     const apiResult = await getInstitutionGroups(institutionId, 1000, page++);
-    groups.push(...toGroups(apiResult.content ?? []));
-    hasMoreItems = !!apiResult.totalPages && apiResult.totalPages >= page;
+    groups.push(...toGroups(apiResult.content));
+    hasMoreItems = apiResult.totalPages >= page;
   } while (hasMoreItems);
   return groups;
 };
@@ -114,7 +115,7 @@ const toUserAuthorizedInstitution = (
   role: userInstitution.products?.at(0)?.productRole,
 });
 
-const parseState = (state?: StatusEnum): StateEnum => {
+const parseState = (state: StatusEnum): StateEnum => {
   switch (state) {
     case StatusEnum.ACTIVE:
       return StateEnum.ACTIVE;
@@ -122,8 +123,6 @@ const parseState = (state?: StatusEnum): StateEnum => {
       return StateEnum.SUSPENDED;
     case StatusEnum.DELETED:
       return StateEnum.DELETED;
-    case undefined:
-      return StateEnum.ACTIVE;
     default:
       // eslint-disable-next-line no-case-declarations
       const _: never = state;
@@ -136,25 +135,15 @@ const toGroups = (
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
     undefined
   >,
-): Group[] =>
-  userGroupResources.map((userGroupResource) => {
-    if (
-      userGroupResource.id &&
-      userGroupResource.name !== undefined &&
-      userGroupResource.status !== undefined
-    ) {
-      return {
-        id: userGroupResource.id,
-        name: userGroupResource.name,
-        state: parseState(userGroupResource.status),
-      };
-    } else {
-      throw new ManagedInternalError(
-        "Error toGroups mapping",
-        "group ID or group name are not defined",
-      );
-    }
-  });
+): Group[] => userGroupResources.map(toGroup);
+
+const toGroup = (
+  group: PromiseValue<ReturnType<typeof getSelfcareGroup>>,
+): Group => ({
+  id: group.id,
+  name: group.name,
+  state: parseState(group.status),
+});
 
 /**
  * Check the existance of the provided groupId from the groups related to the provided institution
@@ -166,10 +155,32 @@ export const groupExists = async (
   institutionId: string,
   groupId: NonEmptyString,
 ): Promise<boolean> => {
-  // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-  const institutionGroupsResponse =
-    await retrieveInstitutionGroups(institutionId);
-  return institutionGroupsResponse.some((group) => group.id === groupId);
+  let exists: boolean;
+  try {
+    await getGroup(groupId, institutionId);
+    exists = true;
+  } catch (error) {
+    if (error instanceof GroupNotFoundError) {
+      exists = false;
+    } else {
+      throw error;
+    }
+  }
+  return exists;
+};
+
+/**
+ * Get Group details by provided groupId and institution
+ * @param groupId the group id
+ * @param institutionId the institution id
+ * @returns the group details
+ */
+export const getGroup = async (
+  groupId: NonEmptyString,
+  institutionId: string,
+): Promise<Group> => {
+  const selfcareGroup = await getSelfcareGroup(groupId, institutionId);
+  return toGroup(selfcareGroup);
 };
 
 export const checkInstitutionGroupsExistence = async (

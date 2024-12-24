@@ -13,6 +13,14 @@ import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmos
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
 
+export class GroupNotFoundError extends Error {
+  constructor(message: string) {
+    super("the Group does not exists");
+    this.name = "GroupNotFoundError";
+    this.message = message;
+  }
+}
+
 export class InstitutionNotFoundError extends Error {
   constructor(message: string) {
     super("the Institution does not exists");

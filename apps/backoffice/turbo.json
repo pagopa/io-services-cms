@@ -23,7 +23,7 @@
     },
     "generate:selfcare-api-models": {
       "inputs": [
-        "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml"
+        "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json"
       ],
       "outputs": [
         "src/generated/selfcare/*"

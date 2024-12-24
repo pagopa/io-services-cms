@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
-import { Institution } from "@/generated/selfcare/Institution";
+import { InstitutionResponse } from "@/generated/selfcare/InstitutionResponse";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import {
   ManagedInternalError,
@@ -306,7 +306,7 @@ const toUser = ({
 }: {
   apimUser: ApimUser;
   identityTokenPayload: IdentityTokenPayload;
-  institution: Institution;
+  institution: InstitutionResponse;
   subscriptionManage: Subscription;
 }): User => ({
   email: identityTokenPayload.email,

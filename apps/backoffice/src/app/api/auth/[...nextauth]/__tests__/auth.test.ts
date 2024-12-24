@@ -4,7 +4,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
-import { Institution } from "../../../../../generated/selfcare/Institution";
+import { InstitutionResponse } from "../../../../../generated/selfcare/InstitutionResponse";
 import { IdentityTokenPayload } from "../../types";
 import { authorize } from "../auth";
 
@@ -87,7 +87,7 @@ const getExpectedUser = (
   jwtPayload: IdentityTokenPayload,
   apimUser: typeof aValidApimUser,
   manageSubscription: typeof aValidSubscription,
-  institution: Institution,
+  institution: InstitutionResponse,
 ) => ({
   id: jwtPayload.uid,
   name: `${jwtPayload.name} ${jwtPayload.family_name}`,
@@ -112,7 +112,8 @@ const getExpectedUser = (
   },
 });
 
-const aValidInstitution = getMockInstitution() as unknown as Institution;
+const aValidInstitution =
+  getMockInstitution() as unknown as InstitutionResponse;
 
 const {
   getUserByEmail,

@@ -156,6 +156,7 @@ export interface ApimService {
   readonly upsertSubscription: (
     ownerId: string,
     subscriptionId: string,
+    displayName?: string,
   ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
 }
 
@@ -251,7 +252,7 @@ export const getApimService = (
         state,
       ),
     ),
-  upsertSubscription: (ownerId, subscriptionId) =>
+  upsertSubscription: (ownerId, subscriptionId, displayName) =>
     pipe(
       getProductByName(
         apimClient,
@@ -280,6 +281,7 @@ export const getApimService = (
           productId,
           userId,
           subscriptionId,
+          displayName,
         ),
       ),
     ),
@@ -437,6 +439,7 @@ const upsertSubscription = (
   productId: string,
   ownerId: string,
   subscriptionId: string,
+  displayName?: string,
 ): TE.TaskEither<ApimRestError, SubscriptionContract> =>
   pipe(
     TE.tryCatch(
@@ -446,7 +449,7 @@ const upsertSubscription = (
           apimServiceName,
           subscriptionId,
           {
-            displayName: subscriptionId,
+            displayName: displayName ?? subscriptionId,
             ownerId,
             scope: `/products/${productId}`,
             state: "active",

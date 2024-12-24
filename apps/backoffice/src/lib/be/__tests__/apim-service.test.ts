@@ -6,12 +6,12 @@ import { getApimRestClient, upsertSubscription } from "../apim-service";
 const mocks: {
   aServiceId: string;
   anUserId: string;
-  aGroupId: string;
+  aGroup: { id: string; name: string };
   upsertSubscription: Mock;
 } = vi.hoisted(() => ({
   aServiceId: "aServiceId",
   anUserId: "anUserId",
-  aGroupId: "aGroupId",
+  aGroup: { id: "aGroupId", name: "aGroupName" },
   upsertSubscription: vi.fn(),
 }));
 
@@ -36,13 +36,6 @@ vi.mock("axios", async () => {
 
 vi.mock("@/lib/be/azure-access-token", () => ({
   getAzureAccessToken,
-}));
-
-const { cacheMock } = vi.hoisted(() => ({
-  cacheMock: (func) => func,
-}));
-vi.mock("react", () => ({
-  cache: cacheMock,
 }));
 
 vi.hoisted(() => {
@@ -329,12 +322,12 @@ describe("upsertSubscription", () => {
   });
 
   it.each`
-    type              | ownerId           | value             | expectedSubId
-    ${"MANAGE"}       | ${mocks.anUserId} | ${undefined}      | ${"MANAGE-" + mocks.anUserId}
-    ${"MANAGE_GROUP"} | ${mocks.anUserId} | ${mocks.aGroupId} | ${"MANAGE-GROUP-" + mocks.aGroupId}
+    type              | ownerId           | value           | expectedSubId                        | expectedSubName
+    ${"MANAGE"}       | ${mocks.anUserId} | ${undefined}    | ${"MANAGE-" + mocks.anUserId}        | ${undefined}
+    ${"MANAGE_GROUP"} | ${mocks.anUserId} | ${mocks.aGroup} | ${"MANAGE-GROUP-" + mocks.aGroup.id} | ${mocks.aGroup.name}
   `(
     "should call upsertSubscription with proper subscriptionId when type is $type",
-    ({ type, ownerId, value, expectedSubId }) => {
+    ({ type, ownerId, value, expectedSubId, expectedSubName }) => {
       // given
       const upsertSubscriptionResultMock = { bar: "bar" };
       mocks.upsertSubscription.mockReturnValueOnce(
@@ -347,10 +340,10 @@ describe("upsertSubscription", () => {
       // then
       expect(res).toStrictEqual(upsertSubscriptionResultMock);
       expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
-      expect(mocks.upsertSubscription).toHaveBeenCalledWith(
-        ownerId,
-        expectedSubId,
-      );
+      const params = value
+        ? [ownerId, expectedSubId, expectedSubName]
+        : [ownerId, expectedSubId];
+      expect(mocks.upsertSubscription).toHaveBeenCalledWith(...params);
     },
   );
 });
