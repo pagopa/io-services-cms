@@ -1644,7 +1644,6 @@ components:
         digitalAddress:
           type: string
           description: Institution's digitalAddress
-          format: email
           example: email@pec.mail.org
 
         address:
@@ -1661,17 +1660,6 @@ components:
           description: The origin form which the institution has been retrieved
           example: IPA
         institutionType:
-          enum:
-            - AS
-            - GSP
-            - PA
-            - PG
-            - PSP
-            - PT
-            - SA
-            - SCP
-            - REC
-            - CON
           type: string
         geographicTaxonomies:
           type: array
@@ -1679,9 +1667,6 @@ components:
             $ref: '#/components/schemas/GeographicTaxonomy'
       additionalProperties: false
     GeographicTaxonomy:
-      required:
-        - code
-        - desc
       type: object
       properties:
         code:
@@ -1834,6 +1819,7 @@ components:
       properties:
         groupId:
           type: string
+          minLength: 1
       required:
         - groupId
     ServiceLifecycleMetadata:

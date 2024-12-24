@@ -2,6 +2,7 @@
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
+import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -24,7 +25,7 @@ import {
   handleBadRequestErrorResponse,
   handleInternalErrorResponse,
 } from "../errors";
-import { retrieveInstitutionGroups } from "../institutions/business";
+import { getGroup, retrieveInstitutionGroups } from "../institutions/business";
 import { getSubscriptions } from "./apim";
 import {
   IoServicesCmsClient,
@@ -288,28 +289,38 @@ export async function forwardIoServicesCmsRequest<
       (result.right.status === 200 || result.right.status === 201) &&
       ("value" in result.right.value || "metadata" in result.right.value)
     ) {
-      // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-      const institutionGroupsResponse = await retrieveInstitutionGroups(
-        backofficeUser.institution.id,
-      );
-      const groupIdToNameMap = reduceGrops(institutionGroupsResponse);
-
       if ("metadata" in result.right.value) {
         // case single service
+        const groupIdToGroupMap: Map<Group["id"], Group> = result.right.value
+          .metadata.group_id
+          ? new Map([
+              [
+                result.right.value.metadata.group_id,
+                await getGroup(
+                  result.right.value.metadata.group_id,
+                  backofficeUser.institution.id,
+                ),
+              ],
+            ])
+          : new Map();
         mappedValue = {
           ...result.right.value,
           metadata: mapServiceGroup(
             result.right.value.metadata,
-            groupIdToNameMap,
+            groupIdToGroupMap,
           ),
         };
       } else {
         // case paginated services
+        const institutionGroupsResponse = await retrieveInstitutionGroups(
+          backofficeUser.institution.id,
+        );
+        const groupIdToGroupMap = reduceGrops(institutionGroupsResponse);
         mappedValue = {
           pagination: result.right.value.pagination,
           value: result.right.value.value?.map((item) => ({
             ...item,
-            metadata: mapServiceGroup(item.metadata, groupIdToNameMap),
+            metadata: mapServiceGroup(item.metadata, groupIdToGroupMap),
           })),
         };
       }

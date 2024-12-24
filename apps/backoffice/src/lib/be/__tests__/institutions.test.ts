@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Institution } from "../../../generated/selfcare/Institution";
-import { UserInstitutionResponse } from "../../../generated/selfcare/UserInstitutionResponse";
+import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { UserInstitutions } from "../../../lib/be/selfcare-client";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
-import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
-import { ManagedInternalError } from "../errors";
+import {
+  StatusEnum,
+  UserGroupResource,
+} from "../../../generated/selfcare/UserGroupResource";
+import { GroupNotFoundError } from "../errors";
 import {
   groupExists,
   retrieveInstitution,
@@ -16,12 +18,13 @@ import {
 } from "../institutions/business";
 
 const mocks: {
-  institution: Institution;
+  institution: InstitutionResponse;
   userInstitutions: UserInstitutions;
   aSelfcareUserId: string;
+  institutionGroup: UserGroupResource;
   institutionGroups: PageOfUserGroupResource;
 } = vi.hoisted(() => ({
-  institution: { id: "institutionId" } as Institution,
+  institution: { id: "institutionId" },
   userInstitutions: [
     {
       id: "0ff2d229-d592-4b68-84c0-4533c6547756",
@@ -29,19 +32,25 @@ const mocks: {
       institutionId: "1dd8cdaa-8cdc-41cf-9922-f35a8429b366",
       institutionDescription: "Vaccari, Francesca e Massari Group",
       institutionRootName: "Caggiano e figli",
-      userMailUuid: "9e22fb49-a0fd-4c98-bb5b-5efe0dbdabfa",
       products: [
         {
           productId: "prod-io",
           status: "ACTIVE",
           productRole: "admin",
           role: "SUB_DELEGATE",
-          env: "ROOT",
         },
       ],
-    } as UserInstitutionResponse,
-  ] as UserInstitutions,
+    },
+  ],
   aSelfcareUserId: "aSelfcareUserId",
+  institutionGroup: {
+    description: "institutionGroups description",
+    id: "institutionGroupsID",
+    institutionId: "institutionGroupsInstID",
+    name: "institutionGroupsName",
+    productId: "institutionGroupsProdID",
+    status: "ACTIVE" as StatusEnum,
+  },
   institutionGroups: {
     content: [
       {
@@ -73,11 +82,13 @@ const {
   getInstitutionByIdMock,
   getInstitutionGroupsMock,
   getManageSubscriptionsMock,
+  getGroupMock,
 } = vi.hoisted(() => ({
   getUserAuthorizedInstitutionsMock: vi.fn(),
   getInstitutionByIdMock: vi.fn(),
   getInstitutionGroupsMock: vi.fn(),
   getManageSubscriptionsMock: vi.fn(),
+  getGroupMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
@@ -87,6 +98,7 @@ vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
     getUserAuthorizedInstitutions: getUserAuthorizedInstitutionsMock,
     getInstitutionById: getInstitutionByIdMock,
     getInstitutionGroups: getInstitutionGroupsMock,
+    getGroup: getGroupMock,
   };
 });
 
@@ -227,44 +239,6 @@ describe("Institutions", () => {
         0,
       );
     });
-
-    it("should rejects on error response if group ID or group Name is not present or undefined", async () => {
-      getInstitutionGroupsMock.mockResolvedValueOnce({
-        content: [
-          {
-            description: "institutionGroups description",
-            id: "institutionGroupsID",
-            institutionId: "institutionGroupsInstID",
-            name: "institutionGroupsName",
-            productId: "institutionGroupsProdID",
-            status: "ACTIVE" as StatusEnum,
-          },
-          {
-            description: "institutionGroupsDescription2",
-            institutionId: "institutionGroupsInstID2",
-            name: "institutionGroupsName2",
-            productId: "institutionGroupsProdID2",
-            status: "ACTIVE" as StatusEnum,
-          },
-        ],
-        number: 0,
-        size: 0,
-        totalElements: 2,
-        totalPages: 0,
-      });
-
-      await expect(() =>
-        retrieveInstitutionGroups("institutionGroupsInstID"),
-      ).rejects.toThrowError(
-        new ManagedInternalError("Error toGroups mapping"),
-      );
-
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
-        (mocks.institutionGroups.content as any[])[0].institutionId,
-        1000,
-        0,
-      );
-    });
   });
 
   describe("groupExists", () => {
@@ -272,49 +246,36 @@ describe("Institutions", () => {
       const institutionId = "institutionId";
       const groupId = "groupId" as NonEmptyString;
       const errorMessage = "errorMessage";
-      getInstitutionGroupsMock.mockRejectedValueOnce(new Error(errorMessage));
+      getGroupMock.mockRejectedValueOnce(new Error(errorMessage));
 
       // when and then
       await expect(() =>
         groupExists(institutionId, groupId),
       ).rejects.toThrowError(errorMessage);
-      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
-        institutionId,
-        1000,
-        0,
-      );
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(groupId, institutionId);
     });
 
     it("should return false when provided groupId does not exists", async () => {
       const institutionId = "institutionId";
-      const groupId = "nonExistingGroupId" as NonEmptyString;
-      getInstitutionGroupsMock.mockResolvedValueOnce(mocks.institutionGroups);
+      const groupId = "groupId" as NonEmptyString;
+      getGroupMock.mockRejectedValueOnce(new GroupNotFoundError("message"));
 
       // when and then
       expect(groupExists(institutionId, groupId)).resolves.toStrictEqual(false);
-      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
-        institutionId,
-        1000,
-        0,
-      );
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(groupId, institutionId);
     });
 
     it("should return true when provided groupId does exists", async () => {
       const institutionId = "institutionId";
-      const groupId = (mocks.institutionGroups.content as any[])[0]
-        .id as NonEmptyString;
-      getInstitutionGroupsMock.mockResolvedValueOnce(mocks.institutionGroups);
+      const groupId = "groupId" as NonEmptyString;
+      getGroupMock.mockResolvedValueOnce(mocks.institutionGroup);
 
       // when and then
       expect(groupExists(institutionId, groupId)).resolves.toStrictEqual(true);
-      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
-        institutionId,
-        1000,
-        0,
-      );
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(groupId, institutionId);
     });
   });
 
