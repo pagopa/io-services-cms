@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 1.21.0
+
+### Minor Changes
+
+- f55c998f: manage subscription display name
+
+### Patch Changes
+
+- Updated dependencies [f55c998f]
+  - @io-services-cms/external-clients@1.7.0
+
 ## 1.20.1
 
 ### Patch Changes
