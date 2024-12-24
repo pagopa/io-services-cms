@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.7.0
+
+### Minor Changes
+
+- f55c998f: manage subscription display name
+
 ## 1.6.0
 
 ### Minor Changes
