@@ -22,6 +22,7 @@ import * as O from "fp-ts/Option";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as RR from "fp-ts/ReadonlyRecord";
+import * as B from "fp-ts/boolean";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
@@ -396,48 +397,31 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   toAzureFunctionHandler,
 );
 
-export const onSelfcareGroupChangeEntryPoint: AzureFunction = async (
-  context,
-  args,
-) => {
-  context.log.info(
-    "maxRetryCount",
-    context.executionContext.retryContext?.maxRetryCount,
-  );
-  context.log.info(
-    "retryCount",
-    context.executionContext.retryContext?.retryCount,
-  );
-  let maxRetry = 3;
-  for (;;) {
-    try {
-      const handlerResult = await pipe(
-        { apimService, serviceLifecycleStore },
-        makeOnSelfcareGroupChangeHandler,
-        processBatchOf(GroupChangeEvent),
-        toAzureFunctionHandler,
-      )(context, args);
-      return handlerResult;
-    } catch (e) {
-      log(
-        context,
-        e instanceof Error ? e.message : "Something went wrong",
-        "warn",
-      );
-      if (maxRetry-- === 0) {
-        // TODO: add item to DLQ
-        throw e;
-      }
-      await sleep(1000);
-    }
-  }
-};
-
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+export const onSelfcareGroupChangeEntryPoint: AzureFunction = (context, args) =>
+  pipe(
+    { apimService, serviceLifecycleStore },
+    makeOnSelfcareGroupChangeHandler,
+    processBatchOf(GroupChangeEvent),
+    RTE.orElseW((e) =>
+      pipe(
+        context.executionContext.retryContext?.maxRetryCount ===
+          context.executionContext.retryContext?.retryCount,
+        B.fold(
+          () => RTE.left(e),
+          () => {
+            log(
+              context,
+              e instanceof Error ? e.message : "Something went wrong",
+              "warn",
+            );
+            context.bindings.syncGroupPoisonQueue = JSON.stringify(args);
+            return RTE.right([]);
+          },
+        ),
+      ),
+    ),
+    toAzureFunctionHandler,
+  )(context, args);
 
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(
