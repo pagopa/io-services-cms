@@ -14,6 +14,8 @@ export interface ApiKeysProps {
   onRotateKey: (type: SubscriptionKeyTypeEnum) => void;
   /** Main component card title */
   title?: string;
+  /** Used to log the page where the event is triggered */
+  type: "manage" | "use";
 }
 
 /** API Key main component
@@ -28,6 +30,10 @@ export const ApiKeys = (props: ApiKeysProps) => (
     padding={3}
   >
     <ApiKeysHeader description={props.description} title={props.title} />
-    <ApiKeysCouple keys={props.keys} onRotateKey={props.onRotateKey} />
+    <ApiKeysCouple
+      keys={props.keys}
+      onRotateKey={props.onRotateKey}
+      type={props.type}
+    />
   </Box>
 );

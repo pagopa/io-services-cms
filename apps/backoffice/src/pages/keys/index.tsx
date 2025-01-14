@@ -7,6 +7,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { trackApiKeyPageEvent } from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -62,6 +63,7 @@ export default function Keys() {
           keys={mkData}
           onRotateKey={handleRotateKey}
           title={t("routes.keys.manage.title")}
+          type="manage"
         />
         <AuthorizedCidrs
           cidrs={acData?.cidrs as unknown as string[]}
@@ -84,6 +86,7 @@ export default function Keys() {
             }
             onGenerateClick={() => router.push("/keys/new-group-api-key")}
             title={t("routes.keys.groups.title")}
+          />
         </Stack>
       )}
     </>

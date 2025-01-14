@@ -6,6 +6,7 @@ import { useDialog } from "@/components/dialog-provider";
 import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroupSubscription";
 import { Groups } from "@/generated/api/Groups";
 import useFetch from "@/hooks/use-fetch";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -17,7 +18,7 @@ import {
 } from "./api-key-builder-step";
 
 const apiKeyDefaultData: CreateManageGroupSubscription = {
-  groupId: "",
+  groupId: "" as NonEmptyString,
 };
 
 export interface ApiKeyCreateUpdateProps {

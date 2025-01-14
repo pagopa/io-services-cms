@@ -359,6 +359,7 @@ const GroupApiKey = ({
             secondary_key: apiKey.secondary_key,
           }}
           onRotateKey={(type) => onRotateKey(type, subscriptionId)}
+          type="manage" // TODO: must add new type for "manage_group"
         />
         <AuthorizedCidrs
           cidrs={apiKey.cidrs as unknown as string[]}
