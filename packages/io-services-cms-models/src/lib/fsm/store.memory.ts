@@ -1,3 +1,4 @@
+import { BulkOperationResponse } from "@azure/cosmos";
 import * as O from "fp-ts/Option";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
@@ -13,7 +14,7 @@ type MemoryStore<T extends WithState<string, Record<string, unknown>>> = {
 
 export const createMemoryStore = <
   T extends {
-    data: { metadata?: { group_id?: string } };
+    data: { metadata?: { group_id?: string }; name: string };
     id: string;
   } & WithState<string, Record<string, unknown>>,
 >(): MemoryStore<T> => {
@@ -25,6 +26,7 @@ export const createMemoryStore = <
         ids.map((id) => m.get(id)),
         (values) => TE.of(values.map((value) => O.fromNullable(value))),
       ),
+    bulkPatch: (_) => TE.right(undefined as unknown as BulkOperationResponse),
     clear: () => m.clear(),
     delete: (id: string) =>
       pipe(
@@ -32,11 +34,43 @@ export const createMemoryStore = <
         T.map(() => undefined),
         TE.fromTask,
       ),
+    executeOnServicesFilteredByGroupId: (
+      groupId: string,
+      callback: (groupIds: readonly string[]) => void,
+    ): TE.TaskEither<Error, void> =>
+      pipe(
+        Array.from(m.values()),
+        (values) =>
+          values.filter((value) => value.data.metadata?.group_id === groupId),
+        (values) =>
+          TE.of(
+            pipe(
+              values.map((value) => value.id),
+              callback,
+            ),
+          ),
+      ),
     fetch: (id: string) =>
       pipe(
         () => Promise.resolve(m.get(id)),
         T.map(O.fromNullable),
         TE.fromTask,
+      ),
+    getGroupUnboundedServicesByIds: (ids: readonly string[]) =>
+      pipe(
+        ids.map((id) => m.get(id)),
+        (values) =>
+          values.filter(
+            (item) =>
+              !!item && !!item.data.metadata && !item.data.metadata.group_id,
+          ),
+        (values) =>
+          TE.of(
+            values.map((value) => ({
+              id: value?.id ?? "",
+              name: value?.data.name ?? "",
+            })),
+          ),
       ),
     getServiceIdsByGroupIds: (
       groupIds: readonly string[],

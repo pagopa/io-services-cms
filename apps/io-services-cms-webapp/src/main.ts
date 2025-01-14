@@ -1,4 +1,5 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
+import { AzureFunction } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   LegacyServiceCosmosResource,
@@ -41,7 +42,12 @@ import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
 } from "./lib/azure/cosmos";
-import { processAllOf, processBatchOf, setBindings } from "./lib/azure/misc";
+import {
+  log,
+  processAllOf,
+  processBatchOf,
+  setBindings,
+} from "./lib/azure/misc";
 import { jiraClient } from "./lib/clients/jira-client";
 import { createRequestPublicationHandler } from "./publicator/request-publication-handler";
 import { createRequestReviewHandler } from "./reviewer/request-review-handler";
@@ -61,6 +67,10 @@ import { jiraProxy } from "./utils/jira-proxy";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
+import {
+  GroupChangeEvent,
+  makeHandler as makeOnSelfcareGroupChangeHandler,
+} from "./watchers/on-selfcare-group-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
 import { handler as onServiceDetailPublicationChangeHandler } from "./watchers/on-service-detail-publication-change";
 import { handler as onServiceHistoryHandler } from "./watchers/on-service-history-change";
@@ -385,6 +395,49 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   })),
   toAzureFunctionHandler,
 );
+
+export const onSelfcareGroupChangeEntryPoint: AzureFunction = async (
+  context,
+  args,
+) => {
+  context.log.info(
+    "maxRetryCount",
+    context.executionContext.retryContext?.maxRetryCount,
+  );
+  context.log.info(
+    "retryCount",
+    context.executionContext.retryContext?.retryCount,
+  );
+  let maxRetry = 3;
+  for (;;) {
+    try {
+      const handlerResult = await pipe(
+        { apimService, serviceLifecycleStore },
+        makeOnSelfcareGroupChangeHandler,
+        processBatchOf(GroupChangeEvent),
+        toAzureFunctionHandler,
+      )(context, args);
+      return handlerResult;
+    } catch (e) {
+      log(
+        context,
+        e instanceof Error ? e.message : "Something went wrong",
+        "warn",
+      );
+      if (maxRetry-- === 0) {
+        // TODO: add item to DLQ
+        throw e;
+      }
+      await sleep(1000);
+    }
+  }
+};
+
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(

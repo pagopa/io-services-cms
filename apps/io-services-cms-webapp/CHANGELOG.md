@@ -1,5 +1,69 @@
 # io-services-cms-webapp
 
+## 1.40.6
+
+### Patch Changes
+
+- Updated dependencies [f55c998f]
+  - @io-services-cms/external-clients@1.7.0
+
+## 1.40.5
+
+### Patch Changes
+
+- 70d33944: add selc eh trigger custom retry logic
+
+## 1.40.4
+
+### Patch Changes
+
+- a3d34206: log using context
+
+## 1.40.3
+
+### Patch Changes
+
+- 7d94f353: log eh trigger executions
+
+## 1.40.2
+
+### Patch Changes
+
+- 0f16b202: configure retry on host.json
+
+## 1.40.1
+
+### Patch Changes
+
+- 7d6a3261: disable SelfcareGroupWatcher on slot
+
+## 1.40.0
+
+### Minor Changes
+
+- 692d63d8: add SelfcareGroupWatcher Az Fn
+
+### Patch Changes
+
+- Updated dependencies [692d63d8]
+  - @io-services-cms/models@1.27.0
+  - @io-services-cms/external-clients@1.6.0
+
+## 1.39.6
+
+### Patch Changes
+
+- Updated dependencies [f8ee3f02]
+  - @io-services-cms/models@1.26.0
+
+## 1.39.5
+
+### Patch Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+- Updated dependencies [7cbd2e9a]
+  - @io-services-cms/models@1.25.0
+
 ## 1.39.4
 
 ### Patch Changes

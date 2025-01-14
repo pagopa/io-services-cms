@@ -7,10 +7,13 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
+import { trackOverviewPageEvent } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
+import mixpanel from "mixpanel-browser";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.overview.title";
@@ -38,6 +41,15 @@ export default function Home() {
     ) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
     }
+    const mixpanelSuperProperties = {
+      institution_id: session?.user?.institution.id,
+      organization_fiscal_code: session?.user?.institution.fiscalCode,
+      organization_name: session?.user?.institution.name,
+      user_role: session?.user?.institution.role,
+    };
+    mixpanel.register(mixpanelSuperProperties);
+    trackOverviewPageEvent();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

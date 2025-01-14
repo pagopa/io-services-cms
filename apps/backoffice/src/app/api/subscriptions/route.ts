@@ -5,11 +5,13 @@ import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
 import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { isAdmin } from "@/lib/be/authz";
 import {
+  GroupNotFoundError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
+import { getGroup } from "@/lib/be/institutions/business";
 import { getQueryParam, parseBody } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
@@ -49,12 +51,21 @@ export const PUT = withJWTAuthHandler(
       );
     }
     try {
+      const group = await getGroup(
+        requestPayload.groupId,
+        backofficeUser.institution.id,
+      );
       const response = await upsertManageSubscription(
         backofficeUser.parameters.userId,
-        requestPayload.groupId,
+        { id: group.id, name: group.name },
       );
       return sanitizedNextResponseJson(response);
     } catch (error) {
+      if (error instanceof GroupNotFoundError) {
+        return handleBadRequestErrorResponse(
+          "Provided group_id does not exists",
+        );
+      }
       handlerErrorLog(
         `An Error has occurred while creating subscription for institution having APIM userId: ${backofficeUser.parameters.userId}, caused by: `,
         error,

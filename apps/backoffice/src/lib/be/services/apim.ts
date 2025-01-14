@@ -15,8 +15,8 @@ const emptySubscriptions: SubscriptionCollection = {
 
 export const getSubscriptions = (
   userId: string,
-  limit: number,
-  offset: number,
+  limit?: number,
+  offset?: number,
   serviceIdFilter?: readonly string[] | string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
   Array.isArray(serviceIdFilter) && serviceIdFilter.length === 0
@@ -27,13 +27,13 @@ export const getSubscriptions = (
           pipe(
             apimRestClient.getUserSubscriptions(
               userId,
-              limit,
-              offset,
               serviceIdFilter
                 ? ApimUtils.apim_filters.subscriptionsByIdsApimFilter(
                     serviceIdFilter,
                   )
                 : ApimUtils.apim_filters.subscriptionsExceptManageOneApimFilter(),
+              limit,
+              offset,
             ),
             TE.orElse((error) =>
               isAxiosError(error) &&

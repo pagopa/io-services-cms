@@ -1,5 +1,23 @@
 # io-services-cms-models
 
+## 1.27.0
+
+### Minor Changes
+
+- 692d63d8: add SelfcareGroupWatcher Az Fn
+
+## 1.26.0
+
+### Minor Changes
+
+- f8ee3f02: add bulk patch service API
+
+## 1.25.0
+
+### Minor Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+
 ## 1.24.0
 
 ### Minor Changes

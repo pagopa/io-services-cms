@@ -212,6 +212,38 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+    patch:
+      tags:
+        - services
+      summary: Bulk patch existing services by ID
+      description: Bulk patch existing services by ID
+      operationId: bulkPatchServices
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: A patch operations
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkPatchServicePayload'
+        required: true
+      responses:
+        '207':
+          description: Operations executed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkPatchServiceResponse'
+        '400':
+          description: Invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
     get:
       tags:
         - services
@@ -263,6 +295,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServiceList'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /services/group-unbound:
+    get:
+      tags:
+        - services
+      summary: Retrieve all group-unbounded services
+      description: Retrieve all services owned by the calling user that are not related to any groups
+      operationId: getGroupUnboundedServices
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Services fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnboundedGroupServices'
         '401':
           description: Unauthorized
         '403':
@@ -1300,6 +1356,36 @@ components:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePublication'
     PatchServicePayload:
       $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/PatchServicePayload'
+    BulkPatchService:
+      allOf:
+        - $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/PatchServicePayload'
+        - type: object
+          properties:
+            id:
+              type: string
+          required:
+            - id
+    BulkPatchServicePayload:
+      type: array
+      items:
+        $ref: '#/components/schemas/BulkPatchService'
+    PatchServiceOperationResult:
+      type: object
+      description: Service basic data
+      properties:
+        id:
+          type: string
+          description: Service id
+        statusCode:
+          type: number
+          description: Operation result
+      required:
+        - id
+        - statusCode
+    BulkPatchServiceResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/PatchServiceOperationResult'
     ServicePayload:
       type: object
       description: Service basic data
@@ -1558,7 +1644,6 @@ components:
         digitalAddress:
           type: string
           description: Institution's digitalAddress
-          format: email
           example: email@pec.mail.org
 
         address:
@@ -1575,17 +1660,6 @@ components:
           description: The origin form which the institution has been retrieved
           example: IPA
         institutionType:
-          enum:
-            - AS
-            - GSP
-            - PA
-            - PG
-            - PSP
-            - PT
-            - SA
-            - SCP
-            - REC
-            - CON
           type: string
         geographicTaxonomies:
           type: array
@@ -1593,9 +1667,6 @@ components:
             $ref: '#/components/schemas/GeographicTaxonomy'
       additionalProperties: false
     GeographicTaxonomy:
-      required:
-        - code
-        - desc
       type: object
       properties:
         code:
@@ -1632,6 +1703,26 @@ components:
           type: string
       required:
         - identity_token
+    UnboundedGroupServices:
+      type: object
+      properties:
+        unboundedServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinifiedService'
+      required:
+        - value
+        - pagination
+    MinifiedService:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
     ServiceList:
       type: object
       properties:
@@ -1728,6 +1819,7 @@ components:
       properties:
         groupId:
           type: string
+          minLength: 1
       required:
         - groupId
     ServiceLifecycleMetadata:

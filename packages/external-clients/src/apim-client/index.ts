@@ -4,8 +4,10 @@ import {
   ProductContract,
   Resource,
   SubscriptionContract,
+  SubscriptionGetResponse,
   SubscriptionKeysContract,
   SubscriptionListSecretsResponse,
+  SubscriptionState,
   UserContract,
   UserCreateParameters,
   UserGetResponse,
@@ -115,7 +117,7 @@ export interface ApimService {
   ) => TE.TaskEither<ApimRestError, O.Option<ProductContract>>;
   readonly getSubscription: (
     subscriptionId: string,
-  ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  ) => TE.TaskEither<ApimRestError, SubscriptionGetResponse>;
   readonly getUser: (
     userId: string,
   ) => TE.TaskEither<ApimRestError, UserGetResponse>;
@@ -139,9 +141,22 @@ export interface ApimService {
     subscriptionId: string,
     keyType: SubscriptionKeyType,
   ) => TE.TaskEither<ApimRestError, SubscriptionContract>;
+  /**
+   * Updates the details of a subscription specified by its identifier.
+   * @param subscriptionId Subscription entity Identifier
+   * @param parameters Update parameters details
+   * @param ifMatch ETag of the Entity. ETag should match the current entity state from the header response of the GET request or it should be * for unconditional update.
+   * @returns the updated Subscription
+   */
+  readonly updateSubscription: (
+    subscriptionId: string,
+    parameters: { displayName: string; state: SubscriptionState },
+    ifMatch?: string,
+  ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
   readonly upsertSubscription: (
     ownerId: string,
     subscriptionId: string,
+    displayName?: string,
   ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
 }
 
@@ -225,7 +240,19 @@ export const getApimService = (
       subscriptionId,
       keyType,
     ),
-  upsertSubscription: (ownerId, subscriptionId) =>
+  updateSubscription: (subscriptionId, { displayName, state }, ifMatch = "*") =>
+    pipe(
+      updateSubscription(
+        apimClient,
+        apimResourceGroup,
+        apimServiceName,
+        subscriptionId,
+        ifMatch,
+        displayName,
+        state,
+      ),
+    ),
+  upsertSubscription: (ownerId, subscriptionId, displayName) =>
     pipe(
       getProductByName(
         apimClient,
@@ -254,6 +281,7 @@ export const getApimService = (
           productId,
           userId,
           subscriptionId,
+          displayName,
         ),
       ),
     ),
@@ -411,6 +439,7 @@ const upsertSubscription = (
   productId: string,
   ownerId: string,
   subscriptionId: string,
+  displayName?: string,
 ): TE.TaskEither<ApimRestError, SubscriptionContract> =>
   pipe(
     TE.tryCatch(
@@ -420,10 +449,48 @@ const upsertSubscription = (
           apimServiceName,
           subscriptionId,
           {
-            displayName: subscriptionId,
+            displayName: displayName ?? subscriptionId,
             ownerId,
             scope: `/products/${productId}`,
             state: "active",
+          },
+        ),
+      identity,
+    ),
+    chainApimMappedError,
+  );
+
+/**
+ * Update an existing subscription for a given user
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param productId
+ * @param ownerId
+ * @param subscriptionId
+ * @returns
+ */
+const updateSubscription = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  subscriptionId: string,
+  ifMatch: string,
+  displayName: string,
+  state: SubscriptionState,
+): TE.TaskEither<ApimRestError, SubscriptionContract> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.update(
+          apimResourceGroup,
+          apimServiceName,
+          subscriptionId,
+          ifMatch,
+          {
+            displayName,
+            state,
           },
         ),
       identity,

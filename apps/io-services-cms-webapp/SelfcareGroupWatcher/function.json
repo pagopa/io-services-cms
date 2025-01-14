@@ -1,0 +1,16 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "eventHubTrigger",
+      "direction": "in",
+      "name": "messages",
+      "connection": "EH_SC_CONNECTIONSTRING",
+      "eventHubName": "%EH_SC_USERGROUP_NAME%",
+      "consumerGroup": "%EH_SC_USERGROUP_CONSUMER_GROUP%",
+      "cardinality": "many"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "onSelfcareGroupChangeEntryPoint"
+}

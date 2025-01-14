@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
+import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
+import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
+import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -16,12 +19,13 @@ import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
 import { BackOfficeUser } from "../../../../types/next-auth";
+import { userAuthz } from "../authz";
 import {
   ManagedInternalError,
   handleBadRequestErrorResponse,
   handleInternalErrorResponse,
 } from "../errors";
-import { retrieveInstitutionGroups } from "../institutions/business";
+import { getGroup, retrieveInstitutionGroups } from "../institutions/business";
 import { getSubscriptions } from "./apim";
 import {
   IoServicesCmsClient,
@@ -29,7 +33,9 @@ import {
   getServiceTopics,
 } from "./cms";
 import {
+  bulkPatch as bulkPatchCosmos,
   retrieveAuthorizedServiceIds,
+  retrieveGroupUnboundedServices,
   retrieveLifecycleServices,
   retrievePublicationServices,
 } from "./cosmos";
@@ -59,10 +65,11 @@ interface PathParameters {
 
 const retrieveSubscriptions = (
   backofficeUser: BackOfficeUser,
-  limit: number,
-  offset: number,
+  limit?: number,
+  offset?: number,
   serviceId?: string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
+  !userAuthz(backofficeUser).isAdmin() &&
   backofficeUser.permissions.selcGroups &&
   backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
@@ -193,6 +200,31 @@ export const retrieveServiceList = async (
   )();
 
 /**
+ * Retrive all the services that are not bound to any Group
+ * @param backofficeUser the logged user
+ * @returns the minified services
+ */
+export const retrieveUnboundedGroupServices = async (
+  backofficeUser: BackOfficeUser,
+): Promise<readonly { id: string; name: string }[]> =>
+  pipe(
+    retrieveSubscriptions(backofficeUser),
+    TE.chain((subscriptions) =>
+      pipe(
+        subscriptions.value
+          ? subscriptions.value.map(
+              (subscription) => subscription.name as NonEmptyString,
+            )
+          : [],
+        retrieveGroupUnboundedServices,
+      ),
+    ),
+    TE.getOrElse((error) => {
+      throw error;
+    }),
+  )();
+
+/**
  * The Backoffice needs to call io-services-cms APIs,
  * we chose to implement intermediate APIs to do this in the B4F,
  * the following method is responsible for forwarding requests to the corresponding io-services-cms APIs
@@ -228,8 +260,9 @@ export async function forwardIoServicesCmsRequest<
       "x-subscription-id": backofficeUser.parameters.subscriptionId,
       "x-user-email": backofficeUser.parameters.userEmail,
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
-      "x-user-groups-selc":
-        backofficeUser.permissions.selcGroups?.join(",") ?? "",
+      "x-user-groups-selc": userAuthz(backofficeUser).isAdmin()
+        ? ""
+        : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
       "x-user-id": backofficeUser.parameters.userId,
     };
 
@@ -256,28 +289,38 @@ export async function forwardIoServicesCmsRequest<
       (result.right.status === 200 || result.right.status === 201) &&
       ("value" in result.right.value || "metadata" in result.right.value)
     ) {
-      // TODO: replace the fallowing API call with retrieveInstitutionGroupById "future" API (not already implemented by Selfcare)
-      const institutionGroupsResponse = await retrieveInstitutionGroups(
-        backofficeUser.institution.id,
-      );
-      const groupIdToNameMap = reduceGrops(institutionGroupsResponse);
-
       if ("metadata" in result.right.value) {
         // case single service
+        const groupIdToGroupMap: Map<Group["id"], Group> = result.right.value
+          .metadata.group_id
+          ? new Map([
+              [
+                result.right.value.metadata.group_id,
+                await getGroup(
+                  result.right.value.metadata.group_id,
+                  backofficeUser.institution.id,
+                ),
+              ],
+            ])
+          : new Map();
         mappedValue = {
           ...result.right.value,
           metadata: mapServiceGroup(
             result.right.value.metadata,
-            groupIdToNameMap,
+            groupIdToGroupMap,
           ),
         };
       } else {
         // case paginated services
+        const institutionGroupsResponse = await retrieveInstitutionGroups(
+          backofficeUser.institution.id,
+        );
+        const groupIdToGroupMap = reduceGrops(institutionGroupsResponse);
         mappedValue = {
           pagination: result.right.value.pagination,
           value: result.right.value.value?.map((item) => ({
             ...item,
-            metadata: mapServiceGroup(item.metadata, groupIdToNameMap),
+            metadata: mapServiceGroup(item.metadata, groupIdToGroupMap),
           })),
         };
       }
@@ -304,6 +347,27 @@ export const retrieveServiceTopics = async (
   await getServiceTopics(
     nextRequest.headers.get("X-Forwarded-For") ?? undefined,
   );
+
+export const bulkPatch = async (
+  bulkPatchServicePayload: BulkPatchServicePayload,
+): Promise<BulkPatchServiceResponse> =>
+  pipe(
+    bulkPatchCosmos(
+      bulkPatchServicePayload.map((bulkPatchService) => ({
+        data: { metadata: bulkPatchService.metadata },
+        id: bulkPatchService.id,
+      })),
+    ),
+    TE.map(
+      RA.mapWithIndex((i, opResponse) => ({
+        id: bulkPatchServicePayload[i].id,
+        statusCode: opResponse.statusCode,
+      })),
+    ),
+    TE.getOrElse((error) => {
+      throw error;
+    }),
+  )();
 
 /**
  * SUBSCRIPTIONS

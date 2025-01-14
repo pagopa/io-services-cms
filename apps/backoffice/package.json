@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "1.18.2",
+  "version": "1.21.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -20,7 +20,7 @@
     "coverage:fe": "vitest run --config ./vitest.config.react.ts --coverage",
     "generate:api-definitions": "rm -rf ./src/generated/api && gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
     "generate:services-cms": "rm -rf ./src/generated/services-cms && gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
-    "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml --out-dir ./src/generated/selfcare --response-decoders"
+    "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json --out-dir ./src/generated/selfcare --response-decoders"
   },
   "dependencies": {
     "@azure/arm-apimanagement": "8.1.2",
@@ -46,6 +46,7 @@
     "io-ts": "^2.2.21",
     "jose": "^4.15.5",
     "lodash": "^4.17.21",
+    "mixpanel-browser": "^2.55.1",
     "next": "^13.5.6",
     "next-auth": "^4.24.5",
     "next-i18next": "^14.0.3",
@@ -66,6 +67,7 @@
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^14.1.2",
     "@types/lodash": "^4.14.202",
+    "@types/mixpanel-browser": "^2.50.0",
     "@types/node": "20.4.5",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",

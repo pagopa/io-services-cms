@@ -523,69 +523,81 @@ describe("ApimService Test", () => {
         get: vi.fn(),
       },
     };
-    it("should return the upsert subscription", async () => {
-      mockApimClient.product.listByService.mockImplementationOnce(() => [
-        Promise.resolve({
+
+    it.each`
+      scenario                    | displayName
+      ${"displayName is not set"} | ${undefined}
+      ${"displayName is set"}     | ${"displayName"}
+    `(
+      "should return the upsert subscription when $scenario",
+      async ({ displayName }) => {
+        // given
+        mockApimClient.product.listByService.mockImplementationOnce(() => [
+          Promise.resolve({
+            _etag: "_etag",
+            description: aProductDescription,
+            displayName: aProductName,
+            state: aProductState,
+            id: aProductId,
+          }),
+        ]);
+        mockApimClient.user.get.mockImplementationOnce((_, __, userId) =>
+          Promise.resolve({
+            _etag: "_etag",
+            userId,
+            id: anOwnerId,
+          }),
+        );
+        mockApimClient.subscription.createOrUpdate.mockResolvedValueOnce({
           _etag: "_etag",
-          description: aProductDescription,
-          displayName: aProductName,
-          state: aProductState,
-          id: aProductId,
-        }),
-      ]);
-      mockApimClient.user.get.mockImplementationOnce((_, __, userId) =>
-        Promise.resolve({
-          _etag: "_etag",
-          userId,
-          id: anOwnerId,
-        }),
-      );
-      mockApimClient.subscription.createOrUpdate.mockResolvedValueOnce({
-        _etag: "_etag",
-      });
-      // create ApimService
-      const apimService = getApimService(
-        mockApimClient as unknown as ApiManagementClient,
-        anApimResourceGroup,
-        anApimServiceName,
-        anApimProductName,
-      );
+        });
+        // create ApimService
+        const apimService = getApimService(
+          mockApimClient as unknown as ApiManagementClient,
+          anApimResourceGroup,
+          anApimServiceName,
+          anApimProductName,
+        );
 
-      // call getUser
-      const result = await apimService.upsertSubscription(
-        anUserId,
-        aServiceId,
-      )();
+        // when
+        // call getUser
+        const result = await apimService.upsertSubscription(
+          anUserId,
+          aServiceId,
+          displayName,
+        )();
 
-      // expect result
-      expect(E.isRight(result)).toBeTruthy();
+        // then
+        // expect result
+        expect(E.isRight(result)).toBeTruthy();
 
-      expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
-      expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
-        anApimResourceGroup,
-        anApimServiceName,
-        {
-          filter: `name eq '${anApimProductName}'`,
-        },
-      );
-      expect(mockApimClient.user.get).toHaveBeenCalledOnce();
-      expect(mockApimClient.user.get).toHaveBeenCalledWith(
-        anApimResourceGroup,
-        anApimServiceName,
-        anUserId,
-      );
-      expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledWith(
-        anApimResourceGroup,
-        anApimServiceName,
-        aServiceId,
-        {
-          displayName: aServiceId,
-          ownerId: anOwnerId,
-          scope: `/products/${aProductId}`,
-          state: "active",
-        },
-      );
-    });
+        expect(mockApimClient.product.listByService).toHaveBeenCalledOnce();
+        expect(mockApimClient.product.listByService).toHaveBeenCalledWith(
+          anApimResourceGroup,
+          anApimServiceName,
+          {
+            filter: `name eq '${anApimProductName}'`,
+          },
+        );
+        expect(mockApimClient.user.get).toHaveBeenCalledOnce();
+        expect(mockApimClient.user.get).toHaveBeenCalledWith(
+          anApimResourceGroup,
+          anApimServiceName,
+          anUserId,
+        );
+        expect(mockApimClient.subscription.createOrUpdate).toHaveBeenCalledWith(
+          anApimResourceGroup,
+          anApimServiceName,
+          aServiceId,
+          {
+            displayName: displayName ? displayName : aServiceId,
+            ownerId: anOwnerId,
+            scope: `/products/${aProductId}`,
+            state: "active",
+          },
+        );
+      },
+    );
 
     it("should return an error when the product is not found", async () => {
       // mock ApimClient
@@ -637,6 +649,7 @@ describe("ApimService Test", () => {
       expect(mockApimClient.user.get).not.toHaveBeenCalled();
       expect(mockApimClient.subscription.createOrUpdate).not.toHaveBeenCalled();
     });
+
     it("should fail when cannot find apim user", async () => {
       // mock ApimClient
       mockApimClient.product.listByService.mockImplementationOnce(() => [

@@ -8,21 +8,13 @@ import {
   IAzureApiAuthorization,
   UserGroup,
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { IAzureUserAttributesManage } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_user_attributes_manage";
-import {
-  ClientIp,
-  ClientIpMiddleware,
-} from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
+import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler,
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
-import {
-  checkSourceIpForHandler,
-  clientIPAndCidrTuple as ipTuple,
-} from "@pagopa/io-functions-commons/dist/src/utils/source_ip_check";
 import {
   IWithinRangeIntegerTag,
   IntegerFromString,
@@ -36,6 +28,7 @@ import {
   ResponseSuccessJson,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -51,24 +44,19 @@ import {
   trackEventOnResponseOK,
 } from "../../utils/applicationinsight";
 import { AzureUserAttributesManageMiddlewareWrapper } from "../../utils/azure-user-attributes-manage-middleware-wrapper";
+import { checkSourceIp } from "../../utils/check-source-ip";
 import { itemToResponse } from "../../utils/converters/service-lifecycle-converters";
 import { ErrorResponseTypes, getLogger } from "../../utils/logger";
 
 const logPrefix = "GetServicesHandler";
 
-type HandlerResponseTypes =
-  | ErrorResponseTypes
-  | IResponseSuccessJson<ServicePagination>;
-
 type GetServicesHandler = (
   context: Context,
   auth: IAzureApiAuthorization,
-  clientIp: ClientIp,
-  attrs: IAzureUserAttributesManage,
   limit: O.Option<number>,
   offset: O.Option<number>,
   authzGroupIds: readonly NonEmptyString[],
-) => Promise<HandlerResponseTypes>;
+) => TE.TaskEither<ErrorResponseTypes, IResponseSuccessJson<ServicePagination>>;
 
 interface Dependencies {
   // An instance of APIM Client
@@ -98,9 +86,8 @@ const buildServicePagination = (
 });
 
 const getServices =
-  (config: IConfig) =>
+  (config: IConfig, fsmLifecycleClient: ServiceLifecycle.FsmClient) =>
   (
-    fsmLifecycleClient: ServiceLifecycle.FsmClient,
     subscriptions: readonly SubscriptionContract[],
   ): TE.TaskEither<
     Error | IResponseErrorInternal,
@@ -207,37 +194,36 @@ export const makeGetServicesHandler =
     fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): GetServicesHandler =>
-  (context, auth, __, ___, limit, offset, authzGroupIds) =>
+  (context, auth, limit, offset, authzGroupIds) =>
     pipe(
-      getAuthorizedSubscriptions(
-        fsmLifecycleClientCreator(authzGroupIds),
-        apimService,
-      )(
-        authzGroupIds,
-        auth.userId,
-        getOffset(offset),
-        getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
-      ),
-      TE.chain((subscriptions) =>
+      authzGroupIds,
+      fsmLifecycleClientCreator,
+      (fsmLifecycleClient) =>
         pipe(
-          getServices(config)(
-            fsmLifecycleClientCreator(authzGroupIds),
-            subscriptions,
-          ),
-          TE.map((services) =>
-            buildServiceSubscriptionPairs(subscriptions, services),
-          ),
-        ),
-      ),
-      TE.map((serviceSubscriptionPairs) =>
-        ResponseSuccessJson<ServicePagination>(
-          buildServicePagination(
-            serviceSubscriptionPairs,
-            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
+          getAuthorizedSubscriptions(fsmLifecycleClient, apimService)(
+            authzGroupIds,
+            auth.userId,
             getOffset(offset),
+            getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
+          ),
+          TE.chain((subscriptions) =>
+            pipe(
+              getServices(config, fsmLifecycleClient)(subscriptions),
+              TE.map((services) =>
+                buildServiceSubscriptionPairs(subscriptions, services),
+              ),
+            ),
+          ),
+          TE.map((serviceSubscriptionPairs) =>
+            ResponseSuccessJson<ServicePagination>(
+              buildServicePagination(
+                serviceSubscriptionPairs,
+                getLimit(limit, config.PAGINATION_DEFAULT_LIMIT),
+                getOffset(offset),
+              ),
+            ),
           ),
         ),
-      ),
       TE.mapLeft((err) =>
         "kind" in err ? err : ResponseErrorInternal(err.message),
       ),
@@ -255,17 +241,12 @@ export const makeGetServicesHandler =
           userSubscriptionId: auth.subscriptionId,
         }),
       ),
-      TE.toUnion,
-    )();
+    );
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
   (handler: GetServicesHandler) => {
     const middlewaresWrap = withRequestMiddlewares(
-      // extract the Azure functions context
-      ContextMiddleware(),
-      // only allow requests by users belonging to certain groups
-      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
       // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
@@ -273,6 +254,10 @@ export const applyRequestMiddelwares =
         subscriptionCIDRsModel,
         config,
       ),
+      // extract the Azure functions context
+      ContextMiddleware(),
+      // only allow requests by users belonging to certain groups
+      AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
       // extract limit as number of records to return from query params
       OptionalQueryParamMiddleware(
         "limit",
@@ -292,9 +277,18 @@ export const applyRequestMiddelwares =
       SelfcareUserGroupsMiddleware(),
     );
     return wrapRequestHandler(
-      middlewaresWrap(
-        // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
+      middlewaresWrap((...args) =>
+        pipe(
+          args,
+          ([clientIp, userAttributesManage, ...rest]) =>
+            pipe(
+              checkSourceIp(clientIp, userAttributesManage.authorizedCIDRs),
+              E.map((_) => rest),
+            ),
+          TE.fromEither,
+          TE.chainW((args) => handler(...args)),
+          TE.toUnion,
+        )(),
       ),
     );
   };

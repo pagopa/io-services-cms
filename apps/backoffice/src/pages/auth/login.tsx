@@ -1,5 +1,7 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { trackLoginEvent } from "@/utils/mix-panel";
+import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -16,6 +18,11 @@ export default function Login() {
     return parsedHash.get("token");
   };
 
+  const manageMixpanelLogin = () => {
+    mixpanel.identify();
+    trackLoginEvent();
+  };
+
   /**
    * Handle identity
    * 1. Get id token from url and check it
@@ -29,6 +36,7 @@ export default function Login() {
       return;
     }
 
+    manageMixpanelLogin();
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
       callbackUrl: "/",
@@ -41,10 +49,12 @@ export default function Login() {
     if (session && router.isReady) {
       // redirect to the return url or home page
       // router.push((router.query.returnUrl as string) || "/");
+
       router.push("/");
     } else {
       handleIdentity();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, router]);
 

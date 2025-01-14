@@ -5,8 +5,8 @@ import {
 } from "@/generated/api/SubscriptionType";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 
 import { getApimService, upsertSubscription } from "../apim-service";
 import {
@@ -14,7 +14,10 @@ import {
   apimErrorToManagedInternalError,
 } from "../errors";
 
-const parseState = (state?: SubscriptionState): StateEnum => {
+// Type utility to extract the right side of a TaskEither
+type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
+
+const parseState = (state: SubscriptionState): StateEnum => {
   switch (state) {
     case "active":
       return StateEnum.active;
@@ -28,8 +31,6 @@ const parseState = (state?: SubscriptionState): StateEnum => {
       return StateEnum.submitted;
     case "suspended":
       return StateEnum.suspended;
-    case undefined:
-      return StateEnum.active;
     default:
       // eslint-disable-next-line no-case-declarations
       const _: never = state;
@@ -37,13 +38,41 @@ const parseState = (state?: SubscriptionState): StateEnum => {
   }
 };
 
+const toSubscription = (
+  subscription: RightType<ReturnType<typeof upsertSubscription>>,
+) => {
+  if (!subscription.name) {
+    throw new ManagedInternalError(
+      "Partial data received",
+      "Subscription 'name' is not defined",
+    );
+  }
+  if (!subscription.state) {
+    throw new ManagedInternalError(
+      "Partial data received",
+      "Subscription 'state' is not defined",
+    );
+  }
+  if (!subscription.displayName) {
+    throw new ManagedInternalError(
+      "Partial data received",
+      "Subscription 'displayName' is not defined",
+    );
+  }
+  return {
+    id: subscription.name,
+    name: subscription.displayName,
+    state: parseState(subscription.state),
+  };
+};
+
 export async function upsertManageSubscription(
   ownerId: string,
-  groupId?: string,
+  group?: { id: string; name: string },
 ): Promise<Subscription> {
   const maybeSubscription = await (
-    groupId
-      ? upsertSubscription("MANAGE_GROUP", ownerId, groupId)
+    group
+      ? upsertSubscription("MANAGE_GROUP", ownerId, group)
       : upsertSubscription("MANAGE", ownerId)
   )();
 
@@ -60,26 +89,8 @@ export async function upsertManageSubscription(
       );
     }
   }
-  if (!maybeSubscription.right.id) {
-    throw new ManagedInternalError(
-      "Partial data received",
-      "Subscription 'id' is not defined",
-    );
-  }
-  if (!maybeSubscription.right.name) {
-    throw new ManagedInternalError(
-      "Partial data received",
-      "Subscription 'name' is not defined",
-    );
-  }
 
-  return {
-    id: ApimUtils.parseIdFromFullPath(
-      maybeSubscription.right.id as NonEmptyString,
-    ),
-    name: maybeSubscription.right.name,
-    state: parseState(maybeSubscription.right.state),
-  };
+  return toSubscription(maybeSubscription.right);
 }
 
 export async function getManageSubscriptions(
@@ -121,9 +132,5 @@ export async function getManageSubscriptions(
     );
   }
 
-  return maybeSubscriptions.right.map((subContract) => ({
-    id: subContract.name ?? "",
-    name: subContract.displayName ?? "",
-    state: parseState(subContract.state),
-  }));
+  return maybeSubscriptions.right.map(toSubscription);
 }

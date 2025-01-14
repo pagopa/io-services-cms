@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type */
+import { BulkOperationResponse } from "@azure/cosmos";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import * as t from "io-ts";
 
@@ -50,8 +52,20 @@ export interface FSMStore<
   T extends Record<string, unknown> = Record<string, unknown>,
 > {
   bulkFetch: (id: string[]) => TE.TaskEither<Error, O.Option<TT>[]>;
+  bulkPatch: (
+    services: readonly ({
+      id: string;
+    } & Patchable)[],
+  ) => TE.TaskEither<Error, BulkOperationResponse>;
   delete: (id: string) => TE.TaskEither<Error, void>;
+  executeOnServicesFilteredByGroupId: (
+    groupId: string,
+    callback: RTE.ReaderTaskEither<readonly string[], Error, void>,
+  ) => TE.TaskEither<Error, void>;
   fetch: (id: string) => TE.TaskEither<Error, O.Option<TT>>;
+  getGroupUnboundedServicesByIds: (
+    ids: readonly string[],
+  ) => TE.TaskEither<Error, { id: string; name: string }[]>;
   getServiceIdsByGroupIds: (
     groupIds: readonly string[],
   ) => TE.TaskEither<Error, readonly string[]>;

@@ -1,4 +1,3 @@
-
 resource "azurerm_storage_container" "static_content" {
   name                  = "static-content"
   storage_account_name  = module.app_be_fn.storage_account.name
@@ -11,6 +10,8 @@ resource "azurerm_storage_blob" "featured_services" {
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
   source                 = "${path.module}/featured-services.json"
+  content_type           = "application/json"
+  content_md5            = filemd5("${path.module}/featured-services.json")
 }
 
 resource "azurerm_storage_blob" "featured_institutions" {
@@ -19,4 +20,6 @@ resource "azurerm_storage_blob" "featured_institutions" {
   storage_container_name = azurerm_storage_container.static_content.name
   type                   = "Block"
   source                 = "${path.module}/featured-institutions.json"
+  content_type           = "application/json"
+  content_md5            = filemd5("${path.module}/featured-institutions.json")
 }

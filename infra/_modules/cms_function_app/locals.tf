@@ -89,6 +89,7 @@ locals {
       REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
       REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
+      SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
 
 
       # List of service ids for which quality control will be bypassed
@@ -112,7 +113,7 @@ locals {
       BACKOFFICE_INTERNAL_SUBNET_CIDRS = var.bo_snet_cidr
 
       # Automatic service validation
-      MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code"
+      MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code,data.metadata.scope"
 
       #EventHubConfing
       SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING = data.azurerm_key_vault_secret.services_publication_event_hub_connection_string.value
@@ -124,9 +125,12 @@ locals {
       SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
 
-
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"
+
+      EH_SC_CONNECTIONSTRING         = data.azurerm_key_vault_secret.eh_sc_connectionstring.value
+      EH_SC_USERGROUP_NAME           = "sc-usergroups"
+      EH_SC_USERGROUP_CONSUMER_GROUP = "io-cms-sync"
     }
     autoscale_settings = {
       min     = 3

@@ -1,5 +1,59 @@
 # io-services-cms-backoffice
 
+## 1.21.0
+
+### Minor Changes
+
+- f55c998f: manage subscription display name
+
+### Patch Changes
+
+- Updated dependencies [f55c998f]
+  - @io-services-cms/external-clients@1.7.0
+
+## 1.20.1
+
+### Patch Changes
+
+- Updated dependencies [692d63d8]
+  - @io-services-cms/models@1.27.0
+  - @io-services-cms/external-clients@1.6.0
+
+## 1.20.0
+
+### Minor Changes
+
+- f8ee3f02: add bulk patch service API
+
+### Patch Changes
+
+- Updated dependencies [f8ee3f02]
+  - @io-services-cms/models@1.26.0
+
+## 1.19.2
+
+### Patch Changes
+
+- d8491487: Fixed mixpanel token
+
+## 1.19.1
+
+### Patch Changes
+
+- b2b0e5ff: Mixpanel Integration
+
+## 1.19.0
+
+### Minor Changes
+
+- 7cbd2e9a: add retrieve group-unbounded services handler
+
+### Patch Changes
+
+- 883ed54e: Fix service cta in service create/update
+- Updated dependencies [7cbd2e9a]
+  - @io-services-cms/models@1.25.0
+
 ## 1.18.2
 
 ### Patch Changes

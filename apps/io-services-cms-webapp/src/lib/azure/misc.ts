@@ -113,12 +113,16 @@ export const processBatchOf =
    *          collected into an array
    */
   <R>(
-    processSingleItem: RTE.ReaderTaskEither<{ item: T }, Error, R>,
+    processSingleItem: RTE.ReaderTaskEither<
+      { context: Context; item: T },
+      Error,
+      R
+    >,
   ): RTE.ReaderTaskEither<AzureFunctionCall, Error, readonly R[]> =>
   ({ context, inputs: [items], ...rest }): TE.TaskEither<Error, readonly R[]> =>
     pipe(
       validateAndMapInput(itemShape, { ignoreMalformedItems })(items, context),
-      TE.map(RA.map((item) => processSingleItem({ item, ...rest }))),
+      TE.map(RA.map((item) => processSingleItem({ context, item, ...rest }))),
       TE.chain(RA.sequence(parallel ? TE.ApplicativePar : TE.ApplicativeSeq)),
     );
 

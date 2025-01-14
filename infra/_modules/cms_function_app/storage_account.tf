@@ -140,3 +140,8 @@ resource "azurerm_storage_queue" "request-services-history-ingestion-retry-poiso
   name                 = "request-services-history-ingestion-retry-poison"
   storage_account_name = module.cms_storage_account.name
 }
+
+resource "azurerm_storage_queue" "sync-group-poison" {
+  name                 = "sync-group-poison"
+  storage_account_name = module.cms_storage_account.name
+}

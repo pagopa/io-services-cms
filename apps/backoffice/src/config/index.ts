@@ -25,8 +25,9 @@ export interface Configuration {
   // BackOffice settings
   BACK_OFFICE_ID: string;
   BACK_OFFICE_IN_APP_PREVIEW_ENABLED: boolean;
-
   BACK_OFFICE_LOGIN_PATH: string;
+
+  BACK_OFFICE_MIXPANEL_TOKEN: string;
   BACK_OFFICE_OPERATIVE_MANUAL_URL: string;
   BACK_OFFICE_PERS_DATA_PROTECTION_URL: string;
   BACK_OFFICE_PRIVACY_POLICY_URL: string;
@@ -102,9 +103,11 @@ export function getConfiguration(): Configuration {
     BACK_OFFICE_ID: process.env.NEXT_PUBLIC_BACK_OFFICE_ID as string,
     BACK_OFFICE_IN_APP_PREVIEW_ENABLED:
       process.env.NEXT_PUBLIC_BACK_OFFICE_IN_APP_PREVIEW_ENABLED === "true",
-
     BACK_OFFICE_LOGIN_PATH: process.env
       .NEXT_PUBLIC_BACK_OFFICE_LOGIN_PATH as string,
+
+    BACK_OFFICE_MIXPANEL_TOKEN: process.env
+      .NEXT_PUBLIC_BACK_OFFICE_MIXPANEL_TOKEN as string,
     BACK_OFFICE_OPERATIVE_MANUAL_URL: process.env
       .NEXT_PUBLIC_BACK_OFFICE_OPERATIVE_MANUAL_URL as string,
     BACK_OFFICE_PERS_DATA_PROTECTION_URL: process.env

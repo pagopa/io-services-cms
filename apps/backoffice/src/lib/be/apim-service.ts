@@ -23,9 +23,9 @@ import * as t from "io-ts";
 export interface ApimRestClient {
   readonly getUserSubscriptions: (
     userId: string,
-    limit: number,
-    offset: number,
     filter: string,
+    limit?: number,
+    offset?: number,
     isRetry?: boolean,
   ) => TE.TaskEither<AxiosError | Error, SubscriptionCollection>;
 }
@@ -122,9 +122,9 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
 
   const getUserSubscriptions: ApimRestClient["getUserSubscriptions"] = (
     userId,
+    filter,
     limit,
     offset,
-    filter,
     isRetry = false,
   ) =>
     pipe(
@@ -156,7 +156,7 @@ export const getApimRestClient = async (): Promise<ApimRestClient> => {
             return pipe(
               TE.fromIO(() => refreshClient()),
               TE.chain(() =>
-                getUserSubscriptions(userId, limit, offset, filter, true),
+                getUserSubscriptions(userId, filter, limit, offset, true),
               ),
             );
           }
@@ -201,26 +201,28 @@ export function upsertSubscription(
 export function upsertSubscription(
   type: "MANAGE_GROUP",
   ownerId: string,
-  groupId: string,
+  group: { id: string; name: string },
 ): UpsertSubscriptionResult;
 export function upsertSubscription(
   type: ApimUtils.definitions.SubscriptionType,
   ownerId: string,
-  value?: string,
+  value?: { id: string; name: string },
 ): UpsertSubscriptionResult {
-  let subscriptionId: string;
   switch (type) {
     case "MANAGE":
-      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + ownerId;
-      break;
+      return getApimService().upsertSubscription(
+        ownerId,
+        ApimUtils.SUBSCRIPTION_MANAGE_PREFIX + ownerId,
+      );
     case "MANAGE_GROUP":
-      subscriptionId = ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + value;
-      break;
+      return getApimService().upsertSubscription(
+        ownerId,
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + value?.id,
+        value?.name,
+      );
     default:
       // eslint-disable-next-line no-case-declarations
       const _: never = type;
       throw new Error("Invalid type");
   }
-
-  return getApimService().upsertSubscription(ownerId, subscriptionId);
 }

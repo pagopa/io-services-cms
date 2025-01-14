@@ -8,6 +8,10 @@ import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
+import {
+  trackServiceCreateAbortEvent,
+  trackServiceEditAbortEvent,
+} from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
@@ -78,6 +82,11 @@ export const ServiceCreateUpdate = ({
     });
     if (confirmed) {
       console.log("operation cancelled");
+      if (mode === "create") {
+        trackServiceCreateAbortEvent();
+      } else if (mode === "update") {
+        trackServiceEditAbortEvent();
+      }
       router.back();
     } else {
       console.log("modal cancelled");

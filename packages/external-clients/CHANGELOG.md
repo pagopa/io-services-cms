@@ -1,5 +1,17 @@
 # @io-services-cms/external-clients
 
+## 1.7.0
+
+### Minor Changes
+
+- f55c998f: manage subscription display name
+
+## 1.6.0
+
+### Minor Changes
+
+- 692d63d8: add SelfcareGroupWatcher Az Fn
+
 ## 1.5.1
 
 ### Patch Changes
