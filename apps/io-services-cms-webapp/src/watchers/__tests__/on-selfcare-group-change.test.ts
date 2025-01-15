@@ -1,31 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { makeHandler } from "../on-selfcare-group-change";
-import {
-  GroupChangeEvent,
-  syncServices,
-  syncSubscription,
-} from "../../utils/sync-group-utils";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { GroupChangeEvent } from "../../utils/sync-group-utils";
+import { makeHandler } from "../on-selfcare-group-change";
 
 const mocks = vi.hoisted(() => ({
-  ApimUtils: {
-    ApimService: { getSubscription: vi.fn(), updateSubscription: vi.fn() },
-    SUBSCRIPTION_MANAGE_GROUP_PREFIX: "FOO",
-  },
-  ServiceLifecycle: {
-    LifecycleStore: vi.fn(),
-  },
   syncSubscription: vi.fn(),
   syncServices: vi.fn(),
-}));
-
-vi.mock("@io-services-cms/external-clients", () => ({
-  ApimUtils: mocks.ApimUtils,
-}));
-
-vi.mock("@io-services-cms/models", () => ({
-  ServiceLifecycle: mocks.ServiceLifecycle,
 }));
 
 vi.mock("../../utils/sync-group-utils", () => ({
@@ -39,8 +20,8 @@ beforeEach(() => {
 
 describe("makeOnSelfcareGroupChangeHandler", () => {
   const deps = {
-    apimService: mocks.ApimUtils.ApimService,
-    serviceLifecycleStore: mocks.ServiceLifecycle.LifecycleStore,
+    apimService: {},
+    serviceLifecycleStore: {},
   } as unknown as Parameters<typeof makeHandler>[0];
 
   it("should complete successfully but do nothing when productId is different from prod-io", async () => {
@@ -57,7 +38,6 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
     }
     expect(mocks.syncSubscription).not.toHaveBeenCalled();
     expect(mocks.syncServices).not.toHaveBeenCalled();
-    expect(mocks.ServiceLifecycle.LifecycleStore).not.toHaveBeenCalled();
   });
 
   it("should fail when the productId is equal to prod-io and syncSubscription fails", async () => {
@@ -75,9 +55,7 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
       expect(result.left).toStrictEqual(error);
     }
     expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(
-      mocks.ApimUtils.ApimService,
-    );
+    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
     expect(mocks.syncServices).not.toHaveBeenCalled();
   });
 
@@ -97,13 +75,9 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
       expect(result.left).toStrictEqual(error);
     }
     expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(
-      mocks.ApimUtils.ApimService,
-    );
+    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
     expect(mocks.syncServices).toHaveBeenCalledOnce();
-    expect(mocks.syncServices).toHaveBeenCalledWith(
-      mocks.ServiceLifecycle.LifecycleStore,
-    );
+    expect(mocks.syncServices).toHaveBeenCalledWith(deps.serviceLifecycleStore);
   });
 
   it("should complete successfully when the productId is equal to prod-io", async () => {
@@ -122,12 +96,8 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
       expect(result.right).toBeUndefined();
     }
     expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(
-      mocks.ApimUtils.ApimService,
-    );
+    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
     expect(mocks.syncServices).toHaveBeenCalledOnce();
-    expect(mocks.syncServices).toHaveBeenCalledWith(
-      mocks.ServiceLifecycle.LifecycleStore,
-    );
+    expect(mocks.syncServices).toHaveBeenCalledWith(deps.serviceLifecycleStore);
   });
 });
