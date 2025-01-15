@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GroupChangeEvent, makeHandler } from "../on-selfcare-group-change";
+import { makeHandler } from "../on-selfcare-group-change";
+import { GroupChangeEvent } from "../../utils/sync-group-utils";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 
