@@ -1,4 +1,4 @@
-import { ApiKeys, AuthorizedCidrs, GroupsApiKeys } from "@/components/api-keys";
+import { ApiKeys, ApiKeysGroups, AuthorizedCidrs } from "@/components/api-keys";
 import { PageHeader } from "@/components/headers";
 import { getConfiguration } from "@/config";
 import { Cidr } from "@/generated/api/Cidr";
@@ -74,7 +74,7 @@ export default function Keys() {
       </Stack>
       {getConfiguration().GROUP_APIKEY_ENABLED && (
         <Stack marginTop={3}>
-          <GroupsApiKeys
+          <ApiKeysGroups
             description={t("routes.keys.groups.description")}
             onCreateGroupClick={() =>
               window.open(

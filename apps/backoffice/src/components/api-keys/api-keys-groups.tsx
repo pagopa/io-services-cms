@@ -28,7 +28,7 @@ import { ApiKeys } from "./api-keys";
 import { ApiKeysHeader } from "./api-keys-header";
 import { AuthorizedCidrs } from "./authorized-cidrs";
 
-export interface GroupsApiKeysProps {
+export interface ApiKeysGroupsProps {
   /** Main component card description */
   description?: string;
   /** Selfcare groups */
@@ -42,7 +42,7 @@ export interface GroupsApiKeysProps {
 }
 
 /** Single Group API Key interface */
-interface GroupApiKeyProps {
+interface ApiKeyGroupProps {
   apiKey: RecordApiKeyValue;
   onDelete: (event: React.MouseEvent, subscriptionId: string) => void;
   onExpand: (expanded: boolean, subscriptionId: string) => void;
@@ -54,7 +54,7 @@ interface GroupApiKeyProps {
   subscriptionId: string;
 }
 
-type GroupApiKeysRecordset = Record<string, RecordApiKeyValue>;
+type ApiKeysGroupRecordset = Record<string, RecordApiKeyValue>;
 
 interface RecordApiKeyValue {
   cidrs: string[];
@@ -65,7 +65,7 @@ interface RecordApiKeyValue {
 
 const convertArrayToRecordset = (
   items: Subscription[],
-): GroupApiKeysRecordset =>
+): ApiKeysGroupRecordset =>
   items.reduce((acc, item) => {
     acc[item.id] = {
       cidrs: [],
@@ -74,7 +74,7 @@ const convertArrayToRecordset = (
       secondary_key: "",
     };
     return acc;
-  }, {} as GroupApiKeysRecordset);
+  }, {} as ApiKeysGroupRecordset);
 
 const checkGroupsExists = async (institutionId: string) => {
   try {
@@ -98,7 +98,7 @@ const borderStyle = "1px solid #E3E7EB";
  *
  * Used to show, copy, rotate `keys` _(primary/secondary)_ and edit optional `authorized cidrs`.
  * */
-export const GroupsApiKeys = (props: GroupsApiKeysProps) => {
+export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const showDialog = useDialog();
@@ -110,7 +110,7 @@ export const GroupsApiKeys = (props: GroupsApiKeysProps) => {
   const { data: cidrsData, fetchData: scFetchData } =
     useFetch<ManageKeyCIDRs>();
 
-  const [apiKeys, setApiKeys] = useState<GroupApiKeysRecordset | undefined>(
+  const [apiKeys, setApiKeys] = useState<ApiKeysGroupRecordset | undefined>(
     undefined,
   );
 
@@ -148,7 +148,7 @@ export const GroupsApiKeys = (props: GroupsApiKeysProps) => {
         [key]: {
           ...currentRecord,
           ...newValues,
-        } as RecordApiKeyValue,
+        },
       };
     });
   };
@@ -292,7 +292,7 @@ export const GroupsApiKeys = (props: GroupsApiKeysProps) => {
       </AccessControl>
       <Box>
         {Object.entries(apiKeys ?? {}).map(([id, apiKey]) => (
-          <GroupsApiKeys.GroupApiKey
+          <ApiKeysGroups.ApiKeyGroup
             apiKey={apiKey}
             key={id}
             onDelete={handleDeleteClick}
@@ -307,15 +307,15 @@ export const GroupsApiKeys = (props: GroupsApiKeysProps) => {
   );
 };
 
-/** GroupsApiKey internal component */
-const GroupApiKey = ({
+/** ApiKeyGroup internal component */
+const ApiKeyGroup = ({
   apiKey,
   onDelete,
   onExpand,
   onRotateKey,
   onUpdateCidrs,
   subscriptionId,
-}: GroupApiKeyProps) => {
+}: ApiKeyGroupProps) => {
   const { t } = useTranslation();
 
   return (
@@ -373,4 +373,4 @@ const GroupApiKey = ({
 };
 
 // namespaced component
-GroupsApiKeys.GroupApiKey = GroupApiKey;
+ApiKeysGroups.ApiKeyGroup = ApiKeyGroup;
