@@ -83,7 +83,6 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
   it("should complete successfully when the productId is equal to prod-io", async () => {
     // given
     const item = { productId: "prod-io" } as GroupChangeEvent;
-    const error = new Error("error from syncServices");
     mocks.syncSubscription.mockReturnValueOnce(() => TE.right(void 0));
     mocks.syncServices.mockReturnValueOnce(() => TE.right(void 0));
 
