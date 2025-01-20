@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.7
+
+### Patch Changes
+
+- e18652c7: handle eh trigger dlq
+
 ## 1.40.6
 
 ### Patch Changes
