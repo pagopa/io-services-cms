@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.22.0
+
+### Minor Changes
+
+- 2ac87511: Added ApiKey Group section list (show/hide, copy, regenerate) and ApiKey Group generation
+
 ## 1.21.0
 
 ### Minor Changes
