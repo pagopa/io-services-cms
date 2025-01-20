@@ -8,9 +8,22 @@
       "connection": "EH_SC_CONNECTIONSTRING",
       "eventHubName": "%EH_SC_USERGROUP_NAME%",
       "consumerGroup": "%EH_SC_USERGROUP_CONSUMER_GROUP%",
-      "cardinality": "many"
+      "cardinality": "one"
+    },
+    {
+      "queueName": "%SYNC_GROUP_POISON_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "syncGroupPoisonQueue",
+      "type": "queue",
+      "direction": "out"
     }
   ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 3,
+    "minimumInterval": "00:00:01",
+    "maximumInterval": "00:01:00"
+  },
   "scriptFile": "../dist/main.js",
   "entryPoint": "onSelfcareGroupChangeEntryPoint"
 }
