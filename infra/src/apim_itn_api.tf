@@ -71,7 +71,7 @@ resource "azurerm_api_management_api_diagnostic" "services_cms_api_app_insights_
   resource_group_name      = data.azurerm_api_management.apim_itn.resource_group_name
   api_management_name      = data.azurerm_api_management.apim_itn.name
   api_name                 = module.api_services_cms_itn.name
-  api_management_logger_id = azurerm_api_management_logger.cache_policy_app_insights.id
+  api_management_logger_id = azurerm_api_management_logger.cache_policy_app_insights_itn.id
 
   sampling_percentage       = 100.0
   always_log_errors         = true
