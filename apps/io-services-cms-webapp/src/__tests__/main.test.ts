@@ -110,14 +110,10 @@ const mocks = vi.hoisted(() => {
     createWebServer: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
     LegacyServiceCosmosResource: {},
-    processBatchOf: vi.fn().mockImplementation((...args) => () => {
-      args;
-    }),
+    processBatchOf: vi.fn().mockImplementation((...args) => () => {}),
     createRequestReviewHandler: vi.fn((...args: any[]) => {}),
     toAzureFunctionHandler: vi.fn(),
-    setBindings: vi.fn((...args: any[]) => () => {
-      args;
-    }),
+    setBindings: vi.fn((...args: any[]) => () => {}),
   };
 });
 
