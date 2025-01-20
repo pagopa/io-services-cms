@@ -51,7 +51,7 @@ Notification.displayName = "Notification";
 
 /** Build snackbar object to enqueue with `enqueueSnackbar` of **notistack** */
 export const buildSnackbarItem = (data: {
-  message: string;
+  message?: string;
   severity: string;
   title: string;
 }) =>

@@ -8,62 +8,80 @@ export const aMockedChangeInstitutionIdentiyToken =
 export const aWellKnown = {
   keys: [
     {
-      kty: "RSA",
-      n:
-        "wxSYmYWPK7uoltGPLr8Pmo_atz0qjMY53M6pR43aPGNjSrpzU2HtTcgfdmm8P6Ckz5lCCVH5Zvk6YM09PQL7kavN994Z2Dr88xsGmGAKQAMN7KKjVZeHx6AFKvz4W9Q4IGmhNSxCNyVqiWPOp9AkME_H7RxaZfB5Cil9rrXb2d0hd9TrkB_QcQlmQxKV9jX0SXJ3HhnklwgQCNeL62OjoxHOydJwN5EV4XoXh0McKn1lLZFX4FsW2fpiKVnNC63Puu2SMk2qs_IoSzVVQ3EucmvnfKiDWj_lcdYvo1s1q3_3BTMFvfHsO5h8rowh8a2U5b_JmiN_ksZHeVg0Kdmquw",
-      e: "AQAB",
       alg: "RS256",
+      e: "AQAB",
       kid: "d4:1d:8c:d9:8f:00:b2:04:e9:80:09:98:ec:f8:42:7e",
-      use: "sig"
-    }
-  ]
+      kty: "RSA",
+      n: "wxSYmYWPK7uoltGPLr8Pmo_atz0qjMY53M6pR43aPGNjSrpzU2HtTcgfdmm8P6Ckz5lCCVH5Zvk6YM09PQL7kavN994Z2Dr88xsGmGAKQAMN7KKjVZeHx6AFKvz4W9Q4IGmhNSxCNyVqiWPOp9AkME_H7RxaZfB5Cil9rrXb2d0hd9TrkB_QcQlmQxKV9jX0SXJ3HhnklwgQCNeL62OjoxHOydJwN5EV4XoXh0McKn1lLZFX4FsW2fpiKVnNC63Puu2SMk2qs_IoSzVVQ3EucmvnfKiDWj_lcdYvo1s1q3_3BTMFvfHsO5h8rowh8a2U5b_JmiN_ksZHeVg0Kdmquw",
+      use: "sig",
+    },
+  ],
 };
 
 export const aMockCurrentUserAuthorizedInstitution = {
   id: "74daefda-7e72-46e2-815a-b26d3bf98988",
+  logo_url: "",
   name: "Comune di Cisternino",
   role: "admin",
-  logo_url: ""
 };
 
 export const getMockUserAuthorizedInstitution = () => ({
   id: faker.string.uuid(),
+  logo_url: "",
   name: faker.company.name(),
   role: faker.helpers.arrayElement(["admin", "operator"]),
-  logo_url: ""
 });
 
 export const getMockUserInstitution = (userId?: string) => ({
   id: faker.string.uuid(),
-  userId: userId ?? faker.string.uuid(),
-  institutionId: faker.string.uuid(),
   institutionDescription: faker.company.name(),
+  institutionId: faker.string.uuid(),
   institutionRootName: faker.company.name(),
-  userMailUuid: faker.string.uuid(),
+  logo: faker.image.url(),
   products: [
     {
-      productId: faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
-      status: "ACTIVE",
+      createdAt: faker.date.past().toISOString(),
+      env: "ROOT",
+      productId: faker.string.alphanumeric({ length: { max: 10, min: 5 } }),
       productRole: faker.helpers.arrayElement(["admin", "operator"]),
       role: "SUB_DELEGATE",
-      env: "ROOT",
-      createdAt: faker.date.past().toISOString()
-    }
+      status: "ACTIVE",
+    },
   ],
-  logo: faker.image.url()
+  userId: userId ?? faker.string.uuid(),
+  userMailUuid: faker.string.uuid(),
 });
 export const getMockInstitution = (institutionId?: string) => ({
-  id: institutionId ?? faker.string.uuid(),
-  externalId: faker.string.numeric(11),
-  originId: faker.string
-    .alphanumeric({ length: { min: 5, max: 10 } })
-    .toUpperCase(),
+  address: faker.location.streetAddress(true),
+  aooParentCode: faker.string.numeric(5),
+  attributes: [
+    {
+      code: faker.lorem.slug(1),
+      description: faker.lorem.slug(1),
+      origin: faker.lorem.slug(1),
+    },
+  ],
+  businessRegisterPlace: faker.lorem.slug(1),
+  dataProtectionOfficer: {
+    address: faker.location.streetAddress(true),
+    email: faker.internet.email(),
+    pec: faker.internet.email(),
+  },
   description: faker.company.name(),
   digitalAddress: faker.internet.email(),
-  address: faker.location.streetAddress(true),
-  zipCode: faker.location.zipCode(),
-  taxCode: faker.string.numeric(11),
-  origin: "SELC",
+  externalId: faker.string.numeric(11),
+  geographicTaxonomies: [
+    {
+      code: faker.location.countryCode(),
+      desc: faker.location.state(),
+    },
+    {
+      code: faker.location.countryCode(),
+      desc: faker.location.state(),
+    },
+  ],
+  id: institutionId ?? faker.string.uuid(),
+  imported: faker.datatype.boolean(),
   institutionType: faker.helpers.arrayElement([
     "GSP",
     "PA",
@@ -71,63 +89,56 @@ export const getMockInstitution = (institutionId?: string) => ({
     "PSP",
     "PT",
     "SCP",
-    "SA"
+    "SA",
   ]),
-  attributes: [
-    {
-      origin: faker.lorem.slug(1),
-      code: faker.lorem.slug(1),
-      description: faker.lorem.slug(1)
-    }
-  ],
+  logo: faker.image.url(),
+  origin: "SELC",
+  originId: faker.string
+    .alphanumeric({ length: { max: 10, min: 5 } })
+    .toUpperCase(),
   paymentServiceProvider: {
     abiCode: faker.string.numeric(5),
     businessRegisterNumber: faker.string.numeric(10),
     legalRegisterName: faker.company.name(),
     legalRegisterNumber: faker.string.numeric(8),
-    vatNumberGroup: faker.datatype.boolean()
+    vatNumberGroup: faker.datatype.boolean(),
   },
-  dataProtectionOfficer: {
-    address: faker.location.streetAddress(true),
-    email: faker.internet.email(),
-    pec: faker.internet.email()
-  },
-  geographicTaxonomies: [
-    {
-      code: faker.location.countryCode(),
-      desc: faker.location.state()
-    },
-    {
-      code: faker.location.countryCode(),
-      desc: faker.location.state()
-    }
-  ],
   rea: faker.lorem.slug(1),
+  rootParent: {
+    description: faker.company.name(),
+    id: faker.string.uuid(),
+  },
   shareCapital: faker.lorem.slug(1),
-  businessRegisterPlace: faker.lorem.slug(1),
-  supportEmail: faker.internet.email(),
-  supportPhone: faker.phone.number(),
-  imported: faker.datatype.boolean(),
-  logo: faker.image.url(),
   subunitCode: faker.string.numeric(5),
   subunitType: faker.lorem.slug(1),
-  aooParentCode: faker.string.numeric(5),
-  rootParent: {
-    id: faker.string.uuid(),
-    description: faker.company.name()
-  }
+  supportEmail: faker.internet.email(),
+  supportPhone: faker.phone.number(),
+  taxCode: faker.string.numeric(11),
+  zipCode: faker.location.zipCode(),
+});
+
+export const getMockInstitutionGroups = (_institutionId?: string) => ({
+  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map((_) =>
+    getMockManageSubscriptionGroup(),
+  ),
+});
+
+export const getMockManageSubscriptionGroup = () => ({
+  id: faker.string.uuid(),
+  name: faker.word.words({ count: { max: 3, min: 1 } }),
+  state: faker.helpers.arrayElement(["ACTIVE", "SUSPENDED", "DELETED"]),
 });
 
 export const getSelfCareProblemResponse = (status: number) => ({
-  status,
-  title: faker.lorem.slug(5),
   detail: faker.lorem.slug(5),
   instance: faker.lorem.slug(1),
-  type: faker.lorem.slug(1),
   invalidParams: [
     {
       name: faker.lorem.slug(1),
-      reason: faker.lorem.slug(1)
-    }
-  ]
+      reason: faker.lorem.slug(1),
+    },
+  ],
+  status,
+  title: faker.lorem.slug(5),
+  type: faker.lorem.slug(1),
 });

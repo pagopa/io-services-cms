@@ -45,6 +45,22 @@
     }
   },
   "forms": {
+    "apiKey": {
+      "buttons": {
+        "create": "Genera API Key"
+      },
+      "group": {
+        "step": {
+          "title": "Genera una API Key",
+          "description": "Con la generazione della API Key dei gruppi, sarà possibile effettuare operazioni programmatiche solo sui servizi associati allo specifico gruppo."
+        },
+        "select": {
+          "helperText": "Il nome del gruppo è ereditato da Area Riservata, se subirà modifiche sarà aggiornato automaticamente",
+          "label": "Seleziona il gruppo a cui rendere visibile l’API Key",
+          "placeholder": "Seleziona il gruppo"
+        }
+      }
+    },
     "cancel": {
       "title": "Sei sicuro di voler annullare la procedura?",
       "description": "L'azione è irreversibile."
@@ -260,6 +276,7 @@
   "loading": "Caricamento in corso",
   "notifications": {
     "exceptionError": "Eccezione applicativa",
+    "genericError": "Si è verificato un errore",
     "httpError": "Errore Http",
     "noChangeError": "Attenzione, nessuna modifica effettuata",
     "success": "Operazione completata con successo",
@@ -327,14 +344,30 @@
     "keys": {
       "title": "API Key",
       "description": "Qui puoi gestire le API key da utilizzare per autenticare le richieste dell’ente.",
+      "groups": {
+        "title": "API Key dei Gruppi",
+        "description": "Genera queste chiavi per i singoli gruppi, così che possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
+        "generate": "Genera API Key",
+        "noGroupModal": {
+          "description": "Non hai ancora creato alcun gruppo per generare le API Key. <br/><br/>Per procedere, vai alla sezione “Gruppi” in Area Riservata e crea nuovi gruppi. Una volta terminato, potrai generare le API Key e associarle ai gruppi.",
+          "confirm": "Crea gruppo"
+        }
+      },
       "manage": {
         "title": "API Key Manage",
         "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente.",
         "shortcut": "Gestisci API Key"
       },
+      "notifications": {
+        "loadingError": "Si è verificato un errore nel caricamento delle ApiKey"
+      },
       "authorizedCidrs": {
         "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le chiavi API."
       }
+    },
+    "new-group-api-key": {
+      "title": "API Key dei Gruppi",
+      "description": "Seleziona il gruppo per il quale vuoi generare un API Key di gruppo. "
     },
     "users": {
       "title": "Utenti",
