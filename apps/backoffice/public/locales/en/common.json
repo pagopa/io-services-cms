@@ -276,6 +276,7 @@
   "loading": "Loading",
   "notifications": {
     "exceptionError": "Applicative exception",
+    "genericError": "An error occurred",
     "httpError": "Http error",
     "noChangeError": "Warning, no changes made",
     "success": "Operation completed successfully",
@@ -356,6 +357,9 @@
         "title": "API Key Manage",
         "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
         "shortcut": "Manage API keys"
+      },
+      "notifications": {
+        "loadingError": "An error occurred while loading the ApiKeys"
       },
       "authorizedCidrs": {
         "description": "Manage here the list of IP addresses in CIDR format of the clients that can use the API keys."

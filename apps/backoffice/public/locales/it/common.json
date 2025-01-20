@@ -276,6 +276,7 @@
   "loading": "Caricamento in corso",
   "notifications": {
     "exceptionError": "Eccezione applicativa",
+    "genericError": "Si è verificato un errore",
     "httpError": "Errore Http",
     "noChangeError": "Attenzione, nessuna modifica effettuata",
     "success": "Operazione completata con successo",
@@ -356,6 +357,9 @@
         "title": "API Key Manage",
         "description": "Utilizza questa chiave per operazioni programmatiche di creazione di un nuovo servizio o aggiornamento di un servizio esistente.",
         "shortcut": "Gestisci API Key"
+      },
+      "notifications": {
+        "loadingError": "Si è verificato un errore nel caricamento delle ApiKey"
       },
       "authorizedCidrs": {
         "description": "Gestisci qui la lista degli indirizzi IP in formato CIDR dei client che possono utilizzare le chiavi API."

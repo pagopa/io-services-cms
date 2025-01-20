@@ -1,4 +1,5 @@
-import { ApiKeys, ApiKeysGroups, AuthorizedCidrs } from "@/components/api-keys";
+import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
+import { ApiKeysGroups } from "@/components/api-keys/api-keys-groups";
 import { PageHeader } from "@/components/headers";
 import { getConfiguration } from "@/config";
 import { Cidr } from "@/generated/api/Cidr";
