@@ -891,9 +891,9 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all active unbound institution groups
-      description: Retrieve all active groups without any API Key related to them for the given institution
-      operationId: getUnboundInstitutionGroups
+      summary: Retrieve all active institution groups
+      description: Retrieve all active groups for the given institution
+      operationId: getInstitutionGroups
       security:
         - cookieAuth: []
       parameters:
@@ -903,6 +903,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: filter
+          in: query
+          description: |
+            Group filter:
+            * `ALL` - All (active) groups
+            * `UNBOUND` - Only (active) groups without any subscription (API Key) related
+          required: false
+          schema:
+            $ref: '#/components/schemas/GroupFilterType'
       responses:
         '200':
           description: Groups fetched successfully
@@ -1767,6 +1776,10 @@ components:
             $ref: '#/components/schemas/Group'
       required:
         - groups
+    GroupFilterType:
+      type: string
+      enum: [ALL, UNBOUND]
+      default: ALL
     PaginationResult:
       type: object
       properties:
