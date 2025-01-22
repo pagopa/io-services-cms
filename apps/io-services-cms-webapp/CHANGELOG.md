@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.9
+
+### Patch Changes
+
+- e7b756e5: restore APPINSIGHTS_INSTRUMENTATIONKEY app config
+
 ## 1.40.8
 
 ### Patch Changes
