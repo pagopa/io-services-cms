@@ -157,7 +157,10 @@ export type QueueConfig = t.TypeOf<typeof QueueConfig>;
 
 // Application Insight configuration
 export const ApplicationInsightConfig = t.type({
-  APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+  APPINSIGHTS_INSTRUMENTATIONKEY: withDefault(
+    NonEmptyString,
+    "" as NonEmptyString,
+  ),
 });
 
 // Services pagination configuration
