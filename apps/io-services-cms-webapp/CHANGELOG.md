@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.8
+
+### Patch Changes
+
+- f0edb2c9: try to use only default ai client
+
 ## 1.40.7
 
 ### Patch Changes
