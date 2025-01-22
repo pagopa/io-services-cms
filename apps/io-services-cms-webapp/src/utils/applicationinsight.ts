@@ -10,11 +10,10 @@ import { pipe } from "fp-ts/lib/function";
 const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
 // Avoid to initialize Application Insights more than once
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const initTelemetryClient = (
   intrumentationKey: NonEmptyString,
   env = process.env,
-) =>
+): TelemetryClient =>
   ai.defaultClient
     ? ai.defaultClient
     : initAppInsights(intrumentationKey, {
@@ -25,7 +24,7 @@ export const initTelemetryClient = (
         ),
       });
 
-export type TelemetryClient = ReturnType<typeof initTelemetryClient>;
+export type TelemetryClient = ai.TelemetryClient;
 
 export const trackEventOnResponseOK =
   <R>(
