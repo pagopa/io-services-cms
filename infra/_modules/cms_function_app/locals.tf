@@ -6,6 +6,9 @@ locals {
     app_settings = {
       NODE_ENV = "production"
 
+      // TODO: after migration, update AI implementation and use connection string
+      APPINSIGHTS_INSTRUMENTATIONKEY = var.ai_common_instrumentation_key
+
       // Keepalive fields are all optionals
       FETCH_KEEPALIVE_ENABLED             = "true"
       FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL   = "110000"
