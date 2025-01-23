@@ -1,0 +1,6 @@
+{
+  "backoffice.backoffice.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
+  "cms_function_app.cms_fn.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
+  "eventhub.eventhub.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
+  "function_app.app_be_fn.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64"
+}
