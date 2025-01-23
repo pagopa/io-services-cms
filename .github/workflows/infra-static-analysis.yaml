@@ -18,6 +18,7 @@ jobs:
 
       - name: init_terraform_folders
         env:
+          PRECOMMIT_DEBUG: 1
           FOLDERS: >
             infra/src
             .identity
