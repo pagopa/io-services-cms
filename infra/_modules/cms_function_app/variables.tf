@@ -74,12 +74,6 @@ variable "private_dns_zone_resource_group_name" {
   description = "Resource group name of the private DNS zone to use for private endpoints"
 }
 
-variable "ai_common_instrumentation_key" {
-  type        = string
-  description = "Application Insights instrumentation key"
-  sensitive   = true
-}
-
 variable "ai_common_connection_string" {
   type        = string
   description = "Application Insights connection string"

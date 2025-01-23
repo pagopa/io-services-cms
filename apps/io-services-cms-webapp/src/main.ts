@@ -154,7 +154,7 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 
 // AppInsights client for Telemetry
 const telemetryClient = initTelemetryClient(
-  config.APPINSIGHTS_INSTRUMENTATIONKEY,
+  config.APPLICATIONINSIGHTS_CONNECTION_STRING,
 );
 
 const legacyServicesContainer = cosmosdbClient

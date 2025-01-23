@@ -79,7 +79,6 @@ module "cms_function_app" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
   ai_common_connection_string          = data.azurerm_application_insights.ai_common.connection_string
-  ai_common_instrumentation_key        = data.azurerm_application_insights.ai_common.instrumentation_key
   cms_snet_cidr                        = local.cms_snet_cidr
   bo_snet_cidr                         = local.bo_snet_cidr
 

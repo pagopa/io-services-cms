@@ -11,12 +11,12 @@ const DEFAULT_SAMPLING_PERCENTAGE = 5;
 
 // Avoid to initialize Application Insights more than once
 export const initTelemetryClient = (
-  intrumentationKey: NonEmptyString,
+  aiConnectionString: NonEmptyString,
   env = process.env,
 ): TelemetryClient =>
   ai.defaultClient
     ? ai.defaultClient
-    : initAppInsights(intrumentationKey, {
+    : initAppInsights(aiConnectionString, {
         disableAppInsights: env.APPINSIGHTS_DISABLE === "true",
         samplingPercentage: pipe(
           IntegerFromString.decode(env.APPINSIGHTS_SAMPLING_PERCENTAGE),
