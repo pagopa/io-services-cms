@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.10
+
+### Patch Changes
+
+- 42d3fbb8: use ai connection_string instead of instrumentation_key
+
 ## 1.40.9
 
 ### Patch Changes
