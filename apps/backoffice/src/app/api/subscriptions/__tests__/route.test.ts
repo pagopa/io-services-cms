@@ -57,26 +57,30 @@ const userMock = {
 
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
-const mocks = vi.hoisted(() => ({
-  upsertManageSubscription: vi.fn(),
-  getManageSubscriptions: vi.fn(),
-  parseBody: vi.fn(),
-  getQueryParam: vi.fn(),
-  getGroup: vi.fn(),
-  withJWTAuthHandler: vi.fn(
-    (
-      handler: (
-        nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any },
-      ) => Promise<NextResponse> | Promise<Response>,
-    ) =>
-      async (nextRequest: NextRequest, { params }: { params: {} }) =>
-        handler(nextRequest, {
-          backofficeUser: userMock,
-          params,
-        }),
-  ),
-}));
+const mocks = vi.hoisted(() => {
+  const getUserMock = vi.fn(() => userMock);
+  return {
+    getUserMock,
+    upsertManageSubscription: vi.fn(),
+    getManageSubscriptions: vi.fn(),
+    parseBody: vi.fn(),
+    getQueryParam: vi.fn(),
+    getGroup: vi.fn(),
+    withJWTAuthHandler: vi.fn(
+      (
+        handler: (
+          nextRequest: NextRequest,
+          context: { backofficeUser: BackOfficeUser; params: any },
+        ) => Promise<NextResponse> | Promise<Response>,
+      ) =>
+        async (nextRequest: NextRequest, { params }: { params: {} }) =>
+          handler(nextRequest, {
+            backofficeUser: getUserMock(),
+            params,
+          }),
+    ),
+  };
+});
 
 vi.mock("@/lib/be/req-res-utils", () => ({
   parseBody: mocks.parseBody,
@@ -106,7 +110,13 @@ describe("Subscription API", () => {
 
     it("should return a forbidden response when user is not an admin", async () => {
       // given
-      userMock.institution.role = SelfcareRoles.operator;
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.operator,
+        },
+      }));
       const nextRequest = new NextRequest("http://localhost");
 
       // when
@@ -123,7 +133,13 @@ describe("Subscription API", () => {
 
     it("should return a bad request when fails to parse request body", async () => {
       // given
-      userMock.institution.role = SelfcareRoles.admin;
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+        },
+      }));
       const errorMessage = "errorMessage";
       mocks.parseBody.mockRejectedValueOnce(new Error(errorMessage));
       const request = new NextRequest(new URL("http://localhost"));
@@ -146,7 +162,13 @@ describe("Subscription API", () => {
 
     it("should return a bad request when the provided group is not found", async () => {
       // given
-      userMock.institution.role = SelfcareRoles.admin;
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+        },
+      }));
       const body = aCorrectRequestBody;
       mocks.parseBody.mockResolvedValueOnce(body);
       mocks.getGroup.mockRejectedValueOnce(
@@ -178,7 +200,13 @@ describe("Subscription API", () => {
 
     it("should fails when upsertManageSubscription return an error", async () => {
       // given
-      userMock.institution.role = SelfcareRoles.admin;
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+        },
+      }));
       const body = aCorrectRequestBody;
       mocks.parseBody.mockResolvedValueOnce(body);
       mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
@@ -213,7 +241,13 @@ describe("Subscription API", () => {
 
     it("should return the upserted manage subscription", async () => {
       // given
-      userMock.institution.role = SelfcareRoles.admin;
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+        },
+      }));
       const body = aCorrectRequestBody;
       mocks.parseBody.mockResolvedValueOnce(body);
       mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
@@ -334,6 +368,39 @@ describe("Subscription API", () => {
       expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
     });
 
+    it("should return forbidden response when kind query param is MANAGE_GROUP, user role is OPERATOR and user groups is empty", async () => {
+      // given
+      const kind = "MANAGE_GROUP";
+      const limit = 10;
+      const offset = 5;
+      const request = new NextRequest(
+        `http://localhost?limit=${limit}&offset=${offset}`,
+      );
+      mocks.getQueryParam.mockImplementation((_, param) =>
+        E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
+      );
+      mocks.getUserMock.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.operator,
+        },
+        permissions: {
+          ...userMock.permissions,
+          selcGroups: [],
+        },
+      }));
+
+      // when
+      const result = await GET(request, {});
+
+      // then
+      expect(result.status).toBe(403);
+      const jsonBody = await result.json();
+      expect(jsonBody.detail).toEqual("Role not authorized");
+      expect(mocks.getManageSubscriptions).not.toHaveBeenCalledOnce();
+    });
+
     it("should return an error response when getManageSubscriptions fails", async () => {
       // given
       const kind = "MANAGE_ROOT";
@@ -389,8 +456,17 @@ describe("Subscription API", () => {
         mocks.getManageSubscriptions.mockResolvedValueOnce(
           expectedSubscriptions,
         );
-        userMock.institution.role = userRole;
-        userMock.permissions.selcGroups = selcGroups;
+        mocks.getUserMock.mockImplementationOnce(() => ({
+          ...userMock,
+          institution: {
+            ...userMock.institution,
+            role: userRole,
+          },
+          permissions: {
+            ...userMock.permissions,
+            selcGroups: selcGroups,
+          },
+        }));
 
         // when
         const result = await GET(request, {});
