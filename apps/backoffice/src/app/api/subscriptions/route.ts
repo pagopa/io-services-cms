@@ -2,8 +2,11 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { ResponseError } from "@/generated/api/ResponseError";
 import { Subscription } from "@/generated/api/Subscription";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
-import { SubscriptionType } from "@/generated/api/SubscriptionType";
-import { isAdmin } from "@/lib/be/authz";
+import {
+  SubscriptionType,
+  SubscriptionTypeEnum,
+} from "@/generated/api/SubscriptionType";
+import { userAuthz } from "@/lib/be/authz";
 import {
   GroupNotFoundError,
   handleBadRequestErrorResponse,
@@ -38,7 +41,7 @@ export const PUT = withJWTAuthHandler(
     request: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse<ResponseError | Subscription>> => {
-    if (!isAdmin(backofficeUser)) {
+    if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
 
@@ -112,13 +115,20 @@ export const GET = withJWTAuthHandler(
         `'offset' query param is not a valid ${NonNegativeInteger.name}`,
       );
     }
+    if (
+      maybeKind.right === SubscriptionTypeEnum.MANAGE_GROUP &&
+      !userAuthz(backofficeUser).isAdmin() &&
+      !userAuthz(backofficeUser).hasSelcGroups()
+    ) {
+      return handleForbiddenErrorResponse("Role not authorized");
+    }
     try {
       const response = await getManageSubscriptions(
         maybeKind.right,
         backofficeUser.parameters.userId,
         maybeLimit.right,
         maybeOffset.right,
-        isAdmin(backofficeUser)
+        userAuthz(backofficeUser).isAdmin()
           ? undefined
           : backofficeUser.permissions.selcGroups,
       );
