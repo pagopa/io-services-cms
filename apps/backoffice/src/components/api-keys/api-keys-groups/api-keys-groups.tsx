@@ -1,5 +1,4 @@
 import { Cidr } from "@/generated/api/Cidr";
-import { Group } from "@/generated/api/Group";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
@@ -23,8 +22,6 @@ import { ButtonGenerateApiKeysGroup } from "./button-generate-api-keys-group";
 export interface ApiKeysGroupsProps {
   /** Main component card description */
   description?: string;
-  /** Selfcare groups */
-  groups?: Group[];
   /** Event triggered when user click "Create group" on modal that warns of the non-existence of any SC group */
   onCreateGroupClick: () => void;
   /** Event triggered when user click "Generate API Key" */

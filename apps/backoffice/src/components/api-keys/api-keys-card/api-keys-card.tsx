@@ -1,0 +1,132 @@
+import { AccessControl } from "@/components/access-control";
+import { CardBaseContainer, CardRowType, CardRows } from "@/components/cards";
+import { getConfiguration } from "@/config";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
+import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
+import useFetch from "@/hooks/use-fetch";
+import { hasManageKeyGroup, hasManageKeyRoot } from "@/utils/auth-util";
+import { ArrowForward } from "@mui/icons-material";
+import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
+import NextLink from "next/link";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "next-i18next";
+import { useEffect } from "react";
+
+import { ApiKeysGroupsEmptyState } from "../api-keys-groups";
+
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
+const KEYS_ROUTE_PATH = "/keys";
+
+export const ApiKeysCard = () => {
+  const { t } = useTranslation();
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
+  const { data: mspData, fetchData: mspFetchData } =
+    useFetch<SubscriptionPagination>();
+
+  const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
+  const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
+  const hideKeysCta =
+    GROUP_APIKEY_ENABLED &&
+    session?.user?.institution.role === "operator" &&
+    session?.user?.permissions.selcGroups &&
+    session?.user?.permissions.selcGroups.length > 0 &&
+    mspData?.value &&
+    mspData.value.length === 0;
+
+  const manageKeyRows: CardRowType[] = [
+    {
+      kind: "apikey",
+      label: "keys.primary.title",
+      value: mkData?.primary_key,
+    },
+    {
+      kind: "apikey",
+      label: "keys.secondary.title",
+      value: mkData?.secondary_key,
+    },
+  ];
+
+  useEffect(() => {
+    if (showManageKeyRoot) {
+      mkFetchData("getManageKeys", {}, SubscriptionKeys);
+    }
+    if (showManageKeyGroup) {
+      mspFetchData(
+        "getManageSubscriptions",
+        { kind: SubscriptionTypeEnum.MANAGE_GROUP, limit: 10 },
+        SubscriptionPagination,
+        {
+          notify: "errors",
+        },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <AccessControl requiredPermissions={["ApiServiceWrite"]}>
+      <CardBaseContainer>
+        <Stack divider={<Divider flexItem />} spacing={3}>
+          {showManageKeyRoot && (
+            <>
+              <Typography id="card-title" variant="overline">
+                {t("routes.keys.manage.title")}
+              </Typography>
+              <Box id="body-rows" marginTop={4}>
+                <CardRows rows={manageKeyRows} />
+              </Box>
+            </>
+          )}
+          {showManageKeyGroup && (
+            <>
+              <Typography id="card-title" variant="overline">
+                {t("routes.keys.groups.title")}
+              </Typography>
+              <ApiKeysGroupsEmptyState apiKeysGroups={mspData?.value} />
+              {mspData?.value && mspData.value.length > 0 && (
+                <Box paddingTop={2}>
+                  {mspData?.value.map((apiKeyGroup) => (
+                    <Chip
+                      clickable={true}
+                      key={apiKeyGroup.id}
+                      label={apiKeyGroup.name}
+                      onClick={() =>
+                        router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
+                      }
+                      size="small"
+                      sx={{
+                        borderRadius: 0.5,
+                        marginBottom: 1,
+                        marginRight: 1,
+                      }}
+                    />
+                  ))}
+                </Box>
+              )}
+            </>
+          )}
+        </Stack>
+        {!hideKeysCta && (
+          <Box id="card-cta" marginTop={3}>
+            <NextLink href={KEYS_ROUTE_PATH}>
+              <ButtonNaked
+                color="primary"
+                endIcon={<ArrowForward />}
+                size="medium"
+                sx={{ fontWeight: 700 }}
+              >
+                {t("routes.keys.manage.shortcut")}
+              </ButtonNaked>
+            </NextLink>
+          </Box>
+        )}
+      </CardBaseContainer>
+    </AccessControl>
+  );
+};

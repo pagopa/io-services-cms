@@ -1,6 +1,6 @@
 import { AccessControl } from "@/components/access-control";
 import { useDialog } from "@/components/dialog-provider";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
 import {
   ServiceContextMenuActions,
@@ -45,7 +45,6 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
-import React from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -485,7 +484,7 @@ export default function Services() {
         </Grid>
       </Grid>
       {noService ? (
-        <EmptyState
+        <EmptyStateLayer
           ctaLabel="service.actions.create"
           ctaRoute={CREATE_SERVICE_ROUTE}
           emptyStateLabel="routes.services.empty"

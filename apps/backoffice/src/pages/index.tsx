@@ -1,19 +1,17 @@
 import { AccessControl } from "@/components/access-control";
+import { ApiKeysCard } from "@/components/api-keys/api-keys-card";
 import { CardDetails } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
 import { MigrationManager } from "@/components/services/subscriptions-migration";
 import { Institution } from "@/generated/api/Institution";
-import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { trackOverviewPageEvent } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import mixpanel from "mixpanel-browser";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.overview.title";
@@ -22,7 +20,7 @@ const pageDescriptionLocaleKey = "routes.overview.description";
 export default function Home() {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
+
   const { data: instData, fetchData: instFetchData } = useFetch<Institution>();
 
   useEffect(() => {
@@ -34,13 +32,6 @@ export default function Home() {
         notify: "errors",
       },
     );
-    if (
-      hasRequiredAuthorizations(session, {
-        requiredPermissions: ["ApiServiceWrite"],
-      })
-    ) {
-      mkFetchData("getManageKeys", {}, SubscriptionKeys);
-    }
     const mixpanelSuperProperties = {
       institution_id: session?.user?.institution.id,
       organization_fiscal_code: session?.user?.institution.fiscalCode,
@@ -96,24 +87,7 @@ export default function Home() {
               />
             </Grid>
             <Grid item xs={12}>
-              <AccessControl requiredPermissions={["ApiServiceWrite"]}>
-                <CardDetails
-                  cta={{ href: "/keys", label: "routes.keys.manage.shortcut" }}
-                  rows={[
-                    {
-                      kind: "apikey",
-                      label: "keys.primary.title",
-                      value: mkData?.primary_key,
-                    },
-                    {
-                      kind: "apikey",
-                      label: "keys.secondary.title",
-                      value: mkData?.secondary_key,
-                    },
-                  ]}
-                  title="routes.keys.manage.title"
-                />
-              </AccessControl>
+              <ApiKeysCard />
             </Grid>
           </Grid>
         </Grid>
