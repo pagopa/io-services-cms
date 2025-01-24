@@ -87,6 +87,7 @@ export const GET = withJWTAuthHandler(
     request,
     { backofficeUser }: { backofficeUser: BackOfficeUser },
   ): Promise<NextResponse<ResponseError | SubscriptionPagination>> => {
+    const userAuthzUtils = userAuthz(backofficeUser);
     const maybeKind = getQueryParam(request, "kind", SubscriptionType);
     if (E.isLeft(maybeKind)) {
       return handleBadRequestErrorResponse(
@@ -117,8 +118,8 @@ export const GET = withJWTAuthHandler(
     }
     if (
       maybeKind.right === SubscriptionTypeEnum.MANAGE_GROUP &&
-      !userAuthz(backofficeUser).isAdmin() &&
-      !userAuthz(backofficeUser).hasSelcGroups()
+      !userAuthzUtils.isAdmin() &&
+      userAuthzUtils.hasSelcGroups()
     ) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
@@ -128,7 +129,7 @@ export const GET = withJWTAuthHandler(
         backofficeUser.parameters.userId,
         maybeLimit.right,
         maybeOffset.right,
-        userAuthz(backofficeUser).isAdmin()
+        userAuthzUtils.isAdmin()
           ? undefined
           : backofficeUser.permissions.selcGroups,
       );
