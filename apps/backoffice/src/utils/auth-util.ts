@@ -27,3 +27,45 @@ export const hasRequiredAuthorizations = (
     session?.user?.institution.role,
     requiredAuthorizations.requiredRole,
   );
+
+/**
+ * Can fetch & show Manage ApiKey (root) only for:
+ * - `groupApiKeyEnabled=false`
+ * - **admin** users
+ * - **operator** users who are not part of any selfcare group
+ * @returns
+ */
+export const hasManageKeyRoot =
+  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
+    !groupApiKeyEnabled ||
+    hasRequiredAuthorizations(session, {
+      requiredPermissions: ["ApiServiceWrite"],
+      requiredRole: "admin",
+    }) ||
+    (hasRequiredAuthorizations(session, {
+      requiredPermissions: ["ApiServiceWrite"],
+      requiredRole: "operator",
+    }) &&
+      (!session?.user?.permissions.selcGroups ||
+        session?.user?.permissions.selcGroups.length === 0));
+
+/**
+ * Can fetch & show Manage Group ApiKey (group) only for:
+ * - `groupApiKeyEnabled=true`
+ *   - **admin** users
+ *   - **operator** users who are in one or more selfcare groups
+ * @returns
+ */
+export const hasManageKeyGroup =
+  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
+    groupApiKeyEnabled &&
+    (hasRequiredAuthorizations(session, {
+      requiredPermissions: ["ApiServiceWrite"],
+      requiredRole: "admin",
+    }) ||
+      (hasRequiredAuthorizations(session, {
+        requiredPermissions: ["ApiServiceWrite"],
+        requiredRole: "operator",
+      }) &&
+        session?.user?.permissions.selcGroups &&
+        session?.user?.permissions.selcGroups.length > 0));
