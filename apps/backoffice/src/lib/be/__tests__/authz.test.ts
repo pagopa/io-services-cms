@@ -130,4 +130,22 @@ describe("userAuthz", () => {
       },
     );
   });
+
+  describe("hasSelcGroups", () => {
+    it.each`
+      scenario                                 | expectedResult | selcGroups
+      ${"the user's selcGroup is not defined"} | ${false}       | ${undefined}
+      ${"the user's selcGroup is empty"}       | ${false}       | ${[]}
+      ${"the user's selcGroup is not empty"}   | ${true}        | ${["group1", "group2"]}
+    `(
+      "should return $expectedResult with $scenario",
+      ({ expectedResult, selcGroups }) => {
+        expect(
+          userAuthz({
+            permissions: { selcGroups },
+          } as BackOfficeUser).hasSelcGroups(),
+        ).toBe(expectedResult);
+      },
+    );
+  });
 });

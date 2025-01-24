@@ -58,9 +58,9 @@ const userMock = {
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
 const mocks = vi.hoisted(() => {
-  const getUserMock = vi.fn(() => userMock);
+  const getUser = vi.fn(() => userMock);
   return {
-    getUserMock,
+    getUser,
     upsertManageSubscription: vi.fn(),
     getManageSubscriptions: vi.fn(),
     parseBody: vi.fn(),
@@ -75,7 +75,7 @@ const mocks = vi.hoisted(() => {
       ) =>
         async (nextRequest: NextRequest, { params }: { params: {} }) =>
           handler(nextRequest, {
-            backofficeUser: getUserMock(),
+            backofficeUser: getUser(),
             params,
           }),
     ),
@@ -110,7 +110,7 @@ describe("Subscription API", () => {
 
     it("should return a forbidden response when user is not an admin", async () => {
       // given
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -133,7 +133,7 @@ describe("Subscription API", () => {
 
     it("should return a bad request when fails to parse request body", async () => {
       // given
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -162,7 +162,7 @@ describe("Subscription API", () => {
 
     it("should return a bad request when the provided group is not found", async () => {
       // given
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -200,7 +200,7 @@ describe("Subscription API", () => {
 
     it("should fails when upsertManageSubscription return an error", async () => {
       // given
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -241,7 +241,7 @@ describe("Subscription API", () => {
 
     it("should return the upserted manage subscription", async () => {
       // given
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -379,7 +379,7 @@ describe("Subscription API", () => {
       mocks.getQueryParam.mockImplementation((_, param) =>
         E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
       );
-      mocks.getUserMock.mockImplementationOnce(() => ({
+      mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
           ...userMock.institution,
@@ -387,7 +387,7 @@ describe("Subscription API", () => {
         },
         permissions: {
           ...userMock.permissions,
-          selcGroups: [],
+          selcGroups: ["group1", "group2"],
         },
       }));
 
@@ -456,7 +456,7 @@ describe("Subscription API", () => {
         mocks.getManageSubscriptions.mockResolvedValueOnce(
           expectedSubscriptions,
         );
-        mocks.getUserMock.mockImplementationOnce(() => ({
+        mocks.getUser.mockImplementationOnce(() => ({
           ...userMock,
           institution: {
             ...userMock.institution,
