@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 1.40.10
+
+### Patch Changes
+
+- 42d3fbb8: use ai connection_string instead of instrumentation_key
+
+## 1.40.9
+
+### Patch Changes
+
+- e7b756e5: restore APPINSIGHTS_INSTRUMENTATIONKEY app config
+
+## 1.40.8
+
+### Patch Changes
+
+- f0edb2c9: try to use only default ai client
+
 ## 1.40.7
 
 ### Patch Changes

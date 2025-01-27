@@ -327,6 +327,28 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /services/group-unbound/any:
+    get:
+      tags:
+        - services
+      summary: Return the information if there is at least one group-unbounded service or not
+      description: Check for the existence of at least one service owned by the calling user that is not related to any group
+      operationId: checkGroupUnboundedServiceExistence
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: At least one group-unbounded service exists
+        '204':
+          description: There is no group-unbounded service
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /services/topics:
     get:
       tags:
@@ -891,9 +913,9 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all active unbound institution groups
-      description: Retrieve all active groups without any API Key related to them for the given institution
-      operationId: getUnboundInstitutionGroups
+      summary: Retrieve all active institution groups
+      description: Retrieve all active groups for the given institution
+      operationId: getInstitutionGroups
       security:
         - cookieAuth: []
       parameters:
@@ -903,6 +925,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: filter
+          in: query
+          description: |
+            Group filter:
+            * `ALL` - All (active) groups
+            * `UNBOUND` - Only (active) groups without any subscription (API Key) related
+          required: false
+          schema:
+            $ref: '#/components/schemas/GroupFilterType'
       responses:
         '200':
           description: Groups fetched successfully
@@ -1127,6 +1158,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+  /subscriptions/{subscriptionId}:
+    delete:
+      tags:
+        - manage-subscriptions
+      summary: Delete manage subscription
+      description: Delete the provided manage subscription
+      operationId: deleteManageSubscription
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          description: ID of the subscription
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Subscription deleted successfully
         '401':
           description: Unauthorized
         '403':
@@ -1767,6 +1827,10 @@ components:
             $ref: '#/components/schemas/Group'
       required:
         - groups
+    GroupFilterType:
+      type: string
+      enum: [ALL, UNBOUND]
+      default: ALL
     PaginationResult:
       type: object
       properties:

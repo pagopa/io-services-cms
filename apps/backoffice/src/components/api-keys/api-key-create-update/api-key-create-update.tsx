@@ -4,6 +4,7 @@ import {
 } from "@/components/create-update-process";
 import { useDialog } from "@/components/dialog-provider";
 import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroupSubscription";
+import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { Groups } from "@/generated/api/Groups";
 import useFetch from "@/hooks/use-fetch";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -61,8 +62,11 @@ export const ApiKeyCreateUpdate = ({ onConfirm }: ApiKeyCreateUpdateProps) => {
 
   useEffect(() => {
     groupsFetchData(
-      "getUnboundInstitutionGroups",
-      { institutionId: session?.user?.institution.id as string },
+      "getInstitutionGroups",
+      {
+        filter: GroupFilterTypeEnum.UNBOUND,
+        institutionId: session?.user?.institution.id as string,
+      },
       Groups,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

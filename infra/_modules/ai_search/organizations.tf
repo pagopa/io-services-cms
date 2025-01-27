@@ -21,11 +21,11 @@ resource "restapi_object" "organizations_datasource" {
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader]
 }
 
-resource "restapi_object" "organizations_index_02" {
+resource "restapi_object" "organizations_index_01" {
   path         = "/indexes"
   query_string = "api-version=2023-11-01"
   data = jsonencode({
-    name                  = "idx-organization-02"
+    name                  = "idx-organization-01"
     defaultScoringProfile = null
     fields = [
       {
@@ -163,14 +163,14 @@ resource "restapi_object" "organizations_index_02" {
   depends_on   = [azurerm_role_assignment.search_to_cosmos_account_reader, azurerm_cosmosdb_sql_role_assignment.search_to_cosmos_data_reader]
 }
 
-resource "restapi_object" "organizations_indexer_02" {
+resource "restapi_object" "organizations_indexer_01" {
   path         = "/indexers"
   query_string = "api-version=2023-11-01"
   data = jsonencode(
     {
-      name            = "idxr-organization-02"
+      name            = "idxr-organization-01"
       dataSourceName  = restapi_object.organizations_datasource.id
-      targetIndexName = restapi_object.organizations_index_02.id
+      targetIndexName = restapi_object.organizations_index_01.id
       description     = null
       skillsetName    = null
       disabled        = null
@@ -207,7 +207,7 @@ resource "restapi_object" "organizations_alias" {
   data = jsonencode(
     {
       name    = local.index_aliases.organizations
-      indexes = [restapi_object.organizations_index_02.id]
+      indexes = [restapi_object.organizations_index_01.id]
     }
   )
   force_new    = ["indexes"]

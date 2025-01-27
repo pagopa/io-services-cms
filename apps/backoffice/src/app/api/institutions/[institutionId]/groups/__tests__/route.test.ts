@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  GroupFilterType,
+  GroupFilterTypeEnum,
+} from "../../../../../../generated/api/GroupFilterType";
 
+import * as E from "fp-ts/lib/Either";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import { GET } from "../route";
 
@@ -8,52 +13,65 @@ const backofficeUserMock = {
   parameters: { userId: "userId" },
 } as BackOfficeUser;
 
-const {
-  isInstitutionIdSameAsCallerMock,
-  isAdminMock,
-  retrieveUnboundInstitutionGroupsMock,
-  withJWTAuthHandlerMock,
-} = vi.hoisted(() => ({
-  isInstitutionIdSameAsCallerMock: vi.fn(() => true),
-  isAdminMock: vi.fn(() => true),
-  retrieveUnboundInstitutionGroupsMock: vi.fn(),
-  withJWTAuthHandlerMock: vi.fn(
-    (
-      handler: (
-        nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any },
-      ) => Promise<NextResponse> | Promise<Response>,
-    ) =>
-      async (nextRequest: NextRequest, { params }: { params: {} }) =>
-        handler(nextRequest, {
-          backofficeUser: backofficeUserMock,
-          params,
-        }),
-  ),
-}));
+const mocks = vi.hoisted(() => {
+  const isAdmin = vi.fn(() => true);
+  const isInstitutionAllowed = vi.fn(() => true);
+  return {
+    isInstitutionAllowed,
+    isAdmin,
+    userAuthz: vi.fn(() => ({
+      isInstitutionAllowed,
+      isAdmin,
+    })),
+    getQueryParam: vi.fn(),
+    retrieveInstitutionGroups: vi.fn(),
+    retrieveUnboundInstitutionGroups: vi.fn(),
+    withJWTAuthHandler: vi.fn(
+      (
+        handler: (
+          nextRequest: NextRequest,
+          context: { backofficeUser: BackOfficeUser; params: any },
+        ) => Promise<NextResponse> | Promise<Response>,
+      ) =>
+        async (nextRequest: NextRequest, { params }: { params: {} }) =>
+          handler(nextRequest, {
+            backofficeUser: backofficeUserMock,
+            params,
+          }),
+    ),
+  };
+});
 
 vi.mock("@/lib/be/authz", () => ({
-  isAdmin: isAdminMock,
-  isInstitutionIdSameAsCaller: isInstitutionIdSameAsCallerMock,
+  userAuthz: mocks.userAuthz,
+}));
+vi.mock("@/lib/be/req-res-utils", () => ({
+  getQueryParam: mocks.getQueryParam,
 }));
 vi.mock("@/lib/be/institutions/business", () => ({
-  retrieveUnboundInstitutionGroups: retrieveUnboundInstitutionGroupsMock,
+  retrieveUnboundInstitutionGroups: mocks.retrieveUnboundInstitutionGroups,
+  retrieveInstitutionGroups: mocks.retrieveInstitutionGroups,
 }));
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock,
+  withJWTAuthHandler: mocks.withJWTAuthHandler,
 }));
 
-afterEach(() => {
+beforeEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("getUnboundedInstitutionGroups", () => {
+afterEach(() => {
+  expect(mocks.userAuthz).toHaveBeenCalledOnce();
+  expect(mocks.userAuthz).toHaveBeenCalledWith(backofficeUserMock);
+});
+
+describe("getInstitutionGroups", () => {
   it("should return an error response bad request when isInstitutionIdSameAsCaller check fail", async () => {
     // given
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isInstitutionIdSameAsCallerMock.mockReturnValueOnce(false);
+    mocks.isInstitutionAllowed.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
@@ -63,14 +81,11 @@ describe("getUnboundedInstitutionGroups", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
-    );
-    expect(isAdminMock).not.toHaveBeenCalled();
-    expect(retrieveUnboundInstitutionGroupsMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Unauthorized institutionId");
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).not.toHaveBeenCalled();
+    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
   });
 
   it("should return an error response bad request when user is not an admin", async () => {
@@ -78,7 +93,7 @@ describe("getUnboundedInstitutionGroups", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isAdminMock.mockReturnValueOnce(false);
+    mocks.isAdmin.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
@@ -88,24 +103,20 @@ describe("getUnboundedInstitutionGroups", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
-    );
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(retrieveUnboundInstitutionGroupsMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Role not authorized");
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).toHaveBeenCalledOnce();
+    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
   });
 
-  it("should return an error response bad request when retrieveUnboundInstitutionGroups rejects", async () => {
+  it("should return an error response when kind query param is not valid", async () => {
     // given
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    const error = new Error();
-    retrieveUnboundInstitutionGroupsMock.mockRejectedValueOnce(error);
+    mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
 
     // when
     const result = await GET(nextRequest, {
@@ -113,52 +124,116 @@ describe("getUnboundedInstitutionGroups", () => {
     });
 
     // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(500);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
+    expect(result.status).toBe(400);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("Bad Request");
+    expect(responseBody.detail).toEqual(
+      `'filter' query param is not a valid ${GroupFilterType.name}`,
     );
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(retrieveUnboundInstitutionGroupsMock).toHaveBeenCalledOnce();
-    expect(retrieveUnboundInstitutionGroupsMock).toHaveBeenCalledWith(
-      institutionId,
-      backofficeUserMock.parameters.userId,
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).toHaveBeenCalledOnce();
+    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+    expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      nextRequest,
+      "filter",
+      GroupFilterType,
+      GroupFilterTypeEnum.ALL,
     );
-    expect(jsonBody.title).toEqual("InstitutionGroupsError");
-    expect(jsonBody.detail).toEqual("Something went wrong");
+    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
   });
 
-  it("should succeed", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    const groups = [];
-    retrieveUnboundInstitutionGroupsMock.mockResolvedValueOnce(groups);
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(200);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
+  it.each`
+    institutionId      | filterType                     | institutionGroupsMock                     | expectedInstitutionGroupsMockParams
+    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]}
+    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}
+  `(
+    "should return an error response bad request when retrieveUnboundInstitutionGroups rejects and filter type is $filterType",
+    async ({
       institutionId,
-    );
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(retrieveUnboundInstitutionGroupsMock).toHaveBeenCalledOnce();
-    expect(retrieveUnboundInstitutionGroupsMock).toHaveBeenCalledWith(
+      filterType,
+      institutionGroupsMock,
+      expectedInstitutionGroupsMockParams,
+    }) => {
+      // given
+      const url = new URL("http://localhost");
+      const nextRequest = new NextRequest(url);
+      const error = new Error();
+      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      institutionGroupsMock.mockRejectedValueOnce(error);
+
+      // when
+      const result = await GET(nextRequest, {
+        params: { institutionId },
+      });
+
+      // then
+      const jsonBody = await result.json();
+      expect(result.status).toBe(500);
+      expect(jsonBody.title).toEqual("InstitutionGroupsError");
+      expect(jsonBody.detail).toEqual("Something went wrong");
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+      expect(mocks.isAdmin).toHaveBeenCalledOnce();
+      expect(mocks.isAdmin).toHaveBeenCalledWith();
+      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+        nextRequest,
+        "filter",
+        GroupFilterType,
+        GroupFilterTypeEnum.ALL,
+      );
+      expect(institutionGroupsMock).toHaveBeenCalledOnce();
+      expect(institutionGroupsMock).toHaveBeenCalledWith(
+        ...expectedInstitutionGroupsMockParams,
+      );
+    },
+  );
+
+  it.each`
+    institutionId      | filterType                     | institutionGroupsMock                     | expectedInstitutionGroupsMockParams
+    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]}
+    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}
+  `(
+    "should succeed when filter type is $filterType",
+    async ({
       institutionId,
-      backofficeUserMock.parameters.userId,
-    );
-    expect(jsonBody).toStrictEqual({ groups });
-  });
+      filterType,
+      institutionGroupsMock,
+      expectedInstitutionGroupsMockParams,
+    }) => {
+      // given
+      const url = new URL("http://localhost");
+      const nextRequest = new NextRequest(url);
+      const groups = [];
+      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      institutionGroupsMock.mockResolvedValueOnce(groups);
+
+      // when
+      const result = await GET(nextRequest, {
+        params: { institutionId },
+      });
+
+      // then
+      const jsonBody = await result.json();
+      expect(result.status).toBe(200);
+      expect(jsonBody).toStrictEqual({ groups });
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+      expect(mocks.isAdmin).toHaveBeenCalledOnce();
+      expect(mocks.isAdmin).toHaveBeenCalledWith();
+      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+        nextRequest,
+        "filter",
+        GroupFilterType,
+        GroupFilterTypeEnum.ALL,
+      );
+      expect(institutionGroupsMock).toHaveBeenCalledOnce();
+      expect(institutionGroupsMock).toHaveBeenCalledWith(
+        ...expectedInstitutionGroupsMockParams,
+      );
+    },
+  );
 });

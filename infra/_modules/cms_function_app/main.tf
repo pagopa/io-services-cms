@@ -121,5 +121,7 @@ module "cms_fn" {
 
   tier = local.cms.tier
 
+  application_insights_connection_string = var.ai_common_connection_string
+
   tags = var.tags
 }
