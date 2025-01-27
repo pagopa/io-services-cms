@@ -17,6 +17,8 @@ import { RecordApiKeyValue } from "./api-keys-groups";
 /** Single Group API Key interface */
 interface ApiKeyGroupProps {
   apiKey: RecordApiKeyValue;
+  /** If true, render accordion opened */
+  isExpanded?: boolean;
   onDelete: (event: React.MouseEvent, subscriptionId: string) => void;
   onExpand: (expanded: boolean, subscriptionId: string) => void;
   onRotateKey: (
@@ -32,6 +34,7 @@ const borderStyle = "1px solid #E3E7EB";
 /** ApiKeyGroup component */
 export const ApiKeyGroup = ({
   apiKey,
+  isExpanded,
   onDelete,
   onExpand,
   onRotateKey,
@@ -40,8 +43,11 @@ export const ApiKeyGroup = ({
 }: ApiKeyGroupProps) => {
   const { t } = useTranslation();
 
+  if (isExpanded) onExpand(true, subscriptionId);
+
   return (
     <Accordion
+      defaultExpanded={isExpanded}
       disableGutters
       key={subscriptionId}
       onChange={(_, expanded) => onExpand(expanded, subscriptionId)}
