@@ -1,5 +1,6 @@
 module "eventhub" {
-  source = "github.com/pagopa/dx//infra/modules/azure_event_hub?ref=main"
+  source  = "pagopa/dx-azure-event-hub/azurerm"
+  version = "~> 0"
 
   environment = {
     prefix          = var.prefix
