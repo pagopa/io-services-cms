@@ -2,5 +2,9 @@
   "backoffice.backoffice.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
   "cms_function_app.cms_fn.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
   "eventhub.eventhub.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
-  "function_app.app_be_fn.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64"
+  "function_app.app_be_fn.naming_convention": "cebed82c7742c150fbcb4c363670d8078bee27ebd7cb37a37c01cd3803670c64",
+  "backoffice.backoffice": "f9746f1db71538ed1051a8f8dfa44a15c9a0a991f0ec98a8b55b0bf750f53f4a",
+  "cms_function_app.cms_fn": "d9ac8c0746d39c97212faec007067a72ca9ceb2cb818a071258f3bcb5746beac",
+  "eventhub.eventhub": "6bbd4dd993d024c2ce249a90626b8df67d29364eabf051c81c073b5252e361d2",
+  "function_app.app_be_fn": "d9ac8c0746d39c97212faec007067a72ca9ceb2cb818a071258f3bcb5746beac"
 }
