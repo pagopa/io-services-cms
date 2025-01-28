@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { buildSnackbarItem } from "../../notification";
 import { ApiKeysHeader } from "../api-keys-header";
 import { ApiKeyGroup } from "./api-keys-group";
+import { ApiKeysGroupsEmptyState } from "./api-keys-groups-empty-state";
 import { ButtonGenerateApiKeysGroup } from "./button-generate-api-keys-group";
 
 export interface ApiKeysGroupsProps {
@@ -245,6 +246,10 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       padding={3}
     >
       <ApiKeysHeader description={props.description} title={props.title} />
+      <ApiKeysGroupsEmptyState
+        apiKeysGroups={mspData?.value}
+        hideAdminWarning
+      />
       <ButtonGenerateApiKeysGroup
         onCreateGroupClick={props.onCreateGroupClick}
         onGenerateClick={props.onGenerateClick}

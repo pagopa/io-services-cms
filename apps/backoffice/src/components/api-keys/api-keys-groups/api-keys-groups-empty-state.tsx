@@ -10,10 +10,12 @@ import { useTranslation } from "next-i18next";
 
 export interface ApiKeysGroupsEmptyStateProps {
   apiKeysGroups?: readonly Subscription[];
+  hideAdminWarning?: boolean;
 }
 
 export const ApiKeysGroupsEmptyState = ({
   apiKeysGroups,
+  hideAdminWarning,
 }: ApiKeysGroupsEmptyStateProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -30,7 +32,8 @@ export const ApiKeysGroupsEmptyState = ({
   // admin users
   if (isAdmin)
     return (
-      !hasAtLeastOneApiKeysGroups && (
+      !hasAtLeastOneApiKeysGroups &&
+      !hideAdminWarning && (
         <Alert
           icon={<WarningAmberOutlined />}
           severity="warning"
