@@ -8,11 +8,11 @@ on:
     paths:
       - "infra/prod/**"
       - "infra/_modules/**"
-      - ".github/workflows/infra-review-p-itn.yml"
+      - ".github/workflows/infra-release-p.yml"
 
 jobs:
   infra_release_prod_itn:
-    uses: pagopa/dx/.github/workflows/infra_apply.yaml@7b317fb26f0c0a921f3bbddacbef3af2e693f87b
+    uses: pagopa/dx/.github/workflows/infra_apply.yaml@8fd8da4ece3ea29908b983fd8960366efb914253
     name: Terraform apply
     secrets: inherit
     with:
