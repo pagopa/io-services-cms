@@ -1,5 +1,5 @@
+/* eslint-disable max-lines-per-function */
 import { Cidr } from "@/generated/api/Cidr";
-import { Group } from "@/generated/api/Group";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
@@ -11,9 +11,10 @@ import { getBffApiClient } from "@/utils/bff-api-client";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Box } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
+import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { enqueueSnackbar } from "notistack";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { buildSnackbarItem } from "../../notification";
 import { ApiKeysHeader } from "../api-keys-header";
@@ -23,8 +24,6 @@ import { ButtonGenerateApiKeysGroup } from "./button-generate-api-keys-group";
 export interface ApiKeysGroupsProps {
   /** Main component card description */
   description?: string;
-  /** Selfcare groups */
-  groups?: Group[];
   /** Event triggered when user click "Create group" on modal that warns of the non-existence of any SC group */
   onCreateGroupClick: () => void;
   /** Event triggered when user click "Generate API Key" */
@@ -60,6 +59,9 @@ const convertArrayToRecordset = (
  * */
 export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { id: queryId } = router.query; // Query parameter `id`
+  const accordionRefs = useRef<Record<string, HTMLDivElement | null>>({}); // Accordions reference map
 
   const { data: mspData, fetchData: mspFetchData } =
     useFetch<SubscriptionPagination>();
@@ -171,6 +173,25 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     console.log("TODO: delete");
   };
 
+  const handleRef = (accordionId: string) => (el: HTMLDivElement | null) => {
+    accordionRefs.current[accordionId] = el;
+  };
+
+  useEffect(() => {
+    if (queryId) {
+      // Delay scrolling to ensure rendering is complete
+      setTimeout(() => {
+        const targetEl = accordionRefs.current[queryId as string];
+        if (targetEl) {
+          targetEl.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 500);
+    }
+  }, [queryId]); // Expose the effect only when `queryId` changes.
+
   // update GroupApiKey keys
   useEffect(() => {
     if (keysData && keysData._referenceId && apiKeys) {
@@ -230,15 +251,18 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       />
       <Box>
         {Object.entries(apiKeys ?? {}).map(([id, apiKey]) => (
-          <ApiKeyGroup
-            apiKey={apiKey}
-            key={id}
-            onDelete={handleDeleteClick}
-            onExpand={handleOnExpandClick}
-            onRotateKey={handleRotateKey}
-            onUpdateCidrs={handleUpdateCidrs}
-            subscriptionId={id}
-          />
+          <Box key={id} ref={handleRef(id)}>
+            <ApiKeyGroup
+              apiKey={apiKey}
+              isExpanded={id === queryId}
+              key={id}
+              onDelete={handleDeleteClick}
+              onExpand={handleOnExpandClick}
+              onRotateKey={handleRotateKey}
+              onUpdateCidrs={handleUpdateCidrs}
+              subscriptionId={id}
+            />
+          </Box>
         ))}
       </Box>
     </Box>

@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { Mock, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { EmptyState } from "../empty-state";
+import { EmptyStateLayer } from "../empty-state";
 
 vi.mock("next-auth/react");
 
@@ -14,12 +14,12 @@ let ctaRoute = "/ctaRoute";
 let requiredPermissions = [""];
 
 const getEmptyStateComponent = () => (
-  <EmptyState
+  <EmptyStateLayer
     emptyStateLabel={emptyStateLabel}
     ctaLabel={ctaLabel}
     ctaRoute={ctaRoute}
     requiredPermissions={requiredPermissions}
-  ></EmptyState>
+  ></EmptyStateLayer>
 );
 
 beforeAll(() => {
@@ -28,33 +28,33 @@ beforeAll(() => {
     data: {
       user: {
         permissions: { apimGroups: ["permission1", "permission2"] },
-        institution: { role: "aRole" }
-      }
-    }
+        institution: { role: "aRole" },
+      },
+    },
   });
 });
 
 // needed to clean document (react dom)
 afterEach(cleanup);
 
-describe("[EmptyState] Component", () => {
+describe("[EmptyStateLayer] Component", () => {
   it("Should render the empty state component", () => {
     requiredPermissions = ["permission1"];
     render(getEmptyStateComponent());
     const aButton = screen.getByRole("button", {
-      name: ctaLabel
+      name: ctaLabel,
     });
 
     expect(aButton).toBeVisible();
     expect(document.getElementById("empty-state")).toBeInTheDocument();
     expect(document.getElementById("empty-state-label")).toHaveTextContent(
-      emptyStateLabel
+      emptyStateLabel,
     );
     expect(document.getElementById("empty-state-cta")).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: ctaLabel })).toHaveAttribute(
       "href",
-      ctaRoute
+      ctaRoute,
     );
   });
 
@@ -63,13 +63,13 @@ describe("[EmptyState] Component", () => {
     const { queryByRole } = render(getEmptyStateComponent());
 
     const aButton = queryByRole("button", {
-      name: ctaLabel
+      name: ctaLabel,
     });
 
     expect(aButton).toBeNull();
     expect(document.getElementById("empty-state")).toBeInTheDocument();
     expect(document.getElementById("empty-state-label")).toHaveTextContent(
-      emptyStateLabel
+      emptyStateLabel,
     );
     expect(document.getElementById("empty-state-cta")).not.toBeInTheDocument();
   });
@@ -82,16 +82,16 @@ describe("[EmptyState] Component", () => {
 
     expect(document.getElementById("empty-state")).toBeInTheDocument();
     expect(document.getElementById("empty-state-label")).toHaveTextContent(
-      emptyStateLabel
+      emptyStateLabel,
     );
     expect(document.getElementById("empty-state-cta")).toBeInTheDocument();
     expect(document.getElementById("empty-state-cta")).toHaveTextContent(
-      ctaLabel
+      ctaLabel,
     );
 
     expect(screen.getByRole("link", { name: ctaLabel })).toHaveAttribute(
       "href",
-      ctaRoute
+      ctaRoute,
     );
   });
 
@@ -102,7 +102,7 @@ describe("[EmptyState] Component", () => {
 
     expect(document.getElementById("empty-state")).toBeInTheDocument();
     expect(document.getElementById("empty-state-label")).toHaveTextContent(
-      emptyStateLabel
+      emptyStateLabel,
     );
   });
 });

@@ -289,7 +289,15 @@
   "routes": {
     "overview": {
       "title": "Overview",
-      "description": "Monitor all your activities from here."
+      "description": "Monitor all your activities from here.",
+      "apiKeys": {
+        "groups": {
+          "emptyState": {
+            "admin": "Make sure groups have been created and API Keys have been associated. Go to the API Keys section to manage the configuration.",
+            "operator": "No API Keys have been created for your group.<br/>Ask your administrator to generate them."
+          }
+        }
+      }
     },
     "services": {
       "title": "Services",
