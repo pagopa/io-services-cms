@@ -8,17 +8,19 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { hasManageKeyGroup, hasManageKeyRoot } from "@/utils/auth-util";
 import { trackApiKeyPageEvent } from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import React from "react";
 import { ReactElement, useEffect } from "react";
 
 const pageTitleLocaleKey = "routes.keys.title";
 const pageDescriptionLocaleKey = "routes.keys.description";
+
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 export default function Keys() {
   const { t } = useTranslation();
@@ -26,6 +28,9 @@ export default function Keys() {
   const { data: session } = useSession();
   const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
   const { data: acData, fetchData: acFetchData } = useFetch<ManageKeyCIDRs>();
+
+  const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
+  const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
 
   const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
     mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
@@ -43,12 +48,13 @@ export default function Keys() {
   };
 
   useEffect(() => {
-    mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
-    acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
-      notify: "errors",
-    });
+    if (showManageKeyRoot) {
+      mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
+      acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
+        notify: "errors",
+      });
+    }
     trackApiKeyPageEvent();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,22 +64,24 @@ export default function Keys() {
         description={pageDescriptionLocaleKey}
         title={pageTitleLocaleKey}
       />
-      <Stack>
-        <ApiKeys
-          description={t("routes.keys.manage.description")}
-          keys={mkData}
-          onRotateKey={handleRotateKey}
-          title={t("routes.keys.manage.title")}
-          type="manage"
-        />
-        <AuthorizedCidrs
-          cidrs={acData?.cidrs as unknown as string[]}
-          description="routes.keys.authorizedCidrs.description"
-          editable={true}
-          onSaveClick={handleUpdateCidrs}
-        />
-      </Stack>
-      {getConfiguration().GROUP_APIKEY_ENABLED && (
+      {showManageKeyRoot && (
+        <Stack>
+          <ApiKeys
+            description={t("routes.keys.manage.description")}
+            keys={mkData}
+            onRotateKey={handleRotateKey}
+            title={t("routes.keys.manage.title")}
+            type="manage"
+          />
+          <AuthorizedCidrs
+            cidrs={acData?.cidrs as unknown as string[]}
+            description="routes.keys.authorizedCidrs.description"
+            editable={true}
+            onSaveClick={handleUpdateCidrs}
+          />
+        </Stack>
+      )}
+      {showManageKeyGroup && (
         <Stack marginTop={3}>
           <ApiKeysGroups
             description={t("routes.keys.groups.description")}
