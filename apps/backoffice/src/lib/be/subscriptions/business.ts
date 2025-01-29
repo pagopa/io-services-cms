@@ -11,6 +11,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { getApimService, upsertSubscription } from "../apim-service";
 import {
   ManagedInternalError,
+  SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
 } from "../errors";
 
@@ -133,4 +134,39 @@ export async function getManageSubscriptions(
   }
 
   return maybeSubscriptions.right.map(toSubscription);
+}
+
+export async function deleteManageSubscription(
+  apimUserId: string,
+  { subscriptionId }: { subscriptionId: string },
+): Promise<void> {
+  const filter =
+    ApimUtils.apim_filters.subscriptionsByIdsApimFilter(subscriptionId);
+  const maybeSubscription = await getApimService().getUserSubscriptions(
+    apimUserId,
+    undefined,
+    undefined,
+    filter,
+  )();
+  if (E.isLeft(maybeSubscription)) {
+    throw apimErrorToManagedInternalError(
+      "Error retrieving user's subscriptions",
+      maybeSubscription.left,
+    );
+  }
+  if (maybeSubscription.right.length === 0) {
+    throw new SubscriptionOwnershipError(
+      "The user can't delete the subscription",
+    );
+  }
+  const deletionResult =
+    await getApimService().deleteSubscription(subscriptionId)();
+  if (E.isLeft(deletionResult)) {
+    const errorMessage = "Error deleting subscription";
+    if ("statusCode" in deletionResult.left) {
+      throw apimErrorToManagedInternalError(errorMessage, deletionResult.left);
+    } else {
+      throw new ManagedInternalError(errorMessage, deletionResult.left.message);
+    }
+  }
 }

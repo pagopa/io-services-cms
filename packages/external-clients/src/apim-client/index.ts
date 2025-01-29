@@ -109,6 +109,9 @@ export interface ApimService {
     user: UserCreateParameters,
     userId?: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, UserContract>;
+  readonly deleteSubscription: (
+    subscriptionId: string,
+  ) => TE.TaskEither<ApimRestError | Error, void>;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, Delegate>;
@@ -181,6 +184,14 @@ export const getApimService = (
       apimServiceName,
       userId,
       user,
+    ),
+  deleteSubscription: (subscriptionId, ifMatch = "*") =>
+    deleteSubscription(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      subscriptionId,
+      ifMatch,
     ),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
@@ -492,6 +503,36 @@ const updateSubscription = (
             displayName,
             state,
           },
+        ),
+      identity,
+    ),
+    chainApimMappedError,
+  );
+
+/**
+ * Delete an existing subscription
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param subscriptionId
+ * @returns
+ */
+const deleteSubscription = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  subscriptionId: string,
+  ifMatch: string,
+): TE.TaskEither<ApimRestError, void> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.delete(
+          apimResourceGroup,
+          apimServiceName,
+          subscriptionId,
+          ifMatch,
         ),
       identity,
     ),

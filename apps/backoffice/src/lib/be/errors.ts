@@ -49,6 +49,14 @@ export class ApiKeyNotFoundError extends ManagedInternalError {
   }
 }
 
+export class SubscriptionOwnershipError extends Error {
+  constructor(message: string) {
+    super("User does not own the subscription");
+    this.name = "SubscriptionOwnershipError";
+    this.message = message;
+  }
+}
+
 export class HealthChecksError extends Error {
   externalServiceName: string;
   innerError: unknown;
