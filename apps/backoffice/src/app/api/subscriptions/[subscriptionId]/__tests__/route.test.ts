@@ -81,7 +81,9 @@ describe("Delete Manage Subscription API", () => {
     // then
     expect(result.status).toBe(403);
     const jsonBody = await result.json();
-    expect(jsonBody.detail).toEqual("Subscription Id not valid");
+    expect(jsonBody.detail).toEqual(
+      "Only MANAGE_GROUP Subscriptions can be deleted",
+    );
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();

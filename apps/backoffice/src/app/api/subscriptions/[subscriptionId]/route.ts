@@ -27,16 +27,19 @@ export const DELETE = withJWTAuthHandler(
     if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
-    const { subscriptionId } = params;
     if (
-      !subscriptionId.startsWith(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX)
+      !params.subscriptionId.startsWith(
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+      )
     ) {
-      return handleForbiddenErrorResponse("Subscription Id not valid");
+      return handleForbiddenErrorResponse(
+        "Only MANAGE_GROUP Subscriptions can be deleted",
+      );
     }
 
     try {
       await deleteManageSubscription(backofficeUser.parameters.userId, {
-        subscriptionId,
+        subscriptionId: params.subscriptionId,
       });
       return new NextResponse(null, {
         status: 204,
@@ -44,11 +47,11 @@ export const DELETE = withJWTAuthHandler(
     } catch (error) {
       if (error instanceof SubscriptionOwnershipError) {
         return handleForbiddenErrorResponse(
-          "User can't delete the subscription",
+          "You can only delete subscriptions that you own",
         );
       }
       handlerErrorLog(
-        `An Error has occurred while deleting subscription for institution having APIM userId: ${backofficeUser.parameters.userId}, caused by: `,
+        `An Error has occurred while deleting subscription with id ${params.subscriptionId} for institution having APIM userId: ${backofficeUser.parameters.userId}, caused by: `,
         error,
       );
       return handleInternalErrorResponse("SubscriptionDeletionError", error);
