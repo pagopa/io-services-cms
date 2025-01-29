@@ -20,6 +20,14 @@ export const userAuthz = (user: BackOfficeUser) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
   return {
     /**
+     * Check if the user has at least one group
+     * @returns a boolean indicating whether the user has at least one group
+     */
+    hasSelcGroups: (): boolean =>
+      !!(
+        user.permissions.selcGroups && user.permissions.selcGroups.length !== 0
+      ),
+    /**
      * Check if the user role is admin
      * @returns a boolean indicating whether the user is admin or not
      */
