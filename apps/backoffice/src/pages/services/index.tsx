@@ -1,4 +1,5 @@
 import { AccessControl } from "@/components/access-control";
+import { ApiKeysGroupTag } from "@/components/api-keys/api-keys-groups/api-keys-group-tag";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
@@ -14,6 +15,7 @@ import {
   TableView,
   TableViewColumn,
 } from "@/components/table-view";
+import { getConfiguration } from "@/config";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceList } from "@/generated/api/ServiceList";
 import {
@@ -52,6 +54,7 @@ const pageDescriptionLocaleKey = "routes.services.description";
 const CREATE_SERVICE_ROUTE = "/services/new-service";
 const DEFAULT_PAGE_LIMIT = 10;
 const TEXT_SECONDARY_COLOR_STYLE = { color: "text.secondary" };
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 // used to fill TableView rows and simulate a complete pagination
 const servicePlaceholder = {
@@ -89,6 +92,30 @@ export default function Services() {
   const { t } = useTranslation();
   const router = useRouter();
   const showDialog = useDialog();
+
+  const getTableViewColumnGroup = (): TableViewColumn<ServiceListItem>[] =>
+    GROUP_APIKEY_ENABLED
+      ? [
+          {
+            alignment: "left",
+            cellTemplate: (service) =>
+              service.metadata?.group ? (
+                <ApiKeysGroupTag
+                  disabled={
+                    service.status.value ===
+                    ServiceLifecycleStatusTypeEnum.deleted
+                  }
+                  label={service.metadata.group?.name}
+                  noWrap
+                />
+              ) : (
+                <></>
+              ),
+            label: "routes.services.tableHeader.group",
+            name: "metadata",
+          },
+        ]
+      : [];
 
   /** MUI `Table` columns definition */
   const tableViewColumns: TableViewColumn<ServiceListItem>[] = [
@@ -165,6 +192,7 @@ export default function Services() {
       label: "routes.services.tableHeader.visibility",
       name: "visibility",
     },
+    ...getTableViewColumnGroup(),
   ];
 
   const {

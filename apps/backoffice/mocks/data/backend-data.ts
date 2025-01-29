@@ -8,6 +8,7 @@ import {
 import { faker } from "@faker-js/faker/locale/it";
 
 import packageJson from "../../package.json";
+import { getMockManageSubscriptionGroup } from "./selfcare-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -143,6 +144,10 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     ]),
     custom_special_flow: faker.lorem.slug(1),
     email: faker.internet.email(),
+    group: faker.helpers.arrayElement([
+      getMockManageSubscriptionGroup(),
+      undefined,
+    ]),
     pec: faker.internet.email(),
     phone: faker.phone.number(),
     privacy_url: faker.internet.url(),

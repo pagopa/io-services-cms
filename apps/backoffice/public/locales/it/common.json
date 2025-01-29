@@ -308,7 +308,8 @@
         "lastUpdate": "Ultima modifica",
         "id": "Codice ID",
         "status": "Stato",
-        "visibility": "Visibilità in IO"
+        "visibility": "Visibilità in IO",
+        "group": "Gruppo"
       }
     },
     "service": {
