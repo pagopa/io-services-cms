@@ -119,7 +119,7 @@ export const GET = withJWTAuthHandler(
     if (
       maybeKind.right === SubscriptionTypeEnum.MANAGE_GROUP &&
       !userAuthzUtils.isAdmin() &&
-      userAuthzUtils.hasSelcGroups()
+      !userAuthzUtils.hasSelcGroups()
     ) {
       return handleForbiddenErrorResponse("Role not authorized");
     }

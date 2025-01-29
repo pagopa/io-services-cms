@@ -387,7 +387,7 @@ describe("Subscription API", () => {
         },
         permissions: {
           ...userMock.permissions,
-          selcGroups: ["group1", "group2"],
+          selcGroups: [],
         },
       }));
 
