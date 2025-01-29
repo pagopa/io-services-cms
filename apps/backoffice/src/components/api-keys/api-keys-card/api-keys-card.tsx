@@ -7,7 +7,7 @@ import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
 import { hasManageKeyGroup, hasManageKeyRoot } from "@/utils/auth-util";
 import { ArrowForward } from "@mui/icons-material";
-import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -16,6 +16,7 @@ import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 
 import { ApiKeysGroupsEmptyState } from "../api-keys-groups";
+import { ApiKeysGroupTag } from "../api-keys-groups/api-keys-group-tag";
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 const KEYS_ROUTE_PATH = "/keys";
@@ -92,19 +93,12 @@ export const ApiKeysCard = () => {
               {mspData?.value && mspData.value.length > 0 && (
                 <Box paddingTop={2}>
                   {mspData?.value.map((apiKeyGroup) => (
-                    <Chip
-                      clickable={true}
+                    <ApiKeysGroupTag
                       key={apiKeyGroup.id}
                       label={apiKeyGroup.name}
                       onClick={() =>
                         router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
                       }
-                      size="small"
-                      sx={{
-                        borderRadius: 0.5,
-                        marginBottom: 1,
-                        marginRight: 1,
-                      }}
                     />
                   ))}
                 </Box>

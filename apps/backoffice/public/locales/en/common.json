@@ -308,7 +308,8 @@
         "lastUpdate": "Last update",
         "id": "ID Code",
         "status": "Status",
-        "visibility": "Visibility on IO"
+        "visibility": "Visibility on IO",
+        "group": "Group"
       }
     },
     "service": {
