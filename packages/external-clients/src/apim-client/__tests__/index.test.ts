@@ -3,7 +3,7 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getApimService, parseIdFromFullPath } from "..";
+import { ApimRestError, getApimService, parseIdFromFullPath } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
 
 afterEach(() => {
@@ -507,6 +507,100 @@ describe("ApimService Test", () => {
           statusCode: 503,
         });
       }
+    });
+  });
+
+  describe("deleteSubscription", () => {
+    // mock ApimClient
+    const mockApimClient = {
+      subscription: {
+        delete: vi.fn(),
+      },
+    };
+
+    it("should return OK after the deletion of the subscription", async () => {
+      //given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      mockApimClient.subscription.delete.mockResolvedValueOnce(void 0);
+
+      // when
+      const result = await apimService.deleteSubscription(aServiceId)();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledOnce();
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        aServiceId,
+        "*",
+      );
+    });
+
+    it("should return error when the apim respond with an unknown error", async () => {
+      //given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      const error = new Error("error from APIM");
+      mockApimClient.subscription.delete.mockRejectedValueOnce(error);
+
+      // when
+      const result = await apimService.deleteSubscription(aServiceId)();
+
+      // then
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toStrictEqual({ statusCode: 500 });
+      }
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledOnce();
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        aServiceId,
+        "*",
+      );
+    });
+
+    it("should return error when the apim respond with an APIM error", async () => {
+      //given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      const error: ApimRestError = {
+        statusCode: 500,
+        name: "apim error",
+        details: "managed error from apim",
+      };
+      mockApimClient.subscription.delete.mockRejectedValueOnce(error);
+
+      // when
+      const result = await apimService.deleteSubscription(aServiceId)();
+
+      // then
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toStrictEqual(error);
+      }
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledOnce();
+      expect(mockApimClient.subscription.delete).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        aServiceId,
+        "*",
+      );
     });
   });
 
