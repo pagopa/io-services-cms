@@ -109,8 +109,14 @@ export interface ApimService {
     user: UserCreateParameters,
     userId?: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, UserContract>;
+  /**
+   * Deletes a subscription specified by its identifier.
+   * @param subscriptionId Subscription entity Identifier
+   * @param ifMatch ETag of the Entity. ETag should match the current entity state from the header response of the GET request or it should be * for unconditional update.
+   */
   readonly deleteSubscription: (
     subscriptionId: string,
+    ifMatch?: string,
   ) => TE.TaskEither<ApimRestError | Error, void>;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
