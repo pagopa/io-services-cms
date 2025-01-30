@@ -239,6 +239,29 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(`${baseURL}/services/group-unbound/any`, () => {
+      const resultArray = [
+        new HttpResponse(null, {
+          status: 200,
+        }),
+        new HttpResponse(null, {
+          status: 204,
+        }),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+      return resultArray[1];
+    }),
     http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
