@@ -2,6 +2,7 @@ import { AccessControl } from "@/components/access-control";
 import { ApiKeysGroupTag } from "@/components/api-keys/api-keys-groups/api-keys-group-tag";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
+import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
 import {
   ServiceContextMenuActions,
@@ -412,9 +413,7 @@ export default function Services() {
     );
   };
 
-  //TODO: id not used, is it a leftover?
-  /*eslint-disable @typescript-eslint/no-unused-vars */
-  const getServices = (id?: string) => {
+  const getServices = () => {
     servicesFetchData(
       "getServiceList",
       {
@@ -491,24 +490,27 @@ export default function Services() {
           />
         </Grid>
         <Grid item xs="auto">
-          <AccessControl requiredPermissions={["ApiServiceWrite"]}>
-            <NextLink
-              href={CREATE_SERVICE_ROUTE}
-              passHref
-              style={{ textDecoration: "none" }}
-            >
-              <Button
-                onClick={() => {
-                  trackServiceCreateStartEvent();
-                }}
-                size="medium"
-                startIcon={<Add />}
-                variant="contained"
+          <Stack direction="row" spacing={2}>
+            <AccessControl requiredPermissions={["ApiServiceWrite"]}>
+              <NextLink
+                href={CREATE_SERVICE_ROUTE}
+                passHref
+                style={{ textDecoration: "none" }}
               >
-                {t("service.actions.create")}
-              </Button>
-            </NextLink>
-          </AccessControl>
+                <Button
+                  onClick={() => {
+                    trackServiceCreateStartEvent();
+                  }}
+                  size="medium"
+                  startIcon={<Add />}
+                  variant="contained"
+                >
+                  {t("service.actions.create")}
+                </Button>
+              </NextLink>
+            </AccessControl>
+            <ButtonAssociateGroup />
+          </Stack>
         </Grid>
       </Grid>
       {noService ? (
