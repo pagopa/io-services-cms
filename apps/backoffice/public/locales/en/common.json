@@ -314,6 +314,10 @@
       "noGroupUnboundedServicesModal": {
         "title": "Associate groups",
         "description": "You cannot add services to groups because they have already been assigned. To change existing associations, go into the details of the individual services."
+      },
+      "deleteApiKeyGroupModal": {
+        "title": "Delete API Key",
+        "description": "Do you want to delete the API Key of the group {{groupName}}? This way you will no longer be able to use these API Keys to manage the associated services, but you can create new ones at any time."
       }
     },
     "service": {

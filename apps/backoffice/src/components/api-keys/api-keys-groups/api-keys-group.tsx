@@ -1,3 +1,4 @@
+import { AccessControl } from "@/components/access-control";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { Delete, ExpandMore } from "@mui/icons-material";
 import {
@@ -19,7 +20,7 @@ interface ApiKeyGroupProps {
   apiKey: RecordApiKeyValue;
   /** If true, render accordion opened */
   isExpanded?: boolean;
-  onDelete: (event: React.MouseEvent, subscriptionId: string) => void;
+  onDelete: (subscription: { id: string; name: string }) => void;
   onExpand: (expanded: boolean, subscriptionId: string) => void;
   onRotateKey: (
     keyType: SubscriptionKeyTypeEnum,
@@ -61,16 +62,21 @@ export const ApiKeyGroup = ({
       <AccordionSummary expandIcon={<ExpandMore />} id="panel1-header">
         <Stack direction="row" flex={1} justifyContent="space-between">
           <Box fontWeight={600}>{apiKey.name}</Box>
-          <Box marginRight={1}>
-            <Button
-              color="error"
-              onClick={(event) => onDelete(event, subscriptionId)}
-              startIcon={<Delete />}
-              variant="naked"
-            >
-              {t("buttons.delete")}
-            </Button>
-          </Box>
+          <AccessControl requiredRole="admin">
+            <Box marginRight={1}>
+              <Button
+                color="error"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete({ id: subscriptionId, name: apiKey.name });
+                }}
+                startIcon={<Delete />}
+                variant="naked"
+              >
+                {t("buttons.delete")}
+              </Button>
+            </Box>
+          </AccessControl>
         </Stack>
       </AccordionSummary>
       {apiKey.primary_key && apiKey.cidrs && (

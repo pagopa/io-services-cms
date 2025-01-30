@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import { useDialog } from "@/components/dialog-provider";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { Subscription } from "@/generated/api/Subscription";
@@ -11,6 +12,7 @@ import { getBffApiClient } from "@/utils/bff-api-client";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Box } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
+import * as tt from "io-ts";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { enqueueSnackbar } from "notistack";
@@ -61,6 +63,8 @@ const convertArrayToRecordset = (
 export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { t } = useTranslation();
   const router = useRouter();
+  const showDialog = useDialog();
+
   const { id: queryId } = router.query; // Query parameter `id`
   const accordionRefs = useRef<Record<string, HTMLDivElement | null>>({}); // Accordions reference map
 
@@ -70,10 +74,21 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     useFetch<SubscriptionKeys>();
   const { data: cidrsData, fetchData: scFetchData } =
     useFetch<ManageKeyCIDRs>();
+  const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   const [apiKeys, setApiKeys] = useState<ApiKeysGroupRecordset | undefined>(
     undefined,
   );
+
+  const getManageGroupSubscriptions = () =>
+    mspFetchData(
+      "getManageSubscriptions",
+      { kind: SubscriptionTypeEnum.MANAGE_GROUP, limit: 10 },
+      SubscriptionPagination,
+      {
+        notify: "errors",
+      },
+    );
 
   const updateApiKey = (key: string, newValues: Partial<RecordApiKeyValue>) => {
     setApiKeys((prevApiKeys) => {
@@ -169,9 +184,28 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     );
   };
 
-  const handleDeleteClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    console.log("TODO: delete");
+  const handleDeleteClick = async (subscription: {
+    id: string;
+    name: string;
+  }) => {
+    const confirmApiKeyDeletion = await showDialog({
+      confirmButtonLabel: t("buttons.delete"),
+      message: t("routes.services.deleteApiKeyGroupModal.description", {
+        groupName: subscription.name,
+      }),
+      title: t("routes.services.deleteApiKeyGroupModal.title"),
+    });
+    if (confirmApiKeyDeletion) {
+      await noContentFetchData(
+        "deleteManageSubscription",
+        { subscriptionId: subscription.id },
+        tt.unknown,
+        {
+          notify: "all",
+        },
+      );
+      getManageGroupSubscriptions();
+    }
   };
 
   const handleRef = (accordionId: string) => (el: HTMLDivElement | null) => {
@@ -227,14 +261,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
 
   // Fetch all Manage Group API Keys
   useEffect(() => {
-    mspFetchData(
-      "getManageSubscriptions",
-      { kind: SubscriptionTypeEnum.MANAGE_GROUP, limit: 10 },
-      SubscriptionPagination,
-      {
-        notify: "errors",
-      },
-    );
+    getManageGroupSubscriptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
