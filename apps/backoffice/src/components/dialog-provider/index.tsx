@@ -14,6 +14,8 @@ interface DialogOptions {
   cancelButtonLabel?: string;
   /** label for confirm button: if specified, overwrite default value */
   confirmButtonLabel?: string;
+  hideCancelButton?: boolean;
+  hideConfirmButton?: boolean;
   /** dialog body message */
   message?: string;
   /** dialog title */
@@ -78,24 +80,28 @@ const DialogProvider: React.FC<{
           ></Typography>
         </DialogContent>
         <DialogActions sx={{ padding: "16px 24px" }}>
-          <Button
-            data-testid="bo-io-dialog-provider-cancel-button"
-            onClick={handleCancel}
-            variant="outlined"
-          >
-            {options.cancelButtonLabel
-              ? t(options.cancelButtonLabel)
-              : t("buttons.cancel")}
-          </Button>
-          <Button
-            data-testid="bo-io-dialog-provider-confirm-button"
-            onClick={handleConfirm}
-            variant="contained"
-          >
-            {options.confirmButtonLabel
-              ? t(options.confirmButtonLabel)
-              : t("buttons.confirm")}
-          </Button>
+          {!options.hideCancelButton && (
+            <Button
+              data-testid="bo-io-dialog-provider-cancel-button"
+              onClick={handleCancel}
+              variant="outlined"
+            >
+              {options.cancelButtonLabel
+                ? t(options.cancelButtonLabel)
+                : t("buttons.cancel")}
+            </Button>
+          )}
+          {!options.hideConfirmButton && (
+            <Button
+              data-testid="bo-io-dialog-provider-confirm-button"
+              onClick={handleConfirm}
+              variant="contained"
+            >
+              {options.confirmButtonLabel
+                ? t(options.confirmButtonLabel)
+                : t("buttons.confirm")}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
       <DialogContext.Provider value={showDialog}>
