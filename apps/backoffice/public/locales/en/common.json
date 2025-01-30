@@ -310,6 +310,10 @@
         "status": "Status",
         "visibility": "Visibility on IO",
         "group": "Group"
+      },
+      "noGroupUnboundedServicesModal": {
+        "title": "Associate groups",
+        "description": "You cannot add services to groups because they have already been assigned. To change existing associations, go into the details of the individual services."
       }
     },
     "service": {
@@ -384,11 +388,16 @@
     },
     "groups": {
       "title": "Groups",
-      "description": ""
+      "description": "",
+      "associate": {
+        "title": "Associate groups",
+        "description": "Here you can associate existing services to your groups."
+      }
     }
   },
   "service": {
     "actions": {
+      "associateGroups": "Associate groups",
       "create": "Create a service",
       "delete": "Delete",
       "edit": "Edit",
