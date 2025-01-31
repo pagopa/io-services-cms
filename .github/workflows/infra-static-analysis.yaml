@@ -7,6 +7,7 @@ on:
     paths:
       - infra/**
       - .identity/**
+      - .terraform-version
       - .github/workflows/infra-static-analysis.yaml
 
 jobs:
