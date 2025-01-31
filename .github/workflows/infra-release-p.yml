@@ -6,16 +6,16 @@ on:
     branches:
       - master
     paths:
-      - "infra/prod/**"
-      - "infra/_modules/**"
+      - "infra/resources/prod/**"
+      - "infra/resources/_modules/**"
       - ".github/workflows/infra-release-p.yml"
 
 jobs:
   infra_release_prod_itn:
-    uses: pagopa/dx/.github/workflows/infra_apply.yaml@8fd8da4ece3ea29908b983fd8960366efb914253
+    uses: pagopa/dx/.github/workflows/infra_apply.yaml@cb9ee2230a521385a3b774d053c122c8b792541a
     name: Terraform apply
     secrets: inherit
     with:
       environment: prod
-      base_path: infra
+      base_path: infra/resources
       use_private_agent: true
