@@ -28,8 +28,14 @@ resource "azurerm_cosmosdb_sql_role_assignment" "search_to_cosmos_data_reader_db
   scope               = "${data.azurerm_cosmosdb_account.cosmos.id}/dbs/${local.cosmos_database_name}/colls/services-publication"
 }
 
+resource "azurerm_role_assignment" "admins_group_to_ai_search_reader" {
+  scope                = azurerm_search_service.srch.id
+  role_definition_name = "Search Index Data Reader"
+  principal_id         = data.azuread_group.adgroup_admin.object_id
+}
+
 resource "azurerm_role_assignment" "developers_group_to_ai_search_reader" {
   scope                = azurerm_search_service.srch.id
   role_definition_name = "Search Index Data Reader"
-  principal_id         = data.azuread_group.adgroup_services_cms.object_id
+  principal_id         = data.azuread_group.adgroup_developers.object_id
 }

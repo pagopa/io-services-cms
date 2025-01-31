@@ -1,8 +1,12 @@
-resource "azurerm_resource_group" "rg" {
+data "azurerm_resource_group" "rg" {
   name     = "${local.project}-${local.application_basename}-rg-01"
-  location = local.location
+}
 
-  tags = local.tags
+removed {
+  from = azurerm_resource_group.rg
+  lifecycle {
+    destroy = false
+  }
 }
 
 module "ai_search" {
@@ -12,7 +16,7 @@ module "ai_search" {
   project              = local.project
   location             = local.location
   application_basename = local.application_basename
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = data.azurerm_resource_group.rg.name
 
   virtual_network = {
     name                = data.azurerm_virtual_network.itn_common.name
@@ -31,7 +35,7 @@ module "key_vault" {
   location_short      = local.location_short
   domain              = local.domain
   location            = local.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   tags = local.tags
 }
@@ -42,7 +46,7 @@ module "function_app" {
   env_short           = local.env_short
   location            = local.location
   domain              = local.domain
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   virtual_network = {
     name                = data.azurerm_virtual_network.itn_common.name
@@ -70,7 +74,7 @@ module "cms_function_app" {
   location            = local.location
   location_short      = local.location_short
   domain              = local.domain
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   virtual_network = {
     name                = data.azurerm_virtual_network.itn_common.name
@@ -92,7 +96,7 @@ module "backoffice" {
   env_short           = local.env_short
   location            = local.location
   domain              = local.domain
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   virtual_network = {
     name                = data.azurerm_virtual_network.itn_common.name
@@ -123,7 +127,7 @@ module "eventhub" {
   env_short           = local.env_short
   location            = local.location
   domain              = local.domain
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   # Cms Fn Binding
   cms_fn_name         = module.cms_function_app.cms_fn_name
