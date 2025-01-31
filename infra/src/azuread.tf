@@ -1,9 +1,13 @@
 # Azure AD
 data "azuread_group" "adgroup_admin" {
+  display_name = format("%s-adgroup-admin", local.project)
+}
+
+data "azuread_group" "adgroup_svc_admins" {
   display_name = format("%s-adgroup-svc-admins", local.project)
 }
 
-data "azuread_group" "adgroup_developers" {
+data "azuread_group" "adgroup_svc_developers" {
   display_name = format("%s-adgroup-svc-developers", local.project)
 }
 
@@ -17,12 +21,12 @@ data "azuread_group" "adgroup_services_cms" {
 
 # User Assigned Managed Identity
 data "azurerm_user_assigned_identity" "infra_ci" {
-  name = format("%s-itn-svc-infra-github-ci-id-01", local.project)
+  name                = format("%s-itn-svc-infra-github-ci-id-01", local.project)
   resource_group_name = data.azurerm_resource_group.svc_itn_01.name
 }
 
 data "azurerm_user_assigned_identity" "infra_cd" {
-  name = format("%s-itn-svc-infra-github-cd-id-01", local.project)
+  name                = format("%s-itn-svc-infra-github-cd-id-01", local.project)
   resource_group_name = data.azurerm_resource_group.svc_itn_01.name
 }
 

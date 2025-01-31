@@ -1,10 +1,14 @@
 data "azurerm_client_config" "current" {}
 
 data "azuread_group" "adgroup_admin" {
+  display_name = "${var.prefix}-${var.env_short}-adgroup-admin"
+}
+
+data "azuread_group" "adgroup_svc_admins" {
   display_name = "${var.prefix}-${var.env_short}-adgroup-svc-admins"
 }
 
-data "azuread_group" "adgroup_services_cms" {
+data "azuread_group" "adgroup_svc_developers" {
   display_name = "${var.prefix}-${var.env_short}-adgroup-svc-developers"
 }
 

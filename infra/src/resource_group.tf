@@ -69,8 +69,8 @@ resource "azurerm_role_assignment" "admins_group_rg" {
 }
 
 resource "azurerm_role_assignment" "devs_group_rg" {
-  scope                =  azurerm_resource_group.rg.id
+  scope                = azurerm_resource_group.rg.id
   role_definition_name = "Contributor"
-  principal_id         = data.azuread_group.adgroup_developers.object_id
+  principal_id         = data.azuread_group.adgroup_svc_developers.object_id
   description          = "Allow AD Dev group to apply changes at monorepository resource group scope"
 }
