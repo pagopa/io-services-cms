@@ -1,5 +1,5 @@
 data "azurerm_resource_group" "rg" {
-  name     = "${local.project}-${local.application_basename}-rg-01"
+  name = "${local.project}-${local.application_basename}-rg-01"
 }
 
 removed {
