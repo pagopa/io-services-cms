@@ -2,13 +2,6 @@ data "azurerm_resource_group" "rg" {
   name = "${local.project}-${local.application_basename}-rg-01"
 }
 
-removed {
-  from = azurerm_resource_group.rg
-  lifecycle {
-    destroy = false
-  }
-}
-
 module "ai_search" {
   source               = "../_modules/ai_search"
   prefix               = local.prefix
