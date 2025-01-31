@@ -109,6 +109,15 @@ export interface ApimService {
     user: UserCreateParameters,
     userId?: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, UserContract>;
+  /**
+   * Deletes a subscription specified by its identifier.
+   * @param subscriptionId Subscription entity Identifier
+   * @param ifMatch ETag of the Entity. ETag should match the current entity state from the header response of the GET request or it should be * for unconditional update.
+   */
+  readonly deleteSubscription: (
+    subscriptionId: string,
+    ifMatch?: string,
+  ) => TE.TaskEither<ApimRestError | Error, void>;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, Delegate>;
@@ -181,6 +190,14 @@ export const getApimService = (
       apimServiceName,
       userId,
       user,
+    ),
+  deleteSubscription: (subscriptionId, ifMatch = "*") =>
+    deleteSubscription(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      subscriptionId,
+      ifMatch,
     ),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
@@ -492,6 +509,36 @@ const updateSubscription = (
             displayName,
             state,
           },
+        ),
+      identity,
+    ),
+    chainApimMappedError,
+  );
+
+/**
+ * Delete an existing subscription
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param subscriptionId
+ * @returns
+ */
+const deleteSubscription = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  subscriptionId: string,
+  ifMatch: string,
+): TE.TaskEither<ApimRestError, void> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.delete(
+          apimResourceGroup,
+          apimServiceName,
+          subscriptionId,
+          ifMatch,
         ),
       identity,
     ),
