@@ -9,17 +9,17 @@ on:
       - reopened
       - ready_for_review
     paths:
-      - "infra/prod/**"
-      - "infra/_modules/**"
+      - "infra/resources/prod/**"
+      - "infra/resources/_modules/**"
       - ".github/workflows/infra-review-p.yml"
-      - ".github/workflows/infra-release-p.yml"
 
 jobs:
   infra_review:
-    uses: pagopa/dx/.github/workflows/infra_plan.yaml@7b317fb26f0c0a921f3bbddacbef3af2e693f87b
+    uses: pagopa/dx/.github/workflows/infra_plan.yaml@cb9ee2230a521385a3b774d053c122c8b792541a
     name: Terraform plan
     secrets: inherit
     with:
       environment: prod
-      base_path: infra
+      base_path: infra/resources
       use_private_agent: true
+      override_github_environment: infra-prod
