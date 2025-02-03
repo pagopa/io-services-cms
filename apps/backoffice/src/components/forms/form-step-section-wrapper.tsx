@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 export interface FormStepSectionWrapperProps {
   children: ReactNode;
   icon?: ReactNode;
-  title: string;
+  title?: string;
 }
 
 /** Purely layout component to wrap the contents of the form section within a well-defined graphic scheme */
@@ -24,10 +24,12 @@ export const FormStepSectionWrapper = ({
       marginY={3}
       padding={3}
     >
-      <Stack alignItems="center" direction="row" gap={1} marginBottom={2}>
-        {icon}
-        <Typography variant="sidenav">{title}</Typography>
-      </Stack>
+      {title && (
+        <Stack alignItems="center" direction="row" gap={1} marginBottom={2}>
+          {icon}
+          <Typography variant="sidenav">{title}</Typography>
+        </Stack>
+      )}
       {children}
     </Box>
   );
