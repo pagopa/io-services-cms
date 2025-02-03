@@ -1,0 +1,10 @@
+{
+  "backoffice.backoffice.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
+  "cms_function_app.cms_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
+  "eventhub.eventhub.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
+  "function_app.app_be_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
+  "backoffice.backoffice": "f9746f1db71538ed1051a8f8dfa44a15c9a0a991f0ec98a8b55b0bf750f53f4a",
+  "cms_function_app.cms_fn": "990fcd1471872c90d7b5791182c2d0234215a13f02186a4df791a959e0d7fdd4",
+  "eventhub.eventhub": "6bbd4dd993d024c2ce249a90626b8df67d29364eabf051c81c073b5252e361d2",
+  "function_app.app_be_fn": "990fcd1471872c90d7b5791182c2d0234215a13f02186a4df791a959e0d7fdd4"
+}

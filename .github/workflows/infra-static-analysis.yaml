@@ -1,53 +1,20 @@
 name: Static Analysis
 
 on:
+  workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, ready_for_review]
+    types: [opened, synchronize]
     paths:
       - infra/**
-      - .identity/**
-      - .github/workflows/infra-static-analysis.yaml
+      - .terraform-version
+      - .pre-commit-config.yaml
+      - .trivyignore
 
 jobs:
-  static_analysis:
-    runs-on: ubuntu-22.04
-
-    steps:
-      # from https://github.com/actions/checkout/commits/main
-      - uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
-
-      - name: init_terraform_folders
-        env:
-          FOLDERS: >
-            infra/src
-            .identity
-        run: |
-          pids=()
-
-          TAG=$(cat .terraform-version)
-          for f in $FOLDERS; do
-            pushd "$(pwd)/${f}"
-              sed -i -e 's/  backend "azurerm" {}//g' main.tf # use local backend
-              docker run -v $(pwd):/tmp -w /tmp hashicorp/terraform:$TAG init &
-              pids+=($!)
-            popd
-          done
-
-          # Wait for each specific process to terminate.
-          # Instead of this loop, a single call to 'wait' would wait for all the jobs
-          # to terminate, but it would not give us their exit status.
-          #
-          for pid in "${pids[@]}"; do
-            #
-            # Waiting on a specific PID makes the wait command return with the exit
-            # status of that process. Because of the 'set -e' setting, any exit status
-            # other than zero causes the current shell to terminate with that exit
-            # status as well.
-            #
-            wait "$pid"
-          done
-
-      - name: run_pre_commit_terraform
-        run: |
-          TAG="v1.86.0@sha256:a1ffb8fff155934c1937580eeab8b3f68726485cd54025d2f911b0c21a9becba"
-          docker run -v $(pwd):/lint -w /lint ghcr.io/antonbabenko/pre-commit-terraform:$TAG run -a
+  tf_analysis:
+    uses: pagopa/dx/.github/workflows/static_analysis.yaml@8fd8da4ece3ea29908b983fd8960366efb914253
+    name: Terraform Validation
+    secrets: inherit
+    with:
+      pre_commit_tf_tag: "v1.97.0@sha256:d5e2233e199bd97566e20db5bbaf5f1db67edd5398660da3b61b1b6163f28ff1"
+      enable_modified_files_detection: true

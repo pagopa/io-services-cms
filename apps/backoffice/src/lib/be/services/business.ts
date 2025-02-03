@@ -2,7 +2,7 @@
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
-import { Group } from "@/generated/api/Group";
+import { Group, StateEnum } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -68,12 +68,18 @@ const retrieveSubscriptions = (
   limit?: number,
   offset?: number,
   serviceId?: string,
+  groupsMap?: GroupMap,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
   !userAuthz(backofficeUser).isAdmin() &&
   backofficeUser.permissions.selcGroups &&
-  backofficeUser.permissions.selcGroups.length > 0
+  backofficeUser.permissions.selcGroups.length > 0 &&
+  groupsMap &&
+  groupsMap.size !== 0
     ? pipe(
-        backofficeUser.permissions.selcGroups,
+        backofficeUser.permissions.selcGroups.filter((selcGroup) => {
+          const group = groupsMap.get(selcGroup);
+          return group && group.state === StateEnum.ACTIVE;
+        }),
         retrieveAuthorizedServiceIds,
         TE.chain((authzServiceIds) =>
           getSubscriptions(
@@ -93,6 +99,8 @@ const retrieveSubscriptions = (
         serviceId,
       );
 
+type GroupMap = ReturnType<typeof reduceGrops>;
+
 /**
  * @description This method Will retrieve the specified list of services partition for the given user
  *
@@ -109,21 +117,27 @@ export const retrieveServiceList = async (
   serviceId?: string,
 ): Promise<ServiceList> =>
   pipe(
-    retrieveSubscriptions(backofficeUser, limit, offset, serviceId),
-    TE.bindTo("apimServices"),
+    pipe(
+      TE.tryCatch(
+        () => retrieveInstitutionGroups(backofficeUser.institution.id),
+        E.toError,
+      ),
+      TE.map(reduceGrops),
+    ),
+    TE.bindTo("groupsMap"),
+    TE.bind("apimServices", ({ groupsMap }) =>
+      retrieveSubscriptions(
+        backofficeUser,
+        limit,
+        offset,
+        serviceId,
+        groupsMap,
+      ),
+    ),
     TE.bind("serviceTopicsMap", (_) =>
       pipe(
         TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
         TE.map(({ topics }) => reduceServiceTopicsList(topics)),
-      ),
-    ),
-    TE.bind("groupsMap", (_) =>
-      pipe(
-        TE.tryCatch(
-          () => retrieveInstitutionGroups(backofficeUser.institution.id),
-          E.toError,
-        ),
-        TE.map(reduceGrops),
       ),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem

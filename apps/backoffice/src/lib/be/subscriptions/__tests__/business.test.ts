@@ -1,16 +1,23 @@
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getManageSubscriptions, upsertManageSubscription } from "../business";
+import {
+  getManageSubscriptions,
+  upsertManageSubscription,
+  deleteManageSubscription,
+} from "../business";
 
-const { upsertSubscription, getUserSubscriptions } = vi.hoisted(() => ({
-  upsertSubscription: vi.fn(),
-  getUserSubscriptions: vi.fn(),
-}));
+const { upsertSubscription, getUserSubscriptions, deleteSubscription } =
+  vi.hoisted(() => ({
+    upsertSubscription: vi.fn(),
+    getUserSubscriptions: vi.fn(),
+    deleteSubscription: vi.fn(),
+  }));
 
 vi.mock("../../apim-service", () => ({
   upsertSubscription,
   getApimService: () => ({
     getUserSubscriptions,
+    deleteSubscription,
   }),
 }));
 
@@ -27,10 +34,11 @@ const mocks = {
   },
   upsertSubscription,
   getUserSubscriptions,
+  deleteSubscription,
 };
 
 afterEach(() => {
-  vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("Subscriptions Business Logic", () => {
@@ -231,6 +239,93 @@ describe("Subscriptions Business Logic", () => {
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("deleteManageSubscription", () => {
+    it("should throw an error when the getUserSubscriptions fails", async () => {
+      //given
+      const subscriptionId = "subscriptionId";
+      const ownerId = mocks.anOwnerId;
+      const errorMessage = "Error retrieving user's subscriptions";
+      const filter = `name eq '${subscriptionId}'`;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.left({ statusCode: 500 }),
+      );
+
+      //when and then
+      await expect(
+        deleteManageSubscription(ownerId, { subscriptionId }),
+      ).rejects.toThrowError(errorMessage);
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        undefined,
+        undefined,
+        filter,
+      );
+    });
+
+    it("should throw an error when the getUserSubscriptions returns an empty list of subscriptions", async () => {
+      //given
+      const subscriptionId = "subscriptionId";
+      const ownerId = mocks.anOwnerId;
+      const errorMessage = "The user can't delete the subscription";
+      const filter = `name eq '${subscriptionId}'`;
+      mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
+
+      //when and then
+      await expect(
+        deleteManageSubscription(ownerId, { subscriptionId }),
+      ).rejects.toThrowError(errorMessage);
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        undefined,
+        undefined,
+        filter,
+      );
+    });
+
+    it.each`
+      scenario              | deleteSubscriptionResult                       | expectedErrorMessage
+      ${"an ApimRestError"} | ${TE.left({ statusCode: 500 })}                | ${"Error deleting subscription"}
+      ${"a generic Error"}  | ${TE.left(new Error("generic error message"))} | ${"Error deleting subscription"}
+    `(
+      "should throw an error when received $scenario response from deleteSubscription",
+      async ({ deleteSubscriptionResult, expectedErrorMessage }) => {
+        //given
+        const subscriptionId = "subscriptionId";
+        const ownerId = mocks.anOwnerId;
+        mocks.getUserSubscriptions.mockReturnValueOnce(
+          TE.right([mocks.aSubscriptionContract]),
+        );
+        mocks.deleteSubscription.mockReturnValueOnce(deleteSubscriptionResult);
+
+        //when and then
+        await expect(
+          deleteManageSubscription(ownerId, { subscriptionId }),
+        ).rejects.toThrowError(expectedErrorMessage);
+        expect(mocks.deleteSubscription).toHaveBeenCalledOnce();
+        expect(mocks.deleteSubscription).toHaveBeenCalledWith(subscriptionId);
+      },
+    );
+
+    it("should success when the delete subscription success", async () => {
+      //given
+      const subscriptionId = "subscriptionId";
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract]),
+      );
+      mocks.deleteSubscription.mockReturnValueOnce(TE.right(void 0));
+
+      //when and then
+      await expect(
+        deleteManageSubscription(ownerId, { subscriptionId }),
+      ).resolves.toBe(undefined);
+      expect(mocks.deleteSubscription).toHaveBeenCalledOnce();
+      expect(mocks.deleteSubscription).toHaveBeenCalledWith(subscriptionId);
     });
   });
 });

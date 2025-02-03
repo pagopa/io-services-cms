@@ -26,7 +26,7 @@ jobs:
   terraform_plan_job:
     name: Terraform Plan
     runs-on: self-hosted
-    environment: prod-ci
+    environment: infra-prod-ci
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       AZURE_ENVIRONMENT: prod
@@ -82,7 +82,7 @@ jobs:
   terraform_apply_job:
     name: Terraform Apply
     runs-on: [self-hosted]
-    environment: prod-cd
+    environment: infra-prod-cd
     needs: [terraform_plan_job]
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
