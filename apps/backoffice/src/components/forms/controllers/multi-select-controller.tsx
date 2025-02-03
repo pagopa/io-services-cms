@@ -2,19 +2,21 @@ import {
   Box,
   Chip,
   FormControl,
+  FormHelperText,
   InputLabel,
   MenuItem,
   OutlinedInput,
   Select,
   SelectProps,
 } from "@mui/material";
-import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import React, { ReactNode } from "react";
+import { Controller, get, useFormContext } from "react-hook-form";
 
 export type MultiSelectControllerProps = {
+  helperText?: ReactNode;
   items: {
     label: string;
-    value: string;
+    value: number | readonly string[] | string | undefined;
   }[];
   name: string;
 } & SelectProps;
@@ -22,24 +24,34 @@ export type MultiSelectControllerProps = {
 /** Controller for MUI `Select` component.\
  * Used for collecting multiple user provided information from a list of options. */
 export function MultiSelectController({
+  helperText,
   items,
   name,
   ...props
 }: MultiSelectControllerProps) {
-  //TODO: removed useTranslation() because it's not used, is it needed?
-  const { control, register } = useFormContext();
+  const { control, formState, register } = useFormContext();
+  const error = get(formState.errors, name);
 
+  if (items.length === 0) return; // avoid mui out-of-range error
   return (
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange } }) => (
+      render={({ field: { onChange, value } }) => (
         <FormControl fullWidth margin="normal">
-          <InputLabel id={`${name}-label`}>{props.label}</InputLabel>
+          <InputLabel
+            error={!!error}
+            id={`${name}-label`}
+            required={props.required}
+          >
+            {props.label}
+          </InputLabel>
           <Select
+            {...props}
             {...register(name)}
             MenuProps={{ disableScrollLock: true }}
             disabled={props.disabled}
+            error={!!error}
             fullWidth
             id={name}
             input={
@@ -64,7 +76,7 @@ export function MultiSelectController({
                 ))}
               </Box>
             )}
-            value={[]}
+            value={value ?? []}
           >
             {items.map((item, keyIndex) => (
               <MenuItem key={keyIndex} value={item.value}>
@@ -72,6 +84,9 @@ export function MultiSelectController({
               </MenuItem>
             ))}
           </Select>
+          <FormHelperText error={!!error}>
+            {error ? error.message : (helperText ?? null)}
+          </FormHelperText>
         </FormControl>
       )}
     />

@@ -212,6 +212,29 @@
           "description": "These features allow you to enrich the service with many additional parameters."
         }
       }
+    },
+    "groups": {
+      "associate": {
+        "buttons": {
+          "associate": "Associate"
+        },
+        "step": {
+          "title": "Create an association",
+          "description": "Select a group to associate a previously created service with."
+        },
+        "group": {
+          "select": {
+            "label": "Select a group",
+            "placeholder": "Select a group"
+          }
+        },
+        "services": {
+          "select": {
+            "label": "Choose the services you want to associate with the group",
+            "placeholder": "Select services"
+          }
+        }
+      }
     }
   },
   "subscriptions": {
