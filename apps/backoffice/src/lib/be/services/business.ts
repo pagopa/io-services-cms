@@ -353,17 +353,17 @@ export const bulkPatch = async (
 ): Promise<BulkPatchServiceResponse> =>
   pipe(
     bulkPatchCosmos(
-      bulkPatchServicePayload.map((bulkPatchService) => ({
+      bulkPatchServicePayload.services.map((bulkPatchService) => ({
         data: { metadata: bulkPatchService.metadata },
         id: bulkPatchService.id,
       })),
     ),
-    TE.map(
-      RA.mapWithIndex((i, opResponse) => ({
-        id: bulkPatchServicePayload[i].id,
+    TE.map((responses) => ({
+      result: responses.map((opResponse, i) => ({
+        id: bulkPatchServicePayload.services[i].id,
         statusCode: opResponse.statusCode,
       })),
-    ),
+    })),
     TE.getOrElse((error) => {
       throw error;
     }),

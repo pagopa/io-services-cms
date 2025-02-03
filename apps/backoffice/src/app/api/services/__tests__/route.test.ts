@@ -417,12 +417,14 @@ describe("Services API", () => {
     it("should return a bad request when provided group is not valid", async () => {
       // given
       const request = new NextRequest("http://localhost");
-      const requestPayload = [
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-      ];
+      const requestPayload = {
+        services: [
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
+      };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       groupExistsMock.mockReturnValueOnce(false);
 
@@ -433,7 +435,7 @@ describe("Services API", () => {
       expect(result.status).toBe(400);
       const responseBody = await result.json();
       expect(responseBody.detail).toStrictEqual(
-        `Provided group_id '${requestPayload[0].metadata.group_id}' does not exists`,
+        `Provided group_id '${requestPayload.services[0].metadata.group_id}' does not exists`,
       );
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -447,7 +449,7 @@ describe("Services API", () => {
       expect(groupExistsMock).toHaveBeenCalledOnce();
       expect(groupExistsMock).toHaveBeenCalledWith(
         backofficeUserMock.institution.id,
-        requestPayload[0].metadata.group_id,
+        requestPayload.services[0].metadata.group_id,
       );
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
@@ -456,12 +458,14 @@ describe("Services API", () => {
     it("should return an internal error response when bulkPatch fail", async () => {
       // given
       const request = new NextRequest("http://localhost");
-      const requestPayload = [
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-      ];
+      const requestPayload = {
+        services: [
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
+      };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       groupExistsMock.mockReturnValue(true);
       bulkPatchMock.mockRejectedValueOnce({});
@@ -485,7 +489,7 @@ describe("Services API", () => {
       expect(groupExistsMock).toHaveBeenCalledOnce();
       expect(groupExistsMock).toHaveBeenCalledWith(
         backofficeUserMock.institution.id,
-        requestPayload[0].metadata.group_id,
+        requestPayload.services[0].metadata.group_id,
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
       expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload);
@@ -495,20 +499,22 @@ describe("Services API", () => {
     it("should execute bulkPatch request", async () => {
       // given
       const request = new NextRequest("http://localhost");
-      const requestPayload = [
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: undefined },
-        },
-      ];
+      const requestPayload = {
+        services: [
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: faker.string.uuid() },
+          },
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: faker.string.uuid() },
+          },
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: undefined },
+          },
+        ],
+      };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       groupExistsMock.mockReturnValue(true);
       bulkPatchMock.mockResolvedValueOnce({});
@@ -527,7 +533,7 @@ describe("Services API", () => {
         request,
         BulkPatchServicePayload,
       );
-      const requestPayloadFiltered = requestPayload.filter(
+      const requestPayloadFiltered = requestPayload.services.filter(
         (item) => item.metadata.group_id,
       );
       expect(groupExistsMock).toHaveBeenCalledTimes(

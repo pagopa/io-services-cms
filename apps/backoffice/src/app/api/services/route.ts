@@ -136,7 +136,7 @@ export const PATCH = withJWTAuthHandler(
           error instanceof Error ? error.message : "Failed to parse JSON body",
         );
       }
-      for (const patchService of requestPayload) {
+      for (const patchService of requestPayload.services) {
         if (
           patchService.metadata.group_id &&
           !(await groupExists(
