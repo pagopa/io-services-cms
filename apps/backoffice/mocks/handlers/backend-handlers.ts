@@ -14,6 +14,8 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getMockBulkPatchService,
+  getMockGroupUnboundedServices,
   getMockManageSubscription,
   getMockManageSubscriptions,
   getMockServiceHistory,
@@ -183,6 +185,30 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.put(`${baseURL}/services/patch`, () => {
+      const resultArray = [
+        new HttpResponse(JSON.stringify(getBulkPatchService207Response()), {
+          status: 207,
+        }),
+        new HttpResponse(null, {
+          status: 400,
+        }),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
     http.get(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServices200Response()), {
@@ -239,6 +265,30 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(`${baseURL}/services/group-unbound`, () => {
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(getGroupUnboundedServices200Response()),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
     http.get(`${baseURL}/services/group-unbound/any`, () => {
       const resultArray = [
         new HttpResponse(null, {
@@ -260,7 +310,7 @@ export const buildHandlers = () => {
           status: 500,
         }),
       ];
-      return resultArray[1];
+      return resultArray[0];
     }),
     http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
@@ -1064,6 +1114,10 @@ export function getCreateService201Response() {
   return getMockServiceLifecycle();
 }
 
+export function getBulkPatchService207Response() {
+  return getMockBulkPatchService();
+}
+
 export function getGetServices200Response() {
   return aMockServicePagination;
 }
@@ -1074,6 +1128,10 @@ export function getGetServiceList200Response(
   id: string,
 ) {
   return getMockServiceList(+limit, +offset, id);
+}
+
+export function getGroupUnboundedServices200Response() {
+  return getMockGroupUnboundedServices();
 }
 
 export function getGetServiceTopics200Response() {

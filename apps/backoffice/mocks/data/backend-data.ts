@@ -290,6 +290,17 @@ export const aMockServiceTopics = {
   topics: aMockServiceTopicsArray,
 };
 
+export const getMockGroupUnboundedServices = () => ({
+  unboundedServices: [
+    ...Array.from(Array(faker.number.int({ max: 100, min: 1 })).keys()).map(
+      () => ({
+        id: faker.string.alphanumeric(26).toUpperCase(),
+        name: faker.lorem.words({ max: 5, min: 3 }),
+      }),
+    ),
+  ],
+});
+
 export const getMockServiceHistory = (
   serviceId: string,
   order: "ASC" | "DESC" | null,
@@ -364,6 +375,17 @@ export const getMockManageSubscription = () => ({
     "rejected",
     "cancelled",
   ]),
+});
+
+export const getMockBulkPatchService = () => ({
+  result: [
+    ...Array.from(Array(faker.number.int({ max: 100, min: 1 })).keys()).map(
+      () => ({
+        id: faker.string.alphanumeric(26).toUpperCase(),
+        statusCode: 200,
+      }),
+    ),
+  ],
 });
 
 // **********************************************************************
