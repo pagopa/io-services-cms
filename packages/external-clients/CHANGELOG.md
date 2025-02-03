@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.0
+
+### Minor Changes
+
+- 5c47502e: implementation of delete subscription api
+
 ## 1.7.0
 
 ### Minor Changes

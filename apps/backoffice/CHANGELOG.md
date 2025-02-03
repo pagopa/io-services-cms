@@ -1,5 +1,24 @@
 # io-services-cms-backoffice
 
+## 1.23.0
+
+### Minor Changes
+
+- 5c47502e: implementation of delete subscription api
+- a1328a54: Added Group ApiKeys card on BackOffice IO Overview page
+
+### Patch Changes
+
+- 6d952f03: Added AssociateGroups button on Services page
+- bd8924ee: Added Group column on services page table view
+- d22953f1: auth control on get subscriptions
+- bf4543d8: When user click on ApiKeyGroup tag on Overview, is directed to the ApiKey page with the anchor point to the clicked ApiKey
+- 3e5f52a2: added filter by active group on service list
+- cf38e664: Added empty state in ApiKeys page for operator users in one or more group without any group ApiKey
+- 72836f9a: Added delete ApiKey Group action
+- Updated dependencies [5c47502e]
+  - @io-services-cms/external-clients@1.8.0
+
 ## 1.22.0
 
 ### Minor Changes
