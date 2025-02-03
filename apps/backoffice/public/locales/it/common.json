@@ -212,7 +212,31 @@
           "description": "Queste funzionalità ti permettono di arricchire il servizio con tanti parametri aggiuntivi."
         }
       }
+    },
+    "groups": {
+      "associate": {
+        "buttons": {
+          "associate": "Associa"
+        },
+        "step": {
+          "title": "Crea una associazione",
+          "description": "Seleziona un gruppo a cui associare un servizio creato precedentemente."
+        },
+        "group": {
+          "select": {
+            "label": "Seleziona un gruppo",
+            "placeholder": "Seleziona un gruppo"
+          }
+        },
+        "services": {
+          "select": {
+            "label": "Scegli i servizi che vuoi associare al gruppo",
+            "placeholder": "Seleziona i servizi"
+          }
+        }
+      }
     }
+
   },
   "subscriptions": {
     "migration": {
