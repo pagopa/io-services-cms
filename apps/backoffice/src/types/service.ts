@@ -1,3 +1,4 @@
+import { StateEnum } from "@/generated/api/Group";
 import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceLifecycleStatus } from "@/generated/api/ServiceLifecycleStatus";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
@@ -26,6 +27,11 @@ export interface ServiceMetadata {
   cta?: string;
   custom_special_flow?: string;
   email?: string;
+  group?: {
+    id: string;
+    name: string;
+    state: StateEnum;
+  };
   pec?: string;
   phone?: string;
   privacy_url?: string;
