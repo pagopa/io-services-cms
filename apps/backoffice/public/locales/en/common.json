@@ -358,6 +358,10 @@
         "title": "API Key",
         "description": "Use this key for programmatic USE operations of the service."
       },
+      "group": {
+        "label": "Group",
+        "unbounded": "Unbounded"
+      },
       "lastUpdate": "Last update",
       "name": "Name",
       "pec": "Pec",
