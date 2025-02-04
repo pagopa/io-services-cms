@@ -5,10 +5,8 @@ import {
   claimOwnershipForDelegate,
   retrieveOwnershipClaimLatestForDelegate,
 } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @description Migrate delegate's services
@@ -19,7 +17,10 @@ export const POST = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { delegateId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { delegateId: string };
+    },
   ) => {
     try {
       const _ = await request.json().catch((_: unknown) => undefined);
@@ -52,7 +53,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { delegateId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { delegateId: string };
+    },
   ) => {
     try {
       const response = await retrieveOwnershipClaimLatestForDelegate(

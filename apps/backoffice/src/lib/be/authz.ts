@@ -1,6 +1,7 @@
 import { SelfcareRoles } from "@/types/auth";
 
 import { BackOfficeUser } from "../../../types/next-auth";
+import { BackOfficeUserEnriched } from "./wrappers";
 
 /**
  * @deprecated use userAuthz.isAdmin instead
@@ -16,7 +17,7 @@ export const isInstitutionIdSameAsCaller = (
   institutionId: string,
 ): boolean => user.institution.id === institutionId;
 
-export const userAuthz = (user: BackOfficeUser) => {
+export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
   return {
     /**
@@ -37,11 +38,21 @@ export const userAuthz = (user: BackOfficeUser) => {
      * @param groupId the group id
      * @returns a boolean indicating whether the group is allowed or not
      */
-    isGroupAllowed: (groupId: string): boolean =>
-      isAdmin() ||
-      !user.permissions.selcGroups ||
-      user.permissions.selcGroups.length === 0 ||
-      user.permissions.selcGroups.includes(groupId),
+    isGroupAllowed: (groupId: string): boolean => {
+      const { selcGroups } = user.permissions;
+      if (isAdmin() || !selcGroups || selcGroups.length === 0) {
+        return true;
+      }
+
+      return selcGroups.some((group) => {
+        if (typeof group === "string") {
+          return group === groupId;
+        } else {
+          return group.id === groupId;
+        }
+      });
+    },
+
     /**
      * Check if the provided institutionId is allowed by the user
      * @param institutionId the instutution id

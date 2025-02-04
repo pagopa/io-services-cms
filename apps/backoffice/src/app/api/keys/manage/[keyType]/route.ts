@@ -6,12 +6,10 @@ import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import { handlerErrorLog } from "@/lib/be/errors";
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @description Regenerate Manage key by key type
@@ -22,7 +20,7 @@ export const PUT = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { keyType: string } },
+    }: { backofficeUser: BackOfficeUserEnriched; params: { keyType: string } },
   ) => {
     try {
       const decodedKeyType = SubscriptionKeyType.decode(params.keyType);

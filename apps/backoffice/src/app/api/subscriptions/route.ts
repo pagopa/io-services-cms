@@ -22,15 +22,13 @@ import {
   upsertManageSubscription,
 } from "@/lib/be/subscriptions/business";
 import { PositiveInteger, PositiveIntegerFromString } from "@/lib/be/types";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import {
   NonNegativeInteger,
   NonNegativeIntegerFromString,
 } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
  * @operationId upsertManageGroupSubscription
@@ -39,7 +37,7 @@ import { BackOfficeUser } from "../../../../types/next-auth";
 export const PUT = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<ResponseError | Subscription>> => {
     if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
@@ -85,7 +83,7 @@ export const PUT = withJWTAuthHandler(
 export const GET = withJWTAuthHandler(
   async (
     request,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<ResponseError | SubscriptionPagination>> => {
     const userAuthzUtils = userAuthz(backofficeUser);
     const maybeKind = getQueryParam(request, "kind", SubscriptionType);

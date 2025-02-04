@@ -16,11 +16,9 @@ import {
 } from "@/lib/be/institutions/business";
 import { getQueryParam } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @operationId getInstitutionGroups
@@ -32,7 +30,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { institutionId: string };
+    },
   ) => {
     const userAuthz = getUserAuthz(backofficeUser);
     if (!userAuthz.isInstitutionAllowed(params.institutionId)) {

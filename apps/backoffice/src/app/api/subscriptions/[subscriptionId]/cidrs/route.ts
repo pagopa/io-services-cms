@@ -13,11 +13,9 @@ import {
 } from "@/lib/be/keys/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @operationId getManageSubscriptionAuthorizedCidrs
@@ -29,7 +27,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { subscriptionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { subscriptionId: string };
+    },
   ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
     if (
       !userAuthz(backofficeUser).isGroupAllowed(
@@ -73,7 +74,10 @@ export const PUT = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { subscriptionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { subscriptionId: string };
+    },
   ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
     if (
       !userAuthz(backofficeUser).isGroupAllowed(
