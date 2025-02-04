@@ -1,47 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { BackOfficeUser } from "../../../../../../../../types/next-auth";
 import { GET } from "../route";
+import { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
 
-const backofficeUserMock = {} as BackOfficeUser;
+const backofficeUserMock = {} as BackOfficeUserEnriched;
 
 const {
-  isInstitutionIdSameAsCallerMock,
+  userAuthzMock,
   isAdminMock,
+  isInstitutionAllowedMock,
   checkInstitutionGroupsExistenceMock,
   withJWTAuthHandlerMock,
-} = vi.hoisted(() => ({
-  isInstitutionIdSameAsCallerMock: vi.fn(() => true),
-  isAdminMock: vi.fn(() => true),
-  checkInstitutionGroupsExistenceMock: vi.fn(),
-  withJWTAuthHandlerMock: vi.fn(
-    (
-      handler: (
-        nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any },
-      ) => Promise<NextResponse> | Promise<Response>,
-    ) =>
-      async (nextRequest: NextRequest, { params }: { params: {} }) =>
-        handler(nextRequest, {
-          backofficeUser: backofficeUserMock,
-          params,
-        }),
-  ),
-}));
+} = vi.hoisted(() => {
+  const isAdminMock = vi.fn(() => true);
+  const isInstitutionAllowedMock = vi.fn(() => true);
+  return {
+    isAdminMock,
+    isInstitutionAllowedMock,
+    userAuthzMock: vi.fn(() => ({
+      isInstitutionAllowed: isInstitutionAllowedMock,
+      isAdmin: isAdminMock,
+    })),
+    checkInstitutionGroupsExistenceMock: vi.fn(),
+    withJWTAuthHandlerMock: vi.fn(
+      (
+        handler: (
+          nextRequest: NextRequest,
+          context: { backofficeUser: BackOfficeUserEnriched; params: any },
+        ) => Promise<NextResponse> | Promise<Response>,
+      ) =>
+        async (nextRequest: NextRequest, { params }: { params: {} }) =>
+          handler(nextRequest, {
+            backofficeUser: backofficeUserMock,
+            params,
+          }),
+    ),
+  };
+});
 
 vi.mock("@/lib/be/authz", () => ({
-  isAdmin: isAdminMock,
-  isInstitutionIdSameAsCaller: isInstitutionIdSameAsCallerMock,
+  userAuthz: userAuthzMock,
 }));
 vi.mock("@/lib/be/institutions/business", () => ({
   checkInstitutionGroupsExistence: checkInstitutionGroupsExistenceMock,
 }));
-vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock,
-}));
 
-afterEach(() => {
+vi.mock("@/lib/be/wrappers", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
+  return {
+    ...original,
+    withJWTAuthHandler: withJWTAuthHandlerMock,
+  };
+});
+
+beforeEach(() => {
   vi.restoreAllMocks();
 });
 
@@ -51,7 +64,7 @@ describe("checkInstitutionGroupsExistence", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isInstitutionIdSameAsCallerMock.mockReturnValueOnce(false);
+    isInstitutionAllowedMock.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
@@ -61,11 +74,8 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
-    );
+    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
+    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
     expect(isAdminMock).not.toHaveBeenCalled();
     expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Unauthorized institutionId");
@@ -86,13 +96,9 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
-    );
+    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
+    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
     expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Role not authorized");
   });
@@ -113,13 +119,9 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(500);
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-    expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-      backofficeUserMock,
-      institutionId,
-    );
+    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
+    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
     expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
     expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
       institutionId,
@@ -151,13 +153,9 @@ describe("checkInstitutionGroupsExistence", () => {
       // then
       expect(result.status).toBe(expectedStatus);
       expect(result.body).toBeNull();
-      expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledOnce();
-      expect(isInstitutionIdSameAsCallerMock).toHaveBeenCalledWith(
-        backofficeUserMock,
-        institutionId,
-      );
+      expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
+      expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
       expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(isAdminMock).toHaveBeenCalledWith(backofficeUserMock);
       expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
       expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
         institutionId,

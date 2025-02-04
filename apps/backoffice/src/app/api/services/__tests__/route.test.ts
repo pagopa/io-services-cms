@@ -50,6 +50,7 @@ vi.hoisted(() => {
 
 const {
   isAdminMock,
+  isGroupAllowedMock,
   userAuthzMock,
   parseBodyMock,
   groupExistsMock,
@@ -58,9 +59,14 @@ const {
   withJWTAuthHandlerMock,
 } = vi.hoisted(() => {
   const isAdminMock = vi.fn(() => true);
+  const isGroupAllowedMock = vi.fn(() => true);
   return {
     isAdminMock,
-    userAuthzMock: vi.fn(() => ({ isAdmin: isAdminMock })),
+    isGroupAllowedMock,
+    userAuthzMock: vi.fn(() => ({
+      isAdmin: isAdminMock,
+      isGroupAllowed: isGroupAllowedMock,
+    })),
     parseBodyMock: vi.fn(),
     groupExistsMock: vi.fn(),
     forwardIoServicesCmsRequestMock: vi.fn(() =>
@@ -131,13 +137,19 @@ describe("Services API", () => {
     });
 
     it.each`
-      scenario                                  | group_id                              | selcGroups                                   | expectedStatusCode | expectedDetail
-      ${"set a group but but he has no groups"} | ${`different-${faker.string.uuid()}`} | ${undefined}                                 | ${403}             | ${"Provided group is out of your scope"}
-      ${"set a group who is not a member"}      | ${`different-${faker.string.uuid()}`} | ${faker.helpers.multiple(faker.string.uuid)} | ${403}             | ${"Provided group is out of your scope"}
-      ${"not set a group but he is has groups"} | ${undefined}                          | ${faker.helpers.multiple(faker.string.uuid)} | ${400}             | ${"group_id is required"}
+      scenario                                  | group_id                              | selcGroups                                   | isGroupAllowed | expectedStatusCode | expectedDetail
+      ${"set a group but but he has no groups"} | ${`different-${faker.string.uuid()}`} | ${undefined}                                 | ${false}       | ${403}             | ${"Provided group is out of your scope"}
+      ${"set a group who is not a member"}      | ${`different-${faker.string.uuid()}`} | ${faker.helpers.multiple(faker.string.uuid)} | ${false}       | ${403}             | ${"Provided group is out of your scope"}
+      ${"not set a group but he is has groups"} | ${undefined}                          | ${faker.helpers.multiple(faker.string.uuid)} | ${true}        | ${400}             | ${"group_id is required"}
     `(
       "should return a forbidden response when user is not admin and $scenario",
-      async ({ group_id, selcGroups, expectedStatusCode, expectedDetail }) => {
+      async ({
+        group_id,
+        selcGroups,
+        isGroupAllowed,
+        expectedStatusCode,
+        expectedDetail,
+      }) => {
         // given
         const jsonBodyMock = {
           ...aValidServicePayload,
@@ -147,6 +159,7 @@ describe("Services API", () => {
           },
         };
         isAdminMock.mockReturnValueOnce(false);
+        isGroupAllowedMock.mockReturnValueOnce(isGroupAllowed);
         parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
         backofficeUserMock.permissions.selcGroups = selcGroups;
         const request = new NextRequest(new URL("http://localhost"));
