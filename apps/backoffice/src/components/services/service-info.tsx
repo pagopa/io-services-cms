@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { Service } from "@/types/service";
 import { trackServiceDetailsEvent } from "@/utils/mix-panel";
@@ -10,10 +11,13 @@ import { useDrawer } from "../drawer-provider";
 
 export interface ServiceInfoProps {
   data?: Service;
+  releaseMode: boolean;
 }
 
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
+
 /** Render service basic information card and service details drawer */
-export const ServiceInfo = ({ data }: ServiceInfoProps) => {
+export const ServiceInfo = ({ data, releaseMode }: ServiceInfoProps) => {
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
 
@@ -43,6 +47,13 @@ export const ServiceInfo = ({ data }: ServiceInfoProps) => {
         value: data?.lastUpdate,
       },
     );
+    if (GROUP_APIKEY_ENABLED && !releaseMode) {
+      rowsMin.push({
+        label: "routes.service.group.label",
+        value:
+          data?.metadata.group?.name ?? t("routes.service.group.unbounded"),
+      });
+    }
     return rowsMin;
   };
 
