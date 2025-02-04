@@ -211,7 +211,7 @@ export default function ServiceDetails() {
       />
       <Grid container spacing={2}>
         <Grid item lg={8} md={8} sm={12} xl={8} xs={12}>
-          <ServiceInfo data={currentService} />
+          <ServiceInfo data={currentService} releaseMode={release} />
         </Grid>
         <Grid item lg={4} md={4} sm={12} xl={4} xs={12}>
           <ServiceLogo serviceId={serviceId} />

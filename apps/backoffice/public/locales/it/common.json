@@ -359,6 +359,10 @@
         "title": "API Key",
         "description": "Utilizza questa chiave per operazioni programmatiche di tipo USE del servizio."
       },
+      "group": {
+        "label": "Gruppo",
+        "unbounded": "Non associato"
+      },
       "lastUpdate": "Ultima modifica",
       "name": "Nome",
       "pec": "Pec",

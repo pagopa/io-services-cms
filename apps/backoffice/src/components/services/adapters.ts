@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-useless-escape */
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
+import { ServiceLifecycleMetadata } from "@/generated/api/ServiceLifecycleMetadata";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
-import { ServiceMetadata } from "@/generated/api/ServiceMetadata";
 import { ServicePayload as ApiServicePayload } from "@/generated/api/ServicePayload";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
@@ -34,7 +34,7 @@ const adaptServiceCommonData = (
   topic: service.metadata.topic,
 });
 
-const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
+const adaptServiceMetadata = (metadata: ServiceLifecycleMetadata) => ({
   address: metadata.address,
   app_android: metadata.app_android,
   app_ios: metadata.app_ios,
@@ -42,6 +42,7 @@ const adaptServiceMetadata = (metadata: ServiceMetadata) => ({
   cta: metadata.cta,
   custom_special_flow: metadata.custom_special_flow,
   email: metadata.email,
+  group: metadata.group,
   pec: metadata.pec,
   phone: metadata.phone,
   privacy_url: metadata.privacy_url,
