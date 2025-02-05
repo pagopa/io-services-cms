@@ -7,7 +7,10 @@ import { BackOfficeUser } from "../../../../../types/next-auth";
 import { BulkPatchServicePayload } from "../../../../generated/api/BulkPatchServicePayload";
 import { CreateServicePayload } from "../../../../generated/api/CreateServicePayload";
 import { ScopeEnum } from "../../../../generated/api/ServiceBaseMetadata";
-import { ManagedInternalError } from "../../../../lib/be/errors";
+import {
+  GroupNotFoundError,
+  ManagedInternalError,
+} from "../../../../lib/be/errors";
 import { SelfcareRoles } from "../../../../types/auth";
 import { PATCH, POST } from "../route";
 
@@ -38,6 +41,12 @@ const aValidServicePayload: CreateServicePayload = {
   },
   max_allowed_payment_amount: 0 as any,
 };
+const aSelcGroupActive = [
+  { id: "aGroupId", name: "groupName", state: "ACTIVE" },
+];
+const aSelcGroupNotActive = [
+  { id: "aGroupId", name: "groupName", state: "SUSPENDED" },
+];
 const aGroup = { id: "group_id", name: "group name" };
 
 vi.hoisted(() => {
@@ -54,6 +63,7 @@ const {
   userAuthzMock,
   parseBodyMock,
   groupExistsMock,
+  getGroupMock,
   forwardIoServicesCmsRequestMock,
   bulkPatchMock,
   withJWTAuthHandlerMock,
@@ -69,6 +79,7 @@ const {
     })),
     parseBodyMock: vi.fn(),
     groupExistsMock: vi.fn(),
+    getGroupMock: vi.fn(),
     forwardIoServicesCmsRequestMock: vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 })),
     ),
@@ -100,6 +111,7 @@ vi.mock("@/lib/be/req-res-utils", () => ({
 
 vi.mock("@/lib/be/institutions/business", () => ({
   groupExists: groupExistsMock,
+  getGroup: getGroupMock,
 }));
 
 vi.mock("@/lib/be/services/business", () => ({
@@ -137,10 +149,10 @@ describe("Services API", () => {
     });
 
     it.each`
-      scenario                                  | group_id                              | selcGroups                                   | isGroupAllowed | expectedStatusCode | expectedDetail
-      ${"set a group but but he has no groups"} | ${`different-${faker.string.uuid()}`} | ${undefined}                                 | ${false}       | ${403}             | ${"Provided group is out of your scope"}
-      ${"set a group who is not a member"}      | ${`different-${faker.string.uuid()}`} | ${faker.helpers.multiple(faker.string.uuid)} | ${false}       | ${403}             | ${"Provided group is out of your scope"}
-      ${"not set a group but he is has groups"} | ${undefined}                          | ${faker.helpers.multiple(faker.string.uuid)} | ${true}        | ${400}             | ${"group_id is required"}
+      scenario                                  | group_id                              | selcGroups          | isGroupAllowed | expectedStatusCode | expectedDetail
+      ${"set a group but but he has no groups"} | ${`different-${faker.string.uuid()}`} | ${undefined}        | ${false}       | ${403}             | ${"Provided group is out of your scope or inactive"}
+      ${"set a group who is not a member"}      | ${`different-${faker.string.uuid()}`} | ${aSelcGroupActive} | ${false}       | ${403}             | ${"Provided group is out of your scope or inactive"}
+      ${"not set a group but he is has groups"} | ${undefined}                          | ${aSelcGroupActive} | ${true}        | ${400}             | ${"group_id is required"}
     `(
       "should return a forbidden response when user is not admin and $scenario",
       async ({
@@ -185,7 +197,7 @@ describe("Services API", () => {
       },
     );
 
-    it("should return an internal error when group is set but checking group fn fails ", async () => {
+    it("should return a bad request when user is admin group is set and the group doesn't exist", async () => {
       // given
       const jsonBodyMock = {
         ...aValidServicePayload,
@@ -195,77 +207,64 @@ describe("Services API", () => {
         },
       };
       parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
-      const errorMessage = "errorMessage";
-      groupExistsMock.mockRejectedValueOnce(
-        new ManagedInternalError(errorMessage),
-      );
+      const groupNotFoundError = new GroupNotFoundError("group doesn't exist");
+      getGroupMock.mockRejectedValueOnce(groupNotFoundError);
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when
       const result = await POST(request, {});
 
-      expect(result.status).toBe(500);
+      // then
+      expect(result.status).toBe(400);
       const responseBody = await result.json();
-      expect(responseBody.detail).toEqual("errorMessage");
+      expect(responseBody.detail).toEqual("group doesn't exist");
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(groupExistsMock).toHaveBeenCalledOnce();
-      expect(groupExistsMock).toHaveBeenCalledWith(
-        backofficeUserMock.institution.id,
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
         jsonBodyMock.metadata.group_id,
+        backofficeUserMock.institution.id,
       );
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
-    it.each`
-      scenario        | selcGroups
-      ${"has groups"} | ${undefined}
-      ${"has groups"} | ${["aGroupId"]}
-    `(
-      "should return a bad request when group is set but doesn't exists and user is admin and $scenario",
-      async ({ selcGroups }) => {
-        // given
-        const jsonBodyMock = {
-          ...aValidServicePayload,
-          metadata: {
-            ...aValidServicePayload.metadata,
-            group_id: "nonExistingGroupId",
-          },
-        };
-        parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
-        groupExistsMock.mockResolvedValueOnce(false);
-        backofficeUserMock.permissions.selcGroups = selcGroups;
-        const request = new NextRequest(new URL("http://localhost"));
+    it("should return a forbidden response when group exists but is not active and user is admin", async () => {
+      // given
+      const jsonBodyMock = {
+        ...aValidServicePayload,
+        metadata: {
+          ...aValidServicePayload.metadata,
+          group_id: "group_id",
+        },
+      };
+      parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
+      getGroupMock.mockResolvedValueOnce(aSelcGroupNotActive[0]);
+      const request = new NextRequest(new URL("http://localhost"));
 
-        // when
-        const result = await POST(request, {});
+      // when
+      const result = await POST(request, {});
 
-        // then
-        expect(result.status).toBe(400);
-        const responseBody = await result.json();
-        expect(responseBody.detail).toEqual(
-          "Provided group_id does not exists",
-        );
-        expect(parseBodyMock).toHaveBeenCalledOnce();
-        expect(parseBodyMock).toHaveBeenCalledWith(
-          request,
-          CreateServicePayload,
-        );
-        expect(userAuthzMock).toHaveBeenCalledOnce();
-        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-        expect(isAdminMock).toHaveBeenCalledOnce();
-        expect(isAdminMock).toHaveBeenCalledWith();
-        expect(groupExistsMock).toHaveBeenCalledOnce();
-        expect(groupExistsMock).toHaveBeenCalledWith(
-          backofficeUserMock.institution.id,
-          jsonBodyMock.metadata.group_id,
-        );
-        expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
-      },
-    );
+      // then
+      expect(result.status).toBe(403);
+      const responseBody = await result.json();
+      expect(responseBody.detail).toEqual("Provided group is not active");
+      expect(parseBodyMock).toHaveBeenCalledOnce();
+      expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
+        jsonBodyMock.metadata.group_id,
+        backofficeUserMock.institution.id,
+      );
+      expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
+    });
 
     it("should return an internal error when group is set but checking group fn fails ", async () => {
       // given
@@ -278,7 +277,7 @@ describe("Services API", () => {
       };
       parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
       const errorMessage = "errorMessage";
-      groupExistsMock.mockRejectedValueOnce(
+      getGroupMock.mockRejectedValueOnce(
         new ManagedInternalError(errorMessage),
       );
       const request = new NextRequest(new URL("http://localhost"));
@@ -296,26 +295,25 @@ describe("Services API", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(groupExistsMock).toHaveBeenCalledOnce();
-      expect(groupExistsMock).toHaveBeenCalledWith(
-        backofficeUserMock.institution.id,
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
         jsonBodyMock.metadata.group_id,
+        backofficeUserMock.institution.id,
       );
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
     it.each`
-      scenario                                                           | userRole                  | selcGroups      | group_id      | mockGroupExists
-      ${"user is operator and has no groups and group is not set"}       | ${SelfcareRoles.operator} | ${undefined}    | ${undefined}  | ${undefined}
-      ${"user is operator and has groups and group is set and included"} | ${SelfcareRoles.operator} | ${["aGroupId"]} | ${"aGroupId"} | ${undefined}
-      ${"user is admin and has no groups and group is not set"}          | ${SelfcareRoles.admin}    | ${undefined}    | ${undefined}  | ${undefined}
-      ${"user is admin and has groups and group is not set"}             | ${SelfcareRoles.admin}    | ${["aGroupId"]} | ${undefined}  | ${undefined}
-      ${"user is admin and has groups and group is set and valid"}       | ${SelfcareRoles.admin}    | ${["aGroupId"]} | ${aGroup.id}  | ${true}
-      ${"user is admin and has no groups and group is not set"}          | ${SelfcareRoles.admin}    | ${undefined}    | ${undefined}  | ${undefined}
-      ${"user is admin and has no groups and group is set and valid"}    | ${SelfcareRoles.admin}    | ${undefined}    | ${aGroup.id}  | ${true}
+      scenario                                                                         | userRole                  | selcGroups          | group_id      | mockGetGroup
+      ${"user is operator and has no groups and group is not set"}                     | ${SelfcareRoles.operator} | ${undefined}        | ${undefined}  | ${undefined}
+      ${"user is operator and has groups and group is set and included and is active"} | ${SelfcareRoles.operator} | ${aSelcGroupActive} | ${"aGroupId"} | ${undefined}
+      ${"user is admin and has no groups and group is not set"}                        | ${SelfcareRoles.admin}    | ${undefined}        | ${undefined}  | ${undefined}
+      ${"user is admin and has groups and group is not set"}                           | ${SelfcareRoles.admin}    | ${aSelcGroupActive} | ${undefined}  | ${undefined}
+      ${"user is admin and has groups and group is set and valid"}                     | ${SelfcareRoles.admin}    | ${aSelcGroupActive} | ${aGroup.id}  | ${aSelcGroupActive[0]}
+      ${"user is admin and has no groups and group is set and valid"}                  | ${SelfcareRoles.admin}    | ${undefined}        | ${aGroup.id}  | ${aSelcGroupActive[0]}
     `(
       "should forward request when $scenario",
-      async ({ userRole, selcGroups, group_id, mockGroupExists }) => {
+      async ({ userRole, selcGroups, group_id, mockGetGroup }) => {
         // given
         const jsonBodyMock = {
           ...aValidServicePayload,
@@ -328,8 +326,8 @@ describe("Services API", () => {
           isAdminMock.mockReturnValueOnce(false);
         }
         parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
-        if (mockGroupExists !== undefined) {
-          groupExistsMock.mockResolvedValueOnce(mockGroupExists);
+        if (mockGetGroup !== undefined) {
+          getGroupMock.mockResolvedValueOnce(mockGetGroup);
         }
         backofficeUserMock.institution.role = userRole;
         backofficeUserMock.permissions.selcGroups = selcGroups;
@@ -349,14 +347,14 @@ describe("Services API", () => {
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
         expect(isAdminMock).toHaveBeenCalledOnce();
         expect(isAdminMock).toHaveBeenCalledWith();
-        if (mockGroupExists !== undefined) {
-          expect(groupExistsMock).toHaveBeenCalledOnce();
-          expect(groupExistsMock).toHaveBeenCalledWith(
-            backofficeUserMock.institution.id,
+        if (mockGetGroup !== undefined) {
+          expect(getGroupMock).toHaveBeenCalledOnce();
+          expect(getGroupMock).toHaveBeenCalledWith(
             jsonBodyMock.metadata.group_id,
+            backofficeUserMock.institution.id,
           );
         } else {
-          expect(groupExistsMock).not.toHaveBeenCalled();
+          expect(getGroupMock).not.toHaveBeenCalled();
         }
         expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
         expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
