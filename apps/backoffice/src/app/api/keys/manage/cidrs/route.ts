@@ -9,12 +9,10 @@ import {
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @description Retrieve manage key authorized CIDRs
@@ -22,7 +20,7 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const authorizedCIDRsResponse =
@@ -56,7 +54,7 @@ export const GET = withJWTAuthHandler(
 export const PUT = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const body = await request.json();

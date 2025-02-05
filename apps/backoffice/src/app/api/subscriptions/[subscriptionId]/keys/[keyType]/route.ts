@@ -10,13 +10,11 @@ import {
 } from "@/lib/be/errors";
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @operationId regenerateManageSubscriptionKey
@@ -29,7 +27,7 @@ export const PUT = withJWTAuthHandler(
       backofficeUser,
       params,
     }: {
-      backofficeUser: BackOfficeUser;
+      backofficeUser: BackOfficeUserEnriched;
       params: { keyType: string; subscriptionId: string };
     },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {

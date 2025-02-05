@@ -6,10 +6,8 @@ import {
 import { ApiKeyNotFoundError, handlerErrorLog } from "@/lib/be/errors";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../types/next-auth";
 
 /**
  * @description Retrieve Manage keys
@@ -18,7 +16,7 @@ import { BackOfficeUser } from "../../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const manageKeysResponse = await retrieveManageSubscriptionApiKeys(

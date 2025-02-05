@@ -10,11 +10,9 @@ import {
 } from "@/lib/be/errors";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @operationId getManageSubscriptionKeys
@@ -27,7 +25,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { subscriptionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { subscriptionId: string };
+    },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
     if (
       !userAuthz(backofficeUser).isGroupAllowed(

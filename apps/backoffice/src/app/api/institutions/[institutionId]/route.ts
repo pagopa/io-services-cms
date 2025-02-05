@@ -5,10 +5,8 @@ import {
 } from "@/lib/be/errors";
 import { retrieveInstitution } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../types/next-auth";
 
 /**
  * @description Retrieve an institution by ID
@@ -18,7 +16,10 @@ export const GET = withJWTAuthHandler(
     request: NextRequest,
     {
       params,
-    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { institutionId: string };
+    },
   ) => {
     try {
       const institutionResponse = await retrieveInstitution(

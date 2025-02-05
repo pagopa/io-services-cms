@@ -1,8 +1,6 @@
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @description Retrieve service keys by service ID
@@ -13,7 +11,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("getServiceKeys", {
       backofficeUser,

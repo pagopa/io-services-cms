@@ -6,12 +6,12 @@ import {
 } from "../../../../../../generated/api/GroupFilterType";
 
 import * as E from "fp-ts/lib/Either";
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import { GET } from "../route";
+import type { BackOfficeUserEnriched } from "../../../../../../lib/be/wrappers";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
-} as BackOfficeUser;
+} as BackOfficeUserEnriched;
 
 const mocks = vi.hoisted(() => {
   const isAdmin = vi.fn(() => true);
@@ -30,7 +30,7 @@ const mocks = vi.hoisted(() => {
       (
         handler: (
           nextRequest: NextRequest,
-          context: { backofficeUser: BackOfficeUser; params: any },
+          context: { backofficeUser: BackOfficeUserEnriched; params: any },
         ) => Promise<NextResponse> | Promise<Response>,
       ) =>
         async (nextRequest: NextRequest, { params }: { params: {} }) =>
@@ -52,9 +52,13 @@ vi.mock("@/lib/be/institutions/business", () => ({
   retrieveUnboundInstitutionGroups: mocks.retrieveUnboundInstitutionGroups,
   retrieveInstitutionGroups: mocks.retrieveInstitutionGroups,
 }));
-vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: mocks.withJWTAuthHandler,
-}));
+vi.mock("@/lib/be/wrappers", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
+  return {
+    ...original,
+    withJWTAuthHandler: mocks.withJWTAuthHandler,
+  };
+});
 
 beforeEach(() => {
   vi.restoreAllMocks();

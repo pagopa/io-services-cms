@@ -5,10 +5,8 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { retrieveUnboundedGroupServices } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @operationId checkGroupUnboundedServiceExistence
@@ -17,7 +15,7 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     _: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<UnboundedGroupServices>> => {
     try {
       if (!userAuthz(backofficeUser).isAdmin()) {

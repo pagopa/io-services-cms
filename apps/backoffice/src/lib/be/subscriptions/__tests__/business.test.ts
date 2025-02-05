@@ -159,12 +159,12 @@ describe("Subscriptions Business Logic", () => {
       const ownerId = mocks.anOwnerId;
       const limit = 5;
       const offset = 0;
-      const groupId = "gid1";
+      const group = { id: "gid1", name: "groupName", state: "ACTIVE" };
       mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
 
       await expect(
         getManageSubscriptions(subscriptionType, ownerId, limit, offset, [
-          groupId,
+          group,
         ]),
       ).resolves.toStrictEqual([]);
 
@@ -173,7 +173,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        `name eq 'MANAGE-GROUP-${groupId}'`,
+        `name eq 'MANAGE-GROUP-${group.id}'`,
       );
     });
 

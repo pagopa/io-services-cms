@@ -16,10 +16,8 @@ import {
   bulkPatch,
   forwardIoServicesCmsRequest,
 } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
  * @description Create a new Service with the attributes provided in the request payload
@@ -27,7 +25,7 @@ import { BackOfficeUser } from "../../../../types/next-auth";
 export const POST = withJWTAuthHandler(
   async (
     nextRequest: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       let servicePayload;
@@ -39,7 +37,8 @@ export const POST = withJWTAuthHandler(
         );
       }
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        if (userAuthz(backofficeUser).isAdmin()) {
+        const userAuth = userAuthz(backofficeUser);
+        if (userAuth.isAdmin()) {
           if (
             servicePayload.metadata.group_id &&
             !(await groupExists(
@@ -53,11 +52,7 @@ export const POST = withJWTAuthHandler(
           }
         } else {
           if (servicePayload.metadata.group_id) {
-            if (
-              !backofficeUser.permissions.selcGroups?.includes(
-                servicePayload.metadata.group_id,
-              )
-            ) {
+            if (!userAuth.isGroupAllowed(servicePayload.metadata.group_id)) {
               return handleForbiddenErrorResponse(
                 "Provided group is out of your scope",
               );
@@ -99,7 +94,7 @@ export const POST = withJWTAuthHandler(
 export const GET = withJWTAuthHandler(
   (
     nextRequest: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     const limit = nextRequest.nextUrl.searchParams.get("limit");
     const offset = nextRequest.nextUrl.searchParams.get("offset");
@@ -122,7 +117,7 @@ export const GET = withJWTAuthHandler(
 export const PATCH = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<BulkPatchServiceResponse | ResponseError>> => {
     try {
       if (!userAuthz(backofficeUser).isAdmin()) {

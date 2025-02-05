@@ -1,8 +1,6 @@
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../types/next-auth";
 
 /**
  * @description Publish service by ID on __IO Platform__
@@ -13,7 +11,10 @@ export const POST = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("releaseService", {
       backofficeUser,
@@ -31,7 +32,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("getPublishedService", {
       backofficeUser,
@@ -49,7 +53,10 @@ export const DELETE = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("unpublishService", {
       backofficeUser,

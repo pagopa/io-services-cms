@@ -1,10 +1,8 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { retrieveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../types/next-auth";
 
 /**
  * @description Retrieves all the onboarded institutions related
@@ -13,7 +11,7 @@ import { BackOfficeUser } from "../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const institutionResponse = await retrieveUserAuthorizedInstitutions(

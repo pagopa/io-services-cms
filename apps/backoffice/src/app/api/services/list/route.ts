@@ -1,19 +1,18 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveServiceList } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
 
-import { BackOfficeUser } from "../../../../../types/next-auth";
 /**
  * @description Retrieve all services owned by the calling user
  */
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const serviceId = request.nextUrl.searchParams.get("id");

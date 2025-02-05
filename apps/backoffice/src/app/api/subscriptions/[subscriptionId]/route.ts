@@ -6,11 +6,9 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { deleteManageSubscription } from "@/lib/be/subscriptions/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
-
-import { BackOfficeUser } from "../../../../../types/next-auth";
 
 /**
  * @operationId deleteManageSubscription
@@ -22,7 +20,10 @@ export const DELETE = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { subscriptionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { subscriptionId: string };
+    },
   ) => {
     if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
