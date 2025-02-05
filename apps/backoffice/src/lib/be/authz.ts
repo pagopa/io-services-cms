@@ -1,3 +1,4 @@
+import { StateEnum } from "@/generated/api/Group";
 import { SelfcareRoles } from "@/types/auth";
 
 import { BackOfficeUser } from "../../../types/next-auth";
@@ -38,7 +39,7 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      * @param groupId the group id
      * @returns a boolean indicating whether the group is allowed or not
      */
-    isGroupAllowed: (groupId: string): boolean => {
+    isGroupAllowed: (groupId: string, active?: boolean): boolean => {
       const { selcGroups } = user.permissions;
       if (isAdmin() || !selcGroups || selcGroups.length === 0) {
         return true;
@@ -48,7 +49,9 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
         if (typeof group === "string") {
           return group === groupId;
         } else {
-          return group.id === groupId;
+          return active
+            ? group.id === groupId && group.state === StateEnum.ACTIVE
+            : group.id === groupId && group.state;
         }
       });
     },
