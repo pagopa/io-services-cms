@@ -51,7 +51,7 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
         } else {
           return active
             ? group.id === groupId && group.state === StateEnum.ACTIVE
-            : group.id === groupId && group.state;
+            : group.id === groupId;
         }
       });
     },
