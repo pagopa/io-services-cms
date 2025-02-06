@@ -112,22 +112,26 @@ describe("userAuthz", () => {
 
   describe("isGroupAllowed", () => {
     it.each`
-      scenario                                                                      | expectedResult | role                      | selcGroups                                                 | groupId
-      ${"is admin"}                                                                 | ${true}        | ${SelfcareRoles.admin}    | ${undefined}                                               | ${""}
-      ${"is not admin and selcGroups is not defined"}                               | ${true}        | ${SelfcareRoles.operator} | ${undefined}                                               | ${""}
-      ${"is not admin and selcGroups is empty"}                                     | ${true}        | ${SelfcareRoles.operator} | ${[]}                                                      | ${""}
-      ${"is not admin and provided groupId is included in selcGroups"}              | ${true}        | ${SelfcareRoles.operator} | ${["groupId"]}                                             | ${"groupId"}
-      ${"is not admin and provided groupId is not included in selcGroups"}          | ${false}       | ${SelfcareRoles.operator} | ${["groupId"]}                                             | ${"different_groupId"}
-      ${"is not admin and provided groupId is included in selcGroups enriched"}     | ${true}        | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]} | ${"groupId"}
-      ${"is not admin and provided groupId is not included in selcGroups enriched"} | ${false}       | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]} | ${"different_groupId"}
+      scenario                                                                                                                               | expectedResult | role                      | selcGroups                                                    | groupId                | active
+      ${"is admin"}                                                                                                                          | ${true}        | ${SelfcareRoles.admin}    | ${undefined}                                                  | ${""}                  | ${undefined}
+      ${"is not admin and selcGroups is not defined"}                                                                                        | ${true}        | ${SelfcareRoles.operator} | ${undefined}                                                  | ${""}                  | ${undefined}
+      ${"is not admin and selcGroups is empty"}                                                                                              | ${true}        | ${SelfcareRoles.operator} | ${[]}                                                         | ${""}                  | ${undefined}
+      ${"is not admin and provided groupId is included in selcGroups"}                                                                       | ${true}        | ${SelfcareRoles.operator} | ${["groupId"]}                                                | ${"groupId"}           | ${undefined}
+      ${"is not admin and provided groupId is not included in selcGroups"}                                                                   | ${false}       | ${SelfcareRoles.operator} | ${["groupId"]}                                                | ${"different_groupId"} | ${undefined}
+      ${"is not admin and provided groupId is included in selcGroups enriched"}                                                              | ${true}        | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"groupId"}           | ${false}
+      ${"is not admin and provided groupId is not included in selcGroups enriched"}                                                          | ${false}       | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"different_groupId"} | ${false}
+      ${"is not admin and provided groupId is included in selcGroups enriched and the group is not active"}                                  | ${false}       | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${true}
+      ${"is not admin and provided groupId is included in selcGroups enriched and the group is not active but the flag active is false"}     | ${true}        | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${false}
+      ${"is not admin and provided groupId is included in selcGroups enriched and the group is not active but the flag active is undefined"} | ${true}        | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${undefined}
+      ${"is not admin and provided groupId is not included in selcGroups enriched the group is active"}                                      | ${false}       | ${SelfcareRoles.operator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"different_groupId"} | ${true}
     `(
       "should return $expectedResult when $scenario",
-      ({ expectedResult, role, selcGroups, groupId }) => {
+      ({ expectedResult, role, selcGroups, groupId, active }) => {
         expect(
           userAuthz({
             institution: { role },
             permissions: { selcGroups },
-          } as BackOfficeUser).isGroupAllowed(groupId),
+          } as BackOfficeUser).isGroupAllowed(groupId, active),
         ).toBe(expectedResult);
       },
     );

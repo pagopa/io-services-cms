@@ -2,15 +2,17 @@ import { getConfiguration } from "@/config";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { CreateServicePayload } from "@/generated/api/CreateServicePayload";
+import { StateEnum } from "@/generated/api/Group";
 import { ResponseError } from "@/generated/api/ResponseError";
 import { userAuthz } from "@/lib/be/authz";
 import {
+  GroupNotFoundError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { groupExists } from "@/lib/be/institutions/business";
+import { getGroup, groupExists } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import {
   bulkPatch,
@@ -39,22 +41,31 @@ export const POST = withJWTAuthHandler(
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
         const userAuth = userAuthz(backofficeUser);
         if (userAuth.isAdmin()) {
-          if (
-            servicePayload.metadata.group_id &&
-            !(await groupExists(
-              backofficeUser.institution.id,
-              servicePayload.metadata.group_id,
-            ))
-          ) {
-            return handleBadRequestErrorResponse(
-              "Provided group_id does not exists",
-            );
+          if (servicePayload.metadata.group_id) {
+            try {
+              const group = await getGroup(
+                servicePayload.metadata.group_id,
+                backofficeUser.institution.id,
+              );
+              if (group.state !== StateEnum.ACTIVE) {
+                return handleForbiddenErrorResponse(
+                  "Provided group is not active",
+                );
+              }
+            } catch (error) {
+              if (error instanceof GroupNotFoundError) {
+                return handleBadRequestErrorResponse(error.message);
+              }
+              throw error;
+            }
           }
         } else {
           if (servicePayload.metadata.group_id) {
-            if (!userAuth.isGroupAllowed(servicePayload.metadata.group_id)) {
+            if (
+              !userAuth.isGroupAllowed(servicePayload.metadata.group_id, true)
+            ) {
               return handleForbiddenErrorResponse(
-                "Provided group is out of your scope",
+                "Provided group is out of your scope or inactive",
               );
             }
           } else {
