@@ -5,6 +5,7 @@ terraform {
     storage_account_name = "iopitntfst001"
     container_name       = "terraform-state"
     key                  = "io-services-cms.prod.italynorth.tfstate"
+    use_azuread_auth     = true
   }
 
   required_providers {
