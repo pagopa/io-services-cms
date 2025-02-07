@@ -1,14 +1,12 @@
-import { isAdmin, isInstitutionIdSameAsCaller } from "@/lib/be/authz";
+import { userAuthz } from "@/lib/be/authz";
 import {
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { checkInstitutionGroupsExistence } from "@/lib/be/institutions/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @operationId checkInstitutionGroupsExistence
@@ -20,12 +18,16 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { institutionId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { institutionId: string };
+    },
   ) => {
-    if (!isInstitutionIdSameAsCaller(backofficeUser, params.institutionId)) {
+    const user = userAuthz(backofficeUser);
+    if (!user.isInstitutionAllowed(params.institutionId)) {
       return handleForbiddenErrorResponse("Unauthorized institutionId");
     }
-    if (!isAdmin(backofficeUser)) {
+    if (!user.isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
     try {

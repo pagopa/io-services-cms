@@ -10,10 +10,8 @@ import {
 import { groupExists } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../types/next-auth";
 
 /**
  * @description Retrieve a service by ID
@@ -24,7 +22,10 @@ export const GET = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("getService", {
       backofficeUser,
@@ -42,7 +43,10 @@ export const PUT = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) => {
     try {
       let servicePayload;
@@ -86,7 +90,10 @@ export const PATCH = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) => {
     try {
       if (!userAuthz(backofficeUser).isAdmin()) {
@@ -136,7 +143,10 @@ export const DELETE = withJWTAuthHandler(
     {
       backofficeUser,
       params,
-    }: { backofficeUser: BackOfficeUser; params: { serviceId: string } },
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
   ) =>
     forwardIoServicesCmsRequest("deleteService", {
       backofficeUser,

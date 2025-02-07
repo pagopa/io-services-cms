@@ -18,7 +18,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { NextRequest } from "next/server";
 
-import { BackOfficeUser } from "../../../../types/next-auth";
 import { userAuthz } from "../authz";
 import {
   ManagedInternalError,
@@ -26,6 +25,7 @@ import {
   handleInternalErrorResponse,
 } from "../errors";
 import { getGroup, retrieveInstitutionGroups } from "../institutions/business";
+import { BackOfficeUserEnriched } from "../wrappers";
 import { getSubscriptions } from "./apim";
 import {
   IoServicesCmsClient,
@@ -64,22 +64,18 @@ interface PathParameters {
 }
 
 const retrieveSubscriptions = (
-  backofficeUser: BackOfficeUser,
+  backofficeUser: BackOfficeUserEnriched,
   limit?: number,
   offset?: number,
   serviceId?: string,
-  groupsMap?: GroupMap,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
   !userAuthz(backofficeUser).isAdmin() &&
   backofficeUser.permissions.selcGroups &&
-  backofficeUser.permissions.selcGroups.length > 0 &&
-  groupsMap &&
-  groupsMap.size !== 0
+  backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
-        backofficeUser.permissions.selcGroups.filter((selcGroup) => {
-          const group = groupsMap.get(selcGroup);
-          return group && group.state === StateEnum.ACTIVE;
-        }),
+        backofficeUser.permissions.selcGroups
+          .filter((selcGroup) => selcGroup.state === StateEnum.ACTIVE)
+          .map((activeGroup) => activeGroup.id),
         retrieveAuthorizedServiceIds,
         TE.chain((authzServiceIds) =>
           getSubscriptions(
@@ -99,8 +95,6 @@ const retrieveSubscriptions = (
         serviceId,
       );
 
-type GroupMap = ReturnType<typeof reduceGrops>;
-
 /**
  * @description This method Will retrieve the specified list of services partition for the given user
  *
@@ -111,34 +105,22 @@ type GroupMap = ReturnType<typeof reduceGrops>;
  */
 export const retrieveServiceList = async (
   nextRequest: NextRequest,
-  backofficeUser: BackOfficeUser,
+  backofficeUser: BackOfficeUserEnriched,
   limit: number,
   offset: number,
   serviceId?: string,
 ): Promise<ServiceList> =>
   pipe(
-    pipe(
-      TE.tryCatch(
-        () => retrieveInstitutionGroups(backofficeUser.institution.id),
-        E.toError,
-      ),
-      TE.map(reduceGrops),
-    ),
-    TE.bindTo("groupsMap"),
-    TE.bind("apimServices", ({ groupsMap }) =>
-      retrieveSubscriptions(
-        backofficeUser,
-        limit,
-        offset,
-        serviceId,
-        groupsMap,
-      ),
-    ),
+    retrieveSubscriptions(backofficeUser, limit, offset, serviceId),
+    TE.bindTo("apimServices"),
     TE.bind("serviceTopicsMap", (_) =>
       pipe(
         TE.tryCatch(() => retrieveServiceTopics(nextRequest), E.toError),
         TE.map(({ topics }) => reduceServiceTopicsList(topics)),
       ),
+    ),
+    TE.bind("groupsMap", (_) =>
+      TE.right(reduceGrops(backofficeUser.permissions.selcGroups ?? [])),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind(
@@ -219,7 +201,7 @@ export const retrieveServiceList = async (
  * @returns the minified services
  */
 export const retrieveUnboundedGroupServices = async (
-  backofficeUser: BackOfficeUser,
+  backofficeUser: BackOfficeUserEnriched,
 ): Promise<readonly { id: string; name: string }[]> =>
   pipe(
     retrieveSubscriptions(backofficeUser),
@@ -253,7 +235,7 @@ export async function forwardIoServicesCmsRequest<
     nextRequest,
     pathParams,
   }: {
-    backofficeUser: BackOfficeUser;
+    backofficeUser: BackOfficeUserEnriched;
     jsonBody?: any;
     nextRequest: NextRequest;
     pathParams?: PathParameters;

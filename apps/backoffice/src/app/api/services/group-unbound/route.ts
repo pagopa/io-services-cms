@@ -6,10 +6,9 @@ import {
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveUnboundedGroupServices } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { BackOfficeUser } from "../../../../../types/next-auth";
 /**
  * @operationId getGroupUnboundedServices
  * @description Retrieve all group-unbounded services owned by the calling user
@@ -17,7 +16,7 @@ import { BackOfficeUser } from "../../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     _: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<UnboundedGroupServices>> => {
     try {
       if (!userAuthz(backofficeUser).isAdmin()) {

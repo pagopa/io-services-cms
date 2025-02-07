@@ -1,3 +1,4 @@
+import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import {
   SubscriptionType,
@@ -99,7 +100,7 @@ export async function getManageSubscriptions(
   apimUserId: string,
   limit?: number,
   offset?: number,
-  selcGroups?: string[],
+  selcGroups?: Group[],
 ): Promise<Subscription[]> {
   let filter;
   switch (subscriptionType) {
@@ -111,8 +112,9 @@ export async function getManageSubscriptions(
       filter = ApimUtils.apim_filters.manageRootSubscriptionsFilter(apimUserId);
       break;
     case SubscriptionTypeEnum.MANAGE_GROUP:
-      filter =
-        ApimUtils.apim_filters.manageGroupSubscriptionsFilter(selcGroups);
+      filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
+        selcGroups?.map((group) => group.id),
+      );
       break;
     default:
       // eslint-disable-next-line no-case-declarations

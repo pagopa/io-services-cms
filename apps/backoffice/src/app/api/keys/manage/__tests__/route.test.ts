@@ -5,44 +5,46 @@ import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { SubscriptionKeys } from "../../../../../generated/api/SubscriptionKeys";
 import { ApiKeyNotFoundError } from "../../../../../lib/be/errors";
 import { GET } from "../route";
+import { BackOfficeUserEnriched } from "../../../../../lib/be/wrappers";
 
 const mocks: {
   apiKeys: SubscriptionKeys;
-  jwtMock: BackOfficeUser;
+  jwtMock: BackOfficeUserEnriched;
 } = vi.hoisted(() => ({
   apiKeys: {
     primary_key: "aPrimaryKey",
-    secondary_key: "aSecondaryKey"
+    secondary_key: "aSecondaryKey",
   },
-  jwtMock: ({
+  jwtMock: {
+    institution: { id: "institutionId" },
     permissions: ["permission1", "permission2"],
     parameters: {
       userEmail: "anEmail@email.it",
       userId: "anUserId",
-      subscriptionId: "aSubscriptionId"
-    }
-  } as unknown) as BackOfficeUser
+      subscriptionId: "aSubscriptionId",
+    },
+  } as unknown as BackOfficeUser,
 }));
 
 const { getToken } = vi.hoisted(() => ({
-  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock))
+  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
 }));
 
 const { retrieveManageSubscriptionApiKeys } = vi.hoisted(() => ({
   retrieveManageSubscriptionApiKeys: vi
     .fn()
-    .mockReturnValue(Promise.resolve(mocks.apiKeys))
+    .mockReturnValue(Promise.resolve(mocks.apiKeys)),
 }));
 
 vi.mock("@/lib/be/keys/business", () => ({
-  retrieveManageSubscriptionApiKeys
+  retrieveManageSubscriptionApiKeys,
 }));
 
 vi.mock("next-auth/jwt", async () => {
   const actual = await vi.importActual("next-auth/jwt");
   return {
     ...(actual as any),
-    getToken
+    getToken,
   };
 });
 
@@ -62,7 +64,7 @@ describe("Retrieve Manage Keys API", () => {
 
   it("should return 400", async () => {
     retrieveManageSubscriptionApiKeys.mockReturnValueOnce(
-      Promise.reject(new ApiKeyNotFoundError("api key not found"))
+      Promise.reject(new ApiKeyNotFoundError("api key not found")),
     );
 
     // Mock NextRequest

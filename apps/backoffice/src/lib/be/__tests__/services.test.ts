@@ -608,7 +608,6 @@ describe("Services TEST", () => {
             count: 2,
           }),
         );
-        retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
         retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
           TE.right(
             ids.map((id) => ({
@@ -648,10 +647,6 @@ describe("Services TEST", () => {
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
         expect(isAdminMock).toHaveBeenCalledOnce();
         expect(isAdminMock).toHaveBeenCalledWith();
-        expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-          backofficeUser.institution.id,
-        );
         expect(getSubscriptionsMock).toHaveBeenCalledOnce();
         expect(getSubscriptionsMock).toHaveBeenCalledWith(
           backofficeUser.parameters.userId,
@@ -735,7 +730,6 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockImplementationOnce((ids: string[]) =>
         TE.right(
           ids.map((id) => ({
@@ -776,10 +770,6 @@ describe("Services TEST", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -851,7 +841,6 @@ describe("Services TEST", () => {
           count: 2,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.right([
           {
@@ -883,10 +872,6 @@ describe("Services TEST", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -945,30 +930,6 @@ describe("Services TEST", () => {
       });
     });
 
-    it("when retrieveInstitutionGroups fails an error is returned", async () => {
-      // given
-      const error = new Error("error from retrieveInstitutionGroups");
-      retrieveInstitutionGroups.mockRejectedValueOnce(error);
-
-      // Mock NextRequest
-      const request = new NextRequest(new URL("http://localhost"));
-
-      // when and then
-      await expect(
-        retrieveServiceList(request, aBackofficeUser, 10, 0),
-      ).rejects.toThrowError(error);
-
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
-      expect(userAuthzMock).not.toHaveBeenCalledOnce();
-      expect(isAdminMock).not.toHaveBeenCalledOnce();
-      expect(getSubscriptionsMock).not.toHaveBeenCalledOnce();
-      expect(retrieveLifecycleServicesMock).not.toHaveBeenCalledOnce();
-      expect(retrievePublicationServicesMock).not.toHaveBeenCalledOnce();
-    });
-
     it("when retrievePublicationServices fails an error is returned", async () => {
       // given
       getSubscriptionsMock.mockReturnValueOnce(
@@ -981,7 +942,6 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.right([mocks.aBaseServiceLifecycle]),
       );
@@ -1003,10 +963,7 @@ describe("Services TEST", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
+
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -1036,7 +993,6 @@ describe("Services TEST", () => {
           count: 1,
         }),
       );
-      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
       retrieveLifecycleServicesMock.mockReturnValueOnce(
         TE.left({
           kind: "COSMOS_ERROR_RESPONSE",
@@ -1055,10 +1011,7 @@ describe("Services TEST", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        aBackofficeUser.institution.id,
-      );
+
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -1076,18 +1029,16 @@ describe("Services TEST", () => {
     it("should return an error when selcGroups has at leas one element but retrieveAuthorizedServiceIds fails", async () => {
       // given
       const error = new Error("message");
-      retrieveInstitutionGroups.mockResolvedValueOnce([
-        mocks.aGroup,
-        { id: "g1", name: "group1", state: "ACTIVE" },
-        { id: "g2", name: "group2", state: "ACTIVE" },
-      ]);
       retrieveAuthorizedServiceIdsMock.mockReturnValueOnce(TE.left(error));
       const request = new NextRequest(new URL("http://localhost"));
       const backofficeUser = {
         ...aBackofficeUser,
         permissions: {
           ...aBackofficeUser.permissions,
-          selcGroups: ["g1", "g2"],
+          selcGroups: [
+            { id: "g1", name: "group1", state: "ACTIVE" },
+            { id: "g2", name: "group2", state: "ACTIVE" },
+          ],
         },
       };
 
@@ -1099,13 +1050,10 @@ describe("Services TEST", () => {
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
-      expect(retrieveInstitutionGroups).toHaveBeenCalled();
-      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-        backofficeUser.institution.id,
-      );
+
       expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
       expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
-        backofficeUser.permissions.selcGroups,
+        backofficeUser.permissions.selcGroups.map((group) => group.id),
       );
       expect(getSubscriptionsMock).not.toHaveBeenCalled();
       expect(retrieveLifecycleServicesMock).not.toHaveBeenCalled();
@@ -1127,43 +1075,24 @@ describe("Services TEST", () => {
           : []
         : serviceId;
 
-    const isGroupActive = (
-      selcGroup: string,
-      institutionGroups: Group[],
-    ): boolean => {
-      return institutionGroups.some(
-        (group) => group.id === selcGroup && group.state === StateEnum.ACTIVE,
-      );
-    };
-
-    const getExpectedActiveGroups = (
-      selcGroups: string[],
-      institutionGroups: Group[],
-    ): string[] => {
-      return selcGroups.filter((selcGroup) =>
-        isGroupActive(selcGroup, institutionGroups),
-      );
-    };
-
     it.each`
-      scenario                                                                                                                                                     | selcGroups      | institutionGroups                                                                                                | serviceId      | authzServiceIds
-      ${"selcGroups is undefined, groupMap (doesn't matters), serviceId is undefined (authzServiceIds doesn't matters)"}                                           | ${undefined}    | ${[]}                                                                                                            | ${undefined}   | ${undefined}
-      ${"selcGroups has no elements, groupMap (doesn't matters), serviceId is undefined (authzServiceIds doesn't matters)"}                                        | ${[]}           | ${[]}                                                                                                            | ${undefined}   | ${undefined}
-      ${"selcGroups is undefined, groupMap (doesn't matters), serviceId is defined (authzServiceIds doesn't matters)"}                                             | ${undefined}    | ${[]}                                                                                                            | ${"serviceId"} | ${undefined}
-      ${"selcGroups has no elements, groupMap (doesn't matters), serviceId is defined (authzServiceIds doesn't matters)"}                                          | ${[]}           | ${[]}                                                                                                            | ${"serviceId"} | ${undefined}
-      ${"selcGroups has at least one element, groupMap has no matching group, serviceId is undefined and authzServiceIds is empty"}                                | ${["group_id"]} | ${[{ id: "g1", name: "group", state: "ACTIVE" }]}                                                                | ${undefined}   | ${[]}
-      ${"selcGroups has at least one element, groupMap has matching group but is not active, serviceId is undefined and authzServiceIds is empty"}                 | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "SUSPENDED" }]}                                                       | ${undefined}   | ${[]}
-      ${"selcGroups has at least one element, groupMap has an active matching group, serviceId is  undefined and authzServiceIds is empty"}                        | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${undefined}   | ${[]}
-      ${"selcGroups has at least one element, groupMap has an active matching group and a non active group, serviceId is  undefined and authzServiceIds is empty"} | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }, { id: "group_id2", name: "group2", state: "SUSPENDED" }]} | ${undefined}   | ${[]}
-      ${"selcGroups has at least one element, groupMap has an active matching group, serviceId is defined and authzServiceIds is empty"}                           | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${"serviceId"} | ${[]}
-      ${"selcGroups has at least one element, groupMap has an active matching group, serviceId is undefined and authzServiceIds is not empty"}                     | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${undefined}   | ${["authzServiceId"]}
-      ${"selcGroups has at least one element, groupMap has an active matching group, serviceId is defined and authzServiceIds is not empty"}                       | ${["group_id"]} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${"serviceId"} | ${["authzServiceId"]}
+      scenario                                                                                          | selcGroups                                                                                                       | serviceId      | authzServiceIds
+      ${"selcGroups is undefined, serviceId is undefined (authzServiceIds doesn't matters)"}            | ${undefined}                                                                                                     | ${undefined}   | ${undefined}
+      ${"selcGroups has no elements, serviceId is undefined (authzServiceIds doesn't matters)"}         | ${[]}                                                                                                            | ${undefined}   | ${undefined}
+      ${"selcGroups is undefined, serviceId is defined (authzServiceIds doesn't matters)"}              | ${undefined}                                                                                                     | ${"serviceId"} | ${undefined}
+      ${"selcGroups has no elements, serviceId is defined (authzServiceIds doesn't matters)"}           | ${[]}                                                                                                            | ${"serviceId"} | ${undefined}
+      ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is empty"}     | ${[{ id: "g1", name: "group", state: "ACTIVE" }]}                                                                | ${undefined}   | ${[]}
+      ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is empty"}     | ${[{ id: "group_id", name: "group", state: "SUSPENDED" }]}                                                       | ${undefined}   | ${[]}
+      ${"selcGroups has at least one element, serviceId is  undefined and authzServiceIds is empty"}    | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${undefined}   | ${[]}
+      ${"selcGroups has at least one element, serviceId is  undefined and authzServiceIds is empty"}    | ${[{ id: "group_id", name: "group", state: "ACTIVE" }, { id: "group_id2", name: "group2", state: "SUSPENDED" }]} | ${undefined}   | ${[]}
+      ${"selcGroups has at least one element, serviceId is defined and authzServiceIds is empty"}       | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${"serviceId"} | ${[]}
+      ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is not empty"} | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${undefined}   | ${["authzServiceId"]}
+      ${"selcGroups has at least one element, serviceId is defined and authzServiceIds is not empty"}   | ${[{ id: "group_id", name: "group", state: "ACTIVE" }]}                                                          | ${"serviceId"} | ${["authzServiceId"]}
     `(
       "should return an error when $scenario, but getSubscriptions fails",
       async ({ selcGroups, institutionGroups, serviceId, authzServiceIds }) => {
         // given
         const error = new Error("message");
-        retrieveInstitutionGroups.mockResolvedValueOnce(institutionGroups);
         getSubscriptionsMock.mockReturnValueOnce(TE.left(error));
         const request = new NextRequest(new URL("http://localhost"));
         const backofficeUser = {
@@ -1187,18 +1116,13 @@ describe("Services TEST", () => {
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
         expect(isAdminMock).toHaveBeenCalledOnce();
         expect(isAdminMock).toHaveBeenCalledWith();
-        expect(retrieveInstitutionGroups).toHaveBeenCalled();
-        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-          backofficeUser.institution.id,
-        );
 
         if (selcGroups && selcGroups.length > 0) {
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
-            getExpectedActiveGroups(
-              backofficeUser.permissions.selcGroups,
-              institutionGroups,
-            ),
+            selcGroups
+              .filter((group) => group.state === StateEnum.ACTIVE)
+              .map((group) => group.id),
           );
         } else {
           expect(retrieveAuthorizedServiceIdsMock).not.toHaveBeenCalled();

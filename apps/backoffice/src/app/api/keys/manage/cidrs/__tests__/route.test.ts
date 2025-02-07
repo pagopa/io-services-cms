@@ -10,42 +10,43 @@ const mocks: {
   jwtMock: BackOfficeUser;
 } = vi.hoisted(() => ({
   authrizedCIDRs: ["127.0.0.1" as Cidr],
-  jwtMock: ({
+  jwtMock: {
+    institution: { role: "admin", id: "institutionId" },
     permissions: ["permission1", "permission2"],
     parameters: {
       userEmail: "anEmail@email.it",
       userId: "anUserId",
-      subscriptionId: "aSubscriptionId"
-    }
-  } as unknown) as BackOfficeUser
+      subscriptionId: "aSubscriptionId",
+    },
+  } as unknown as BackOfficeUser,
 }));
 
 const { getToken } = vi.hoisted(() => ({
-  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock))
+  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
 }));
 
 const {
   retrieveManageSubscriptionAuthorizedCIDRs,
-  upsertManageSubscriptionAuthorizedCIDRs
+  upsertManageSubscriptionAuthorizedCIDRs,
 } = vi.hoisted(() => ({
   retrieveManageSubscriptionAuthorizedCIDRs: vi
     .fn()
     .mockReturnValue(Promise.resolve(mocks.authrizedCIDRs)),
   upsertManageSubscriptionAuthorizedCIDRs: vi
     .fn()
-    .mockReturnValue(Promise.resolve(mocks.authrizedCIDRs))
+    .mockReturnValue(Promise.resolve(mocks.authrizedCIDRs)),
 }));
 
 vi.mock("@/lib/be/keys/business", () => ({
   retrieveManageSubscriptionAuthorizedCIDRs,
-  upsertManageSubscriptionAuthorizedCIDRs
+  upsertManageSubscriptionAuthorizedCIDRs,
 }));
 
 vi.mock("next-auth/jwt", async () => {
   const actual = await vi.importActual("next-auth/jwt");
   return {
     ...(actual as any),
-    getToken
+    getToken,
   };
 });
 
@@ -58,7 +59,7 @@ describe("Authorized CIDRs API", () => {
   describe("Retrieve", () => {
     it("should return 200", async () => {
       retrieveManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
-        Promise.resolve(mocks.authrizedCIDRs)
+        Promise.resolve(mocks.authrizedCIDRs),
       );
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
@@ -76,7 +77,7 @@ describe("Authorized CIDRs API", () => {
 
     it("should return 500", async () => {
       retrieveManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
-        "an error"
+        "an error",
       );
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
@@ -92,14 +93,14 @@ describe("Authorized CIDRs API", () => {
   describe("Update", () => {
     it("should return 200", async () => {
       upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
-        Promise.resolve(mocks.authrizedCIDRs)
+        Promise.resolve(mocks.authrizedCIDRs),
       );
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "PUT",
-        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs })
+        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs }),
       });
 
       const result = await PUT(request, {});
@@ -113,14 +114,14 @@ describe("Authorized CIDRs API", () => {
 
     it("should return 400", async () => {
       upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
-        Promise.resolve(mocks.authrizedCIDRs)
+        Promise.resolve(mocks.authrizedCIDRs),
       );
       getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "PUT",
-        body: JSON.stringify({ aNotValidProp: "aNotValidProp" })
+        body: JSON.stringify({ aNotValidProp: "aNotValidProp" }),
       });
 
       const result = await PUT(request, {});
@@ -137,7 +138,7 @@ describe("Authorized CIDRs API", () => {
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "PUT",
-        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs })
+        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs }),
       });
 
       const result = await PUT(request, {});

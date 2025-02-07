@@ -1,10 +1,8 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveOwnershipClaimLatestStatus } from "@/lib/be/services/business";
-import { withJWTAuthHandler } from "@/lib/be/wrappers";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
-
-import { BackOfficeUser } from "../../../../../../../types/next-auth";
 
 /**
  * @description Retrieve latest service migration status, intended as a list of items containing delegate data, relative service migration status and last update date
@@ -12,7 +10,7 @@ import { BackOfficeUser } from "../../../../../../../types/next-auth";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUser },
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) => {
     try {
       const response = await retrieveOwnershipClaimLatestStatus(
