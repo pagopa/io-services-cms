@@ -145,7 +145,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     custom_special_flow: faker.lorem.slug(1),
     email: faker.internet.email(),
     group: faker.helpers.arrayElement([
-      getMockManageSubscriptionGroup(),
+      getMockManageSubscriptionGroup("abc123"),
       undefined,
     ]),
     pec: faker.internet.email(),
