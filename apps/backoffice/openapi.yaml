@@ -476,7 +476,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /service/{serviceId}/patch:
+  /services/{serviceId}/patch:
     put:
       tags:
         - services
