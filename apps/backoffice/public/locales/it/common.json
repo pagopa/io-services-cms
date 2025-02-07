@@ -75,7 +75,8 @@
         "required": "Campo obbligatorio",
         "max": "Puoi inserire massimo {{max}} caratteri",
         "url": "Formato Url non valido",
-        "privacyCritical": "Campo obbligatorio per un servizio sensibile"
+        "privacyCritical": "Campo obbligatorio per un servizio sensibile",
+        "sameSelectedValue": "Il valore selezionato è lo stesso valore di partenza"
       }
     },
     "noOptionsText": "Nessuna opzione",
@@ -360,8 +361,13 @@
         "description": "Utilizza questa chiave per operazioni programmatiche di tipo USE del servizio."
       },
       "group": {
+        "associate": "Associa",
         "label": "Gruppo",
-        "unbounded": "Non associato"
+        "unbounded": "Non associato",
+        "modal": {
+          "title": "Associa un gruppo al servizio",
+          "message": "Associa un gruppo al servizio selezionato"
+        }
       },
       "lastUpdate": "Ultima modifica",
       "name": "Nome",

@@ -75,7 +75,8 @@
         "required": "Required field",
         "max": "You can enter a maximum of {{max}} characters",
         "url": "Invalid Url",
-        "privacyCritical": "Mandatory field for a sensitive service"
+        "privacyCritical": "Mandatory field for a sensitive service",
+        "sameSelectedValue": "The selected value is the same as the starting value"
       }
     },
     "noOptionsText": "No options",
@@ -359,8 +360,13 @@
         "description": "Use this key for programmatic USE operations of the service."
       },
       "group": {
+        "associate": "Associate",
         "label": "Group",
-        "unbounded": "Unbounded"
+        "unbounded": "Unbounded",
+        "modal": {
+          "title": "Associate a group with the service",
+          "message": "Associate a group with the selected service"
+        }
       },
       "lastUpdate": "Last update",
       "name": "Name",
