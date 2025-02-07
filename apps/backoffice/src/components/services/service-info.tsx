@@ -4,22 +4,31 @@ import { Service } from "@/types/service";
 import { trackServiceDetailsEvent } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
 import { useTranslation } from "next-i18next";
+import { useState } from "react";
 
 import { ServiceInfoContent, ServiceStatus } from ".";
 import { CardDetails, CardRowType } from "../cards";
 import { useDrawer } from "../drawer-provider";
+import { AssociateGroupToService } from "../groups/associate-group-to-service";
+import { GroupInfoTag } from "../groups/group-info-tag";
 
 export interface ServiceInfoProps {
   data?: Service;
+  onGroupChange: () => void;
   releaseMode: boolean;
 }
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 /** Render service basic information card and service details drawer */
-export const ServiceInfo = ({ data, releaseMode }: ServiceInfoProps) => {
+export const ServiceInfo = ({
+  data,
+  onGroupChange,
+  releaseMode,
+}: ServiceInfoProps) => {
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
+  const [associateGroupOpen, setAssociateGroupOpen] = useState(false);
 
   /** row list for minified/basic information card */
   const buildRowsMin = () => {
@@ -50,8 +59,12 @@ export const ServiceInfo = ({ data, releaseMode }: ServiceInfoProps) => {
     if (GROUP_APIKEY_ENABLED && !releaseMode) {
       rowsMin.push({
         label: "routes.service.group.label",
-        value:
-          data?.metadata.group?.name ?? t("routes.service.group.unbounded"),
+        value: (
+          <GroupInfoTag
+            name={data?.metadata.group?.name}
+            onAssociateClick={() => setAssociateGroupOpen(true)}
+          />
+        ),
       });
     }
     return rowsMin;
@@ -59,19 +72,32 @@ export const ServiceInfo = ({ data, releaseMode }: ServiceInfoProps) => {
 
   const openDetails = () => {
     trackServiceDetailsEvent(data?.id as string);
-
     openDrawer(<ServiceInfoContent data={data} />);
   };
 
+  const handleGroupChange = () => {
+    setAssociateGroupOpen(false);
+    onGroupChange();
+  };
+
   return (
-    <CardDetails
-      cta={{
-        fn: openDetails,
-        icon: <ReadMore style={{ fontSize: "24px" }} />,
-        label: "routes.service.viewDetails",
-      }}
-      rows={buildRowsMin()}
-      title="routes.service.information"
-    />
+    <>
+      <CardDetails
+        cta={{
+          fn: openDetails,
+          icon: <ReadMore style={{ fontSize: "24px" }} />,
+          label: "routes.service.viewDetails",
+        }}
+        rows={buildRowsMin()}
+        title="routes.service.information"
+      />
+      <AssociateGroupToService
+        groupId={data?.metadata.group?.id}
+        onClose={() => setAssociateGroupOpen(false)}
+        onConfirm={handleGroupChange}
+        open={associateGroupOpen}
+        service={data ? { id: data.id, name: data.name } : undefined}
+      />
+    </>
   );
 };
