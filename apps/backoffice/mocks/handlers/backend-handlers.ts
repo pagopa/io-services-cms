@@ -389,6 +389,34 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.put(`${baseURL}/services/:serviceId/patch`, ({ params }) => {
+      const { serviceId } = params;
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(getUpdateService200Response(serviceId as string)),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 404,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
     http.delete(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
         new HttpResponse(null, {

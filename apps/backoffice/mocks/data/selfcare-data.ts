@@ -118,13 +118,14 @@ export const getMockInstitution = (institutionId?: string) => ({
 });
 
 export const getMockInstitutionGroups = (_institutionId?: string) => ({
-  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map((_) =>
-    getMockManageSubscriptionGroup(),
+  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
+    (_, index) =>
+      getMockManageSubscriptionGroup(index === 0 ? "abc123" : undefined),
   ),
 });
 
-export const getMockManageSubscriptionGroup = () => ({
-  id: faker.string.uuid(),
+export const getMockManageSubscriptionGroup = (id?: string) => ({
+  id: id ?? faker.string.uuid(),
   name: faker.word.words({ count: { max: 3, min: 1 } }),
   state: faker.helpers.arrayElement(["ACTIVE", "SUSPENDED", "DELETED"]),
 });
