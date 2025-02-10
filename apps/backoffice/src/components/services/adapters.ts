@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-useless-escape */
+import { CreateServicePayload as ApiServicePayload } from "@/generated/api/CreateServicePayload";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import { ServiceLifecycleMetadata } from "@/generated/api/ServiceLifecycleMetadata";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
-import { ServicePayload as ApiServicePayload } from "@/generated/api/ServicePayload";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { ServicePublicationStatusType } from "@/generated/api/ServicePublicationStatusType";
 import {
@@ -123,6 +123,7 @@ export const fromServiceLifecycleToServiceCreateUpdatePayload = (
     category: sl.metadata.category ?? "",
     cta: buildCtaObj(sl.metadata.cta),
     custom_special_flow: sl.metadata.custom_special_flow ?? "",
+    group_id: sl.metadata.group?.id,
     privacy_url: sl.metadata.privacy_url ?? "",
     scope: sl.metadata.scope,
     token_name: sl.metadata.token_name ?? "",
