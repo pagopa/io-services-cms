@@ -197,6 +197,14 @@
           "helperText": "Qual è l'argomento del servizio?",
           "label": "Argomento del servizio",
           "placeholder": ""
+        },
+        "group": {
+          "info": "In futuro, per modificare l'assegnazione del servizio al gruppo, sarà necessario contattare l'amministratore, che si occuperà di gestire l'operazione.",
+          "title": "Gruppi",
+          "description": "Scegli qui il gruppo che può gestire questo servizio.",
+          "helperText": "Vuoi modificare i gruppi del tuo ente? Vai nella <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">sezione dedicata</a>",
+          "label": "Scegli il gruppo",
+          "placeholder": "Scegli il gruppo"
         }
       },
       "steps": {
@@ -237,7 +245,6 @@
         }
       }
     }
-
   },
   "subscriptions": {
     "migration": {

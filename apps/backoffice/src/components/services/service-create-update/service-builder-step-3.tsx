@@ -1,9 +1,11 @@
+import { CreateUpdateMode } from "@/components/create-update-process";
 import { FormStepSectionWrapper } from "@/components/forms";
 import { TextFieldArrayController } from "@/components/forms/controllers";
 import {
   arrayOfIPv4CidrSchema,
   getOptionalUrlSchema,
 } from "@/components/forms/schemas";
+import { Group } from "@/generated/api/Group";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
@@ -12,6 +14,7 @@ import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 
 import { ServiceExtraConfigurator } from "./service-extra-configurator";
+import { ServiceGroupSelector } from "./service-group-selector";
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
   z.object({
@@ -24,8 +27,16 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
     }),
   });
 
+export interface ServiceBuilderStep3Props {
+  groups?: readonly Group[];
+  mode: CreateUpdateMode;
+}
+
 /** Third step of Service create/update process */
-export const ServiceBuilderStep3 = () => {
+export const ServiceBuilderStep3 = ({
+  groups,
+  mode,
+}: ServiceBuilderStep3Props) => {
   const { t } = useTranslation();
   const { getFieldState, resetField, watch } = useFormContext();
   const watchedAuthorizedCidrs = watch("authorized_cidrs");
@@ -34,6 +45,9 @@ export const ServiceBuilderStep3 = () => {
   const handleCancel = () => {
     resetField("authorized_cidrs");
   };
+
+  const isGroupSelectorVisible = () =>
+    mode === "create" && groups && groups?.length > 0;
 
   useEffect(() => {
     setAreAuthorizedCidrsDirty(getFieldState("authorized_cidrs").isDirty);
@@ -66,6 +80,7 @@ export const ServiceBuilderStep3 = () => {
           sx={{ maxWidth: "185px" }}
         />
       </FormStepSectionWrapper>
+      {isGroupSelectorVisible() && <ServiceGroupSelector groups={groups} />}
       <ServiceExtraConfigurator />
     </>
   );

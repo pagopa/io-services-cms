@@ -14,10 +14,11 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement } from "react";
-import React from "react";
 
 const pageTitleLocaleKey = "routes.new-service.title";
 const pageDescriptionLocaleKey = "routes.new-service.description";
+
+const SERVICES_ROUTE_PATH = "/services";
 
 export default function NewService() {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ export default function NewService() {
       );
     }
     // redirect to services list in both cases
-    router.push("/services");
+    router.push(SERVICES_ROUTE_PATH);
   };
 
   return (
@@ -60,7 +61,7 @@ export default function NewService() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push("/services")}
+        onExitClick={() => router.push(SERVICES_ROUTE_PATH)}
         showExit
         title={pageTitleLocaleKey}
       />

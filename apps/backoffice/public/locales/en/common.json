@@ -197,6 +197,14 @@
           "helperText": "What is the service topic?",
           "label": "Service topic",
           "placeholder": ""
+        },
+        "group": {
+          "info": "In the future, to change the assignment of the service to the group, you will need to contact the administrator, who will handle the operation.",
+          "title": "Groups",
+          "description": "Choose here the group that can manage this service.",
+          "helperText": "Do you want to change your organization's groups? Go to the <a style=\"color: #0073E6;\" href=\"https://selfcare.pagopa.it/\" target=\"_blank\">dedicated section</a>",
+          "label": "Choose group",
+          "placeholder": "Choose group"
         }
       },
       "steps": {

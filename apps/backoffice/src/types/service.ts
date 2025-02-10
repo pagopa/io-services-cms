@@ -66,6 +66,7 @@ export interface ServiceCreateUpdatePayloadMetadata {
     url: string;
   };
   custom_special_flow?: string;
+  group_id?: string;
   privacy_url: string;
   scope: ScopeEnum;
   token_name?: string;
