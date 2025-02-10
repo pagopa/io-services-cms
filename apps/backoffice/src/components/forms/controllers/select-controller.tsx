@@ -38,6 +38,7 @@ export function SelectController({
       render={({ field: { onChange, value } }) => (
         <FormControl fullWidth margin="normal">
           <InputLabel
+            disabled={props.disabled}
             error={!!error}
             id={`${name}-label`}
             required={props.required}
