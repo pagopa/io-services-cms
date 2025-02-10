@@ -22,6 +22,8 @@ import React from "react";
 const pageTitleLocaleKey = "routes.edit-service.title";
 const pageDescriptionLocaleKey = "routes.edit-service.description";
 
+const SERVICES_ROUTE_PATH = "/services";
+
 export default function EditService() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -60,13 +62,13 @@ export default function EditService() {
       );
     }
     // redirect to service details in both cases
-    router.push(`/services/${serviceId}`);
+    router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);
   };
 
   useEffect(() => {
     serviceFetchData("getService", { serviceId }, ServiceLifecycle, {
       notify: "errors",
-      redirect: { href: "/services", on: "errors" },
+      redirect: { href: SERVICES_ROUTE_PATH, on: "errors" },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -84,7 +86,7 @@ export default function EditService() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(`/services/${serviceId}`)}
+        onExitClick={() => router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`)}
         showExit
         title={pageTitleLocaleKey}
       />
