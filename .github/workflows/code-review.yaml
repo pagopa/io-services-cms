@@ -11,6 +11,7 @@ on:
       - apps/**
       - packages/**
       - package.json
+      - .node-version
 
 jobs:
   js_code_review:
