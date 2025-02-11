@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 1.24.0
+
+### Minor Changes
+
+- 18fe61c5: Added group selection in service create funnel
+
+### Patch Changes
+
+- ffe52784: refactor backoffice user to include selfcare groups detail
+- cb013819: Added group association action in service details page
+- 9f38730f: Added group information in service details page
+- 51247216: added check on group's state during service creation
+
 ## 1.23.0
 
 ### Minor Changes
