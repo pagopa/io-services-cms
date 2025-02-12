@@ -20,6 +20,8 @@ import { ApiKeysGroupTag } from "../api-keys-groups/api-keys-group-tag";
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 const KEYS_ROUTE_PATH = "/keys";
+const MAX_APIKEY_GROUP_TO_DISPLAY = 2;
+const GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT = 10;
 
 export const ApiKeysCard = () => {
   const { t } = useTranslation();
@@ -53,6 +55,9 @@ export const ApiKeysCard = () => {
     },
   ];
 
+  const getRemainingApiKeyGroupCount = () =>
+    mspData ? mspData.pagination.count - MAX_APIKEY_GROUP_TO_DISPLAY : 0;
+
   useEffect(() => {
     if (showManageKeyRoot) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
@@ -60,7 +65,10 @@ export const ApiKeysCard = () => {
     if (showManageKeyGroup) {
       mspFetchData(
         "getManageSubscriptions",
-        { kind: SubscriptionTypeEnum.MANAGE_GROUP, limit: 10 },
+        {
+          kind: SubscriptionTypeEnum.MANAGE_GROUP,
+          limit: GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT,
+        },
         SubscriptionPagination,
         {
           notify: "errors",
@@ -92,15 +100,23 @@ export const ApiKeysCard = () => {
               <ApiKeysGroupsEmptyState apiKeysGroups={mspData?.value} />
               {mspData?.value && mspData.value.length > 0 && (
                 <Box paddingTop={2}>
-                  {mspData?.value.map((apiKeyGroup) => (
+                  {mspData?.value
+                    .slice(0, MAX_APIKEY_GROUP_TO_DISPLAY)
+                    .map((apiKeyGroup) => (
+                      <ApiKeysGroupTag
+                        key={apiKeyGroup.id}
+                        label={apiKeyGroup.name}
+                        onClick={() =>
+                          router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
+                        }
+                      />
+                    ))}
+                  {mspData.pagination.count > MAX_APIKEY_GROUP_TO_DISPLAY && (
                     <ApiKeysGroupTag
-                      key={apiKeyGroup.id}
-                      label={apiKeyGroup.name}
-                      onClick={() =>
-                        router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
-                      }
+                      label={`+${getRemainingApiKeyGroupCount()}`}
+                      onClick={() => router.push(KEYS_ROUTE_PATH)}
                     />
-                  ))}
+                  )}
                 </Box>
               )}
             </>
