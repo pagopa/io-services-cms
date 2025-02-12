@@ -371,9 +371,17 @@
         "associate": "Associa",
         "label": "Gruppo",
         "unbounded": "Non associato",
-        "modal": {
-          "title": "Associa un gruppo al servizio",
-          "message": "Associa un gruppo al servizio selezionato"
+        "bound": {
+          "modal": {
+            "title": "Associa un gruppo al servizio",
+            "message": "Associa un gruppo al servizio selezionato"
+          }
+        },
+        "unbound": {
+          "modal": {
+            "title": "Vuoi eliminare l’associazione tra questo Gruppo e il servizio?",
+            "message": "Elimina l'associazione tra servizio e gruppo."
+          }
         }
       },
       "lastUpdate": "Ultima modifica",

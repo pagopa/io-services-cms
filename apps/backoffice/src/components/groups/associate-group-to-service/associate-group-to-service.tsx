@@ -142,10 +142,10 @@ export const AssociateGroupToService = ({
         </FormProvider>
       }
       isOpen={open}
-      message={t("routes.service.group.modal.message")}
+      message={t("routes.service.group.bound.modal.message")}
       onClose={handleCancel}
       onConfirm={handleConfirmGroupAssociation}
-      title={t("routes.service.group.modal.title")}
+      title={t("routes.service.group.bound.modal.title")}
     />
   );
 };
