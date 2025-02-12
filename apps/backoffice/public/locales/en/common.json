@@ -371,9 +371,17 @@
         "associate": "Associate",
         "label": "Group",
         "unbounded": "Unbounded",
-        "modal": {
-          "title": "Associate a group with the service",
-          "message": "Associate a group with the selected service"
+        "bound": {
+          "modal": {
+            "title": "Associate a group with the service",
+            "message": "Associate a group with the selected service"
+          }
+        },
+        "unbound": {
+          "modal": {
+            "title": "Do you want to remove the association between this Group and the service?",
+            "message": "Removes the association between service and group."
+          }
         }
       },
       "lastUpdate": "Last update",

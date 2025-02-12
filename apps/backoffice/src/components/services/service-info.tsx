@@ -1,8 +1,10 @@
 import { getConfiguration } from "@/config";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
+import useFetch from "@/hooks/use-fetch";
 import { Service } from "@/types/service";
 import { trackServiceDetailsEvent } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
+import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
@@ -29,6 +31,19 @@ export const ServiceInfo = ({
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
   const [associateGroupOpen, setAssociateGroupOpen] = useState(false);
+  const { fetchData: noContentFetchData } = useFetch<unknown>();
+
+  const handleServiceGroupUnbound = async () => {
+    await noContentFetchData(
+      "unboundServiceFromGroup",
+      { serviceId: data?.id as string },
+      tt.unknown,
+      {
+        notify: "all",
+      },
+    );
+    onGroupChange();
+  };
 
   /** row list for minified/basic information card */
   const buildRowsMin = () => {
@@ -63,6 +78,7 @@ export const ServiceInfo = ({
           <GroupInfoTag
             name={data?.metadata.group?.name}
             onAssociateClick={() => setAssociateGroupOpen(true)}
+            onUnboundClick={handleServiceGroupUnbound}
           />
         ),
       });
