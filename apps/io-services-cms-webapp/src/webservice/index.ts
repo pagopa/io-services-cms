@@ -82,6 +82,10 @@ import {
   makeReviewServiceHandler,
 } from "./controllers/review-service";
 import {
+  applyRequestMiddelwares as applyUnboundServiceGroupRequestMiddelwares,
+  makeUnboundServiceGroupHandler,
+} from "./controllers/unbound-service-group";
+import {
   applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
   makeUnpublishServiceHandler,
 } from "./controllers/unpublish-service";
@@ -242,6 +246,18 @@ export const createWebServer = ({
         telemetryClient,
       }),
       applyDeleteServiceRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
+  );
+
+  router.delete(
+    `${serviceLifecyclePath}/group`,
+    pipe(
+      makeUnboundServiceGroupHandler({
+        apimService,
+        fsmLifecycleClientCreator,
+        telemetryClient,
+      }),
+      applyUnboundServiceGroupRequestMiddelwares(config),
     ),
   );
 
