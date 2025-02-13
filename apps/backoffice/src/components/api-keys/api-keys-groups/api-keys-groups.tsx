@@ -10,7 +10,9 @@ import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
 import { getBffApiClient } from "@/utils/bff-api-client";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
+import { KeyboardArrowDown } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
 import { useRouter } from "next/router";
@@ -23,6 +25,8 @@ import { ApiKeysHeader } from "../api-keys-header";
 import { ApiKeyGroup } from "./api-keys-group";
 import { ApiKeysGroupsEmptyState } from "./api-keys-groups-empty-state";
 import { ButtonGenerateApiKeysGroup } from "./button-generate-api-keys-group";
+
+const GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT = 10;
 
 export interface ApiKeysGroupsProps {
   /** Main component card description */
@@ -79,16 +83,31 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const [apiKeys, setApiKeys] = useState<ApiKeysGroupRecordset | undefined>(
     undefined,
   );
+  const [pagination, setPagination] = useState({
+    count: 0,
+    limit: GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT,
+    offset: 0,
+  });
 
   const getManageGroupSubscriptions = () =>
     mspFetchData(
       "getManageSubscriptions",
-      { kind: SubscriptionTypeEnum.MANAGE_GROUP, limit: 10 },
+      {
+        kind: SubscriptionTypeEnum.MANAGE_GROUP,
+        limit: pagination.limit,
+        offset: pagination.offset,
+      },
       SubscriptionPagination,
       {
         notify: "errors",
       },
     );
+
+  const handleLoadMore = () =>
+    setPagination({
+      ...pagination,
+      offset: pagination.offset + pagination.limit,
+    });
 
   const updateApiKey = (key: string, newValues: Partial<RecordApiKeyValue>) => {
     setApiKeys((prevApiKeys) => {
@@ -204,7 +223,9 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
           notify: "all",
         },
       );
-      getManageGroupSubscriptions();
+      // Reset api keys data and restart fetch from offset 0
+      setApiKeys({});
+      setPagination({ ...pagination, offset: 0 });
     }
   };
 
@@ -254,7 +275,10 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
 
   useEffect(() => {
     if (mspData?.value) {
-      setApiKeys(convertArrayToRecordset(mspData.value as Subscription[]));
+      setApiKeys({
+        ...apiKeys,
+        ...convertArrayToRecordset(mspData.value as Subscription[]),
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mspData?.value]);
@@ -263,7 +287,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   useEffect(() => {
     getManageGroupSubscriptions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pagination]);
 
   return (
     <Box
@@ -296,6 +320,20 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
             />
           </Box>
         ))}
+        {mspData &&
+          mspData?.pagination.count > pagination.offset + pagination.limit && (
+            <Box textAlign="center">
+              <ButtonNaked
+                color="primary"
+                endIcon={<KeyboardArrowDown fontSize="small" />}
+                onClick={handleLoadMore}
+                size="medium"
+                sx={{ fontWeight: 700, marginTop: 1 }}
+              >
+                {t("routes.keys.groups.loadMore")}
+              </ButtonNaked>
+            </Box>
+          )}
       </Box>
     </Box>
   );
