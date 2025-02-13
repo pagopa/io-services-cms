@@ -1,10 +1,10 @@
 import { getConfiguration } from "@/config";
+import { PatchServicePayload } from "@/generated/api/PatchServicePayload";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import useFetch from "@/hooks/use-fetch";
 import { Service } from "@/types/service";
 import { trackServiceDetailsEvent } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
-import * as tt from "io-ts";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
@@ -31,16 +31,19 @@ export const ServiceInfo = ({
   const { t } = useTranslation();
   const { openDrawer } = useDrawer();
   const [associateGroupOpen, setAssociateGroupOpen] = useState(false);
-  const { fetchData: noContentFetchData } = useFetch<unknown>();
+  const { fetchData: psFetchData } = useFetch<PatchServicePayload>();
 
   const handleServiceGroupUnbound = async () => {
-    await noContentFetchData(
-      "unboundServiceFromGroup",
-      { serviceId: data?.id as string },
-      tt.unknown,
+    await psFetchData(
+      "patchService",
       {
-        notify: "all",
+        body: {
+          metadata: {},
+        },
+        serviceId: data?.id as string,
       },
+      PatchServicePayload,
+      { notify: "all" },
     );
     onGroupChange();
   };
