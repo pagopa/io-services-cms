@@ -414,6 +414,7 @@
         "title": "API Key dei Gruppi",
         "description": "Genera queste chiavi per i singoli gruppi, così che possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
         "generate": "Genera API Key",
+        "loadMore": "Carica altri",
         "noGroupModal": {
           "description": "Non hai ancora creato alcun gruppo per generare le API Key. <br/><br/>Per procedere, vai alla sezione “Gruppi” in Area Riservata e crea nuovi gruppi. Una volta terminato, potrai generare le API Key e associarle ai gruppi.",
           "confirm": "Crea gruppo"
