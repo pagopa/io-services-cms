@@ -12,13 +12,14 @@ import {
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { getGroup, groupExists } from "@/lib/be/institutions/business";
+import { getGroup } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import {
   bulkPatch,
   forwardIoServicesCmsRequest,
 } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -42,21 +43,13 @@ export const POST = withJWTAuthHandler(
         const userAuth = userAuthz(backofficeUser);
         if (userAuth.isAdmin()) {
           if (servicePayload.metadata.group_id) {
-            try {
-              const group = await getGroup(
-                servicePayload.metadata.group_id,
-                backofficeUser.institution.id,
-              );
-              if (group.state !== StateEnum.ACTIVE) {
-                return handleForbiddenErrorResponse(
-                  "Provided group is not active",
-                );
-              }
-            } catch (error) {
-              if (error instanceof GroupNotFoundError) {
-                return handleBadRequestErrorResponse(error.message);
-              }
-              throw error;
+            const checkGroup = await checkGroupExistenceAndStatus(
+              servicePayload.metadata.group_id,
+              backofficeUser.institution.id,
+            );
+
+            if (checkGroup) {
+              return checkGroup;
             }
           }
         } else {
@@ -143,16 +136,15 @@ export const PATCH = withJWTAuthHandler(
         );
       }
       for (const patchService of requestPayload.services) {
-        if (
-          patchService.metadata.group_id &&
-          !(await groupExists(
-            backofficeUser.institution.id,
+        if (patchService.metadata.group_id) {
+          const checkGroup = await checkGroupExistenceAndStatus(
             patchService.metadata.group_id,
-          ))
-        ) {
-          return handleBadRequestErrorResponse(
-            `Provided group_id '${patchService.metadata.group_id}' does not exists`,
+            backofficeUser.institution.id,
           );
+
+          if (checkGroup) {
+            return checkGroup;
+          }
         }
       }
       const response = await bulkPatch(requestPayload);
@@ -166,3 +158,24 @@ export const PATCH = withJWTAuthHandler(
     }
   },
 );
+
+const checkGroupExistenceAndStatus = async (
+  groupId: NonEmptyString,
+  institutionId: string,
+): Promise<NextResponse<ResponseError> | undefined> => {
+  try {
+    const group = await getGroup(groupId, institutionId);
+    if (group.state !== StateEnum.ACTIVE) {
+      return handleForbiddenErrorResponse(
+        `Provided group_id '${groupId}' is not active`,
+      );
+    }
+  } catch (error) {
+    if (error instanceof GroupNotFoundError) {
+      return handleBadRequestErrorResponse(
+        `Provided group_id '${groupId}' does not exists`,
+      );
+    }
+    throw error;
+  }
+};
