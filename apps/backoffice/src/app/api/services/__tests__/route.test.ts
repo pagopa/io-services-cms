@@ -217,7 +217,9 @@ describe("Services API", () => {
       // then
       expect(result.status).toBe(400);
       const responseBody = await result.json();
-      expect(responseBody.detail).toEqual("group doesn't exist");
+      expect(responseBody.detail).toEqual(
+        "Provided group_id 'nonExistingGroupId' does not exists",
+      );
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
       expect(userAuthzMock).toHaveBeenCalledOnce();
@@ -251,7 +253,9 @@ describe("Services API", () => {
       // then
       expect(result.status).toBe(403);
       const responseBody = await result.json();
-      expect(responseBody.detail).toEqual("Provided group is not active");
+      expect(responseBody.detail).toEqual(
+        "Provided group_id 'group_id' is not active",
+      );
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
       expect(userAuthzMock).toHaveBeenCalledOnce();
@@ -393,7 +397,7 @@ describe("Services API", () => {
       expect(isAdminMock).toHaveBeenCalledOnce();
       expect(isAdminMock).toHaveBeenCalledWith();
       expect(parseBodyMock).not.toHaveBeenCalled();
-      expect(groupExistsMock).not.toHaveBeenCalled();
+      expect(getGroupMock).not.toHaveBeenCalled();
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
@@ -420,12 +424,12 @@ describe("Services API", () => {
         request,
         BulkPatchServicePayload,
       );
-      expect(groupExistsMock).not.toHaveBeenCalled();
+      expect(getGroupMock).not.toHaveBeenCalled();
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
-    it("should return a bad request when provided group is not valid", async () => {
+    it("should return a bad request when provided group is not active", async () => {
       // given
       const request = new NextRequest("http://localhost");
       const requestPayload = {
@@ -437,7 +441,49 @@ describe("Services API", () => {
         ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
-      groupExistsMock.mockReturnValueOnce(false);
+      getGroupMock.mockReturnValueOnce(aSelcGroupNotActive[0]);
+
+      // when
+      const result = await PATCH(request, {});
+
+      // then
+      expect(result.status).toBe(403);
+      const responseBody = await result.json();
+      expect(responseBody.detail).toStrictEqual(
+        `Provided group_id '${requestPayload.services[0].metadata.group_id}' is not active`,
+      );
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
+      expect(parseBodyMock).toHaveBeenCalledOnce();
+      expect(parseBodyMock).toHaveBeenCalledWith(
+        request,
+        BulkPatchServicePayload,
+      );
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
+        requestPayload.services[0].metadata.group_id,
+        backofficeUserMock.institution.id,
+      );
+      expect(bulkPatchMock).not.toHaveBeenCalled();
+      expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
+    });
+
+    it("should return a bad request when provided group doesn't exist", async () => {
+      // given
+      const request = new NextRequest("http://localhost");
+      const requestPayload = {
+        services: [
+          {
+            id: faker.string.uuid(),
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
+      };
+      const groupNotFoundError = new GroupNotFoundError("group not found");
+      parseBodyMock.mockResolvedValueOnce(requestPayload);
+      getGroupMock.mockRejectedValueOnce(groupNotFoundError);
 
       // when
       const result = await PATCH(request, {});
@@ -457,10 +503,10 @@ describe("Services API", () => {
         request,
         BulkPatchServicePayload,
       );
-      expect(groupExistsMock).toHaveBeenCalledOnce();
-      expect(groupExistsMock).toHaveBeenCalledWith(
-        backofficeUserMock.institution.id,
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
         requestPayload.services[0].metadata.group_id,
+        backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
@@ -478,7 +524,7 @@ describe("Services API", () => {
         ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
-      groupExistsMock.mockReturnValue(true);
+      getGroupMock.mockReturnValue(aSelcGroupActive[0]);
       bulkPatchMock.mockRejectedValueOnce({});
 
       // when
@@ -497,10 +543,10 @@ describe("Services API", () => {
         request,
         BulkPatchServicePayload,
       );
-      expect(groupExistsMock).toHaveBeenCalledOnce();
-      expect(groupExistsMock).toHaveBeenCalledWith(
-        backofficeUserMock.institution.id,
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
         requestPayload.services[0].metadata.group_id,
+        backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
       expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload);
@@ -527,7 +573,7 @@ describe("Services API", () => {
         ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
-      groupExistsMock.mockReturnValue(true);
+      getGroupMock.mockReturnValue(aSelcGroupActive[0]);
       bulkPatchMock.mockResolvedValueOnce({});
 
       // when
@@ -547,14 +593,12 @@ describe("Services API", () => {
       const requestPayloadFiltered = requestPayload.services.filter(
         (item) => item.metadata.group_id,
       );
-      expect(groupExistsMock).toHaveBeenCalledTimes(
-        requestPayloadFiltered.length,
-      );
+      expect(getGroupMock).toHaveBeenCalledTimes(requestPayloadFiltered.length);
       requestPayloadFiltered.forEach((item, i) =>
-        expect(groupExistsMock).toHaveBeenNthCalledWith(
+        expect(getGroupMock).toHaveBeenNthCalledWith(
           i + 1,
-          backofficeUserMock.institution.id,
           item.metadata.group_id,
+          backofficeUserMock.institution.id,
         ),
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
