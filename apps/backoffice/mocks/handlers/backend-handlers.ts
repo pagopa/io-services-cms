@@ -511,30 +511,6 @@ export const buildHandlers = () => {
         return resultArray[0];
       },
     ),
-    http.delete(`${baseURL}/services/:serviceId/group`, () => {
-      const resultArray = [
-        new HttpResponse(null, {
-          status: 204,
-        }),
-        new HttpResponse(null, {
-          status: 401,
-        }),
-        new HttpResponse(null, {
-          status: 403,
-        }),
-        new HttpResponse(null, {
-          status: 404,
-        }),
-        new HttpResponse(null, {
-          status: 429,
-        }),
-        new HttpResponse(null, {
-          status: 500,
-        }),
-      ];
-
-      return resultArray[0];
-    }),
     http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
