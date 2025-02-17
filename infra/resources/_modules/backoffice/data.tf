@@ -33,6 +33,19 @@ data "azurerm_api_management_product" "apim_v2_product_services" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
 }
 
+# APIM itn
+
+data "azurerm_api_management" "apim_itn" {
+  name                = "${var.prefix}-${var.env_short}-itn-apim-01"
+  resource_group_name = "${var.prefix}-${var.env_short}-itn-common-rg-01"
+}
+
+data "azurerm_api_management_product" "apim_itn_product_services" {
+  product_id          = "${var.prefix}-services-api"
+  api_management_name = "${var.prefix}-${var.env_short}-itn-apim-01"
+  resource_group_name = "${var.prefix}-${var.env_short}-itn-common-rg-01"
+}
+
 ####################
 # KeyVault Secrets #
 ####################
