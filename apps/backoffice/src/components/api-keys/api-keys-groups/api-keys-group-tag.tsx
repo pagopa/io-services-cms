@@ -1,59 +1,47 @@
-import Chip from "@mui/material/Chip";
-import Tooltip from "@mui/material/Tooltip";
-import { useTranslation } from "next-i18next";
+import { StateEnum, Subscription } from "@/generated/api/Subscription";
+import { Warning } from "@mui/icons-material";
+
+import { ApiKeyTag } from "../api-key-tag";
 
 interface ApiKeysGroupTagProps {
   disabled?: boolean;
   id?: string;
-  /** Tag label text */
-  label: string;
   /** If `true`, the text will not wrap, but instead will truncate with a text overflow ellipsis. */
   noWrap?: boolean;
   onClick?: () => void;
+  value: Subscription;
 }
-
-const baseStyle = {
-  borderRadius: 0.5,
-  marginBottom: 1,
-  marginRight: 1,
-};
-
-const ellipsisStyle = {
-  "& .MuiChip-label": {
-    display: "block",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  maxWidth: "90px",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
 
 /** `ApiKeysGroupTag` component */
 export const ApiKeysGroupTag = ({
   disabled,
   id,
-  label,
   noWrap,
   onClick,
+  value,
 }: ApiKeysGroupTagProps) => {
-  const { t } = useTranslation();
+  const shouldBeDisabled = () =>
+    value.state !== StateEnum.active && value.state !== StateEnum.suspended;
 
-  const getNoWrapStyle = () => (noWrap ? ellipsisStyle : {});
+  const handleOnClick = () =>
+    !shouldBeDisabled() && onClick ? onClick() : undefined;
 
   return (
-    <Tooltip arrow placement="top" title={noWrap ? t(label) : ""}>
-      <Chip
-        clickable={!!onClick}
-        disabled={disabled}
-        key={id}
-        label={t(label)}
-        onClick={onClick}
-        size="small"
-        sx={{ ...baseStyle, ...getNoWrapStyle() }}
-      />
-    </Tooltip>
+    <ApiKeyTag
+      color={value.state === StateEnum.suspended ? "warning" : "default"}
+      disabled={disabled || shouldBeDisabled()}
+      icon={value.state === StateEnum.suspended ? <Warning /> : undefined}
+      id={id}
+      label={value.name}
+      noWrap={noWrap}
+      onClick={handleOnClick}
+      tooltip={
+        value.state === StateEnum.suspended
+          ? "routes.keys.groups.state.suspended.tooltip"
+          : noWrap
+            ? value.name
+            : ""
+      }
+    />
   );
 };
