@@ -12,8 +12,8 @@ module "subsmigration_postgres_flexible_server" {
   delegated_subnet_id      = module.postgres_flexible_snet.id
 
   ### Admin
-  administrator_login    = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_username
-  administrator_password = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_password
+  administrator_login    = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_username.value
+  administrator_password = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_password.value
 
   sku_name   = "GP_Standard_D2ds_v5"
   db_version = "11"
