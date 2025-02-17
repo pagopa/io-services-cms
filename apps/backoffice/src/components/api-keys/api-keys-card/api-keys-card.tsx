@@ -15,13 +15,13 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
 
+import { ApiKeyTag } from "../api-key-tag";
 import { ApiKeysGroupsEmptyState } from "../api-keys-groups";
 import { ApiKeysGroupTag } from "../api-keys-groups/api-keys-group-tag";
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 const KEYS_ROUTE_PATH = "/keys";
-const MAX_APIKEY_GROUP_TO_DISPLAY = 2;
-const GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT = 10;
+const MAX_APIKEY_GROUP_TO_DISPLAY = 5;
 
 export const ApiKeysCard = () => {
   const { t } = useTranslation();
@@ -67,7 +67,7 @@ export const ApiKeysCard = () => {
         "getManageSubscriptions",
         {
           kind: SubscriptionTypeEnum.MANAGE_GROUP,
-          limit: GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT,
+          limit: MAX_APIKEY_GROUP_TO_DISPLAY,
         },
         SubscriptionPagination,
         {
@@ -105,14 +105,14 @@ export const ApiKeysCard = () => {
                     .map((apiKeyGroup) => (
                       <ApiKeysGroupTag
                         key={apiKeyGroup.id}
-                        label={apiKeyGroup.name}
                         onClick={() =>
                           router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
                         }
+                        value={apiKeyGroup}
                       />
                     ))}
                   {mspData.pagination.count > MAX_APIKEY_GROUP_TO_DISPLAY && (
-                    <ApiKeysGroupTag
+                    <ApiKeyTag
                       label={`+${getRemainingApiKeyGroupCount()}`}
                       onClick={() => router.push(KEYS_ROUTE_PATH)}
                     />

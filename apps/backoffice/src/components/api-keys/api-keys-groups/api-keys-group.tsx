@@ -1,6 +1,7 @@
 import { AccessControl } from "@/components/access-control";
+import { StateEnum } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
-import { Delete, ExpandMore } from "@mui/icons-material";
+import { Delete, ExpandMore, Warning } from "@mui/icons-material";
 import {
   Accordion,
   AccordionDetails,
@@ -11,6 +12,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
+import { ApiKeyTag } from "../api-key-tag";
 import { ApiKeys } from "../api-keys";
 import { AuthorizedCidrs } from "../authorized-cidrs";
 import { RecordApiKeyValue } from "./api-keys-groups";
@@ -44,14 +46,29 @@ export const ApiKeyGroup = ({
 }: ApiKeyGroupProps) => {
   const { t } = useTranslation();
 
+  const isApiKeySuspended = () => apiKey.state === StateEnum.suspended;
+  const canBeExpanded = () => apiKey.state === StateEnum.active;
+
+  const handleExpandChange = (
+    event: React.SyntheticEvent,
+    expanded: boolean,
+  ) => {
+    event.stopPropagation();
+    console.log("handleExpandChange");
+    if (expanded) {
+      if (canBeExpanded()) return onExpand(expanded, subscriptionId);
+    } else return onExpand(expanded, subscriptionId);
+  };
+
   if (isExpanded) onExpand(true, subscriptionId);
 
   return (
     <Accordion
       defaultExpanded={isExpanded}
       disableGutters
+      disabled={apiKey.state === StateEnum.cancelled}
       key={subscriptionId}
-      onChange={(_, expanded) => onExpand(expanded, subscriptionId)}
+      onChange={handleExpandChange}
       square
       sx={{
         border: borderStyle,
@@ -59,24 +76,39 @@ export const ApiKeyGroup = ({
         marginY: 1,
       }}
     >
-      <AccordionSummary expandIcon={<ExpandMore />} id="panel1-header">
+      <AccordionSummary
+        expandIcon={canBeExpanded() ? <ExpandMore /> : null}
+        id="panel1-header"
+      >
         <Stack direction="row" flex={1} justifyContent="space-between">
-          <Box fontWeight={600}>{apiKey.name}</Box>
-          <AccessControl requiredRole="admin">
-            <Box marginRight={1}>
-              <Button
-                color="error"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onDelete({ id: subscriptionId, name: apiKey.name });
-                }}
-                startIcon={<Delete />}
-                variant="naked"
-              >
-                {t("buttons.delete")}
-              </Button>
-            </Box>
-          </AccessControl>
+          <Stack direction="row" flex={1} spacing={1}>
+            <Box>{apiKey.name}</Box>
+            {isApiKeySuspended() && (
+              <ApiKeyTag
+                color="warning"
+                icon={<Warning />}
+                label="routes.keys.groups.state.suspended.label"
+                tooltip="routes.keys.groups.state.suspended.tooltip"
+              />
+            )}
+          </Stack>
+          {apiKey.state !== StateEnum.cancelled && (
+            <AccessControl requiredRole="admin">
+              <Box marginRight={1}>
+                <Button
+                  color="error"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete({ id: subscriptionId, name: apiKey.name });
+                  }}
+                  startIcon={<Delete />}
+                  variant="naked"
+                >
+                  {t("buttons.delete")}
+                </Button>
+              </Box>
+            </AccessControl>
+          )}
         </Stack>
       </AccordionSummary>
       {apiKey.primary_key && apiKey.cidrs && (

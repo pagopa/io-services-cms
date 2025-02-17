@@ -1,6 +1,7 @@
 export * from "./adapters";
 export * from "./service-alerts";
 export * from "./service-context-menu";
+export * from "./service-group-tag";
 export * from "./service-history";
 export * from "./service-info";
 export * from "./service-info-content";
