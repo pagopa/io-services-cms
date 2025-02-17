@@ -549,7 +549,7 @@ describe("Services API", () => {
         backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
-      expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload);
+      expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload.services);
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
@@ -581,6 +581,7 @@ describe("Services API", () => {
 
       // then
       expect(result.status).toBe(207);
+      console.log(result);
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
       expect(isAdminMock).toHaveBeenCalledOnce();
@@ -602,7 +603,7 @@ describe("Services API", () => {
         ),
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
-      expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload);
+      expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload.services);
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
   });

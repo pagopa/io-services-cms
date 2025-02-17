@@ -18,18 +18,16 @@ beforeEach(() => {
 describe("bulkPatch", () => {
   it("shold throw an error when bulkPatch dependency fail", () => {
     // given
-    const bulkPatchServicePayload = {
-      services: [
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-      ],
-    };
+    const bulkPatchServicePayload = [
+      {
+        id: faker.string.uuid(),
+        metadata: { group_id: faker.string.uuid() },
+      },
+      {
+        id: faker.string.uuid(),
+        metadata: { group_id: faker.string.uuid() },
+      },
+    ];
     const error = new Error("error message");
     bulkPatchMock.mockReturnValueOnce(TE.left(error));
 
@@ -37,7 +35,7 @@ describe("bulkPatch", () => {
     expect(bulkPatch(bulkPatchServicePayload)).rejects.toThrowError(error);
     expect(bulkPatchMock).toHaveBeenCalledOnce();
     expect(bulkPatchMock).toHaveBeenCalledWith(
-      bulkPatchServicePayload.services.map((item) => ({
+      bulkPatchServicePayload.map((item) => ({
         id: item.id,
         data: { metadata: item.metadata },
       })),
@@ -46,34 +44,31 @@ describe("bulkPatch", () => {
 
   it("shold not fail", () => {
     // given
-    const bulkPatchServicePayload = {
-      services: [
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-        {
-          id: faker.string.uuid(),
-          metadata: { group_id: faker.string.uuid() },
-        },
-      ],
-    };
+    const bulkPatchServicePayload = [
+      {
+        id: faker.string.uuid(),
+        metadata: { group_id: faker.string.uuid() },
+      },
+      {
+        id: faker.string.uuid(),
+        metadata: { group_id: faker.string.uuid() },
+      },
+    ];
+
     bulkPatchMock.mockReturnValueOnce(
-      TE.right(
-        bulkPatchServicePayload.services.map((_) => ({ statusCode: 200 })),
-      ),
+      TE.right(bulkPatchServicePayload.map((_) => ({ statusCode: 200 }))),
     );
 
     // when and then
-    expect(bulkPatch(bulkPatchServicePayload)).resolves.toStrictEqual({
-      result: bulkPatchServicePayload.services.map((item) => ({
+    expect(bulkPatch(bulkPatchServicePayload)).resolves.toStrictEqual(
+      bulkPatchServicePayload.map((item) => ({
         id: item.id,
         statusCode: 200,
       })),
-    });
+    );
     expect(bulkPatchMock).toHaveBeenCalledOnce();
     expect(bulkPatchMock).toHaveBeenCalledWith(
-      bulkPatchServicePayload.services.map((item) => ({
+      bulkPatchServicePayload.map((item) => ({
         id: item.id,
         data: { metadata: item.metadata },
       })),
