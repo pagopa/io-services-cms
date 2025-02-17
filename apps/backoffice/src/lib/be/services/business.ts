@@ -345,21 +345,21 @@ export const retrieveServiceTopics = async (
   );
 
 export const bulkPatch = async (
-  bulkPatchServicePayload: BulkPatchServicePayload,
-): Promise<BulkPatchServiceResponse> =>
+  services: BulkPatchServicePayload["services"],
+): Promise<BulkPatchServiceResponse["result"]> =>
   pipe(
     bulkPatchCosmos(
-      bulkPatchServicePayload.services.map((bulkPatchService) => ({
-        data: { metadata: bulkPatchService.metadata },
-        id: bulkPatchService.id,
+      services.map((service) => ({
+        data: { metadata: service.metadata },
+        id: service.id,
       })),
     ),
-    TE.map((responses) => ({
-      result: responses.map((opResponse, i) => ({
-        id: bulkPatchServicePayload.services[i].id,
+    TE.map((responses) =>
+      responses.map((opResponse, i) => ({
+        id: services[i].id,
         statusCode: opResponse.statusCode,
       })),
-    })),
+    ),
     TE.getOrElse((error) => {
       throw error;
     }),

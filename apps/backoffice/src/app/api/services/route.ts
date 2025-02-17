@@ -147,7 +147,8 @@ export const PATCH = withJWTAuthHandler(
           }
         }
       }
-      const response = await bulkPatch(requestPayload);
+      const result = await bulkPatch(requestPayload.services);
+      const response = { result };
       return NextResponse.json(response, { status: 207 });
     } catch (error) {
       handlerErrorLog(
