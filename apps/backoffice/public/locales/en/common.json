@@ -418,6 +418,12 @@
         "noGroupModal": {
           "description": "You have not yet created any groups to generate API Keys. <br/><br/>To proceed, go to the “Groups” section in the Reserved Area and create new groups. Once finished, you can generate API Keys and associate them with groups.",
           "confirm": "Add group"
+        },
+        "state": {
+          "suspended": {
+            "label": "Group API Keys are suspended",
+            "tooltip": "The group has been suspended in the Reserved Area and its API Keys are blocked."
+          }
         }
       },
       "manage": {

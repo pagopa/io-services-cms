@@ -418,6 +418,12 @@
         "noGroupModal": {
           "description": "Non hai ancora creato alcun gruppo per generare le API Key. <br/><br/>Per procedere, vai alla sezione “Gruppi” in Area Riservata e crea nuovi gruppi. Una volta terminato, potrai generare le API Key e associarle ai gruppi.",
           "confirm": "Crea gruppo"
+        },
+        "state": {
+          "suspended": {
+            "label": "API Key del gruppo sospese",
+            "tooltip": "Il gruppo è stato sospeso in Area Riservata e le relative API Key sono bloccate."
+          }
         }
       },
       "manage": {

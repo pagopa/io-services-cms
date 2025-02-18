@@ -1,9 +1,9 @@
 import { AccessControl } from "@/components/access-control";
-import { ApiKeysGroupTag } from "@/components/api-keys/api-keys-groups/api-keys-group-tag";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
+import { ServiceGroupTag } from "@/components/services";
 import {
   ServiceContextMenuActions,
   ServiceSearchById,
@@ -101,14 +101,7 @@ export default function Services() {
             alignment: "left",
             cellTemplate: (service) =>
               service.metadata?.group ? (
-                <ApiKeysGroupTag
-                  disabled={
-                    service.status.value ===
-                    ServiceLifecycleStatusTypeEnum.deleted
-                  }
-                  label={service.metadata.group?.name}
-                  noWrap
-                />
+                <ServiceGroupTag noWrap value={service.metadata.group} />
               ) : (
                 <></>
               ),

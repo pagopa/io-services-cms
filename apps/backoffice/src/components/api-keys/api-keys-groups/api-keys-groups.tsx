@@ -2,7 +2,7 @@
 import { useDialog } from "@/components/dialog-provider";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { Subscription } from "@/generated/api/Subscription";
+import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
@@ -44,6 +44,7 @@ export interface RecordApiKeyValue {
   name: string;
   primary_key: string;
   secondary_key: string;
+  state?: StateEnum;
 }
 
 type ApiKeysGroupRecordset = Record<string, RecordApiKeyValue>;
@@ -56,6 +57,7 @@ const convertArrayToRecordset = (
       name: item.name,
       primary_key: "",
       secondary_key: "",
+      state: item.state,
     };
     return acc;
   }, {} as ApiKeysGroupRecordset);
@@ -115,6 +117,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         name: "",
         primary_key: "",
         secondary_key: "",
+        state: undefined,
       };
 
       return {
@@ -142,6 +145,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         name: apiKeys[subscriptionId].name,
         primary_key: "",
         secondary_key: "",
+        state: apiKeys[subscriptionId].state,
       };
 
       const maybeKeys = await getBffApiClient().fetchData(

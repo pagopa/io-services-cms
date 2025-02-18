@@ -340,7 +340,9 @@ export const getMockManageSubscriptions = (
   kind: SubscriptionType,
 ) => {
   const purifiedLimit = limit
-    ? faker.number.int({ max: limit, min: 1 })
+    ? limit >= 10
+      ? faker.number.int({ max: limit, min: 10 })
+      : faker.number.int({ max: 10, min: limit })
     : faker.helpers.arrayElement([10, 20, 50, 100]);
   const purifiedOffset =
     offset !== undefined && offset >= 0 && offset < 99
@@ -349,7 +351,7 @@ export const getMockManageSubscriptions = (
 
   const total =
     kind === SubscriptionTypeEnum.MANAGE_GROUP
-      ? [...Array.from(Array(purifiedLimit).keys())]
+      ? [...Array.from(Array(purifiedLimit + 15).keys())]
       : [1];
 
   return {
@@ -358,7 +360,7 @@ export const getMockManageSubscriptions = (
       limit: purifiedLimit,
       offset: purifiedOffset,
     },
-    value: total.map((_) => ({
+    value: [...Array.from(Array(purifiedLimit).keys())].map((_) => ({
       ...getMockManageSubscription(),
     })),
   };

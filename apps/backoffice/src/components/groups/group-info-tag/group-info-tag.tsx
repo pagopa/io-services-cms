@@ -1,5 +1,6 @@
-import { ApiKeysGroupTag } from "@/components/api-keys/api-keys-groups/api-keys-group-tag";
 import { useDialog } from "@/components/dialog-provider";
+import { ServiceGroupTag } from "@/components/services";
+import { Group } from "@/generated/api/Group";
 import { Delete, Edit } from "@mui/icons-material";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
@@ -7,16 +8,15 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 
 export interface GroupInfoTagProps {
-  /** Group name */
-  name?: string;
   onAssociateClick?: () => void;
   onUnboundClick?: () => void;
+  value?: Group;
 }
 
 export const GroupInfoTag = ({
-  name,
   onAssociateClick,
   onUnboundClick,
+  value,
 }: GroupInfoTagProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -36,7 +36,7 @@ export const GroupInfoTag = ({
   };
 
   // Unbounded service: only admin can bound it to a group
-  if (!name) {
+  if (!value) {
     if (session?.user?.institution.role === "admin")
       return (
         <ButtonNaked
@@ -60,7 +60,7 @@ export const GroupInfoTag = ({
   // Service already associated
   return (
     <Stack direction="row" spacing={1}>
-      <ApiKeysGroupTag label={name} />
+      <ServiceGroupTag value={value} />
       {session?.user?.institution.role === "admin" && (
         <>
           <IconButton
