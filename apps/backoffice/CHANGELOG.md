@@ -1,5 +1,22 @@
 # io-services-cms-backoffice
 
+## 1.25.0
+
+### Minor Changes
+
+- 718b08cb: Added action to unbound service from group
+
+### Patch Changes
+
+- 15d0f69a: Added pagination on ApiKey Group section of ApiKey page
+- dd0c03b9: Added clearable behaviour to group selector in service create funnel
+- 69629f31: Remove unboundServiceFromGroup openapi spec and replace backoffice frontend implementation with patchService api call
+- 9c739153: Added apikey group tags pagination in overview page
+- 835dcb8e: added check for active group on bulk patch
+- 793a73e4: Added ux/ui for suspended group/apikeys
+- 07b081b9: Openapi specification delete unbound group from service
+- cfba6c33: refactor on wrapping logic for patch api
+
 ## 1.24.0
 
 ### Minor Changes
