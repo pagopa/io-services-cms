@@ -1,6 +1,9 @@
+import { Clear } from "@mui/icons-material";
 import {
   FormControl,
   FormHelperText,
+  IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   OutlinedInput,
@@ -11,6 +14,7 @@ import { ReactNode } from "react";
 import { Controller, get, useFormContext } from "react-hook-form";
 
 export type SelectControllerProps = {
+  clearable?: boolean;
   helperText?: ReactNode;
   items: {
     label: string;
@@ -22,12 +26,13 @@ export type SelectControllerProps = {
 /** Controller for MUI `Select` component.\
  * Used for collecting user provided information from a list of options. */
 export function SelectController({
+  clearable,
   helperText,
   items,
   name,
   ...props
 }: SelectControllerProps) {
-  const { control, formState, register } = useFormContext();
+  const { control, formState, register, setValue } = useFormContext();
   const error = get(formState.errors, name);
 
   if (items.length === 0) return; // avoid mui out-of-range error
@@ -49,6 +54,20 @@ export function SelectController({
             {...props}
             {...register(name)}
             MenuProps={{ disableScrollLock: true }}
+            endAdornment={
+              clearable &&
+              value && (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setValue(name, "")}
+                    size="small"
+                    sx={{ marginRight: 2 }}
+                  >
+                    <Clear />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }
             error={!!error}
             fullWidth
             id={name}
