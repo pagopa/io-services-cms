@@ -37,6 +37,7 @@ export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
         </Alert>
       )}
       <SelectController
+        clearable
         disabled={isOperator() && groups?.length === 1}
         items={
           groups
