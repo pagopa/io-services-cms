@@ -22,7 +22,6 @@ module "runtime_server_migration_postgres_flexible_server" {
   storage_mb = 32768
 
   ### zones & HA
-  zone                      = 1
   high_availability_enabled = false
 
   maintenance_window_config = {
