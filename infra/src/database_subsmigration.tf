@@ -24,7 +24,6 @@ module "subsmigration_postgres_flexible_server" {
   ### zones & HA
   zone                      = 1
   high_availability_enabled = false
-  standby_availability_zone = 3
 
   maintenance_window_config = {
     day_of_week  = 0
