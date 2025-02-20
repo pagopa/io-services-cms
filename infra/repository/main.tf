@@ -92,8 +92,9 @@ module "repo" {
     instance_number = local.instance_number
   }
 
-  subscription_id = data.azurerm_subscription.current.id
-  tenant_id       = data.azurerm_client_config.current.tenant_id
+  subscription_id               = data.azurerm_subscription.current.id
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  nat_gateway_resource_group_id = local.vnet.resource_group_name
 
   entraid_groups = {
     admins_object_id = data.azuread_group.admins.object_id
