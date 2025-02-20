@@ -258,7 +258,9 @@ export async function forwardIoServicesCmsRequest<
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
       "x-user-groups-selc": userAuthz(backofficeUser).isAdmin()
         ? ""
-        : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
+        : (backofficeUser.permissions.selcGroups
+            ?.map((group) => group.id)
+            .join(",") ?? ""),
       "x-user-id": backofficeUser.parameters.userId,
     };
 
