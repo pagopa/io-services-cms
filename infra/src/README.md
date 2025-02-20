@@ -29,8 +29,8 @@
 | <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v3.git//key_vault | v8.44.2 |
 | <a name="module_postgres_flexible_server_private"></a> [postgres\_flexible\_server\_private](#module\_postgres\_flexible\_server\_private) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v8.44.2 |
 | <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v8.44.2 |
-| <a name="module_runtime_server_migration_postgres_flexible_server"></a> [runtime\_server\_migration\_postgres\_flexible\_server](#module\_runtime\_server\_migration\_postgres\_flexible\_server) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v8.44.2 |
-| <a name="module_subsmigration_postgres_flexible_server"></a> [subsmigration\_postgres\_flexible\_server](#module\_subsmigration\_postgres\_flexible\_server) | github.com/pagopa/terraform-azurerm-v3.git//postgres_flexible_server | v8.44.2 |
+| <a name="module_runtime_server_migration_postgres_flexible_server"></a> [runtime\_server\_migration\_postgres\_flexible\_server](#module\_runtime\_server\_migration\_postgres\_flexible\_server) | pagopa/dx-azure-postgres-server/azurerm | ~> 0 |
+| <a name="module_subsmigration_postgres_flexible_server"></a> [subsmigration\_postgres\_flexible\_server](#module\_subsmigration\_postgres\_flexible\_server) | pagopa/dx-azure-postgres-server/azurerm | ~> 0 |
 
 ## Resources
 
