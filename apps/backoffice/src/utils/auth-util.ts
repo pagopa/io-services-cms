@@ -1,3 +1,5 @@
+import { StateEnum } from "@/generated/api/Group";
+import { ServiceListItem } from "@/generated/api/ServiceListItem";
 import { RequiredAuthorizations, SelfcareRoles } from "@/types/auth";
 import { Session } from "next-auth";
 
@@ -75,3 +77,9 @@ export const isAdmin = (session: Session | null) =>
 
 export const isOperator = (session: Session | null) =>
   session?.user?.institution.role === SelfcareRoles.operator;
+
+export const isOperatorAndServiceBoundedToInactiveGroup =
+  (session: Session | null) => (service?: ServiceListItem) =>
+    isOperator(session) &&
+    (service?.metadata?.group?.state === StateEnum.DELETED ||
+      service?.metadata?.group?.state === StateEnum.SUSPENDED);

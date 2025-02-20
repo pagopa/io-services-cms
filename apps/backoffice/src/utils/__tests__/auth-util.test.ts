@@ -7,7 +7,27 @@ import {
   hasRequiredRole,
   isAdmin,
   isOperator,
+  isOperatorAndServiceBoundedToInactiveGroup,
 } from "../auth-util";
+
+const anAdminSession: any = {
+  user: {
+    permissions: {
+      apimGroups: ["ApiServiceWrite"],
+      selcGroups: ["aSelcGroup"],
+    },
+    institution: { role: "admin" },
+  },
+};
+const anOperatorSession: any = {
+  user: {
+    permissions: {
+      apimGroups: ["ApiServiceWrite"],
+      selcGroups: ["aSelcGroup"],
+    },
+    institution: { role: "operator" },
+  },
+};
 
 describe("[auth utils] hasRequiredPermissions", () => {
   it("should return true if userPermissions contains all requiredPermissions", () => {
@@ -142,24 +162,6 @@ describe("[auth utils] hasManageKeyRoot", () => {
       institution: { role: "operator" },
     },
   };
-  const anAdminSession: any = {
-    user: {
-      permissions: {
-        apimGroups: ["ApiServiceWrite"],
-        selcGroups: ["aSelcGroup"],
-      },
-      institution: { role: "admin" },
-    },
-  };
-  const anOperatorSession: any = {
-    user: {
-      permissions: {
-        apimGroups: ["ApiServiceWrite"],
-        selcGroups: ["aSelcGroup"],
-      },
-      institution: { role: "operator" },
-    },
-  };
 
   it("should return true if GROUP_APIKEY_ENABLED env var is disabled", () => {
     const result = hasManageKeyRoot(false)(null);
@@ -215,24 +217,6 @@ describe("[auth utils] hasManageKeyGroup", () => {
     user: {
       permissions: {
         apimGroups: ["ApiServiceRead"],
-      },
-      institution: { role: "operator" },
-    },
-  };
-  const anAdminSession: any = {
-    user: {
-      permissions: {
-        apimGroups: ["ApiServiceWrite"],
-        selcGroups: ["aSelcGroup"],
-      },
-      institution: { role: "admin" },
-    },
-  };
-  const anOperatorSession: any = {
-    user: {
-      permissions: {
-        apimGroups: ["ApiServiceWrite"],
-        selcGroups: ["aSelcGroup"],
       },
       institution: { role: "operator" },
     },
@@ -299,8 +283,54 @@ describe("[auth utils] isOperator", () => {
     },
   };
 
-  it("should return true for operato user sessions", () => {
+  it("should return true for operator user sessions", () => {
     const result = isOperator(anOperatorSession);
     expect(result).toBe(true);
+  });
+});
+
+describe("[auth utils] isOperatorAndServiceBoundedToInactiveGroup", () => {
+  const aServiceWithSuspendedGroup: any = {
+    metadata: {
+      group: {
+        id: "abc123",
+        name: "group name",
+        state: "SUSPENDED",
+      },
+    },
+  };
+
+  const anUnboundedService: any = {
+    metadata: {},
+  };
+
+  it("should return true for operator and a service with suspended group", () => {
+    const result = isOperatorAndServiceBoundedToInactiveGroup(
+      anOperatorSession,
+    )(aServiceWithSuspendedGroup);
+    expect(result).toBe(true);
+  });
+
+  it("should return false for operator and an unbounded service", () => {
+    const result =
+      isOperatorAndServiceBoundedToInactiveGroup(anOperatorSession)(
+        anUnboundedService,
+      );
+    expect(result).toBe(false);
+  });
+
+  it("should return false for admin and a service with suspended group", () => {
+    const result = isOperatorAndServiceBoundedToInactiveGroup(anAdminSession)(
+      aServiceWithSuspendedGroup,
+    );
+    expect(result).toBe(false);
+  });
+
+  it("should return false for admin and an unbounded service", () => {
+    const result =
+      isOperatorAndServiceBoundedToInactiveGroup(anAdminSession)(
+        anUnboundedService,
+      );
+    expect(result).toBe(false);
   });
 });
