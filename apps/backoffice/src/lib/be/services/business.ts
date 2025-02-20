@@ -120,13 +120,25 @@ export const retrieveServiceList = async (
       ),
     ),
     TE.bind("groupsMap", (_) =>
-      TE.right(reduceGrops(backofficeUser.permissions.selcGroups ?? [])),
+      pipe(
+        TE.right(userAuthz(backofficeUser)),
+        TE.chain((auth) =>
+          auth.isAdmin() || !auth.hasSelcGroups()
+            ? TE.tryCatch(
+                () => retrieveInstitutionGroups(backofficeUser.institution.id),
+                E.toError,
+              )
+            : TE.right(backofficeUser.permissions.selcGroups),
+        ),
+        TE.map((groups) => reduceGrops(groups ?? [])),
+      ),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind(
       "lifecycleServices",
-      ({ apimServices, groupsMap, serviceTopicsMap }) =>
-        pipe(
+      ({ apimServices, groupsMap, serviceTopicsMap }) => {
+        console.log(groupsMap);
+        return pipe(
           apimServices.value
             ? apimServices.value.map(
                 (subscription) => subscription.name as NonEmptyString,
@@ -134,7 +146,8 @@ export const retrieveServiceList = async (
             : [],
           retrieveLifecycleServices,
           TE.map(RA.map(toServiceListItem(serviceTopicsMap, groupsMap))),
-        ),
+        );
+      },
     ),
     // get services from services-publication cosmos container
     // create a Record list which contains the service id and its visibility
