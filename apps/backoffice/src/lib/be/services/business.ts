@@ -120,7 +120,18 @@ export const retrieveServiceList = async (
       ),
     ),
     TE.bind("groupsMap", (_) =>
-      TE.right(reduceGrops(backofficeUser.permissions.selcGroups ?? [])),
+      pipe(
+        TE.right(userAuthz(backofficeUser)),
+        TE.chain((auth) =>
+          auth.isAdmin() || !auth.hasSelcGroups()
+            ? TE.tryCatch(
+                () => retrieveInstitutionGroups(backofficeUser.institution.id),
+                E.toError,
+              )
+            : TE.right(backofficeUser.permissions.selcGroups),
+        ),
+        TE.map((groups) => reduceGrops(groups ?? [])),
+      ),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
     TE.bind(

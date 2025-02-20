@@ -142,9 +142,11 @@ const {
   retrieveAuthorizedServiceIdsMock,
   retrieveGroupUnboundedServicesMock,
   isAdminMock,
+  hasSelcGroupsMock,
   userAuthzMock,
 } = vi.hoisted(() => {
   const isAdminMock = vi.fn(() => false);
+  const hasSelcGroupsMock = vi.fn(() => false);
   return {
     getIoServicesCmsClient: vi.fn().mockReturnValue({
       getServices: vi.fn(() =>
@@ -190,7 +192,11 @@ const {
     retrieveAuthorizedServiceIdsMock: vi.fn(),
     retrieveGroupUnboundedServicesMock: vi.fn(),
     isAdminMock,
-    userAuthzMock: vi.fn(() => ({ isAdmin: isAdminMock })),
+    hasSelcGroupsMock,
+    userAuthzMock: vi.fn(() => ({
+      isAdmin: isAdminMock,
+      hasSelcGroups: hasSelcGroupsMock,
+    })),
   };
 });
 
@@ -591,8 +597,12 @@ describe("Services TEST", () => {
         // given
         const aServiceinPublicationId = "aServiceInPublicationId";
         const aServiceNotInPublicationId = "aServiceNotInPublicationId";
-        isAdminMock.mockReturnValueOnce(
+        isAdminMock.mockReturnValue(
           backofficeUser.institution.role === "admin",
+        );
+        hasSelcGroupsMock.mockReturnValueOnce(
+          backofficeUser.permissions.selcGroups &&
+            backofficeUser.permissions.selcGroups.length > 0,
         );
 
         getSubscriptionsMock.mockReturnValueOnce(
@@ -630,6 +640,7 @@ describe("Services TEST", () => {
                 })),
             ),
         );
+        retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
 
         // Mock NextRequest
         const request = new NextRequest(new URL("http://localhost"));
@@ -643,16 +654,25 @@ describe("Services TEST", () => {
         );
 
         // then
-        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledTimes(2);
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUser);
-        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledTimes(2);
         expect(isAdminMock).toHaveBeenCalledWith();
+        if (backofficeUser.institution.role !== "admin") {
+          expect(hasSelcGroupsMock).toHaveBeenCalledOnce();
+          expect(hasSelcGroupsMock).toHaveBeenCalledWith();
+        }
         expect(getSubscriptionsMock).toHaveBeenCalledOnce();
         expect(getSubscriptionsMock).toHaveBeenCalledWith(
           backofficeUser.parameters.userId,
           10,
           0,
           undefined,
+        );
+
+        expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+        expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+          backofficeUser.institution.id,
         );
         expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
         expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
@@ -719,7 +739,7 @@ describe("Services TEST", () => {
     it("should return a list of services with visibility enriched with topic", async () => {
       // given
       const aServiceinPublicationId = "aServiceInPublicationId";
-
+      isAdminMock.mockReturnValue(aBackofficeUser.institution.role === "admin");
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
@@ -758,6 +778,7 @@ describe("Services TEST", () => {
             })),
         ),
       );
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -766,16 +787,21 @@ describe("Services TEST", () => {
       const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
       // then
-      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledTimes(2);
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
-      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledTimes(2);
       expect(isAdminMock).toHaveBeenCalledWith();
+      expect(hasSelcGroupsMock).not.toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
         10,
         0,
         undefined,
+      );
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        aBackofficeUser.institution.id,
       );
       expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
       expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
@@ -826,6 +852,7 @@ describe("Services TEST", () => {
       const aServiceInLifecycleId = "aServiceInLifecycleId";
       const aServiceNotInLifecycleId = "aServiceNotInLifecycleId";
       const aServiceNotInLifecycleCreateDate = new Date();
+      isAdminMock.mockReturnValue(aBackofficeUser.institution.role === "admin");
 
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
@@ -860,6 +887,7 @@ describe("Services TEST", () => {
           },
         ]),
       );
+      retrieveInstitutionGroups.mockResolvedValueOnce([mocks.aGroup]);
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -868,10 +896,15 @@ describe("Services TEST", () => {
       const result = await retrieveServiceList(request, aBackofficeUser, 10, 0);
 
       // then
-      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledTimes(2);
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
-      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledTimes(2);
       expect(isAdminMock).toHaveBeenCalledWith();
+      expect(hasSelcGroupsMock).not.toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        aBackofficeUser.institution.id,
+      );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -932,6 +965,8 @@ describe("Services TEST", () => {
 
     it("when retrievePublicationServices fails an error is returned", async () => {
       // given
+      isAdminMock.mockReturnValue(aBackofficeUser.institution.role === "admin");
+
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
@@ -951,6 +986,7 @@ describe("Services TEST", () => {
           error: "error",
         }),
       );
+      retrieveInstitutionGroups.mockResolvedValue([mocks.aGroup]);
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -959,11 +995,15 @@ describe("Services TEST", () => {
       await expect(
         retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
-      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledTimes(2);
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
-      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledTimes(2);
       expect(isAdminMock).toHaveBeenCalledWith();
-
+      expect(hasSelcGroupsMock).not.toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        aBackofficeUser.institution.id,
+      );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
@@ -983,6 +1023,8 @@ describe("Services TEST", () => {
 
     it("when retrieveLifecycleServices fails an error is returned", async () => {
       // given
+      isAdminMock.mockReturnValue(aBackofficeUser.institution.role === "admin");
+
       getSubscriptionsMock.mockReturnValueOnce(
         TE.right({
           value: [
@@ -999,6 +1041,7 @@ describe("Services TEST", () => {
           error: "error",
         }),
       );
+      retrieveInstitutionGroups.mockResolvedValue([mocks.aGroup]);
 
       // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
@@ -1007,11 +1050,15 @@ describe("Services TEST", () => {
       await expect(
         retrieveServiceList(request, aBackofficeUser, 10, 0),
       ).rejects.toThrowError();
-      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledTimes(2);
       expect(userAuthzMock).toHaveBeenCalledWith(aBackofficeUser);
-      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledTimes(2);
       expect(isAdminMock).toHaveBeenCalledWith();
-
+      expect(hasSelcGroupsMock).not.toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        aBackofficeUser.institution.id,
+      );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
         aBackofficeUser.parameters.userId,
