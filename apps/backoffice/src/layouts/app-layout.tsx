@@ -3,6 +3,7 @@ import { Header, TopBar } from "@/components/headers";
 import { Sidenav, SidenavItem } from "@/components/sidenav";
 import { getConfiguration } from "@/config";
 import styles from "@/styles/app-layout.module.css";
+import { SelfcareRoles } from "@/types/auth";
 import {
   Category,
   People,
@@ -61,14 +62,14 @@ export const AppLayout = ({
       href: `${getSelfcareInstitutionDashboardUrl()}/users`,
       icon: <People fontSize="inherit" />,
       linkType: "external",
-      requiredRole: "admin",
+      requiredRole: SelfcareRoles.admin,
       text: "routes.users.title",
     },
     {
       href: `${getSelfcareInstitutionDashboardUrl()}/groups`,
       icon: <SupervisedUserCircle fontSize="inherit" />,
       linkType: "external",
-      requiredRole: "admin",
+      requiredRole: SelfcareRoles.admin,
       text: "routes.groups.title",
     },
   ];

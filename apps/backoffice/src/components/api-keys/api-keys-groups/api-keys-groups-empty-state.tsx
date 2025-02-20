@@ -1,5 +1,6 @@
 import { EmptyStateCard } from "@/components/empty-state";
 import { Subscription } from "@/generated/api/Subscription";
+import { isAdmin } from "@/utils/auth-util";
 import {
   SupervisedUserCircle,
   WarningAmberOutlined,
@@ -20,8 +21,6 @@ export const ApiKeysGroupsEmptyState = ({
   const { t } = useTranslation();
   const { data: session } = useSession();
 
-  const isAdmin = session?.user?.institution.role === "admin";
-
   const hasAtLeastOneGroup =
     session?.user?.permissions.selcGroups &&
     session?.user?.permissions.selcGroups.length > 0;
@@ -30,7 +29,7 @@ export const ApiKeysGroupsEmptyState = ({
     Array.isArray(apiKeysGroups) && apiKeysGroups.length > 0;
 
   // admin users
-  if (isAdmin)
+  if (isAdmin(session))
     return (
       !hasAtLeastOneApiKeysGroups &&
       !hideAdminWarning && (
