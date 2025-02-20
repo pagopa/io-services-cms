@@ -4,6 +4,7 @@ import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { SelfcareRoles } from "@/types/auth";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
@@ -61,4 +62,4 @@ AssociateGroups.getLayout = function getLayout(page: ReactElement) {
   );
 };
 
-AssociateGroups.requiredRole = "admin";
+AssociateGroups.requiredRole = SelfcareRoles.admin;

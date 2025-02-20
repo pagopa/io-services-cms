@@ -1,4 +1,4 @@
-import { RequiredAuthorizations } from "@/types/auth";
+import { RequiredAuthorizations, SelfcareRoles } from "@/types/auth";
 import { Session } from "next-auth";
 
 const isArraySubset = (subset: string[], superset: string[]) =>
@@ -40,11 +40,11 @@ export const hasManageKeyRoot =
     !groupApiKeyEnabled ||
     hasRequiredAuthorizations(session, {
       requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: "admin",
+      requiredRole: SelfcareRoles.admin,
     }) ||
     (hasRequiredAuthorizations(session, {
       requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: "operator",
+      requiredRole: SelfcareRoles.operator,
     }) &&
       (!session?.user?.permissions.selcGroups ||
         session?.user?.permissions.selcGroups.length === 0));
@@ -61,11 +61,17 @@ export const hasManageKeyGroup =
     groupApiKeyEnabled &&
     (hasRequiredAuthorizations(session, {
       requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: "admin",
+      requiredRole: SelfcareRoles.admin,
     }) ||
       (hasRequiredAuthorizations(session, {
         requiredPermissions: ["ApiServiceWrite"],
-        requiredRole: "operator",
+        requiredRole: SelfcareRoles.operator,
       }) &&
         session?.user?.permissions.selcGroups &&
         session?.user?.permissions.selcGroups.length > 0));
+
+export const isAdmin = (session: Session | null) =>
+  session?.user?.institution.role === SelfcareRoles.admin;
+
+export const isOperator = (session: Session | null) =>
+  session?.user?.institution.role === SelfcareRoles.operator;

@@ -5,6 +5,8 @@ import {
   hasRequiredAuthorizations,
   hasRequiredPermissions,
   hasRequiredRole,
+  isAdmin,
+  isOperator,
 } from "../auth-util";
 
 describe("[auth utils] hasRequiredPermissions", () => {
@@ -268,5 +270,37 @@ describe("[auth utils] hasManageKeyGroup", () => {
   it("should return false for users without WRITE permission", () => {
     const result = hasManageKeyGroup(true)(aSessionWithoutWritePermission);
     expect(result).toBe(false);
+  });
+});
+
+describe("[auth utils] isAdmin", () => {
+  const anAdminSession: any = {
+    user: {
+      permissions: {
+        apimGroups: ["ApiServiceWrite"],
+      },
+      institution: { role: "admin" },
+    },
+  };
+
+  it("should return true for admin user sessions", () => {
+    const result = isAdmin(anAdminSession);
+    expect(result).toBe(true);
+  });
+});
+
+describe("[auth utils] isOperator", () => {
+  const anOperatorSession: any = {
+    user: {
+      permissions: {
+        apimGroups: ["ApiServiceRead"],
+      },
+      institution: { role: "operator" },
+    },
+  };
+
+  it("should return true for operato user sessions", () => {
+    const result = isOperator(anOperatorSession);
+    expect(result).toBe(true);
   });
 });

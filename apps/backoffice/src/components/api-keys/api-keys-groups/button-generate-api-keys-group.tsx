@@ -1,6 +1,7 @@
 import { AccessControl } from "@/components/access-control";
 import { useDialog } from "@/components/dialog-provider";
 import { client } from "@/hooks/use-fetch";
+import { SelfcareRoles } from "@/types/auth";
 import { Add } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -58,7 +59,7 @@ export const ButtonGenerateApiKeysGroup = ({
   };
 
   return (
-    <AccessControl requiredRole="admin">
+    <AccessControl requiredRole={SelfcareRoles.admin}>
       <Button
         onClick={handleOnGenerateClick}
         size="medium"
