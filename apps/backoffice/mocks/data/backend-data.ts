@@ -372,10 +372,10 @@ export const getMockManageSubscription = () => ({
   state: faker.helpers.arrayElement([
     "suspended",
     "active",
-    "expired",
-    "submitted",
-    "rejected",
-    "cancelled",
+    // "expired",
+    // "submitted",
+    // "rejected",
+    // "cancelled",
   ]),
 });
 
