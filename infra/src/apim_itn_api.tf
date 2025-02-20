@@ -56,6 +56,16 @@ resource "azurerm_api_management_api_operation_policy" "get_service_topics_polic
 
   xml_content = file("./api/io_services_cms/v1/getservicetopics_policy/policy.xml")
 }
+
+resource "azurerm_api_management_api_operation_policy" "regenerate_service_key_policy_itn" {
+  api_name            = "io-services-cms-api"
+  api_management_name = data.azurerm_api_management.apim_v2.name
+  resource_group_name = data.azurerm_api_management.apim_v2.resource_group_name
+  operation_id        = "regenerateServiceKey"
+
+  xml_content = file("./api/io_services_cms/v1/regenerateServiceKey_policy/policy.xml")
+}
+
 resource "azurerm_api_management_logger" "cache_policy_app_insights_itn" {
   name                = "cache-policy-appinsight-apimlogger"
   api_management_name = data.azurerm_api_management.apim_itn.name

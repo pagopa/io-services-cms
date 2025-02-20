@@ -1,6 +1,8 @@
 <policies>
     <inbound>
         <base/>
+        <!--Mock response used during apim migration-->
+        <mock-response status-code="503" content-type="application/json" />
         <!--Service creation implies subscription creation. 
             There is an hard-limit o APIM such as creations cannot happen concurrently on the same product
             (because every subscription creation modifies the arm resource).
