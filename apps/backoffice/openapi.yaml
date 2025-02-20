@@ -967,6 +967,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: filter
+          in: query
+          description: |
+            Group filter:
+            * `ALL` - All (active) groups
+            * `UNBOUND` - Only (active) groups without any subscription (API Key) related
+          required: false
+          schema:
+            $ref: '#/components/schemas/GroupFilterType'
       responses:
         '200':
           description: At least one active Group exists
