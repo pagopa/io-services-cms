@@ -74,16 +74,9 @@ export const retrieveUnboundInstitutionGroups = async (
   apimUserId: string,
   institutionId: string,
 ): Promise<Group[]> => {
-  const [subscriptions, groups] = await Promise.all([
-    getManageSubscriptions(SubscriptionTypeEnum.MANAGE_GROUP, apimUserId),
-    retrieveInstitutionGroups(institutionId),
-  ]);
-  const subscriptionBoundGroupIds = subscriptions.reduce(
-    (acc, item) =>
-      acc.add(
-        item.id.substring(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length),
-      ),
-    new Set<Group["id"]>(),
+  const { groups, subscriptionBoundGroupIds } = await getUnboundGroupsData(
+    apimUserId,
+    institutionId,
   );
   return groups.filter((group) => !subscriptionBoundGroupIds.has(group.id));
 };
@@ -188,4 +181,38 @@ export const checkInstitutionGroupsExistence = async (
 ): Promise<boolean> => {
   const apiResult = await getInstitutionGroups(institutionId, 1, 0);
   return !!apiResult.totalElements;
+};
+
+export const checkInstitutionUnboundGroupsExistence = async (
+  apimUserId: string,
+  institutionId: string,
+): Promise<boolean> => {
+  const { groups, subscriptionBoundGroupIds } = await getUnboundGroupsData(
+    apimUserId,
+    institutionId,
+  );
+  return groups.some((group) => !subscriptionBoundGroupIds.has(group.id));
+};
+
+const getUnboundGroupsData = async (
+  apimUserId: string,
+  institutionId: string,
+): Promise<{
+  groups: Group[];
+  subscriptionBoundGroupIds: Set<Group["id"]>;
+}> => {
+  const [subscriptions, groups] = await Promise.all([
+    getManageSubscriptions(SubscriptionTypeEnum.MANAGE_GROUP, apimUserId),
+    retrieveInstitutionGroups(institutionId),
+  ]);
+
+  const subscriptionBoundGroupIds = subscriptions.reduce(
+    (acc, item) =>
+      acc.add(
+        item.id.substring(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length),
+      ),
+    new Set<Group["id"]>(),
+  );
+
+  return { groups, subscriptionBoundGroupIds };
 };

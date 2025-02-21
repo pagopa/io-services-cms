@@ -1,11 +1,21 @@
+import {
+  GroupFilterType,
+  GroupFilterTypeEnum,
+} from "@/generated/api/GroupFilterType";
 import { userAuthz } from "@/lib/be/authz";
 import {
+  handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { checkInstitutionGroupsExistence } from "@/lib/be/institutions/business";
+import {
+  checkInstitutionGroupsExistence,
+  checkInstitutionUnboundGroupsExistence,
+} from "@/lib/be/institutions/business";
+import { getQueryParam } from "@/lib/be/req-res-utils";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
 
 /**
@@ -14,7 +24,7 @@ import { NextRequest } from "next/server";
  */
 export const GET = withJWTAuthHandler(
   async (
-    _: NextRequest,
+    request: NextRequest,
     {
       backofficeUser,
       params,
@@ -30,10 +40,36 @@ export const GET = withJWTAuthHandler(
     if (!user.isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
-    try {
-      const existsAtLeastOneGroup = await checkInstitutionGroupsExistence(
-        params.institutionId,
+    const maybeFilter = getQueryParam(
+      request,
+      "filter",
+      GroupFilterType,
+      GroupFilterTypeEnum.ALL,
+    );
+    if (E.isLeft(maybeFilter)) {
+      return handleBadRequestErrorResponse(
+        `'filter' query param is not a valid ${GroupFilterType.name}`,
       );
+    }
+    try {
+      let existsAtLeastOneGroup: boolean;
+      switch (maybeFilter.right) {
+        case GroupFilterTypeEnum.ALL:
+          existsAtLeastOneGroup = await checkInstitutionGroupsExistence(
+            params.institutionId,
+          );
+          break;
+        case GroupFilterTypeEnum.UNBOUND:
+          existsAtLeastOneGroup = await checkInstitutionUnboundGroupsExistence(
+            backofficeUser.parameters.userId,
+            params.institutionId,
+          );
+          break;
+        default:
+          // eslint-disable-next-line no-case-declarations
+          const _: never = maybeFilter.right;
+          throw new Error(`Invalid filter: ${maybeFilter.right}`);
+      }
       return new Response(null, { status: existsAtLeastOneGroup ? 200 : 204 });
     } catch (error) {
       handlerErrorLog(
@@ -42,7 +78,7 @@ export const GET = withJWTAuthHandler(
       );
 
       return handleInternalErrorResponse(
-        "CheckInstitutionGroupsExistanceError",
+        "CheckInstitutionGroupsExistenceError",
         error,
       );
     }
