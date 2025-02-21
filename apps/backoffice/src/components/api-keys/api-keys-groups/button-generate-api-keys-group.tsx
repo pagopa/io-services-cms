@@ -1,6 +1,8 @@
 import { AccessControl } from "@/components/access-control";
 import { useDialog } from "@/components/dialog-provider";
+import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { client } from "@/hooks/use-fetch";
+import { SelfcareRoles } from "@/types/auth";
 import { Add } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -14,9 +16,10 @@ export interface ButtonGenerateApiKeysGroupProps {
   onGenerateClick: () => void;
 }
 
-const checkGroupsExists = async (institutionId: string) => {
+const checkUnboundedGroupsExists = async (institutionId: string) => {
   try {
     const maybeResponse = await client.checkInstitutionGroupsExistence({
+      filter: GroupFilterTypeEnum.UNBOUND,
       institutionId,
     });
 
@@ -38,11 +41,11 @@ export const ButtonGenerateApiKeysGroup = ({
   const showDialog = useDialog();
 
   const handleOnGenerateClick = async () => {
-    const hasAtLeastOneGroup = await checkGroupsExists(
+    const hasAtLeastOneUnboundedGroup = await checkUnboundedGroupsExists(
       session?.user?.institution.id as string,
     );
 
-    if (hasAtLeastOneGroup) {
+    if (hasAtLeastOneUnboundedGroup) {
       onGenerateClick();
     } else {
       const noGroupAvailableCreateOne = await showDialog({
@@ -58,7 +61,7 @@ export const ButtonGenerateApiKeysGroup = ({
   };
 
   return (
-    <AccessControl requiredRole="admin">
+    <AccessControl requiredRole={SelfcareRoles.admin}>
       <Button
         onClick={handleOnGenerateClick}
         size="medium"

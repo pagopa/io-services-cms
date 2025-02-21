@@ -1,6 +1,7 @@
 import { AccessControl } from "@/components/access-control";
 import { StateEnum } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
+import { SelfcareRoles } from "@/types/auth";
 import { Delete, ExpandMore, Warning } from "@mui/icons-material";
 import {
   Accordion,
@@ -93,7 +94,7 @@ export const ApiKeyGroup = ({
             )}
           </Stack>
           {apiKey.state !== StateEnum.cancelled && (
-            <AccessControl requiredRole="admin">
+            <AccessControl requiredRole={SelfcareRoles.admin}>
               <Box marginRight={1}>
                 <Button
                   color="error"

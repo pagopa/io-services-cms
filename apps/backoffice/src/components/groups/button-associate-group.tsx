@@ -1,5 +1,6 @@
 import { getConfiguration } from "@/config";
 import { client } from "@/hooks/use-fetch";
+import { SelfcareRoles } from "@/types/auth";
 import { SupervisedUserCircle } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -51,7 +52,7 @@ export const ButtonAssociateGroup = () => {
   return (
     <AccessControl
       requiredPermissions={["ApiServiceWrite"]}
-      requiredRole="admin"
+      requiredRole={SelfcareRoles.admin}
     >
       <Button
         onClick={handleClick}
