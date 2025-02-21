@@ -10,6 +10,8 @@ import {
 } from "../../../generated/selfcare/UserGroupResource";
 import { GroupNotFoundError } from "../errors";
 import {
+  checkInstitutionGroupsExistence,
+  checkInstitutionUnboundGroupsExistence,
   groupExists,
   retrieveInstitution,
   retrieveInstitutionGroups,
@@ -339,6 +341,136 @@ describe("Institutions", () => {
           state: (mocks.institutionGroups.content as any[])[0].status,
         },
       ]);
+      expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
+        "MANAGE_GROUP",
+        apimUserId,
+      );
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1000,
+        0,
+      );
+    });
+  });
+
+  describe("checkInstitutionGroupsExistence", () => {
+    it("should return true when at least one group is found for the institution", async () => {
+      // given
+      const institutionId = "institutionId";
+      getInstitutionGroupsMock.mockResolvedValueOnce({
+        ...mocks.institutionGroups,
+        totalPages: 1,
+        totalElements: 2,
+      });
+
+      // when
+      const result = await checkInstitutionGroupsExistence(institutionId);
+
+      // then
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1,
+        0,
+      );
+      expect(result).toStrictEqual(true);
+    });
+
+    it("should return false when no group is found for the institution", async () => {
+      // given
+      const institutionId = "institutionId";
+      getInstitutionGroupsMock.mockResolvedValueOnce({
+        totalPages: 1,
+        totalElements: 0,
+      });
+
+      // when
+      const result = await checkInstitutionGroupsExistence(institutionId);
+
+      // then
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1,
+        0,
+      );
+      expect(result).toStrictEqual(false);
+    });
+
+    it("should rejects when getInstitutionGroups return an error response", async () => {
+      // given
+      const error = new Error("errorMessage");
+      const institutionId = "institutionId";
+      getInstitutionGroupsMock.mockRejectedValueOnce(error);
+
+      // when and then
+      expect(
+        checkInstitutionGroupsExistence(institutionId),
+      ).rejects.toThrowError(error);
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1,
+        0,
+      );
+    });
+  });
+
+  describe("checkInstitutionUnboundGroupsExistence", () => {
+    it.each`
+      scenario
+      ${"getManageSubscriptions"}
+      ${"getInstitutionGroups"}
+    `("should reject when $scenario rejects", async ({ scenario }) => {
+      // given
+      const apimUserId = "apimUserId";
+      const institutionId = "institutionId";
+      const error = new Error();
+      if (scenario === "getManageSubscriptions") {
+        getManageSubscriptionsMock.mockRejectedValueOnce(error);
+        getInstitutionGroupsMock.mockResolvedValueOnce({});
+      } else {
+        getManageSubscriptionsMock.mockResolvedValueOnce({});
+        getInstitutionGroupsMock.mockRejectedValueOnce(error);
+      }
+
+      // when and then
+      await expect(() =>
+        checkInstitutionUnboundGroupsExistence(apimUserId, institutionId),
+      ).rejects.toThrowError(error);
+      expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
+        "MANAGE_GROUP",
+        apimUserId,
+      );
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+        institutionId,
+        1000,
+        0,
+      );
+    });
+
+    it("should return true if at least on selfcare group is found without subscription", async () => {
+      // given
+      const apimUserId = "apimUserId";
+      const institutionId = "institutionId";
+      getManageSubscriptionsMock.mockResolvedValueOnce([
+        {
+          id: `MANAGE-GROUP-${(mocks.institutionGroups.content as any[])[1].id}`,
+          name: "name",
+          state: "active",
+        },
+      ]);
+      getInstitutionGroupsMock.mockResolvedValueOnce(mocks.institutionGroups);
+
+      // when and then
+      const res = await checkInstitutionUnboundGroupsExistence(
+        apimUserId,
+        institutionId,
+      );
+      expect(res).toStrictEqual(true);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
         "MANAGE_GROUP",

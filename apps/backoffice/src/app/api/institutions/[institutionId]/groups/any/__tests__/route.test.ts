@@ -1,28 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "../route";
+import * as E from "fp-ts/lib/Either";
 import { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
+import {
+  GroupFilterType,
+  GroupFilterTypeEnum,
+} from "../../../../../../../generated/api/GroupFilterType";
 
-const backofficeUserMock = {} as BackOfficeUserEnriched;
+const backofficeUserMock = {
+  parameters: { userId: "userId" },
+} as BackOfficeUserEnriched;
 
-const {
-  userAuthzMock,
-  isAdminMock,
-  isInstitutionAllowedMock,
-  checkInstitutionGroupsExistenceMock,
-  withJWTAuthHandlerMock,
-} = vi.hoisted(() => {
-  const isAdminMock = vi.fn(() => true);
-  const isInstitutionAllowedMock = vi.fn(() => true);
+const mocks = vi.hoisted(() => {
+  const isAdmin = vi.fn(() => true);
+  const isInstitutionAllowed = vi.fn(() => true);
   return {
-    isAdminMock,
-    isInstitutionAllowedMock,
+    isAdmin,
+    isInstitutionAllowed,
+    getQueryParam: vi.fn(),
     userAuthzMock: vi.fn(() => ({
-      isInstitutionAllowed: isInstitutionAllowedMock,
-      isAdmin: isAdminMock,
+      isInstitutionAllowed,
+      isAdmin,
     })),
-    checkInstitutionGroupsExistenceMock: vi.fn(),
+    checkInstitutionGroupsExistence: vi.fn(),
+    checkInstitutionUnboundGroupsExistence: vi.fn(),
     withJWTAuthHandlerMock: vi.fn(
       (
         handler: (
@@ -40,17 +43,22 @@ const {
 });
 
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock,
+  userAuthz: mocks.userAuthzMock,
+}));
+vi.mock("@/lib/be/req-res-utils", () => ({
+  getQueryParam: mocks.getQueryParam,
 }));
 vi.mock("@/lib/be/institutions/business", () => ({
-  checkInstitutionGroupsExistence: checkInstitutionGroupsExistenceMock,
+  checkInstitutionGroupsExistence: mocks.checkInstitutionGroupsExistence,
+  checkInstitutionUnboundGroupsExistence:
+    mocks.checkInstitutionUnboundGroupsExistence,
 }));
 
 vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   const original = (await importOriginal()) as any;
   return {
     ...original,
-    withJWTAuthHandler: withJWTAuthHandlerMock,
+    withJWTAuthHandler: mocks.withJWTAuthHandlerMock,
   };
 });
 
@@ -64,7 +72,7 @@ describe("checkInstitutionGroupsExistence", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isInstitutionAllowedMock.mockReturnValueOnce(false);
+    mocks.isInstitutionAllowed.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
@@ -74,11 +82,11 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).not.toHaveBeenCalled();
-    expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Unauthorized institutionId");
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).not.toHaveBeenCalled();
+    expect(mocks.checkInstitutionGroupsExistence).not.toHaveBeenCalled();
   });
 
   it("should return an error response bad request when user is not an admin", async () => {
@@ -86,7 +94,7 @@ describe("checkInstitutionGroupsExistence", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isAdminMock.mockReturnValueOnce(false);
+    mocks.isAdmin.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
@@ -96,20 +104,20 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
     expect(jsonBody.detail).toEqual("Role not authorized");
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).toHaveBeenCalledOnce();
+    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.checkInstitutionGroupsExistence).not.toHaveBeenCalled();
   });
 
-  it("should return an error response bad request when checkInstitutionGroupsExistence rejects", async () => {
+  it("should return an error response when kind query param is not valid", async () => {
     // given
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    const error = new Error();
-    checkInstitutionGroupsExistenceMock.mockRejectedValueOnce(error);
+    mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
 
     // when
     const result = await GET(nextRequest, {
@@ -117,48 +125,116 @@ describe("checkInstitutionGroupsExistence", () => {
     });
 
     // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(500);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
-      institutionId,
+    expect(result.status).toBe(400);
+    const responseBody = await result.json();
+    expect(responseBody.title).toEqual("Bad Request");
+    expect(responseBody.detail).toEqual(
+      `'filter' query param is not a valid ${GroupFilterType.name}`,
     );
-    expect(jsonBody.title).toEqual("CheckInstitutionGroupsExistanceError");
-    expect(jsonBody.detail).toEqual("Something went wrong");
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+    expect(mocks.isAdmin).toHaveBeenCalledOnce();
+    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+    expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      nextRequest,
+      "filter",
+      GroupFilterType,
+      GroupFilterTypeEnum.ALL,
+    );
+    expect(mocks.checkInstitutionGroupsExistence).not.toHaveBeenCalled();
   });
 
   it.each`
-    scenario                         | checkInstitutionGroupsExistenceValue | expectedStatus
-    ${"there is at least one group"} | ${true}                              | ${200}
-    ${"there is at least one group"} | ${false}                             | ${204}
+    institutionId      | filterType                     | institutionGroupsMock                           | expectedInstitutionGroupsMockParams
+    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.checkInstitutionUnboundGroupsExistence} | ${[backofficeUserMock.parameters.userId, "institutionId"]}
+    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.checkInstitutionGroupsExistence}        | ${["institutionId"]}
   `(
-    "should succeed when $scenario",
-    async ({ checkInstitutionGroupsExistenceValue, expectedStatus }) => {
+    "should return an error response bad request when checkInstitutionUnboundGroupsExistence rejects and filter type is $filterType",
+    async ({
+      institutionId,
+      filterType,
+      institutionGroupsMock,
+      expectedInstitutionGroupsMockParams,
+    }) => {
       // given
       const url = new URL("http://localhost");
       const nextRequest = new NextRequest(url);
-      const institutionId = "institutionId";
-      checkInstitutionGroupsExistenceMock.mockResolvedValueOnce(
-        checkInstitutionGroupsExistenceValue,
-      );
+      const error = new Error();
+      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      institutionGroupsMock.mockRejectedValueOnce(error);
 
       // when
-      const result: Response = await GET(nextRequest, {
+      const result = await GET(nextRequest, {
         params: { institutionId },
       });
 
       // then
-      expect(result.status).toBe(expectedStatus);
-      expect(result.body).toBeNull();
-      expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-      expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
-      expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
-        institutionId,
+      const jsonBody = await result.json();
+      expect(result.status).toBe(500);
+      expect(jsonBody.title).toEqual("CheckInstitutionGroupsExistenceError");
+      expect(jsonBody.detail).toEqual("Something went wrong");
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+      expect(mocks.isAdmin).toHaveBeenCalledOnce();
+      expect(mocks.isAdmin).toHaveBeenCalledWith();
+      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+        nextRequest,
+        "filter",
+        GroupFilterType,
+        GroupFilterTypeEnum.ALL,
+      );
+      expect(institutionGroupsMock).toHaveBeenCalledOnce();
+      expect(institutionGroupsMock).toHaveBeenCalledWith(
+        ...expectedInstitutionGroupsMockParams,
+      );
+    },
+  );
+
+  it.each`
+    institutionId      | filterType                     | institutionGroupsMock                           | expectedInstitutionGroupsMockParams                        | checkGroupExistence | expectedStatusCode
+    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.checkInstitutionUnboundGroupsExistence} | ${[backofficeUserMock.parameters.userId, "institutionId"]} | ${true}             | ${200}
+    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.checkInstitutionGroupsExistence}        | ${["institutionId"]}                                       | ${true}             | ${200}
+    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.checkInstitutionUnboundGroupsExistence} | ${[backofficeUserMock.parameters.userId, "institutionId"]} | ${false}            | ${204}
+    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.checkInstitutionGroupsExistence}        | ${["institutionId"]}                                       | ${false}            | ${204}
+  `(
+    "should succeed when filter type is $filterType and check returns $checkGroupExistence",
+    async ({
+      institutionId,
+      filterType,
+      institutionGroupsMock,
+      expectedInstitutionGroupsMockParams,
+      checkGroupExistence,
+      expectedStatusCode,
+    }) => {
+      // given
+      const url = new URL("http://localhost");
+      const nextRequest = new NextRequest(url);
+      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      institutionGroupsMock.mockResolvedValueOnce(checkGroupExistence);
+
+      // when
+      const result = await GET(nextRequest, {
+        params: { institutionId },
+      });
+
+      // then
+      expect(result.status).toBe(expectedStatusCode);
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
+      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
+      expect(mocks.isAdmin).toHaveBeenCalledOnce();
+      expect(mocks.isAdmin).toHaveBeenCalledWith();
+      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+        nextRequest,
+        "filter",
+        GroupFilterType,
+        GroupFilterTypeEnum.ALL,
+      );
+      expect(institutionGroupsMock).toHaveBeenCalledOnce();
+      expect(institutionGroupsMock).toHaveBeenCalledWith(
+        ...expectedInstitutionGroupsMockParams,
       );
     },
   );
