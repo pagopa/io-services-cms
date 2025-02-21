@@ -12,7 +12,7 @@ module "subsmigration_postgres_flexible_server" {
   resource_group_name                  = azurerm_resource_group.rg.name
   private_dns_zone_resource_group_name = var.io_common.resource_group_name
 
-  tier = "l"
+  tier = "m"
 
   administrator_credentials = {
     name     = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_username.value
