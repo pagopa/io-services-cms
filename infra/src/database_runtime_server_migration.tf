@@ -14,6 +14,8 @@ module "runtime_server_migration_postgres_flexible_server" {
 
   tier = "m"
 
+  db_version = 11
+
   administrator_credentials = {
     name     = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_username.value
     password = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_password.value
