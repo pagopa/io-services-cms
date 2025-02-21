@@ -1,6 +1,6 @@
 module "runtime_server_migration_postgres_flexible_server" {
   source  = "pagopa/dx-azure-postgres-server/azurerm"
-  version = "~> 0"
+  version = "~> 1"
 
   environment = {
     prefix          = var.prefix
