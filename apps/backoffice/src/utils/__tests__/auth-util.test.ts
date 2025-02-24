@@ -9,6 +9,7 @@ import {
   isOperator,
   isOperatorAndServiceBoundedToInactiveGroup,
 } from "../auth-util";
+import { TEST_INSTITUTION_ID } from "../../config/constants";
 
 const anAdminSession: any = {
   user: {
@@ -16,7 +17,7 @@ const anAdminSession: any = {
       apimGroups: ["ApiServiceWrite"],
       selcGroups: ["aSelcGroup"],
     },
-    institution: { role: "admin" },
+    institution: { id: TEST_INSTITUTION_ID, role: "admin" },
   },
 };
 const anOperatorSession: any = {
@@ -25,7 +26,7 @@ const anOperatorSession: any = {
       apimGroups: ["ApiServiceWrite"],
       selcGroups: ["aSelcGroup"],
     },
-    institution: { role: "operator" },
+    institution: { id: TEST_INSTITUTION_ID, role: "operator" },
   },
 };
 
@@ -218,7 +219,7 @@ describe("[auth utils] hasManageKeyGroup", () => {
       permissions: {
         apimGroups: ["ApiServiceRead"],
       },
-      institution: { role: "operator" },
+      institution: { id: TEST_INSTITUTION_ID, role: "operator" },
     },
   };
 
