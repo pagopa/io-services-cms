@@ -25,7 +25,10 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { isOperatorAndServiceBoundedToInactiveGroup } from "@/utils/auth-util";
+import {
+  hasApiKeyGroupsFeatures,
+  isOperatorAndServiceBoundedToInactiveGroup,
+} from "@/utils/auth-util";
 import {
   trackServiceCreateStartEvent,
   trackServiceEditStartEvent,
@@ -98,7 +101,7 @@ export default function Services() {
   const showDialog = useDialog();
 
   const getTableViewColumnGroup = (): TableViewColumn<ServiceListItem>[] =>
-    GROUP_APIKEY_ENABLED
+    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session)
       ? [
           {
             alignment: "left",

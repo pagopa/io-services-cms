@@ -48,3 +48,5 @@ export const HTTP_STATUS_GATEWAY_TIMEOUT = 504 as Exclude<
 export const HTTP_TITLE_BAD_REQUEST = "Bad Request";
 export const HTTP_TITLE_UNAUTHORIZED = "Unauthorized";
 export const HTTP_TITLE_FORBIDDEN = "Forbidden";
+
+export const TEST_INSTITUTION_ID = "141b402b-79e7-4d39-a729-5f31bf5c1a77";
