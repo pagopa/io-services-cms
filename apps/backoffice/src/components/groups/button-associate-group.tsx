@@ -1,10 +1,12 @@
 import { getConfiguration } from "@/config";
+import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { client } from "@/hooks/use-fetch";
 import { SelfcareRoles } from "@/types/auth";
 import { SupervisedUserCircle } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 
 import { AccessControl } from "../access-control";
@@ -26,12 +28,51 @@ const checkAtLeastOneGroupUnboundedServiceExists = async () => {
   }
 };
 
+const checkAtLeastOneActiveGroupExists = async (institutionId: string) => {
+  try {
+    const maybeResponse = await client.checkInstitutionGroupsExistence({
+      filter: GroupFilterTypeEnum.ALL,
+      institutionId,
+    });
+
+    if (E.isRight(maybeResponse)) {
+      return maybeResponse.right.status === 200;
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+};
+
 export const ButtonAssociateGroup = () => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { data: session } = useSession();
   const showDialog = useDialog();
 
   const handleClick = async () => {
+    const atLeastOneActiveGroupExists = await checkAtLeastOneActiveGroupExists(
+      session?.user?.institution.id as string,
+    );
+
+    if (!atLeastOneActiveGroupExists) {
+      const noActiveGroupsAvailable = await showDialog({
+        cancelButtonLabel: t("buttons.close"),
+        confirmButtonLabel: t("routes.services.noActiveGroupsModal.confirm"),
+        message: t("routes.services.noActiveGroupsModal.description"),
+        title: t("routes.services.noActiveGroupsModal.title"),
+      });
+      if (noActiveGroupsAvailable) {
+        window.open(
+          `${getConfiguration().SELFCARE_URL}/dashboard/${
+            session?.user?.institution.id
+          }/groups`,
+          "_blank",
+        );
+      }
+      return;
+    }
+
     const atLeastOneGroupUnboundedServiceExists =
       await checkAtLeastOneGroupUnboundedServiceExists();
 

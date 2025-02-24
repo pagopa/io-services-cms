@@ -343,6 +343,11 @@
         "visibility": "Visibility on IO",
         "group": "Group"
       },
+      "noActiveGroupsModal": {
+        "title": "Associate groups",
+        "description": "It is not possible to add services to groups because there is no active group.<br/><br/>To proceed, go to the “Groups” section in the Reserved Area and check the configuration.",
+        "confirm": "Verify groups"
+      },
       "noGroupUnboundedServicesModal": {
         "title": "Associate groups",
         "description": "You cannot add services to groups because they have already been assigned. To change existing associations, go into the details of the individual services."
