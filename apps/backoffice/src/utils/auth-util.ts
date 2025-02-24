@@ -1,3 +1,4 @@
+import { TEST_INSTITUTION_ID } from "@/config/constants";
 import { StateEnum } from "@/generated/api/Group";
 import { ServiceListItem } from "@/generated/api/ServiceListItem";
 import { RequiredAuthorizations, SelfcareRoles } from "@/types/auth";
@@ -30,6 +31,11 @@ export const hasRequiredAuthorizations = (
     requiredAuthorizations.requiredRole,
   );
 
+/** Check to enable ApiKey Groups features only for test Institution */
+export const hasApiKeyGroupsFeatures =
+  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
+    groupApiKeyEnabled && session?.user?.institution.id === TEST_INSTITUTION_ID;
+
 /**
  * Can fetch & show Manage ApiKey (root) only for:
  * - `groupApiKeyEnabled=false`
@@ -60,7 +66,7 @@ export const hasManageKeyRoot =
  */
 export const hasManageKeyGroup =
   (groupApiKeyEnabled: boolean) => (session: Session | null) =>
-    groupApiKeyEnabled &&
+    hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
     (hasRequiredAuthorizations(session, {
       requiredPermissions: ["ApiServiceWrite"],
       requiredRole: SelfcareRoles.admin,
