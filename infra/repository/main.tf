@@ -131,11 +131,10 @@ module "repo" {
     }
   }
 
-  //apim_id                  = data.azurerm_api_management.apim.id
-  apim_id                    = data.azurerm_api_management.apim_itn.id
-  pep_vnet_id                = data.azurerm_virtual_network.common.id
-  dns_zone_resource_group_id = data.azurerm_resource_group.external.id
-  opex_resource_group_id     = data.azurerm_resource_group.dashboards.id
+  apim_id                            = data.azurerm_api_management.apim_itn.id
+  pep_vnet_id                        = data.azurerm_virtual_network.common.id
+  private_dns_zone_resource_group_id = data.azurerm_resource_group.dns_zones.id
+  opex_resource_group_id             = data.azurerm_resource_group.dashboards.id
 
   keyvault_common_ids = [
     data.azurerm_key_vault.common.id
