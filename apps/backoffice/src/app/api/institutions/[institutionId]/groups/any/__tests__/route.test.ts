@@ -1,29 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_TITLE_BAD_REQUEST,
+  HTTP_TITLE_FORBIDDEN,
+} from "../../../../../../../config/constants";
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "../route";
-import { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
+import type { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
 
-const backofficeUserMock = {} as BackOfficeUserEnriched;
+const backofficeUserMock = {
+  parameters: { userId: "userId" },
+} as BackOfficeUserEnriched;
 
-const {
-  userAuthzMock,
-  isAdminMock,
-  isInstitutionAllowedMock,
-  checkInstitutionGroupsExistenceMock,
-  withJWTAuthHandlerMock,
-} = vi.hoisted(() => {
-  const isAdminMock = vi.fn(() => true);
-  const isInstitutionAllowedMock = vi.fn(() => true);
+const mocks = vi.hoisted(() => {
+  const getInstitutionGroupBaseHandler = vi.fn();
   return {
-    isAdminMock,
-    isInstitutionAllowedMock,
-    userAuthzMock: vi.fn(() => ({
-      isInstitutionAllowed: isInstitutionAllowedMock,
-      isAdmin: isAdminMock,
-    })),
-    checkInstitutionGroupsExistenceMock: vi.fn(),
-    withJWTAuthHandlerMock: vi.fn(
+    getInstitutionGroupBaseHandler,
+    withJWTAuthHandler: vi.fn(
       (
         handler: (
           nextRequest: NextRequest,
@@ -39,18 +35,19 @@ const {
   };
 });
 
-vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock,
-}));
-vi.mock("@/lib/be/institutions/business", () => ({
-  checkInstitutionGroupsExistence: checkInstitutionGroupsExistenceMock,
-}));
-
 vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   const original = (await importOriginal()) as any;
   return {
     ...original,
-    withJWTAuthHandler: withJWTAuthHandlerMock,
+    withJWTAuthHandler: mocks.withJWTAuthHandler,
+  };
+});
+
+vi.mock("@/utils/get-institution-groups-util", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
+  return {
+    ...original,
+    getInstitutionGroupBaseHandler: mocks.getInstitutionGroupBaseHandler,
   };
 });
 
@@ -58,58 +55,54 @@ beforeEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("checkInstitutionGroupsExistence", () => {
-  it("should return an error response bad request when isInstitutionIdSameAsCaller check fail", async () => {
+describe("getInstitutionGroups", () => {
+  it.each`
+    getInstitutionGroupBaseHandlerResponseStatusCode | getInstitutionGroupBaseHandlerResponse
+    ${403}                                           | ${NextResponse.json({ detail: "error detail", status: HTTP_STATUS_FORBIDDEN, title: HTTP_TITLE_FORBIDDEN }, { status: HTTP_STATUS_FORBIDDEN })}
+    ${400}                                           | ${NextResponse.json({ detail: "error detail", status: HTTP_STATUS_BAD_REQUEST, title: HTTP_TITLE_BAD_REQUEST }, { status: HTTP_STATUS_BAD_REQUEST })}
+  `(
+    "should return an error response bad request when getInstitutionGroupBaseHandler returns a response with status code $getInstitutionGroupBaseHandlerResponseStatusCode",
+    async ({
+      getInstitutionGroupBaseHandlerResponseStatusCode,
+      getInstitutionGroupBaseHandlerResponse,
+    }) => {
+      // given
+      const url = new URL("http://localhost");
+      const nextRequest = new NextRequest(url);
+      const institutionId = "institutionId";
+      mocks.getInstitutionGroupBaseHandler.mockReturnValueOnce(
+        getInstitutionGroupBaseHandlerResponse,
+      );
+
+      // when
+      const result = await GET(nextRequest, {
+        params: { institutionId },
+      });
+
+      // then
+      const jsonBody = await result.json();
+      expect(result.status).toBe(
+        getInstitutionGroupBaseHandlerResponseStatusCode,
+      );
+      expect(jsonBody.detail).toEqual("error detail");
+      expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledWith(
+        nextRequest,
+        {
+          backofficeUser: backofficeUserMock,
+          params: { institutionId: institutionId },
+        },
+      );
+    },
+  );
+
+  it("should return an error response internal server error when getInstitutionGroupBaseHandler throws an error", async () => {
     // given
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    isInstitutionAllowedMock.mockReturnValueOnce(false);
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(403);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).not.toHaveBeenCalled();
-    expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
-    expect(jsonBody.detail).toEqual("Unauthorized institutionId");
-  });
-
-  it("should return an error response bad request when user is not an admin", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    isAdminMock.mockReturnValueOnce(false);
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(403);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).not.toHaveBeenCalled();
-    expect(jsonBody.detail).toEqual("Role not authorized");
-  });
-
-  it("should return an error response bad request when checkInstitutionGroupsExistence rejects", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    const error = new Error();
-    checkInstitutionGroupsExistenceMock.mockRejectedValueOnce(error);
+    const error = new Error("error from getInstitutionGroupBaseHandler");
+    mocks.getInstitutionGroupBaseHandler.mockRejectedValueOnce(error);
 
     // when
     const result = await GET(nextRequest, {
@@ -119,46 +112,45 @@ describe("checkInstitutionGroupsExistence", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(500);
-    expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-    expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
-    expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
-      institutionId,
-    );
-    expect(jsonBody.title).toEqual("CheckInstitutionGroupsExistanceError");
     expect(jsonBody.detail).toEqual("Something went wrong");
+    expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledOnce();
+    expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledWith(
+      nextRequest,
+      {
+        backofficeUser: backofficeUserMock,
+        params: { institutionId: institutionId },
+      },
+    );
   });
 
   it.each`
-    scenario                         | checkInstitutionGroupsExistenceValue | expectedStatus
-    ${"there is at least one group"} | ${true}                              | ${200}
-    ${"there is at least one group"} | ${false}                             | ${204}
+    scenario                        | responseCode | groupsResult
+    ${"the result groups is empty"} | ${204}       | ${[]}
+    ${"there are groups"}           | ${200}       | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}
   `(
-    "should succeed when $scenario",
-    async ({ checkInstitutionGroupsExistenceValue, expectedStatus }) => {
+    "should return a $responseCode response when $scenario",
+    async ({ responseCode, groupsResult }) => {
       // given
       const url = new URL("http://localhost");
       const nextRequest = new NextRequest(url);
       const institutionId = "institutionId";
-      checkInstitutionGroupsExistenceMock.mockResolvedValueOnce(
-        checkInstitutionGroupsExistenceValue,
-      );
+      const groups =
+        mocks.getInstitutionGroupBaseHandler.mockReturnValueOnce(groupsResult);
 
       // when
-      const result: Response = await GET(nextRequest, {
+      const result = await GET(nextRequest, {
         params: { institutionId },
       });
 
       // then
-      expect(result.status).toBe(expectedStatus);
-      expect(result.body).toBeNull();
-      expect(isInstitutionAllowedMock).toHaveBeenCalledOnce();
-      expect(isInstitutionAllowedMock).toHaveBeenCalledWith(institutionId);
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledOnce();
-      expect(checkInstitutionGroupsExistenceMock).toHaveBeenCalledWith(
-        institutionId,
+      expect(result.status).toBe(responseCode);
+      expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionGroupBaseHandler).toHaveBeenCalledWith(
+        nextRequest,
+        {
+          backofficeUser: backofficeUserMock,
+          params: { institutionId: institutionId },
+        },
       );
     },
   );
