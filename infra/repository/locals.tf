@@ -38,6 +38,10 @@ locals {
     resource_group_name = "${local.prefix}-${local.env_short}-rg-external"
   }
 
+  dns_zones = {
+    resource_group_name = "${local.prefix}-${local.env_short}-rg-common"
+  }
+
   tf_storage_account = {
     name                = "iopitntfst001"
     resource_group_name = "terraform-state-rg"

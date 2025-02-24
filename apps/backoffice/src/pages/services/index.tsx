@@ -3,9 +3,9 @@ import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
-import { ServiceGroupTag } from "@/components/services";
 import {
   ServiceContextMenuActions,
+  ServiceGroupTag,
   ServiceSearchById,
   ServiceStatus,
   ServiceVersionSwitcher,
@@ -25,6 +25,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { isOperatorAndServiceBoundedToInactiveGroup } from "@/utils/auth-util";
 import {
   trackServiceCreateStartEvent,
   trackServiceEditStartEvent,
@@ -45,6 +46,7 @@ import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, ReactNode, useEffect, useState } from "react";
@@ -91,6 +93,7 @@ const getTypographyDefaultColor = (
 // eslint-disable-next-line max-lines-per-function
 export default function Services() {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const router = useRouter();
   const showDialog = useDialog();
 
@@ -117,7 +120,10 @@ export default function Services() {
       alignment: "left",
       cellTemplate: (service) => (
         <Button
-          disabled={isServiceStatusValueDeleted(service.status.value)}
+          disabled={
+            isServiceStatusValueDeleted(service.status.value) ||
+            isOperatorAndServiceBoundedToInactiveGroup(session)(service)
+          }
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
@@ -126,7 +132,14 @@ export default function Services() {
           size="large"
           startIcon={
             hasTwoDifferentVersions(service) ? (
-              <CallSplit color="primary" fontSize="small" />
+              <CallSplit
+                color={
+                  isOperatorAndServiceBoundedToInactiveGroup(session)(service)
+                    ? "disabled"
+                    : "primary"
+                }
+                fontSize="small"
+              />
             ) : null
           }
           sx={{ fontWeight: 700, textAlign: "left" }}
@@ -305,6 +318,10 @@ export default function Services() {
   /** Returns a list of `TableRowMenuAction` depending on service status and visibility */
   const getServiceMenu = (service: ServiceListItem): TableRowMenuAction[] => {
     const result: TableRowMenuAction[] = [];
+
+    // Group Check: no menu actions for operator and services with not active selfcare bounded group
+    if (isOperatorAndServiceBoundedToInactiveGroup(session)(service))
+      return result;
 
     // Lifecycle actions
     switch (service.status.value) {

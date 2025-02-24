@@ -1,6 +1,7 @@
 import { useDialog } from "@/components/dialog-provider";
 import { ServiceGroupTag } from "@/components/services";
 import { Group } from "@/generated/api/Group";
+import { isAdmin } from "@/utils/auth-util";
 import { Delete, Edit } from "@mui/icons-material";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
@@ -37,7 +38,7 @@ export const GroupInfoTag = ({
 
   // Unbounded service: only admin can bound it to a group
   if (!value) {
-    if (session?.user?.institution.role === "admin")
+    if (isAdmin(session))
       return (
         <ButtonNaked
           color="primary"
@@ -61,7 +62,7 @@ export const GroupInfoTag = ({
   return (
     <Stack direction="row" spacing={1}>
       <ServiceGroupTag value={value} />
-      {session?.user?.institution.role === "admin" && (
+      {isAdmin(session) && (
         <>
           <IconButton
             aria-label="edit"
