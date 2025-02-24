@@ -17,8 +17,8 @@ module "runtime_server_migration_postgres_flexible_server" {
   db_version = 11
 
   administrator_credentials = {
-    name     = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_username.value
-    password = data.azurerm_key_vault_secret.devportalservicedata_db_server_adm_password.value
+    name     = data.azurerm_key_vault_secret.subscriptionmigrations_db_server_adm_username.value
+    password = data.azurerm_key_vault_secret.subscriptionmigrations_db_server_adm_password.value
   }
 
   subnet_pep_id = data.azurerm_subnet.private_endpoints_subnet[0].id
