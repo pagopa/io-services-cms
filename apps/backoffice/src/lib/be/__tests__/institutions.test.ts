@@ -222,6 +222,46 @@ describe("Institutions", () => {
       ]);
     });
 
+    it("should return the groups found for the institution filtered by the group list passed", async () => {
+      // given
+      const institutionId = "institutionId";
+      getInstitutionGroupsMock.mockResolvedValueOnce({
+        ...mocks.institutionGroups,
+        totalPages: 0,
+      });
+      const groupsFilter = [
+        {
+          id: "institutionGroupsID",
+          name: "institutionGroupsName",
+          status: "ACTIVE" as StatusEnum,
+        },
+      ];
+
+      // when
+      const result = await retrieveInstitutionGroups(
+        institutionId,
+        groupsFilter,
+      );
+
+      // then
+      expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(
+        1,
+        institutionId,
+        1000,
+        0,
+      );
+      expect(result).toStrictEqual(
+        mocks.institutionGroups.content
+          .filter((group) => group.id === groupsFilter[0].id)
+          .map((group) => ({
+            id: group.id,
+            name: group.name,
+            state: group.status,
+          })),
+      );
+    });
+
     it("should rejects when getInstitutionGroups return an error response", async () => {
       // given
       const error = new Error("errorMessage");
