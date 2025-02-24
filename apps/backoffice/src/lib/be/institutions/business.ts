@@ -48,10 +48,12 @@ export const retrieveInstitution = async (
 /**
  * Fetch all group related to provided institution
  * @param institutionId the institution id
+ * @param groupsToFilter the group list the serves as filter for the result of the groups of the institution
  * @returns all institution groups
  */
 export const retrieveInstitutionGroups = async (
   institutionId: string,
+  groupsToFilter: Group[] = [],
 ): Promise<Group[]> => {
   const groups: Group[] = [];
   let page = 0;
@@ -61,6 +63,10 @@ export const retrieveInstitutionGroups = async (
     groups.push(...toGroups(apiResult.content));
     hasMoreItems = apiResult.totalPages >= page;
   } while (hasMoreItems);
+  if (groupsToFilter.length !== 0) {
+    const groupsToFilterIds = groupsToFilter.map((group) => group.id);
+    return groups.filter((group) => groupsToFilterIds.includes(group.id));
+  }
   return groups;
 };
 
@@ -181,11 +187,4 @@ export const getGroup = async (
 ): Promise<Group> => {
   const selfcareGroup = await getSelfcareGroup(groupId, institutionId);
   return toGroup(selfcareGroup);
-};
-
-export const checkInstitutionGroupsExistence = async (
-  institutionId: string,
-): Promise<boolean> => {
-  const apiResult = await getInstitutionGroups(institutionId, 1, 0);
-  return !!apiResult.totalElements;
 };
