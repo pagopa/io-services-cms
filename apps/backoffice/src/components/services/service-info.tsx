@@ -3,8 +3,10 @@ import { PatchServicePayload } from "@/generated/api/PatchServicePayload";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import useFetch from "@/hooks/use-fetch";
 import { Service } from "@/types/service";
+import { hasApiKeyGroupsFeatures } from "@/utils/auth-util";
 import { trackServiceDetailsEvent } from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
@@ -29,6 +31,7 @@ export const ServiceInfo = ({
   releaseMode,
 }: ServiceInfoProps) => {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const { openDrawer } = useDrawer();
   const [associateGroupOpen, setAssociateGroupOpen] = useState(false);
   const { fetchData: psFetchData } = useFetch<PatchServicePayload>();
@@ -74,7 +77,10 @@ export const ServiceInfo = ({
         value: data?.lastUpdate,
       },
     );
-    if (GROUP_APIKEY_ENABLED && !releaseMode) {
+    if (
+      hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+      !releaseMode
+    ) {
       rowsMin.push({
         label: "routes.service.group.label",
         value: (

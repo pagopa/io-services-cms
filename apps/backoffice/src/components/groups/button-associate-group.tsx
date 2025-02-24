@@ -2,6 +2,7 @@ import { getConfiguration } from "@/config";
 import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { client } from "@/hooks/use-fetch";
 import { SelfcareRoles } from "@/types/auth";
+import { hasApiKeyGroupsFeatures } from "@/utils/auth-util";
 import { SupervisedUserCircle } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -88,7 +89,7 @@ export const ButtonAssociateGroup = () => {
     }
   };
 
-  if (!GROUP_APIKEY_ENABLED) return null;
+  if (!hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session)) return null;
 
   return (
     <AccessControl
