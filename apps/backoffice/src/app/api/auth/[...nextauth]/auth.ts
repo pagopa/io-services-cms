@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Configuration, getConfiguration } from "@/config";
+import { TEST_INSTITUTION_ID } from "@/config/constants";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { InstitutionResponse } from "@/generated/selfcare/InstitutionResponse";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
@@ -330,8 +331,7 @@ const toUser = ({
       .map((group) => group.name),
     selcGroups:
       getConfiguration().GROUP_AUTHZ_ENABLED ||
-      identityTokenPayload.organization.id ===
-        "141b402b-79e7-4d39-a729-5f31bf5c1a77"
+      identityTokenPayload.organization.id === TEST_INSTITUTION_ID
         ? identityTokenPayload.organization.groups
         : undefined,
   },
