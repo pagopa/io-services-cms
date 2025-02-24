@@ -1,0 +1,16 @@
+<policies>
+    <inbound>
+        <base />
+        <!--Mock response used during apim migration-->
+        <mock-response status-code="503" content-type="application/json" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
