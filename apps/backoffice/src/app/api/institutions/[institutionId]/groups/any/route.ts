@@ -1,11 +1,9 @@
-import { userAuthz } from "@/lib/be/authz";
-import {
-  handleForbiddenErrorResponse,
-  handleInternalErrorResponse,
-  handlerErrorLog,
-} from "@/lib/be/errors";
-import { checkInstitutionGroupsExistence } from "@/lib/be/institutions/business";
+import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import {
+  getInstitutionGroupBaseHandler,
+  isErrorResponse,
+} from "@/utils/get-institution-groups-util";
 import { NextRequest } from "next/server";
 
 /**
@@ -14,7 +12,7 @@ import { NextRequest } from "next/server";
  */
 export const GET = withJWTAuthHandler(
   async (
-    _: NextRequest,
+    request: NextRequest,
     {
       backofficeUser,
       params,
@@ -23,24 +21,18 @@ export const GET = withJWTAuthHandler(
       params: { institutionId: string };
     },
   ) => {
-    const user = userAuthz(backofficeUser);
-    if (!user.isInstitutionAllowed(params.institutionId)) {
-      return handleForbiddenErrorResponse("Unauthorized institutionId");
-    }
-    if (!user.isAdmin()) {
-      return handleForbiddenErrorResponse("Role not authorized");
-    }
     try {
-      const existsAtLeastOneGroup = await checkInstitutionGroupsExistence(
-        params.institutionId,
-      );
-      return new Response(null, { status: existsAtLeastOneGroup ? 200 : 204 });
+      const groupResponse = await getInstitutionGroupBaseHandler(request, {
+        backofficeUser,
+        params,
+      });
+      if (isErrorResponse(groupResponse)) {
+        return groupResponse;
+      }
+      return new Response(null, {
+        status: groupResponse.length > 0 ? 200 : 204,
+      });
     } catch (error) {
-      handlerErrorLog(
-        `An Error has occurred while checking groups existance: ${params.institutionId}`,
-        error,
-      );
-
       return handleInternalErrorResponse(
         "CheckInstitutionGroupsExistanceError",
         error,
