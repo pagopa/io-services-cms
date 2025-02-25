@@ -43,8 +43,14 @@ locals {
       LEGACY_JIRA_PROJECT_NAME = "IES"
 
       # Apim connection
-      AZURE_APIM                           = "io-p-apim-v2-api"
-      AZURE_APIM_RESOURCE_GROUP            = "io-p-rg-internal"
+      # AZURE_APIM                           = "io-p-apim-v2-api"
+      # AZURE_APIM_RESOURCE_GROUP            = "io-p-rg-internal"
+      # AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
+      # AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = "io-services-api"
+
+      # Apim itn connection
+      AZURE_APIM                           = "io-p-itn-apim-01"
+      AZURE_APIM_RESOURCE_GROUP            = "io-p-itn-common-rg-01"
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
       AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = "io-services-api"
 

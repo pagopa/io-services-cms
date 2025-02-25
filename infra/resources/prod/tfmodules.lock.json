@@ -3,8 +3,8 @@
   "cms_function_app.cms_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
   "eventhub.eventhub.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
   "function_app.app_be_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
-  "backoffice.backoffice": "f9746f1db71538ed1051a8f8dfa44a15c9a0a991f0ec98a8b55b0bf750f53f4a",
-  "cms_function_app.cms_fn": "9bb1e709ec6db835ac84e6a5b9dbde1c6ad3a79c8e64c118f523fe2fd87873c6",
-  "eventhub.eventhub": "6bbd4dd993d024c2ce249a90626b8df67d29364eabf051c81c073b5252e361d2",
-  "function_app.app_be_fn": "9bb1e709ec6db835ac84e6a5b9dbde1c6ad3a79c8e64c118f523fe2fd87873c6"
+  "backoffice.backoffice": "c344b2a451d60887e3e6a3f01bdcd84c8d074bfb8fefe349beb780552ce84eae",
+  "cms_function_app.cms_fn": "35993f0f57f017a544522dac18c8b585d9642d93edf9a45d7651a8388ed8980b",
+  "eventhub.eventhub": "a26f902e947420a38e6033ee1649bdeb7e33d6e6717068fbe6512680db727545",
+  "function_app.app_be_fn": "35993f0f57f017a544522dac18c8b585d9642d93edf9a45d7651a8388ed8980b"
 }
