@@ -322,9 +322,9 @@ paths:
     put:
       tags:
         - services
-      summary: Put service
+      summary: Patch service workaround
       description: Update a subset of properties of an existing service
-      operationId: putService
+      operationId: patchServiceWorkaround
       parameters:
         - $ref: '#/components/parameters/UserEmail'
         - $ref: '#/components/parameters/UserGroups'
