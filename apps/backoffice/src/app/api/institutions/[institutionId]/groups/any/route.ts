@@ -1,10 +1,7 @@
-import {
-  institutionGroupBaseHandler,
-  isErrorResponse,
-} from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
-import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { institutionGroupBaseHandler } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
+import { Group } from "@/generated/api/Group";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * @operationId checkInstitutionGroupsExistence
@@ -20,23 +17,13 @@ export const GET = withJWTAuthHandler(
       backofficeUser: BackOfficeUserEnriched;
       params: { institutionId: string };
     },
-  ) => {
-    try {
-      const groupResponse = await institutionGroupBaseHandler(request, {
-        backofficeUser,
-        params,
-      });
-      if (isErrorResponse(groupResponse)) {
-        return groupResponse;
-      }
-      return new Response(null, {
-        status: groupResponse.length > 0 ? 200 : 204,
-      });
-    } catch (error) {
-      return handleInternalErrorResponse(
-        "CheckInstitutionGroupsExistanceError",
-        error,
-      );
-    }
-  },
+  ) =>
+    await institutionGroupBaseHandler(request, {
+      backofficeUser,
+      groupHandler: (groups: Group[]) =>
+        new NextResponse(null, {
+          status: groups.length > 0 ? 200 : 204,
+        }),
+      params,
+    }),
 );
