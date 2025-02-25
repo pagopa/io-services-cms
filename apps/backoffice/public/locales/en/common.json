@@ -417,7 +417,7 @@
       "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
       "groups": {
         "title": "Group API Keys",
-        "description": "Generate these keys for individual groups, so that they can perform programmatic operations only on the services they manage.",
+        "description": "Administrators can generate and manage these keys for individual groups, so that operators can perform programmatic operations only on the services they manage.",
         "generate": "Generate API Key",
         "loadMore": "Load more",
         "noGroupModal": {
