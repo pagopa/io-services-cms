@@ -1,5 +1,6 @@
 import { AccessControl } from "@/components/access-control";
 import { CardBaseContainer, CardRowType, CardRows } from "@/components/cards";
+import { LoaderSkeleton } from "@/components/loaders";
 import { getConfiguration } from "@/config";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
@@ -33,8 +34,11 @@ export const ApiKeysCard = () => {
   const router = useRouter();
 
   const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
-  const { data: mspData, fetchData: mspFetchData } =
-    useFetch<SubscriptionPagination>();
+  const {
+    data: mspData,
+    fetchData: mspFetchData,
+    loading: mspLoading,
+  } = useFetch<SubscriptionPagination>();
 
   const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
@@ -101,28 +105,35 @@ export const ApiKeysCard = () => {
               <Typography id="card-title" variant="overline">
                 {t("routes.keys.groups.title")}
               </Typography>
-              <ApiKeysGroupsEmptyState apiKeysGroups={mspData?.value} />
-              {mspData?.value && mspData.value.length > 0 && (
-                <Box paddingTop={2}>
-                  {mspData?.value
-                    .slice(0, MAX_APIKEY_GROUP_TO_DISPLAY)
-                    .map((apiKeyGroup) => (
-                      <ApiKeysGroupTag
-                        key={apiKeyGroup.id}
-                        onClick={() =>
-                          router.push(`${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`)
-                        }
-                        value={apiKeyGroup}
+              <ApiKeysGroupsEmptyState
+                apiKeysGroups={mspData?.value}
+                loading={mspLoading}
+              />
+              <LoaderSkeleton loading={mspLoading} style={{ height: 40 }}>
+                {mspData?.value && mspData.value.length > 0 && (
+                  <Box paddingTop={2}>
+                    {mspData?.value
+                      .slice(0, MAX_APIKEY_GROUP_TO_DISPLAY)
+                      .map((apiKeyGroup) => (
+                        <ApiKeysGroupTag
+                          key={apiKeyGroup.id}
+                          onClick={() =>
+                            router.push(
+                              `${KEYS_ROUTE_PATH}?id=${apiKeyGroup.id}`,
+                            )
+                          }
+                          value={apiKeyGroup}
+                        />
+                      ))}
+                    {mspData.pagination.count > MAX_APIKEY_GROUP_TO_DISPLAY && (
+                      <ApiKeyTag
+                        label={`+${getRemainingApiKeyGroupCount()}`}
+                        onClick={() => router.push(KEYS_ROUTE_PATH)}
                       />
-                    ))}
-                  {mspData.pagination.count > MAX_APIKEY_GROUP_TO_DISPLAY && (
-                    <ApiKeyTag
-                      label={`+${getRemainingApiKeyGroupCount()}`}
-                      onClick={() => router.push(KEYS_ROUTE_PATH)}
-                    />
-                  )}
-                </Box>
-              )}
+                    )}
+                  </Box>
+                )}
+              </LoaderSkeleton>
             </>
           )}
         </Stack>
