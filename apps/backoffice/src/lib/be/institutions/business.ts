@@ -182,10 +182,3 @@ export const getGroup = async (
   const selfcareGroup = await getSelfcareGroup(groupId, institutionId);
   return toGroup(selfcareGroup);
 };
-
-export const checkInstitutionGroupsExistence = async (
-  institutionId: string,
-): Promise<boolean> => {
-  const apiResult = await getInstitutionGroups(institutionId, 1, 0);
-  return !!apiResult.totalElements;
-};
