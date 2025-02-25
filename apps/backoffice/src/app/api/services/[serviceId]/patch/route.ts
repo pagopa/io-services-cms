@@ -1,3 +1,63 @@
-import { PATCH } from "../route";
+import { PatchServicePayload } from "@/generated/services-cms/PatchServicePayload";
+import { userAuthz } from "@/lib/be/authz";
+import {
+  handleBadRequestErrorResponse,
+  handleForbiddenErrorResponse,
+  handleInternalErrorResponse,
+  handlerErrorLog,
+} from "@/lib/be/errors";
+import { groupExists } from "@/lib/be/institutions/business";
+import { parseBody } from "@/lib/be/req-res-utils";
+import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
+import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { NextRequest } from "next/server";
 
-export const PUT = PATCH;
+export const PUT = withJWTAuthHandler(
+  async (
+    nextRequest: NextRequest,
+    {
+      backofficeUser,
+      params,
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+      params: { serviceId: string };
+    },
+  ) => {
+    try {
+      if (!userAuthz(backofficeUser).isAdmin()) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
+      let requestPayload;
+      try {
+        requestPayload = await parseBody(nextRequest, PatchServicePayload);
+      } catch (error) {
+        return handleBadRequestErrorResponse(
+          error instanceof Error ? error.message : "Failed to parse JSON body",
+        );
+      }
+      if (
+        requestPayload.metadata.group_id &&
+        !(await groupExists(
+          backofficeUser.institution.id,
+          requestPayload.metadata.group_id,
+        ))
+      ) {
+        return handleBadRequestErrorResponse(
+          "Provided group_id does not exists",
+        );
+      }
+      return forwardIoServicesCmsRequest("putService", {
+        backofficeUser,
+        jsonBody: requestPayload,
+        nextRequest,
+        pathParams: params,
+      });
+    } catch (error) {
+      handlerErrorLog(
+        `An Error has occurred while patching service: userId=${backofficeUser.id} , institutionId=${backofficeUser.institution.id} , serviceId=${params.serviceId}`,
+        error,
+      );
+      return handleInternalErrorResponse("PatchServiceError", error);
+    }
+  },
+);
