@@ -85,6 +85,7 @@ export const ServiceInfo = ({
         label: "routes.service.group.label",
         value: (
           <GroupInfoTag
+            loading={!data}
             onAssociateClick={() => setAssociateGroupOpen(true)}
             onUnboundClick={handleServiceGroupUnbound}
             value={data?.metadata.group}
