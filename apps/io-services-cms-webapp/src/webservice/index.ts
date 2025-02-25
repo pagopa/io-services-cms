@@ -233,6 +233,17 @@ export const createWebServer = ({
     ),
   );
 
+  router.put(`${serviceLifecyclePath}/patch`, (req, res, next) =>
+    pipe(
+      makePatchServiceHandler({
+        apimService,
+        fsmLifecycleClientCreator,
+        telemetryClient,
+      }),
+      applyPatchServiceRequestMiddelwares(config),
+    )(req, res, next),
+  );
+
   router.delete(
     serviceLifecyclePath,
     pipe(
