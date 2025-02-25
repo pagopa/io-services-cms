@@ -417,7 +417,7 @@
       "description": "Qui puoi gestire le API key da utilizzare per autenticare le richieste dell’ente.",
       "groups": {
         "title": "API Key dei Gruppi",
-        "description": "Genera queste chiavi per i singoli gruppi, così che possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
+        "description": "Gli amministratori possono generare e gestire queste chiavi per i singoli gruppi, così che gli operatori possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
         "generate": "Genera API Key",
         "loadMore": "Carica altri",
         "noGroupModal": {
