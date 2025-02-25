@@ -1,5 +1,6 @@
 /* eslint-disable max-lines-per-function */
 import { useDialog } from "@/components/dialog-provider";
+import { LoaderSkeleton } from "@/components/loaders";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -74,8 +75,11 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { id: queryId } = router.query; // Query parameter `id`
   const accordionRefs = useRef<Record<string, HTMLDivElement | null>>({}); // Accordions reference map
 
-  const { data: mspData, fetchData: mspFetchData } =
-    useFetch<SubscriptionPagination>();
+  const {
+    data: mspData,
+    fetchData: mspFetchData,
+    loading: mspLoading,
+  } = useFetch<SubscriptionPagination>();
   const { data: keysData, fetchData: skFetchData } =
     useFetch<SubscriptionKeys>();
   const { data: cidrsData, fetchData: scFetchData } =
@@ -304,6 +308,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       <ApiKeysGroupsEmptyState
         apiKeysGroups={mspData?.value}
         hideAdminWarning
+        loading={mspLoading}
       />
       <ButtonGenerateApiKeysGroup
         onCreateGroupClick={props.onCreateGroupClick}
@@ -324,6 +329,12 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
             />
           </Box>
         ))}
+        <LoaderSkeleton
+          loading={mspLoading}
+          style={{ height: 85, width: "100%" }}
+        >
+          <></>
+        </LoaderSkeleton>
         {mspData &&
           mspData?.pagination.count > pagination.offset + pagination.limit && (
             <Box textAlign="center">

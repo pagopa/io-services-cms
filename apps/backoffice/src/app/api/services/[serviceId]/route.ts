@@ -118,7 +118,7 @@ export const PATCH = withJWTAuthHandler(
           "Provided group_id does not exists",
         );
       }
-      return forwardIoServicesCmsRequest("patchService", {
+      return forwardIoServicesCmsRequest("patchServiceWorkaround", {
         backofficeUser,
         jsonBody: requestPayload,
         nextRequest,

@@ -1,4 +1,5 @@
 import { useDialog } from "@/components/dialog-provider";
+import { LoaderSkeleton } from "@/components/loaders";
 import { ServiceGroupTag } from "@/components/services";
 import { Group } from "@/generated/api/Group";
 import { isAdmin } from "@/utils/auth-util";
@@ -9,12 +10,14 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 
 export interface GroupInfoTagProps {
+  loading?: boolean;
   onAssociateClick?: () => void;
   onUnboundClick?: () => void;
   value?: Group;
 }
 
 export const GroupInfoTag = ({
+  loading,
   onAssociateClick,
   onUnboundClick,
   value,
@@ -35,6 +38,16 @@ export const GroupInfoTag = ({
       console.warn("Operation canceled");
     }
   };
+
+  if (loading)
+    return (
+      <LoaderSkeleton
+        loading={loading}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <></>
+      </LoaderSkeleton>
+    );
 
   // Unbounded service: only admin can bound it to a group
   if (!value) {
