@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.40.12
+
+### Patch Changes
+
+- e443e513: added put /serviceId/patch api
+- 69629f31: Remove unboundServiceFromGroup openapi spec and replace backoffice frontend implementation with patchService api call
+- 07b081b9: Openapi specification delete unbound group from service
+
 ## 1.40.11
 
 ### Patch Changes
