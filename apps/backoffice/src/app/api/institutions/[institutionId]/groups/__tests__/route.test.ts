@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_TITLE_BAD_REQUEST,
   HTTP_TITLE_FORBIDDEN,
 } from "../../../../../../config/constants";
@@ -70,7 +71,7 @@ describe("getInstitutionGroups", () => {
       const url = new URL("http://localhost");
       const nextRequest = new NextRequest(url);
       const institutionId = "institutionId";
-      mocks.institutionGroupBaseHandler.mockReturnValueOnce(
+      mocks.institutionGroupBaseHandler.mockResolvedValueOnce(
         institutionGroupBaseHandlerResponse,
       );
 
@@ -84,13 +85,11 @@ describe("getInstitutionGroups", () => {
       expect(result.status).toBe(institutionGroupBaseHandlerResponseStatusCode);
       expect(jsonBody.detail).toEqual("error detail");
       expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
-      expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledWith(
-        nextRequest,
-        {
-          backofficeUser: backofficeUserMock,
-          params: { institutionId: institutionId },
-        },
-      );
+      const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+      expect(callArgs[0]).toBe(nextRequest);
+      expect(callArgs[1].params.institutionId).toBe(institutionId);
+      expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+      expect(typeof callArgs[1].groupHandler).toBe("function");
     },
   );
 
@@ -99,8 +98,16 @@ describe("getInstitutionGroups", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    const error = new Error("error from institutionGroupBaseHandler");
-    mocks.institutionGroupBaseHandler.mockRejectedValueOnce(error);
+    mocks.institutionGroupBaseHandler.mockResolvedValueOnce(
+      NextResponse.json(
+        {
+          detail: "error detail",
+          status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          title: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        },
+        { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
+      ),
+    );
 
     // when
     const result = await GET(nextRequest, {
@@ -110,15 +117,13 @@ describe("getInstitutionGroups", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(500);
-    expect(jsonBody.detail).toEqual("Something went wrong");
+    expect(jsonBody.detail).toEqual("error detail");
     expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
-    expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledWith(
-      nextRequest,
-      {
-        backofficeUser: backofficeUserMock,
-        params: { institutionId: institutionId },
-      },
-    );
+    const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+    expect(callArgs[0]).toBe(nextRequest);
+    expect(callArgs[1].params.institutionId).toBe(institutionId);
+    expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+    expect(typeof callArgs[1].groupHandler).toBe("function");
   });
 
   it("should return a 200 response", async () => {
@@ -133,7 +138,8 @@ describe("getInstitutionGroups", () => {
         state: "ACTIVE",
       },
     ];
-    mocks.institutionGroupBaseHandler.mockReturnValueOnce(groups);
+    const response = NextResponse.json({ groupResponse: groups });
+    mocks.institutionGroupBaseHandler.mockResolvedValueOnce(response);
 
     // when
     const result = await GET(nextRequest, {
@@ -145,12 +151,10 @@ describe("getInstitutionGroups", () => {
     expect(result.status).toBe(200);
     expect(jsonBody).toEqual({ groupResponse: groups });
     expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
-    expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledWith(
-      nextRequest,
-      {
-        backofficeUser: backofficeUserMock,
-        params: { institutionId: institutionId },
-      },
-    );
+    const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+    expect(callArgs[0]).toBe(nextRequest);
+    expect(callArgs[1].params.institutionId).toBe(institutionId);
+    expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+    expect(typeof callArgs[1].groupHandler).toBe("function");
   });
 });

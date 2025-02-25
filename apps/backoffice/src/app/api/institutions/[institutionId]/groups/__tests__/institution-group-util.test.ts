@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { institutionGroupBaseHandler } from "../institution-groups-util";
 
@@ -56,6 +56,7 @@ afterEach(() => {
 });
 
 describe("institutionGroupsUtil", () => {
+  const aMockedHandler = vi.fn(() => NextResponse.json({}, { status: 200 }));
   it("should return a forbidden error response when isInstitutionAllowed check fails", async () => {
     // given
     const url = new URL("http://localhost");
@@ -67,6 +68,7 @@ describe("institutionGroupsUtil", () => {
     const result = await institutionGroupBaseHandler(nextRequest, {
       backofficeUser: backofficeUserMock,
       params: { institutionId },
+      groupHandler: aMockedHandler,
     });
 
     // then
@@ -93,6 +95,7 @@ describe("institutionGroupsUtil", () => {
     const result = await institutionGroupBaseHandler(nextRequest, {
       backofficeUser: backofficeUserMock,
       params: { institutionId },
+      groupHandler: aMockedHandler,
     });
 
     // then
@@ -117,6 +120,7 @@ describe("institutionGroupsUtil", () => {
     const result = await institutionGroupBaseHandler(nextRequest, {
       backofficeUser: backofficeUserMock,
       params: { institutionId },
+      groupHandler: aMockedHandler,
     });
 
     // then
@@ -160,14 +164,17 @@ describe("institutionGroupsUtil", () => {
       mocks.isAdmin.mockReturnValueOnce(true);
 
       // when
-      await expect(
-        institutionGroupBaseHandler(nextRequest, {
-          backofficeUser: backofficeUserMock,
-          params: { institutionId },
-        }),
-      ).rejects.toThrowError("error from retrieve");
+      const result = await institutionGroupBaseHandler(nextRequest, {
+        backofficeUser: backofficeUserMock,
+        params: { institutionId },
+        groupHandler: aMockedHandler,
+      });
 
       // then
+      expect(result.status).toBe(500);
+      const jsonBody = await result.json();
+      expect(jsonBody.title).toEqual("InstitutionGroupsError");
+      expect(jsonBody.detail).toEqual("Something went wrong");
       expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
       expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
       if (filterType === GroupFilterTypeEnum.UNBOUND) {
@@ -224,10 +231,13 @@ describe("institutionGroupsUtil", () => {
       const result = await institutionGroupBaseHandler(nextRequest, {
         backofficeUser: backofficeUserMock,
         params: { institutionId },
+        groupHandler: (groups) => NextResponse.json(groups),
       });
 
       // then
-      expect(result).toEqual(groups);
+      expect(result.status).toBe(200);
+      const jsonBody = await result.json();
+      expect(jsonBody).toEqual(groups);
       expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
       expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
       if (filterType === GroupFilterTypeEnum.UNBOUND) {
