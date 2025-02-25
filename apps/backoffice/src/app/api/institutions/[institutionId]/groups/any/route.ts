@@ -1,9 +1,9 @@
+import {
+  institutionGroupBaseHandler,
+  isErrorResponse,
+} from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import {
-  getInstitutionGroupBaseHandler,
-  isErrorResponse,
-} from "@/utils/get-institution-groups-util";
 import { NextRequest } from "next/server";
 
 /**
@@ -22,7 +22,7 @@ export const GET = withJWTAuthHandler(
     },
   ) => {
     try {
-      const groupResponse = await getInstitutionGroupBaseHandler(request, {
+      const groupResponse = await institutionGroupBaseHandler(request, {
         backofficeUser,
         params,
       });
