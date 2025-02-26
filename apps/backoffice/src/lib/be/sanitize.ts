@@ -19,6 +19,6 @@ export const sanitizeObject = (obj: any): any => {
     return obj;
   }
 };
-
+//TODO improve typing
 export const sanitizedNextResponseJson = (obj: any, status = 200) =>
   NextResponse.json(sanitizeObject(obj), { status });

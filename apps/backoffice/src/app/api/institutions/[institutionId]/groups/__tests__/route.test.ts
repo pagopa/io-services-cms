@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  GroupFilterType,
-  GroupFilterTypeEnum,
-} from "../../../../../../generated/api/GroupFilterType";
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_INTERNAL_SERVER_ERROR,
+  HTTP_TITLE_BAD_REQUEST,
+  HTTP_TITLE_FORBIDDEN,
+} from "../../../../../../config/constants";
 
-import * as E from "fp-ts/lib/Either";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { GET } from "../route";
 import type { BackOfficeUserEnriched } from "../../../../../../lib/be/wrappers";
 
@@ -14,18 +17,9 @@ const backofficeUserMock = {
 } as BackOfficeUserEnriched;
 
 const mocks = vi.hoisted(() => {
-  const isAdmin = vi.fn(() => true);
-  const isInstitutionAllowed = vi.fn(() => true);
+  const institutionGroupBaseHandler = vi.fn();
   return {
-    isInstitutionAllowed,
-    isAdmin,
-    userAuthz: vi.fn(() => ({
-      isInstitutionAllowed,
-      isAdmin,
-    })),
-    getQueryParam: vi.fn(),
-    retrieveInstitutionGroups: vi.fn(),
-    retrieveUnboundInstitutionGroups: vi.fn(),
+    institutionGroupBaseHandler,
     withJWTAuthHandler: vi.fn(
       (
         handler: (
@@ -42,16 +36,6 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/be/authz", () => ({
-  userAuthz: mocks.userAuthz,
-}));
-vi.mock("@/lib/be/req-res-utils", () => ({
-  getQueryParam: mocks.getQueryParam,
-}));
-vi.mock("@/lib/be/institutions/business", () => ({
-  retrieveUnboundInstitutionGroups: mocks.retrieveUnboundInstitutionGroups,
-  retrieveInstitutionGroups: mocks.retrieveInstitutionGroups,
-}));
 vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   const original = (await importOriginal()) as any;
   return {
@@ -60,112 +44,36 @@ vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   };
 });
 
+vi.mock("../institution-groups-util", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
+  return {
+    ...original,
+    institutionGroupBaseHandler: mocks.institutionGroupBaseHandler,
+  };
+});
+
 beforeEach(() => {
   vi.restoreAllMocks();
 });
 
-afterEach(() => {
-  expect(mocks.userAuthz).toHaveBeenCalledOnce();
-  expect(mocks.userAuthz).toHaveBeenCalledWith(backofficeUserMock);
-});
-
 describe("getInstitutionGroups", () => {
-  it("should return an error response bad request when isInstitutionIdSameAsCaller check fail", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    mocks.isInstitutionAllowed.mockReturnValueOnce(false);
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(403);
-    expect(jsonBody.detail).toEqual("Unauthorized institutionId");
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-    expect(mocks.isAdmin).not.toHaveBeenCalled();
-    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
-  });
-
-  it("should return an error response bad request when user is not an admin", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    mocks.isAdmin.mockReturnValueOnce(false);
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    const jsonBody = await result.json();
-    expect(result.status).toBe(403);
-    expect(jsonBody.detail).toEqual("Role not authorized");
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-    expect(mocks.isAdmin).toHaveBeenCalledOnce();
-    expect(mocks.isAdmin).toHaveBeenCalledWith();
-    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
-  });
-
-  it("should return an error response when kind query param is not valid", async () => {
-    // given
-    const url = new URL("http://localhost");
-    const nextRequest = new NextRequest(url);
-    const institutionId = "institutionId";
-    mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
-
-    // when
-    const result = await GET(nextRequest, {
-      params: { institutionId },
-    });
-
-    // then
-    expect(result.status).toBe(400);
-    const responseBody = await result.json();
-    expect(responseBody.title).toEqual("Bad Request");
-    expect(responseBody.detail).toEqual(
-      `'filter' query param is not a valid ${GroupFilterType.name}`,
-    );
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
-    expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-    expect(mocks.isAdmin).toHaveBeenCalledOnce();
-    expect(mocks.isAdmin).toHaveBeenCalledWith();
-    expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-    expect(mocks.getQueryParam).toHaveBeenCalledWith(
-      nextRequest,
-      "filter",
-      GroupFilterType,
-      GroupFilterTypeEnum.ALL,
-    );
-    expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
-  });
-
   it.each`
-    institutionId      | filterType                     | institutionGroupsMock                     | expectedInstitutionGroupsMockParams
-    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]}
-    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}
+    institutionGroupBaseHandlerResponseStatusCode | institutionGroupBaseHandlerResponse
+    ${403}                                        | ${NextResponse.json({ detail: "error detail", status: HTTP_STATUS_FORBIDDEN, title: HTTP_TITLE_FORBIDDEN }, { status: HTTP_STATUS_FORBIDDEN })}
+    ${400}                                        | ${NextResponse.json({ detail: "error detail", status: HTTP_STATUS_BAD_REQUEST, title: HTTP_TITLE_BAD_REQUEST }, { status: HTTP_STATUS_BAD_REQUEST })}
   `(
-    "should return an error response bad request when retrieveUnboundInstitutionGroups rejects and filter type is $filterType",
+    "should return an error response bad request when institutionGroupBaseHandler returns a response with status code $institutionGroupBaseHandlerResponseStatusCode",
     async ({
-      institutionId,
-      filterType,
-      institutionGroupsMock,
-      expectedInstitutionGroupsMockParams,
+      institutionGroupBaseHandlerResponseStatusCode,
+      institutionGroupBaseHandlerResponse,
     }) => {
       // given
       const url = new URL("http://localhost");
       const nextRequest = new NextRequest(url);
-      const error = new Error();
-      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
-      institutionGroupsMock.mockRejectedValueOnce(error);
+      const institutionId = "institutionId";
+      mocks.institutionGroupBaseHandler.mockResolvedValueOnce(
+        institutionGroupBaseHandlerResponse,
+      );
 
       // when
       const result = await GET(nextRequest, {
@@ -174,70 +82,79 @@ describe("getInstitutionGroups", () => {
 
       // then
       const jsonBody = await result.json();
-      expect(result.status).toBe(500);
-      expect(jsonBody.title).toEqual("InstitutionGroupsError");
-      expect(jsonBody.detail).toEqual("Something went wrong");
-      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
-      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-      expect(mocks.isAdmin).toHaveBeenCalledOnce();
-      expect(mocks.isAdmin).toHaveBeenCalledWith();
-      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getQueryParam).toHaveBeenCalledWith(
-        nextRequest,
-        "filter",
-        GroupFilterType,
-        GroupFilterTypeEnum.ALL,
-      );
-      expect(institutionGroupsMock).toHaveBeenCalledOnce();
-      expect(institutionGroupsMock).toHaveBeenCalledWith(
-        ...expectedInstitutionGroupsMockParams,
-      );
+      expect(result.status).toBe(institutionGroupBaseHandlerResponseStatusCode);
+      expect(jsonBody.detail).toEqual("error detail");
+      expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
+      const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+      expect(callArgs[0]).toBe(nextRequest);
+      expect(callArgs[1].params.institutionId).toBe(institutionId);
+      expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+      expect(typeof callArgs[1].groupHandler).toBe("function");
     },
   );
 
-  it.each`
-    institutionId      | filterType                     | institutionGroupsMock                     | expectedInstitutionGroupsMockParams
-    ${"institutionId"} | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]}
-    ${"institutionId"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}
-  `(
-    "should succeed when filter type is $filterType",
-    async ({
-      institutionId,
-      filterType,
-      institutionGroupsMock,
-      expectedInstitutionGroupsMockParams,
-    }) => {
-      // given
-      const url = new URL("http://localhost");
-      const nextRequest = new NextRequest(url);
-      const groups = [];
-      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
-      institutionGroupsMock.mockResolvedValueOnce(groups);
+  it("should return an error response internal server error when institutionGroupBaseHandler throws an error", async () => {
+    // given
+    const url = new URL("http://localhost");
+    const nextRequest = new NextRequest(url);
+    const institutionId = "institutionId";
+    mocks.institutionGroupBaseHandler.mockResolvedValueOnce(
+      NextResponse.json(
+        {
+          detail: "error detail",
+          status: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+          title: HTTP_STATUS_INTERNAL_SERVER_ERROR,
+        },
+        { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
+      ),
+    );
 
-      // when
-      const result = await GET(nextRequest, {
-        params: { institutionId },
-      });
+    // when
+    const result = await GET(nextRequest, {
+      params: { institutionId },
+    });
 
-      // then
-      const jsonBody = await result.json();
-      expect(result.status).toBe(200);
-      expect(jsonBody).toStrictEqual({ groups });
-      expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
-      expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-      expect(mocks.isAdmin).toHaveBeenCalledOnce();
-      expect(mocks.isAdmin).toHaveBeenCalledWith();
-      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getQueryParam).toHaveBeenCalledWith(
-        nextRequest,
-        "filter",
-        GroupFilterType,
-        GroupFilterTypeEnum.ALL,
-      );
-      expect(institutionGroupsMock).toHaveBeenCalledOnce();
-      expect(institutionGroupsMock).toHaveBeenCalledWith(
-        ...expectedInstitutionGroupsMockParams,
-      );
-    },
-  );
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(500);
+    expect(jsonBody.detail).toEqual("error detail");
+    expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
+    const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+    expect(callArgs[0]).toBe(nextRequest);
+    expect(callArgs[1].params.institutionId).toBe(institutionId);
+    expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+    expect(typeof callArgs[1].groupHandler).toBe("function");
+  });
+
+  it("should return a 200 response", async () => {
+    // given
+    const url = new URL("http://localhost");
+    const nextRequest = new NextRequest(url);
+    const institutionId = "institutionId";
+    const groups = [
+      {
+        id: "groupId",
+        name: "groupName",
+        state: "ACTIVE",
+      },
+    ];
+    const response = NextResponse.json({ groupResponse: groups });
+    mocks.institutionGroupBaseHandler.mockResolvedValueOnce(response);
+
+    // when
+    const result = await GET(nextRequest, {
+      params: { institutionId },
+    });
+
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(200);
+    expect(jsonBody).toEqual({ groupResponse: groups });
+    expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
+    const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
+    expect(callArgs[0]).toBe(nextRequest);
+    expect(callArgs[1].params.institutionId).toBe(institutionId);
+    expect(callArgs[1].backofficeUser).toBe(backofficeUserMock);
+    expect(typeof callArgs[1].groupHandler).toBe("function");
+  });
 });
