@@ -15,6 +15,7 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { GroupNotFoundError } from "../errors";
+import { GroupFilter } from "../selfcare-client";
 import { getManageSubscriptions } from "../subscriptions/business";
 
 // Type utility to extract the resolved type of a Promise
@@ -52,12 +53,18 @@ export const retrieveInstitution = async (
  */
 export const retrieveInstitutionGroups = async (
   institutionId: string,
+  state?: GroupFilter,
 ): Promise<Group[]> => {
   const groups: Group[] = [];
   let page = 0;
   let hasMoreItems = false;
   do {
-    const apiResult = await getInstitutionGroups(institutionId, 1000, page++);
+    const apiResult = await getInstitutionGroups(
+      institutionId,
+      1000,
+      page++,
+      state,
+    );
     groups.push(...toGroups(apiResult.content));
     hasMoreItems = apiResult.totalPages >= page;
   } while (hasMoreItems);

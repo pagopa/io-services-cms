@@ -6,7 +6,11 @@ import {
   InstitutionNotFoundError,
   ManagedInternalError,
 } from "@/lib/be/errors";
-import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
+import {
+  GroupFilter,
+  UserInstitutions,
+  getSelfcareClient,
+} from "@/lib/be/selfcare-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { isAxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
@@ -60,11 +64,13 @@ export const getInstitutionGroups = async (
   institutionId: string,
   size?: number,
   page?: number,
+  state?: GroupFilter,
 ): Promise<PageOfUserGroupResource> => {
   const apiResult = await getSelfcareClient().getInstitutionGroups(
     institutionId,
     size,
     page,
+    state,
   )();
 
   if (E.isLeft(apiResult)) {
