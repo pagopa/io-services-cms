@@ -27,9 +27,10 @@ export const institutionGroupBaseHandler = async (
     params,
   }: {
     backofficeUser: BackOfficeUserEnriched;
-    groupHandler: (groups: Group[]) => NextResponse<unknown>;
+    groupHandler: (groups: Group[]) => NextResponse<unknown>; //TODO improve typing
     params: { institutionId: string };
   },
+  //TODO improve typing
 ): Promise<NextResponse> => {
   try {
     const userAuthz = getUserAuthz(backofficeUser);
