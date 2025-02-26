@@ -1,5 +1,34 @@
 # io-services-cms-backoffice
 
+## 1.25.0
+
+### Minor Changes
+
+- 718b08cb: Added action to unbound service from group
+
+### Patch Changes
+
+- 1e69106e: Added loader on single apikey group accordion item
+- 18cdeb18: Added active group control when admin user click on "Associate groups" in Services Page
+- 02bd3beb: fix selc groups on forward to cms
+- 4aea46f7: Added loaders on ApiKey Group UX data components
+- 201808c7: Operator users cannot access to services bounded to SUSPENDED/DELETED group
+- 15d0f69a: Added pagination on ApiKey Group section of ApiKey page
+- e443e513: added put /serviceId/patch api
+- 42c1bad4: refactor permissions on getInstitutionGroups
+- 28f95425: Added GroupFilterType on checkInstitutionGroupsExistence and set filter=UNBOUNDED on generate ApiKey Group initial check
+- dd0c03b9: Added clearable behaviour to group selector in service create funnel
+- 69629f31: Remove unboundServiceFromGroup openapi spec and replace backoffice frontend implementation with patchService api call
+- 9c739153: Added apikey group tags pagination in overview page
+- c25fcde8: Added hasApiKeyGroupsFeatures auth util fn to enable ApiKey Groups feaatures based on FF and on test institution only"
+- 835dcb8e: added check for active group on bulk patch
+- e0a78066: fix group on service list
+- 793a73e4: Added ux/ui for suspended group/apikeys
+- 8e191dfc: show suspended group on service list
+- 07b081b9: Openapi specification delete unbound group from service
+- cfba6c33: refactor on wrapping logic for patch api
+- 8c687205: Updated copy for ApiKey Group section in ApiKey page
+
 ## 1.24.0
 
 ### Minor Changes
