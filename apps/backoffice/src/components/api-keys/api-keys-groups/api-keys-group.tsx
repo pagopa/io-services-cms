@@ -9,6 +9,7 @@ import {
   AccordionSummary,
   Box,
   Button,
+  CircularProgress,
   Stack,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
@@ -112,31 +113,37 @@ export const ApiKeyGroup = ({
           )}
         </Stack>
       </AccordionSummary>
-      {apiKey.primary_key && apiKey.cidrs && (
-        <AccordionDetails
-          sx={{
-            border: borderStyle,
-            borderRadius: 1,
-            margin: 3,
-            marginTop: 1,
-          }}
-        >
-          <ApiKeys
-            keys={{
-              primary_key: apiKey.primary_key,
-              secondary_key: apiKey.secondary_key,
+      {canBeExpanded() ? (
+        apiKey.primary_key && apiKey.cidrs ? (
+          <AccordionDetails
+            sx={{
+              border: borderStyle,
+              borderRadius: 1,
+              margin: 3,
+              marginTop: 1,
             }}
-            onRotateKey={(type) => onRotateKey(type, subscriptionId)}
-            type="manage" // TODO: must add new type for "manage_group"
-          />
-          <AuthorizedCidrs
-            cidrs={apiKey.cidrs as unknown as string[]}
-            description="routes.keys.authorizedCidrs.description"
-            editable={true}
-            onSaveClick={(cidrs) => onUpdateCidrs(cidrs, subscriptionId)}
-          />
-        </AccordionDetails>
-      )}
+          >
+            <ApiKeys
+              keys={{
+                primary_key: apiKey.primary_key,
+                secondary_key: apiKey.secondary_key,
+              }}
+              onRotateKey={(type) => onRotateKey(type, subscriptionId)}
+              type="manage" // TODO: must add new type for "manage_group"
+            />
+            <AuthorizedCidrs
+              cidrs={apiKey.cidrs as unknown as string[]}
+              description="routes.keys.authorizedCidrs.description"
+              editable={true}
+              onSaveClick={(cidrs) => onUpdateCidrs(cidrs, subscriptionId)}
+            />
+          </AccordionDetails>
+        ) : (
+          <Box paddingY={1} textAlign="center">
+            <CircularProgress size={30} />
+          </Box>
+        )
+      ) : null}
     </Accordion>
   );
 };
