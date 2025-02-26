@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.2
+
+### Patch Changes
+
+- b5a4fd88: remove group's feature from test institution
+
 ## 1.25.1
 
 ### Patch Changes
