@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.1
+
+### Patch Changes
+
+- c00b95df: Fixed apikey group feature activation on services list items
+
 ## 1.25.0
 
 ### Minor Changes
