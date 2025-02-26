@@ -125,7 +125,8 @@ export default function Services() {
         <Button
           disabled={
             isServiceStatusValueDeleted(service.status.value) ||
-            isOperatorAndServiceBoundedToInactiveGroup(session)(service)
+            (hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+              isOperatorAndServiceBoundedToInactiveGroup(session)(service))
           }
           onClick={() =>
             hasTwoDifferentVersions(service)
@@ -137,6 +138,7 @@ export default function Services() {
             hasTwoDifferentVersions(service) ? (
               <CallSplit
                 color={
+                  hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
                   isOperatorAndServiceBoundedToInactiveGroup(session)(service)
                     ? "disabled"
                     : "primary"
@@ -323,7 +325,10 @@ export default function Services() {
     const result: TableRowMenuAction[] = [];
 
     // Group Check: no menu actions for operator and services with not active selfcare bounded group
-    if (isOperatorAndServiceBoundedToInactiveGroup(session)(service))
+    if (
+      hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+      isOperatorAndServiceBoundedToInactiveGroup(session)(service)
+    )
       return result;
 
     // Lifecycle actions
