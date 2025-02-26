@@ -201,12 +201,14 @@ describe("Institutions", () => {
         institutionId,
         1000,
         0,
+        undefined,
       );
       expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(
         2,
         institutionId,
         1000,
         1,
+        undefined,
       );
       expect(result).toStrictEqual([
         ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
@@ -237,6 +239,7 @@ describe("Institutions", () => {
         (mocks.institutionGroups.content as any[])[0].institutionId,
         1000,
         0,
+        undefined,
       );
     });
   });
@@ -311,6 +314,7 @@ describe("Institutions", () => {
         institutionId,
         1000,
         0,
+        undefined,
       );
     });
 
@@ -349,6 +353,7 @@ describe("Institutions", () => {
         institutionId,
         1000,
         0,
+        undefined,
       );
     });
   });

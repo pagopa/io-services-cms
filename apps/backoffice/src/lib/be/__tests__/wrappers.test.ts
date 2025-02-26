@@ -183,6 +183,7 @@ describe("withJWTAuthHandler", () => {
     expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
     expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
       mocks.jwtMock.institution.id,
+      "*",
     );
   });
 });
