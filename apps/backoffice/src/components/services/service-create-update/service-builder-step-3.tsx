@@ -9,7 +9,7 @@ import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
 import {
   hasApiKeyGroupsFeatures,
-  hasAtLeastOneGroup,
+  isAtLeastInOneGroup,
   isOperator,
 } from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
@@ -39,7 +39,7 @@ export const getValidationSchema = (
       group_id:
         hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
         isOperator(session) &&
-        hasAtLeastOneGroup(session)
+        isAtLeastInOneGroup(session)
           ? z.string().min(1, { message: t("forms.errors.field.required") })
           : z.string().optional(),
     }),

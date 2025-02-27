@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { TEST_INSTITUTION_ID } from "../../config/constants";
 import {
-  hasAtLeastOneGroup,
+  isAtLeastInOneGroup,
   hasManageKeyGroup,
   hasManageKeyRoot,
   hasRequiredAuthorizations,
@@ -199,22 +199,22 @@ describe("[auth utils] hasAtLeastOneGroup", () => {
   };
 
   it("should return false for a session without groups", () => {
-    const result = hasAtLeastOneGroup(aSessionWithoutGroups);
+    const result = isAtLeastInOneGroup(aSessionWithoutGroups);
     expect(result).toBe(false);
   });
 
   it("should return false for a session with empty groups", () => {
-    const result = hasAtLeastOneGroup(aSessionWithEmptyGroups);
+    const result = isAtLeastInOneGroup(aSessionWithEmptyGroups);
     expect(result).toBe(false);
   });
 
   it("should return true for a session with one group", () => {
-    const result = hasAtLeastOneGroup(aSessionWithOneGroup);
+    const result = isAtLeastInOneGroup(aSessionWithOneGroup);
     expect(result).toBe(true);
   });
 
   it("should return true for a session with more groups", () => {
-    const result = hasAtLeastOneGroup(aSessionWithMoreGroups);
+    const result = isAtLeastInOneGroup(aSessionWithMoreGroups);
     expect(result).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import { EmptyStateCard } from "@/components/empty-state";
 import { Subscription } from "@/generated/api/Subscription";
-import { isAdmin } from "@/utils/auth-util";
+import { isAdmin, isAtLeastInOneGroup } from "@/utils/auth-util";
 import {
   SupervisedUserCircle,
   WarningAmberOutlined,
@@ -22,10 +22,6 @@ export const ApiKeysGroupsEmptyState = ({
 }: ApiKeysGroupsEmptyStateProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-
-  const hasAtLeastOneGroup =
-    session?.user?.permissions.selcGroups &&
-    session?.user?.permissions.selcGroups.length > 0;
 
   const hasAtLeastOneApiKeysGroups =
     Array.isArray(apiKeysGroups) && apiKeysGroups.length > 0;
@@ -51,7 +47,7 @@ export const ApiKeysGroupsEmptyState = ({
   // operator users
   else
     return (
-      hasAtLeastOneGroup &&
+      isAtLeastInOneGroup(session) &&
       !hasAtLeastOneApiKeysGroups && (
         <EmptyStateCard
           description="routes.overview.apiKeys.groups.emptyState.operator"

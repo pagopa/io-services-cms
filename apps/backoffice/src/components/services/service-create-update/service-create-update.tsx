@@ -65,7 +65,7 @@ export const ServiceCreateUpdate = ({
   const handleOperatorWithSingleGroup = () =>
     hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
     isOperator(session) &&
-    session?.user?.permissions.selcGroups &&
+    session?.user?.permissions.selcGroups !== undefined &&
     session.user.permissions.selcGroups.length === 1
       ? session.user.permissions.selcGroups[0]
       : "";
