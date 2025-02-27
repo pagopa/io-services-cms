@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.3
+
+### Patch Changes
+
+- e097c467: restore feature flag groups for test institution
+
 ## 1.25.2
 
 ### Patch Changes
