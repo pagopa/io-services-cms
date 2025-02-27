@@ -10,6 +10,7 @@ import {
   hasApiKeyGroupsFeatures,
   hasManageKeyGroup,
   hasManageKeyRoot,
+  isOperator,
 } from "@/utils/auth-util";
 import { ArrowForward } from "@mui/icons-material";
 import { Box, Divider, Stack, Typography } from "@mui/material";
@@ -44,7 +45,7 @@ export const ApiKeysCard = () => {
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
   const hideKeysCta =
     hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
-    session?.user?.institution.role === "operator" &&
+    isOperator(session) &&
     session?.user?.permissions.selcGroups &&
     session?.user?.permissions.selcGroups.length > 0 &&
     mspData?.value &&

@@ -64,7 +64,8 @@ export function SelectController({
             MenuProps={{ disableScrollLock: true }}
             endAdornment={
               clearable &&
-              value && (
+              value &&
+              !props.disabled && (
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setValue(name, "")}

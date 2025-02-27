@@ -5,9 +5,12 @@ import {
   arrayOfIPv4CidrSchema,
   getOptionalUrlSchema,
 } from "@/components/forms/schemas";
+import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
+import { hasApiKeyGroupsFeatures, isOperator } from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
+import { Session } from "next-auth";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -16,7 +19,12 @@ import * as z from "zod";
 import { ServiceExtraConfigurator } from "./service-extra-configurator";
 import { ServiceGroupSelector } from "./service-group-selector";
 
-export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
+
+export const getValidationSchema = (
+  t: TFunction<"translation", undefined>,
+  session: Session | null,
+) =>
   z.object({
     authorized_cidrs: arrayOfIPv4CidrSchema,
     metadata: z.object({
@@ -24,6 +32,11 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
         text: z.string(),
         url: getOptionalUrlSchema(t),
       }),
+      group_id:
+        hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+        isOperator(session)
+          ? z.string().min(1, { message: t("forms.errors.field.required") })
+          : z.string().optional(),
     }),
   });
 
