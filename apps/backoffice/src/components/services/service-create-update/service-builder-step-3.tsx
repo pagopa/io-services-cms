@@ -7,7 +7,11 @@ import {
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
-import { hasApiKeyGroupsFeatures, isOperator } from "@/utils/auth-util";
+import {
+  hasApiKeyGroupsFeatures,
+  hasAtLeastOneGroup,
+  isOperator,
+} from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { Session } from "next-auth";
@@ -34,7 +38,8 @@ export const getValidationSchema = (
       }),
       group_id:
         hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
-        isOperator(session)
+        isOperator(session) &&
+        hasAtLeastOneGroup(session)
           ? z.string().min(1, { message: t("forms.errors.field.required") })
           : z.string().optional(),
     }),

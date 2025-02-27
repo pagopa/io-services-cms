@@ -36,6 +36,11 @@ export const hasApiKeyGroupsFeatures =
   (groupApiKeyEnabled: boolean) => (session: Session | null) =>
     groupApiKeyEnabled && session?.user?.institution.id === TEST_INSTITUTION_ID;
 
+/** Check if user is in one or more Selfcare Group  */
+export const hasAtLeastOneGroup = (session: Session | null) =>
+  session?.user?.permissions.selcGroups &&
+  session?.user?.permissions.selcGroups?.length > 0;
+
 /**
  * Can fetch & show Manage ApiKey (root) only for:
  * - `groupApiKeyEnabled=false`
