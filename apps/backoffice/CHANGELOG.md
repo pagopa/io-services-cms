@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.4
+
+### Patch Changes
+
+- 00cb5415: Fix: avoid clearable SelectController when disabled, general improvements on group selector for create service form
+
 ## 1.25.3
 
 ### Patch Changes
