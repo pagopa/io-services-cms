@@ -193,8 +193,7 @@ describe("patchService", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     // then
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual(aService);
+    expect(response.statusCode).toBe(204);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       mockApimService,

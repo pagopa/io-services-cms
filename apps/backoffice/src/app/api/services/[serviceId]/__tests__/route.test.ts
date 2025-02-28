@@ -215,12 +215,14 @@ describe("Services API", () => {
         if (requestPayload.metadata.group_id) {
           groupExistsMock.mockReturnValueOnce(true);
         }
-
+        forwardIoServicesCmsRequestMock.mockReturnValueOnce(
+          new NextResponse(null, { status: 204 }),
+        );
         // when
         const result = await PATCH(request, { params });
 
         // then
-        expect(result.status).toBe(200);
+        expect(result.status).toBe(204);
         expect(userAuthzMock).toHaveBeenCalledOnce();
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
         expect(isAdminMock).toHaveBeenCalledOnce();
