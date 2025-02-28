@@ -194,7 +194,6 @@ describe("patchService", () => {
 
     // then
     expect(response.statusCode).toBe(204);
-    expect(response.body).toStrictEqual(aService);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       mockApimService,
