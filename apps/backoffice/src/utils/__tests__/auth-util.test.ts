@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { TEST_INSTITUTION_ID } from "../../config/constants";
 import {
+  isAtLeastInOneGroup,
   hasManageKeyGroup,
   hasManageKeyRoot,
   hasRequiredAuthorizations,
@@ -9,7 +11,6 @@ import {
   isOperator,
   isOperatorAndServiceBoundedToInactiveGroup,
 } from "../auth-util";
-import { TEST_INSTITUTION_ID } from "../../config/constants";
 
 const anAdminSession: any = {
   user: {
@@ -151,6 +152,70 @@ describe("[auth utils] hasRequiredAuthorizations", () => {
       requiredPermissions: ["p3", "p4"],
     });
     expect(result).toBe(false);
+  });
+});
+
+describe("[auth utils] hasAtLeastOneGroup", () => {
+  const aSessionWithoutGroups: any = {
+    user: {
+      permissions: {
+        apimGroups: ["ApiServiceRead"],
+      },
+      institution: { role: "operator" },
+    },
+  };
+
+  const aSessionWithEmptyGroups: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: [],
+      },
+    },
+  };
+
+  const aSessionWithOneGroup: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: ["group1"],
+      },
+    },
+  };
+
+  const aSessionWithMoreGroups: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: ["group1", "group2", "group3"],
+      },
+    },
+  };
+
+  it("should return false for a session without groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithoutGroups);
+    expect(result).toBe(false);
+  });
+
+  it("should return false for a session with empty groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithEmptyGroups);
+    expect(result).toBe(false);
+  });
+
+  it("should return true for a session with one group", () => {
+    const result = isAtLeastInOneGroup(aSessionWithOneGroup);
+    expect(result).toBe(true);
+  });
+
+  it("should return true for a session with more groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithMoreGroups);
+    expect(result).toBe(true);
   });
 });
 

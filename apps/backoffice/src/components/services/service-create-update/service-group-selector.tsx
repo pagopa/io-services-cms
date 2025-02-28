@@ -1,6 +1,7 @@
 import { FormStepSectionWrapper } from "@/components/forms";
 import { SelectController } from "@/components/forms/controllers";
 import { Group } from "@/generated/api/Group";
+import { isAdmin, isOperator } from "@/utils/auth-util";
 import { InfoOutlined, SupervisedUserCircle } from "@mui/icons-material";
 import { Alert, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
@@ -15,8 +16,6 @@ export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
-  const isOperator = () => session?.user?.institution.role === "operator";
-
   return (
     <FormStepSectionWrapper
       description={t("forms.service.metadata.group.description")}
@@ -24,7 +23,7 @@ export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
       key={0}
       title={t("forms.service.metadata.group.title")}
     >
-      {isOperator() && (
+      {isOperator(session) && (
         <Alert
           icon={<InfoOutlined />}
           severity="info"
@@ -37,8 +36,8 @@ export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
         </Alert>
       )}
       <SelectController
-        clearable
-        disabled={isOperator() && groups?.length === 1}
+        clearable={isAdmin(session)}
+        //disabled={isOperator(session) && groups?.length === 1}
         items={
           groups
             ? groups.map((group) => ({

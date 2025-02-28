@@ -11,7 +11,11 @@ import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
-import { hasManageKeyGroup } from "@/utils/auth-util";
+import {
+  hasApiKeyGroupsFeatures,
+  hasManageKeyGroup,
+  isOperator,
+} from "@/utils/auth-util";
 import {
   trackServiceCreateAbortEvent,
   trackServiceEditAbortEvent,
@@ -59,8 +63,9 @@ export const ServiceCreateUpdate = ({
   const { data: groupsData, fetchData: groupsFetchData } = useFetch<Groups>();
 
   const handleOperatorWithSingleGroup = () =>
-    session?.user?.institution.role === "operator" &&
-    session.user.permissions.selcGroups &&
+    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+    isOperator(session) &&
+    session?.user?.permissions.selcGroups !== undefined &&
     session.user.permissions.selcGroups.length === 1
       ? session.user.permissions.selcGroups[0]
       : "";
@@ -129,7 +134,7 @@ export const ServiceCreateUpdate = ({
       content: <ServiceBuilderStep3 groups={groupsData?.groups} mode={mode} />,
       description: "forms.service.steps.step3.description",
       label: "forms.service.steps.step3.label",
-      validationSchema: getVs3(t),
+      validationSchema: getVs3(t, session),
     },
   ];
 
