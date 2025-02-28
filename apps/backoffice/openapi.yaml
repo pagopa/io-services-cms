@@ -500,12 +500,8 @@ paths:
               $ref: '#/components/schemas/PatchServicePayload'
         required: true
       responses:
-        '200':
+        '204':
           description: Service updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceLifecycle'
         '400':
           description: Invalid payload
         '401':
