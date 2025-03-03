@@ -11,6 +11,7 @@ const anAuthrizedCIDRs = ["127.0.0.1" as Cidr];
 
 const mock: {
   isGroupAllowed: Mock;
+  isAdminMock: Mock;
   userAuthz: Mock;
   parseBody: Mock;
   retrieveManageSubscriptionAuthorizedCIDRs: Mock;
@@ -19,7 +20,11 @@ const mock: {
 } = vi.hoisted(() => ({
   isGroupAllowed: vi.fn(),
   parseBody: vi.fn(),
-  userAuthz: vi.fn(() => ({ isGroupAllowed: mock.isGroupAllowed })),
+  isAdminMock: vi.fn(() => true),
+  userAuthz: vi.fn(() => ({
+    isGroupAllowed: mock.isGroupAllowed,
+    isAdmin: mock.isAdminMock,
+  })),
   retrieveManageSubscriptionAuthorizedCIDRs: vi.fn(),
   upsertManageSubscriptionAuthorizedCIDRs: vi.fn(),
   withJWTAuthHandler: vi.fn(
@@ -168,7 +173,7 @@ describe("Authorized CIDRs API", () => {
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
       const subscriptionId = `MANAGE-GROUP-${groupId}`;
-      mock.isGroupAllowed.mockReturnValueOnce(false);
+      mock.isAdminMock.mockReturnValueOnce(false);
 
       // when
       const result = await PUT(nextRequest, {
@@ -183,8 +188,8 @@ describe("Authorized CIDRs API", () => {
       );
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
-      expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
+      expect(mock.isAdminMock).toHaveBeenCalledOnce();
+      expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.parseBody).not.toHaveBeenCalled();
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs,
@@ -214,8 +219,8 @@ describe("Authorized CIDRs API", () => {
       expect(jsonBody.detail).toEqual(error.message);
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
-      expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
+      expect(mock.isAdminMock).toHaveBeenCalledOnce();
+      expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
@@ -251,8 +256,8 @@ describe("Authorized CIDRs API", () => {
       expect(jsonBody.detail).toEqual("Something went wrong");
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
-      expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
+      expect(mock.isAdminMock).toHaveBeenCalledOnce();
+      expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
@@ -292,8 +297,8 @@ describe("Authorized CIDRs API", () => {
       expect(jsonBody).toStrictEqual({ cidrs: anAuthrizedCIDRs });
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
-      expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
+      expect(mock.isAdminMock).toHaveBeenCalledOnce();
+      expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
