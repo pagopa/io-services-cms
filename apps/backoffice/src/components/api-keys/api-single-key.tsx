@@ -1,4 +1,6 @@
+import { getConfiguration } from "@/config";
 import { SubscriptionKeyTypeEnum } from "@/generated/services-cms/SubscriptionKeyType";
+import { isAdmin } from "@/utils/auth-util";
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -8,10 +10,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
 
 import { ApiKeyValue } from ".";
+import { AccessControl } from "../access-control";
+
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 export interface ApiSingleKeyProps {
   keyType: SubscriptionKeyTypeEnum;
@@ -31,7 +37,11 @@ export const ApiSingleKey = ({
   onRotateClick,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
+  const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
+
+  const handleEnableRotateAction = () =>
+    !GROUP_APIKEY_ENABLED || (GROUP_APIKEY_ENABLED && isAdmin(session));
 
   return (
     <Grid columnSpacing={4} container rowSpacing={3}>
@@ -73,14 +83,16 @@ export const ApiSingleKey = ({
           justifyContent="flex-start"
           spacing={2}
         >
-          <Button
-            onClick={() => onRotateClick(keyType)}
-            size="small"
-            startIcon={<Sync fontSize="inherit" />}
-            variant="outlined"
-          >
-            {t("keys.rotate.button")}
-          </Button>
+          <AccessControl checkFn={handleEnableRotateAction}>
+            <Button
+              onClick={() => onRotateClick(keyType)}
+              size="small"
+              startIcon={<Sync fontSize="inherit" />}
+              variant="outlined"
+            >
+              {t("keys.rotate.button")}
+            </Button>
+          </AccessControl>
           {/* <Button //TODO not yet implemented
             variant="outlined"
             size="small"
