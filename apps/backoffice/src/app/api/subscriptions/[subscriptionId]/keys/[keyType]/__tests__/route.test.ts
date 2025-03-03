@@ -9,12 +9,15 @@ const backofficeUserMock = { permissions: {} } as BackOfficeUser;
 const {
   userAuthzMock,
   isGroupAllowedMock,
+  isAdminMock,
   regenerateManageSubscritionApiKeyMock,
   withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
+  isAdminMock: vi.fn(() => true),
   userAuthzMock: vi.fn(() => ({
     isGroupAllowed: isGroupAllowedMock,
+    isAdmin: isAdminMock,
   })),
   regenerateManageSubscritionApiKeyMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
@@ -52,7 +55,7 @@ describe("regenerateManageSubscriptionKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
     const subscriptionId = `MANAGE-GROUP-${groupId}`;
-    isGroupAllowedMock.mockReturnValueOnce(false);
+    isAdminMock.mockReturnValueOnce(false);
 
     // when
     const result = await PUT(nextRequest, {
@@ -62,13 +65,11 @@ describe("regenerateManageSubscriptionKey", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(jsonBody.detail).toEqual(
-      "Requested subscription is out of your scope",
-    );
+    expect(jsonBody.detail).toEqual("Role not authorized");
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isGroupAllowedMock).toHaveBeenCalledOnce();
-    expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+    expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(isAdminMock).toHaveBeenCalledWith();
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
 
@@ -77,7 +78,7 @@ describe("regenerateManageSubscriptionKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
     const subscriptionId = `MANAGE-GROUP-${groupId}`;
-    isGroupAllowedMock.mockReturnValueOnce(true);
+    isAdminMock.mockReturnValueOnce(true);
     const keyType = "invalid";
 
     // when
@@ -91,8 +92,8 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(jsonBody.detail).toMatch(/is not a valid/);
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isGroupAllowedMock).toHaveBeenCalledOnce();
-    expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+    expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(isAdminMock).toHaveBeenCalledWith();
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
 
@@ -119,8 +120,8 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(jsonBody).toStrictEqual(expectedResponse);
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isGroupAllowedMock).toHaveBeenCalledOnce();
-    expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+    expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(isAdminMock).toHaveBeenCalledWith();
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
       subscriptionId,
@@ -139,7 +140,7 @@ describe("regenerateManageSubscriptionKey", () => {
       const keyType = "primary";
       const groupId = "groupId";
       const subscriptionId = `MANAGE-GROUP-${groupId}`;
-      isGroupAllowedMock.mockReturnValueOnce(true);
+      isAdminMock.mockReturnValueOnce(true);
       regenerateManageSubscritionApiKeyMock.mockRejectedValueOnce(error);
 
       // when
@@ -154,8 +155,8 @@ describe("regenerateManageSubscriptionKey", () => {
       expect(jsonBody.detail).toEqual(expectedDetail);
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-      expect(isGroupAllowedMock).toHaveBeenCalledOnce();
-      expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
         subscriptionId,
