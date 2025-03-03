@@ -31,9 +31,7 @@ export const PUT = withJWTAuthHandler(
     },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
     if (!userAuthz(backofficeUser).isAdmin()) {
-      return handleForbiddenErrorResponse(
-        "Requested subscription is out of your scope",
-      );
+      return handleForbiddenErrorResponse("Role not authorized");
     }
     try {
       const maybeDecodedKeyType = SubscriptionKeyType.decode(params.keyType);

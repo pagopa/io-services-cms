@@ -29,9 +29,7 @@ export const PUT = withJWTAuthHandler(
         getConfiguration().GROUP_AUTHZ_ENABLED &&
         !userAuthz(backofficeUser).isAdmin()
       ) {
-        return handleForbiddenErrorResponse(
-          "Requested subscription is out of your scope",
-        );
+        return handleForbiddenErrorResponse("Role not authorized");
       }
       const decodedKeyType = SubscriptionKeyType.decode(params.keyType);
 

@@ -65,9 +65,7 @@ describe("regenerateManageSubscriptionKey", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
-    expect(jsonBody.detail).toEqual(
-      "Requested subscription is out of your scope",
-    );
+    expect(jsonBody.detail).toEqual("Role not authorized");
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
