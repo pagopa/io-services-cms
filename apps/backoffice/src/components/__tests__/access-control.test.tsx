@@ -10,8 +10,20 @@ const mockUseSession = useSession as Mock;
 
 let requiredPermissions = [""];
 let requiredRole: any;
-let checkFunction: () => boolean;
+let checkFunction: any;
 let renderNoAccess: any;
+
+const resetVariables = () => {
+  requiredPermissions = [];
+  requiredRole = undefined;
+  checkFunction = undefined;
+  renderNoAccess = undefined;
+};
+
+const reset = () => {
+  cleanup();
+  resetVariables();
+}
 
 /** a test `AccessControl` component */
 const getAccessControlComponent = () => (
@@ -37,8 +49,8 @@ beforeAll(() => {
   });
 });
 
-// needed to clean document (react dom)
-afterEach(cleanup);
+// needed to clean document (react dom) and variables
+afterEach(reset);
 
 describe("[AccessControl] Component", () => {
   it("should render wrapped children if requiredPermissions is a subset of session.user permissions", () => {
