@@ -8,7 +8,11 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { hasManageKeyGroup, hasManageKeyRoot } from "@/utils/auth-util";
+import {
+  hasManageKeyGroup,
+  hasManageKeyRoot,
+  isAdmin,
+} from "@/utils/auth-util";
 import { trackApiKeyPageEvent } from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
 import { useRouter } from "next/router";
@@ -76,7 +80,7 @@ export default function Keys() {
           <AuthorizedCidrs
             cidrs={acData?.cidrs as unknown as string[]}
             description="routes.keys.authorizedCidrs.description"
-            editable={true}
+            editable={!(GROUP_APIKEY_ENABLED && !isAdmin(session))}
             onSaveClick={handleUpdateCidrs}
           />
         </Stack>
