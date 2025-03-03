@@ -1,9 +1,11 @@
+import { getConfiguration } from "@/config";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } from "@/config/constants";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
-import { handlerErrorLog } from "@/lib/be/errors";
+import { userAuthz } from "@/lib/be/authz";
+import { handleForbiddenErrorResponse, handlerErrorLog } from "@/lib/be/errors";
 import {
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs,
@@ -59,6 +61,12 @@ export const PUT = withJWTAuthHandler(
     try {
       const body = await request.json();
       const decodedBody = ManageKeyCIDRs.decode(body);
+      if (
+        getConfiguration().GROUP_AUTHZ_ENABLED &&
+        !userAuthz(backofficeUser).isAdmin()
+      ) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
 
       if (E.isLeft(decodedBody)) {
         return NextResponse.json(

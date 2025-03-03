@@ -79,16 +79,8 @@ export const PUT = withJWTAuthHandler(
       params: { subscriptionId: string };
     },
   ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
-    if (
-      !userAuthz(backofficeUser).isGroupAllowed(
-        params.subscriptionId.substring(
-          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
-        ),
-      )
-    ) {
-      return handleForbiddenErrorResponse(
-        "Requested subscription is out of your scope",
-      );
+    if (!userAuthz(backofficeUser).isAdmin()) {
+      return handleForbiddenErrorResponse("Role not authorized");
     }
     // TODO: add subscription ownerId check. To do that we need to fetch first the subscription in order to get its ownerId and then check equality with backofficeUser.parameters.userId
     let requestPayload;

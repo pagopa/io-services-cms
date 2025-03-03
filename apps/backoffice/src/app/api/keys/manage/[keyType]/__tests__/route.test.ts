@@ -24,6 +24,14 @@ const mocks: {
   } as unknown as BackOfficeUser,
 }));
 
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    GROUP_AUTHZ_ENABLED: "true",
+  };
+});
+
 const { getToken } = vi.hoisted(() => ({
   getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
 }));
@@ -92,5 +100,21 @@ describe("Regenerate Manage Keys API", () => {
     const result = await PUT(request, { params: { keyType: "secondary" } });
 
     expect(result.status).toBe(500);
+  });
+
+  it("should return 403", async () => {
+    getToken.mockReturnValueOnce(
+      Promise.resolve({
+        ...mocks.jwtMock,
+        institution: { ...mocks.jwtMock.institution, role: "operator" },
+      }),
+    );
+
+    // Mock NextRequest
+    const request = new NextRequest(new URL("http://localhost"));
+
+    const result = await PUT(request, { params: { keyType: "secondary" } });
+
+    expect(result.status).toBe(403);
   });
 });

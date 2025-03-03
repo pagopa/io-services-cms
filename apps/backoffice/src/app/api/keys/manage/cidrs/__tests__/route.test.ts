@@ -21,6 +21,14 @@ const mocks: {
   } as unknown as BackOfficeUser,
 }));
 
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    GROUP_AUTHZ_ENABLED: "true",
+  };
+});
+
 const { getToken } = vi.hoisted(() => ({
   getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
 }));
@@ -127,6 +135,28 @@ describe("Authorized CIDRs API", () => {
       const result = await PUT(request, {});
 
       expect(result.status).toBe(400);
+    });
+
+    it("should return 403", async () => {
+      upsertManageSubscriptionAuthorizedCIDRs.mockReturnValueOnce(
+        Promise.resolve(mocks.authrizedCIDRs),
+      );
+      getToken.mockReturnValueOnce(
+        Promise.resolve({
+          ...mocks.jwtMock,
+          institution: { ...mocks.jwtMock, role: "operator" },
+        }),
+      );
+
+      // Mock NextRequest
+      const request = new NextRequest(new URL("http://localhost"), {
+        method: "PUT",
+        body: JSON.stringify({ cidrs: mocks.authrizedCIDRs }),
+      });
+
+      const result = await PUT(request, {});
+
+      expect(result.status).toBe(403);
     });
 
     //mockRejectedValueOnce

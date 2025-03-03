@@ -406,7 +406,11 @@
     },
     "new-service": {
       "title": "Create a new service",
-      "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app."
+      "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app.",
+      "noActiveGroupsModal": {
+        "title": "Create a service",
+        "description": "Cannot create a service because there is no active group.<br/><br/>Contact your administrator to verify your configuration."
+      }
     },
     "edit-service": {
       "title": "Edit the service",

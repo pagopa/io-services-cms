@@ -17,16 +17,19 @@ import {
   TableViewColumn,
 } from "@/components/table-view";
 import { getConfiguration } from "@/config";
+import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServiceList } from "@/generated/api/ServiceList";
 import {
   ServiceListItem,
   VisibilityEnum,
 } from "@/generated/api/ServiceListItem";
-import useFetch from "@/hooks/use-fetch";
+import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import {
   hasApiKeyGroupsFeatures,
+  isAtLeastInOneGroup,
+  isOperator,
   isOperatorAndServiceBoundedToInactiveGroup,
 } from "@/utils/auth-util";
 import {
@@ -47,7 +50,6 @@ import {
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
-import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -92,6 +94,22 @@ const getTypographyDefaultColor = (
   serviceStatusValue: ServiceLifecycleStatusTypeEnum,
 ) =>
   isServiceStatusValueDeleted(serviceStatusValue) ? "text.disabled" : "inherit";
+
+const checkAtLeastOneActiveGroupExists = async (institutionId: string) => {
+  try {
+    const maybeResponse = await client.checkInstitutionGroupsExistence({
+      filter: GroupFilterTypeEnum.ALL,
+      institutionId,
+    });
+
+    if (E.isRight(maybeResponse)) {
+      return maybeResponse.right.status === 200;
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+};
 
 // eslint-disable-next-line max-lines-per-function
 export default function Services() {
@@ -262,6 +280,31 @@ export default function Services() {
     trackServiceEditStartEvent("services", service.id);
 
     router.push(`/services/${service.id}/edit-service`);
+  };
+
+  const handleCreateService = async () => {
+    if (
+      hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED) &&
+      isOperator(session) &&
+      isAtLeastInOneGroup(session)
+    ) {
+      const atLeastOneActiveGroupExists =
+        await checkAtLeastOneActiveGroupExists(
+          session?.user?.institution.id as string,
+        );
+
+      if (!atLeastOneActiveGroupExists) {
+        await showDialog({
+          cancelButtonLabel: t("buttons.close"),
+          hideConfirmButton: true,
+          message: t("routes.new-service.noActiveGroupsModal.description"),
+          title: t("routes.new-service.noActiveGroupsModal.title"),
+        });
+        return;
+      }
+    }
+    trackServiceCreateStartEvent();
+    router.push(CREATE_SERVICE_ROUTE);
   };
 
   /**
@@ -510,22 +553,14 @@ export default function Services() {
         <Grid item xs="auto">
           <Stack direction="row" spacing={2}>
             <AccessControl requiredPermissions={["ApiServiceWrite"]}>
-              <NextLink
-                href={CREATE_SERVICE_ROUTE}
-                passHref
-                style={{ textDecoration: "none" }}
+              <Button
+                onClick={handleCreateService}
+                size="medium"
+                startIcon={<Add />}
+                variant="contained"
               >
-                <Button
-                  onClick={() => {
-                    trackServiceCreateStartEvent();
-                  }}
-                  size="medium"
-                  startIcon={<Add />}
-                  variant="contained"
-                >
-                  {t("service.actions.create")}
-                </Button>
-              </NextLink>
+                {t("service.actions.create")}
+              </Button>
             </AccessControl>
             <ButtonAssociateGroup />
           </Stack>
