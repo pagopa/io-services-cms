@@ -24,6 +24,14 @@ const mocks: {
   } as unknown as BackOfficeUser,
 }));
 
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    GROUP_AUTHZ_ENABLED: "true",
+  };
+});
+
 const { getToken } = vi.hoisted(() => ({
   getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
 }));
