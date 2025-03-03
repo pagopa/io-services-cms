@@ -11,7 +11,6 @@ import {
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
@@ -31,13 +30,7 @@ export const PUT = withJWTAuthHandler(
       params: { keyType: string; subscriptionId: string };
     },
   ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
-    if (
-      !userAuthz(backofficeUser).isGroupAllowed(
-        params.subscriptionId.substring(
-          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
-        ),
-      )
-    ) {
+    if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse(
         "Requested subscription is out of your scope",
       );
