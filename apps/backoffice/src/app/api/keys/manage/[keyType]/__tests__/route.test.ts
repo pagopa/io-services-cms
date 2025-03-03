@@ -93,4 +93,20 @@ describe("Regenerate Manage Keys API", () => {
 
     expect(result.status).toBe(500);
   });
+
+  it("should return 403", async () => {
+    getToken.mockReturnValueOnce(
+      Promise.resolve({
+        ...mocks.jwtMock,
+        institution: { ...mocks.jwtMock.institution, role: "operator" },
+      }),
+    );
+
+    // Mock NextRequest
+    const request = new NextRequest(new URL("http://localhost"));
+
+    const result = await PUT(request, { params: { keyType: "secondary" } });
+
+    expect(result.status).toBe(403);
+  });
 });
