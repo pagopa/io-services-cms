@@ -1,3 +1,4 @@
+import { getConfiguration } from "@/config";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
@@ -24,7 +25,10 @@ export const PUT = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUserEnriched; params: { keyType: string } },
   ) => {
     try {
-      if (!userAuthz(backofficeUser).isAdmin()) {
+      if (
+        getConfiguration().GROUP_AUTHZ_ENABLED &&
+        !userAuthz(backofficeUser).isAdmin()
+      ) {
         return handleForbiddenErrorResponse(
           "Requested subscription is out of your scope",
         );
