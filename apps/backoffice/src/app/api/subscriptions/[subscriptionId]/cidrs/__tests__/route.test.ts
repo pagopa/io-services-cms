@@ -183,9 +183,7 @@ describe("Authorized CIDRs API", () => {
       // then
       const jsonBody = await result.json();
       expect(result.status).toBe(403);
-      expect(jsonBody.detail).toEqual(
-        "Requested subscription is out of your scope",
-      );
+      expect(jsonBody.detail).toEqual("Role not authorized");
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
       expect(mock.isAdminMock).toHaveBeenCalledOnce();
