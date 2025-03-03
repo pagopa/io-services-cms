@@ -79,13 +79,7 @@ export const PUT = withJWTAuthHandler(
       params: { subscriptionId: string };
     },
   ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
-    if (
-      !userAuthz(backofficeUser).isGroupAllowed(
-        params.subscriptionId.substring(
-          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
-        ),
-      )
-    ) {
+    if (!userAuthz(backofficeUser).isAdmin()) {
       return handleForbiddenErrorResponse(
         "Requested subscription is out of your scope",
       );
