@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { TEST_INSTITUTION_ID } from "../../config/constants";
 import {
+  isAtLeastInOneGroup,
   hasManageKeyGroup,
   hasManageKeyRoot,
   hasRequiredAuthorizations,
@@ -16,7 +18,7 @@ const anAdminSession: any = {
       apimGroups: ["ApiServiceWrite"],
       selcGroups: ["aSelcGroup"],
     },
-    institution: { role: "admin" },
+    institution: { id: TEST_INSTITUTION_ID, role: "admin" },
   },
 };
 const anOperatorSession: any = {
@@ -25,7 +27,7 @@ const anOperatorSession: any = {
       apimGroups: ["ApiServiceWrite"],
       selcGroups: ["aSelcGroup"],
     },
-    institution: { role: "operator" },
+    institution: { id: TEST_INSTITUTION_ID, role: "operator" },
   },
 };
 
@@ -153,6 +155,70 @@ describe("[auth utils] hasRequiredAuthorizations", () => {
   });
 });
 
+describe("[auth utils] hasAtLeastOneGroup", () => {
+  const aSessionWithoutGroups: any = {
+    user: {
+      permissions: {
+        apimGroups: ["ApiServiceRead"],
+      },
+      institution: { role: "operator" },
+    },
+  };
+
+  const aSessionWithEmptyGroups: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: [],
+      },
+    },
+  };
+
+  const aSessionWithOneGroup: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: ["group1"],
+      },
+    },
+  };
+
+  const aSessionWithMoreGroups: any = {
+    ...aSessionWithoutGroups,
+    user: {
+      ...aSessionWithoutGroups.user.institution,
+      permissions: {
+        ...aSessionWithoutGroups.user.permissions,
+        selcGroups: ["group1", "group2", "group3"],
+      },
+    },
+  };
+
+  it("should return false for a session without groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithoutGroups);
+    expect(result).toBe(false);
+  });
+
+  it("should return false for a session with empty groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithEmptyGroups);
+    expect(result).toBe(false);
+  });
+
+  it("should return true for a session with one group", () => {
+    const result = isAtLeastInOneGroup(aSessionWithOneGroup);
+    expect(result).toBe(true);
+  });
+
+  it("should return true for a session with more groups", () => {
+    const result = isAtLeastInOneGroup(aSessionWithMoreGroups);
+    expect(result).toBe(true);
+  });
+});
+
 describe("[auth utils] hasManageKeyRoot", () => {
   const aSessionWithoutWritePermission: any = {
     user: {
@@ -218,7 +284,7 @@ describe("[auth utils] hasManageKeyGroup", () => {
       permissions: {
         apimGroups: ["ApiServiceRead"],
       },
-      institution: { role: "operator" },
+      institution: { id: TEST_INSTITUTION_ID, role: "operator" },
     },
   };
 

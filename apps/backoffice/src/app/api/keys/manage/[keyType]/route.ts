@@ -1,9 +1,11 @@
+import { getConfiguration } from "@/config";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } from "@/config/constants";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
-import { handlerErrorLog } from "@/lib/be/errors";
+import { userAuthz } from "@/lib/be/authz";
+import { handleForbiddenErrorResponse, handlerErrorLog } from "@/lib/be/errors";
 import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
@@ -23,6 +25,12 @@ export const PUT = withJWTAuthHandler(
     }: { backofficeUser: BackOfficeUserEnriched; params: { keyType: string } },
   ) => {
     try {
+      if (
+        getConfiguration().GROUP_AUTHZ_ENABLED &&
+        !userAuthz(backofficeUser).isAdmin()
+      ) {
+        return handleForbiddenErrorResponse("Role not authorized");
+      }
       const decodedKeyType = SubscriptionKeyType.decode(params.keyType);
 
       if (E.isLeft(decodedKeyType)) {

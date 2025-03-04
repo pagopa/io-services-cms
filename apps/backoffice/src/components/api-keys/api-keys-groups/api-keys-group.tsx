@@ -1,7 +1,9 @@
 import { AccessControl } from "@/components/access-control";
+import { getConfiguration } from "@/config";
 import { StateEnum } from "@/generated/api/Subscription";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SelfcareRoles } from "@/types/auth";
+import { isAdmin } from "@/utils/auth-util";
 import { Delete, ExpandMore, Warning } from "@mui/icons-material";
 import {
   Accordion,
@@ -9,8 +11,10 @@ import {
   AccordionSummary,
   Box,
   Button,
+  CircularProgress,
   Stack,
 } from "@mui/material";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 
 import { ApiKeyTag } from "../api-key-tag";
@@ -34,6 +38,7 @@ interface ApiKeyGroupProps {
 }
 
 const borderStyle = "1px solid #E3E7EB";
+const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 /** ApiKeyGroup component */
 export const ApiKeyGroup = ({
@@ -46,6 +51,7 @@ export const ApiKeyGroup = ({
   subscriptionId,
 }: ApiKeyGroupProps) => {
   const { t } = useTranslation();
+  const { data: session } = useSession();
 
   const isApiKeySuspended = () => apiKey.state === StateEnum.suspended;
   const canBeExpanded = () => apiKey.state === StateEnum.active;
@@ -112,31 +118,37 @@ export const ApiKeyGroup = ({
           )}
         </Stack>
       </AccordionSummary>
-      {apiKey.primary_key && apiKey.cidrs && (
-        <AccordionDetails
-          sx={{
-            border: borderStyle,
-            borderRadius: 1,
-            margin: 3,
-            marginTop: 1,
-          }}
-        >
-          <ApiKeys
-            keys={{
-              primary_key: apiKey.primary_key,
-              secondary_key: apiKey.secondary_key,
+      {canBeExpanded() ? (
+        apiKey.primary_key && apiKey.cidrs ? (
+          <AccordionDetails
+            sx={{
+              border: borderStyle,
+              borderRadius: 1,
+              margin: 3,
+              marginTop: 1,
             }}
-            onRotateKey={(type) => onRotateKey(type, subscriptionId)}
-            type="manage" // TODO: must add new type for "manage_group"
-          />
-          <AuthorizedCidrs
-            cidrs={apiKey.cidrs as unknown as string[]}
-            description="routes.keys.authorizedCidrs.description"
-            editable={true}
-            onSaveClick={(cidrs) => onUpdateCidrs(cidrs, subscriptionId)}
-          />
-        </AccordionDetails>
-      )}
+          >
+            <ApiKeys
+              keys={{
+                primary_key: apiKey.primary_key,
+                secondary_key: apiKey.secondary_key,
+              }}
+              onRotateKey={(type) => onRotateKey(type, subscriptionId)}
+              type="manage" // TODO: must add new type for "manage_group"
+            />
+            <AuthorizedCidrs
+              cidrs={apiKey.cidrs as unknown as string[]}
+              description="routes.keys.authorizedCidrs.description"
+              editable={!(GROUP_APIKEY_ENABLED && !isAdmin(session))}
+              onSaveClick={(cidrs) => onUpdateCidrs(cidrs, subscriptionId)}
+            />
+          </AccordionDetails>
+        ) : (
+          <Box paddingY={1} textAlign="center">
+            <CircularProgress size={30} />
+          </Box>
+        )
+      ) : null}
     </Accordion>
   );
 };

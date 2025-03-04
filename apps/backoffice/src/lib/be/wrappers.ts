@@ -45,6 +45,7 @@ export const withJWTAuthHandler =
     } else {
       const institutionGroups = await retrieveInstitutionGroups(
         authenticationDetails.institution.id,
+        "*",
       );
       backofficeUser = {
         ...authenticationDetails,

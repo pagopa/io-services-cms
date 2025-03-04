@@ -2,7 +2,7 @@
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
-import { Group, StateEnum } from "@/generated/api/Group";
+import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -73,9 +73,7 @@ const retrieveSubscriptions = (
   backofficeUser.permissions.selcGroups &&
   backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
-        backofficeUser.permissions.selcGroups
-          .filter((selcGroup) => selcGroup.state === StateEnum.ACTIVE)
-          .map((activeGroup) => activeGroup.id),
+        backofficeUser.permissions.selcGroups.map((group) => group.id),
         retrieveAuthorizedServiceIds,
         TE.chain((authzServiceIds) =>
           getSubscriptions(
@@ -125,7 +123,8 @@ export const retrieveServiceList = async (
         TE.chain((auth) =>
           auth.isAdmin() || !auth.hasSelcGroups()
             ? TE.tryCatch(
-                () => retrieveInstitutionGroups(backofficeUser.institution.id),
+                () =>
+                  retrieveInstitutionGroups(backofficeUser.institution.id, "*"),
                 E.toError,
               )
             : TE.right(backofficeUser.permissions.selcGroups),

@@ -15,9 +15,9 @@ import {
   wrapRequestHandler,
 } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
-  IResponseSuccessJson,
+  IResponseSuccessNoContent,
   ResponseErrorInternal,
-  ResponseSuccessJson,
+  ResponseSuccessNoContent,
 } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -48,7 +48,7 @@ type EditServiceHandler = (
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: PatchServicePayload,
-) => TE.TaskEither<ErrorResponseTypes, IResponseSuccessJson<unknown>>;
+) => TE.TaskEither<ErrorResponseTypes, IResponseSuccessNoContent>;
 
 export const makePatchServiceHandler =
   ({
@@ -72,7 +72,7 @@ export const makePatchServiceHandler =
           TE.mapLeft((err) =>
             ResponseErrorInternal("Failed to patch caused by: " + err.message),
           ),
-          TE.map(ResponseSuccessJson),
+          TE.map(ResponseSuccessNoContent),
         ),
       ),
       TE.map(

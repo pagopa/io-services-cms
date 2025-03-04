@@ -5,11 +5,11 @@ import {
 } from "@/components/forms/controllers";
 import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { Groups } from "@/generated/api/Groups";
-import { PatchServicePayload } from "@/generated/api/PatchServicePayload";
 import useFetch from "@/hooks/use-fetch";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as tt from "io-ts";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect } from "react";
@@ -42,7 +42,7 @@ export const AssociateGroupToService = ({
   const { t } = useTranslation();
   const { data: session } = useSession();
   const { data: groupsData, fetchData: groupsFetchData } = useFetch<Groups>();
-  const { fetchData: psFetchData } = useFetch<PatchServicePayload>();
+  const { fetchData: psFetchData } = useFetch<unknown>();
 
   const getValidationSchema = () =>
     z
@@ -84,7 +84,7 @@ export const AssociateGroupToService = ({
           },
           serviceId: service?.id ?? "",
         },
-        PatchServicePayload,
+        tt.unknown,
         { notify: "all" },
       );
       onConfirm();

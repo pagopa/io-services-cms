@@ -1,3 +1,4 @@
+import { StateEnum } from "@/generated/api/Group";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
 import {
@@ -24,6 +25,8 @@ export const UserInstitutions = t.readonlyArray(
 );
 export type UserInstitutions = t.TypeOf<typeof UserInstitutions>;
 
+export type GroupFilter = "*" | StateEnum;
+
 export interface SelfcareClient {
   getGroup: (
     id: NonEmptyString,
@@ -35,6 +38,7 @@ export interface SelfcareClient {
     institutionId: string,
     size?: number,
     page?: number,
+    state?: GroupFilter,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getUserAuthorizedInstitutions: (
     userId: string,
@@ -151,6 +155,7 @@ const buildSelfcareClient = (): SelfcareClient => {
     institutionId: string,
     size?: number,
     page?: number,
+    state: GroupFilter = StateEnum.ACTIVE,
   ) =>
     pipe(
       TE.tryCatch(
@@ -160,7 +165,7 @@ const buildSelfcareClient = (): SelfcareClient => {
               institutionId,
               page,
               size,
-              status: "ACTIVE",
+              status: state === "*" ? undefined : state,
             },
           }),
         flow(

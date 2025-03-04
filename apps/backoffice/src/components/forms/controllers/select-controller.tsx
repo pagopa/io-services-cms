@@ -1,3 +1,4 @@
+import { LoaderSkeleton } from "@/components/loaders";
 import { Clear } from "@mui/icons-material";
 import {
   FormControl,
@@ -35,7 +36,14 @@ export function SelectController({
   const { control, formState, register, setValue } = useFormContext();
   const error = get(formState.errors, name);
 
-  if (items.length === 0) return; // avoid mui out-of-range error
+  // avoid mui out-of-range error
+  if (items.length === 0)
+    return (
+      <LoaderSkeleton loading style={{ height: 87, width: "100%" }}>
+        <></>
+      </LoaderSkeleton>
+    );
+
   return (
     <Controller
       control={control}
@@ -56,7 +64,8 @@ export function SelectController({
             MenuProps={{ disableScrollLock: true }}
             endAdornment={
               clearable &&
-              value && (
+              value &&
+              !props.disabled && (
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setValue(name, "")}

@@ -389,15 +389,11 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
-    http.put(`${baseURL}/services/:serviceId/patch`, ({ params }) => {
-      const { serviceId } = params;
+    http.put(`${baseURL}/services/:serviceId/patch`, () => {
       const resultArray = [
-        new HttpResponse(
-          JSON.stringify(getUpdateService200Response(serviceId as string)),
-          {
-            status: 200,
-          },
-        ),
+        new HttpResponse(null, {
+          status: 204,
+        }),
         new HttpResponse(null, {
           status: 401,
         }),

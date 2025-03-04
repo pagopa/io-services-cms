@@ -10,11 +10,25 @@ const mockUseSession = useSession as Mock;
 
 let requiredPermissions = [""];
 let requiredRole: any;
+let checkFunction: any;
 let renderNoAccess: any;
+
+const resetVariables = () => {
+  requiredPermissions = [];
+  requiredRole = undefined;
+  checkFunction = undefined;
+  renderNoAccess = undefined;
+};
+
+const reset = () => {
+  cleanup();
+  resetVariables();
+}
 
 /** a test `AccessControl` component */
 const getAccessControlComponent = () => (
   <AccessControl
+    checkFn={checkFunction}
     requiredPermissions={requiredPermissions}
     requiredRole={requiredRole}
     renderNoAccess={renderNoAccess}
@@ -29,14 +43,14 @@ beforeAll(() => {
     data: {
       user: {
         permissions: { apimGroups: ["permission1", "permission2"] },
-        institution: { role: "aRole" }
-      }
-    }
+        institution: { role: "aRole" },
+      },
+    },
   });
 });
 
-// needed to clean document (react dom)
-afterEach(cleanup);
+// needed to clean document (react dom) and variables
+afterEach(reset);
 
 describe("[AccessControl] Component", () => {
   it("should render wrapped children if requiredPermissions is a subset of session.user permissions", () => {
@@ -96,5 +110,19 @@ describe("[AccessControl] Component", () => {
 
     expect(document.getElementById("ac-test")).not.toBeInTheDocument();
     expect(document.getElementById("alternative-content")).toBeVisible();
+  });
+
+  it("should render wrapped children if checkFn returns true", () => {
+    checkFunction = () => true;
+    render(getAccessControlComponent());
+
+    expect(document.getElementById("ac-test")).toBeInTheDocument();
+  });
+
+  it("should NOT render wrapped children if checkFn returns false", () => {
+    checkFunction = () => false;
+    render(getAccessControlComponent());
+
+    expect(document.getElementById("ac-test")).not.toBeInTheDocument();
   });
 });

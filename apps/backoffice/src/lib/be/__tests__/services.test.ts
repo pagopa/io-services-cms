@@ -673,6 +673,7 @@ describe("Services TEST", () => {
         expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
         expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
           backofficeUser.institution.id,
+          "*",
         );
         expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
         expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
@@ -802,6 +803,7 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
+        "*",
       );
       expect(retrieveLifecycleServicesMock).toHaveBeenCalledOnce();
       expect(retrieveLifecycleServicesMock).toHaveBeenCalledWith([
@@ -904,6 +906,7 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
+        "*",
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -1003,6 +1006,7 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
+        "*",
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -1058,6 +1062,7 @@ describe("Services TEST", () => {
       expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
       expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
         aBackofficeUser.institution.id,
+        "*",
       );
       expect(getSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getSubscriptionsMock).toHaveBeenCalledWith(
@@ -1167,9 +1172,7 @@ describe("Services TEST", () => {
         if (selcGroups && selcGroups.length > 0) {
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
-            selcGroups
-              .filter((group) => group.state === StateEnum.ACTIVE)
-              .map((group) => group.id),
+            selcGroups.map((group) => group.id),
           );
         } else {
           expect(retrieveAuthorizedServiceIdsMock).not.toHaveBeenCalled();

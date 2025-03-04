@@ -1,6 +1,6 @@
 import { EmptyStateCard } from "@/components/empty-state";
 import { Subscription } from "@/generated/api/Subscription";
-import { isAdmin } from "@/utils/auth-util";
+import { isAdmin, isAtLeastInOneGroup } from "@/utils/auth-util";
 import {
   SupervisedUserCircle,
   WarningAmberOutlined,
@@ -12,21 +12,21 @@ import { useTranslation } from "next-i18next";
 export interface ApiKeysGroupsEmptyStateProps {
   apiKeysGroups?: readonly Subscription[];
   hideAdminWarning?: boolean;
+  loading?: boolean;
 }
 
 export const ApiKeysGroupsEmptyState = ({
   apiKeysGroups,
   hideAdminWarning,
+  loading,
 }: ApiKeysGroupsEmptyStateProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
-  const hasAtLeastOneGroup =
-    session?.user?.permissions.selcGroups &&
-    session?.user?.permissions.selcGroups.length > 0;
-
   const hasAtLeastOneApiKeysGroups =
     Array.isArray(apiKeysGroups) && apiKeysGroups.length > 0;
+
+  if (loading) return <></>;
 
   // admin users
   if (isAdmin(session))
@@ -47,7 +47,7 @@ export const ApiKeysGroupsEmptyState = ({
   // operator users
   else
     return (
-      hasAtLeastOneGroup &&
+      isAtLeastInOneGroup(session) &&
       !hasAtLeastOneApiKeysGroups && (
         <EmptyStateCard
           description="routes.overview.apiKeys.groups.emptyState.operator"

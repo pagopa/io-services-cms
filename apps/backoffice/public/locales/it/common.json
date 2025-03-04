@@ -343,6 +343,11 @@
         "visibility": "Visibilità in IO",
         "group": "Gruppo"
       },
+      "noActiveGroupsModal": {
+        "title": "Associa gruppi",
+        "description": "Non è possibile aggiungere servizi ai gruppi perché non c'è nessun gruppo attivo.<br/><br/>Per procedere, vai alla sezione “Gruppi” in Area Riservata e verifica la configurazione.",
+        "confirm": "Verifica gruppi"
+      },
       "noGroupUnboundedServicesModal": {
         "title": "Associa gruppi",
         "description": "Non è possibile aggiungere servizi ai gruppi perché sono già stati assegnati. Per modificare le associazioni esistenti entra nel dettaglio dei singoli servizi."
@@ -401,7 +406,11 @@
     },
     "new-service": {
       "title": "Crea un nuovo servizio",
-      "description": "Segui i passaggi e compila i campi richiesti. Una volta creato, potrai inviare il servizio in revisione e procedere poi alla pubblicazione su app IO."
+      "description": "Segui i passaggi e compila i campi richiesti. Una volta creato, potrai inviare il servizio in revisione e procedere poi alla pubblicazione su app IO.",
+      "noActiveGroupsModal": {
+        "title": "Crea un servizio",
+        "description": "Non è possibile creare un servizio perché non c'è nessun gruppo attivo.<br/><br/>Contatta l'amministratore per la verifica della configurazione."
+      }
     },
     "edit-service": {
       "title": "Modifica il servizio",
@@ -412,7 +421,7 @@
       "description": "Qui puoi gestire le API key da utilizzare per autenticare le richieste dell’ente.",
       "groups": {
         "title": "API Key dei Gruppi",
-        "description": "Genera queste chiavi per i singoli gruppi, così che possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
+        "description": "Gli amministratori possono generare e gestire queste chiavi per i singoli gruppi, così che gli operatori possano svolgere operazioni programmatiche solo sui servizi da loro gestiti.",
         "generate": "Genera API Key",
         "loadMore": "Carica altri",
         "noGroupModal": {

@@ -343,6 +343,11 @@
         "visibility": "Visibility on IO",
         "group": "Group"
       },
+      "noActiveGroupsModal": {
+        "title": "Associate groups",
+        "description": "It is not possible to add services to groups because there is no active group.<br/><br/>To proceed, go to the “Groups” section in the Reserved Area and check the configuration.",
+        "confirm": "Verify groups"
+      },
       "noGroupUnboundedServicesModal": {
         "title": "Associate groups",
         "description": "You cannot add services to groups because they have already been assigned. To change existing associations, go into the details of the individual services."
@@ -401,7 +406,11 @@
     },
     "new-service": {
       "title": "Create a new service",
-      "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app."
+      "description": "Follow the steps and fill in the required fields. Once created, you can send the service for review and then proceed to publish it on the IO app.",
+      "noActiveGroupsModal": {
+        "title": "Create a service",
+        "description": "Cannot create a service because there is no active group.<br/><br/>Contact your administrator to verify your configuration."
+      }
     },
     "edit-service": {
       "title": "Edit the service",
@@ -412,7 +421,7 @@
       "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
       "groups": {
         "title": "Group API Keys",
-        "description": "Generate these keys for individual groups, so that they can perform programmatic operations only on the services they manage.",
+        "description": "Administrators can generate and manage these keys for individual groups, so that operators can perform programmatic operations only on the services they manage.",
         "generate": "Generate API Key",
         "loadMore": "Load more",
         "noGroupModal": {

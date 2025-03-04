@@ -3,4 +3,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-Openapi specification delete unbound group from service
+change patch service response code into 204
