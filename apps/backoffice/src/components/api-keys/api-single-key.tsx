@@ -25,6 +25,7 @@ export interface ApiSingleKeyProps {
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onCopyClick?: () => void;
   onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
+  type: "manage" | "use";
 }
 
 /** Single API Key component */
@@ -35,13 +36,16 @@ export const ApiSingleKey = ({
   onBlockClick,
   onCopyClick,
   onRotateClick,
+  type,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
   const handleEnableRotateAction = () =>
-    !GROUP_APIKEY_ENABLED || (GROUP_APIKEY_ENABLED && isAdmin(session));
+    type === "use" ||
+    !GROUP_APIKEY_ENABLED ||
+    (GROUP_APIKEY_ENABLED && isAdmin(session));
 
   return (
     <Grid columnSpacing={4} container rowSpacing={3}>
