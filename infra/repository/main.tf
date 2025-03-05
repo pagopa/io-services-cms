@@ -49,6 +49,11 @@ data "azurerm_api_management" "apim" {
   resource_group_name = local.apim.resource_group_name
 }
 
+data "azurerm_api_management" "apim_itn" {
+  name                = local.apim_itn.name
+  resource_group_name = local.apim_itn.resource_group_name
+}
+
 data "azurerm_key_vault" "common" {
   name                = local.key_vault.name
   resource_group_name = local.key_vault.resource_group_name
@@ -91,8 +96,9 @@ module "repo" {
     instance_number = local.instance_number
   }
 
-  subscription_id = data.azurerm_subscription.current.id
-  tenant_id       = data.azurerm_client_config.current.tenant_id
+  subscription_id               = data.azurerm_subscription.current.id
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  nat_gateway_resource_group_id = local.vnet.resource_group_name
 
   entraid_groups = {
     admins_object_id = data.azuread_group.admins.object_id
@@ -125,10 +131,11 @@ module "repo" {
     }
   }
 
-  apim_id                            = data.azurerm_api_management.apim.id
+  apim_id                            = data.azurerm_api_management.apim_itn.id
   pep_vnet_id                        = data.azurerm_virtual_network.common.id
   private_dns_zone_resource_group_id = data.azurerm_resource_group.dns_zones.id
   opex_resource_group_id             = data.azurerm_resource_group.dashboards.id
+
   keyvault_common_ids = [
     data.azurerm_key_vault.common.id
   ]
