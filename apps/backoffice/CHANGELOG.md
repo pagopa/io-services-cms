@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 1.25.4
+
+### Patch Changes
+
+- 5b1a89de: change auth controls update manage key authorized cidr
+- 00cb5415: Fix: avoid clearable SelectController when disabled, general improvements on group selector for create service form
+- 7126efb7: Update patchService response codec
+- d65484da: Added admin control to enable keys rotate and cidrs update actions
+- 5b24e87a: change patch service response code into 204
+- b3933abf: add auth check for admin on regenerate manage keys
+- cb7f40aa: Added control for active groups on create service button for operator in at least one group
+- 59ab544e: Added control to allow USE apikey rotation for all user types
+
 ## 1.25.3
 
 ### Patch Changes

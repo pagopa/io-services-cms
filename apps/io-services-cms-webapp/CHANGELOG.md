@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.13
+
+### Patch Changes
+
+- 5b24e87a: change patch service response code into 204
+
 ## 1.40.12
 
 ### Patch Changes
