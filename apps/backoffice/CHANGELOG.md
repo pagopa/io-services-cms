@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.5
+
+### Patch Changes
+
+- f4be0568: Activate NEXT_PUBLIC_GROUP_APIKEY_ENABLED client feature flag
+
 ## 1.25.4
 
 ### Patch Changes
