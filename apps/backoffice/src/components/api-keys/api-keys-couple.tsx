@@ -70,6 +70,7 @@ export const ApiKeysCouple = ({
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.primary);
         }}
         onRotateClick={handleRotate}
+        type={type}
       />
       <Divider sx={{ marginTop: 3 }} />
       <ApiSingleKey
@@ -80,6 +81,7 @@ export const ApiKeysCouple = ({
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.secondary);
         }}
         onRotateClick={handleRotate}
+        type={type}
       />
     </>
   );
