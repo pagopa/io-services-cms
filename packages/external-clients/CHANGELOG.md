@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.1
+
+### Patch Changes
+
+- d4f23f75: fix concurrency upsert apim client
+
 ## 1.8.0
 
 ### Minor Changes

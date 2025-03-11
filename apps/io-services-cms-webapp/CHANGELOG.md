@@ -1,5 +1,12 @@
 # io-services-cms-webapp
 
+## 1.40.14
+
+### Patch Changes
+
+- Updated dependencies [d4f23f75]
+  - @io-services-cms/external-clients@1.8.1
+
 ## 1.40.13
 
 ### Patch Changes
