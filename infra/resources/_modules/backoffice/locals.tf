@@ -14,17 +14,12 @@ locals {
       AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
       # Apim connection
-      AZURE_SUBSCRIPTION_ID = data.azurerm_subscription.current.subscription_id
-      # AZURE_APIM                = data.azurerm_api_management.apim_v2.name
-      # AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_v2.resource_group_name
-      # AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_v2_product_services.product_id
-      APIM_USER_GROUPS = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
-      API_APIM_MOCKING = false
-
-      # Apim itn connection 
+      AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
       AZURE_APIM                = data.azurerm_api_management.apim_itn.name
       AZURE_APIM_RESOURCE_GROUP = data.azurerm_api_management.apim_itn.resource_group_name
       AZURE_APIM_PRODUCT_NAME   = data.azurerm_api_management_product.apim_itn_product_services.product_id
+      APIM_USER_GROUPS          = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
+      API_APIM_MOCKING          = false
 
       # Logs
       AI_SDK_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string

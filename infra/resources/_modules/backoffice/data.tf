@@ -22,19 +22,7 @@ data "azurerm_monitor_action_group" "error_action_group" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
 }
 
-data "azurerm_api_management" "apim_v2" {
-  name                = "${var.prefix}-${var.env_short}-apim-v2-api"
-  resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
-}
-
-data "azurerm_api_management_product" "apim_v2_product_services" {
-  product_id          = "${var.prefix}-services-api"
-  api_management_name = "${var.prefix}-${var.env_short}-apim-v2-api"
-  resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
-}
-
-# APIM itn
-
+# APIM
 data "azurerm_api_management" "apim_itn" {
   name                = "${var.prefix}-${var.env_short}-itn-apim-01"
   resource_group_name = "${var.prefix}-${var.env_short}-itn-common-rg-01"
