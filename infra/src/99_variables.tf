@@ -86,19 +86,6 @@ variable "postgres_readonly_usr_credentials_rotation_id" {
 # APIM #
 ########
 
-
-variable "azure_apim_v2" {
-  type        = string
-  description = "APIM v2 resource name."
-  default     = null
-}
-
-variable "azure_apim_resource_group" {
-  type        = string
-  description = "APIM resource group name."
-  default     = null
-}
-
 variable "azure_apim_product_id" {
   type        = string
   description = "APIM Services Product id."

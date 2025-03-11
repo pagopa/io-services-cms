@@ -112,8 +112,6 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_azure_apim_product_id"></a> [azure\_apim\_product\_id](#input\_azure\_apim\_product\_id) | APIM Services Product id. | `string` | `null` | no |
-| <a name="input_azure_apim_resource_group"></a> [azure\_apim\_resource\_group](#input\_azure\_apim\_resource\_group) | APIM resource group name. | `string` | `null` | no |
-| <a name="input_azure_apim_v2"></a> [azure\_apim\_v2](#input\_azure\_apim\_v2) | APIM v2 resource name. | `string` | `null` | no |
 | <a name="input_bo_auth_session_secret_rotation_id"></a> [bo\_auth\_session\_secret\_rotation\_id](#input\_bo\_auth\_session\_secret\_rotation\_id) | You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp) | `string` | `"1695908210722"` | no |
 | <a name="input_container_app_environment"></a> [container\_app\_environment](#input\_container\_app\_environment) | n/a | <pre>object({<br/>    name                = string<br/>    resource_group_name = string<br/>  })</pre> | n/a | yes |
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
