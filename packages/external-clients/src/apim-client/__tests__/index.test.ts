@@ -689,6 +689,9 @@ describe("ApimService Test", () => {
             scope: `/products/${aProductId}`,
             state: "active",
           },
+          {
+            ifMatch: "*",
+          },
         );
       },
     );
@@ -870,6 +873,9 @@ describe("ApimService Test", () => {
           ownerId: anOwnerId,
           scope: `/products/${aProductId}`,
           state: "active",
+        },
+        {
+          ifMatch: "*",
         },
       );
     });
