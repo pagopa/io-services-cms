@@ -19,11 +19,6 @@ locals {
     }
   }
 
-  apim = {
-    name                = "${local.prefix}-${local.env_short}-apim-v2-api"
-    resource_group_name = "${local.prefix}-${local.env_short}-rg-internal"
-  }
-
   apim_itn = {
     name                = "${local.prefix}-${local.env_short}-itn-apim-01"
     resource_group_name = "${local.prefix}-${local.env_short}-itn-common-rg-01"

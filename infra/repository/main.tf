@@ -44,11 +44,6 @@ data "azurerm_container_app_environment" "runner" {
   resource_group_name = local.runner.cae_resource_group_name
 }
 
-data "azurerm_api_management" "apim" {
-  name                = local.apim.name
-  resource_group_name = local.apim.resource_group_name
-}
-
 data "azurerm_api_management" "apim_itn" {
   name                = local.apim_itn.name
   resource_group_name = local.apim_itn.resource_group_name

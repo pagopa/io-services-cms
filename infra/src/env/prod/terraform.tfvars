@@ -33,9 +33,7 @@ cosmos_private_endpoint_enabled      = false
 cosmos_public_network_access_enabled = false
 
 ## Apim
-azure_apim_v2             = "io-p-apim-v2-api"
-azure_apim_resource_group = "io-p-rg-internal"
-azure_apim_product_id     = "io-services-api"
+azure_apim_product_id = "io-services-api"
 
 ## PostgreSQL
 reviewer_db_name   = "reviewer"

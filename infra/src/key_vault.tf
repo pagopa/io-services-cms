@@ -33,11 +33,6 @@ data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   key_vault_id = module.key_vault_domain.id
 }
 
-data "azurerm_key_vault_secret" "function_apim_key" {
-  name         = "${local.project}-services-cms-webapp-fn-apim-key"
-  key_vault_id = module.key_vault_domain.id
-}
-
 resource "azurerm_key_vault_access_policy" "adgroup_admin" {
   key_vault_id = module.key_vault_domain.id
 
@@ -94,17 +89,6 @@ resource "azurerm_key_vault_access_policy" "github_infra_cd" {
   secret_permissions      = ["Get", "List", "Set"]
   storage_permissions     = []
   certificate_permissions = ["Get", "List", ]
-}
-
-resource "azurerm_key_vault_access_policy" "apim" {
-  key_vault_id = module.key_vault_domain.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_api_management.apim_v2.identity[0].principal_id
-
-  secret_permissions      = ["Get", "List", ]
-  storage_permissions     = []
-  certificate_permissions = []
-  key_permissions         = []
 }
 
 resource "azurerm_key_vault_access_policy" "apim_itn" {
