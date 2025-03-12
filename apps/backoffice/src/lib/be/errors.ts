@@ -3,6 +3,7 @@ import {
   HTTP_STATUS_FORBIDDEN,
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_PRECONDITION_FAILED,
   HTTP_STATUS_UNAUTHORIZED,
   HTTP_TITLE_BAD_REQUEST,
   HTTP_TITLE_FORBIDDEN,
@@ -54,6 +55,19 @@ export class SubscriptionOwnershipError extends Error {
     super("User does not own the subscription");
     this.name = "SubscriptionOwnershipError";
     this.message = message;
+  }
+}
+
+export class PreconditionFailedError extends Error {
+  additionalDetails?: string;
+  constructor(message: string, additionalDetails?: unknown) {
+    super("Precondition failed ");
+    this.name = "PreconditionFailedError";
+    this.message = message;
+    this.additionalDetails =
+      typeof additionalDetails === "string"
+        ? additionalDetails
+        : JSON.stringify(additionalDetails);
   }
 }
 
@@ -143,6 +157,24 @@ export const handleNotFoundErrorResponse = (
       title,
     },
     { status: HTTP_STATUS_NOT_FOUND },
+  );
+};
+
+export const handlePreconditionFailedErrorResponse = (
+  title: string,
+  error: unknown,
+): NextResponse<ResponseError> => {
+  let detail = "Something went wrong";
+  if (error instanceof PreconditionFailedError) {
+    detail = error.message;
+  }
+  return NextResponse.json(
+    {
+      detail: detail,
+      status: HTTP_STATUS_PRECONDITION_FAILED,
+      title,
+    },
+    { status: HTTP_STATUS_PRECONDITION_FAILED },
   );
 };
 

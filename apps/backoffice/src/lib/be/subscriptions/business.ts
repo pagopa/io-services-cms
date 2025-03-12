@@ -12,6 +12,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { getApimService, upsertSubscription } from "../apim-service";
 import {
   ManagedInternalError,
+  PreconditionFailedError,
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
 } from "../errors";
@@ -80,6 +81,12 @@ export async function upsertManageSubscription(
 
   if (E.isLeft(maybeSubscription)) {
     if ("statusCode" in maybeSubscription.left) {
+      if (maybeSubscription.left.statusCode === 412) {
+        throw new PreconditionFailedError(
+          maybeSubscription.left.name ?? "Precondition Failed",
+          maybeSubscription.left.details ?? "",
+        );
+      }
       throw apimErrorToManagedInternalError(
         "Error creating subscription",
         maybeSubscription.left,
