@@ -16,6 +16,7 @@ import { SubscriptionType } from "../../../../generated/api/SubscriptionType";
 import {
   GroupNotFoundError,
   ManagedInternalError,
+  PreconditionFailedError,
 } from "../../../../lib/be/errors";
 import {
   PositiveInteger,
@@ -226,6 +227,47 @@ describe("Subscription API", () => {
       expect(result.status).toBe(500);
       const responseBody = await result.json();
       expect(responseBody.title).toEqual("SubscriptionCreateError");
+      expect(responseBody.detail).toEqual(errorMessage);
+      expect(mocks.getGroup).toHaveBeenCalledOnce();
+      expect(mocks.getGroup).toHaveBeenCalledWith(
+        body.groupId,
+        userMock.institution.id,
+      );
+      expect(mocks.upsertManageSubscription).toHaveBeenCalledOnce();
+      expect(mocks.upsertManageSubscription).toHaveBeenCalledWith(
+        userMock.parameters.userId,
+        stubs.aGroup,
+      );
+    });
+
+    it("should return 412 when upsertManageSubscription return a Precondition failed error", async () => {
+      // given
+      mocks.getUser.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+        },
+      }));
+      const body = aCorrectRequestBody;
+      mocks.parseBody.mockResolvedValueOnce(body);
+      mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
+      const errorMessage = "error message";
+      mocks.upsertManageSubscription.mockRejectedValueOnce(
+        new PreconditionFailedError(errorMessage),
+      );
+      const nextRequest = new NextRequest("http://localhost", {
+        method: "PUT",
+        body: JSON.stringify(body),
+      });
+
+      // when
+      const result = await PUT(nextRequest, {});
+
+      // then
+      expect(result.status).toBe(412);
+      const responseBody = await result.json();
+      expect(responseBody.title).toEqual("Precondition Failed");
       expect(responseBody.detail).toEqual(errorMessage);
       expect(mocks.getGroup).toHaveBeenCalledOnce();
       expect(mocks.getGroup).toHaveBeenCalledWith(

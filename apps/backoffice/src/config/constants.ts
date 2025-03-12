@@ -33,6 +33,10 @@ export const HTTP_STATUS_NOT_FOUND = 404 as Exclude<
   ResponseError["status"],
   undefined
 >;
+export const HTTP_STATUS_PRECONDITION_FAILED = 412 as Exclude<
+  ResponseError["status"],
+  undefined
+>;
 export const HTTP_STATUS_INTERNAL_SERVER_ERROR = 500 as Exclude<
   ResponseError["status"],
   undefined
