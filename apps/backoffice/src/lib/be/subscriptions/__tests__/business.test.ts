@@ -44,11 +44,12 @@ afterEach(() => {
 describe("Subscriptions Business Logic", () => {
   describe("upsertManageSubscription", () => {
     it.each`
-      scenario              | upsertSubResult                                | excpectedErrorMessage
-      ${"an ApimRestError"} | ${TE.left({ statusCode: 500 })}                | ${"Error creating subscription"}
-      ${"a generic Error"}  | ${TE.left(new Error("generic error message"))} | ${"Error creating subscription"}
-      ${"an invalid"}       | ${TE.right({ id: undefined, name: "name" })}   | ${"Partial data received"}
-      ${"an invalid"}       | ${TE.right({ id: "id", name: undefined })}     | ${"Partial data received"}
+      scenario                                | upsertSubResult                                | excpectedErrorMessage
+      ${"an ApimRestError"}                   | ${TE.left({ statusCode: 500 })}                | ${"Error creating subscription"}
+      ${"a generic Error"}                    | ${TE.left(new Error("generic error message"))} | ${"Error creating subscription"}
+      ${"an invalid"}                         | ${TE.right({ id: undefined, name: "name" })}   | ${"Partial data received"}
+      ${"an invalid"}                         | ${TE.right({ id: "id", name: undefined })}     | ${"Partial data received"}
+      ${"an ApimPreconditionFailedRestError"} | ${TE.left({ statusCode: 412 })}                | ${"Precondition Failed"}
     `(
       "should throw an error when received $scenario response",
       async ({ upsertSubResult, excpectedErrorMessage }) => {
