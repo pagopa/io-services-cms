@@ -50,7 +50,7 @@ export default function Home() {
   const temp_banner_description =
     "Disponibile dal 31/03/2025 la funzionalità dei **Gruppi** per IO. " +
     "Permette di gestire i servizi limitando l’accesso a gruppi specifici di utenti." +
-    "\n\n[Come funziona?](https://docs.pagopa.it/io-guida-tecnica/funzionalita/pubblicare-un-servizio)";
+    "\n\n[Come funziona?](https://docs.pagopa.it/io-guida-tecnica/funzionalita/pubblicare-un-servizio/gestire-laccesso-ai-servizi-tramite-i-gruppi)";
 
   return (
     <>
