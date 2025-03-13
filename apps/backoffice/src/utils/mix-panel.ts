@@ -138,7 +138,7 @@ export const trackManageKeyCopyEvent = (
 };
 
 // Function for IO_BO_MANAGE_KEY_ROTATE
-export const trackManageKeyRotateEvent = (keyType: ApiKeyType) => {
+export const trackManageKeyRegenerateEvent = (keyType: ApiKeyType) => {
   logToMixpanel(
     "IO_BO_MANAGE_KEY_ROTATE",
     "UX",
@@ -269,7 +269,7 @@ export const trackServiceKeyCopyEvent = (keyType: ApiKeyType) => {
 };
 
 // Function for IO_BO_SERVICE_KEY_ROTATE
-export const trackServiceKeyRotateEvent = (keyType: ApiKeyType) => {
+export const trackServiceKeyRegenerateEvent = (keyType: ApiKeyType) => {
   logToMixpanel(
     "IO_BO_SERVICE_KEY_ROTATE",
     "UX",

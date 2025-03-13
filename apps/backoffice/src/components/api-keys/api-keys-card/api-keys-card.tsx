@@ -94,7 +94,7 @@ export const ApiKeysCard = () => {
           {showManageKeyRoot && (
             <>
               <Typography id="card-title" variant="overline">
-                {t("routes.keys.manage.title")}
+                {t("routes.keys.manage.master.title")}
               </Typography>
               <Box id="body-rows" marginTop={4}>
                 <CardRows rows={manageKeyRows} />
@@ -104,7 +104,7 @@ export const ApiKeysCard = () => {
           {showManageKeyGroup && (
             <>
               <Typography id="card-title" variant="overline">
-                {t("routes.keys.groups.title")}
+                {t("routes.keys.manage.group.title")}
               </Typography>
               <ApiKeysGroupsEmptyState
                 apiKeysGroups={mspData?.value}
@@ -147,7 +147,7 @@ export const ApiKeysCard = () => {
                 size="medium"
                 sx={{ fontWeight: 700 }}
               >
-                {t("routes.keys.manage.shortcut")}
+                {t("routes.keys.manage.master.shortcut")}
               </ButtonNaked>
             </NextLink>
           </Box>

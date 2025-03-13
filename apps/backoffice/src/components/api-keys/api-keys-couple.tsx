@@ -2,9 +2,9 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
   trackManageKeyCopyEvent,
-  trackManageKeyRotateEvent,
+  trackManageKeyRegenerateEvent,
   trackServiceKeyCopyEvent,
-  trackServiceKeyRotateEvent,
+  trackServiceKeyRegenerateEvent,
 } from "@/utils/mix-panel";
 import { Divider } from "@mui/material";
 import { useTranslation } from "next-i18next";
@@ -15,8 +15,8 @@ import { ApiSingleKey } from "./api-single-key";
 export interface ApiKeysCoupleProps {
   /** Api key values */
   keys?: SubscriptionKeys;
-  /** Event triggered when user click "Rotate" on confirmation modal */
-  onRotateKey: (type: SubscriptionKeyTypeEnum) => void;
+  /** Event triggered when user click "Regenerate" on confirmation modal */
+  onRegenerateKey: (type: SubscriptionKeyTypeEnum) => void;
   /** Used to track the page where the event is triggered */
   type: "manage" | "use";
 }
@@ -24,17 +24,17 @@ export interface ApiKeysCoupleProps {
 /** API Keys key-couple (primary/secondary) component */
 export const ApiKeysCouple = ({
   keys,
-  onRotateKey,
+  onRegenerateKey,
   type,
 }: ApiKeysCoupleProps) => {
   const { t } = useTranslation();
   const showDialog = useDialog();
 
-  const handleRotateEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
+  const handleRegenerateEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
     if (type === "manage") {
-      trackManageKeyRotateEvent(keyType);
+      trackManageKeyRegenerateEvent(keyType);
     } else if (type === "use") {
-      trackServiceKeyRotateEvent(keyType);
+      trackServiceKeyRegenerateEvent(keyType);
     }
   };
 
@@ -46,15 +46,15 @@ export const ApiKeysCouple = ({
     }
   };
 
-  const handleRotate = async (keyType: SubscriptionKeyTypeEnum) => {
-    const makeKeyRotation = await showDialog({
-      confirmButtonLabel: t("keys.rotate.button"),
-      message: t("keys.rotate.modal.description"),
-      title: t("keys.rotate.modal.title"),
+  const handleRegenerate = async (keyType: SubscriptionKeyTypeEnum) => {
+    const makeKeyRegeneration = await showDialog({
+      confirmButtonLabel: t("keys.regenerate.button"),
+      message: t("keys.regenerate.modal.description"),
+      title: t("keys.regenerate.modal.title"),
     });
-    if (makeKeyRotation) {
-      onRotateKey(keyType);
-      handleRotateEventMixpanel(keyType);
+    if (makeKeyRegeneration) {
+      onRegenerateKey(keyType);
+      handleRegenerateEventMixpanel(keyType);
     } else {
       console.warn("Operation canceled");
     }
@@ -69,7 +69,7 @@ export const ApiKeysCouple = ({
         onCopyClick={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.primary);
         }}
-        onRotateClick={handleRotate}
+        onRegenerateClick={handleRegenerate}
         type={type}
       />
       <Divider sx={{ marginTop: 3 }} />
@@ -80,7 +80,7 @@ export const ApiKeysCouple = ({
         onCopyClick={() => {
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.secondary);
         }}
-        onRotateClick={handleRotate}
+        onRegenerateClick={handleRegenerate}
         type={type}
       />
     </>

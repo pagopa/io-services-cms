@@ -36,7 +36,7 @@ export default function Keys() {
   const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
 
-  const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
+  const handleRegenerateKey = (keyType: SubscriptionKeyTypeEnum) => {
     mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
       notify: "all",
     });
@@ -71,10 +71,10 @@ export default function Keys() {
       {showManageKeyRoot && (
         <Stack>
           <ApiKeys
-            description={t("routes.keys.manage.description")}
+            description={t("routes.keys.manage.master.description")}
             keys={mkData}
-            onRotateKey={handleRotateKey}
-            title={t("routes.keys.manage.title")}
+            onRegenerateKey={handleRegenerateKey}
+            title={t("routes.keys.manage.master.title")}
             type="manage"
           />
           <AuthorizedCidrs
@@ -88,7 +88,7 @@ export default function Keys() {
       {showManageKeyGroup && (
         <Stack marginTop={3}>
           <ApiKeysGroups
-            description={t("routes.keys.groups.description")}
+            description={t("routes.keys.manage.group.description")}
             onCreateGroupClick={() =>
               window.open(
                 `${getConfiguration().SELFCARE_URL}/dashboard/${
@@ -98,7 +98,7 @@ export default function Keys() {
               )
             }
             onGenerateClick={() => router.push("/keys/new-group-api-key")}
-            title={t("routes.keys.groups.title")}
+            title={t("routes.keys.manage.group.title")}
           />
         </Stack>
       )}
