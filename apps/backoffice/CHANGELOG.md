@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 1.25.7
+
+### Patch Changes
+
+- cbb0ab03: added precondition failed error handler
+
+## 1.25.6
+
+### Patch Changes
+
+- Updated dependencies [d4f23f75]
+  - @io-services-cms/external-clients@1.8.1
+
 ## 1.25.5
 
 ### Patch Changes

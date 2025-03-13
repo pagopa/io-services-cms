@@ -9,9 +9,11 @@ import {
 import { userAuthz } from "@/lib/be/authz";
 import {
   GroupNotFoundError,
+  PreconditionFailedError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
+  handlePreconditionFailedErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { getGroup } from "@/lib/be/institutions/business";
@@ -65,6 +67,12 @@ export const PUT = withJWTAuthHandler(
       if (error instanceof GroupNotFoundError) {
         return handleBadRequestErrorResponse(
           "Provided group_id does not exists",
+        );
+      }
+      if (error instanceof PreconditionFailedError) {
+        return handlePreconditionFailedErrorResponse(
+          "Precondition Failed",
+          error,
         );
       }
       handlerErrorLog(

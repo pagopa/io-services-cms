@@ -471,6 +471,9 @@ const upsertSubscription = (
             scope: `/products/${productId}`,
             state: "active",
           },
+          {
+            ifMatch: "*",
+          },
         ),
       identity,
     ),

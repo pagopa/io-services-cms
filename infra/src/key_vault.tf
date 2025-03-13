@@ -91,17 +91,6 @@ resource "azurerm_key_vault_access_policy" "github_infra_cd" {
   certificate_permissions = ["Get", "List", ]
 }
 
-resource "azurerm_key_vault_access_policy" "apim_itn" {
-  key_vault_id = module.key_vault_domain.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_api_management.apim_itn.identity[0].principal_id
-
-  secret_permissions      = ["Get", "List", ]
-  storage_permissions     = []
-  certificate_permissions = []
-  key_permissions         = []
-}
-
 resource "random_password" "bo_auth_session_secret" {
   for_each    = toset([var.bo_auth_session_secret_rotation_id])
   length      = 16
