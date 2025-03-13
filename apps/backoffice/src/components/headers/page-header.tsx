@@ -36,7 +36,7 @@ export const PageHeader = ({
         </Box>
       ) : null}
       {hideBreadcrumbs ? null : <PageBreadcrumbs />}
-      <Box id="bo-io-page-title-descr" marginBottom={3}>
+      <Box id="bo-io-page-title-descr" marginBottom={2}>
         <Typography marginBottom={2} variant={titleVariant}>
           <LoaderSkeleton
             loading={title === undefined}
