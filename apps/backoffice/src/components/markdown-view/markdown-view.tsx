@@ -10,6 +10,9 @@ export const MarkdownView = ({ children }: MarkdownViewProps) => (
   <span data-testid="bo-io-markdown-view" style={{ fontSize: "16px" }}>
     <Markdown
       allowedElements={["p", "strong", "em", "ul", "ol", "li", "a"]}
+      components={{
+        a: (props) => <a {...props} target="_blank" />,
+      }}
       unwrapDisallowed
     >
       {children}
