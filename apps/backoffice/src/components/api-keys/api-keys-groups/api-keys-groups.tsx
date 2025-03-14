@@ -65,7 +65,7 @@ const convertArrayToRecordset = (
 
 /** Group API Keys main component
  *
- * Used to show, copy, rotate `keys` _(primary/secondary)_ and edit optional `authorized cidrs`.
+ * Used to show, copy, regenerate `keys` _(primary/secondary)_ and edit optional `authorized cidrs`.
  * */
 export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { t } = useTranslation();
@@ -184,7 +184,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     }
   };
 
-  const handleRotateKey = (
+  const handleRegenerateKey = (
     keyType: SubscriptionKeyTypeEnum,
     subscriptionId: string,
   ) => {
@@ -323,7 +323,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
               key={id}
               onDelete={handleDeleteClick}
               onExpand={handleOnExpandClick}
-              onRotateKey={handleRotateKey}
+              onRegenerateKey={handleRegenerateKey}
               onUpdateCidrs={handleUpdateCidrs}
               subscriptionId={id}
             />
@@ -345,7 +345,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
                 size="medium"
                 sx={{ fontWeight: 700, marginTop: 1 }}
               >
-                {t("routes.keys.groups.loadMore")}
+                {t("routes.keys.manage.group.loadMore")}
               </ButtonNaked>
             </Box>
           )}

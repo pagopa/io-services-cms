@@ -294,11 +294,11 @@
     "primary": {
       "title": "Primary API Key"
     },
-    "rotate": {
-      "button": "Rotate",
+    "regenerate": {
+      "button": "Regenerate",
       "modal": {
-        "title": "Rotate API Key",
-        "description": "By rotating this API Key, you deactivate the existing one and generate a new one, with the same attributes."
+        "title": "Regenerate API Key",
+        "description": "By Regenerating this API Key, you deactivate the existing one and generate a new one, with the same attributes."
       }
     },
     "secondary": {
@@ -369,8 +369,8 @@
       "information": "Information",
       "linksContacts": "Links & Contacts",
       "keys": {
-        "title": "API Key",
-        "description": "Use this key for programmatic USE operations of the service."
+        "title": "API Key Use",
+        "description": "Use this key to send a message via API."
       },
       "group": {
         "associate": "Associate",
@@ -419,26 +419,28 @@
     "keys": {
       "title": "API Keys",
       "description": "Here you can manage the API keys to be used to authenticate the institution's requests.",
-      "groups": {
-        "title": "Group API Keys",
-        "description": "Administrators can generate and manage these keys for individual groups, so that operators can perform programmatic operations only on the services they manage.",
-        "generate": "Generate API Key",
-        "loadMore": "Load more",
-        "noGroupModal": {
-          "description": "You have not yet created any groups to generate API Keys. <br/><br/>To proceed, go to the “Groups” section in the Reserved Area and create new groups. Once finished, you can generate API Keys and associate them with groups.",
-          "confirm": "Add group"
+      "manage": {
+        "master": {
+          "title": "API Key Manage Master",
+          "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
+          "shortcut": "Manage API keys"
         },
-        "state": {
-          "suspended": {
-            "label": "Group API Keys are suspended",
-            "tooltip": "The group has been suspended in the Reserved Area and its API Keys are blocked."
+        "group": {
+          "title": "API Key Manage Group",
+          "description": "Administrators can generate and manage these keys for individual groups, so that operators can perform programmatic operations only on the services they manage.",
+          "generate": "Generate API Key",
+          "loadMore": "Load more",
+          "noGroupModal": {
+            "description": "You do not have any groups for which to generate the relative API Keys. <br/>To create new groups, go to the \"Groups\" section of the Reserved Area.",
+            "confirm": "Add group"
+          },
+          "state": {
+            "suspended": {
+              "label": "Group API Keys are suspended",
+              "tooltip": "The group has been suspended in the Reserved Area and its API Keys are blocked."
+            }
           }
         }
-      },
-      "manage": {
-        "title": "API Key Manage",
-        "description": "Use this key for programmatic operations of creating a new service or updating an existing one.",
-        "shortcut": "Manage API keys"
       },
       "notifications": {
         "loadingError": "An error occurred while loading the ApiKeys"
@@ -448,7 +450,7 @@
       }
     },
     "new-group-api-key": {
-      "title": "Groups API Key",
+      "title": "API Key Manage Group",
       "description": "Select the group for which you want to generate a group API Key."
     },
     "users": {

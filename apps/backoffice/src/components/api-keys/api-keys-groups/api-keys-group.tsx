@@ -29,7 +29,7 @@ interface ApiKeyGroupProps {
   isExpanded?: boolean;
   onDelete: (subscription: { id: string; name: string }) => void;
   onExpand: (expanded: boolean, subscriptionId: string) => void;
-  onRotateKey: (
+  onRegenerateKey: (
     keyType: SubscriptionKeyTypeEnum,
     subscriptionId: string,
   ) => void;
@@ -46,7 +46,7 @@ export const ApiKeyGroup = ({
   isExpanded,
   onDelete,
   onExpand,
-  onRotateKey,
+  onRegenerateKey,
   onUpdateCidrs,
   subscriptionId,
 }: ApiKeyGroupProps) => {
@@ -94,8 +94,8 @@ export const ApiKeyGroup = ({
               <ApiKeyTag
                 color="warning"
                 icon={<Warning />}
-                label="routes.keys.groups.state.suspended.label"
-                tooltip="routes.keys.groups.state.suspended.tooltip"
+                label="routes.keys.manage.group.state.suspended.label"
+                tooltip="routes.keys.manage.group.state.suspended.tooltip"
               />
             )}
           </Stack>
@@ -133,7 +133,7 @@ export const ApiKeyGroup = ({
                 primary_key: apiKey.primary_key,
                 secondary_key: apiKey.secondary_key,
               }}
-              onRotateKey={(type) => onRotateKey(type, subscriptionId)}
+              onRegenerateKey={(type) => onRegenerateKey(type, subscriptionId)}
               type="manage" // TODO: must add new type for "manage_group"
             />
             <AuthorizedCidrs
