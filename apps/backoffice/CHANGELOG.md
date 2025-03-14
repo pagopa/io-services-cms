@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.25.8
+
+### Patch Changes
+
+- 779f6c53: Added a temporary static banner to inform users of the new feature related to the use of groups
+- 4155f1f8: Updated ApiKey copy
+
 ## 1.25.7
 
 ### Patch Changes
