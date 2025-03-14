@@ -25,7 +25,7 @@ export const ServiceGroupTag = ({
     noWrap={noWrap}
     tooltip={
       value.state === StateEnum.SUSPENDED
-        ? "routes.keys.groups.state.suspended.tooltip"
+        ? "routes.keys.manage.group.state.suspended.tooltip"
         : noWrap
           ? value.name
           : ""

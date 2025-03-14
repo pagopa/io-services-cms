@@ -30,7 +30,6 @@ import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement, useEffect, useState } from "react";
-import React from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
 
@@ -67,7 +66,7 @@ export default function ServiceDetails() {
           fromServiceLifecycleToService(slData, spData?.status),
         );
 
-  const handleRotateKey = (keyType: SubscriptionKeyTypeEnum) => {
+  const handleRegenerateKey = (keyType: SubscriptionKeyTypeEnum) => {
     skFetchData(
       "regenerateServiceKey",
       { keyType, serviceId },
@@ -223,7 +222,7 @@ export default function ServiceDetails() {
           <ApiKeys
             description={t("routes.service.keys.description")}
             keys={skData}
-            onRotateKey={handleRotateKey}
+            onRegenerateKey={handleRegenerateKey}
             title={t("routes.service.keys.title")}
             type="use"
           />

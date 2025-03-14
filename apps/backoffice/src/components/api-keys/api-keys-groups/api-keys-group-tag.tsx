@@ -37,7 +37,7 @@ export const ApiKeysGroupTag = ({
       onClick={handleOnClick}
       tooltip={
         value.state === StateEnum.suspended
-          ? "routes.keys.groups.state.suspended.tooltip"
+          ? "routes.keys.manage.group.state.suspended.tooltip"
           : noWrap
             ? value.name
             : ""

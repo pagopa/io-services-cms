@@ -24,7 +24,7 @@ export interface ApiSingleKeyProps {
   keyValue?: string;
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onCopyClick?: () => void;
-  onRotateClick: (keyType: SubscriptionKeyTypeEnum) => void;
+  onRegenerateClick: (keyType: SubscriptionKeyTypeEnum) => void;
   type: "manage" | "use";
 }
 
@@ -35,14 +35,14 @@ export const ApiSingleKey = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBlockClick,
   onCopyClick,
-  onRotateClick,
+  onRegenerateClick,
   type,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleEnableRotateAction = () =>
+  const handleEnableRegenerateAction = () =>
     type === "use" ||
     !GROUP_APIKEY_ENABLED ||
     (GROUP_APIKEY_ENABLED && isAdmin(session));
@@ -87,14 +87,14 @@ export const ApiSingleKey = ({
           justifyContent="flex-start"
           spacing={2}
         >
-          <AccessControl checkFn={handleEnableRotateAction}>
+          <AccessControl checkFn={handleEnableRegenerateAction}>
             <Button
-              onClick={() => onRotateClick(keyType)}
+              onClick={() => onRegenerateClick(keyType)}
               size="small"
               startIcon={<Sync fontSize="inherit" />}
               variant="outlined"
             >
-              {t("keys.rotate.button")}
+              {t("keys.regenerate.button")}
             </Button>
           </AccessControl>
           {/* <Button //TODO not yet implemented

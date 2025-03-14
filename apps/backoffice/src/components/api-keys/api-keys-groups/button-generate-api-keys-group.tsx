@@ -50,9 +50,9 @@ export const ButtonGenerateApiKeysGroup = ({
     } else {
       const noGroupAvailableCreateOne = await showDialog({
         cancelButtonLabel: t("buttons.close"),
-        confirmButtonLabel: t("routes.keys.groups.noGroupModal.confirm"),
-        message: t("routes.keys.groups.noGroupModal.description"),
-        title: t("routes.keys.groups.title"),
+        confirmButtonLabel: t("routes.keys.manage.group.noGroupModal.confirm"),
+        message: t("routes.keys.manage.group.noGroupModal.description"),
+        title: t("routes.keys.manage.group.title"),
       });
       if (noGroupAvailableCreateOne) {
         onCreateGroupClick();
@@ -69,7 +69,7 @@ export const ButtonGenerateApiKeysGroup = ({
         sx={{ marginBottom: 2 }}
         variant="contained"
       >
-        {t("routes.keys.groups.generate")}
+        {t("routes.keys.manage.group.generate")}
       </Button>
     </AccessControl>
   );
