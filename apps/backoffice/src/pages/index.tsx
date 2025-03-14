@@ -1,5 +1,6 @@
 import { AccessControl } from "@/components/access-control";
 import { ApiKeysCard } from "@/components/api-keys/api-keys-card";
+import { Banner } from "@/components/banner";
 import { CardDetails } from "@/components/cards";
 import { PageHeader } from "@/components/headers";
 import { MigrationManager } from "@/components/services/subscriptions-migration";
@@ -44,8 +45,20 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO Temporary Static Banner. Will be replaced with dynamic target development
+  const temp_banner_title = "Novità!";
+  const temp_banner_description =
+    "Disponibile dal 31/03/2025 la funzionalità dei **Gruppi** per IO. " +
+    "Permette di gestire i servizi limitando l’accesso a gruppi specifici di utenti." +
+    "\n\n[Come funziona?](https://docs.pagopa.it/io-guida-tecnica/v5.2-preview/funzionalita/pubblicare-un-servizio/gestire-laccesso-ai-servizi-tramite-i-gruppi)";
+
   return (
     <>
+      <Banner
+        description={temp_banner_description}
+        severity="info"
+        title={temp_banner_title}
+      />
       <PageHeader
         description={pageDescriptionLocaleKey}
         title={pageTitleLocaleKey}

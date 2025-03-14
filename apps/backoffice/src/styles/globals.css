@@ -8,3 +8,12 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.banner a {
+  color: #0073e6;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.banner p {
+  margin: 4px 0;
+}
