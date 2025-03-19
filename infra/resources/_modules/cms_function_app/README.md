@@ -15,7 +15,7 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_cms_fn"></a> [cms\_fn](#module\_cms\_fn) | pagopa/dx-azure-function-app/azurerm | ~> 0 |
+| <a name="module_cms_fn"></a> [cms\_fn](#module\_cms\_fn) | pagopa-dx/azure-function-app/azurerm | ~> 0.0 |
 | <a name="module_cms_storage_account"></a> [cms\_storage\_account](#module\_cms\_storage\_account) | github.com/pagopa/terraform-azurerm-v3//storage_account | v8.26.3 |
 
 ## Resources
