@@ -2,17 +2,17 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>4"
+      version = "~> 4.0"
     }
 
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~>3"
+      version = "~> 3.0"
     }
 
     github = {
       source  = "integrations/github"
-      version = "~>6"
+      version = "~> 6.0"
     }
   }
 
@@ -80,8 +80,8 @@ data "azuread_group" "developers" {
 }
 
 module "repo" {
-  source  = "pagopa/dx-azure-github-environment-bootstrap/azurerm"
-  version = "~>1"
+  source  = "pagopa-dx/azure-github-environment-bootstrap/azurerm"
+  version = "~> 1.0"
 
   environment = {
     prefix          = local.prefix

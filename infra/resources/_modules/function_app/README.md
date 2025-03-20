@@ -15,7 +15,7 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_app_be_fn"></a> [app\_be\_fn](#module\_app\_be\_fn) | pagopa/dx-azure-function-app/azurerm | ~> 0 |
+| <a name="module_app_be_fn"></a> [app\_be\_fn](#module\_app\_be\_fn) | pagopa-dx/azure-function-app/azurerm | ~> 0.0 |
 
 ## Resources
 

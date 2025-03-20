@@ -3,8 +3,8 @@
 #################
 
 module "backoffice" {
-  source  = "pagopa/dx-azure-app-service/azurerm"
-  version = "~> 0"
+  source  = "pagopa-dx/azure-app-service/azurerm"
+  version = "~> 0.0"
 
   environment = {
     prefix          = var.prefix

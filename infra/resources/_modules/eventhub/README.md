@@ -15,7 +15,7 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_eventhub"></a> [eventhub](#module\_eventhub) | pagopa/dx-azure-event-hub/azurerm | ~> 0 |
+| <a name="module_eventhub"></a> [eventhub](#module\_eventhub) | pagopa-dx/azure-event-hub/azurerm | ~> 0.0 |
 
 ## Resources
 

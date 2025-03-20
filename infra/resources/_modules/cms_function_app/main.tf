@@ -3,8 +3,8 @@
 ##################
 
 module "cms_fn" {
-  source  = "pagopa/dx-azure-function-app/azurerm"
-  version = "~> 0"
+  source  = "pagopa-dx/azure-function-app/azurerm"
+  version = "~> 0.0"
 
   environment = {
     prefix          = var.prefix
