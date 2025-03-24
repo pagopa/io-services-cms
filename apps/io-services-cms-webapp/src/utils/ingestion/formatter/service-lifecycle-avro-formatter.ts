@@ -38,6 +38,7 @@ export const buildAvroServiceLifecycleObject = (
         custom_special_flow:
           serviceLifecycleCosmosRecord.data.metadata.custom_special_flow,
         email: serviceLifecycleCosmosRecord.data.metadata.email,
+        group_id: serviceLifecycleCosmosRecord.data.metadata.group_id,
         pec: serviceLifecycleCosmosRecord.data.metadata.pec,
         phone: serviceLifecycleCosmosRecord.data.metadata.phone,
         privacy_url: serviceLifecycleCosmosRecord.data.metadata.privacy_url,

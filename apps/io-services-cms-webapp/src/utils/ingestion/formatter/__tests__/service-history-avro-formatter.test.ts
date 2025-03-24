@@ -82,6 +82,7 @@ describe("Service History Avro Formatter", () => {
             tos_url: null,
             web_url: null,
             topic_id: null,
+            group_id: null,
           },
         },
         fsm: {
@@ -95,11 +96,10 @@ describe("Service History Avro Formatter", () => {
   });
 
   it("should fail when the service does not meet the Avro criteria", () => {
-    const aBadServicePublicationCosmosResource: ServiceHistory =
-      {
-        ...aServicePublicationCosmosResource,
-        id: undefined, // this will make the formatter fail
-      } as unknown as ServiceHistory;
+    const aBadServicePublicationCosmosResource: ServiceHistory = {
+      ...aServicePublicationCosmosResource,
+      id: undefined, // this will make the formatter fail
+    } as unknown as ServiceHistory;
 
     const res = avroServiceHistoryFormatter(
       aBadServicePublicationCosmosResource,
