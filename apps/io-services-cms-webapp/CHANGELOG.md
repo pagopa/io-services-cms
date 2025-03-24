@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.15
+
+### Patch Changes
+
+- 83a462b0: send group_id to datalake
+
 ## 1.40.14
 
 ### Patch Changes
