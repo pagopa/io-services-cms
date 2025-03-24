@@ -84,6 +84,7 @@ describe("Service Lifecycle Avro Formatter", () => {
             tos_url: null,
             web_url: null,
             topic_id: null,
+            group_id: null,
           },
         },
         fsm: {

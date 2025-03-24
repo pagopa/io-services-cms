@@ -37,6 +37,7 @@ export const buildAvroServiceHistoryObject = (
         custom_special_flow:
           serviceHistoryCosmosRecord.data.metadata.custom_special_flow,
         email: serviceHistoryCosmosRecord.data.metadata.email,
+        group_id: serviceHistoryCosmosRecord.data.metadata.group_id,
         pec: serviceHistoryCosmosRecord.data.metadata.pec,
         phone: serviceHistoryCosmosRecord.data.metadata.phone,
         privacy_url: serviceHistoryCosmosRecord.data.metadata.privacy_url,
