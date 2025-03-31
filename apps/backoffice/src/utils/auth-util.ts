@@ -1,4 +1,3 @@
-import { TEST_INSTITUTION_ID } from "@/config/constants";
 import { StateEnum } from "@/generated/api/Group";
 import { ServiceListItem } from "@/generated/api/ServiceListItem";
 import { RequiredAuthorizations, SelfcareRoles } from "@/types/auth";
@@ -33,8 +32,8 @@ export const hasRequiredAuthorizations = (
 
 /** Check to enable ApiKey Groups features only for test Institution */
 export const hasApiKeyGroupsFeatures =
-  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
-    groupApiKeyEnabled && session?.user?.institution.id === TEST_INSTITUTION_ID;
+  (groupApiKeyEnabled: boolean) => (_session: Session | null) =>
+    groupApiKeyEnabled;
 
 /** Check if user is in one or more Selfcare Group  */
 export const isAtLeastInOneGroup = (session: Session | null) =>
