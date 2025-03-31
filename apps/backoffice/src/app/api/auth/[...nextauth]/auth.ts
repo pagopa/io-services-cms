@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Configuration, getConfiguration } from "@/config";
-import { TEST_INSTITUTION_ID } from "@/config/constants";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { InstitutionResponse } from "@/generated/selfcare/InstitutionResponse";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
@@ -329,10 +328,8 @@ const toUser = ({
     apimGroups: apimUser.groups
       .filter((group) => group.type === "custom")
       .map((group) => group.name),
-    selcGroups:
-      getConfiguration().GROUP_AUTHZ_ENABLED ||
-      identityTokenPayload.organization.id === TEST_INSTITUTION_ID
-        ? identityTokenPayload.organization.groups
-        : undefined,
+    selcGroups: getConfiguration().GROUP_AUTHZ_ENABLED
+      ? identityTokenPayload.organization.groups
+      : undefined,
   },
 });
