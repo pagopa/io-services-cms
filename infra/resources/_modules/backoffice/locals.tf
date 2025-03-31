@@ -66,10 +66,10 @@ locals {
       FETCH_KEEPALIVE_MAX_SOCKETS         = "40"
       FETCH_KEEPALIVE_MAX_FREE_SOCKETS    = "10"
       FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT = "30000"
-      FETCH_KEEPALIVE_TIMEOUT             = "60000"
+      FETCH_KEEPALIVE_TIMEOUT             = "70000"
 
       // Group ApiKey feature
-      GROUP_AUTHZ_ENABLED = "true"
+      GROUP_AUTHZ_ENABLED = true
     }
 
     prod_app_setting = {
