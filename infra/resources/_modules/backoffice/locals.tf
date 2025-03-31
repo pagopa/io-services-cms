@@ -69,7 +69,7 @@ locals {
       FETCH_KEEPALIVE_TIMEOUT             = "60000"
 
       // Group ApiKey feature
-      GROUP_AUTHZ_ENABLED = "true"
+      GROUP_AUTHZ_ENABLED = true
     }
 
     prod_app_setting = {

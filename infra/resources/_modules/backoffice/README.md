@@ -15,7 +15,7 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_backoffice"></a> [backoffice](#module\_backoffice) | pagopa-dx/azure-app-service/azurerm | ~> 0.0 |
+| <a name="module_backoffice"></a> [backoffice](#module\_backoffice) | pagopa-dx/azure-app-service/azurerm | ~> 0.1.5 |
 
 ## Resources
 
