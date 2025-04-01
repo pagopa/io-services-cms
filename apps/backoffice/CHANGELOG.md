@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.25.9
+
+### Patch Changes
+
+- e3b2758c: Update ApiKey Group banner link
+- bd8da5d4: Open ApiKey Group to all institutions
+
 ## 1.25.8
 
 ### Patch Changes
