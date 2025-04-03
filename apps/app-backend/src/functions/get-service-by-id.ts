@@ -11,13 +11,10 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
-import { AvailableNotificationChannels } from "../generated/definitions/internal/AvailableNotificationChannels";
-import { NotificationChannelEnum } from "../generated/definitions/internal/NotificationChannel";
+import { ScopeEnum } from "../generated/definitions/internal/ServiceBaseMetadata";
 import { ServiceDetails as ApiResponseServiceDetails } from "../generated/definitions/internal/ServiceDetails";
-import {
-  CategoryEnum,
-  ScopeEnum,
-} from "../generated/definitions/internal/ServiceMetadata";
+import { CategoryEnum as SpecialCategoryEnum } from "../generated/definitions/internal/SpecialServiceMetadata";
+import { CategoryEnum as StandardCategoryEnum } from "../generated/definitions/internal/StandardServiceMetadata";
 import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency";
 
@@ -87,15 +84,11 @@ const executeGetServiceById: (
 export const toApiResponseServiceDetails = (
   cosmosDbServiceDetail: CosmosDbServiceDetails,
 ): ApiResponseServiceDetails => ({
-  available_notification_channels: calculateAvailableNotificationChannels(
-    cosmosDbServiceDetail,
-  ),
   description: cosmosDbServiceDetail.description,
   id: cosmosDbServiceDetail.id,
   metadata: toApiResponseServiceMetadata(cosmosDbServiceDetail.metadata),
   name: cosmosDbServiceDetail.name,
   organization: cosmosDbServiceDetail.organization,
-  version: cosmosDbServiceDetail.cms_last_update_ts,
 });
 
 // TODO: in MVP0 we are not mapping the topic conversion
@@ -108,17 +101,6 @@ const toApiResponseServiceMetadata = ({
   category: mapCategory(metadata.category),
   scope: mapScope(metadata.scope),
 });
-
-const calculateAvailableNotificationChannels = ({
-  require_secure_channel,
-}: CosmosDbServiceDetails): AvailableNotificationChannels =>
-  pipe(
-    require_secure_channel,
-    B.fold(
-      () => [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK],
-      () => [NotificationChannelEnum.WEBHOOK],
-    ),
-  );
 
 const mapScope = (
   scope: CosmosDbServiceDetails["metadata"]["scope"],
@@ -133,14 +115,10 @@ const mapScope = (
 
 const mapCategory = (
   category: CosmosDbServiceDetails["metadata"]["category"],
-): CategoryEnum =>
-  pipe(
-    category === CategoryEnum.SPECIAL,
-    B.fold(
-      () => CategoryEnum.STANDARD,
-      () => CategoryEnum.SPECIAL,
-    ),
-  );
+) =>
+  category === "STANDARD"
+    ? StandardCategoryEnum.STANDARD
+    : SpecialCategoryEnum.SPECIAL;
 
 export const makeGetServiceByIdHandler: H.Handler<
   H.HttpRequest,
