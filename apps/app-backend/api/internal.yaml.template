@@ -307,17 +307,12 @@ components:
           description: Service description
         organization:
           $ref: "#/components/schemas/Organization"
-        available_notification_channels:
-          $ref: "#/components/schemas/AvailableNotificationChannels"
         metadata:
           $ref: "#/components/schemas/ServiceMetadata"
-        version:
-          type: integer
-          description: Service version
       required:
         - id
         - name
-        - version
+        - description
         - organization
         - metadata
     FeaturedItems:
@@ -351,26 +346,94 @@ components:
             organization_name:
               type: string
               description: Organization Name
+    ServiceBaseMetadata:
+      type: object
+      description: A set of common service metadata properties
+      properties:
+        web_url:
+          type: string
+          minLength: 1
+        app_ios:
+          type: string
+          minLength: 1
+        app_android:
+          type: string
+          minLength: 1
+        tos_url:
+          type: string
+          minLength: 1
+        privacy_url:
+          type: string
+          minLength: 1
+        address:
+          type: string
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          minLength: 1
+        pec:
+          type: string
+          minLength: 1
+        cta:
+          type: string
+          minLength: 1
+        token_name:
+          type: string
+          minLength: 1
+        support_url:
+          type: string
+          minLength: 1
+        scope:
+          type: string
+          enum: [NATIONAL, LOCAL]
+      required:
+        - scope
     ServiceMetadata:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServiceMetadata"
+      x-one-of: true
+      allOf:
+        - $ref: "#/components/schemas/StandardServiceMetadata"
+        - $ref: "#/components/schemas/SpecialServiceMetadata"
+    StandardServiceMetadata:
+      allOf:
+        - $ref: "#/components/schemas/ServiceBaseMetadata"
+        - type: object
+          properties:
+            category:
+              type: string
+              enum: [STANDARD]
+          required:
+            - category
+    SpecialServiceMetadata:
+      allOf:
+        - $ref: "#/components/schemas/ServiceBaseMetadata"
+        - type: object
+          properties:
+            category:
+              type: string
+              enum: [SPECIAL]
+            custom_special_flow:
+              type: string
+              minLength: 1
+          required:
+            - category
     Organization:
-      $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Organization"
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        fiscal_code:
+          $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode'
+      required:
+        - name
+        - fiscal_code
     OrganizationFiscalCode:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/OrganizationFiscalCode"
     PaginationResultSet:
       $ref: "https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet"
-    AvailableNotificationChannels:
-      description: All the notification channels available for a service
-      type: array
-      items:
-        $ref: "#/components/schemas/NotificationChannel"
-    NotificationChannel:
-      type: string
-      description: All notification channels
-      enum:
-        - EMAIL
-        - WEBHOOK
-      example: [EMAIL]
     ScopeType:
       type: string
       description: Institutions/Services Scopes
