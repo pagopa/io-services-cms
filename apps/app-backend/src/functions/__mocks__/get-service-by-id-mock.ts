@@ -7,7 +7,7 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { vi } from "vitest";
 
-import { ScopeEnum } from "../../generated/definitions/internal/ServiceBaseMetadata";
+import { ScopeTypeEnum } from "../../generated/definitions/internal/ScopeType";
 import { ServiceDetails as ApiResponseServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
 import { StandardServiceCategoryEnum } from "../../generated/definitions/internal/StandardServiceCategory";
 
@@ -28,7 +28,7 @@ export const buildCosmosDbServiceDetails = (
     pec: "aServicePec" as NonEmptyString,
     phone: "aServicePhone" as NonEmptyString,
     privacy_url: "aServicePrivacyUrl" as NonEmptyString,
-    scope: ScopeEnum.LOCAL,
+    scope: ScopeTypeEnum.LOCAL,
     support_url: "aServiceSupportUrl" as NonEmptyString,
     token_name: "aServiceTokenName" as NonEmptyString,
     topic_id: 1,
@@ -57,7 +57,7 @@ export const buildApiResponseServiceDetails =
       pec: "aServicePec" as NonEmptyString,
       phone: "aServicePhone" as NonEmptyString,
       privacy_url: "aServicePrivacyUrl" as NonEmptyString,
-      scope: ScopeEnum.LOCAL,
+      scope: ScopeTypeEnum.LOCAL,
       support_url: "aServiceSupportUrl" as NonEmptyString,
       token_name: "aServiceTokenName" as NonEmptyString,
       tos_url: "aServiceTosUrl" as NonEmptyString,
