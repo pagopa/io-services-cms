@@ -7,12 +7,9 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import { vi } from "vitest";
 
-import { NotificationChannelEnum } from "../../generated/definitions/internal/NotificationChannel";
+import { ScopeTypeEnum } from "../../generated/definitions/internal/ScopeType";
 import { ServiceDetails as ApiResponseServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
-import {
-  CategoryEnum,
-  ScopeEnum,
-} from "../../generated/definitions/internal/ServiceMetadata";
+import { StandardServiceCategoryEnum } from "../../generated/definitions/internal/StandardServiceCategory";
 
 export const buildCosmosDbServiceDetails = (
   require_secure_channel: boolean,
@@ -25,13 +22,13 @@ export const buildCosmosDbServiceDetails = (
     address: "aServiceAddress" as NonEmptyString,
     app_android: "aServiceAppAndroid" as NonEmptyString,
     app_ios: "aServiceAppIos" as NonEmptyString,
-    category: CategoryEnum.STANDARD,
+    category: StandardServiceCategoryEnum.STANDARD,
     cta: "aServiceCta" as NonEmptyString,
     email: "aServiceEmail" as NonEmptyString,
     pec: "aServicePec" as NonEmptyString,
     phone: "aServicePhone" as NonEmptyString,
     privacy_url: "aServicePrivacyUrl" as NonEmptyString,
-    scope: ScopeEnum.LOCAL,
+    scope: ScopeTypeEnum.LOCAL,
     support_url: "aServiceSupportUrl" as NonEmptyString,
     token_name: "aServiceTokenName" as NonEmptyString,
     topic_id: 1,
@@ -46,35 +43,32 @@ export const buildCosmosDbServiceDetails = (
   require_secure_channel,
 });
 
-export const buildApiResponseServiceDetails = (
-  available_notification_channels?: NotificationChannelEnum[],
-): ApiResponseServiceDetails => ({
-  available_notification_channels,
-  description: "aServiceDescription",
-  id: "aServiceId",
-  metadata: {
-    address: "aServiceAddress" as NonEmptyString,
-    app_android: "aServiceAppAndroid" as NonEmptyString,
-    app_ios: "aServiceAppIos" as NonEmptyString,
-    category: CategoryEnum.STANDARD,
-    cta: "aServiceCta" as NonEmptyString,
-    email: "aServiceEmail" as NonEmptyString,
-    pec: "aServicePec" as NonEmptyString,
-    phone: "aServicePhone" as NonEmptyString,
-    privacy_url: "aServicePrivacyUrl" as NonEmptyString,
-    scope: ScopeEnum.LOCAL,
-    support_url: "aServiceSupportUrl" as NonEmptyString,
-    token_name: "aServiceTokenName" as NonEmptyString,
-    tos_url: "aServiceTosUrl" as NonEmptyString,
-    web_url: "aServiceWebUrl" as NonEmptyString,
-  },
-  name: "aServiceName",
-  organization: {
-    fiscal_code: "01234567890" as OrganizationFiscalCode,
-    name: "aServiceOrganization" as NonEmptyString,
-  },
-  version: 1,
-});
+export const buildApiResponseServiceDetails =
+  (): ApiResponseServiceDetails => ({
+    description: "aServiceDescription",
+    id: "aServiceId",
+    metadata: {
+      address: "aServiceAddress" as NonEmptyString,
+      app_android: "aServiceAppAndroid" as NonEmptyString,
+      app_ios: "aServiceAppIos" as NonEmptyString,
+      category: StandardServiceCategoryEnum.STANDARD,
+      cta: "aServiceCta" as NonEmptyString,
+      email: "aServiceEmail" as NonEmptyString,
+      pec: "aServicePec" as NonEmptyString,
+      phone: "aServicePhone" as NonEmptyString,
+      privacy_url: "aServicePrivacyUrl" as NonEmptyString,
+      scope: ScopeTypeEnum.LOCAL,
+      support_url: "aServiceSupportUrl" as NonEmptyString,
+      token_name: "aServiceTokenName" as NonEmptyString,
+      tos_url: "aServiceTosUrl" as NonEmptyString,
+      web_url: "aServiceWebUrl" as NonEmptyString,
+    },
+    name: "aServiceName",
+    organization: {
+      fiscal_code: "01234567890" as OrganizationFiscalCode,
+      name: "aServiceOrganization" as NonEmptyString,
+    },
+  });
 
 export const mockServiceDetailsContainer = (
   statusCode: number,
