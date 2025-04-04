@@ -11,7 +11,7 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
-import { ScopeEnum } from "../generated/definitions/internal/ServiceBaseMetadata";
+import { ScopeTypeEnum } from "../generated/definitions/internal/ScopeType";
 import { ServiceDetails as ApiResponseServiceDetails } from "../generated/definitions/internal/ServiceDetails";
 import { SpecialServiceCategoryEnum } from "../generated/definitions/internal/SpecialServiceCategory";
 import { StandardServiceCategoryEnum } from "../generated/definitions/internal/StandardServiceCategory";
@@ -104,12 +104,12 @@ const toApiResponseServiceMetadata = ({
 
 const mapScope = (
   scope: CosmosDbServiceDetails["metadata"]["scope"],
-): ScopeEnum =>
+): ScopeTypeEnum =>
   pipe(
-    scope === ScopeEnum.NATIONAL,
+    scope === "NATIONAL",
     B.fold(
-      () => ScopeEnum.LOCAL,
-      () => ScopeEnum.NATIONAL,
+      () => ScopeTypeEnum.LOCAL,
+      () => ScopeTypeEnum.NATIONAL,
     ),
   );
 
