@@ -9,7 +9,7 @@ import { vi } from "vitest";
 
 import { ScopeEnum } from "../../generated/definitions/internal/ServiceBaseMetadata";
 import { ServiceDetails as ApiResponseServiceDetails } from "../../generated/definitions/internal/ServiceDetails";
-import { CategoryEnum as StandardCategoryEnum } from "../../generated/definitions/internal/StandardServiceMetadata";
+import { StandardServiceCategoryEnum } from "../../generated/definitions/internal/StandardServiceCategory";
 
 export const buildCosmosDbServiceDetails = (
   require_secure_channel: boolean,
@@ -22,7 +22,7 @@ export const buildCosmosDbServiceDetails = (
     address: "aServiceAddress" as NonEmptyString,
     app_android: "aServiceAppAndroid" as NonEmptyString,
     app_ios: "aServiceAppIos" as NonEmptyString,
-    category: StandardCategoryEnum.STANDARD,
+    category: StandardServiceCategoryEnum.STANDARD,
     cta: "aServiceCta" as NonEmptyString,
     email: "aServiceEmail" as NonEmptyString,
     pec: "aServicePec" as NonEmptyString,
@@ -51,7 +51,7 @@ export const buildApiResponseServiceDetails =
       address: "aServiceAddress" as NonEmptyString,
       app_android: "aServiceAppAndroid" as NonEmptyString,
       app_ios: "aServiceAppIos" as NonEmptyString,
-      category: StandardCategoryEnum.STANDARD,
+      category: StandardServiceCategoryEnum.STANDARD,
       cta: "aServiceCta" as NonEmptyString,
       email: "aServiceEmail" as NonEmptyString,
       pec: "aServicePec" as NonEmptyString,

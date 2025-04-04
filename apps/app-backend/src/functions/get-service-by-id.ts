@@ -13,8 +13,8 @@ import { flow, pipe } from "fp-ts/lib/function";
 
 import { ScopeEnum } from "../generated/definitions/internal/ServiceBaseMetadata";
 import { ServiceDetails as ApiResponseServiceDetails } from "../generated/definitions/internal/ServiceDetails";
-import { CategoryEnum as SpecialCategoryEnum } from "../generated/definitions/internal/SpecialServiceMetadata";
-import { CategoryEnum as StandardCategoryEnum } from "../generated/definitions/internal/StandardServiceMetadata";
+import { SpecialServiceCategoryEnum } from "../generated/definitions/internal/SpecialServiceCategory";
+import { StandardServiceCategoryEnum } from "../generated/definitions/internal/StandardServiceCategory";
 import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { ServiceDetailsContainerDependency } from "../utils/cosmos-db/dependency";
 
@@ -117,8 +117,8 @@ const mapCategory = (
   category: CosmosDbServiceDetails["metadata"]["category"],
 ) =>
   category === "STANDARD"
-    ? StandardCategoryEnum.STANDARD
-    : SpecialCategoryEnum.SPECIAL;
+    ? StandardServiceCategoryEnum.STANDARD
+    : SpecialServiceCategoryEnum.SPECIAL;
 
 export const makeGetServiceByIdHandler: H.Handler<
   H.HttpRequest,
