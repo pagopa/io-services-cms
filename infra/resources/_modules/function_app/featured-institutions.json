@@ -1,3 +1,9 @@
 {
-  "institutions": []
+  "institutions": [
+    {
+      "id": "97532760580",
+      "name": "Ministero delle infrastrutture e dei trasporti",
+      "fiscal_code": "97532760580"
+    }
+  ]
 }
