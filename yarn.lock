@@ -7303,7 +7303,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"azure-functions-core-tools@npm:4.0.7030":
+"azure-functions-core-tools@npm:^4.0.7030":
   version: 4.0.7030
   resolution: "azure-functions-core-tools@npm:4.0.7030"
   dependencies:
@@ -11903,7 +11903,7 @@ __metadata:
     "@types/upng-js": ^2.1.1
     "@vitest/coverage-v8": ^1.0.4
     avsc: ^5.7.7
-    azure-functions-core-tools: 4.0.7030
+    azure-functions-core-tools: ^4.0.7030
     body-parser: ^1.20.2
     dotenv-cli: ^7.2.1
     eslint: ^8.57.0
