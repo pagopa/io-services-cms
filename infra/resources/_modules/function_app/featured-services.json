@@ -1,6 +1,12 @@
 {
   "services": [
     {
+      "id": "01JEXVQSRV2XRX9XDWQ5XQ6A8T",
+      "name": "Motorizzazione Civile - Le mie patenti",
+      "organization_name": "Ministero delle infrastrutture e dei trasporti",
+      "version": 1734603413986
+    },
+    {
       "id": "01G40DWQGKY5GRWSNM4303VNRP",
       "name": "SEND - Notifiche digitali",
       "organization_name": "IO - L'app dei servizi pubblici",
