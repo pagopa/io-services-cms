@@ -1,7 +1,9 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { Context } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
+import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -96,7 +98,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       await createIngestionRetryQueueTriggerHandler(
         ItemType,
         aProducer,
-        aFormatter,
+        (item) => pipe(aFormatter(item), TE.fromEither),
       )(context, anInvalidQueueItem);
 
       expect(aFormatter).toBeCalledTimes(0);
@@ -109,7 +111,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       await createIngestionRetryQueueTriggerHandler(
         ItemType,
         aProducer,
-        aFormatter,
+        (item) => pipe(aFormatter(item), TE.fromEither),
       )(context, aValidQueueItem);
 
       expect(aFormatter).toBeCalledTimes(1);
@@ -123,7 +125,7 @@ describe("Generic Ingestion PDND Handlers", () => {
         createIngestionRetryQueueTriggerHandler(
           ItemType,
           aProducerWhichFails,
-          aFormatter,
+          (item) => pipe(aFormatter(item), TE.fromEither),
         )(context, aValidQueueItem),
       ).rejects.toThrowError("Failed to send batch");
     });

@@ -110,8 +110,10 @@ const mocks = vi.hoisted(() => {
     createWebServer: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
     LegacyServiceCosmosResource: {},
+    LegacyActivation: {},
     processBatchOf: vi.fn().mockImplementation((...args) => () => {}),
     createRequestReviewHandler: vi.fn((...args: any[]) => {}),
+    createRequestActivationIngestionRetryHandler: vi.fn((...args: any[]) => {}),
     toAzureFunctionHandler: vi.fn(),
     setBindings: vi.fn((...args: any[]) => () => {}),
   };
@@ -194,6 +196,13 @@ vi.mock("../reviewer/request-review-handler", () => {
   };
 });
 
+vi.mock("../ingestion/request-activation-ingestion-retry-handler", () => {
+  return {
+    createRequestActivationIngestionRetryHandler:
+      mocks.createRequestActivationIngestionRetryHandler,
+  };
+});
+
 vi.mock("../watchers/on-selfcare-group-change", () => {
   return {
     makeHandler: mocks.makeHandler,
@@ -209,6 +218,7 @@ vi.mock("@io-services-cms/models", () => {
     stores: mocks.stores,
     ServiceHistory: mocks.ServiceHistory,
     LegacyServiceCosmosResource: mocks.LegacyServiceCosmosResource,
+    LegacyActivation: mocks.LegacyActivation,
   };
 });
 
