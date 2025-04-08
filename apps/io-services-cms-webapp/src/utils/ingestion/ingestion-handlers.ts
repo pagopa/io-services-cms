@@ -1,6 +1,7 @@
 import { EventData, EventHubProducerClient } from "@azure/event-hubs";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
+import * as RE from "fp-ts/lib/ReaderEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -22,15 +23,24 @@ export type IngestionResults<S> = IngestionError<S> | IngestionSuccess;
 const noAction = {};
 
 export const toEvents =
-  <S>(formatter: (item: S) => E.Either<Error, EventData>) =>
-  (items: readonly S[]): E.Either<Error, EventData[]> =>
-    pipe([...items], A.traverse(E.Applicative)(formatter));
+  <S, U extends S>(
+    formatter: RE.ReaderEither<U, Error, EventData>,
+    enricher: RTE.ReaderTaskEither<S, Error, U> = (item) => TE.right(item as U),
+  ) =>
+  (items: readonly S[]): TE.TaskEither<Error, EventData[]> =>
+    pipe(
+      [...items],
+      A.traverse(TE.ApplicativeSeq)((item) =>
+        pipe(item, enricher, TE.chainEitherK(formatter)),
+      ),
+    );
 
 // CosmosDBTrigger
 export const createIngestionCosmosDBTriggerHandler =
-  <S>(
+  <S, U extends S>(
     producer: EventHubProducerClient,
-    formatter: (item: S) => E.Either<Error, EventData>,
+    formatter: RE.ReaderEither<U, Error, EventData>,
+    enricher: RTE.ReaderTaskEither<S, Error, U> = (item) => TE.right(item as U),
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     never,
@@ -39,8 +49,7 @@ export const createIngestionCosmosDBTriggerHandler =
   ({ items }) =>
     pipe(
       items,
-      toEvents(formatter), // format service to the specified avro format
-      TE.fromEither,
+      toEvents(formatter, enricher), // format service to the specified avro format
       TE.chainW(
         (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub
       ),
@@ -60,16 +69,16 @@ export const createIngestionCosmosDBTriggerHandler =
 export const createIngestionRetryQueueTriggerHandler = <S>(
   decoder: t.Decoder<unknown, S>, // parse the incoming message
   producer: EventHubProducerClient,
-  formatter: (item: S) => E.Either<Error, EventData>,
+  formatter: (item: S) => TE.TaskEither<Error, EventData>, //TaskEither to support async enrichment
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
     pipe(
       queueItem,
       parseIncomingMessage(decoder),
-      E.chainW(formatter),
       TE.fromEither,
-      TE.chainW(
-        (event) => TE.tryCatch(() => producer.sendBatch([event]), E.toError), // send the formatted service to the eventhub
+      TE.chainW(formatter),
+      TE.chainW((event) =>
+        TE.tryCatch(() => producer.sendBatch([event]), E.toError),
       ),
       TE.fold(
         (e) => {
