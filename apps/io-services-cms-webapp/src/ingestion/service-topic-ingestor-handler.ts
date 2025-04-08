@@ -23,7 +23,6 @@ const writeTopicsOnEventHub = (
   return pipe(
     items,
     toEvents(avroServiceTopicFormatter),
-    TE.fromEither,
     TE.chainW(
       (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub
     ),

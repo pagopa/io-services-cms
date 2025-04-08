@@ -1,5 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import * as TE from "fp-ts/lib/TaskEither";
+import { pipe } from "fp-ts/lib/function";
 
 import { withJsonInput } from "../lib/azure/misc";
 import { avroServiceLifecycleFormatter } from "../utils/ingestion/formatter/service-lifecycle-avro-formatter";
@@ -11,5 +13,5 @@ export const createRequestServicesLifecycleIngestionRetryHandler = (
   createIngestionRetryQueueTriggerHandler(
     ServiceLifecycle.CosmosResource,
     producer,
-    avroServiceLifecycleFormatter,
+    (item) => pipe(avroServiceLifecycleFormatter(item), TE.fromEither),
   );
