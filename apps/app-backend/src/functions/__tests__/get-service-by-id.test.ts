@@ -2,17 +2,13 @@ import * as H from "@pagopa/handler-kit";
 import * as E from "fp-ts/Either";
 import { describe, expect, it } from "vitest";
 import { IConfig } from "../../config";
-import { NotificationChannelEnum } from "../../generated/definitions/internal/NotificationChannel";
 import {
   buildApiResponseServiceDetails,
   buildCosmosDbServiceDetails,
   mockServiceDetailsContainer,
 } from "../__mocks__/get-service-by-id-mock";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
-import {
-  makeGetServiceByIdHandler,
-  toApiResponseServiceDetails,
-} from "../get-service-by-id";
+import { makeGetServiceByIdHandler } from "../get-service-by-id";
 
 const mockedConfiguration = {
   PAGINATION_DEFAULT_LIMIT: 20,
@@ -31,7 +27,7 @@ describe("Get Service By Id Tests", () => {
       };
       const serviceDetailsContainer = mockServiceDetailsContainer(
         200,
-        buildCosmosDbServiceDetails(false)
+        buildCosmosDbServiceDetails(false),
       );
 
       const result = await makeGetServiceByIdHandler({
@@ -42,21 +38,18 @@ describe("Get Service By Id Tests", () => {
 
       expect(serviceDetailsContainer.item).toBeCalledWith(
         "aServiceId",
-        "aServiceId"
+        "aServiceId",
       );
 
       expect(result).toEqual(
         E.right(
           expect.objectContaining({
             body: {
-              ...buildApiResponseServiceDetails([
-                NotificationChannelEnum.EMAIL,
-                NotificationChannelEnum.WEBHOOK,
-              ]),
+              ...buildApiResponseServiceDetails(),
             },
             statusCode: 200,
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -78,7 +71,7 @@ describe("Get Service By Id Tests", () => {
 
       expect(serviceDetailsContainer.item).toBeCalledWith(
         "aServiceId",
-        "aServiceId"
+        "aServiceId",
       );
 
       expect(result).toEqual(
@@ -89,8 +82,8 @@ describe("Get Service By Id Tests", () => {
               title: "Service 'aServiceId' not found",
             },
             statusCode: 404,
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -114,7 +107,7 @@ describe("Get Service By Id Tests", () => {
 
       expect(serviceDetailsContainer.item).toBeCalledWith(
         "aServiceId",
-        "aServiceId"
+        "aServiceId",
       );
 
       expect(result).toEqual(
@@ -123,12 +116,12 @@ describe("Get Service By Id Tests", () => {
             body: {
               status: 500,
               title: expect.stringContaining(
-                `An error has occurred while decoding service having ID aServiceId [`
+                `An error has occurred while decoding service having ID aServiceId [`,
               ),
             },
             statusCode: 500,
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -144,7 +137,7 @@ describe("Get Service By Id Tests", () => {
         500,
         null,
         "An error occurred",
-        true
+        true,
       );
 
       const result = await makeGetServiceByIdHandler({
@@ -155,7 +148,7 @@ describe("Get Service By Id Tests", () => {
 
       expect(serviceDetailsContainer.item).toBeCalledWith(
         "aServiceId",
-        "aServiceId"
+        "aServiceId",
       );
 
       expect(result).toEqual(
@@ -166,31 +159,9 @@ describe("Get Service By Id Tests", () => {
               title: `An error has occurred while fetching service having ID aServiceId [An error occurred]`,
             },
             statusCode: 500,
-          })
-        )
+          }),
+        ),
       );
-    });
-  });
-  describe("toApiResponseServiceDetails", () => {
-    it("Available Notification channel should contains only Webhook when required secure channel is true", () => {
-      const cosmosDbServiceDetails = buildCosmosDbServiceDetails(true);
-
-      const result = toApiResponseServiceDetails(cosmosDbServiceDetails);
-
-      expect(result.available_notification_channels).toEqual([
-        NotificationChannelEnum.WEBHOOK,
-      ]);
-    });
-
-    it("Available Notification channel should contains both Webhook and Email when required secure channel is false", () => {
-      const cosmosDbServiceDetails = buildCosmosDbServiceDetails(false);
-
-      const result = toApiResponseServiceDetails(cosmosDbServiceDetails);
-
-      expect(result.available_notification_channels).toEqual([
-        NotificationChannelEnum.EMAIL,
-        NotificationChannelEnum.WEBHOOK,
-      ]);
     });
   });
 });
