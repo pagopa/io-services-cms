@@ -1,29 +1,25 @@
 {
-  "extends": [
-    "//"
-  ],
+  "extends": ["//"],
   "tasks": {
+    "generate:tokenizer-client": {
+      "outputs": ["src/generated/pdv-tokenizer-api/*"]
+    },
     "generate:definitions": {
       "inputs": [
         "openapi.yaml",
         "../../packages/io-services-cms-models/openapi/*.yaml"
       ],
-      "outputs": [
-        "src/generated/api/**/*"
-      ]
+      "outputs": ["src/generated/api/**/*"]
     },
     "generate:avro": {
-      "inputs": [
-        "avro/**"
-      ],
-      "outputs": [
-        "src/generated/avro/**/*"
-      ]
+      "inputs": ["avro/**"],
+      "outputs": ["src/generated/avro/**/*"]
     },
     "generate": {
       "dependsOn": [
         "generate:definitions",
-        "generate:avro"
+        "generate:avro",
+        "generate:tokenizer-client"
       ]
     }
   }
