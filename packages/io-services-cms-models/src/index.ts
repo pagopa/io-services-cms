@@ -1,3 +1,4 @@
+export * as LegacyActivation from "./activation-legacy";
 export {
   FSMStore,
   FsmAuthorizationError,
