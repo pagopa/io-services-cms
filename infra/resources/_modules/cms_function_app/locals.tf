@@ -122,8 +122,8 @@ locals {
       SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING   = data.azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
-      ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = data.azurerm_key_vault_secret.activations_event_hub_connection_string.value
-      ACTIVATIONS_EVENT_HUB_NAME                       = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
+      #ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = data.azurerm_key_vault_secret.activations_event_hub_connection_string.value
+      ACTIVATIONS_EVENT_HUB_NAME = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
 
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"
