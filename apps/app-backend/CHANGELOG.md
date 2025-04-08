@@ -1,5 +1,15 @@
 # io-services-app-backend
 
+## 1.1.0
+
+### Minor Changes
+
+- 30efc51d: update openapi definition for getServiceById
+
+### Patch Changes
+
+- 30efc51d: use x-extensible-enum for service category enums
+
 ## 1.0.13
 
 ### Patch Changes
