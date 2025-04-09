@@ -82,6 +82,26 @@ locals {
             manage = false
           }
         ]
+      },
+      {
+        name                   = "activations"
+        partitions             = 5
+        message_retention_days = 7
+        consumers              = []
+        keys = [
+          {
+            name   = var.cms_fn_name
+            listen = false
+            send   = true
+            manage = false
+          },
+          {
+            name   = "pdnd"
+            listen = true
+            send   = false
+            manage = false
+          }
+        ]
       }
     ]
 
