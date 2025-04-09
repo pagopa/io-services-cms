@@ -99,10 +99,10 @@ data "azurerm_key_vault_secret" "services_history_event_hub_connection_string" {
   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
 
-# data "azurerm_key_vault_secret" "activations_event_hub_connection_string" {
-#   name         = "ACTIVATIONS-EVENT-HUB-CONNECTION-STRING"
-#   key_vault_id = data.azurerm_key_vault.cms_key_vault.id
-# }
+data "azurerm_key_vault_secret" "activations_event_hub_connection_string" {
+  name         = "ACTIVATIONS-EVENT-HUB-CONNECTION-STRING"
+  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+}
 
 data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
   name         = "EH-SC-CONNECTIONSTRING"
