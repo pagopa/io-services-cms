@@ -3,7 +3,7 @@ import * as avro from "avsc";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
-import { activation as avroActivation } from "../../../generated/avro/dto/activation";
+import { ServiceActivations as avroActivation } from "../../../generated/avro/dto/ServiceActivations";
 import { EnrichedLegacyActivationCosmosResource } from "../enriched-types/activation-pdv-enriched";
 
 export const buildAvroActivationObject = (

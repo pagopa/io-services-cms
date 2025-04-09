@@ -1,8 +1,8 @@
 {
-  "name": "activation",
+  "name": "ServiceActivations",
   "type": "record",
   "namespace": "dto",
-  "doc": "Schema for 'activations'",
+  "doc": "Schema for 'service-activations'",
   "fields": [
     {
       "name": "id",
@@ -25,7 +25,7 @@
       "name": "status",
       "type": {
         "type": "enum",
-        "name": "ActivationStatusEnum",
+        "name": "StatusEnum",
         "symbols": ["ACTIVE", "INACTIVE", "PENDING"]
       }
     }
