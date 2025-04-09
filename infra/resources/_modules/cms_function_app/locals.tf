@@ -122,7 +122,7 @@ locals {
       SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING   = data.azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
       SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
-      ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = data.azurerm_key_vault_secret.activations_event_hub_connection_string.value
+      ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = "@Microsoft.KeyVault(VaultName=${data.azurerm_key_vault.cms_key_vault.name};SecretName=ACTIVATIONS-EVENT-HUB-CONNECTION-STRING)"
       ACTIVATIONS_EVENT_HUB_NAME                       = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
 
       # Fix Service Review Checker pg module
