@@ -5,7 +5,7 @@ import * as RE from "fp-ts/lib/ReaderEither";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { withJsonInput } from "../../lib/azure/misc";
@@ -22,10 +22,12 @@ export type IngestionResults<S> = IngestionError<S> | IngestionSuccess;
 
 const noAction = {};
 
+const noEnricher = <S, U extends S>(item: S) => TE.right(item as U);
+
 export const toEvents =
   <S, U extends S>(
     formatter: RE.ReaderEither<U, Error, EventData>,
-    enricher: RTE.ReaderTaskEither<S, Error, U> = (item) => TE.right(item as U),
+    enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
   ) =>
   (items: readonly S[]): TE.TaskEither<Error, EventData[]> =>
     pipe(
@@ -40,7 +42,7 @@ export const createIngestionCosmosDBTriggerHandler =
   <S, U extends S>(
     producer: EventHubProducerClient,
     formatter: RE.ReaderEither<U, Error, EventData>,
-    enricher: RTE.ReaderTaskEither<S, Error, U> = (item) => TE.right(item as U),
+    enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     never,
@@ -66,17 +68,19 @@ export const createIngestionCosmosDBTriggerHandler =
     );
 
 // Retry QuqueTrigger
-export const createIngestionRetryQueueTriggerHandler = <S>(
+export const createIngestionRetryQueueTriggerHandler = <S, U extends S>(
   decoder: t.Decoder<unknown, S>, // parse the incoming message
   producer: EventHubProducerClient,
-  formatter: (item: S) => TE.TaskEither<Error, EventData>, //TaskEither to support async enrichment
+  formatter: (item: S) => E.Either<Error, EventData>, //TaskEither to support async enrichment
+  enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
 ): ReturnType<typeof withJsonInput> =>
   withJsonInput((context, queueItem) =>
     pipe(
       queueItem,
       parseIncomingMessage(decoder),
       TE.fromEither,
-      TE.chainW(formatter),
+      TE.chainW(enricher),
+      TE.chainW(flow(formatter, TE.fromEither)),
       TE.chainW((event) =>
         TE.tryCatch(() => producer.sendBatch([event]), E.toError),
       ),

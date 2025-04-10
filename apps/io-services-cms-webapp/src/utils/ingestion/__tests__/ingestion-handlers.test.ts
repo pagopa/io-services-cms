@@ -98,7 +98,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       await createIngestionRetryQueueTriggerHandler(
         ItemType,
         aProducer,
-        (item) => pipe(aFormatter(item), TE.fromEither),
+        aFormatter,
       )(context, anInvalidQueueItem);
 
       expect(aFormatter).toBeCalledTimes(0);
@@ -111,7 +111,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       await createIngestionRetryQueueTriggerHandler(
         ItemType,
         aProducer,
-        (item) => pipe(aFormatter(item), TE.fromEither),
+        aFormatter,
       )(context, aValidQueueItem);
 
       expect(aFormatter).toBeCalledTimes(1);
@@ -125,7 +125,7 @@ describe("Generic Ingestion PDND Handlers", () => {
         createIngestionRetryQueueTriggerHandler(
           ItemType,
           aProducerWhichFails,
-          (item) => pipe(aFormatter(item), TE.fromEither),
+          aFormatter,
         )(context, aValidQueueItem),
       ).rejects.toThrowError("Failed to send batch");
     });

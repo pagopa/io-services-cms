@@ -1,7 +1,6 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { LegacyActivation } from "@io-services-cms/models";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { withJsonInput } from "../lib/azure/misc";
@@ -43,7 +42,7 @@ export const createRequestActivationIngestionRetryHandler = (
   return createIngestionRetryQueueTriggerHandler(
     ActivationResourceDecoder,
     producer,
-    (item) =>
-      pipe(item, conditionalEnricher, TE.chainEitherK(avroActivationFormatter)),
+    avroActivationFormatter,
+    conditionalEnricher,
   );
 };

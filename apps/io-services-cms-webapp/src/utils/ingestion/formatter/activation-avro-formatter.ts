@@ -9,10 +9,11 @@ import { EnrichedLegacyActivationCosmosResource } from "../enriched-types/activa
 export const buildAvroActivationObject = (
   activationCosmosRecord: EnrichedLegacyActivationCosmosResource,
 ): Omit<avroActivation, "schema" | "subject"> => ({
-  id:
-    activationCosmosRecord.userPDVId +
-    activationCosmosRecord.serviceId +
+  id: [
+    activationCosmosRecord.userPDVId,
+    activationCosmosRecord.serviceId,
     activationCosmosRecord._ts,
+  ].join("-"),
   modifiedAt: activationCosmosRecord._ts,
   serviceId: activationCosmosRecord.serviceId,
   status: activationCosmosRecord.status,
