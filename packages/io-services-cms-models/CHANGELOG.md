@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.27.1
+
+### Patch Changes
+
+- 2e7d8bf0: add ingestion activations
+
 ## 1.27.0
 
 ### Minor Changes
