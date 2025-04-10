@@ -8,10 +8,10 @@
       "connection": "LEGACY_COSMOSDB_CONNECTIONSTRING",
       "databaseName": "%LEGACY_COSMOSDB_NAME%",
       "containerName": "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS%",
-      "leaseContainerName": "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE%",
+      "leaseContainerName": "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE%-TEST",
       "createLeaseContainerIfNotExists": true,
       "startFromBeginning": true,
-      "maxItemsPerInvocation": 30
+      "maxItemsPerInvocation": 1
     },
     {
       "queueName": "%REQUEST_ACTIVATIONS_INGESTION_RETRY_QUEUE%",
