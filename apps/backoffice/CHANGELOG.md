@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.25.10
+
+### Patch Changes
+
+- fefcbbc3: Updated Group ApiKey info banner link
+- Updated dependencies [2e7d8bf0]
+  - @io-services-cms/models@1.27.1
+
 ## 1.25.9
 
 ### Patch Changes

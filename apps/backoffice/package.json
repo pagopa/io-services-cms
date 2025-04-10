@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "1.25.9",
+  "version": "1.25.10",
   "private": true,
   "scripts": {
     "dev": "next dev",
