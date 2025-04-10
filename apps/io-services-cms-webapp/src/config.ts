@@ -277,43 +277,64 @@ export const ServicesHistoryEventHubConfig = t.type({
   SERVICES_HISTORY_EVENT_HUB_NAME: NonEmptyString,
 });
 
+export type ActivationEventHubConfig = t.TypeOf<
+  typeof ServicesHistoryEventHubConfig
+>;
+export const ActivationEventHubConfig = t.type({
+  ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  ACTIVATIONS_EVENT_HUB_NAME: NonEmptyString,
+});
+
+//PDV tokenizer client configuration
+export type PDVTokenizerClientConfiguration = t.TypeOf<
+  typeof PDVTokenizerClientConfiguration
+>;
+export const PDVTokenizerClientConfiguration = t.type({
+  PDV_TOKENIZER_API_KEY: NonEmptyString,
+  PDV_TOKENIZER_BASE_PATH: NonEmptyString,
+  PDV_TOKENIZER_BASE_URL: NonEmptyString,
+});
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.intersection([
-    t.type({ isProduction: t.boolean }),
-    InternalStorageAccount,
-    JiraConfig,
-    ReviewerPostgreSqlConfig,
-    ServicePayloadConfig,
+    t.intersection([
+      t.type({ isProduction: t.boolean }),
+      InternalStorageAccount,
+      JiraConfig,
+      ReviewerPostgreSqlConfig,
+      ServicePayloadConfig,
+    ]),
+    t.intersection([
+      CosmosConfig,
+      ApimUtils.definitions.AzureClientSecretCredential,
+      ApimConfig,
+      QueueConfig,
+      ServiceIdQualityCheckExclusionList,
+    ]),
+    t.intersection([
+      CosmosLegacyConfig,
+      PaginationConfig,
+      JiraLegacyProjectName,
+      ApplicationInsightConfig,
+      FeatureFlags,
+    ]),
+    t.intersection([
+      ExternalStorageAccountConfiguration,
+      BackofficeInternalSubnetCIDRs,
+      TopicPostgreSqlConfig,
+      ServiceValidationConfig,
+      DefaultValues,
+    ]),
+    t.intersection([
+      ServicesPublicationEventHubConfig,
+      ServicesTopicsEventHubConfig,
+      ServicesLifecycleEventHubConfig,
+      ServicesHistoryEventHubConfig,
+    ]),
   ]),
-  t.intersection([
-    CosmosConfig,
-    ApimUtils.definitions.AzureClientSecretCredential,
-    ApimConfig,
-    QueueConfig,
-    ServiceIdQualityCheckExclusionList,
-  ]),
-  t.intersection([
-    CosmosLegacyConfig,
-    PaginationConfig,
-    JiraLegacyProjectName,
-    ApplicationInsightConfig,
-    FeatureFlags,
-  ]),
-  t.intersection([
-    ExternalStorageAccountConfiguration,
-    BackofficeInternalSubnetCIDRs,
-    TopicPostgreSqlConfig,
-    ServiceValidationConfig,
-    DefaultValues,
-  ]),
-  t.intersection([
-    ServicesPublicationEventHubConfig,
-    ServicesTopicsEventHubConfig,
-    ServicesLifecycleEventHubConfig,
-    ServicesHistoryEventHubConfig,
-  ]),
+  t.intersection([PDVTokenizerClientConfiguration, ActivationEventHubConfig]),
 ]);
 
 export const envConfig = {
