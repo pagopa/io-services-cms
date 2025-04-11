@@ -69,7 +69,9 @@ locals {
       LEGACY_COSMOSDB_URI                             = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
       LEGACY_COSMOSDB_KEY                             = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
       LEGACY_COSMOSDB_CONTAINER_SERVICES              = "services"
+      LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS           = "activations"
       LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = "services-cms--legacy-watcher-lease"
+      LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE     = "activations-ingestion-lease"
       LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = 10
 
       // Internal Storage Account Queues
@@ -131,6 +133,12 @@ locals {
       EH_SC_CONNECTIONSTRING         = data.azurerm_key_vault_secret.eh_sc_connectionstring.value
       EH_SC_USERGROUP_NAME           = "sc-usergroups"
       EH_SC_USERGROUP_CONSUMER_GROUP = "io-cms-sync"
+
+      # PDV configurations
+      PDV_TOKENIZER_BASE_URL  = "https://api.tokenizer.pdv.pagopa.it"
+      PDV_TOKENIZER_BASE_PATH = "/tokenizer/v1"
+      PDV_TOKENIZER_API_KEY   = data.azurerm_key_vault_secret.pdv_tokenizer_api_key.value
+
     }
     autoscale_settings = {
       min     = 3
