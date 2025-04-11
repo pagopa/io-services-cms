@@ -1,6 +1,6 @@
 import * as AzureIdentity from "@azure/identity";
 import * as E from "fp-ts/Either";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ATestType,
   aValidMockedElement,
@@ -11,10 +11,8 @@ import { makeAzureSearchClient } from "../../utils/azure-search/client";
 import { DefaultAzureCredential } from "@azure/identity";
 import * as searchSDK from "@azure/search-documents";
 
-const mockSearchMethod = vi.fn().mockResolvedValue({
-  results: [Promise.resolve(aValidMockedElement)],
-  count: 1,
-});
+const mockSearchMethod = vi.fn();
+const getDocumentsCountMock = vi.fn();
 
 const mockAzureIdentity = vi
   .spyOn(AzureIdentity, "DefaultAzureCredential")
@@ -26,7 +24,12 @@ const mockAzureSearchClientContructor = vi
   .spyOn(searchSDK, "SearchClient")
   .mockReturnValue({
     search: mockSearchMethod,
+    getDocumentsCount: getDocumentsCountMock,
   } as unknown as searchSDK.SearchClient<object>);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("Azure Search Client Tests", () => {
   describe("Build Client Tests", () => {
@@ -36,7 +39,7 @@ describe("Azure Search Client Tests", () => {
         "anEndpoint",
         "aServiceVersion",
         "anIndexName",
-        "anApiKey"
+        "anApiKey",
       );
 
       expect(mockAzureSearchClientContructor).toBeCalledWith(
@@ -45,7 +48,7 @@ describe("Azure Search Client Tests", () => {
         new searchSDK.AzureKeyCredential("anApiKey"),
         {
           serviceVersion: "aServiceVersion",
-        }
+        },
       );
 
       expect(client).toBeDefined();
@@ -56,7 +59,7 @@ describe("Azure Search Client Tests", () => {
         ATestType,
         "anEndpoint",
         "aServiceVersion",
-        "anIndexName"
+        "anIndexName",
       );
 
       expect(mockAzureSearchClientContructor).toBeCalledWith(
@@ -65,7 +68,7 @@ describe("Azure Search Client Tests", () => {
         new DefaultAzureCredential(),
         {
           serviceVersion: "aServiceVersion",
-        }
+        },
       );
 
       expect(client).toBeDefined();
@@ -76,9 +79,14 @@ describe("Azure Search Client Tests", () => {
       ATestType,
       "anEndpoint",
       "anIndexName",
-      "anApiKey"
+      "anApiKey",
     );
     it("Should Success and return the results", async () => {
+      mockSearchMethod.mockResolvedValue({
+        results: [Promise.resolve(aValidMockedElement)],
+        count: 1,
+      });
+
       const result = await client.fullTextSearch({
         searchText: "aSearchText",
         searchParams: ["a"],
@@ -90,7 +98,7 @@ describe("Azure Search Client Tests", () => {
         expect.objectContaining({
           searchFields: ["a"],
           top: 10,
-        })
+        }),
       );
 
       expect(result).toEqual(
@@ -103,8 +111,8 @@ describe("Azure Search Client Tests", () => {
               },
             ],
             count: 1,
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -125,10 +133,42 @@ describe("Azure Search Client Tests", () => {
         expect.objectContaining({
           searchFields: ["a"],
           top: 10,
-        })
+        }),
       );
 
       expect(E.isLeft(result)).toBeTruthy();
+    });
+  });
+
+  describe("getDocumentCount", () => {
+    const client = makeAzureSearchClient<ATestType>(
+      ATestType,
+      "anEndpoint",
+      "anIndexName",
+      "anApiKey",
+    );
+
+    it("Should Fail when downstram API call fail", async () => {
+      getDocumentsCountMock.mockRejectedValueOnce(new Error());
+
+      const result = await client.getDocumentCount()();
+
+      expect(getDocumentsCountMock).toHaveBeenCalledOnce();
+      expect(getDocumentsCountMock).toHaveBeenCalledWith();
+
+      expect(E.isLeft(result)).toBeTruthy();
+    });
+
+    it("Should succeed and return the document counts", async () => {
+      const documentCount = 1;
+      getDocumentsCountMock.mockResolvedValueOnce(documentCount);
+
+      const result = await client.getDocumentCount()();
+
+      expect(getDocumentsCountMock).toHaveBeenCalledOnce();
+      expect(getDocumentsCountMock).toHaveBeenCalledWith();
+
+      expect(result).toEqual(E.right(documentCount));
     });
   });
 });

@@ -7,6 +7,7 @@ import {
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
+import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
@@ -28,16 +29,12 @@ export interface FullTextSearchParam {
 }
 
 export interface AzureSearchClient<T> {
-  fullTextSearch: ({
-    filter,
-    orderBy,
-    scoringParameters,
-    scoringProfile,
-    searchParams,
-    searchText,
-    skip,
-    top,
-  }: FullTextSearchParam) => TE.TaskEither<Error, SearchMappedResult<T>>;
+  fullTextSearch: RTE.ReaderTaskEither<
+    FullTextSearchParam,
+    Error,
+    SearchMappedResult<T>
+  >;
+  getDocumentCount: RTE.ReaderTaskEither<void, Error, number>;
 }
 
 /**
@@ -64,7 +61,7 @@ export const makeAzureSearchClient = <T>(
     },
   );
 
-  const fullTextSearch = ({
+  const fullTextSearch: AzureSearchClient<T>["fullTextSearch"] = ({
     filter,
     orderBy,
     scoringParameters,
@@ -73,7 +70,7 @@ export const makeAzureSearchClient = <T>(
     searchText,
     skip,
     top,
-  }: FullTextSearchParam): TE.TaskEither<Error, SearchMappedResult<T>> =>
+  }) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -108,7 +105,11 @@ export const makeAzureSearchClient = <T>(
         ),
       ),
     );
-  return { fullTextSearch };
+
+  const getDocumentCount: AzureSearchClient<T>["getDocumentCount"] = () =>
+    pipe(TE.tryCatch(() => searchClient.getDocumentsCount(), E.toError));
+
+  return { fullTextSearch, getDocumentCount };
 };
 
 const resultsToMappedList =
