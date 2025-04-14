@@ -17,7 +17,7 @@ module "backoffice" {
 
   resource_group_name = var.resource_group_name
   health_check_path   = "/api/info"
-  node_version        = 18
+  node_version        = 20
 
   subnet_cidr                          = var.bo_snet_cidr
   subnet_pep_id                        = var.peps_snet_id
