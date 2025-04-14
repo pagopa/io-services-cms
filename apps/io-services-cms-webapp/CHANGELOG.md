@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.17
+
+### Patch Changes
+
+- 7fcdfcf0: update cms to node 20
+
 ## 1.40.16
 
 ### Patch Changes
