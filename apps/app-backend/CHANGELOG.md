@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.1.2
+
+### Patch Changes
+
+- 7fcdfcf0: update cms to node 20
+
 ## 1.1.1
 
 ### Patch Changes

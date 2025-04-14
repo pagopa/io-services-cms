@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.12
+
+### Patch Changes
+
+- 7fcdfcf0: update cms to node 20
+
 ## 1.25.11
 
 ### Patch Changes
