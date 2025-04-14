@@ -137,7 +137,7 @@ locals {
       # PDV configurations
       PDV_TOKENIZER_BASE_URL  = "https://api.tokenizer.pdv.pagopa.it"
       PDV_TOKENIZER_BASE_PATH = "/tokenizer/v1"
-      PDV_TOKENIZER_API_KEY   = "@Microsoft.KeyVault(VaultName=${data.azurerm_key_vault.cms_key_vault.name};SecretName=PDV-TOKENIZER-API-KEY)"
+      PDV_TOKENIZER_API_KEY   = data.azurerm_key_vault_secret.pdv_tokenizer_api_key.value
 
     }
     autoscale_settings = {

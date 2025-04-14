@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.40.16
+
+### Patch Changes
+
+- 2e7d8bf0: add ingestion activations
+- Updated dependencies [2e7d8bf0]
+  - @io-services-cms/models@1.27.1
+
 ## 1.40.15
 
 ### Patch Changes
