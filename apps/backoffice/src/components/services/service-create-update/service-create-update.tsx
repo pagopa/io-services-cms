@@ -23,7 +23,7 @@ import {
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import {
   ServiceBuilderStep1,
@@ -70,33 +70,37 @@ export const ServiceCreateUpdate = ({
       ? session.user.permissions.selcGroups[0]
       : "";
 
-  const serviceDefaultData: ServiceCreateUpdatePayload = {
-    authorized_cidrs: [],
-    authorized_recipients: [],
-    description: "",
-    max_allowed_payment_amount: 0,
-    metadata: {
-      address: "",
-      app_android: "",
-      app_ios: "",
-      assistanceChannels: [{ type: "email", value: "" }],
-      category: "",
-      cta: {
-        text: "",
-        url: "",
+  const serviceDefaultData: ServiceCreateUpdatePayload = useMemo(
+    () => ({
+      authorized_cidrs: [],
+      authorized_recipients: [],
+      description: "",
+      max_allowed_payment_amount: 0,
+      metadata: {
+        address: "",
+        app_android: "",
+        app_ios: "",
+        assistanceChannels: [{ type: "email", value: "" }],
+        category: "",
+        cta: {
+          text: "",
+          url: "",
+        },
+        custom_special_flow: "",
+        group_id: handleOperatorWithSingleGroup(),
+        privacy_url: "",
+        scope: ScopeEnum.LOCAL,
+        token_name: "",
+        topic_id: "",
+        tos_url: "",
+        web_url: "",
       },
-      custom_special_flow: "",
-      group_id: handleOperatorWithSingleGroup(),
-      privacy_url: "",
-      scope: ScopeEnum.LOCAL,
-      token_name: "",
-      topic_id: "",
-      tos_url: "",
-      web_url: "",
-    },
-    name: "",
-    require_secure_channel: false,
-  };
+      name: "",
+      require_secure_channel: false,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const handleCancel = async () => {
     const confirmed = await showDialog({

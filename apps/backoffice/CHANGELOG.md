@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.11
+
+### Patch Changes
+
+- fba8d0ac: Service create form: fixed issue where form would reset and lose data when changing browser tabs
+
 ## 1.25.10
 
 ### Patch Changes
