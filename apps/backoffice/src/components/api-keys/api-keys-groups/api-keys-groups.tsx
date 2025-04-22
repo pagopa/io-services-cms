@@ -10,6 +10,10 @@ import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
 import { getBffApiClient } from "@/utils/bff-api-client";
+import {
+  trackGroupKeyDeleteEvent,
+  trackGroupKeyRegenerateEvent,
+} from "@/utils/mix-panel";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Box } from "@mui/material";
@@ -188,6 +192,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     keyType: SubscriptionKeyTypeEnum,
     subscriptionId: string,
   ) => {
+    trackGroupKeyRegenerateEvent(keyType);
     skFetchData(
       "regenerateManageSubscriptionKey",
       { keyType, subscriptionId },
@@ -223,6 +228,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       title: t("routes.services.deleteApiKeyGroupModal.title"),
     });
     if (confirmApiKeyDeletion) {
+      trackGroupKeyDeleteEvent(subscription.id);
       await noContentFetchData(
         "deleteManageSubscription",
         { subscriptionId: subscription.id },

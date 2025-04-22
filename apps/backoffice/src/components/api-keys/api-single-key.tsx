@@ -1,5 +1,6 @@
 import { getConfiguration } from "@/config";
 import { SubscriptionKeyTypeEnum } from "@/generated/services-cms/SubscriptionKeyType";
+import { ApiKeyScopeType } from "@/types/api-key";
 import { isAdmin } from "@/utils/auth-util";
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
@@ -25,7 +26,7 @@ export interface ApiSingleKeyProps {
   onBlockClick: (keyType: SubscriptionKeyTypeEnum) => void;
   onCopyClick?: () => void;
   onRegenerateClick: (keyType: SubscriptionKeyTypeEnum) => void;
-  type: "manage" | "use";
+  scope: ApiKeyScopeType;
 }
 
 /** Single API Key component */
@@ -36,14 +37,14 @@ export const ApiSingleKey = ({
   onBlockClick,
   onCopyClick,
   onRegenerateClick,
-  type,
+  scope,
 }: ApiSingleKeyProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
   const handleEnableRegenerateAction = () =>
-    type === "use" ||
+    scope === "use" ||
     !GROUP_APIKEY_ENABLED ||
     (GROUP_APIKEY_ENABLED && isAdmin(session));
 

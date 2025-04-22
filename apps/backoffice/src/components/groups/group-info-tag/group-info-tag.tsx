@@ -11,7 +11,7 @@ import { useTranslation } from "next-i18next";
 
 export interface GroupInfoTagProps {
   loading?: boolean;
-  onAssociateClick?: () => void;
+  onAssociateClick?: (isAlreadyBounded: boolean) => void;
   onUnboundClick?: () => void;
   value?: Group;
 }
@@ -39,6 +39,10 @@ export const GroupInfoTag = ({
     }
   };
 
+  const handleAssociateClick = (isAlreadyBounded: boolean) => {
+    if (onAssociateClick) onAssociateClick(isAlreadyBounded);
+  };
+
   if (loading)
     return (
       <LoaderSkeleton
@@ -56,7 +60,7 @@ export const GroupInfoTag = ({
         <ButtonNaked
           color="primary"
           endIcon={<Edit />}
-          onClick={onAssociateClick}
+          onClick={() => handleAssociateClick(false)}
           size="medium"
           sx={{ fontWeight: 700 }}
         >
@@ -80,7 +84,7 @@ export const GroupInfoTag = ({
           <IconButton
             aria-label="edit"
             color="primary"
-            onClick={onAssociateClick}
+            onClick={() => handleAssociateClick(true)}
             size="small"
           >
             <Edit fontSize="inherit" />

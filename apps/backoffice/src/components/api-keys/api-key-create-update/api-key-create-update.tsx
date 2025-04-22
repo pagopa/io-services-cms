@@ -7,6 +7,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { Groups } from "@/generated/api/Groups";
 import useFetch from "@/hooks/use-fetch";
+import { trackGroupKeyGenerateAbortEvent } from "@/utils/mix-panel";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -43,6 +44,7 @@ export const ApiKeyCreateUpdate = ({ onConfirm }: ApiKeyCreateUpdateProps) => {
     });
     if (confirmed) {
       console.log("operation cancelled");
+      trackGroupKeyGenerateAbortEvent();
       router.back();
     } else {
       console.log("modal cancelled");

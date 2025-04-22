@@ -3,7 +3,10 @@ import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycle
 import useFetch from "@/hooks/use-fetch";
 import { Service } from "@/types/service";
 import { hasApiKeyGroupsFeatures } from "@/utils/auth-util";
-import { trackServiceDetailsEvent } from "@/utils/mix-panel";
+import {
+  trackServiceDetailsEvent,
+  trackServiceGroupAssignmentDeleteEvent,
+} from "@/utils/mix-panel";
 import { ReadMore } from "@mui/icons-material";
 import * as tt from "io-ts";
 import { useSession } from "next-auth/react";
@@ -34,9 +37,11 @@ export const ServiceInfo = ({
   const { data: session } = useSession();
   const { openDrawer } = useDrawer();
   const [associateGroupOpen, setAssociateGroupOpen] = useState(false);
+  const [isAlreadyGroupBounded, setIsAlreadyGroupBounded] = useState(false);
   const { fetchData: psFetchData } = useFetch<unknown>();
 
   const handleServiceGroupUnbound = async () => {
+    trackServiceGroupAssignmentDeleteEvent();
     await psFetchData(
       "patchService",
       {
@@ -48,7 +53,13 @@ export const ServiceInfo = ({
       tt.unknown,
       { notify: "all" },
     );
+    setIsAlreadyGroupBounded(false);
     onGroupChange();
+  };
+
+  const handleAssociateClick = (isAlreadyBounded: boolean) => {
+    setIsAlreadyGroupBounded(isAlreadyBounded);
+    setAssociateGroupOpen(true);
   };
 
   /** row list for minified/basic information card */
@@ -86,7 +97,7 @@ export const ServiceInfo = ({
         value: (
           <GroupInfoTag
             loading={!data}
-            onAssociateClick={() => setAssociateGroupOpen(true)}
+            onAssociateClick={handleAssociateClick}
             onUnboundClick={handleServiceGroupUnbound}
             value={data?.metadata.group}
           />
@@ -119,6 +130,7 @@ export const ServiceInfo = ({
       />
       <AssociateGroupToService
         groupId={data?.metadata.group?.id}
+        isAlreadyGroupBounded={isAlreadyGroupBounded}
         onClose={() => setAssociateGroupOpen(false)}
         onConfirm={handleGroupChange}
         open={associateGroupOpen}

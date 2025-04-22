@@ -22,6 +22,7 @@ import {
   trackServiceDetailsPageEvent,
   trackServiceEditStartEvent,
   trackServiceHistoryEvent,
+  trackServiceKeyRegenerateEvent,
   trackServicePreviewEvent,
 } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
@@ -67,6 +68,7 @@ export default function ServiceDetails() {
         );
 
   const handleRegenerateKey = (keyType: SubscriptionKeyTypeEnum) => {
+    trackServiceKeyRegenerateEvent(keyType);
     skFetchData(
       "regenerateServiceKey",
       { keyType, serviceId },
@@ -110,9 +112,9 @@ export default function ServiceDetails() {
     fetchServiceLifecycle(); // reload ServiceLifecycle
   };
 
-  const handleHistory = (continuationToken?: string) => {
+  const handleHistory = (trackEvent: boolean, continuationToken?: string) => {
     setShowHistory(true);
-    trackServiceHistoryEvent(serviceId);
+    if (trackEvent) trackServiceHistoryEvent(serviceId);
 
     shFetchData(
       "getServiceHistory",
@@ -176,7 +178,7 @@ export default function ServiceDetails() {
             lifecycleStatus={slData?.status}
             onDeleteClick={handleDelete}
             onEditClick={handleEdit}
-            onHistoryClick={() => handleHistory()}
+            onHistoryClick={() => handleHistory(true)}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
             onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
@@ -197,7 +199,7 @@ export default function ServiceDetails() {
         historyData={shData}
         loading={shLoading}
         onClose={() => setShowHistory(false)}
-        onLoadMoreClick={handleHistory}
+        onLoadMoreClick={(ct) => handleHistory(false, ct)}
         showHistory={showHistory}
       />
       <AppPreview
@@ -223,8 +225,8 @@ export default function ServiceDetails() {
             description={t("routes.service.keys.description")}
             keys={skData}
             onRegenerateKey={handleRegenerateKey}
+            scope="use"
             title={t("routes.service.keys.title")}
-            type="use"
           />
         </Grid>
         <Grid item xs={12}>

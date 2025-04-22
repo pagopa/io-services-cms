@@ -1,10 +1,10 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { ApiKeyScopeType } from "@/types/api-key";
 import {
+  trackGroupKeyCopyEvent,
   trackManageKeyCopyEvent,
-  trackManageKeyRegenerateEvent,
   trackServiceKeyCopyEvent,
-  trackServiceKeyRegenerateEvent,
 } from "@/utils/mix-panel";
 import { Divider } from "@mui/material";
 import { useTranslation } from "next-i18next";
@@ -17,31 +17,25 @@ export interface ApiKeysCoupleProps {
   keys?: SubscriptionKeys;
   /** Event triggered when user click "Regenerate" on confirmation modal */
   onRegenerateKey: (type: SubscriptionKeyTypeEnum) => void;
-  /** Used to track the page where the event is triggered */
-  type: "manage" | "use";
+  /** Used to define scope: **manage** _(root or group)_ or **use** */
+  scope: ApiKeyScopeType;
 }
 
 /** API Keys key-couple (primary/secondary) component */
 export const ApiKeysCouple = ({
   keys,
   onRegenerateKey,
-  type,
+  scope,
 }: ApiKeysCoupleProps) => {
   const { t } = useTranslation();
   const showDialog = useDialog();
 
-  const handleRegenerateEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
-    if (type === "manage") {
-      trackManageKeyRegenerateEvent(keyType);
-    } else if (type === "use") {
-      trackServiceKeyRegenerateEvent(keyType);
-    }
-  };
-
   const handleCopyEventMixpanel = (keyType: SubscriptionKeyTypeEnum) => {
-    if (type === "manage") {
+    if (scope === "manageRoot") {
       trackManageKeyCopyEvent("apikey", keyType);
-    } else if (type === "use") {
+    } else if (scope === "manageGroup") {
+      trackGroupKeyCopyEvent(keyType);
+    } else {
       trackServiceKeyCopyEvent(keyType);
     }
   };
@@ -54,7 +48,6 @@ export const ApiKeysCouple = ({
     });
     if (makeKeyRegeneration) {
       onRegenerateKey(keyType);
-      handleRegenerateEventMixpanel(keyType);
     } else {
       console.warn("Operation canceled");
     }
@@ -70,7 +63,7 @@ export const ApiKeysCouple = ({
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.primary);
         }}
         onRegenerateClick={handleRegenerate}
-        type={type}
+        scope={scope}
       />
       <Divider sx={{ marginTop: 3 }} />
       <ApiSingleKey
@@ -81,7 +74,7 @@ export const ApiKeysCouple = ({
           handleCopyEventMixpanel(SubscriptionKeyTypeEnum.secondary);
         }}
         onRegenerateClick={handleRegenerate}
-        type={type}
+        scope={scope}
       />
     </>
   );

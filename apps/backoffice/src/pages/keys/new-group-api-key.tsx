@@ -5,6 +5,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { Subscription } from "@/generated/api/Subscription";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
@@ -18,7 +19,7 @@ export default function NewGroupApiKey() {
   const { fetchData: upsertSubFetchData } = useFetch<Subscription>();
 
   const handleConfirm = async (group: CreateManageGroupSubscription) => {
-    await upsertSubFetchData(
+    const result = await upsertSubFetchData(
       "upsertManageGroupSubscription",
       {
         body: group,
@@ -26,6 +27,11 @@ export default function NewGroupApiKey() {
       Subscription,
       { notify: "all" },
     );
+    if (result.success) {
+      trackGroupKeyGenerateEndEvent("success");
+    } else {
+      trackGroupKeyGenerateEndEvent("error");
+    }
     // redirect to keys page
     router.push(keysPageUrl);
   };

@@ -1,5 +1,6 @@
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { ApiKeyScopeType } from "@/types/api-key";
 import { Box } from "@mui/material";
 
 import { ApiKeysCouple } from "./api-keys-couple";
@@ -12,10 +13,10 @@ export interface ApiKeysProps {
   keys?: SubscriptionKeys;
   /** Event triggered when user click "Regenerate" on confirmation modal */
   onRegenerateKey: (type: SubscriptionKeyTypeEnum) => void;
+  /** Used to define scope: **manage** _(root or group)_ or **use** */
+  scope: ApiKeyScopeType;
   /** Main component card title */
   title?: string;
-  /** Used to log the page where the event is triggered */
-  type: "manage" | "use";
 }
 
 /** API Key main component
@@ -33,7 +34,7 @@ export const ApiKeys = (props: ApiKeysProps) => (
     <ApiKeysCouple
       keys={props.keys}
       onRegenerateKey={props.onRegenerateKey}
-      type={props.type}
+      scope={props.scope}
     />
   </Box>
 );

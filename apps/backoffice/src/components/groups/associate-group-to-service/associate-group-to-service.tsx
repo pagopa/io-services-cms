@@ -6,6 +6,10 @@ import {
 import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { Groups } from "@/generated/api/Groups";
 import useFetch from "@/hooks/use-fetch";
+import {
+  trackServiceGroupAssignmentEvent,
+  trackServiceGroupAssignmentModifyEvent,
+} from "@/utils/mix-panel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -18,6 +22,7 @@ import { z } from "zod";
 
 export interface AssociateGroupToServiceProps {
   groupId?: string;
+  isAlreadyGroupBounded: boolean;
   onClose: () => void;
   onConfirm: () => void;
   open: boolean;
@@ -34,6 +39,7 @@ const defaultFormValues = {
 
 export const AssociateGroupToService = ({
   groupId,
+  isAlreadyGroupBounded,
   onClose,
   onConfirm,
   open,
@@ -76,6 +82,8 @@ export const AssociateGroupToService = ({
 
   const handleConfirmGroupAssociation = () => {
     if (isValid) {
+      if (isAlreadyGroupBounded) trackServiceGroupAssignmentModifyEvent();
+      else trackServiceGroupAssignmentEvent();
       psFetchData(
         "patchService",
         {
