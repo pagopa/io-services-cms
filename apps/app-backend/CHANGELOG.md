@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.1.3
+
+### Patch Changes
+
+- 785df233: Perform a getDocumentCount intead of a full text-search within AI Search check probe
+
 ## 1.1.2
 
 ### Patch Changes
