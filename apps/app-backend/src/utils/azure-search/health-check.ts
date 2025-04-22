@@ -13,7 +13,7 @@ export const makeAzureSearchHealthCheck = <T>({
   searchClient,
 }: AzureSearchClientDependency<T>): HealthCheck<AzureSearchProblemSource> =>
   pipe(
-    searchClient.fullTextSearch({ searchText: "test" }),
+    searchClient.getDocumentCount(),
     TE.mapLeft(toHealthProblems("AzureSearch" as const)),
     TE.map(() => true),
   );
