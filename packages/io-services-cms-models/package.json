@@ -34,8 +34,6 @@
     "newtype-ts": "^0.3.5"
   },
   "devDependencies": {
-    "@pagopa/eslint-config": "^4.0.1",
-    "eslint": "^8.57.0",
     "typescript": "^5.0.4"
   }
 }
