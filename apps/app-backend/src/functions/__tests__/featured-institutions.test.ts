@@ -33,22 +33,22 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
           body: mockFeaturedInstitutions,
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
   it("should return internal error", async () => {
     const errorMessage = "Error blobService";
     mockUpsertBlobFromObject.mockReturnValueOnce(
-      TE.left(new Error(errorMessage))
+      TE.left(new Error(errorMessage)),
     );
 
     const result = await makeFeaturedInstitutionsHandler(mockedConfiguration)({
@@ -61,7 +61,7 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
@@ -71,8 +71,8 @@ describe("Get Featured Institutions", () => {
             title: `An error occurred retrieving featuredInstitutions file from blobService: [${errorMessage}]`,
           },
           statusCode: 500,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -89,7 +89,7 @@ describe("Get Featured Institutions", () => {
       Institutions,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME
+      mockedConfiguration.FEATURED_INSTITUTIONS_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
@@ -98,8 +98,8 @@ describe("Get Featured Institutions", () => {
             institutions: [],
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 });

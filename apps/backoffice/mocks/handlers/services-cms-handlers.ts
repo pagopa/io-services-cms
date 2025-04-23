@@ -6,7 +6,7 @@ import {
   aMockServicePublication,
   getIoServicesError,
   getMockServiceKeys,
-  getMockServiceLifecycle
+  getMockServiceLifecycle,
 } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import { getGetServiceTopics200Response } from "./backend-handlers";
@@ -23,23 +23,23 @@ export const buildHandlers = () => {
     http.post(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getCreateService201Response()), {
-          status: 201
+          status: 201,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(400)), {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -47,20 +47,20 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServices200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -68,23 +68,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services/topics`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceTopics200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -95,24 +95,24 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getGetService200Response(serviceId as string)),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -123,27 +123,27 @@ export const buildHandlers = () => {
         new HttpResponse(
           JSON.stringify(getUpdateService200Response(serviceId as string)),
           {
-            status: 200
-          }
+            status: 200,
+          },
         ),
         new HttpResponse(JSON.stringify(getIoServicesError(400)), {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -151,23 +151,23 @@ export const buildHandlers = () => {
     http.delete(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -175,26 +175,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/logo`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(400)), {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -202,23 +202,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services/:serviceId/keys`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -226,26 +226,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/keys/:keyType`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getRegenerateServiceKey200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(400)), {
-          status: 400
+          status: 400,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -253,26 +253,26 @@ export const buildHandlers = () => {
     http.put(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(409)), {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -280,26 +280,26 @@ export const buildHandlers = () => {
     http.patch(`${baseURL}/services/:serviceId/review`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(409)), {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -307,26 +307,26 @@ export const buildHandlers = () => {
     http.post(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(409)), {
-          status: 409
+          status: 409,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -334,23 +334,23 @@ export const buildHandlers = () => {
     http.get(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetPublishedService200Response()), {
-          status: 200
+          status: 200,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
@@ -358,27 +358,27 @@ export const buildHandlers = () => {
     http.delete(`${baseURL}/services/:serviceId/release`, () => {
       const resultArray = [
         new HttpResponse(null, {
-          status: 204
+          status: 204,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(401)), {
-          status: 401
+          status: 401,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(403)), {
-          status: 403
+          status: 403,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(404)), {
-          status: 404
+          status: 404,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(429)), {
-          status: 429
+          status: 429,
         }),
         new HttpResponse(JSON.stringify(getIoServicesError(500)), {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
-    })
+    }),
   ];
   return configuration.IS_DEVELOPMENT
     ? [
@@ -386,15 +386,15 @@ export const buildHandlers = () => {
         http.get(`${baseURL}/info`, () => {
           const resultArray = [
             new HttpResponse(JSON.stringify(getInfo200Response()), {
-              status: 200
+              status: 200,
             }),
             new HttpResponse(JSON.stringify(getInfo500Response()), {
-              status: 500
-            })
+              status: 500,
+            }),
           ];
 
           return resultArray[0];
-        })
+        }),
       ]
     : handlers;
 };
@@ -402,7 +402,7 @@ export const buildHandlers = () => {
 function getInfo200Response() {
   return {
     version: faker.lorem.slug(1),
-    name: faker.person.fullName()
+    name: faker.person.fullName(),
   };
 }
 

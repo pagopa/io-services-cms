@@ -4,31 +4,30 @@ import { sanitizeObject } from "../sanitize";
 const aService = {
   id: "aServiceId",
   status: {
-    value: "submitted"
+    value: "submitted",
   },
   last_update: "2024-01-31T14:44:57.000Z",
   metadata: {
     privacy_url: "https://testprivacy.it",
     address: "via dell'ente, 32",
-    cta:
-      '"---\nit:\n  cta_1: \n    text: "Etichetta CTA"\n    action: "iohandledlink://https://cta"\nen:\n  cta_1: \n    text: "Etichetta CTA"\n    action: "iohandledlink://https://cta"\n---"',
+    cta: '"---\nit:\n  cta_1: \n    text: "Etichetta CTA"\n    action: "iohandledlink://https://cta"\nen:\n  cta_1: \n    text: "Etichetta CTA"\n    action: "iohandledlink://https://cta"\n---"',
     email: "servizio@email.it",
     scope: "LOCAL",
     topic: {
       id: 6,
-      name: "Educazione e formazione"
-    }
+      name: "Educazione e formazione",
+    },
   },
   name: "aServiceName",
   description: "test description \n\n**bold text**",
   organization: {
     name: "anOrganizationName",
-    fiscal_code: "00000000001"
+    fiscal_code: "00000000001",
   },
   require_secure_channel: false,
   max_allowed_payment_amount: 0,
   authorized_recipients: ["AAAAAA00A00A000A"],
-  authorized_cidrs: []
+  authorized_cidrs: [],
 };
 
 describe("sanitizeObject", () => {
@@ -40,7 +39,7 @@ describe("sanitizeObject", () => {
   it("should sanitize the name", () => {
     const anUnsafeService = {
       ...aService,
-      name: "<img src/onerror=alert(document.cookie)>"
+      name: "<img src/onerror=alert(document.cookie)>",
     };
 
     const result = sanitizeObject(anUnsafeService);
@@ -48,7 +47,7 @@ describe("sanitizeObject", () => {
     expect(result).not.toEqual(anUnsafeService);
     expect(result).toStrictEqual({
       ...anUnsafeService,
-      name: "<img>"
+      name: "<img>",
     });
   });
 
@@ -57,8 +56,8 @@ describe("sanitizeObject", () => {
       ...aService,
       metadata: {
         ...aService.metadata,
-        address: "<img src/onerror=alert(document.cookie)>"
-      }
+        address: "<img src/onerror=alert(document.cookie)>",
+      },
     };
 
     const result = sanitizeObject(anUnsafeService);
@@ -68,8 +67,8 @@ describe("sanitizeObject", () => {
       ...anUnsafeService,
       metadata: {
         ...anUnsafeService.metadata,
-        address: "<img>"
-      }
+        address: "<img>",
+      },
     });
   });
 
@@ -81,8 +80,8 @@ describe("sanitizeObject", () => {
         "AAAAAA00A00A000A",
         "<img src/onerror=alert(document.cookie)>",
         "<script>alert('You Have been Pwned!')</script>",
-        '<img height="300" src/onerror=alert(document.cookie) width="400">'
-      ]
+        '<img height="300" src/onerror=alert(document.cookie) width="400">',
+      ],
     };
 
     const result = sanitizeObject(anUnsafeService);
@@ -95,8 +94,8 @@ describe("sanitizeObject", () => {
         "AAAAAA00A00A000A",
         "<img>",
         "&lt;script&gt;alert('You Have been Pwned!')&lt;/script&gt;",
-        '<img height="300" width="400">'
-      ]
+        '<img height="300" width="400">',
+      ],
     });
   });
 });

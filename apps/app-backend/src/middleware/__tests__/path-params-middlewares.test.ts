@@ -20,7 +20,7 @@ describe("Path Params Middleware Tests", () => {
 
       const result = await PathParamValidatorMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -39,13 +39,13 @@ describe("Path Params Middleware Tests", () => {
 
       const result = await PathParamValidatorMiddleware(
         "param",
-        IntegerFromString.pipe(NonNegativeInteger)
+        IntegerFromString.pipe(NonNegativeInteger),
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          "Invalid pathParam 'param' supplied in request query"
+          "Invalid pathParam 'param' supplied in request query",
         );
       }
     });
@@ -60,13 +60,13 @@ describe("Path Params Middleware Tests", () => {
 
       const result = await PathParamValidatorMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          "Cannot extract Path param 'param' from request"
+          "Cannot extract Path param 'param' from request",
         );
       }
     });

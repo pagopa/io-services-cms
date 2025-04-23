@@ -32,7 +32,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
 const anOrganizationFiscalCode = "12345678901" as OrganizationFiscalCode;
 
@@ -124,7 +124,7 @@ describe("Sync Legacy Handler", () => {
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(legacyServiceModelMock.findOneByServiceId).not.toBeCalled();
@@ -144,8 +144,8 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock
-      )()
+        legacyServiceModelMock,
+      )(),
     ).rejects.toThrowError(CosmosEmptyResponse.kind);
 
     expect(legacyServiceModelMock.create).not.toBeCalled();
@@ -172,8 +172,8 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock
-      )()
+        legacyServiceModelMock,
+      )(),
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
     expect(legacyServiceModelMock.update).not.toBeCalled();
@@ -200,8 +200,8 @@ describe("Sync Legacy Handler", () => {
       handleQueueItem(
         context,
         aRequestSyncLegacyItem as unknown as Json,
-        legacyServiceModelMock
-      )()
+        legacyServiceModelMock,
+      )(),
     ).rejects.toThrowError(CosmosConflictResponse.kind);
 
     expect(legacyServiceModelMock.create).not.toBeCalled();
@@ -227,7 +227,7 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(res).toBeUndefined();
@@ -238,7 +238,7 @@ describe("Sync Legacy Handler", () => {
     ]);
     expect(legacyServiceModelMock.create).toBeCalledTimes(1);
     expect(legacyServiceModelMock.create).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true })
+      expect.objectContaining({ cmsTag: true }),
     );
   });
   it("should create a new legacy service with CMS tag on, when only minimal data is set", async () => {
@@ -280,7 +280,7 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncMinimalLegacyItem as unknown as Json,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(res).toBeUndefined();
@@ -291,7 +291,7 @@ describe("Sync Legacy Handler", () => {
     ]);
     expect(legacyServiceModelMock.create).toBeCalledTimes(1);
     expect(legacyServiceModelMock.create).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true })
+      expect.objectContaining({ cmsTag: true }),
     );
   });
 
@@ -306,14 +306,14 @@ describe("Sync Legacy Handler", () => {
         TE.right({
           ...aRetrievedService,
           ...aLegacyService,
-        })
+        }),
       ),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(res).toBeUndefined();
@@ -327,11 +327,11 @@ describe("Sync Legacy Handler", () => {
       JSON.stringify({
         ...aRetrievedService,
         ...aRequestSyncLegacyItem,
-      })
+      }),
     );
     console.log("expected:", expected);
     expect(legacyServiceModelMock.update).toBeCalledWith(
-      expect.objectContaining({ cmsTag: true })
+      expect.objectContaining({ cmsTag: true }),
     );
   });
 
@@ -374,7 +374,7 @@ describe("Sync Legacy Handler", () => {
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(res).toBeUndefined();
@@ -387,7 +387,7 @@ describe("Sync Legacy Handler", () => {
     expect(legacyServiceModelMock.create).toBeCalledWith(
       expect.objectContaining({
         authorizedCIDRs: new Set(["0.0.0.0/0"]) as Set<CIDR>,
-      })
+      }),
     );
   });
 
@@ -426,14 +426,14 @@ describe("Sync Legacy Handler", () => {
         TE.right({
           ...aRetrievedService,
           ...aLegacyService,
-        })
+        }),
       ),
     } as unknown as ServiceModel;
 
     const res = await handleQueueItem(
       context,
       aRequestSyncLegacyItem as unknown as Json,
-      legacyServiceModelMock
+      legacyServiceModelMock,
     )();
 
     expect(res).toBeUndefined();
@@ -447,12 +447,12 @@ describe("Sync Legacy Handler", () => {
       JSON.stringify({
         ...aRetrievedService,
         ...aRequestSyncLegacyItem,
-      })
+      }),
     );
     expect(legacyServiceModelMock.update).toBeCalledWith(
       expect.objectContaining({
         authorizedCIDRs: new Set(["0.0.0.0/0"]) as Set<CIDR>,
-      })
+      }),
     );
   });
 });

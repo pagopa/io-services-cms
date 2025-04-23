@@ -39,7 +39,7 @@ describe("[ButtonExit] Component", () => {
     const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
     await fireEvent.click(
-      screen.getByTestId("bo-io-dialog-provider-confirm-button")
+      screen.getByTestId("bo-io-dialog-provider-confirm-button"),
     );
 
     expect(onClick).toHaveBeenCalled();
@@ -51,7 +51,7 @@ describe("[ButtonExit] Component", () => {
     const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
     await fireEvent.click(
-      screen.getByTestId("bo-io-dialog-provider-cancel-button")
+      screen.getByTestId("bo-io-dialog-provider-cancel-button"),
     );
 
     expect(onClick).not.toHaveBeenCalled();

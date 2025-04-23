@@ -5,5 +5,5 @@ export const aMockErrorResponse = {
   title: "Service Unavailable",
   status: 200,
   detail: "There was an error processing the request",
-  instance: faker.internet.url()
+  instance: faker.internet.url(),
 };

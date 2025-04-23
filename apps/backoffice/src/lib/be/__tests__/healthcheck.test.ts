@@ -8,14 +8,14 @@ describe("healthcheck", () => {
     expect.assertions(2);
     const health = await healthcheck([
       Promise.reject(
-        new HealthChecksError("service1", new Error("failure error message"))
+        new HealthChecksError("service1", new Error("failure error message")),
       ),
-      Promise.resolve()
+      Promise.resolve(),
     ]);
     expect(health.status).toBe("fail");
     if (health.status === "fail") {
       expect(health.failures).toEqual([
-        { service: "service1", errorMessage: "failure error message" }
+        { service: "service1", errorMessage: "failure error message" },
       ]);
     }
   });
@@ -29,12 +29,12 @@ describe("healthcheck", () => {
   });
   test("set unknown as failure reason if a checker does not throw an HealthChecksError", async () => {
     const health = await healthcheck([
-      Promise.reject("not an HealthChecksError")
+      Promise.reject("not an HealthChecksError"),
     ]);
     expect.assertions(1);
     if (health.status === "fail") {
       expect(health.failures).toEqual([
-        { service: "unknown", errorMessage: "unknown error" }
+        { service: "unknown", errorMessage: "unknown error" },
       ]);
     }
   });

@@ -23,7 +23,7 @@ const resetVariables = () => {
 const reset = () => {
   cleanup();
   resetVariables();
-}
+};
 
 /** a test `AccessControl` component */
 const getAccessControlComponent = () => (

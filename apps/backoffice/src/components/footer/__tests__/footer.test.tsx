@@ -8,7 +8,7 @@ let loggedUser = true;
 let currentLanguage: LangCode = "it";
 
 vi.mock("next/router", () => ({
-  useRouter: () => {}
+  useRouter: () => {},
 }));
 
 const getFooterComponent = () => (
@@ -62,7 +62,7 @@ describe("[AppFooter] Component", () => {
     Object.defineProperty(navigator, "language", {
       value: "en",
       configurable: true,
-      writable: true
+      writable: true,
     });
 
     render(getFooterComponent());

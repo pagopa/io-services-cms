@@ -49,7 +49,7 @@ describe(`toAzureFunctionHandler`, () => {
     try {
       const result = await handler(mockContext);
       assert.fail(
-        `It's not supposed to be here, result: ${JSON.stringify(result)}`
+        `It's not supposed to be here, result: ${JSON.stringify(result)}`,
       );
     } catch (error) {
       expect(aFailingProcedure).toHaveBeenCalledWith({

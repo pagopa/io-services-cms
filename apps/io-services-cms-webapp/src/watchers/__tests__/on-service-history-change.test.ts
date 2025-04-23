@@ -98,7 +98,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -129,12 +129,12 @@ describe("On Service History Change Handler", () => {
       const res = await handler(
         mockConfig,
         mockApimService,
-        mockFsmPublicationClient
+        mockFsmPublicationClient,
       )({ item })();
       expect(E.isRight(res)).toBeTruthy();
       if (E.isRight(res)) {
         expect(res.right).toStrictEqual(expected);
       }
-    }
+    },
   );
 });

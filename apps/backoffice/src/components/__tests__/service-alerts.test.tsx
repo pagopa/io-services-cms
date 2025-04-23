@@ -5,7 +5,7 @@ import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStat
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import {
   ServicePublicationStatusType,
-  ServicePublicationStatusTypeEnum
+  ServicePublicationStatusTypeEnum,
 } from "../../generated/api/ServicePublicationStatusType";
 import { useDrawer } from "../drawer-provider";
 import { ServiceAlerts } from "../services";
@@ -29,7 +29,7 @@ const getServiceAlertsComponent = () => (
 
 beforeAll(() => {
   mockUseDrawer.mockReturnValue({
-    openDrawer: vi.fn()
+    openDrawer: vi.fn(),
   });
 });
 
@@ -67,8 +67,8 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
@@ -81,15 +81,15 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServiceLifecycle alert (sl-alert-submitted) for a SUBMITTED and never approved service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = undefined;
 
@@ -97,21 +97,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-submitted"
-        })
+          name: "sl-alert-submitted",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeNull();
     });
 
     it("Should render a ServiceLifecycle alert (sl-alert-submitted) and ServicePublication alert (sp-alert) for a SUBMITTED service that has a previous APPROVED/UNPUBLISHED version", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -119,21 +119,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-submitted"
-        })
+          name: "sl-alert-submitted",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServiceLifecycle alert (sl-alert-submitted) and ServicePublication alert (sp-alert) for a SUBMITTED service that has a previous APPROVED/PUBLISHED version", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -141,21 +141,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-submitted"
-        })
+          name: "sl-alert-submitted",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should NOT render any alert for an APPROVED/UNPUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -167,7 +167,7 @@ describe("[ServiceAlerts] Component", () => {
     it("Should NOT render any alert for an APPROVED/PUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -179,7 +179,7 @@ describe("[ServiceAlerts] Component", () => {
     it("Should render a ServiceLifecycle alert (sl-alert-rejected) for a REJECTED and never approved service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = undefined;
 
@@ -187,21 +187,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-rejected"
-        })
+          name: "sl-alert-rejected",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeNull();
     });
 
     it("Should render a ServiceLifecycle alert (sl-alert-rejected) and ServicePublication alert (sp-alert) for a REJECTED service that has a previous APPROVED/UNPUBLISHED version", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -209,21 +209,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-rejected"
-        })
+          name: "sl-alert-rejected",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServiceLifecycle alert (sl-alert-rejected) and ServicePublication alert (sp-alert) for a REJECTED service that has a previous APPROVED/PUBLISHED version", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -231,21 +231,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-rejected"
-        })
+          name: "sl-alert-rejected",
+        }),
       ).toBeVisible();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should NOT render any alert for a DELETED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.deleted
+        value: ServiceLifecycleStatusTypeEnum.deleted,
       };
       aServicePublicationStatus = undefined;
 
@@ -265,8 +265,8 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
@@ -279,15 +279,15 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServicePublication alert (sp-alert) for a SUBMITTED service that has an UNPUBLISHED version", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -295,21 +295,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-submitted"
-        })
+          name: "sl-alert-submitted",
+        }),
       ).toBeNull();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServicePublication alert (sp-alert) for a SUBMITTED service that has a PUBLISHED version", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -317,21 +317,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-submitted"
-        })
+          name: "sl-alert-submitted",
+        }),
       ).toBeNull();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should NOT render any alert for an APPROVED/UNPUBLISHED service", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -343,7 +343,7 @@ describe("[ServiceAlerts] Component", () => {
     it("Should NOT render any alert for an APPROVED/PUBLISHED service", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -355,7 +355,7 @@ describe("[ServiceAlerts] Component", () => {
     it("Should render a ServicePublication alert (sp-alert) for a REJECTED service that has an UNPUBLISHED version", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
@@ -363,21 +363,21 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-rejected"
-        })
+          name: "sl-alert-rejected",
+        }),
       ).toBeNull();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
 
     it("Should render a ServicePublication alert (sp-alert) for a REJECTED service that has a PUBLISHED version", () => {
       isRelease = true;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
@@ -385,14 +385,14 @@ describe("[ServiceAlerts] Component", () => {
 
       expect(
         queryByRole("alert", {
-          name: "sl-alert-rejected"
-        })
+          name: "sl-alert-rejected",
+        }),
       ).toBeNull();
 
       expect(
         queryByRole("alert", {
-          name: "sp-alert"
-        })
+          name: "sp-alert",
+        }),
       ).toBeVisible();
     });
   });

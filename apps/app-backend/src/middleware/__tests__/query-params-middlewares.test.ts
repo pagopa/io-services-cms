@@ -25,7 +25,7 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await RequiredQueryParamMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -44,13 +44,13 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await RequiredQueryParamMiddleware(
         "param",
-        IntegerFromString.pipe(NonNegativeInteger)
+        IntegerFromString.pipe(NonNegativeInteger),
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          "Invalid 'param' supplied in request query"
+          "Invalid 'param' supplied in request query",
         );
       }
     });
@@ -65,7 +65,7 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await RequiredQueryParamMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
@@ -87,7 +87,7 @@ describe("Query Params Middleware Tests", () => {
       const result = await RequiredWithDefaultQueryParamMiddleware(
         "param",
         NonEmptyString,
-        "default" as NonEmptyString
+        "default" as NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -107,13 +107,13 @@ describe("Query Params Middleware Tests", () => {
       const result = await RequiredWithDefaultQueryParamMiddleware(
         "param",
         IntegerFromString.pipe(NonNegativeInteger),
-        10 as NonNegativeInteger
+        10 as NonNegativeInteger,
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          "Invalid 'param' supplied in request query"
+          "Invalid 'param' supplied in request query",
         );
       }
     });
@@ -129,7 +129,7 @@ describe("Query Params Middleware Tests", () => {
       const result = await RequiredWithDefaultQueryParamMiddleware(
         "param",
         NonEmptyString,
-        "default" as NonEmptyString
+        "default" as NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -150,7 +150,7 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await OptionalQueryParamMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -172,13 +172,13 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await OptionalQueryParamMiddleware(
         "param",
-        IntegerFromString.pipe(NonNegativeInteger)
+        IntegerFromString.pipe(NonNegativeInteger),
       )(request)();
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).toEqual(
-          "Invalid 'param' supplied in request query"
+          "Invalid 'param' supplied in request query",
         );
       }
     });
@@ -193,7 +193,7 @@ describe("Query Params Middleware Tests", () => {
 
       const result = await OptionalQueryParamMiddleware(
         "param",
-        NonEmptyString
+        NonEmptyString,
       )(request)();
 
       expect(E.isRight(result)).toBeTruthy();

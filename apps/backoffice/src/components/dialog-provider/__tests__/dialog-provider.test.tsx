@@ -18,7 +18,7 @@ const ButtonTestComponent = () => {
       title: "title test",
       message: "desc test",
       confirmButtonLabel: confirmLabel,
-      cancelButtonLabel: cancelLabel
+      cancelButtonLabel: cancelLabel,
     });
     if (confirmed) {
       onConfirm();

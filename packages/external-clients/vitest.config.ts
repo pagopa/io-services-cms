@@ -7,5 +7,5 @@ export default mergeConfig(
     test: {
       exclude: [...defaultExclude, "__integrations__"],
     },
-  })
+  }),
 );

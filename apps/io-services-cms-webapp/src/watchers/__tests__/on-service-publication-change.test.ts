@@ -33,9 +33,9 @@ const aModifiedAt = DateUtils.unixTimestamp();
 
 describe("On Service Publication Change Handler", () => {
   it.each`
-    scenario                     | item                                                                                                    | expected
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                              | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "unpublished" } } }}
-    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                                | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "published" } } }}
+    scenario                     | item                                                                                               | expected
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "unpublished" } }}                         | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "unpublished" } } }}
+    ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" } }}                           | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: expectedTsModifiedAt, fsm: { state: "published" } } }}
     ${"request-historicization"} | ${{ ...aServicePublicationCosmosResource, fsm: { state: "published" }, modified_at: aModifiedAt }} | ${{ requestHistoricization: { ...aService, version: expectedVersion, modified_at: aModifiedAt, fsm: { state: "published" } } }}
   `("should map an item to a $scenario action", async ({ item, expected }) => {
     const res = await handler({ item })();

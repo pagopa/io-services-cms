@@ -12,7 +12,7 @@ const mockUseSession = useSession as Mock;
 
 // mock useRouter
 vi.mock("next/router", () => ({
-  useRouter: vi.fn()
+  useRouter: vi.fn(),
 }));
 const mockUseRouter = useRouter as Mock;
 const pushMock = vi.fn();
@@ -24,14 +24,14 @@ const mockMenuItems: Array<SidenavItem> = [
     text: "aLabel1",
     linkType: "internal",
     requiredPermissions: ["p1", "p2"],
-    requiredRole: "aRole"
+    requiredRole: "aRole",
   },
   {
     href: "/authorizedRoute2",
     icon: <Add fontSize="inherit" />,
     text: "aLabel2",
     linkType: "internal",
-    requiredPermissions: ["p2"]
+    requiredPermissions: ["p2"],
   },
   {
     href: "/authorizedRoute3",
@@ -39,7 +39,7 @@ const mockMenuItems: Array<SidenavItem> = [
     text: "aLabel3",
     linkType: "internal",
     hasBottomDivider: true,
-    requiredRole: "aRole"
+    requiredRole: "aRole",
   },
   {
     href: "/unauthorizedRoute4",
@@ -47,50 +47,50 @@ const mockMenuItems: Array<SidenavItem> = [
     text: "aLabel4",
     linkType: "internal",
     requiredPermissions: ["p3"],
-    requiredRole: "aDifferentRole"
+    requiredRole: "aDifferentRole",
   },
   {
     href: "/unauthorizedRoute5",
     icon: <Add fontSize="inherit" />,
     text: "aLabel5",
     linkType: "internal",
-    requiredPermissions: ["p3"]
+    requiredPermissions: ["p3"],
   },
   {
     href: "/unauthorizedRoute6",
     icon: <Add fontSize="inherit" />,
     text: "aLabel6",
     linkType: "internal",
-    requiredRole: "aDifferentRole"
+    requiredRole: "aDifferentRole",
   },
   {
     href: "/publicRoute7",
     icon: <Add fontSize="inherit" />,
     text: "aLabel7",
-    linkType: "internal"
+    linkType: "internal",
   },
   {
     href: "/publicRoute8",
     icon: <Add fontSize="inherit" />,
     text: "aLabel8",
-    linkType: "external"
-  }
+    linkType: "external",
+  },
 ];
 
 beforeAll(() => {
   mockUseRouter.mockReturnValue({
     pathname: "/authorizedRoute2", // to check current selected item menu
     query: {},
-    push: pushMock
+    push: pushMock,
   });
   mockUseSession.mockReturnValue({
     status: "authenticated",
     data: {
       user: {
         permissions: { apimGroups: ["p1", "p2"] },
-        institution: { role: "aRole" }
-      }
-    }
+        institution: { role: "aRole" },
+      },
+    },
   });
 });
 
@@ -100,7 +100,7 @@ afterEach(cleanup);
 describe("[Sidenav] Component", () => {
   it("should render menu items correctly based on auth matches", () => {
     const { queryByLabelText } = render(
-      <Sidenav items={mockMenuItems} onWidthChange={w => console.log(w)} />
+      <Sidenav items={mockMenuItems} onWidthChange={(w) => console.log(w)} />,
     );
 
     // authorized menu items
@@ -120,7 +120,7 @@ describe("[Sidenav] Component", () => {
 
   it("should render 2nd menu item (aLabel2) correctly as current selected route", () => {
     const { container } = render(
-      <Sidenav items={mockMenuItems} onWidthChange={w => console.log(w)} />
+      <Sidenav items={mockMenuItems} onWidthChange={(w) => console.log(w)} />,
     );
     const elements = container.getElementsByClassName("Mui-selected");
 

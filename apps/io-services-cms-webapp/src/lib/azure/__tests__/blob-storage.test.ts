@@ -16,7 +16,7 @@ describe("upsertBlobFromImageBuffer", () => {
       mockBlobService,
       containerName,
       blobName,
-      content
+      content,
     )();
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {

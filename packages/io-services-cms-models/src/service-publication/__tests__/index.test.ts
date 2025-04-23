@@ -37,7 +37,7 @@ const expectSuccess = async ({
   const applyTask = pipe(
     actions,
     sequence(RTE.ApplicativeSeq),
-    RTE.map((a) => a[a.length - 1])
+    RTE.map((a) => a[a.length - 1]),
   );
 
   const result = await applyTask(void 0)();
@@ -78,7 +78,7 @@ const expectFailure = async ({
   const applyTask = pipe(
     actions,
     sequence(RTE.ApplicativeSeq),
-    RTE.map((a) => a[a.length - 1])
+    RTE.map((a) => a[a.length - 1]),
   );
 
   try {
@@ -122,7 +122,7 @@ const aService = pipe(
   Service.decode,
   E.getOrElseW((_) => {
     throw new Error(`Bad mock`);
-  })
+  }),
 );
 
 const changeName = ({ data, ...rest }: Service, name: string): Service => ({
@@ -278,7 +278,7 @@ describe("override", () => {
       .inspect()
       .set(
         aServiceId,
-        aService as unknown as WithState<string, Record<string, unknown>>
+        aService as unknown as WithState<string, Record<string, unknown>>,
       );
     const item = {} as unknown as ItemType;
     const result = await fsmClient.override(aServiceId, item)();
@@ -324,7 +324,10 @@ describe("override", () => {
     };
     store
       .inspect()
-      .set(aServiceId, { ...aServiceWithSpaces, fsm: { state: "unpublished" } });
+      .set(aServiceId, {
+        ...aServiceWithSpaces,
+        fsm: { state: "unpublished" },
+      });
 
     const item = {
       ...aServiceWithSpaces,
@@ -346,7 +349,7 @@ describe("release", () => {
       .inspect()
       .set(
         aServiceId,
-        aService as unknown as WithState<string, Record<string, unknown>>
+        aService as unknown as WithState<string, Record<string, unknown>>,
       );
     const item = {} as unknown as ItemType;
     const result = await fsmClient.release(aServiceId, item, true)();
@@ -375,7 +378,7 @@ describe("release", () => {
       const result = await fsmClient.release(
         aServiceId,
         aService,
-        action === "publish"
+        action === "publish",
       )();
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -387,6 +390,6 @@ describe("release", () => {
           },
         });
       }
-    }
+    },
   );
 });

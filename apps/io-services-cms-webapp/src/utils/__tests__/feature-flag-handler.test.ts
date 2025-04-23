@@ -15,7 +15,7 @@ const mockApimService = {
     TE.right({
       _etag: "_etag",
       ownerId,
-    })
+    }),
   ),
 } as unknown as ApimUtils.ApimService;
 
@@ -35,14 +35,14 @@ describe("FeatureFlagHandlerTest", () => {
       const result = await isUserEnabledForCmsToLegacySync(
         mockConfig,
         mockApimService,
-        aServiceId
+        aServiceId,
       )();
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
         expect(result.right).toStrictEqual(expected);
       }
-    }
+    },
   );
   it("isUserEnabledForCmsToLegacySync should end up in error when apim respond with and error", async () => {
     const mockConfig = {
@@ -53,14 +53,14 @@ describe("FeatureFlagHandlerTest", () => {
       getSubscription: vi.fn(() =>
         TE.left({
           statusCode: 500,
-        })
+        }),
       ),
     } as unknown as ApimUtils.ApimService;
 
     const result = await isUserEnabledForCmsToLegacySync(
       mockConfig,
       errorMockApimService,
-      aServiceId
+      aServiceId,
     )();
 
     expect(E.isLeft(result)).toBeTruthy();

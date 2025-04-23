@@ -13,13 +13,13 @@ const compat = new FlatCompat({
 });
 
 export default [
-  ...pagopa, 
+  ...pagopa,
   ...compat.extends("next/core-web-vitals"),
   {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_"  },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "no-console": "off",
     },
@@ -33,5 +33,4 @@ export default [
   {
     ignores: ["**/.scripts/*", "**/node_modules/*", "**/__tests__/*"],
   },
-  
 ];

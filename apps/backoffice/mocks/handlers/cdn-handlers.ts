@@ -17,8 +17,8 @@ export const buildHandlers = () => {
     http.get(
       baseURL + configuration.SERVICES_LOGO_PATH + ":image",
       async () => {
-        const imageBuffer = await fetch(testLogo as any).then(res =>
-          res.arrayBuffer()
+        const imageBuffer = await fetch(testLogo as any).then((res) =>
+          res.arrayBuffer(),
         );
 
         const resultArray = [
@@ -26,19 +26,19 @@ export const buildHandlers = () => {
             status: 200,
             headers: {
               "Content-Length": imageBuffer.byteLength.toString(),
-              "Content-Type": "image/png"
-            }
+              "Content-Type": "image/png",
+            },
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
-    )
+      },
+    ),
   ];
 };

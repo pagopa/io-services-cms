@@ -12,7 +12,6 @@
     "dist",
     "index.js"
   ],
-  "packageManager": "yarn@3.3.0",
   "scripts": {
     "build": "rm -rf ./dist & tsc",
     "format": "prettier --write .",
@@ -36,10 +35,7 @@
     "newtype-ts": "^0.3.5"
   },
   "devDependencies": {
-    "@pagopa/eslint-config": "^4.0.1",
     "@pagopa/openapi-codegen-ts": "^13.1.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.0.4"
   },
   "imports": {

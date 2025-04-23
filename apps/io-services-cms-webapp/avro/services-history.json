@@ -31,9 +31,7 @@
             "type": {
               "type": "array",
               "items": "string",
-              "default": [
-                "AAAAAA00A00A000A"
-              ]
+              "default": ["AAAAAA00A00A000A"]
             }
           },
           {
@@ -56,10 +54,7 @@
           },
           {
             "name": "institution_id",
-            "type": [
-              "null",
-              "string"
-            ],
+            "type": ["null", "string"],
             "default": null
           },
           {
@@ -78,10 +73,7 @@
                 },
                 {
                   "name": "department_name",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 }
               ]
@@ -98,19 +90,13 @@
                   "type": {
                     "type": "enum",
                     "name": "HistoryScopeEnum",
-                    "symbols": [
-                      "LOCAL",
-                      "NATIONAL"
-                    ],
+                    "symbols": ["LOCAL", "NATIONAL"],
                     "default": "LOCAL"
                   }
                 },
                 {
                   "name": "address",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
@@ -118,123 +104,78 @@
                   "type": {
                     "type": "enum",
                     "name": "HistoryCategoryEnum",
-                    "symbols": [
-                      "STANDARD",
-                      "SPECIAL"
-                    ],
+                    "symbols": ["STANDARD", "SPECIAL"],
                     "default": "STANDARD"
                   }
                 },
                 {
                   "name": "email",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "pec",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "phone",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "token_name",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "privacy_url",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "app_android",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "app_ios",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "cta",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "custom_special_flow",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "support_url",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "tos_url",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "web_url",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 },
                 {
                   "name": "topic_id",
-                  "type": [
-                    "null",
-                    "int"
-                  ],
+                  "type": ["null", "int"],
                   "default": null
                 },
                 {
                   "name": "group_id",
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": ["null", "string"],
                   "default": null
                 }
               ]

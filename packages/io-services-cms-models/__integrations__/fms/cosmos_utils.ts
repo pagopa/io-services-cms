@@ -12,7 +12,7 @@ const getRequiredStringEnv = (k: string): NonEmptyString =>
     NonEmptyString.decode,
     E.getOrElseW((_) => {
       throw new Error(`${k} must be defined and non-empty`);
-    })
+    }),
   );
 
 const endpoint = getRequiredStringEnv("COSMOSDB_URI");
@@ -28,7 +28,7 @@ const makeRandomName = (): string => {
   for (let i = 0; i < 12; i++) {
     // eslint-disable-next-line functional/immutable-data
     result.push(
-      characters.charAt(Math.floor(Math.random() * charactersLength))
+      characters.charAt(Math.floor(Math.random() * charactersLength)),
     );
   }
   return `test-${result.join("")}`;

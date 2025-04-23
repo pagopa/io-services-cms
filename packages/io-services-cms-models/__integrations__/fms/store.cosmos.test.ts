@@ -39,8 +39,8 @@ it<CosmosContext>("should handle document that does not exists", async ({
       },
       (_) => {
         expect(O.isNone(_)).toBe(true);
-      }
-    )
+      },
+    ),
   );
 });
 
@@ -64,14 +64,14 @@ it<CosmosContext>("should retrieve document that exists", async ({
 
     TE.getOrElseW((_) => {
       throw new Error("unexpected error");
-    })
+    }),
   )();
 
   const fetchResult = await pipe(
     store.fetch(aDoc.id),
     TE.getOrElse((_) => {
       throw new Error("unexpected error");
-    })
+    }),
   )();
 
   pipe(
@@ -81,7 +81,7 @@ it<CosmosContext>("should retrieve document that exists", async ({
     }),
     O.getOrElseW(() => {
       throw new Error("unexpected none");
-    })
+    }),
   );
 });
 
@@ -113,12 +113,12 @@ it<CosmosContext>("should retrieve documents that exist with a bulk read", async
     store.bulkFetch([aDoc0.id, aDoc1.id, aDoc2.id]),
     TE.getOrElse((_) => {
       throw new Error("unexpected error");
-    })
+    }),
   )();
 
   pipe(
     bulkFetchResult.forEach((result, index) => {
       expect(result).toEqual(expect.objectContaining(aDocArray[index]));
-    })
+    }),
   );
 });

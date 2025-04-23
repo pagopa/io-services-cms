@@ -7,7 +7,7 @@ import { HttpResponse, http } from "msw";
 import {
   getDelegatesByOrganizationMockResponse,
   getLatestOwnershipClaimStatusMockResponse,
-  getOwnershipClaimStatusMockResponse
+  getOwnershipClaimStatusMockResponse,
 } from "../data/subscription-migration-data";
 
 faker.seed(new Date().getTime());
@@ -23,25 +23,25 @@ export const buildHandlers = () => {
           new HttpResponse(
             JSON.stringify(getLatestOwnershipClaimStatusMockResponse()),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 400
+            status: 400,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
 
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/:delegateId`,
@@ -50,47 +50,47 @@ export const buildHandlers = () => {
           new HttpResponse(
             JSON.stringify(getOwnershipClaimStatusMockResponse()),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 400
+            status: 400,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
         return resultArray[0];
-      }
+      },
     ),
     http.post(
       `${baseURL}/organizations/:organizationFiscalCode/ownership-claims/:delegateId`,
       () => {
         const resultArray = [
           new HttpResponse(null, {
-            status: 202
+            status: 202,
           }),
           new HttpResponse(null, {
-            status: 400
+            status: 400,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
         return resultArray[0];
-      }
+      },
     ),
     http.get(
       `${baseURL}/organizations/:organizationFiscalCode/delegates`,
@@ -99,24 +99,24 @@ export const buildHandlers = () => {
           new HttpResponse(
             JSON.stringify(getDelegatesByOrganizationMockResponse()),
             {
-              status: 200
-            }
+              status: 200,
+            },
           ),
           new HttpResponse(null, {
-            status: 400
+            status: 400,
           }),
           new HttpResponse(null, {
-            status: 401
+            status: 401,
           }),
           new HttpResponse(null, {
-            status: 404
+            status: 404,
           }),
           new HttpResponse(null, {
-            status: 500
-          })
+            status: 500,
+          }),
         ];
         return resultArray[0];
-      }
-    )
+      },
+    ),
   ];
 };

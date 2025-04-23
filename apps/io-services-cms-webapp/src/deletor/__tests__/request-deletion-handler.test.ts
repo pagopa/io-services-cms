@@ -12,7 +12,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
 const deleteMock = vi.fn((id: NonEmptyString) => {
   return TE.of(void 0);
@@ -38,7 +38,7 @@ describe("Service Deletion Handler", () => {
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
     )();
 
     expect(mockFsmPublicationClient.getStore).toBeCalledTimes(0);
@@ -67,8 +67,8 @@ describe("Service Deletion Handler", () => {
       handleQueueItem(
         context,
         aValidQueueItem,
-        mockFsmPublicationClientFailure
-      )()
+        mockFsmPublicationClientFailure,
+      )(),
     ).rejects.toThrowError("A transient error");
   });
 });

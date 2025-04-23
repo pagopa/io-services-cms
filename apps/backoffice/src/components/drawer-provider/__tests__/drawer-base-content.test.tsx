@@ -6,7 +6,7 @@ import { DrawerBaseContent, DrawerBaseContentHeader } from "../";
 const BO_IO_DRAWER_BASE_CONTENT = "bo-io-drawer-base-content";
 
 let header: DrawerBaseContentHeader = {
-  title: "title"
+  title: "title",
 };
 let children: ReactNode;
 

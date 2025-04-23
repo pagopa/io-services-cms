@@ -197,12 +197,12 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
           startAt: 0,
           total: 3,
           issues: [aJiraIssue1, aJiraIssue2, aJiraIssue3],
-        })
+        }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy
+      mainMockJiraProxy,
     )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -231,12 +231,12 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
           startAt: 0,
           total: 0,
           issues: [],
-        })
+        }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy
+      mainMockJiraProxy,
     )([])();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -252,12 +252,12 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
           startAt: 0,
           total: 0,
           issues: [],
-        })
+        }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy
+      mainMockJiraProxy,
     )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -268,12 +268,12 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
 
   it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
-      () => TE.left(new Error())
+      () => TE.left(new Error()),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy
+      mainMockJiraProxy,
     )(anItemList)();
 
     expect(E.isLeft(result)).toBeTruthy();
@@ -290,19 +290,19 @@ describe("[Service Review Checker Handler] updateReview", () => {
         TE.right({
           ...aService,
           fsm: { state: "approved" },
-        })
+        }),
       ),
       reject: vi.fn(() =>
         TE.right({
           ...aService2,
           fsm: { state: "rejected" },
-        })
+        }),
       ),
     } as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
       mockContext,
       mainMockServiceReviewDao,
-      mockFsmLifecycleClient
+      mockFsmLifecycleClient,
     )([
       {
         issue: aJiraIssue1,
@@ -345,19 +345,19 @@ describe("[Service Review Checker Handler] updateReview", () => {
         TE.right({
           ...aService,
           fsm: { state: "approved" },
-        })
+        }),
       ),
       reject: vi.fn(() =>
         TE.right({
           ...aService2,
           fsm: { state: "rejected" },
-        })
+        }),
       ),
     } as unknown as ServiceLifecycle.FsmClient;
     const result = await updateReview(
       mockContext,
       mainMockServiceReviewDao,
-      mockFsmLifecycleClient
+      mockFsmLifecycleClient,
     )([
       {
         issue: aJiraIssue3,
@@ -400,7 +400,7 @@ describe("[Service Review Checker Handler] updateReview", () => {
     const result = await updateReview(
       mockContext,
       mainMockServiceReviewDao,
-      mockFsmLifecycleClient
+      mockFsmLifecycleClient,
     )([] as unknown as IssueItemPair[])();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -421,20 +421,20 @@ describe("[Service Review Checker Handler] updateReview", () => {
       approve: vi.fn(() => TE.left(new FSMError())),
     } as unknown as ServiceLifecycle.FsmClient;
     const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-      Promise.resolve({} as QueryResult)
+      Promise.resolve({} as QueryResult),
     );
     const mockServiceReviewDao = {
       insert: vi.fn(),
       executeOnPending: vi.fn(),
       updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus),
       ),
     };
 
     const result = await updateReview(
       mockContext,
       mockServiceReviewDao,
-      mockFsmLifecycleClient
+      mockFsmLifecycleClient,
     )([
       {
         issue: aJiraIssue1,
@@ -460,20 +460,20 @@ describe("[Service Review Checker Handler] updateReview", () => {
       approve: vi.fn(() => TE.left(new FSMError())),
     } as unknown as ServiceLifecycle.FsmClient;
     const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-      Promise.resolve({} as QueryResult)
+      Promise.resolve({} as QueryResult),
     );
     const mockServiceReviewDao = {
       insert: vi.fn(),
       executeOnPending: vi.fn(),
       updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-        TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+        TE.fromTask(mockServiceReviewDao_onUpdateStatus),
       ),
     };
 
     const result = await updateReview(
       mockContext,
       mockServiceReviewDao,
-      mockFsmLifecycleClient
+      mockFsmLifecycleClient,
     )([
       {
         issue: aJiraIssue1,

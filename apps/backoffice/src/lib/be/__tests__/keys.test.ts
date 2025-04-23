@@ -8,7 +8,7 @@ import {
   regenerateManageSubscritionApiKey,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
-  upsertManageSubscriptionAuthorizedCIDRs
+  upsertManageSubscriptionAuthorizedCIDRs,
 } from "../keys/business";
 
 const mocks: {
@@ -20,7 +20,7 @@ const mocks: {
   cidrs: new Set(["127.0.0.1/8", "127.0.0.2/8"]) as Set<Cidr>,
   aSubscriptionId: "aSubscriptionId",
   aPrimaryKey: "primary",
-  aSecondaryKey: "secondary"
+  aSecondaryKey: "secondary",
 }));
 
 const { getSubscriptionCIDRsModel } = vi.hoisted(() => ({
@@ -28,16 +28,16 @@ const { getSubscriptionCIDRsModel } = vi.hoisted(() => ({
     findLastVersionByModelId: vi.fn(() =>
       TE.right(
         O.some({
-          cidrs: mocks.cidrs
-        })
-      )
+          cidrs: mocks.cidrs,
+        }),
+      ),
     ),
-    upsert: vi.fn(request =>
+    upsert: vi.fn((request) =>
       TE.right({
-        cidrs: request.cidrs.values()
-      })
-    )
-  })
+        cidrs: request.cidrs.values(),
+      }),
+    ),
+  }),
 }));
 
 const { getApimService } = vi.hoisted(() => ({
@@ -45,24 +45,24 @@ const { getApimService } = vi.hoisted(() => ({
     listSecrets: vi.fn(() =>
       TE.right({
         primaryKey: mocks.aPrimaryKey,
-        secondaryKey: mocks.aSecondaryKey
-      })
+        secondaryKey: mocks.aSecondaryKey,
+      }),
     ),
     regenerateSubscriptionKey: vi.fn(() =>
       TE.right({
         primaryKey: mocks.aPrimaryKey,
-        secondaryKey: mocks.aSecondaryKey
-      })
-    )
-  })
+        secondaryKey: mocks.aSecondaryKey,
+      }),
+    ),
+  }),
 }));
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
-  getSubscriptionCIDRsModel
+  getSubscriptionCIDRsModel,
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({
-  getApimService
+  getApimService,
 }));
 
 describe("Manage Keys", () => {
@@ -71,21 +71,21 @@ describe("Manage Keys", () => {
       const listSecrets = vi.fn(() =>
         TE.right({
           primaryKey: mocks.aPrimaryKey,
-          secondaryKey: mocks.aSecondaryKey
-        })
+          secondaryKey: mocks.aSecondaryKey,
+        }),
       );
       getApimService.mockReturnValueOnce({
-        listSecrets
+        listSecrets,
       });
 
       const result = await retrieveManageSubscriptionApiKeys(
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       );
 
       expect(listSecrets).toHaveBeenCalledWith(mocks.aSubscriptionId);
       expect(result).toStrictEqual({
         primary_key: mocks.aPrimaryKey,
-        secondary_key: mocks.aSecondaryKey
+        secondary_key: mocks.aSecondaryKey,
       });
     });
 
@@ -94,17 +94,17 @@ describe("Manage Keys", () => {
         TE.left({
           error: {
             code: "Error",
-            message: "An error has occurred on APIM"
+            message: "An error has occurred on APIM",
           },
-          statusCode: 500
-        })
+          statusCode: 500,
+        }),
       );
       getApimService.mockReturnValueOnce({
-        listSecrets
+        listSecrets,
       });
 
       expect(
-        retrieveManageSubscriptionApiKeys(mocks.aSubscriptionId)
+        retrieveManageSubscriptionApiKeys(mocks.aSubscriptionId),
       ).rejects.toThrowError();
       expect(listSecrets).toHaveBeenCalledWith(mocks.aSubscriptionId);
     });
@@ -115,25 +115,25 @@ describe("Manage Keys", () => {
       const regenerateSubscriptionKey = vi.fn(() =>
         TE.right({
           primaryKey: mocks.aPrimaryKey,
-          secondaryKey: mocks.aSecondaryKey
-        })
+          secondaryKey: mocks.aSecondaryKey,
+        }),
       );
       getApimService.mockReturnValueOnce({
-        regenerateSubscriptionKey
+        regenerateSubscriptionKey,
       });
 
       const result = await regenerateManageSubscritionApiKey(
         mocks.aSubscriptionId,
-        SubscriptionKeyTypeEnum.primary
+        SubscriptionKeyTypeEnum.primary,
       );
 
       expect(regenerateSubscriptionKey).toHaveBeenCalledWith(
         mocks.aSubscriptionId,
-        SubscriptionKeyTypeEnum.primary
+        SubscriptionKeyTypeEnum.primary,
       );
       expect(result).toStrictEqual({
         primary_key: mocks.aPrimaryKey,
-        secondary_key: mocks.aSecondaryKey
+        secondary_key: mocks.aSecondaryKey,
       });
     });
 
@@ -142,24 +142,24 @@ describe("Manage Keys", () => {
         TE.left({
           error: {
             code: "Error",
-            message: "An error has occurred on APIM"
+            message: "An error has occurred on APIM",
           },
-          statusCode: 500
-        })
+          statusCode: 500,
+        }),
       );
       getApimService.mockReturnValueOnce({
-        regenerateSubscriptionKey
+        regenerateSubscriptionKey,
       });
 
       expect(
         regenerateManageSubscritionApiKey(
           mocks.aSubscriptionId,
-          SubscriptionKeyTypeEnum.primary
-        )
+          SubscriptionKeyTypeEnum.primary,
+        ),
       ).rejects.toThrowError();
       expect(regenerateSubscriptionKey).toHaveBeenCalledWith(
         mocks.aSubscriptionId,
-        SubscriptionKeyTypeEnum.primary
+        SubscriptionKeyTypeEnum.primary,
       );
     });
   });
@@ -171,21 +171,21 @@ describe("Authorized CIDRs Subscription Manage", () => {
       const findLastVersionByModelId = vi.fn(() =>
         TE.right(
           O.some({
-            cidrs: mocks.cidrs
-          })
-        )
+            cidrs: mocks.cidrs,
+          }),
+        ),
       );
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({
-        findLastVersionByModelId
+        findLastVersionByModelId,
       });
 
       const result = await retrieveManageSubscriptionAuthorizedCIDRs(
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       );
 
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       ]);
       expect(result).toStrictEqual(Array.from(mocks.cidrs));
     });
@@ -194,15 +194,15 @@ describe("Authorized CIDRs Subscription Manage", () => {
       const findLastVersionByModelId = vi.fn(() => TE.right(O.none));
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({
-        findLastVersionByModelId
+        findLastVersionByModelId,
       });
 
       const result = await retrieveManageSubscriptionAuthorizedCIDRs(
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       );
 
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       ]);
       expect(result).not.toBe(null);
       expect(result).toStrictEqual(Array<Cidr>());
@@ -216,21 +216,21 @@ describe("Authorized CIDRs Subscription Manage", () => {
             code: 500,
             body: {
               code: "Error",
-              message: "Cosmos error"
-            }
-          }
-        })
+              message: "Cosmos error",
+            },
+          },
+        }),
       );
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({
-        findLastVersionByModelId
+        findLastVersionByModelId,
       });
 
       expect(
-        retrieveManageSubscriptionAuthorizedCIDRs(mocks.aSubscriptionId)
+        retrieveManageSubscriptionAuthorizedCIDRs(mocks.aSubscriptionId),
       ).rejects.toThrowError();
       expect(findLastVersionByModelId).toHaveBeenCalledWith([
-        mocks.aSubscriptionId
+        mocks.aSubscriptionId,
       ]);
     });
   });
@@ -239,23 +239,23 @@ describe("Authorized CIDRs Subscription Manage", () => {
     it("should return 200 when authorized cidrs are updated correctly", async () => {
       const upsert = vi.fn(() =>
         TE.right({
-          cidrs: mocks.cidrs.values()
-        })
+          cidrs: mocks.cidrs.values(),
+        }),
       );
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({
-        upsert
+        upsert,
       });
 
       const result = await upsertManageSubscriptionAuthorizedCIDRs(
         mocks.aSubscriptionId,
-        Array.from(mocks.cidrs)
+        Array.from(mocks.cidrs),
       );
 
       expect(upsert).toHaveBeenCalledWith({
         cidrs: mocks.cidrs,
         kind: "INewSubscriptionCIDRs",
-        subscriptionId: mocks.aSubscriptionId
+        subscriptionId: mocks.aSubscriptionId,
       });
       expect(result).toStrictEqual(Array.from(mocks.cidrs));
     });
@@ -268,26 +268,26 @@ describe("Authorized CIDRs Subscription Manage", () => {
             code: 500,
             body: {
               code: "Error",
-              message: "Cosmos error"
-            }
-          }
-        })
+              message: "Cosmos error",
+            },
+          },
+        }),
       );
 
       getSubscriptionCIDRsModel.mockReturnValueOnce({
-        upsert
+        upsert,
       });
 
       expect(
         upsertManageSubscriptionAuthorizedCIDRs(
           mocks.aSubscriptionId,
-          Array.from(mocks.cidrs)
-        )
+          Array.from(mocks.cidrs),
+        ),
       ).rejects.toThrowError();
       expect(upsert).toHaveBeenCalledWith({
         cidrs: mocks.cidrs,
         kind: "INewSubscriptionCIDRs",
-        subscriptionId: mocks.aSubscriptionId
+        subscriptionId: mocks.aSubscriptionId,
       });
     });
   });
