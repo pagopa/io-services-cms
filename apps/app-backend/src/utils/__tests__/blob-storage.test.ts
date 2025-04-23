@@ -30,17 +30,17 @@ describe("Azure Blob Storage Client Helper Tests", () => {
       AnExampleType,
       mockBlobServiceClient,
       "aContainer",
-      "aBlob"
+      "aBlob",
     )();
 
     expect(mockBlobServiceClient.getContainerClient).toBeCalledWith(
-      "aContainer"
+      "aContainer",
     );
     expect(mockGetBlockBlobClient).toBeCalledWith("aBlob");
     expect(mockDownloadToBuffer).toBeCalled();
 
     expect(result).toEqual(
-      E.right(expect.objectContaining(O.some({ aField: "aString" })))
+      E.right(expect.objectContaining(O.some({ aField: "aString" }))),
     );
   });
 
@@ -48,17 +48,17 @@ describe("Azure Blob Storage Client Helper Tests", () => {
     mockDownloadToBuffer.mockRejectedValueOnce(
       new RestError("Not found", {
         statusCode: 404,
-      })
+      }),
     );
     const result = await getBlobAsObject(
       AnExampleType,
       mockBlobServiceClient,
       "aContainer",
-      "aBlob"
+      "aBlob",
     )();
 
     expect(mockBlobServiceClient.getContainerClient).toBeCalledWith(
-      "aContainer"
+      "aContainer",
     );
     expect(mockGetBlockBlobClient).toBeCalledWith("aBlob");
     expect(mockDownloadToBuffer).toBeCalled();
@@ -70,21 +70,23 @@ describe("Azure Blob Storage Client Helper Tests", () => {
     mockDownloadToBuffer.mockRejectedValueOnce(
       new RestError("Error on Blob", {
         statusCode: 429,
-      })
+      }),
     );
     const result = await getBlobAsObject(
       AnExampleType,
       mockBlobServiceClient,
       "aContainer",
-      "aBlob"
+      "aBlob",
     )();
 
     expect(mockBlobServiceClient.getContainerClient).toBeCalledWith(
-      "aContainer"
+      "aContainer",
     );
     expect(mockGetBlockBlobClient).toBeCalledWith("aBlob");
     expect(mockDownloadToBuffer).toBeCalled();
 
-    expect(result).toEqual(E.left(new Error("Error on Blob")));
+    expect(result).toEqual(
+      E.left(expect.objectContaining({ message: "Error on Blob" })),
+    );
   });
 });
