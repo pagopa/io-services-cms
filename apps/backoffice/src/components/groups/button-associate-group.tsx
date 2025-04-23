@@ -3,6 +3,7 @@ import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { client } from "@/hooks/use-fetch";
 import { SelfcareRoles } from "@/types/auth";
 import { hasApiKeyGroupsFeatures } from "@/utils/auth-util";
+import { trackBulkGroupAssignmentStartEvent } from "@/utils/mix-panel";
 import { SupervisedUserCircle } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
@@ -78,6 +79,7 @@ export const ButtonAssociateGroup = () => {
       await checkAtLeastOneGroupUnboundedServiceExists();
 
     if (atLeastOneGroupUnboundedServiceExists) {
+      trackBulkGroupAssignmentStartEvent();
       router.push(ASSOCIATE_GROUP_ROUTE);
     } else {
       await showDialog({

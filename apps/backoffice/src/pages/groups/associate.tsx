@@ -5,6 +5,7 @@ import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceRespon
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { SelfcareRoles } from "@/types/auth";
+import { trackBulkGroupAssignmentEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
@@ -21,12 +22,17 @@ export default function AssociateGroups() {
   const handleConfirm = async (
     groupAssociatedServices: BulkPatchServicePayload,
   ) => {
-    await bulkAssociateServicesFetchData(
+    const result = await bulkAssociateServicesFetchData(
       "bulkPatchServices",
       { body: groupAssociatedServices },
       BulkPatchServiceResponse,
       { notify: "all" },
     );
+    if (result.success) {
+      trackBulkGroupAssignmentEndEvent("success");
+    } else {
+      trackBulkGroupAssignmentEndEvent("error");
+    }
     // redirect to services page
     router.push(servicesPageUrl);
   };

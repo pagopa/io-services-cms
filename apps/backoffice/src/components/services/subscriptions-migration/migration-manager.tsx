@@ -153,7 +153,7 @@ export const MigrationManager = () => {
           title: t("notifications.exceptionError"),
         }),
       );
-      trackServicesImportEndEvent(error as string);
+      trackServicesImportEndEvent("error");
     } finally {
       setImportInProgress(false);
       fetchMigrationLatestData();

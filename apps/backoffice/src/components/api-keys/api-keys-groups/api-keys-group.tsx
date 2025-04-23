@@ -61,7 +61,6 @@ export const ApiKeyGroup = ({
     expanded: boolean,
   ) => {
     event.stopPropagation();
-    console.log("handleExpandChange");
     if (expanded) {
       if (canBeExpanded()) return onExpand(expanded, subscriptionId);
     } else return onExpand(expanded, subscriptionId);
@@ -134,7 +133,7 @@ export const ApiKeyGroup = ({
                 secondary_key: apiKey.secondary_key,
               }}
               onRegenerateKey={(type) => onRegenerateKey(type, subscriptionId)}
-              type="manage" // TODO: must add new type for "manage_group"
+              scope="manageGroup"
             />
             <AuthorizedCidrs
               cidrs={apiKey.cidrs as unknown as string[]}

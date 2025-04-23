@@ -30,7 +30,7 @@ export default function NewService() {
     const maybeServicePayload =
       fromServiceCreateUpdatePayloadToApiServicePayload(service);
     if (E.isRight(maybeServicePayload)) {
-      await serviceFetchData(
+      const result = await serviceFetchData(
         "createService",
         {
           body: maybeServicePayload.right,
@@ -38,7 +38,11 @@ export default function NewService() {
         ServiceLifecycle,
         { notify: "all" },
       );
-      trackServiceCreateEndEvent("success", "");
+      if (result.success) {
+        trackServiceCreateEndEvent("success");
+      } else {
+        trackServiceCreateEndEvent("error");
+      }
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -47,10 +51,7 @@ export default function NewService() {
           title: t("notifications.validationError"),
         }),
       );
-      trackServiceCreateEndEvent(
-        readableReport(maybeServicePayload.left),
-        "error",
-      );
+      trackServiceCreateEndEvent("error");
     }
     // redirect to services list in both cases
     router.push(SERVICES_ROUTE_PATH);

@@ -37,7 +37,6 @@ export const CardRows = ({ rows }: CardRowsProps) => {
   const { t } = useTranslation();
 
   const handleMixpanel = (row: any, label: string) => {
-    console.log(row);
     if (label === "keys.primary.title") {
       trackManageKeyCopyEvent("overview", "primary");
     } else if (label === "keys.secondary.title") {

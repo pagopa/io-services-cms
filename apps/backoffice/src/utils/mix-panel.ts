@@ -1,16 +1,18 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable perfectionist/sort-interfaces */
 
 import { getConfiguration } from "@/config";
 import mixpanel from "mixpanel-browser";
 
+export type TechEventResult = "error" | "success";
+
 type ApiKeyType = "primary" | "secondary";
+
 interface MixPanelEventsStructure {
-  readonly IO_BO_APIKEY_PAGE: {};
+  readonly IO_BO_APIKEY_PAGE: Record<string, never>;
   readonly IO_BO_INSTITUTION_SWITCH: {
     switchToInstitutionId: string;
   };
-  readonly IO_BO_LOGIN: {};
+  readonly IO_BO_LOGIN: Record<string, never>;
   readonly IO_BO_MANAGE_KEY_COPY: {
     entryPoint: string;
     keyType: ApiKeyType;
@@ -18,28 +20,26 @@ interface MixPanelEventsStructure {
   readonly IO_BO_MANAGE_KEY_ROTATE: {
     keyType: ApiKeyType;
   };
-  readonly IO_BO_OVERVIEW_PAGE: {};
+  readonly IO_BO_OVERVIEW_PAGE: Record<string, never>;
   readonly IO_BO_PRODUCT_SWITCH: { productId: string };
-  readonly IO_BO_SERVICE_CREATE_ABORT: {};
+  readonly IO_BO_SERVICE_CREATE_ABORT: Record<string, never>;
   readonly IO_BO_SERVICE_CREATE_END: {
-    result: string;
-    serviceId: string;
+    result: TechEventResult;
+    serviceId?: string;
   };
-  readonly IO_BO_SERVICE_CREATE_START: {};
+  readonly IO_BO_SERVICE_CREATE_START: Record<string, never>;
   readonly IO_BO_SERVICE_DETAILS: { serviceId: string };
   readonly IO_BO_SERVICE_DETAILS_PAGE: {
     serviceId: string;
     serviceName: string;
   };
-  readonly IO_BO_SERVICE_EDIT_ABORT: {};
-
+  readonly IO_BO_SERVICE_EDIT_ABORT: Record<string, never>;
   readonly IO_BO_SERVICE_EDIT_END: {
-    result: string;
+    result: TechEventResult;
     serviceId: string;
   };
   readonly IO_BO_SERVICE_EDIT_START: {
     entryPoint: string;
-
     serviceId: string;
   };
   readonly IO_BO_SERVICE_HISTORY: { serviceId: string };
@@ -50,12 +50,25 @@ interface MixPanelEventsStructure {
     keyType: ApiKeyType;
   };
   readonly IO_BO_SERVICE_PREVIEW: { serviceId: string };
-  readonly IO_BO_SERVICES_IMPORT_END: { result: string };
-  readonly IO_BO_SERVICES_IMPORT_OPEN: {};
+  readonly IO_BO_SERVICES_IMPORT_END: { result: TechEventResult };
+  readonly IO_BO_SERVICES_IMPORT_OPEN: Record<string, never>;
   readonly IO_BO_SERVICES_IMPORT_START: {
     delegates: string[];
   };
-  readonly IO_BO_SERVICES_PAGE: {};
+  readonly IO_BO_SERVICES_PAGE: Record<string, never>;
+
+  readonly IO_BO_GROUP_KEY_GENERATE_START: Record<string, never>;
+  readonly IO_BO_GROUP_KEY_GENERATE_END: { result: TechEventResult };
+  readonly IO_BO_GROUP_KEY_GENERATE_ABORT: Record<string, never>;
+  readonly IO_BO_GROUP_KEY_DELETE: { subscriptionId: string };
+  readonly IO_BO_GROUP_KEY_ROTATE: { keyType: ApiKeyType };
+  readonly IO_BO_GROUP_KEY_COPY: { keyType: ApiKeyType };
+  readonly IO_BO_SERVICE_GROUP_ASSIGNMENT: Record<string, never>;
+  readonly IO_BO_SERVICE_GROUP_ASSIGNMENT_MODIFY: Record<string, never>;
+  readonly IO_BO_SERVICE_GROUP_ASSIGNMENT_DELETE: Record<string, never>;
+  readonly IO_BO_BULK_GROUP_ASSIGNMENT_START: Record<string, never>;
+  readonly IO_BO_BULK_GROUP_ASSIGNMENT_END: { result: TechEventResult };
+  readonly IO_BO_BULK_GROUP_ASSIGNMENT_ABORT: Record<string, never>;
 }
 
 export const mixpanelSetup = () => {
@@ -71,40 +84,24 @@ export const mixpanelSetup = () => {
 type MixPanelEvents<T extends keyof MixPanelEventsStructure> =
   MixPanelEventsStructure[T];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface OperationId<Event extends MixPanelEventsStructure> {
-  eventKey: Extract<keyof Event, string>;
-}
-
-export const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
+const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
   eventCategory: "TECH" | "UX",
   mixpanelEventData: MixPanelEvents<T>,
   eventType?: "action" | "screen_view",
 ) => {
-  let currentEvent;
-  let currentEventData;
-
-  // check to avoid multiple logs
-  if (currentEvent !== operationId || currentEventData !== mixpanelEventData) {
-    currentEvent = operationId;
-    currentEventData = mixpanelEventData;
-    const categorizedEventData = {
-      eventCategory,
-      eventType,
-      ...mixpanelEventData,
-    };
-
-    mixpanel.track(operationId, categorizedEventData);
-  }
+  const categorizedEventData = {
+    eventCategory,
+    eventType,
+    ...mixpanelEventData,
+  };
+  mixpanel.track(operationId, categorizedEventData);
 };
 
-// Functions for IO_BO_APIKEY_PAGE
 export const trackApiKeyPageEvent = () => {
   logToMixpanel("IO_BO_APIKEY_PAGE", "UX", {}, "screen_view");
 };
 
-// Function for IO_BO_INSTITUTION_SWITCH
 export const trackInstitutionSwitchEvent = (id: string) => {
   logToMixpanel(
     "IO_BO_INSTITUTION_SWITCH",
@@ -116,12 +113,10 @@ export const trackInstitutionSwitchEvent = (id: string) => {
   );
 };
 
-// Function for IO_BO_LOGIN
 export const trackLoginEvent = () => {
   logToMixpanel("IO_BO_LOGIN", "UX", {}, "screen_view");
 };
 
-// Function for IO_BO_MANAGE_KEY_COPY
 export const trackManageKeyCopyEvent = (
   entryPoint: string,
   keyType: ApiKeyType,
@@ -130,76 +125,68 @@ export const trackManageKeyCopyEvent = (
     "IO_BO_MANAGE_KEY_COPY",
     "UX",
     {
-      entryPoint: entryPoint,
-      keyType: keyType,
+      entryPoint,
+      keyType,
     },
     "action",
   );
 };
 
-// Function for IO_BO_MANAGE_KEY_ROTATE
 export const trackManageKeyRegenerateEvent = (keyType: ApiKeyType) => {
   logToMixpanel(
     "IO_BO_MANAGE_KEY_ROTATE",
     "UX",
     {
-      keyType: keyType,
+      keyType,
     },
     "action",
   );
 };
 
-// Function for IO_BO_OVERVIEW_PAGE
 export const trackOverviewPageEvent = () => {
   logToMixpanel("IO_BO_OVERVIEW_PAGE", "UX", {}, "screen_view");
 };
 
-// Function for IO_BO_PRODUCT_SWITCH
 export const trackProductSwitchEvent = (productId: string) => {
   logToMixpanel(
     "IO_BO_PRODUCT_SWITCH",
     "UX",
     {
-      productId: productId,
+      productId,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_CREATE_ABORT
 export const trackServiceCreateAbortEvent = () => {
   logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", "UX", {}, "action");
 };
 
-// Function for IO_BO_SERVICE_CREATE_END
 export const trackServiceCreateEndEvent = (
-  result: string,
-  serviceId: string,
+  result: TechEventResult,
+  serviceId?: string,
 ) => {
   logToMixpanel("IO_BO_SERVICE_CREATE_END", "TECH", {
-    result: result,
-    serviceId: serviceId, // Missing New servie ID
+    result,
+    serviceId, // Missing New servie ID
   });
 };
 
-// Function for IO_BO_SERVICE_CREATE_START
 export const trackServiceCreateStartEvent = () => {
   logToMixpanel("IO_BO_SERVICE_CREATE_START", "UX", {}, "action");
 };
 
-// Function for IO_BO_SERVICE_DETAILS
 export const trackServiceDetailsEvent = (serviceId: string) => {
   logToMixpanel(
     "IO_BO_SERVICE_DETAILS",
     "UX",
     {
-      serviceId: serviceId,
+      serviceId,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_DETAILS_PAGE
 export const trackServiceDetailsPageEvent = (
   serviceId: string,
   serviceName: string,
@@ -208,27 +195,27 @@ export const trackServiceDetailsPageEvent = (
     "IO_BO_SERVICE_DETAILS_PAGE",
     "UX",
     {
-      serviceId: serviceId,
-      serviceName: serviceName,
+      serviceId,
+      serviceName,
     },
     "screen_view",
   );
 };
 
-// Function for IO_BO_SERVICE_EDIT_ABORT
 export const trackServiceEditAbortEvent = () => {
   logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", "UX", {}, "action");
 };
 
-// Function for IO_BO_SERVICE_EDIT_END
-export const trackServiceEditEndEvent = (result: string, serviceId: string) => {
+export const trackServiceEditEndEvent = (
+  result: TechEventResult,
+  serviceId: string,
+) => {
   logToMixpanel("IO_BO_SERVICE_EDIT_END", "TECH", {
-    result: result,
-    serviceId: serviceId,
+    result,
+    serviceId,
   });
 };
 
-// Function for IO_BO_SERVICE_EDIT_START
 export const trackServiceEditStartEvent = (
   entryPoint: string,
   serviceId: string,
@@ -237,86 +224,132 @@ export const trackServiceEditStartEvent = (
     "IO_BO_SERVICE_EDIT_START",
     "UX",
     {
-      entryPoint: entryPoint,
-      serviceId: serviceId,
+      entryPoint,
+      serviceId,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_HISTORY
 export const trackServiceHistoryEvent = (serviceId: string) => {
   logToMixpanel(
     "IO_BO_SERVICE_HISTORY",
     "UX",
     {
-      serviceId: serviceId,
+      serviceId,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_KEY_COPY
 export const trackServiceKeyCopyEvent = (keyType: ApiKeyType) => {
   logToMixpanel(
     "IO_BO_SERVICE_KEY_COPY",
     "UX",
     {
-      keyType: keyType,
+      keyType,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_KEY_ROTATE
 export const trackServiceKeyRegenerateEvent = (keyType: ApiKeyType) => {
   logToMixpanel(
     "IO_BO_SERVICE_KEY_ROTATE",
     "UX",
     {
-      keyType: keyType,
+      keyType,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICE_PREVIEW
 export const trackServicePreviewEvent = (serviceId: string) => {
   logToMixpanel(
     "IO_BO_SERVICE_PREVIEW",
     "UX",
     {
-      serviceId: serviceId,
+      serviceId,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICES_IMPORT_END
-export const trackServicesImportEndEvent = (result: string) => {
+export const trackServicesImportEndEvent = (result: TechEventResult) => {
   logToMixpanel("IO_BO_SERVICES_IMPORT_END", "TECH", {
-    result: result,
+    result,
   });
 };
 
-// Function for IO_BO_SERVICES_IMPORT_OPEN
 export const trackServicesImportOpenEvent = () => {
   logToMixpanel("IO_BO_SERVICES_IMPORT_OPEN", "UX", {}, "action");
 };
 
-// Function for IO_BO_SERVICES_IMPORT_START
 export const trackServicesImportStartEvent = (delegates: string[]) => {
   logToMixpanel(
     "IO_BO_SERVICES_IMPORT_START",
     "UX",
     {
-      delegates: delegates,
+      delegates,
     },
     "action",
   );
 };
 
-// Function for IO_BO_SERVICES_PAGE
 export const trackServicesPageEvent = () => {
   logToMixpanel("IO_BO_SERVICES_PAGE", "UX", {}, "screen_view");
+};
+
+// GROUP API KEYS
+
+export const trackGroupKeyGenerateStartEvent = () => {
+  logToMixpanel("IO_BO_GROUP_KEY_GENERATE_START", "UX", {}, "action");
+};
+
+export const trackGroupKeyGenerateEndEvent = (result: TechEventResult) => {
+  logToMixpanel("IO_BO_GROUP_KEY_GENERATE_END", "TECH", {
+    result,
+  });
+};
+
+export const trackGroupKeyGenerateAbortEvent = () => {
+  logToMixpanel("IO_BO_GROUP_KEY_GENERATE_ABORT", "UX", {}, "action");
+};
+
+export const trackGroupKeyDeleteEvent = (subscriptionId: string) => {
+  logToMixpanel("IO_BO_GROUP_KEY_DELETE", "UX", { subscriptionId }, "action");
+};
+
+export const trackGroupKeyRegenerateEvent = (keyType: ApiKeyType) => {
+  logToMixpanel("IO_BO_GROUP_KEY_ROTATE", "UX", { keyType }, "action");
+};
+
+export const trackGroupKeyCopyEvent = (keyType: ApiKeyType) => {
+  logToMixpanel("IO_BO_GROUP_KEY_COPY", "UX", { keyType }, "action");
+};
+
+export const trackServiceGroupAssignmentEvent = () => {
+  logToMixpanel("IO_BO_SERVICE_GROUP_ASSIGNMENT", "UX", {}, "action");
+};
+
+export const trackServiceGroupAssignmentModifyEvent = () => {
+  logToMixpanel("IO_BO_SERVICE_GROUP_ASSIGNMENT_MODIFY", "UX", {}, "action");
+};
+
+export const trackServiceGroupAssignmentDeleteEvent = () => {
+  logToMixpanel("IO_BO_SERVICE_GROUP_ASSIGNMENT_DELETE", "UX", {}, "action");
+};
+
+export const trackBulkGroupAssignmentStartEvent = () => {
+  logToMixpanel("IO_BO_BULK_GROUP_ASSIGNMENT_START", "UX", {}, "action");
+};
+
+export const trackBulkGroupAssignmentEndEvent = (result: TechEventResult) => {
+  logToMixpanel("IO_BO_BULK_GROUP_ASSIGNMENT_END", "TECH", {
+    result,
+  });
+};
+
+export const trackBulkGroupAssignmentAbortEvent = () => {
+  logToMixpanel("IO_BO_BULK_GROUP_ASSIGNMENT_ABORT", "UX", {}, "action");
 };

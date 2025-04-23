@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
@@ -7,7 +8,6 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as iots from "io-ts";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
@@ -123,10 +123,6 @@ const useFetch = <RC>() => {
   const [options, setOptions] = useState<UseFetchOptions>();
 
   const { push } = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { data: session } = useSession();
-
-  // used to show notifications
   const { enqueueSnackbar } = useSnackbar();
   const [fetchTaskCounter, setFetchTaskCounter] = useState(0);
 
@@ -207,10 +203,16 @@ const useFetch = <RC>() => {
     requestParams: ExtractRequestParams<T>,
     responseCodec: iots.Type<RC>,
     options?: UseFetchOptions,
-  ) => {
+  ): Promise<{
+    data?: DataReference & RC;
+    error?: UseFetchError;
+    success: boolean;
+  }> => {
     setOptions(options);
     setData(undefined); // reset data
     setLoading(true); // set loading state
+    let fetchData: (DataReference & RC) | undefined;
+    let fetchError: UseFetchError | undefined;
     try {
       const enhancedCodec = iots.intersection([responseCodec, DataReference]);
 
@@ -219,7 +221,12 @@ const useFetch = <RC>() => {
       });
 
       if (E.isLeft(result)) {
-        setUseFetchError("validationError", readableReport(result.left));
+        fetchError = {
+          kind: "validationError" as UseFetchErrorStatusType,
+          message: readableReport(result.left),
+        };
+        setUseFetchError(fetchError.kind, fetchError.message);
+        return { error: fetchError, success: false };
       } else {
         // Get client http response
         const response = result.right;
@@ -227,7 +234,14 @@ const useFetch = <RC>() => {
         // Check 401 Unauthorized
         if (response.status === 401) {
           push("/auth/logout");
-          return;
+          return {
+            error: {
+              kind: "httpError",
+              message: "401 Unauthorized",
+              status: 401,
+            },
+            success: false,
+          };
         }
 
         /** Set a response class type based on http response status code */
@@ -244,24 +258,52 @@ const useFetch = <RC>() => {
                 _referenceId: options?.referenceId,
               }),
               E.fold(
-                (e) => setUseFetchError("validationError", readableReport(e)),
-                setData,
+                (e) => {
+                  fetchError = {
+                    kind: "validationError",
+                    message: readableReport(e),
+                  };
+                  setUseFetchError(fetchError.kind, fetchError.message);
+                },
+                (decoded) => {
+                  fetchData = decoded;
+                  setData(decoded);
+                },
               ),
             );
-            break;
+            if (fetchError) return { error: fetchError, success: false };
+            return { data: fetchData, success: true };
           case "clientError":
           case "serverError":
+            fetchError = {
+              kind: "httpError" as UseFetchErrorStatusType,
+              message: httpResponseClassType,
+              status: response.status,
+            };
             setUseFetchError(
-              "httpError",
-              httpResponseClassType,
-              response.status,
+              fetchError.kind,
+              fetchError.message,
+              fetchError.status,
             );
-            break;
-          // todo: manage other response class type
+            return { error: fetchError, success: false };
+          default:
+            return {
+              error: {
+                kind: "httpError" as UseFetchErrorStatusType,
+                message: httpResponseClassType,
+                status: response.status,
+              },
+              success: false,
+            };
         }
       }
     } catch (err) {
-      setUseFetchError("exceptionError", (err as Error).message);
+      fetchError = {
+        kind: "exceptionError" as UseFetchErrorStatusType,
+        message: (err as Error).message,
+      };
+      setUseFetchError(fetchError.kind, fetchError.message);
+      return { error: fetchError, success: false };
     } finally {
       setLoading(false); // reset loading state
       setFetchTaskCounter(() => fetchTaskCounter + 1);

@@ -38,7 +38,7 @@ export default function EditService() {
     const maybeApiServicePayload =
       fromServiceCreateUpdatePayloadToApiServicePayload(service);
     if (E.isRight(maybeApiServicePayload)) {
-      await serviceFetchData(
+      const result = await serviceFetchData(
         "updateService",
         {
           body: maybeApiServicePayload.right,
@@ -47,7 +47,11 @@ export default function EditService() {
         ServiceLifecycle,
         { notify: "all" },
       );
-      trackServiceEditEndEvent("success", serviceId);
+      if (result.success) {
+        trackServiceEditEndEvent("success", serviceId);
+      } else {
+        trackServiceEditEndEvent("error", serviceId);
+      }
     } else {
       enqueueSnackbar(
         buildSnackbarItem({
@@ -56,10 +60,7 @@ export default function EditService() {
           title: t("notifications.validationError"),
         }),
       );
-      trackServiceEditEndEvent(
-        readableReport(maybeApiServicePayload.left),
-        serviceId,
-      );
+      trackServiceEditEndEvent("error", serviceId);
     }
     // redirect to service details in both cases
     router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);

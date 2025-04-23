@@ -13,7 +13,11 @@ import {
   hasManageKeyRoot,
   isAdmin,
 } from "@/utils/auth-util";
-import { trackApiKeyPageEvent } from "@/utils/mix-panel";
+import {
+  trackApiKeyPageEvent,
+  trackGroupKeyGenerateStartEvent,
+  trackManageKeyRegenerateEvent,
+} from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -37,6 +41,7 @@ export default function Keys() {
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
 
   const handleRegenerateKey = (keyType: SubscriptionKeyTypeEnum) => {
+    trackManageKeyRegenerateEvent(keyType);
     mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
       notify: "all",
     });
@@ -49,6 +54,11 @@ export default function Keys() {
       ManageKeyCIDRs,
       { notify: "all" },
     );
+  };
+
+  const handleGenerateGroupApiKey = () => {
+    trackGroupKeyGenerateStartEvent();
+    router.push("/keys/new-group-api-key");
   };
 
   useEffect(() => {
@@ -74,8 +84,8 @@ export default function Keys() {
             description={t("routes.keys.manage.master.description")}
             keys={mkData}
             onRegenerateKey={handleRegenerateKey}
+            scope="manageRoot"
             title={t("routes.keys.manage.master.title")}
-            type="manage"
           />
           <AuthorizedCidrs
             cidrs={acData?.cidrs as unknown as string[]}
@@ -97,7 +107,7 @@ export default function Keys() {
                 "_blank",
               )
             }
-            onGenerateClick={() => router.push("/keys/new-group-api-key")}
+            onGenerateClick={handleGenerateGroupApiKey}
             title={t("routes.keys.manage.group.title")}
           />
         </Stack>
