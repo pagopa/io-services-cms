@@ -35,8 +35,7 @@
     "newtype-ts": "^0.3.5"
   },
   "devDependencies": {
-    "@pagopa/openapi-codegen-ts": "^13.1.0",
-    "typescript": "^5.0.4"
+    "@pagopa/openapi-codegen-ts": "^13.1.0"
   },
   "imports": {
     "#package.json": "./package.json"
