@@ -7,15 +7,15 @@ export default mergeConfig(
   defineConfig({
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src")
-      }
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
     test: {
       setupFiles: ["./mocks/msw-vitest.ts"],
       include: ["./src/**/__tests__/*.ts"],
       exclude: [
         ...configDefaults.exclude,
-        "./src/components/__tests__/setup.ts"
+        "./src/components/__tests__/setup.ts",
       ],
       coverage: {
         reportsDirectory: `${configDefaults.coverage.reportsDirectory}/backend`,
@@ -40,9 +40,9 @@ export default mergeConfig(
           "**/__mocks__/**",
           // FE
           "src/hooks/*",
-          "src/layouts/*"
-        ]
-      }
-    }
-  })
+          "src/layouts/*",
+        ],
+      },
+    },
+  }),
 );

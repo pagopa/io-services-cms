@@ -12,7 +12,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
 const atimestamp = 1685529694747;
 const aService = {
@@ -51,14 +51,14 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "published" },
-        })
+        }),
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       anInvalidQueueItem,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
     )();
 
     expect(mockFsmPublicationClient.release).not.toHaveBeenCalled();
@@ -77,20 +77,20 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "published" },
-        })
+        }),
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       autoPublishQueueItem,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
     expect(mockFsmPublicationClient.release).toBeCalledWith(
       aService.id,
       aService,
-      autoPublishQueueItem.autoPublish
+      autoPublishQueueItem.autoPublish,
     );
   });
 
@@ -107,20 +107,20 @@ describe("Service Publication Handler", () => {
         TE.right({
           ...aService,
           fsm: { state: "unpublished" },
-        })
+        }),
       ),
     } as unknown as ServicePublication.FsmClient;
 
     await handleQueueItem(
       context,
       autoPublishQueueItem as unknown as Json,
-      mockFsmPublicationClient
+      mockFsmPublicationClient,
     )();
     expect(mockFsmPublicationClient.release).toBeCalledTimes(1);
     expect(mockFsmPublicationClient.release).toBeCalledWith(
       aService.id,
       aService,
-      autoPublishQueueItem.autoPublish
+      autoPublishQueueItem.autoPublish,
     );
   });
 });

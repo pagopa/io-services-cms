@@ -5,7 +5,7 @@ import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStat
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import {
   ServicePublicationStatusType,
-  ServicePublicationStatusTypeEnum
+  ServicePublicationStatusTypeEnum,
 } from "../../generated/api/ServicePublicationStatusType";
 import { ServiceContextMenu } from "../services";
 
@@ -38,11 +38,11 @@ describe("[ServiceContextMenu] Component", () => {
       aServicePublicationStatus = undefined;
 
       const { queryByText, queryByLabelText, queryByRole } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       const sendReviewButton = queryByRole("button", {
-        name: "service.actions.submitReview"
+        name: "service.actions.submitReview",
       });
 
       // sendReview button
@@ -60,11 +60,11 @@ describe("[ServiceContextMenu] Component", () => {
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
       const { queryByText, queryByLabelText, queryByRole } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       const sendReviewButton = queryByRole("button", {
-        name: "service.actions.submitReview"
+        name: "service.actions.submitReview",
       });
 
       // sendReview button
@@ -82,11 +82,11 @@ describe("[ServiceContextMenu] Component", () => {
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
       const { queryByText, queryByLabelText, queryByRole } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       const sendReviewButton = queryByRole("button", {
-        name: "service.actions.submitReview"
+        name: "service.actions.submitReview",
       });
 
       // sendReview button
@@ -101,12 +101,12 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a SUBMITTED and never approved service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = undefined;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
@@ -120,12 +120,12 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a SUBMITTED/UNPUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
@@ -139,12 +139,12 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a SUBMITTED/PUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.submitted
+        value: ServiceLifecycleStatusTypeEnum.submitted,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
@@ -158,12 +158,12 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a APPROVED/UNPUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
@@ -178,12 +178,12 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a APPROVED/PUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.approved
+        value: ServiceLifecycleStatusTypeEnum.approved,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
@@ -198,19 +198,19 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a REJECTED and never approved service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = undefined;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
       expect(queryByText(/service\.actions\.submitReview/)).toBeInTheDocument();
       expect(queryByText(/service\.actions\.submitReview/)).toHaveProperty(
         "disabled",
-        true
+        true,
       );
       // publish/unpublish buttons
       expect(queryByText(/service\.actions\.(publish|unpublish)/)).toBeNull();
@@ -221,19 +221,19 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a REJECTED/UNPUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
       expect(queryByText(/service\.actions\.submitReview/)).toBeInTheDocument();
       expect(queryByText(/service\.actions\.submitReview/)).toHaveProperty(
         "disabled",
-        true
+        true,
       );
       // publish/unpublish buttons
       expect(queryByText(/service\.actions\.(publish|unpublish)/)).toBeNull();
@@ -244,19 +244,19 @@ describe("[ServiceContextMenu] Component", () => {
     it("Should render context menu for a REJECTED/PUBLISHED service", () => {
       isRelease = false;
       aServiceLifecycleStatus = {
-        value: ServiceLifecycleStatusTypeEnum.rejected
+        value: ServiceLifecycleStatusTypeEnum.rejected,
       };
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
       const { queryByText, queryByLabelText } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
       expect(queryByText(/service\.actions\.submitReview/)).toBeInTheDocument();
       expect(queryByText(/service\.actions\.submitReview/)).toHaveProperty(
         "disabled",
-        true
+        true,
       );
       // publish/unpublish buttons
       expect(queryByText(/service\.actions\.(publish|unpublish)/)).toBeNull();
@@ -272,14 +272,14 @@ describe("[ServiceContextMenu] Component", () => {
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.unpublished;
 
       const { queryByText, queryByLabelText, queryByRole } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
       expect(
         queryByRole("button", {
-          name: "service.actions.submitReview"
-        })
+          name: "service.actions.submitReview",
+        }),
       ).toBeNull();
       // publish/unpublish buttons
       expect(queryByText(/service\.actions\.publish/)).toBeInTheDocument();
@@ -295,14 +295,14 @@ describe("[ServiceContextMenu] Component", () => {
       aServicePublicationStatus = ServicePublicationStatusTypeEnum.published;
 
       const { queryByText, queryByLabelText, queryByRole } = render(
-        getServiceContextMenuComponent()
+        getServiceContextMenuComponent(),
       );
 
       // sendReview button
       expect(
         queryByRole("button", {
-          name: "service.actions.submitReview"
-        })
+          name: "service.actions.submitReview",
+        }),
       ).toBeNull();
       // publish/unpublish buttons
       expect(queryByText(/service\.actions\.publish/)).toBeNull();
@@ -316,11 +316,11 @@ describe("[ServiceContextMenu] Component", () => {
   it("Should render context menu for a DELETED service", () => {
     isRelease = false;
     aServiceLifecycleStatus = {
-      value: ServiceLifecycleStatusTypeEnum.deleted
+      value: ServiceLifecycleStatusTypeEnum.deleted,
     };
 
     const { queryByText, queryByLabelText } = render(
-      getServiceContextMenuComponent()
+      getServiceContextMenuComponent(),
     );
 
     // sendReview button

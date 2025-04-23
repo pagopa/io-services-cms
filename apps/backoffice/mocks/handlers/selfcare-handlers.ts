@@ -10,7 +10,7 @@ import {
   aWellKnown,
   getMockInstitution,
   getMockUserInstitution,
-  getSelfCareProblemResponse
+  getSelfCareProblemResponse,
 } from "../data/selfcare-data";
 
 faker.seed(1);
@@ -23,7 +23,7 @@ export const buildHandlers = () => {
     http.get(configuration.SELFCARE_JWKS_URL, () => {
       const resultArray = [
         HttpResponse.json(getWellKnown200Response() as any, { status: 200 }),
-        HttpResponse.json(getWellKnown500Response() as any, { status: 500 })
+        HttpResponse.json(getWellKnown500Response() as any, { status: 500 }),
       ];
 
       return resultArray[0];
@@ -33,14 +33,14 @@ export const buildHandlers = () => {
       const userId = url.searchParams.get("userId") ?? undefined;
       const resultArray = [
         HttpResponse.json([getMockUserInstitution(userId)] as any, {
-          status: 200
+          status: 200,
         }),
         HttpResponse.json(getSelfCareProblemResponse(404) as any, {
-          status: 404
+          status: 404,
         }),
         HttpResponse.json(getSelfCareProblemResponse(500) as any, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
       return resultArray[0];
     }),
@@ -48,18 +48,18 @@ export const buildHandlers = () => {
       const { institutionId } = params;
       const resultArray = [
         HttpResponse.json(getMockInstitution(institutionId as string) as any, {
-          status: 200
+          status: 200,
         }),
         HttpResponse.json(getSelfCareProblemResponse(404) as any, {
-          status: 404
+          status: 404,
         }),
         HttpResponse.json(getSelfCareProblemResponse(500) as any, {
-          status: 500
-        })
+          status: 500,
+        }),
       ];
 
       return resultArray[0];
-    })
+    }),
   ];
 };
 

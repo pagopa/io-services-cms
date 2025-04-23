@@ -14,7 +14,7 @@ const createContext = () =>
     bindings: {},
     executionContext: { functionName: "funcname" },
     log: { ...console, verbose: console.log },
-  } as unknown as Context);
+  }) as unknown as Context;
 
 const serviceDetailCosmosHelperMock: CosmosHelper = {
   fetchSingleItem: vi.fn(() => TE.right(O.none)),
@@ -84,11 +84,11 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      anInvalidQueueItem
+      anInvalidQueueItem,
     )();
 
     expect(
-      serviceDetailCosmosHelperMock.fetchSingleItem
+      serviceDetailCosmosHelperMock.fetchSingleItem,
     ).not.toHaveBeenCalled();
   });
 
@@ -98,15 +98,15 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      aGenericPublicationItemType
+      aGenericPublicationItemType,
     )();
 
     expect(
-      serviceDetailCosmosHelperMock.fetchSingleItem
+      serviceDetailCosmosHelperMock.fetchSingleItem,
     ).not.toHaveBeenCalled();
 
     expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericPublicationItemType))
+      JSON.stringify(toServiceDetail(aGenericPublicationItemType)),
     );
   });
 
@@ -116,13 +116,13 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMock,
-      aGenericLifecycleItemType
+      aGenericLifecycleItemType,
     )();
 
     expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
 
     expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericLifecycleItemType))
+      JSON.stringify(toServiceDetail(aGenericLifecycleItemType)),
     );
   });
 
@@ -137,7 +137,7 @@ describe("Service Detail Handler", () => {
     await handleQueueItem(
       context,
       serviceDetailCosmosHelperMockPubFound,
-      aGenericLifecycleItemType
+      aGenericLifecycleItemType,
     )();
 
     expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
@@ -152,20 +152,20 @@ describe("Service Detail Handler", () => {
       expect(res.right.id).toBe(aGenericPublicationItemType.id);
       expect(res.right.name).toBe(aGenericPublicationItemType.data.name);
       expect(res.right.description).toBe(
-        aGenericPublicationItemType.data.description
+        aGenericPublicationItemType.data.description,
       );
       expect(res.right.require_secure_channel).toBe(
-        aGenericPublicationItemType.data.require_secure_channel
+        aGenericPublicationItemType.data.require_secure_channel,
       );
       expect(res.right.organization).toBe(
-        aGenericPublicationItemType.data.organization
+        aGenericPublicationItemType.data.organization,
       );
       expect(res.right.metadata).toBe(
-        aGenericPublicationItemType.data.metadata
+        aGenericPublicationItemType.data.metadata,
       );
       expect(res.right.kind).toBe(aGenericPublicationItemType.kind);
       expect(res.right.cms_last_update_ts).toBe(
-        aGenericPublicationItemType.cms_last_update_ts
+        aGenericPublicationItemType.cms_last_update_ts,
       );
     } else {
       assert.fail("Expected right");

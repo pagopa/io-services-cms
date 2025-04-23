@@ -134,7 +134,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
             startAt: 0,
             total: 2,
             issues: [aJiraIssue1, aJiraIssue2],
-          })
+          }),
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -161,7 +161,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
             startAt: 0,
             total: 0,
             issues: [],
-          })
+          }),
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)([])();
@@ -179,7 +179,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
             startAt: 0,
             total: 0,
             issues: [],
-          })
+          }),
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -192,7 +192,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
 
     it("should return Error if searchJiraIssuesByKeyAndStatus returns an error", async () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
-        () => TE.left(new Error())
+        () => TE.left(new Error()),
       );
 
       const result = await buildIssueItemPairs(mainMockJiraProxy)(anItemList)();
@@ -213,16 +213,16 @@ describe("Service Review Legacy Checker Handler tests", () => {
             O.some({
               ...aService,
               fsm: { state: "submitted" },
-            })
-          )
+            }),
+          ),
         )
         .mockImplementationOnce(() =>
           TE.right(
             O.some({
               ...aService2,
               fsm: { state: "submitted" },
-            })
-          )
+            }),
+          ),
         );
 
       const mockFsmLifecycleClient = {
@@ -233,7 +233,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([
         {
           issue: aJiraIssue1,
@@ -286,7 +286,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([])();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -302,8 +302,8 @@ describe("Service Review Legacy Checker Handler tests", () => {
           O.some({
             ...aService,
             fsm: { state: "submitted" },
-          })
-        )
+          }),
+        ),
       );
 
       const mockFsmLifecycleClient = {
@@ -312,20 +312,20 @@ describe("Service Review Legacy Checker Handler tests", () => {
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult)
+        Promise.resolve({} as QueryResult),
       );
       const mockServiceReviewDao = {
         insert: vi.fn(),
         executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([
         {
           issue: aJiraIssue1,
@@ -350,7 +350,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       const result = await updateReview(
         mainMockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([])();
 
       expect(E.isRight(result)).toBeTruthy();
@@ -367,20 +367,20 @@ describe("Service Review Legacy Checker Handler tests", () => {
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult)
+        Promise.resolve({} as QueryResult),
       );
       const mockServiceReviewDao = {
         insert: vi.fn(),
         executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([
         {
           issue: aJiraIssue1,
@@ -391,7 +391,7 @@ describe("Service Review Legacy Checker Handler tests", () => {
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left.message).eq(
-          `Service ${anItem1.service_id} not found cannot ovverride after legacy review`
+          `Service ${anItem1.service_id} not found cannot ovverride after legacy review`,
         );
       }
 
@@ -407,8 +407,8 @@ describe("Service Review Legacy Checker Handler tests", () => {
           O.some({
             ...aService,
             fsm: { state: "deleted" },
-          })
-        )
+          }),
+        ),
       );
 
       const mockFsmLifecycleClient = {
@@ -417,20 +417,20 @@ describe("Service Review Legacy Checker Handler tests", () => {
       } as unknown as ServiceLifecycle.FsmClient;
 
       const mockServiceReviewDao_onUpdateStatus = vi.fn(() =>
-        Promise.resolve({} as QueryResult)
+        Promise.resolve({} as QueryResult),
       );
       const mockServiceReviewDao = {
         insert: vi.fn(),
         executeOnPending: vi.fn(),
         updateStatus: vi.fn((_: ServiceReviewRowDataTable) =>
-          TE.fromTask(mockServiceReviewDao_onUpdateStatus)
+          TE.fromTask(mockServiceReviewDao_onUpdateStatus),
         ),
       };
 
       const result = await updateReview(
         mockServiceReviewDao,
         mockFsmLifecycleClient,
-        mockContext
+        mockContext,
       )([
         {
           issue: aJiraIssue1,

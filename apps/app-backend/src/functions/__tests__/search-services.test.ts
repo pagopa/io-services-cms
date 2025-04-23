@@ -42,7 +42,7 @@ describe("Search Services Tests", () => {
       expect.objectContaining({
         top: 20,
         orderBy: [DEFAULT_ORDER_BY],
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -55,8 +55,8 @@ describe("Search Services Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -84,7 +84,7 @@ describe("Search Services Tests", () => {
         orderBy: [DEFAULT_ORDER_BY],
         top: 10,
         skip: 0,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -97,8 +97,8 @@ describe("Search Services Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -134,7 +134,7 @@ describe("Search Services Tests", () => {
         top: 10,
         skip: 0,
         orderBy: [DEFAULT_ORDER_BY],
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -145,8 +145,8 @@ describe("Search Services Tests", () => {
             title: `${errorMessage}`,
           },
           statusCode: 500,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -177,8 +177,8 @@ describe("Search Services Tests", () => {
             title: "Invalid 'limit' supplied in request query",
           },
           statusCode: 400,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -209,8 +209,8 @@ describe("Search Services Tests", () => {
             title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
-        })
-      )
+        }),
+      ),
     );
   });
 });

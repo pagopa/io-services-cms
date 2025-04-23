@@ -9,7 +9,7 @@ const {
   getApimHealth,
   getAzureAccessTokenHealth,
   getCosmosStoreHealth,
-  getSubscriptionsMigrationHealth
+  getSubscriptionsMigrationHealth,
 } = vi.hoisted(() => ({
   getLegacyCosmosHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getSelfcareHealth: vi.fn().mockReturnValue(Promise.resolve()),
@@ -17,35 +17,35 @@ const {
   getApimHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getAzureAccessTokenHealth: vi.fn().mockReturnValue(Promise.resolve()),
   getCosmosStoreHealth: vi.fn().mockReturnValue(Promise.resolve()),
-  getSubscriptionsMigrationHealth: vi.fn().mockReturnValue(Promise.resolve())
+  getSubscriptionsMigrationHealth: vi.fn().mockReturnValue(Promise.resolve()),
 }));
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
-  getLegacyCosmosHealth
+  getLegacyCosmosHealth,
 }));
 
 vi.mock("@/lib/be/selfcare-client", () => ({
-  getSelfcareHealth
+  getSelfcareHealth,
 }));
 
 vi.mock("@/lib/be/cms-client", () => ({
-  getIoServicesCmsHealth
+  getIoServicesCmsHealth,
 }));
 
 vi.mock("@/lib/be/apim-service", () => ({
-  getApimHealth
+  getApimHealth,
 }));
 
 vi.mock("@/lib/be/azure-access-token", () => ({
-  getAzureAccessTokenHealth
+  getAzureAccessTokenHealth,
 }));
 
 vi.mock("@/lib/be/cosmos-store", () => ({
-  getCosmosStoreHealth
+  getCosmosStoreHealth,
 }));
 
 vi.mock("@/lib/be/subscription-migration-client", () => ({
-  getSubscriptionsMigrationHealth
+  getSubscriptionsMigrationHealth,
 }));
 
 describe("test backend api info()", () => {
@@ -57,15 +57,15 @@ describe("test backend api info()", () => {
 
     expect(result.status).toBe(200);
     expect(jsonResponse).toStrictEqual({
-      status: "ok"
+      status: "ok",
     });
   });
 
   it("should return 500 on at least one healthcheck fails", async () => {
     getSelfcareHealth.mockReturnValueOnce(
       Promise.reject(
-        new HealthChecksError("selfcare", new Error("config error"))
-      )
+        new HealthChecksError("selfcare", new Error("config error")),
+      ),
     );
 
     const result = await GET();
@@ -75,7 +75,7 @@ describe("test backend api info()", () => {
 
     expect(result.status).toBe(500);
     expect(jsonResponse).toStrictEqual({
-      status: "fail"
+      status: "fail",
     });
   });
 });

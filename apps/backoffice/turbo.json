@@ -1,33 +1,25 @@
 {
-  "extends": [
-    "//"
-  ],
+  "extends": ["//"],
   "tasks": {
     "generate:api-definitions": {
       "inputs": [
         "openapi.yaml",
         "../../packages/io-services-cms-models/openapi/*.yaml"
       ],
-      "outputs": [
-        "src/generated/api/**"
-      ]
+      "outputs": ["src/generated/api/**"]
     },
     "generate:services-cms": {
       "inputs": [
         "../io-services-cms-webapp/openapi.yaml",
         "../../packages/io-services-cms-models/openapi/*.yaml"
       ],
-      "outputs": [
-        "src/generated/services-cms/**"
-      ]
+      "outputs": ["src/generated/services-cms/**"]
     },
     "generate:selfcare-api-models": {
       "inputs": [
         "https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json"
       ],
-      "outputs": [
-        "src/generated/selfcare/*"
-      ]
+      "outputs": ["src/generated/selfcare/*"]
     },
     "generate": {
       "dependsOn": [
@@ -47,20 +39,11 @@
         "!README.md",
         "!vitest.config.*"
       ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "typecheck": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "tsconfig.json"
-      ],
-      "dependsOn": [
-        "build"
-      ]
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json"],
+      "dependsOn": ["build"]
     }
   }
 }

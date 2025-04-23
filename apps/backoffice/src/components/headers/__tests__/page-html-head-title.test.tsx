@@ -10,7 +10,7 @@ vi.mock("next/head", () => {
     __esModule: true,
     default: ({ children }: { children: Array<React.ReactElement> }) => {
       return <>{children}</>;
-    }
+    },
   };
 });
 

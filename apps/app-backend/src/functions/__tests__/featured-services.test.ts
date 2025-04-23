@@ -33,22 +33,22 @@ describe("Get Featured Services", () => {
       FeaturedServices,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
         expect.objectContaining({
           body: mockFeaturedServices,
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
   it("should return internal error", async () => {
     const errorMessage = "Error blobService";
     mockUpsertBlobFromObject.mockReturnValueOnce(
-      TE.left(new Error(errorMessage))
+      TE.left(new Error(errorMessage)),
     );
 
     const result = await makeFeaturedServicesHandler(mockedConfiguration)({
@@ -61,7 +61,7 @@ describe("Get Featured Services", () => {
       FeaturedServices,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
@@ -71,8 +71,8 @@ describe("Get Featured Services", () => {
             title: `An error occurred retrieving featuredServices file from blobService: [${errorMessage}]`,
           },
           statusCode: 500,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -89,7 +89,7 @@ describe("Get Featured Services", () => {
       FeaturedServices,
       mockBlobServiceClient,
       mockedConfiguration.FEATURED_ITEMS_CONTAINER_NAME,
-      mockedConfiguration.FEATURED_SERVICES_FILE_NAME
+      mockedConfiguration.FEATURED_SERVICES_FILE_NAME,
     );
     expect(result).toEqual(
       E.right(
@@ -98,8 +98,8 @@ describe("Get Featured Services", () => {
             services: [],
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 });

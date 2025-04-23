@@ -75,7 +75,7 @@ describe("[ButtonWithLoader] Component", () => {
     isLoading = true;
     render(getButtonWithLoaderComponent());
     const loader = screen.getByTestId(
-      "bo-io-button-with-loader-circular-progress"
+      "bo-io-button-with-loader-circular-progress",
     );
 
     expect(loader).toBeDefined();

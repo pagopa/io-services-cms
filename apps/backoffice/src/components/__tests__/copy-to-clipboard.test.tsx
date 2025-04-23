@@ -16,15 +16,15 @@ describe("[CopyToClipboard] Component", () => {
 
     Object.assign(window.navigator, {
       clipboard: {
-        writeText: vitest.fn().mockImplementation(() => Promise.resolve())
-      }
+        writeText: vitest.fn().mockImplementation(() => Promise.resolve()),
+      },
     });
 
     const button = getByRole("button");
     fireEvent.click(button);
 
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledWith(
-      textToCopy
+      textToCopy,
     );
   });
 });

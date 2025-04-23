@@ -14,7 +14,7 @@ import {
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
     findById: vi.fn((id: number) =>
-      TE.right(O.some({ id, name: "topic name" }))
+      TE.right(O.some({ id, name: "topic name" })),
     ),
   })),
 }));
@@ -56,7 +56,7 @@ describe("test service-lifecycle-converters", () => {
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode
+      aSandboxFiscalCode as FiscalCode,
     );
     expect(result.data.authorized_recipients).toBeDefined();
     expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
@@ -82,7 +82,7 @@ describe("test service-lifecycle-converters", () => {
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode
+      aSandboxFiscalCode as FiscalCode,
     );
     expect(result.data.authorized_recipients).toBeDefined();
     expect(result.data.authorized_recipients).toContain(aSandboxFiscalCode);
@@ -107,7 +107,7 @@ describe("test service-lifecycle-converters", () => {
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode
+      aSandboxFiscalCode as FiscalCode,
     );
     expect(result.data.metadata).toBeDefined();
     expect(result.data.metadata.category).toBeDefined();
@@ -134,7 +134,7 @@ describe("test service-lifecycle-converters", () => {
     const result = payloadToItem(
       "ffefefe" as NonEmptyString,
       aNewService,
-      aSandboxFiscalCode as FiscalCode
+      aSandboxFiscalCode as FiscalCode,
     );
     expect(result.data.metadata).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBeDefined();

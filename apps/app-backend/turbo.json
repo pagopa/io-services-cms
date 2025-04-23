@@ -3,9 +3,7 @@
   "tasks": {
     "generate": {
       "inputs": ["api/*"],
-      "outputs": [
-        "src/generated/**/*"
-      ]
+      "outputs": ["src/generated/**/*"]
     }
   }
 }

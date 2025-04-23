@@ -33,5 +33,5 @@ export {
   MobileIconPhoneCall,
   MobileIconQMark,
   MobileIconSecurity,
-  MobileIconWebsite
+  MobileIconWebsite,
 };

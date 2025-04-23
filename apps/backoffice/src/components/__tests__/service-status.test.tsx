@@ -6,7 +6,7 @@ import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifec
 import { ServiceStatus } from "../services";
 
 let aServiceStatus: ServiceLifecycleStatus | undefined = {
-  value: ServiceLifecycleStatusTypeEnum.approved
+  value: ServiceLifecycleStatusTypeEnum.approved,
 };
 
 const getServiceStatusComponent = () => (
@@ -25,14 +25,13 @@ describe("[ServiceStatus] Component", () => {
     expect(elements.length).toBe(1);
     expect(elements[0]).toHaveAttribute(
       "aria-label",
-      ServiceLifecycleStatusTypeEnum.approved
+      ServiceLifecycleStatusTypeEnum.approved,
     );
     expect(disabledElements.length).toBe(0);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(0);
   });
 
@@ -45,14 +44,13 @@ describe("[ServiceStatus] Component", () => {
     expect(elements.length).toBe(1);
     expect(elements[0]).toHaveAttribute(
       "aria-label",
-      ServiceLifecycleStatusTypeEnum.deleted
+      ServiceLifecycleStatusTypeEnum.deleted,
     );
     expect(disabledElements.length).toBe(1);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(0);
   });
 
@@ -65,14 +63,13 @@ describe("[ServiceStatus] Component", () => {
     expect(elements.length).toBe(1);
     expect(elements[0]).toHaveAttribute(
       "aria-label",
-      ServiceLifecycleStatusTypeEnum.draft
+      ServiceLifecycleStatusTypeEnum.draft,
     );
     expect(disabledElements.length).toBe(0);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(0);
   });
 
@@ -85,14 +82,13 @@ describe("[ServiceStatus] Component", () => {
     expect(elements.length).toBe(1);
     expect(elements[0]).toHaveAttribute(
       "aria-label",
-      ServiceLifecycleStatusTypeEnum.rejected
+      ServiceLifecycleStatusTypeEnum.rejected,
     );
     expect(disabledElements.length).toBe(0);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(0);
   });
 
@@ -105,14 +101,13 @@ describe("[ServiceStatus] Component", () => {
     expect(elements.length).toBe(1);
     expect(elements[0]).toHaveAttribute(
       "aria-label",
-      ServiceLifecycleStatusTypeEnum.submitted
+      ServiceLifecycleStatusTypeEnum.submitted,
     );
     expect(disabledElements.length).toBe(0);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(0);
   });
 
@@ -127,9 +122,8 @@ describe("[ServiceStatus] Component", () => {
     expect(disabledElements.length).toBe(0);
     expect(document.getElementById("service-status")).toBeInTheDocument();
 
-    const parent = container.parentElement?.getElementsByClassName(
-      "MuiSkeleton-root"
-    );
+    const parent =
+      container.parentElement?.getElementsByClassName("MuiSkeleton-root");
     expect(parent?.length).toBe(1);
   });
 });

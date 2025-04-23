@@ -69,7 +69,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
     if (E.isLeft(issues)) {
       expect(issues.left).toHaveProperty(
         "message",
-        `Jira API returns an error, responseBody: ${JSON.stringify(resultObj)}`
+        `Jira API returns an error, responseBody: ${JSON.stringify(resultObj)}`,
       );
     }
   });
@@ -80,7 +80,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
     const mockFetch = vitest.fn().mockImplementation(async () => ({
       json: vitest.fn(() =>
-        Promise.reject(new Error("Bad Error on JSON deserialize"))
+        Promise.reject(new Error("Bad Error on JSON deserialize")),
       ),
       headers: {
         forEach: (callback) => mockHeaders.forEach(callback),
@@ -103,7 +103,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
     if (E.isLeft(issues)) {
       expect(issues.left).toHaveProperty(
         "message",
-        'Error parsing Jira response, statusCode: 500, headers: {"anHeader":"anHeaderValue"}, error: Bad Error on JSON deserialize'
+        'Error parsing Jira response, statusCode: 500, headers: {"anHeader":"anHeaderValue"}, error: Bad Error on JSON deserialize',
       );
     }
   });
@@ -116,7 +116,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
       const mockFetch = vitest.fn().mockImplementation(async () => ({
         json: vitest.fn(() =>
-          Promise.reject(new Error("Bad Error on JSON deserialize"))
+          Promise.reject(new Error("Bad Error on JSON deserialize")),
         ),
         headers: {
           forEach: (callback) => mockHeaders.forEach(callback),
@@ -144,11 +144,11 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
       if (E.isLeft(issues)) {
         expect(issues.left).toHaveProperty(
           "message",
-          'Cannot Contact jira after retries, statusCode: 429, headers: {"Retry-After":"2"}'
+          'Cannot Contact jira after retries, statusCode: 429, headers: {"Retry-After":"2"}',
         );
       }
     },
-    { timeout: 15000 }
+    { timeout: 15000 },
   );
 
   it(
@@ -159,7 +159,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
       const mockFetch = vitest.fn().mockImplementation(async () => ({
         json: vitest.fn(() =>
-          Promise.reject(new Error("Bad Error on JSON deserialize"))
+          Promise.reject(new Error("Bad Error on JSON deserialize")),
         ),
         headers: {
           forEach: (callback) => mockHeaders.forEach(callback),
@@ -190,11 +190,11 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
       if (E.isLeft(issues)) {
         expect(issues.left).toHaveProperty(
           "message",
-          'Cannot Contact jira after retries, statusCode: 429, headers: {"anotherHeader":"anotherHeaderValue"}'
+          'Cannot Contact jira after retries, statusCode: 429, headers: {"anotherHeader":"anotherHeaderValue"}',
         );
       }
     },
-    { timeout: 7000 }
+    { timeout: 7000 },
   );
 
   it(
@@ -205,7 +205,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
       const mockFetch = vitest.fn().mockImplementation(async () => ({
         json: vitest.fn(() =>
-          Promise.reject(new Error("Bad Error on JSON deserialize"))
+          Promise.reject(new Error("Bad Error on JSON deserialize")),
         ),
         headers: {
           forEach: (callback) => mockHeaders.forEach(callback),
@@ -230,11 +230,11 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
       if (E.isLeft(issues)) {
         expect(issues.left).toHaveProperty(
           "message",
-          'Cannot Contact jira after retries, statusCode: 429, headers: {"Retry-After":"anotherHeaderValue"}'
+          'Cannot Contact jira after retries, statusCode: 429, headers: {"Retry-After":"anotherHeaderValue"}',
         );
       }
     },
-    { timeout: 30000 }
+    { timeout: 30000 },
   );
 
   it("should correctly retrieve an issue", async () => {
@@ -243,7 +243,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
 
     const mockFetch = vitest.fn().mockImplementation(async () => ({
       json: vitest.fn(() =>
-        Promise.resolve(aSearchJiraIssuesByServiceIdResponse)
+        Promise.resolve(aSearchJiraIssuesByServiceIdResponse),
       ),
       headers: {
         forEach: (callback) => mockHeaders.forEach(callback),
@@ -277,7 +277,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
         .fn()
         .mockImplementationOnce(async () => ({
           json: vitest.fn(() =>
-            Promise.reject(new Error("Bad Error on JSON deserialize"))
+            Promise.reject(new Error("Bad Error on JSON deserialize")),
           ),
           headers: {
             forEach: (callback) => mockHeaders1.forEach(callback),
@@ -287,7 +287,7 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
         }))
         .mockImplementationOnce(async () => ({
           json: vitest.fn(() =>
-            Promise.resolve(aSearchJiraIssuesByServiceIdResponse)
+            Promise.resolve(aSearchJiraIssuesByServiceIdResponse),
           ),
           headers: {
             forEach: (callback) => mockHeaders2.forEach(callback),
@@ -309,6 +309,6 @@ describe("[JiraLegacyClient] searchJiraIssueByServiceId", () => {
       expect(mockFetch).toBeCalledTimes(2);
       expect(E.isRight(issue)).toBeTruthy();
     },
-    { timeout: 5000 }
+    { timeout: 5000 },
   );
 });

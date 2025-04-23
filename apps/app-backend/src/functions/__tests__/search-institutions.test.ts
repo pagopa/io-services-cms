@@ -41,7 +41,7 @@ describe("Search Institutions Tests", () => {
       expect.objectContaining({
         orderBy: [DEFAULT_ORDER_BY],
         top: 20,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -54,8 +54,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -68,7 +68,7 @@ describe("Search Institutions Tests", () => {
             mockedConfiguration.PAGINATION_MAX_OFFSET +
             mockedConfiguration.PAGINATION_DEFAULT_LIMIT +
             20,
-        })
+        }),
       ),
     } as AzureSearchClient<Institution>;
 
@@ -89,7 +89,7 @@ describe("Search Institutions Tests", () => {
       expect.objectContaining({
         orderBy: [DEFAULT_ORDER_BY],
         top: 20,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -102,8 +102,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -116,7 +116,7 @@ describe("Search Institutions Tests", () => {
             mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH +
             mockedConfiguration.PAGINATION_DEFAULT_LIMIT +
             20,
-        })
+        }),
       ),
     } as AzureSearchClient<Institution>;
 
@@ -134,7 +134,7 @@ describe("Search Institutions Tests", () => {
       expect.objectContaining({
         orderBy: [DEFAULT_ORDER_BY],
         top: 20,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -147,8 +147,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -176,7 +176,7 @@ describe("Search Institutions Tests", () => {
         top: 10,
         skip: 0,
         orderBy: undefined,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -189,8 +189,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -216,7 +216,7 @@ describe("Search Institutions Tests", () => {
         top: 10,
         skip: 0,
         orderBy: [DEFAULT_ORDER_BY],
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -229,8 +229,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -260,7 +260,7 @@ describe("Search Institutions Tests", () => {
         scoringProfile: "aScoringProfile",
         scoringParameters: ["aTag-aValue"],
         orderBy: undefined,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -273,8 +273,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -301,7 +301,7 @@ describe("Search Institutions Tests", () => {
       expect.objectContaining({
         searchText: "Age",
         orderBy: undefined,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -314,8 +314,8 @@ describe("Search Institutions Tests", () => {
             offset: 0,
           },
           statusCode: 200,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -351,7 +351,7 @@ describe("Search Institutions Tests", () => {
         top: 10,
         skip: 0,
         orderBy: undefined,
-      })
+      }),
     );
 
     expect(result).toEqual(
@@ -362,8 +362,8 @@ describe("Search Institutions Tests", () => {
             title: `${errorMessage}`,
           },
           statusCode: 500,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -390,8 +390,8 @@ describe("Search Institutions Tests", () => {
             title: "Invalid 'limit' supplied in request query",
           },
           statusCode: 400,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -419,8 +419,8 @@ describe("Search Institutions Tests", () => {
             title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -448,8 +448,8 @@ describe("Search Institutions Tests", () => {
             title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
-        })
-      )
+        }),
+      ),
     );
   });
 });

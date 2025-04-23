@@ -6,7 +6,7 @@ import { PageBreadcrumbs } from "../page-breadcrumbs";
 
 // mock useRouter
 vi.mock("next/router", () => ({
-  useRouter: vi.fn()
+  useRouter: vi.fn(),
 }));
 const mockUseRouter = useRouter as Mock;
 
@@ -16,43 +16,43 @@ afterEach(cleanup);
 describe("[PageBreadcrumbs] Component", () => {
   it("should NOT render breadcrumbs for base App route", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/"
+      asPath: "/",
     });
 
     const { container } = render(<PageBreadcrumbs />);
 
     expect(
-      document.getElementById("bo-io-breadcrumbs")
+      document.getElementById("bo-io-breadcrumbs"),
     ).not.toBeInTheDocument();
   });
 
   it("should NOT render breadcrumbs for base App route with particular queryparams", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/?test=:/abc"
+      asPath: "/?test=:/abc",
     });
 
     const { container } = render(<PageBreadcrumbs />);
 
     expect(
-      document.getElementById("bo-io-breadcrumbs")
+      document.getElementById("bo-io-breadcrumbs"),
     ).not.toBeInTheDocument();
   });
 
   it("should NOT render breadcrumbs for level 0 route section", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/root-section"
+      asPath: "/root-section",
     });
 
     const { container } = render(<PageBreadcrumbs />);
 
     expect(
-      document.getElementById("bo-io-breadcrumbs")
+      document.getElementById("bo-io-breadcrumbs"),
     ).not.toBeInTheDocument();
   });
 
   it("should render breadcrumbs for a nested route section", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/root-section/nested-section"
+      asPath: "/root-section/nested-section",
     });
 
     const { container } = render(<PageBreadcrumbs />);
@@ -66,7 +66,7 @@ describe("[PageBreadcrumbs] Component", () => {
 
   it("should render breadcrumbs without queryparams for a nested route section with queryparams", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/root-section/nested-section?key1=val1&key2=val2"
+      asPath: "/root-section/nested-section?key1=val1&key2=val2",
     });
 
     const { container } = render(<PageBreadcrumbs />);
@@ -80,7 +80,7 @@ describe("[PageBreadcrumbs] Component", () => {
 
   it("should render breadcrumbs without queryparams for a nested route section with particular queryparams", () => {
     mockUseRouter.mockReturnValueOnce({
-      asPath: "/root-section/nested-section?test=:/abc"
+      asPath: "/root-section/nested-section?test=:/abc",
     });
 
     const { container } = render(<PageBreadcrumbs />);
