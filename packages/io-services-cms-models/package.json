@@ -12,7 +12,6 @@
     "dist",
     "index.js"
   ],
-  "packageManager": "yarn@3.3.0",
   "scripts": {
     "build": "rm -rf ./dist & tsc",
     "format": "prettier --write .",
