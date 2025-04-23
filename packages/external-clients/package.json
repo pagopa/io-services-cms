@@ -39,7 +39,6 @@
     "@pagopa/eslint-config": "^4.0.1",
     "@pagopa/openapi-codegen-ts": "^13.1.0",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
     "typescript": "^5.0.4"
   },
   "imports": {

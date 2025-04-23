@@ -3669,7 +3669,6 @@ __metadata:
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
-    prettier: ^3.2.5
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -3688,7 +3687,6 @@ __metadata:
     io-ts-types: ^0.5.19
     monocle-ts: ^2.3.13
     newtype-ts: ^0.3.5
-    prettier: ^3.2.5
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -11904,7 +11902,6 @@ __metadata:
     fp-ts: ^2.16.5
     io-ts: ^2.2.21
     npm-pack-zip: ^1.3.0
-    prettier: ^3.2.5
     shx: ^0.3.2
     supertest: ^6.3.4
     swagger-cli: ^4.0.4
@@ -11959,7 +11956,6 @@ __metadata:
     next-auth: ^4.24.5
     next-i18next: ^14.0.3
     notistack: ^3.0.1
-    prettier: ^3.3.3
     react: 18.2.0
     react-dom: 18.2.0
     react-hook-form: ^7.47.0
@@ -12012,7 +12008,6 @@ __metadata:
     npm-pack-zip: ^1.3.0
     pg: ^8.10.0
     pg-cursor: ^2.9.0
-    prettier: ^3.2.5
     supertest: ^6.3.3
     typescript: ^5.0.4
     upng-js: ^2.1.0
@@ -12026,6 +12021,7 @@ __metadata:
     "@changesets/cli": ^2.26.2
     "@vitest/coverage-v8": ^3.1.2
     jsdom: ^26.1.0
+    prettier: ^3.5.3
     turbo: ^2.0.7
     vitest: ^3.1.2
   languageName: unknown
@@ -15633,12 +15629,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.2.5, prettier@npm:^3.3.3":
-  version: 3.3.3
-  resolution: "prettier@npm:3.3.3"
+"prettier@npm:^3.5.3":
+  version: 3.5.3
+  resolution: "prettier@npm:3.5.3"
   bin:
     prettier: bin/prettier.cjs
-  checksum: bc8604354805acfdde6106852d14b045bb20827ad76a5ffc2455b71a8257f94de93f17f14e463fe844808d2ccc87248364a5691488a3304f1031326e62d9276e
+  checksum: 61e97bb8e71a95d8f9c71f1fd5229c9aaa9d1e184dedb12399f76aa802fb6fdc8954ecac9df25a7f82ee7311cf8ddbd06baf5507388fc98e5b44036cc6a88a1b
   languageName: node
   linkType: hard
 
