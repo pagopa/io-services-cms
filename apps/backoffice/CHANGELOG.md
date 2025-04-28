@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.25.13
+
+### Patch Changes
+
+- 68a97853: Group ApiKey: add MixPanel events tracking
+
 ## 1.25.12
 
 ### Patch Changes
