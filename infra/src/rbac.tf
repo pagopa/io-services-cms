@@ -5,7 +5,7 @@ data "azurerm_data_factory" "adf" {
 
 module "adf_to_cosmos_data_reader_db" {
   source  = "pagopa-dx/azure-role-assignments/azurerm"
-  version = "1.0.2"
+  version = "~> 1.0"
 
   principal_id    = data.azurerm_data_factory.adf.identity[0].principal_id
   subscription_id = data.azurerm_subscription.current.subscription_id
