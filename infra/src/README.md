@@ -20,6 +20,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_adf_to_cosmos_data_reader_db"></a> [adf\_to\_cosmos\_data\_reader\_db](#module\_adf\_to\_cosmos\_data\_reader\_db) | pagopa-dx/azure-role-assignments/azurerm | 1.0.2 |
 | <a name="module_api_services_cms_itn"></a> [api\_services\_cms\_itn](#module\_api\_services\_cms\_itn) | github.com/pagopa/terraform-azurerm-v3.git//api_management_api | v8.44.2 |
 | <a name="module_app_snet"></a> [app\_snet](#module\_app\_snet) | github.com/pagopa/terraform-azurerm-v3.git//subnet | v8.44.2 |
 | <a name="module_cosmosdb_account"></a> [cosmosdb\_account](#module\_cosmosdb\_account) | github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account | v8.44.2 |
@@ -40,7 +41,6 @@
 | [azurerm_api_management_logger.cache_policy_app_insights_itn](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/api_management_logger) | resource |
 | [azurerm_cosmosdb_sql_database.db_app_be](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_database) | resource |
 | [azurerm_cosmosdb_sql_database.db_cms](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_database) | resource |
-| [azurerm_cosmosdb_sql_role_assignment.adf_to_cosmos_data_reader_db](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/cosmosdb_sql_role_assignment) | resource |
 | [azurerm_key_vault_access_policy.adgroup_admin](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_svc_admins](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.adgroup_svc_developers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
