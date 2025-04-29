@@ -1,0 +1,3 @@
+# Commons for IO-Services-CMS
+
+Define commons utility and services for all the applications of the system. This is the module that implements third-party services clients, common utility etc...

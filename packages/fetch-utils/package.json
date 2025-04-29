@@ -1,0 +1,37 @@
+{
+  "name": "@io-services-cms/fetch-utils",
+  "version": "1.0.0",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "index.js"
+  ],
+  "scripts": {
+    "build": "rm -rf ./dist & tsc",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:integrations": "vitest run -c __integrations__/vitest.config.ts",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**\"",
+    "lint:fix": "eslint --fix \"src/**\""
+  },
+  "dependencies": {
+    "@pagopa/ts-commons": "^13.1.2",
+    "fp-ts": "^2.16.5",
+    "io-ts": "^2.2.21",
+    "node-fetch-commonjs": "3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.10.8"
+  },
+  "imports": {
+    "#package.json": "./package.json"
+  }
+}
