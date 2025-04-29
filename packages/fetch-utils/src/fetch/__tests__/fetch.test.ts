@@ -162,6 +162,17 @@ describe("fetch", () => {
       });
 
       const promise = fetcher(url, init);
+      // **Attach the rejection handler (Vitest's assertion) immediately.**
+      //    We do this *before* advancing the fake timers. `expect(promise).rejects`
+      //    attaches internal logic to handle the promise's rejection and returns a
+      //    new promise (`expectation`) that will resolve if the original `promise`
+      //    rejects as expected.
+      //
+      //    **Why?** If we advanced timers first, `promise` might reject *during* the
+      //    timer advancement. At that exact moment, Node.js checks if a `.catch()` or
+      //    similar handler is attached. If not, it emits an `unhandledRejection` event,
+      //    causing Vitest warnings, even if we attach the handler later.
+      //    Attaching the handler now prevents this race condition.
       const expectation = expect(promise).rejects.toThrow(TransientError);
 
       await vi.advanceTimersByTimeAsync(initialDelay);
@@ -178,9 +189,7 @@ describe("fetch", () => {
       mocks.agentFetch.mockResolvedValue(clientErrorResponse);
 
       //when
-      const fetcher = createRetriableAgentFetch(mockAgentConfig, {
-        maxRetries: 3,
-      });
+      const fetcher = createRetriableAgentFetch(mockAgentConfig);
       const promise = fetcher(url, init);
 
       //then
@@ -232,6 +241,17 @@ describe("fetch", () => {
 
       const promise = fetcher(url, init);
 
+      // **Attach the rejection handler (Vitest's assertion) immediately.**
+      //    We do this *before* advancing the fake timers. `expect(promise).rejects`
+      //    attaches internal logic to handle the promise's rejection and returns a
+      //    new promise (`expectation`) that will resolve if the original `promise`
+      //    rejects as expected.
+      //
+      //    **Why?** If we advanced timers first, `promise` might reject *during* the
+      //    timer advancement. At that exact moment, Node.js checks if a `.catch()` or
+      //    similar handler is attached. If not, it emits an `unhandledRejection` event,
+      //    causing Vitest warnings, even if we attach the handler later.
+      //    Attaching the handler now prevents this race condition.
       const expectation = expect(promise).rejects.toThrow(networkError);
 
       await vi.advanceTimersByTimeAsync(initialDelay);
@@ -275,6 +295,17 @@ describe("fetch", () => {
       });
       const promise = fetcher(url, init);
 
+      // **Attach the rejection handler (Vitest's assertion) immediately.**
+      //    We do this *before* advancing the fake timers. `expect(promise).rejects`
+      //    attaches internal logic to handle the promise's rejection and returns a
+      //    new promise (`expectation`) that will resolve if the original `promise`
+      //    rejects as expected.
+      //
+      //    **Why?** If we advanced timers first, `promise` might reject *during* the
+      //    timer advancement. At that exact moment, Node.js checks if a `.catch()` or
+      //    similar handler is attached. If not, it emits an `unhandledRejection` event,
+      //    causing Vitest warnings, even if we attach the handler later.
+      //    Attaching the handler now prevents this race condition.
       //then
       const expectation = expect(promise).rejects.toThrowError(
         /timeout aborted request/i,
@@ -321,6 +352,17 @@ describe("fetch", () => {
       const promise = fetcher(url, init);
 
       //then
+      // **Attach the rejection handler (Vitest's assertion) immediately.**
+      //    We do this *before* advancing the fake timers. `expect(promise).rejects`
+      //    attaches internal logic to handle the promise's rejection and returns a
+      //    new promise (`expectation`) that will resolve if the original `promise`
+      //    rejects as expected.
+      //
+      //    **Why?** If we advanced timers first, `promise` might reject *during* the
+      //    timer advancement. At that exact moment, Node.js checks if a `.catch()` or
+      //    similar handler is attached. If not, it emits an `unhandledRejection` event,
+      //    causing Vitest warnings, even if we attach the handler later.
+      //    Attaching the handler now prevents this race condition.
       const expectation = expect(promise).rejects.toThrowError(
         /timeout aborted request/i,
       );

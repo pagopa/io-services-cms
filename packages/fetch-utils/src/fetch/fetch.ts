@@ -7,6 +7,10 @@ import { fetchWithAgents } from "../agent/agent";
 import { HttpAgentConfig } from "../config/agent-config";
 
 export const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
+export const DEFAULT_BACKOFF_FACTOR = 1;
+export const DEFAULT_INITIAL_DELAY = 1000;
+export const DEFAULT_MAX_RETRIES = 3;
+export const DEFAULT_CODE_TO_CHECK = [408, 429, 500, 502, 503, 504];
 
 /**
  * Represents a transient HTTP error that might be resolved by retrying the request.
@@ -36,6 +40,13 @@ export class HttpManagedError extends Error {
   }
 }
 
+export interface RetryOptions {
+  backoffFactor?: number;
+  initialDelay?: number;
+  maxRetries?: number;
+  timeout?: number;
+}
+
 const exponentialDelay = (
   initialDelay: number,
   retryAttempt: number,
@@ -44,11 +55,8 @@ const exponentialDelay = (
 
 const checkStatus: (
   response: Response,
-  codeToCheck?: number[],
-) => TE.TaskEither<Error, Response> = (
-  response,
-  codeToCheck = [408, 429, 500, 502, 503, 504],
-) => {
+  codeToCheck: number[],
+) => TE.TaskEither<Error, Response> = (response, codeToCheck) => {
   if (response.ok) {
     return TE.right(response);
   } else {
@@ -73,7 +81,7 @@ const retriableFetch: ({
   timeout,
 }: {
   backoffFactor: number;
-  codeToCheck?: number[];
+  codeToCheck: number[];
   initialDelay: number;
   maxRetries: number;
   timeout: number;
@@ -83,7 +91,7 @@ const retriableFetch: ({
     codeToCheck,
     initialDelay = 1000,
     maxRetries = 3,
-    timeout = 10000,
+    timeout = DEFAULT_REQUEST_TIMEOUT_MS,
   }) =>
   (f) =>
   (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -146,31 +154,32 @@ const retriableFetch: ({
  *
  * @function createRetriableAgentFetch
  * @param {HttpAgentConfig} agentConfig - Configuration object for the HTTP/HTTPS agents (e.g., proxy URLs, keep-alive settings). See `HttpAgentConfig` definition.
- * @param {RetryFetchOptions} [retryOptions={}] - Optional configuration for the retry mechanism.
+ * @param {RetryOptions} [retryOptions={}] - Optional configuration for the retry mechanism.
  * @param {number} [retryOptions.backoffFactor=2] - Exponential backoff factor. Defaults to `2`.
  * @param {number} [retryOptions.initialDelay=1000] - Initial delay in ms before the first retry. Defaults to `1000`.
  * @param {number} [retryOptions.maxRetries=3] - Maximum number of retry attempts. Defaults to `3`.
  * @param {number} [retryOptions.timeout=10000] - Timeout in ms for each individual request attempt. Defaults to `DEFAULT_REQUEST_TIMEOUT_MS` (10000).
- * @param {number[]} [retryOptions.codeToCheck] - Optional array of status codes to treat as transient/retryable. Defaults internally in `checkStatus` to `[408, 429, 500, 502, 503, 504]`.
+ * @param {number[]} [retryOptions.codeToCheck = [408, 429, 500, 502, 503, 504]] - Optional array of status codes to treat as transient/retryable. Defaults internally in `checkStatus` to `[408, 429, 500, 502, 503, 504]`.
  *
  * @returns {typeof fetch} A function with the same signature as the standard API, but enhanced with agent support and automatic retries. It returns a `Promise<Response>`.
  */
 export const createRetriableAgentFetch = (
-  agentConfig: HttpAgentConfig, // Accept agent config
-  retryOptions: {
-    // Accept retry options
-    backoffFactor?: number;
-    initialDelay?: number;
-    maxRetries?: number;
-    timeout?: number;
-  } = {},
+  agentConfig: HttpAgentConfig,
+  {
+    backoffFactor = DEFAULT_BACKOFF_FACTOR,
+    initialDelay = DEFAULT_INITIAL_DELAY,
+    maxRetries = DEFAULT_MAX_RETRIES,
+    timeout = DEFAULT_REQUEST_TIMEOUT_MS,
+  }: RetryOptions = {},
+  codeToCheck: number[] = DEFAULT_CODE_TO_CHECK,
 ): typeof fetch => {
   const agentFetch = fetchWithAgents(agentConfig);
 
   return retriableFetch({
-    backoffFactor: retryOptions.backoffFactor ?? 2,
-    initialDelay: retryOptions.initialDelay ?? 1000,
-    maxRetries: retryOptions.maxRetries ?? 3,
-    timeout: retryOptions.timeout ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    backoffFactor: backoffFactor,
+    codeToCheck: codeToCheck,
+    initialDelay: initialDelay,
+    maxRetries: maxRetries,
+    timeout: timeout,
   })(agentFetch);
 };
