@@ -42,6 +42,7 @@
     "@azure/identity": "^4.0.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
     "@io-services-cms/external-clients": "workspace:^",
+    "@io-services-cms/fetch-utils": "workspace:^",
     "@io-services-cms/models": "workspace:^",
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^29.1.2",

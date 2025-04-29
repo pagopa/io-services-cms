@@ -6,6 +6,7 @@
  */
 
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
@@ -334,7 +335,11 @@ export const IConfig = t.intersection([
       ServicesHistoryEventHubConfig,
     ]),
   ]),
-  t.intersection([PDVTokenizerClientConfiguration, ActivationEventHubConfig]),
+  t.intersection([
+    PDVTokenizerClientConfiguration,
+    ActivationEventHubConfig,
+    HttpAgentConfig,
+  ]),
 ]);
 
 export const envConfig = {

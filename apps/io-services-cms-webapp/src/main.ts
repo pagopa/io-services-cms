@@ -1,6 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { AzureFunction } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { Fetch } from "@io-services-cms/fetch-utils";
 import {
   LegacyActivation,
   LegacyServiceCosmosResource,
@@ -66,7 +67,6 @@ import {
   cosmosdbClient,
   cosmosdbInstance as legacyCosmosDbInstance,
 } from "./utils/cosmos-legacy";
-import { httpOrHttpsApiFetch } from "./utils/fetch";
 import { jiraProxy } from "./utils/jira-proxy";
 import { pdvTokenizerClient } from "./utils/pdvTokenizerClient";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
@@ -161,7 +161,7 @@ const fsmPublicationClient = ServicePublication.getFsmClient(
 const pdvTokenizer = pdvTokenizerClient(
   config.PDV_TOKENIZER_BASE_URL,
   config.PDV_TOKENIZER_API_KEY,
-  httpOrHttpsApiFetch,
+  Fetch.createRetriableAgentFetch(config),
   config.PDV_TOKENIZER_BASE_PATH,
 );
 
