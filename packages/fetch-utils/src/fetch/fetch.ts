@@ -86,13 +86,7 @@ const retriableFetch: ({
   maxRetries: number;
   timeout: number;
 }) => (f: typeof fetch) => typeof fetch =
-  ({
-    backoffFactor = 1,
-    codeToCheck,
-    initialDelay = 1000,
-    maxRetries = 3,
-    timeout = DEFAULT_REQUEST_TIMEOUT_MS,
-  }) =>
+  ({ backoffFactor, codeToCheck, initialDelay, maxRetries, timeout }) =>
   (f) =>
   (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const retryWithDelay = (
@@ -155,11 +149,11 @@ const retriableFetch: ({
  * @function createRetriableAgentFetch
  * @param {HttpAgentConfig} agentConfig - Configuration object for the HTTP/HTTPS agents (e.g., proxy URLs, keep-alive settings). See `HttpAgentConfig` definition.
  * @param {RetryOptions} [retryOptions={}] - Optional configuration for the retry mechanism.
- * @param {number} [retryOptions.backoffFactor=2] - Exponential backoff factor. Defaults to `2`.
- * @param {number} [retryOptions.initialDelay=1000] - Initial delay in ms before the first retry. Defaults to `1000`.
- * @param {number} [retryOptions.maxRetries=3] - Maximum number of retry attempts. Defaults to `3`.
- * @param {number} [retryOptions.timeout=10000] - Timeout in ms for each individual request attempt. Defaults to `DEFAULT_REQUEST_TIMEOUT_MS` (10000).
- * @param {number[]} [retryOptions.codeToCheck = [408, 429, 500, 502, 503, 504]] - Optional array of status codes to treat as transient/retryable. Defaults internally in `checkStatus` to `[408, 429, 500, 502, 503, 504]`.
+ * @param {number} [retryOptions.backoffFactor={@link DEFAULT_BACKOFF_FACTOR}] - Exponential backoff factor. Defaults to {@link DEFAULT_BACKOFF_FACTOR}.
+ * @param {number} [retryOptions.initialDelay={@link DEFAULT_INITIAL_DELAY}] - Initial delay in ms before the first retry. Defaults to {@link DEFAULT_INITIAL_DELAY}.
+ * @param {number} [retryOptions.maxRetries={@link DEFAULT_MAX_RETRIES}] - Maximum number of retry attempts. Defaults to {@link DEFAULT_MAX_RETRIES}.
+ * @param {number} [retryOptions.timeout={@link DEFAULT_REQUEST_TIMEOUT_MS}] - Timeout in ms for each individual request attempt. Defaults to {@link DEFAULT_REQUEST_TIMEOUT_MS}.
+ * @param {number[]} [retryOptions.codeToCheck = {@link DEFAULT_CODE_TO_CHECK}] - Optional array of status codes to treat as transient/retryable. Defaults internally in `checkStatus` to {@link DEFAULT_CODE_TO_CHECK}.
  *
  * @returns {typeof fetch} A function with the same signature as the standard API, but enhanced with agent support and automatic retries. It returns a `Promise<Response>`.
  */
