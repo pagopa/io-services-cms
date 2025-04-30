@@ -27,6 +27,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { CreateServicePayload } from "../../generated/api/CreateServicePayload";
+import { CategoryEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
@@ -104,13 +105,29 @@ export const makeCreateServiceHandler =
       ),
       TE.chainW((_) =>
         pipe(
-          fsmLifecycleClientCreator(authzGroupIds).create(serviceId, {
-            data: payloadToItem(
-              serviceId,
-              servicePayload,
-              config.SANDBOX_FISCAL_CODE,
+          fsmLifecycleClientCreator(authzGroupIds).create(
+            serviceId,
+            pipe(
+              payloadToItem(
+                serviceId,
+                servicePayload,
+                config.SANDBOX_FISCAL_CODE,
+              ),
+              (serviceItem) => ({
+                data: {
+                  ...serviceItem,
+                  data: {
+                    ...serviceItem.data,
+                    metadata: {
+                      ...serviceItem.data.metadata,
+                      category: CategoryEnum.STANDARD,
+                      custom_special_flow: undefined,
+                    },
+                  },
+                },
+              }),
             ),
-          }),
+          ),
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
         ),
       ),
