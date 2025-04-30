@@ -114,18 +114,17 @@ export const makeCreateServiceHandler =
                 config.SANDBOX_FISCAL_CODE,
               ),
               (serviceItem) => ({
+                ...serviceItem,
                 data: {
-                  ...serviceItem,
-                  data: {
-                    ...serviceItem.data,
-                    metadata: {
-                      ...serviceItem.data.metadata,
-                      category: CategoryEnum.STANDARD,
-                      custom_special_flow: undefined,
-                    },
+                  ...serviceItem.data,
+                  metadata: {
+                    ...serviceItem.data.metadata,
+                    category: CategoryEnum.STANDARD,
+                    custom_special_flow: undefined,
                   },
                 },
               }),
+              (modifiedServiceItem) => ({ data: modifiedServiceItem }),
             ),
           ),
           TE.mapLeft((err) => ResponseErrorInternal(err.message)),
