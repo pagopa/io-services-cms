@@ -130,6 +130,8 @@ const FSM: FSM = {
             ...data.data,
             metadata: {
               ...data.data.metadata,
+              category: current.data.metadata.category,
+              custom_special_flow: current.data.metadata.custom_special_flow,
               group_id: current.data.metadata.group_id,
             },
           },
@@ -253,6 +255,8 @@ const FSM: FSM = {
             ...data.data,
             metadata: {
               ...data.data.metadata,
+              category: current.data.metadata.category,
+              custom_special_flow: current.data.metadata.custom_special_flow,
               group_id: current.data.metadata.group_id,
             },
           },
@@ -273,6 +277,8 @@ const FSM: FSM = {
             ...data.data,
             metadata: {
               ...data.data.metadata,
+              category: current.data.metadata.category,
+              custom_special_flow: current.data.metadata.custom_special_flow,
               group_id: current.data.metadata.group_id,
             },
           },
