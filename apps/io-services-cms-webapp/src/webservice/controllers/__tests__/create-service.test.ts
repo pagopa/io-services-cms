@@ -27,7 +27,13 @@ const {
   logErrorResponseMock,
   getLoggerMock,
 } = vi.hoisted(() => {
-  const payloadToItemResponseMock = "payloadToItemResponse";
+  //const payloadToItemResponseMock = "payloadToItemResponse";
+  const payloadToItemResponseMock = {
+    data: {
+      metadata: {},
+    },
+    id: "testId",
+  };
   const itemToResponseResponseMock = "itemToResponseResponse";
   const itemToResponseMock = vi.fn(() => TE.right(itemToResponseResponseMock));
   const logErrorResponseMock = vi.fn((err) => err);
@@ -191,6 +197,13 @@ describe("createService", () => {
   it("should create a draft service", async () => {
     // given
     const servicePayload = aNewService;
+    // const itemService = {
+    //   data: {
+    //     metadata: {},
+    //   },
+    //   id: "testId",
+    // };
+    // payloadToItemMock.mockImplementationOnce(() => itemService);
 
     // when
     const response = await request(app)
@@ -214,7 +227,18 @@ describe("createService", () => {
     expect(fsmLifecycleClientMock.create).toHaveBeenCalledOnce();
     expect(fsmLifecycleClientMock.create).toHaveBeenCalledWith(
       expect.any(String),
-      { data: payloadToItemResponseMock },
+      {
+        data: {
+          ...payloadToItemResponseMock,
+          data: {
+            ...payloadToItemResponseMock.data,
+            metadata: {
+              ...payloadToItemResponseMock.data.metadata,
+              category: "STANDARD",
+            },
+          },
+        },
+      },
     );
     expect(getLoggerMock).toHaveBeenCalledOnce();
     expect(getLoggerMock).toHaveBeenCalledWith(mockContext, logPrefix);
