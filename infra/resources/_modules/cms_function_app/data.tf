@@ -104,6 +104,11 @@ data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
   key_vault_id = var.key_vault_id
 }
 
+data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
+  name         = var.pdv_tokenizer_api_key_name
+  key_vault_id = var.key_vault_id
+}
+
 ####################
 # Private DNS Zone #
 ####################
@@ -111,9 +116,4 @@ data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
 data "azurerm_private_dns_zone" "storage_account_queue" {
   name                = "privatelink.queue.core.windows.net"
   resource_group_name = var.private_dns_zone_resource_group_name
-}
-
-data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
-  name         = "PDV-TOKENIZER-API-KEY"
-  key_vault_id = var.key_vault_id
 }

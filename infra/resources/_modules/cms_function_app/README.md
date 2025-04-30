@@ -97,6 +97,7 @@ No requirements.
 | <a name="input_legacy_cosmosdb_key_name"></a> [legacy\_cosmosdb\_key\_name](#input\_legacy\_cosmosdb\_key\_name) | Legacy CosmosDB Key Name | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region | `string` | n/a | yes |
 | <a name="input_location_short"></a> [location\_short](#input\_location\_short) | Azure region | `string` | n/a | yes |
+| <a name="input_pdv_tokenizer_api_key_name"></a> [pdv\_tokenizer\_api\_key\_name](#input\_pdv\_tokenizer\_api\_key\_name) | PDV token | `string` | n/a | yes |
 | <a name="input_peps_snet_id"></a> [peps\_snet\_id](#input\_peps\_snet\_id) | Id of the subnet which holds private endpoints | `string` | n/a | yes |
 | <a name="input_pgres_flex_reviewer_usr_pwd_name"></a> [pgres\_flex\_reviewer\_usr\_pwd\_name](#input\_pgres\_flex\_reviewer\_usr\_pwd\_name) | Postgres User Name | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"io"` | no |

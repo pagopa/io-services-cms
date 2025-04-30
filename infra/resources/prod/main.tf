@@ -95,6 +95,7 @@ module "cms_function_app" {
   services_history_event_hub_connection_string_name     = module.key_vault.secrets_name.services_history_event_hub_connection_string
   activations_event_hub_connection_string_name          = module.key_vault.secrets_name.activations_event_hub_connection_string
   eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
+  pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
 
   tags = local.tags

@@ -163,3 +163,8 @@ variable "eh_sc_connectionstring_name" {
   type        = string
   description = "event hub connection string Name"
 }
+
+variable "pdv_tokenizer_api_key_name" {
+  type        = string
+  description = "PDV token"
+}
