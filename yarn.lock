@@ -3670,6 +3670,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@io-services-cms/fetch-utils@workspace:^, @io-services-cms/fetch-utils@workspace:packages/fetch-utils":
+  version: 0.0.0-use.local
+  resolution: "@io-services-cms/fetch-utils@workspace:packages/fetch-utils"
+  dependencies:
+    "@pagopa/ts-commons": ^13.1.2
+    "@types/node": 20.10.8
+    fp-ts: ^2.16.5
+    io-ts: ^2.2.21
+    node-fetch-commonjs: 3.3.2
+  languageName: unknown
+  linkType: soft
+
 "@io-services-cms/models@workspace:^, @io-services-cms/models@workspace:packages/io-services-cms-models":
   version: 0.0.0-use.local
   resolution: "@io-services-cms/models@workspace:packages/io-services-cms-models"
@@ -5225,6 +5237,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@pagopa/ts-commons@npm:^13.1.2":
+  version: 13.1.2
+  resolution: "@pagopa/ts-commons@npm:13.1.2"
+  dependencies:
+    abort-controller: ^3.0.0
+    agentkeepalive: ^4.1.4
+    applicationinsights: ^2.9.5
+    jose: ^4.15.5
+    json-set-map: ^1.1.2
+    jsonwebtoken: ^9.0.1
+    node-fetch: ^2.6.0
+    semver: ^7.5.2
+    ulid: ^2.3.0
+    validator: ^13.7.0
+  peerDependencies:
+    fp-ts: ^2.16.5
+    io-ts: ^2.2.21
+  checksum: 13035381d0b7c5730ba5f3a520942fe9180f5c555acb0e56a1f682e8fc02168a7a5a914ecafdd3c6071872e450ba09a8ad7c01436c8ab38f44f444e8d501aa96
+  languageName: node
+  linkType: hard
+
 "@panva/hkdf@npm:^1.0.2":
   version: 1.1.1
   resolution: "@panva/hkdf@npm:1.1.1"
@@ -6064,6 +6097,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:20.10.8, @types/node@npm:~20.10.0":
+  version: 20.10.8
+  resolution: "@types/node@npm:20.10.8"
+  dependencies:
+    undici-types: ~5.26.4
+  checksum: ce9b7ee545b3605f667be2ea900e38ab58d7b561192a7342443e5d7f61c44fd9d016eac48e95d3011f090ceea65a727e83a31d51fabdd9fc20ff9992edcbc682
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:20.4.5":
   version: 20.4.5
   resolution: "@types/node@npm:20.4.5"
@@ -6084,15 +6126,6 @@ __metadata:
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
   checksum: e4f86785f4092706e0d3b0edff8dca5a13b45627e4b36700acd8dfe6ad53db71928c8dee914d4276c7fd3b6ccd829aa919811c9eb708a2c8e4c6eb3701178c37
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:~20.10.0":
-  version: 20.10.8
-  resolution: "@types/node@npm:20.10.8"
-  dependencies:
-    undici-types: ~5.26.4
-  checksum: ce9b7ee545b3605f667be2ea900e38ab58d7b561192a7342443e5d7f61c44fd9d016eac48e95d3011f090ceea65a727e83a31d51fabdd9fc20ff9992edcbc682
   languageName: node
   linkType: hard
 
@@ -11987,6 +12020,7 @@ __metadata:
     "@azure/identity": ^4.0.0
     "@chasdevs/avro-to-typescript": ^1.4.0
     "@io-services-cms/external-clients": "workspace:^"
+    "@io-services-cms/fetch-utils": "workspace:^"
     "@io-services-cms/models": "workspace:^"
     "@pagopa/express-azure-functions": ^4.0.1
     "@pagopa/io-functions-commons": ^29.1.2
@@ -14519,6 +14553,16 @@ __metadata:
   version: 1.0.0
   resolution: "node-domexception@npm:1.0.0"
   checksum: ee1d37dd2a4eb26a8a92cd6b64dfc29caec72bff5e1ed9aba80c294f57a31ba4895a60fd48347cf17dd6e766da0ae87d75657dfd1f384ebfa60462c2283f5c7f
+  languageName: node
+  linkType: hard
+
+"node-fetch-commonjs@npm:3.3.2":
+  version: 3.3.2
+  resolution: "node-fetch-commonjs@npm:3.3.2"
+  dependencies:
+    node-domexception: ^1.0.0
+    web-streams-polyfill: ^3.0.3
+  checksum: 7cc9bc3cba02c88ae031028c07af7f5053d1968e7f8e06931cdca51a695d66bb9fc9bca11bde31915a3e70a957b8e240c568f7ff47af5757efb5526c4389f570
   languageName: node
   linkType: hard
 
