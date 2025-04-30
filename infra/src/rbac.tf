@@ -12,7 +12,7 @@ module "adf_to_cosmos_data_reader_db" {
   cosmos = [{
     account_name        = module.cosmosdb_account.name
     resource_group_name = azurerm_resource_group.rg.name
-    description         = "To allow export of published services"
+    description         = "To allow ADF Interactive authoring"
     role                = "reader"
     database            = azurerm_cosmosdb_sql_database.db_cms.name
     }, {
