@@ -79,6 +79,24 @@ module "cms_function_app" {
   cms_snet_cidr                        = local.cms_snet_cidr
   bo_snet_cidr                         = local.bo_snet_cidr
 
+  # KeyVault Secrets
+  key_vault_id                                          = module.key_vault.key_vault_id
+  pgres_flex_reviewer_usr_pwd_name                      = module.key_vault.secrets_name.pgres_flex_reviewer_usr_pwd
+  jira_token_name                                       = module.key_vault.secrets_name.jira_token
+  azure_client_secret_credential_secret_name            = module.key_vault.secrets_name.azure_client_secret_credential_secret
+  azure_client_secret_credential_client_id_name         = module.key_vault.secrets_name.azure_client_secret_credential_client_id
+  serviceid_quality_check_exclusion_list_name           = module.key_vault.secrets_name.serviceid_quality_check_exclusion_list
+  legacy_cosmosdb_connectionstring_name                 = module.key_vault.secrets_name.legacy_cosmosdb_connectionstring
+  legacy_cosmosdb_key_name                              = module.key_vault.secrets_name.legacy_cosmosdb_key
+  asset_storage_connectionstring_secret_name            = module.key_vault.secrets_name.asset_storage_connectionstring_secret
+  services_publication_event_hub_connection_string_name = module.key_vault.secrets_name.services_publication_event_hub_connection_string
+  services_topics_event_hub_connection_string_name      = module.key_vault.secrets_name.services_topics_event_hub_connection_string
+  services_lifecycle_event_hub_connection_string_name   = module.key_vault.secrets_name.services_lifecycle_event_hub_connection_string
+  services_history_event_hub_connection_string_name     = module.key_vault.secrets_name.services_history_event_hub_connection_string
+  activations_event_hub_connection_string_name          = module.key_vault.secrets_name.activations_event_hub_connection_string
+  eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
+
+
   tags = local.tags
 }
 

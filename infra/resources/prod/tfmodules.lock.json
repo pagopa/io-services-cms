@@ -1,10 +1,6 @@
 {
-  "backoffice.backoffice.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
-  "cms_function_app.cms_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
-  "eventhub.eventhub.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
-  "function_app.app_be_fn.naming_convention": "5b1d21788783dcf33e17a9842f9f7c874c8c5f736c82e70979eb9c8785a74ce4",
-  "backoffice.backoffice": "d0d562ff768bfee8c22840875072f94144f80531a0c13986170272443fa7744f",
-  "cms_function_app.cms_fn": "65752c8749a035e65ca3471951c32c03cad2ea02a16176ae3ec57b030d07ac03",
-  "eventhub.eventhub": "a26f902e947420a38e6033ee1649bdeb7e33d6e6717068fbe6512680db727545",
-  "function_app.app_be_fn": "65752c8749a035e65ca3471951c32c03cad2ea02a16176ae3ec57b030d07ac03"
+  "backoffice.backoffice": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
+  "cms_function_app.cms_fn": "9e8ff9c8a5e80e7ba79922eccfd983b3321e25dd4b22a1e7602fa581a389a6f1",
+  "eventhub.eventhub": "ed4cc7d76a428cf9427d2c21eff715e5303809324c43c581101d5a9cf6bd8b62",
+  "function_app.app_be_fn": "9e8ff9c8a5e80e7ba79922eccfd983b3321e25dd4b22a1e7602fa581a389a6f1"
 }
