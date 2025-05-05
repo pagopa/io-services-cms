@@ -115,7 +115,7 @@ variable "azure_client_secret_credential_secret_name" {
 }
 
 variable "serviceid_quality_check_exclusion_list_name" {
-  type        = string #corretto?
+  type        = string
   description = "Service quality check exclusion list"
 }
 
