@@ -3,6 +3,7 @@ import {
   IResponseErrorInternal,
   ResponseErrorInternal,
 } from "@pagopa/ts-commons/lib/responses";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
@@ -42,6 +43,13 @@ export const payloadToItem = (
     ),
     max_allowed_payment_amount,
     metadata: { ...metadata, category: toCategoryType(metadata.category) },
+    organization: {
+      ...data.organization,
+      name: renameIoAppServicesOrganizationName(
+        data.organization.fiscal_code,
+        data.organization.name,
+      ),
+    },
     require_secure_channel,
   },
   id,
@@ -110,6 +118,19 @@ const toServiceTopic =
           ),
         )
       : TE.right(undefined);
+
+//FIXME: remove this workaround for managing the creation and the update of services from pagopa
+//        where the name of the organization needs to be renamed into "IO - L'app dei servizi pubblici"
+const IO_APP_ORGANIZATION_NAME = "IO - L'app dei servizi pubblici";
+const PAGOPA_ORGANIZATION_FISCAL_CODE = "15376371009";
+
+const renameIoAppServicesOrganizationName = (
+  fiscalCode: string,
+  organizationName: string,
+): NonEmptyString =>
+  fiscalCode === PAGOPA_ORGANIZATION_FISCAL_CODE
+    ? (IO_APP_ORGANIZATION_NAME as NonEmptyString)
+    : (organizationName as NonEmptyString);
 
 export const toServiceStatus = (
   fsm: ServiceLifecycle.ItemType["fsm"],
