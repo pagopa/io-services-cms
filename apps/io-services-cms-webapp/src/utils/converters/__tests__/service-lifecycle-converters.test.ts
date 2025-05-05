@@ -140,4 +140,56 @@ describe("test service-lifecycle-converters", () => {
     expect(result.data.metadata.custom_special_flow).toBeDefined();
     expect(result.data.metadata.custom_special_flow).toBe(aCustomSpecialFlow);
   });
+
+  test("Converting a service payload from PagoPA requires mapping the organization name", () => {
+    const aNewService = {
+      name: "a service",
+      description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "15376371009",
+      },
+      metadata: {
+        scope: "LOCAL",
+        topic_id: 1,
+      },
+      authorized_recipients: [anAutorizedFiscalCode],
+    } as unknown as ServicePayload;
+
+    const result = payloadToItem(
+      "ffefefe" as NonEmptyString,
+      aNewService,
+      aSandboxFiscalCode as FiscalCode,
+    );
+    expect(result.data.metadata).toBeDefined();
+    expect(result.data.metadata.category).toBeDefined();
+    expect(result.data.organization.name).toBe(
+      "IO - L'app dei servizi pubblici",
+    );
+  });
+
+  test("converting a payload of a service that doesn't come from the organization PagoPA, the organization name must not be modified", () => {
+    const aNewService = {
+      name: "a service",
+      description: "a description",
+      organization: {
+        name: "org",
+        fiscal_code: "000000000000",
+      },
+      metadata: {
+        scope: "LOCAL",
+        topic_id: 1,
+      },
+      authorized_recipients: [anAutorizedFiscalCode],
+    } as unknown as ServicePayload;
+
+    const result = payloadToItem(
+      "ffefefe" as NonEmptyString,
+      aNewService,
+      aSandboxFiscalCode as FiscalCode,
+    );
+    expect(result.data.metadata).toBeDefined();
+    expect(result.data.metadata.category).toBeDefined();
+    expect(result.data.organization.name).toBe("org");
+  });
 });
