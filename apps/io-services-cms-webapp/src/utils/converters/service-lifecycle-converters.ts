@@ -45,7 +45,7 @@ export const payloadToItem = (
     metadata: { ...metadata, category: toCategoryType(metadata.category) },
     organization: {
       ...data.organization,
-      name: renameIoAppServicesOrganizationName(
+      name: renamePagoPAServicesOrganizationName(
         data.organization.fiscal_code,
         data.organization.name,
       ),
@@ -121,15 +121,15 @@ const toServiceTopic =
 
 //FIXME: remove this workaround for managing the creation and the update of services from pagopa
 //        where the name of the organization needs to be renamed into "IO - L'app dei servizi pubblici"
-const IO_APP_ORGANIZATION_NAME = "IO - L'app dei servizi pubblici";
+const PAGOPA_ORGANIZATION_NAME = "IO - L'app dei servizi pubblici";
 const PAGOPA_ORGANIZATION_FISCAL_CODE = "15376371009";
 
-const renameIoAppServicesOrganizationName = (
+const renamePagoPAServicesOrganizationName = (
   fiscalCode: string,
   organizationName: string,
 ): NonEmptyString =>
   fiscalCode === PAGOPA_ORGANIZATION_FISCAL_CODE
-    ? (IO_APP_ORGANIZATION_NAME as NonEmptyString)
+    ? (PAGOPA_ORGANIZATION_NAME as NonEmptyString)
     : (organizationName as NonEmptyString);
 
 export const toServiceStatus = (
