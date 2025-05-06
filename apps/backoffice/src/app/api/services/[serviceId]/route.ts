@@ -11,6 +11,7 @@ import { groupExists } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import { forwardIoServicesCmsRequest } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { renamePagoPAServicesOrganizationName } from "@/utils/rename-pagopa-organization";
 import { NextRequest } from "next/server";
 
 /**
@@ -64,7 +65,10 @@ export const PUT = withJWTAuthHandler(
           ...servicePayload,
           organization: {
             fiscal_code: backofficeUser.institution.fiscalCode,
-            name: backofficeUser.institution.name,
+            name: renamePagoPAServicesOrganizationName(
+              backofficeUser.institution.fiscalCode,
+              backofficeUser.institution.name,
+            ),
           },
         },
         nextRequest,
