@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 1.40.18
+
+### Patch Changes
+
+- 059e8213: fix category override on special services
+- b154af02: added common package for fetch utils like retriable fetch and agent management
+- Updated dependencies [059e8213]
+- Updated dependencies [b154af02]
+  - @io-services-cms/models@1.27.2
+  - @io-services-cms/fetch-utils@1.0.0
+
 ## 1.40.17
 
 ### Patch Changes
