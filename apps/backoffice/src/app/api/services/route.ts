@@ -19,6 +19,7 @@ import {
   forwardIoServicesCmsRequest,
 } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { getServiceOrganizationName } from "@/utils/organization-name-utils";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -77,7 +78,7 @@ export const POST = withJWTAuthHandler(
           ...servicePayload,
           organization: {
             fiscal_code: backofficeUser.institution.fiscalCode,
-            name: backofficeUser.institution.name,
+            name: getServiceOrganizationName(backofficeUser.institution),
           },
         },
         nextRequest,
