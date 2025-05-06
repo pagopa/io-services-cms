@@ -377,6 +377,61 @@ describe("Services API", () => {
         );
       },
     );
+
+    it("should forward request with request organization name modified if organization is PagoPA", async () => {
+      // given
+      const userRole = SelfcareRoles.admin;
+      const selcGroups = aSelcGroupActive as any;
+      backofficeUserMock.institution.fiscalCode = "15376371009";
+      backofficeUserMock.institution.name = "org";
+      const group_id = "aGroupId";
+      const jsonBodyMock = {
+        ...aValidServicePayload,
+        metadata: {
+          ...aValidServicePayload.metadata,
+          group_id,
+        },
+      };
+
+      parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
+      getGroupMock.mockResolvedValueOnce(aSelcGroupActive[0]);
+
+      backofficeUserMock.institution.role = userRole;
+      backofficeUserMock.permissions.selcGroups = selcGroups;
+      const request = new NextRequest(new URL("http://localhost"));
+
+      // when
+      const result = await POST(request, {});
+
+      // then
+      expect(result.status).toBe(200);
+      expect(parseBodyMock).toHaveBeenCalledOnce();
+      expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
+      expect(getGroupMock).toHaveBeenCalledOnce();
+      expect(getGroupMock).toHaveBeenCalledWith(
+        jsonBodyMock.metadata.group_id,
+        backofficeUserMock.institution.id,
+      );
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
+        "createService",
+        {
+          nextRequest: request,
+          backofficeUser: backofficeUserMock,
+          jsonBody: {
+            ...jsonBodyMock,
+            organization: {
+              name: "IO - L'app dei servizi pubblici",
+              fiscal_code: backofficeUserMock.institution.fiscalCode,
+            },
+          },
+        },
+      );
+    });
   });
 
   describe("bulkPatchServices", () => {

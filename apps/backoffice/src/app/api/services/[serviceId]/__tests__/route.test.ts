@@ -124,6 +124,39 @@ describe("Services API", () => {
         },
       );
     });
+
+    it("should forward request with request organization name modified if organization is PagoPA", async () => {
+      // given
+      const jsonBodyMock = aValidServicePayload;
+      parseBodyMock.mockResolvedValueOnce(aValidServicePayload);
+      backofficeUserMock.institution.role = SelfcareRoles.admin;
+      backofficeUserMock.institution.fiscalCode = "15376371009";
+      backofficeUserMock.institution.name = "org";
+      const params = { serviceId: faker.string.uuid() };
+      const request = new NextRequest(new URL("http://localhost"));
+
+      // when
+      const result = await PUT(request, { params });
+
+      // then
+      expect(result.status).toBe(200);
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
+        "updateService",
+        {
+          nextRequest: request,
+          backofficeUser: backofficeUserMock,
+          jsonBody: {
+            ...jsonBodyMock,
+            organization: {
+              name: "IO - L'app dei servizi pubblici",
+              fiscal_code: backofficeUserMock.institution.fiscalCode,
+            },
+          },
+          pathParams: params,
+        },
+      );
+    });
   });
 
   describe("patchService", () => {
