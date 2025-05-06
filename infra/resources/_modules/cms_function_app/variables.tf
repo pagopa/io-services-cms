@@ -84,3 +84,87 @@ variable "bo_snet_cidr" {
   type        = string
   description = "Backoffice Subnet CIDR"
 }
+
+###########################
+#  Azure KeyVault Secrets #
+###########################
+
+variable "key_vault_id" {
+  type        = string
+  description = "Azure KeyVault ID"
+}
+
+variable "pgres_flex_reviewer_usr_pwd_name" {
+  type        = string
+  description = "Postgres User Name"
+}
+
+variable "jira_token_name" {
+  type        = string
+  description = "Connection Token to Jira"
+}
+
+variable "azure_client_secret_credential_client_id_name" {
+  type        = string
+  description = "Azure Client Secret Credential Client Id Name"
+}
+
+variable "azure_client_secret_credential_secret_name" {
+  type        = string
+  description = "Azure Client Secret Credential Secret Name"
+}
+
+variable "serviceid_quality_check_exclusion_list_name" {
+  type        = string
+  description = "Service quality check exclusion list"
+}
+
+variable "legacy_cosmosdb_connectionstring_name" {
+  type        = string
+  description = "Legacy comsmos db connection string name"
+}
+
+variable "legacy_cosmosdb_key_name" {
+  type        = string
+  description = "Legacy CosmosDB Key Name"
+}
+
+variable "asset_storage_connectionstring_secret_name" {
+  type        = string
+  description = "Asset storage connection string Name"
+}
+
+variable "services_publication_event_hub_connection_string_name" {
+  type        = string
+  description = "Publication event hub connection string Name"
+}
+
+variable "services_topics_event_hub_connection_string_name" {
+  type        = string
+  description = "Topics event hub connection string Name"
+}
+
+variable "services_lifecycle_event_hub_connection_string_name" {
+  type        = string
+  description = "Lifecycle event hub connection string Name"
+}
+
+variable "services_history_event_hub_connection_string_name" {
+  type        = string
+  description = "History event hub connection string Name"
+}
+
+variable "activations_event_hub_connection_string_name" {
+  type        = string
+  description = "Activations event hub connection string Name"
+}
+
+variable "eh_sc_connectionstring_name" {
+  type        = string
+  description = "event hub connection string Name"
+}
+
+variable "pdv_tokenizer_api_key_name" {
+  type        = string
+  description = "PDV token"
+}

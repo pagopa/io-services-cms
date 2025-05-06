@@ -31,82 +31,82 @@ data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
 # KeyVault Secrets #
 ####################
 
-data "azurerm_key_vault" "cms_key_vault" {
-  name                = "${var.prefix}-${var.env_short}-services-cms-kv"
-  resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
-}
-
 data "azurerm_key_vault_secret" "pgres_flex_reviewer_usr_pwd" {
-  name         = "pgres-flex-reviewer-usr-pwd"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.pgres_flex_reviewer_usr_pwd_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "jira_token" {
-  name         = "JIRA-TOKEN"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.jira_token_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.azure_client_secret_credential_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.azure_client_secret_credential_client_id_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
-  name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.serviceid_quality_check_exclusion_list_name
+  key_vault_id = var.key_vault_id
 }
 
 
 data "azurerm_key_vault_secret" "legacy_cosmosdb_connectionstring" {
-  name         = "legacy-cosmosdb-connectionstring"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.legacy_cosmosdb_connectionstring_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
-  name         = "legacy-cosmosdb-key"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.legacy_cosmosdb_key_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
-  name         = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.asset_storage_connectionstring_secret_name
+  key_vault_id = var.key_vault_id
 }
 
 
 data "azurerm_key_vault_secret" "services_publication_event_hub_connection_string" {
-  name         = "SERVICES-PUBLICATION-EVENT-HUB-CONNECTION-STRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.services_publication_event_hub_connection_string_name
+  key_vault_id = var.key_vault_id
 }
 
 
 data "azurerm_key_vault_secret" "services_topics_event_hub_connection_string" {
-  name         = "SERVICES-TOPICS-EVENT-HUB-CONNECTION-STRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.services_topics_event_hub_connection_string_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "services_lifecycle_event_hub_connection_string" {
-  name         = "SERVICES-LIFECYCLE-EVENT-HUB-CONNECTION-STRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.services_lifecycle_event_hub_connection_string_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "services_history_event_hub_connection_string" {
-  name         = "SERVICES-HISTORY-EVENT-HUB-CONNECTION-STRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.services_history_event_hub_connection_string_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "activations_event_hub_connection_string" {
-  name         = "ACTIVATIONS-EVENT-HUB-CONNECTION-STRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.activations_event_hub_connection_string_name
+  key_vault_id = var.key_vault_id
 }
 
 data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
-  name         = "EH-SC-CONNECTIONSTRING"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
+  name         = var.eh_sc_connectionstring_name
+  key_vault_id = var.key_vault_id
+}
+
+data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
+  name         = var.pdv_tokenizer_api_key_name
+  key_vault_id = var.key_vault_id
 }
 
 ####################
@@ -116,9 +116,4 @@ data "azurerm_key_vault_secret" "eh_sc_connectionstring" {
 data "azurerm_private_dns_zone" "storage_account_queue" {
   name                = "privatelink.queue.core.windows.net"
   resource_group_name = var.private_dns_zone_resource_group_name
-}
-
-data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
-  name         = "PDV-TOKENIZER-API-KEY"
-  key_vault_id = data.azurerm_key_vault.cms_key_vault.id
 }
