@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.25.14
+
+### Patch Changes
+
+- f57d0422: fix organization name override with temporary workaround
+- Updated dependencies [059e8213]
+  - @io-services-cms/models@1.27.2
+
 ## 1.25.13
 
 ### Patch Changes

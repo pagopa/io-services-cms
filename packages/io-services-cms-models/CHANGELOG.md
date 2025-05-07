@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.27.2
+
+### Patch Changes
+
+- 059e8213: fix category override on special services
+
 ## 1.27.1
 
 ### Patch Changes
