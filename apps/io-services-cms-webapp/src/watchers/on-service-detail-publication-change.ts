@@ -32,13 +32,4 @@ export const handler: RTE.ReaderTaskEither<
   { item: ServicePublication.CosmosResource },
   Error,
   NoAction | OnDetailPublicationActions
-> = ({ item }) => {
-  switch (item.fsm.state) {
-    case "unpublished":
-      return TE.right(noAction);
-    case "published":
-      return pipe(item, onDetailPublicationHandler, TE.right);
-    default:
-      return TE.right(noAction);
-  }
-};
+> = ({ item }) => pipe(item, onDetailPublicationHandler, TE.right);
