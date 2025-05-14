@@ -5,15 +5,12 @@ import { pipe } from "fp-ts/lib/function";
 
 type Actions = "requestDetailPublication";
 
-type NoAction = typeof noAction;
 type Action<A extends Actions, B> = Record<A, B>;
 type RequestDetailPublicationAction = Action<
   "requestDetailPublication",
   Queue.RequestDetailItem
 >;
 type OnDetailPublicationActions = RequestDetailPublicationAction;
-
-const noAction = {};
 
 const onDetailPublicationHandler = ({
   _ts,
@@ -31,14 +28,5 @@ const onDetailPublicationHandler = ({
 export const handler: RTE.ReaderTaskEither<
   { item: ServicePublication.CosmosResource },
   Error,
-  NoAction | OnDetailPublicationActions
-> = ({ item }) => {
-  switch (item.fsm.state) {
-    case "unpublished":
-      return TE.right(noAction);
-    case "published":
-      return pipe(item, onDetailPublicationHandler, TE.right);
-    default:
-      return TE.right(noAction);
-  }
-};
+  OnDetailPublicationActions
+> = ({ item }) => pipe(item, onDetailPublicationHandler, TE.right);
