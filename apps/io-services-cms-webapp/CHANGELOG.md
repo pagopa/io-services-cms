@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.19
+
+### Patch Changes
+
+- 386d7bde: change sync condition to app-be from service publication
+
 ## 1.40.18
 
 ### Patch Changes
