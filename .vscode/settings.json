@@ -1,7 +1,8 @@
 {
+  "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
   },
   "azureFunctions.projectSubpath": "apps/app-backend"
 }
