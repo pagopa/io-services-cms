@@ -18,6 +18,7 @@
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
     "start": "dotenv -e .env func start -- --javascript",
+    "which": "which func",
     "generate:avro": "rm -rf ./src/generated/avro && mkdir -p ./src/generated/avro && avro-to-typescript --compile ./avro ./src/generated/avro",
     "generate:definitions": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders",
     "generate:tokenizer-client": "rm -rf ./src/generated/pdv-tokenizer-api && gen-api-models --api-spec https://api.tokenizer.pdv.pagopa.it/docs/tokenizerpapis/openapi.json --out-dir ./src/generated/pdv-tokenizer-api --no-strict --request-types --response-decoders --client"
@@ -30,7 +31,6 @@
     "@types/pg-cursor": "^2.7.0",
     "@types/supertest": "^2.0.12",
     "@types/upng-js": "^2.1.1",
-    "azure-functions-core-tools": "^4.0.7030",
     "npm-pack-zip": "^1.3.0",
     "supertest": "^6.3.3"
   },
