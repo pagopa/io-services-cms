@@ -1,12 +1,9 @@
 locals {
-  prefix               = "io"
-  env_short            = "p"
-  location             = "italynorth"
-  location_short       = "itn"
-  project              = "${local.prefix}-${local.env_short}-${local.location_short}"
-  application_basename = "svc"
-  domain               = "svc"
-  instance_number      = "01"
+  prefix          = "io"
+  env_short       = "p"
+  location        = "italynorth"
+  domain          = "svc"
+  instance_number = "01"
 
   adgroups = {
     admins_name = "io-p-adgroup-svc-admins"
