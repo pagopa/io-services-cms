@@ -3,7 +3,7 @@ name: Infra Drift Detection
 on:
   workflow_dispatch:
   schedule:
-    - cron: '08 00 * * *'
+    - cron: '00 06 * * *' # Run at 06:00 every day
 
 permissions:
   id-token: write
@@ -14,14 +14,12 @@ env:
   AZURE_ENVIRONMENT: prod
 
 jobs:
-
   terraform_driftdetection_job:
     name: Terraform Drift Detection
     runs-on: [self-hosted]
     environment: infra-prod-ci
 
     steps:
-
       - name: Checkout
         id: checkout
         # from https://github.com/actions/checkout/commits/main
