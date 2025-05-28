@@ -54,6 +54,10 @@ data "azurerm_key_vault" "common" {
   resource_group_name = local.key_vault.resource_group_name
 }
 
+data "azurerm_resource_group" "common" {
+  name = local.vnet.resource_group_name
+}
+
 data "azurerm_virtual_network" "common" {
   name                = local.vnet.name
   resource_group_name = local.vnet.resource_group_name
@@ -81,7 +85,7 @@ data "azuread_group" "developers" {
 
 module "repo" {
   source  = "pagopa-dx/azure-github-environment-bootstrap/azurerm"
-  version = "~> 1.0"
+  version = "~> 2.0"
 
   environment = {
     prefix          = local.prefix
@@ -93,7 +97,7 @@ module "repo" {
 
   subscription_id               = data.azurerm_subscription.current.id
   tenant_id                     = data.azurerm_client_config.current.tenant_id
-  nat_gateway_resource_group_id = local.vnet.resource_group_name
+  nat_gateway_resource_group_id = data.azurerm_resource_group.common.id
 
   entraid_groups = {
     admins_object_id = data.azuread_group.admins.object_id
