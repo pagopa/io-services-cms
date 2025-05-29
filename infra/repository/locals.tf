@@ -59,6 +59,10 @@ locals {
     resource_group_name = "io-p-rg-common"
   }
 
+  repo_secrets = {
+    "SLACK_WEBHOOK_URL" = data.azurerm_key_vault_secret.slack_webhook_url.value
+  }
+
   tags = {
     CreatedBy      = "Terraform"
     Environment    = "Prod"
