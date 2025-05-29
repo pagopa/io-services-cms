@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '00 06 * * *' # Run at 06:00 every day
 
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
 jobs:
   drift_detection_itn:
     uses: pagopa/dx/.github/workflows/infra_drift_detection.yml@main
@@ -16,10 +21,29 @@ jobs:
       override_github_environment: 'infra-prod'
 
   drift_detection_weu:
-    uses: pagopa/dx/.github/workflows/infra_drift_detection.yml@main
     name: Drift Detection West Europe
-    secrets: inherit
-    with:
-      environment: prod
-      base_path: 'infra/src/'
-      override_github_environment: 'infra-prod-ci'
+    runs-on: [self-hosted]
+    environment: infra-prod-ci
+    steps:
+      - name: Checkout
+        id: checkout
+        # from https://github.com/actions/checkout/commits/main
+        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup terraform
+        id: setup-version
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/terraform/terraform-install-action
+        uses: pagopa/eng-github-actions-iac-template/terraform/terraform-install-action@main
+
+      - name: Terraform drift detection
+        # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/terraform-driftdetection-azure-action
+        uses: pagopa/eng-github-actions-iac-template/azure/terraform-driftdetection-azure-action@main
+        with:
+          client_id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant_id: ${{ secrets.ARM_TENANT_ID }}
+          subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          dir: 'infra/src'
+          azure_environment: prod
