@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 1.25.15
+
+### Patch Changes
+
+- 7efb8449: Added mixpanel custom stepIndex prop on IO_BO_SERVICE_CREATE_ABORT and on IO_BO_SERVICE_EDIT_ABORT.
+  Added mixpanel new IO_BO_LOGIN_ERROR event for auth error page
+
 ## 1.25.14
 
 ### Patch Changes
