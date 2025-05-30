@@ -13,6 +13,7 @@ interface MixPanelEventsStructure {
     switchToInstitutionId: string;
   };
   readonly IO_BO_LOGIN: Record<string, never>;
+  readonly IO_BO_LOGIN_ERROR: { reason: string };
   readonly IO_BO_MANAGE_KEY_COPY: {
     entryPoint: string;
     keyType: ApiKeyType;
@@ -22,7 +23,7 @@ interface MixPanelEventsStructure {
   };
   readonly IO_BO_OVERVIEW_PAGE: Record<string, never>;
   readonly IO_BO_PRODUCT_SWITCH: { productId: string };
-  readonly IO_BO_SERVICE_CREATE_ABORT: Record<string, never>;
+  readonly IO_BO_SERVICE_CREATE_ABORT: { stepIndex: number };
   readonly IO_BO_SERVICE_CREATE_END: {
     result: TechEventResult;
     serviceId?: string;
@@ -33,7 +34,7 @@ interface MixPanelEventsStructure {
     serviceId: string;
     serviceName: string;
   };
-  readonly IO_BO_SERVICE_EDIT_ABORT: Record<string, never>;
+  readonly IO_BO_SERVICE_EDIT_ABORT: { stepIndex: number };
   readonly IO_BO_SERVICE_EDIT_END: {
     result: TechEventResult;
     serviceId: string;
@@ -117,6 +118,10 @@ export const trackLoginEvent = () => {
   logToMixpanel("IO_BO_LOGIN", "UX", {}, "screen_view");
 };
 
+export const trackLoginErrorEvent = (reason: string) => {
+  logToMixpanel("IO_BO_LOGIN_ERROR", "UX", { reason }, "screen_view");
+};
+
 export const trackManageKeyCopyEvent = (
   entryPoint: string,
   keyType: ApiKeyType,
@@ -158,8 +163,8 @@ export const trackProductSwitchEvent = (productId: string) => {
   );
 };
 
-export const trackServiceCreateAbortEvent = () => {
-  logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", "UX", {}, "action");
+export const trackServiceCreateAbortEvent = (stepIndex: number) => {
+  logToMixpanel("IO_BO_SERVICE_CREATE_ABORT", "UX", { stepIndex }, "action");
 };
 
 export const trackServiceCreateEndEvent = (
@@ -202,8 +207,8 @@ export const trackServiceDetailsPageEvent = (
   );
 };
 
-export const trackServiceEditAbortEvent = () => {
-  logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", "UX", {}, "action");
+export const trackServiceEditAbortEvent = (stepIndex: number) => {
+  logToMixpanel("IO_BO_SERVICE_EDIT_ABORT", "UX", { stepIndex }, "action");
 };
 
 export const trackServiceEditEndEvent = (
