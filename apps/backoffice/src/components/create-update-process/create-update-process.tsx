@@ -40,14 +40,20 @@ export interface ConfirmButtonLabelsType {
 export interface CreateUpdateProcessProps<T> {
   /** Label for final confirm button _(in both modes `create` and `update`)_ */
   confirmButtonLabels: ConfirmButtonLabelsType;
-  /** item for which to carry out the creation or modification process */
+  /** Item for which to carry out the creation or modification process */
   itemToCreateUpdate: DefaultValues<T>;
   /** Process mode: `create` or `update` */
   mode: CreateUpdateMode;
-  /** event triggered on process exit */
+  /** Event triggered on process exit */
   onCancel: () => void;
-  /** event triggered on process completed, with result item of `T` */
+  /** Event triggered on process completed, with result item of `T` */
   onConfirm: (value: T) => void;
+  /**
+   * Event triggered on form step index change
+   * @param index step index
+   * @returns
+   */
+  onStepChange?: (index: number) => void;
   /** list of step that make up the process */
   steps: BuilderStep[];
 }
@@ -59,6 +65,7 @@ export function CreateUpdateProcess<T extends FieldValues>({
   mode,
   onCancel,
   onConfirm,
+  onStepChange,
   steps,
 }: CreateUpdateProcessProps<T>) {
   const { t } = useTranslation();
@@ -84,10 +91,12 @@ export function CreateUpdateProcess<T extends FieldValues>({
   const decreaseStep = () => {
     clearErrors();
     setCurrentStep(currentStepIndex - 1);
+    onStepChange?.(currentStepIndex - 1);
   };
   const increaseStep = () => {
     clearErrors();
     setCurrentStep(currentStepIndex + 1);
+    onStepChange?.(currentStepIndex + 1);
   };
 
   const handleShowMore = () => {
