@@ -9,7 +9,10 @@ import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ServiceCreateUpdatePayload } from "@/types/service";
-import { trackServiceEditEndEvent } from "@/utils/mix-panel";
+import {
+  trackServiceEditAbortEvent,
+  trackServiceEditEndEvent,
+} from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { useRouter } from "next/router";
@@ -17,7 +20,6 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useState } from "react";
-import React from "react";
 
 const pageTitleLocaleKey = "routes.edit-service.title";
 const pageDescriptionLocaleKey = "routes.edit-service.description";
@@ -33,6 +35,7 @@ export default function EditService() {
     useFetch<ServiceLifecycle>();
   const [serviceCreateUpdatePayload, setServiceCreateUpdatePayload] =
     useState<ServiceCreateUpdatePayload>();
+  const [stepIndex, setStepIndex] = useState(0);
 
   const handleConfirm = async (service: ServiceCreateUpdatePayload) => {
     const maybeApiServicePayload =
@@ -66,6 +69,11 @@ export default function EditService() {
     router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);
   };
 
+  const handleAbort = () => {
+    trackServiceEditAbortEvent(stepIndex);
+    router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);
+  };
+
   useEffect(() => {
     serviceFetchData("getService", { serviceId }, ServiceLifecycle, {
       notify: "errors",
@@ -87,13 +95,15 @@ export default function EditService() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`)}
+        onExitClick={handleAbort}
         showExit
         title={pageTitleLocaleKey}
       />
       <ServiceCreateUpdate
         mode="update"
+        onCancel={handleAbort}
         onConfirm={handleConfirm}
+        onStepChange={setStepIndex}
         service={serviceCreateUpdatePayload}
       />
     </>

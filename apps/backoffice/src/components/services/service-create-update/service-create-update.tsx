@@ -16,11 +16,6 @@ import {
   hasManageKeyGroup,
   isOperator,
 } from "@/utils/auth-util";
-import {
-  trackServiceCreateAbortEvent,
-  trackServiceEditAbortEvent,
-} from "@/utils/mix-panel";
-import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useMemo } from "react";
@@ -42,7 +37,16 @@ const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 export interface ServiceCreateUpdateProps {
   mode: CreateUpdateMode;
+  /** Event triggered on process exit */
+  onCancel: () => void;
+  /** Event triggered on process completed, with `ServiceCreateUpdatePayload` result item */
   onConfirm: (value: ServiceCreateUpdatePayload) => void;
+  /**
+   * Event triggered on form step index change
+   * @param index step index
+   * @returns
+   */
+  onStepChange?: (index: number) => void;
   service?: ServiceCreateUpdatePayload;
 }
 
@@ -50,12 +54,13 @@ export interface ServiceCreateUpdateProps {
  * Here are defined process steps (`BuilderStep[]`), service default data, and process mode. */
 export const ServiceCreateUpdate = ({
   mode,
+  onCancel,
   onConfirm,
+  onStepChange,
   service,
 }: ServiceCreateUpdateProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
-  const router = useRouter();
   const showDialog = useDialog();
 
   const { data: topicsData, fetchData: topicsFetchData } =
@@ -108,13 +113,7 @@ export const ServiceCreateUpdate = ({
       title: t("forms.cancel.title"),
     });
     if (confirmed) {
-      console.log("operation cancelled");
-      if (mode === "create") {
-        trackServiceCreateAbortEvent();
-      } else if (mode === "update") {
-        trackServiceEditAbortEvent();
-      }
-      router.back();
+      onCancel();
     } else {
       console.log("modal cancelled");
     }
@@ -164,8 +163,9 @@ export const ServiceCreateUpdate = ({
       }}
       itemToCreateUpdate={service ?? serviceDefaultData}
       mode={mode}
-      onCancel={() => handleCancel()}
-      onConfirm={(value) => onConfirm(value)}
+      onCancel={handleCancel}
+      onConfirm={onConfirm}
+      onStepChange={onStepChange}
       steps={serviceBuilderSteps}
     />
   );
