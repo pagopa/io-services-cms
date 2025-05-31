@@ -21,3 +21,7 @@ data "azurerm_application_insights" "ai_common" {
   name                = "${local.prefix}-${local.env_short}-ai-common"
   resource_group_name = "${local.prefix}-${local.env_short}-rg-common"
 }
+
+data "azurerm_resource_group" "rg" {
+  name = "${local.project}-${local.application_basename}-rg-01"
+}

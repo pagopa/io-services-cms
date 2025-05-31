@@ -1,6 +1,6 @@
 {
-  "backoffice.backoffice": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
-  "cms_function_app.cms_fn": "9e8ff9c8a5e80e7ba79922eccfd983b3321e25dd4b22a1e7602fa581a389a6f1",
-  "eventhub.eventhub": "ed4cc7d76a428cf9427d2c21eff715e5303809324c43c581101d5a9cf6bd8b62",
-  "function_app.app_be_fn": "9e8ff9c8a5e80e7ba79922eccfd983b3321e25dd4b22a1e7602fa581a389a6f1"
+  "backoffice.backoffice": "f9ca4358339f15cbe7b244e729d9b3e27c2676e73066eb424bf8f6c9ec9e2661",
+  "cms_function_app.cms_fn": "2277ce75e9b22c9e0f7eb03a0e3523ff8c48f67f69690d599b2976ee9d11a575",
+  "eventhub.eventhub": "e3ede429c584ca96bb5f2adb4cfb893e7bd520e719bd7e502fdae03a15ce45d3",
+  "function_app.app_be_fn": "2277ce75e9b22c9e0f7eb03a0e3523ff8c48f67f69690d599b2976ee9d11a575"
 }
