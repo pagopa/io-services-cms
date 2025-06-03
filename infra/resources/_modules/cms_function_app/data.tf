@@ -17,11 +17,6 @@ data "azurerm_cosmosdb_account" "cosmos_legacy" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
 }
 
-data "azurerm_monitor_action_group" "error_action_group" {
-  name                = "${var.prefix}${var.env_short}error"
-  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
-}
-
 data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
   name                = "${var.prefix}-${var.env_short}-services-cms-private-pgflex"
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"

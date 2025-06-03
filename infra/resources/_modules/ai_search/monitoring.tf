@@ -21,7 +21,7 @@ resource "azurerm_monitor_metric_alert" "srch_high_latency" {
   }
 
   action {
-    action_group_id = data.azurerm_monitor_action_group.error_action_group.id
+    action_group_id = var.error_action_group_id
   }
 
   tags = var.tags
@@ -46,7 +46,7 @@ resource "azurerm_monitor_metric_alert" "srch_throttled_queries" {
   }
 
   action {
-    action_group_id = data.azurerm_monitor_action_group.error_action_group.id
+    action_group_id = var.error_action_group_id
   }
 
   tags = var.tags

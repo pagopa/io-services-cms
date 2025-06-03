@@ -72,7 +72,6 @@ No requirements.
 | [azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.services_publication_event_hub_connection_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.services_topics_event_hub_connection_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
-| [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/monitor_action_group) | data source |
 | [azurerm_postgresql_flexible_server.cms_private_pgflex](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/postgresql_flexible_server) | data source |
 | [azurerm_private_dns_zone.storage_account_queue](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
@@ -91,6 +90,7 @@ No requirements.
 | <a name="input_domain"></a> [domain](#input\_domain) | Domain name of the application | `string` | n/a | yes |
 | <a name="input_eh_sc_connectionstring_name"></a> [eh\_sc\_connectionstring\_name](#input\_eh\_sc\_connectionstring\_name) | event hub connection string Name | `string` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
+| <a name="input_error_action_group_id"></a> [error\_action\_group\_id](#input\_error\_action\_group\_id) | Id of the action group to use for error notifications | `string` | n/a | yes |
 | <a name="input_jira_token_name"></a> [jira\_token\_name](#input\_jira\_token\_name) | Connection Token to Jira | `string` | n/a | yes |
 | <a name="input_key_vault_id"></a> [key\_vault\_id](#input\_key\_vault\_id) | Azure KeyVault ID | `string` | n/a | yes |
 | <a name="input_legacy_cosmosdb_connectionstring_name"></a> [legacy\_cosmosdb\_connectionstring\_name](#input\_legacy\_cosmosdb\_connectionstring\_name) | Legacy comsmos db connection string name | `string` | n/a | yes |

@@ -168,3 +168,13 @@ variable "pdv_tokenizer_api_key_name" {
   type        = string
   description = "PDV token"
 }
+
+
+################
+#  Monitoring  #
+################
+
+variable "error_action_group_id" {
+  description = "Id of the action group to use for error notifications"
+  type        = string
+}

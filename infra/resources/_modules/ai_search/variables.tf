@@ -72,6 +72,16 @@ variable "private_dns_zone_resource_group_name" {
 }
 
 
+################
+#  Monitoring  #
+################
+
+variable "error_action_group_id" {
+  description = "Id of the action group to use for error notifications"
+  type        = string
+}
+
+
 #####################
 #  Azure AI Search  #
 #####################

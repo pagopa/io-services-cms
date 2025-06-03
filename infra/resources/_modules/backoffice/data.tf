@@ -17,11 +17,6 @@ data "azurerm_cosmosdb_account" "cosmos_legacy" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
 }
 
-data "azurerm_monitor_action_group" "error_action_group" {
-  name                = "${var.prefix}${var.env_short}error"
-  resource_group_name = "${var.prefix}-${var.env_short}-rg-common"
-}
-
 # APIM
 data "azurerm_api_management" "apim_itn" {
   name                = "${var.prefix}-${var.env_short}-itn-apim-01"
