@@ -180,6 +180,6 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "poison-queue-alert" {
   }
 
   action {
-    action_groups = [data.azurerm_monitor_action_group.error_action_group.id]
+    action_groups = [var.error_action_group_id]
   }
 }

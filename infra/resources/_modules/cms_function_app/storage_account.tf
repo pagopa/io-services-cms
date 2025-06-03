@@ -13,7 +13,7 @@ module "cms_storage_account" {
   public_network_access_enabled = false
 
   action = [{
-    action_group_id    = data.azurerm_monitor_action_group.error_action_group.id
+    action_group_id    = var.error_action_group_id
     webhook_properties = null
   }]
 

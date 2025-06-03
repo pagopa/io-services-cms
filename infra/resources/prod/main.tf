@@ -117,6 +117,7 @@ module "cms_function_app" {
   eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
+  error_action_group_id = module.monitor.error_action_group_id
 
   tags = local.tags
 }
