@@ -74,6 +74,8 @@ module "function_app" {
     services_index_name    = module.ai_search.search_service_index_aliases.services
   }
 
+  error_action_group_id = module.monitor.error_action_group_id
+
   tags = local.tags
 }
 

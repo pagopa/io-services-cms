@@ -27,7 +27,7 @@ module "app_be_fn" {
     resource_group_name = var.virtual_network.resource_group_name
   }
 
-  action_group_id = data.azurerm_monitor_action_group.error_action_group.id
+  action_group_id = var.error_action_group_id
 
   app_settings      = local.app_be.app_settings
   slot_app_settings = local.app_be.app_settings
