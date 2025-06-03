@@ -3,8 +3,8 @@
 ##########
 resource "azurerm_monitor_action_group" "error_action_group" {
   resource_group_name = var.resource_group_name
-  name                = "${var.prefix}${var.env_short}-${var.domain}-error-ag-01"
-  short_name          = "${var.prefix}${var.env_short}-${var.domain}-error-ag-01"
+  name                = "${var.prefix}-${var.env_short}-${var.domain}-error-ag-01"
+  short_name          = "${var.domain}-error-ag"
 
   webhook_receiver {
     name                    = "callslacksvcmonitor"
