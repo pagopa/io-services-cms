@@ -14,7 +14,7 @@ resource "azurerm_monitor_action_group" "error_action_group" {
 
   webhook_receiver {
     name                    = "callopsgenie"
-    service_uri             = data.azurerm_key_vault_secret.alert_error_notification_opsgenie.value
+    service_uri             = "https://api.opsgenie.com/v1/json/azure?apiKey=${data.azurerm_key_vault_secret.opsgenie_svc_api_key.value}"
     use_common_alert_schema = true
   }
 

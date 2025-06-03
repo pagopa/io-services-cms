@@ -23,6 +23,7 @@ module "monitor" {
     id = module.key_vault.key_vault_id
     secrets_name = {
       slack_svc_monitor_webhook_url = module.key_vault.secrets_name.slack_svc_monitor_webhook_url
+      opsgenie_svc_api_key          = module.key_vault.secrets_name.opsgenie_svc_api_key
     }
   }
 
