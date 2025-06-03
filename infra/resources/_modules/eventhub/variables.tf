@@ -66,3 +66,13 @@ variable "cms_fn_principal_id" {
   type        = string
   description = "Principal ID of the Services CMS Function App"
 }
+
+
+################
+#  Monitoring  #
+################
+
+variable "error_action_group_id" {
+  description = "Id of the action group to use for error notifications"
+  type        = string
+}
