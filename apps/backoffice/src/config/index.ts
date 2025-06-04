@@ -36,6 +36,7 @@ export interface Configuration {
   BACKOFFICE_HOST: string;
 
   CDN_URL: string;
+  EA_ENABLED: boolean; // BFF & FE feature flag for Aggregator Institution (Ente Aggregatore)
   GROUP_APIKEY_ENABLED: boolean; // frontend feature flag
   GROUP_AUTHZ_ENABLED: boolean; // backend feature flag
   // window guards (useful to configure MSW to work in the browser or in Node environment)
@@ -119,6 +120,7 @@ export function getConfiguration(): Configuration {
     BACKOFFICE_HOST: process.env.BACKOFFICE_HOST as string,
 
     CDN_URL: process.env.NEXT_PUBLIC_CDN_URL as string,
+    EA_ENABLED: process.env.NEXT_PUBLIC_EA_ENABLED?.toLowerCase() === "true",
     GROUP_APIKEY_ENABLED:
       process.env.NEXT_PUBLIC_GROUP_APIKEY_ENABLED?.toLocaleLowerCase() ===
       "true",
