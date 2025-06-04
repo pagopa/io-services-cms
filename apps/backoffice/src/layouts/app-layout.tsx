@@ -6,6 +6,7 @@ import styles from "@/styles/app-layout.module.css";
 import { SelfcareRoles } from "@/types/auth";
 import {
   Category,
+  Dns,
   People,
   SupervisedUserCircle,
   ViewSidebar,
@@ -36,8 +37,23 @@ export const AppLayout = ({
       session?.user?.institution.id
     }`;
 
+  const getAggregatedInstitutionsSidenavItem = (): SidenavItem[] => {
+    if (session?.user?.institution.isAggregator) {
+      return [
+        {
+          href: "/aggregated-institutions",
+          icon: <Dns fontSize="inherit" />,
+          linkType: "internal",
+          text: "routes.aggregated-institutions.title",
+        },
+      ];
+    }
+    return [];
+  };
+
   /** List of sidenav menu items _(displayed on left side column)_ */
   const menu: SidenavItem[] = [
+    ...getAggregatedInstitutionsSidenavItem(),
     {
       href: "/",
       icon: <ViewSidebar fontSize="inherit" />,
