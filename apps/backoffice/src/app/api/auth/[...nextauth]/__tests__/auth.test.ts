@@ -6,13 +6,14 @@ import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
 import { InstitutionResponse } from "../../../../../generated/selfcare/InstitutionResponse";
 import { IdentityTokenPayload } from "../../types";
-import { authorize } from "../auth";
+import { authorize, isAggregatorInstitutionForIO } from "../auth";
 
 vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
     GROUP_AUTHZ_ENABLED: "true",
+    NEXT_PUBLIC_EA_ENABLED: "true",
   };
 });
 
@@ -96,6 +97,7 @@ const getExpectedUser = (
     id: jwtPayload.organization.id,
     name: jwtPayload.organization.name,
     fiscalCode: jwtPayload.organization.fiscal_code,
+    isAggregator: isAggregatorInstitutionForIO(institution.onboarding),
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo,
   },
@@ -719,5 +721,103 @@ describe("Authorize", () => {
     expect(getInstitutionById).toHaveBeenCalledWith(
       aValidJwtPayload.organization.id,
     );
+  });
+
+  it("should return a valid user with aggregator institution type if the onboarded product IO is aggregator", async () => {
+    const aValidAggregatorInstitution = {
+      ...aValidInstitution,
+      onboarding: [
+        {
+          isAggregator: true,
+          productId: "prod-io",
+          status: "ACTIVE",
+        },
+      ],
+    };
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload,
+    });
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getInstitutionById.mockResolvedValueOnce(aValidAggregatorInstitution);
+
+    const user: any = await authorize(mockConfig)(
+      { identity_token: "identity_token" },
+      {},
+    );
+
+    expect(user.institution.isAggregator).toBe(true);
+  });
+
+  it("should return a valid user with NON aggregator institution type if the onboarded product IO is NOT aggregator", async () => {
+    const aValidNonAggregatorInstitution = {
+      ...aValidInstitution,
+      onboarding: [
+        {
+          isAggregator: false,
+          productId: "prod-io",
+          status: "ACTIVE",
+        },
+      ],
+    };
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload,
+    });
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getInstitutionById.mockResolvedValueOnce(aValidNonAggregatorInstitution);
+
+    const user: any = await authorize(mockConfig)(
+      { identity_token: "identity_token" },
+      {},
+    );
+
+    expect(user.institution.isAggregator).toBe(false);
+  });
+
+  it("should return a valid user with NON aggregator institution type if the onboarded product IO is undefined", async () => {
+    const aValidNonAggregatorInstitution = {
+      ...aValidInstitution,
+      onboarding: undefined,
+    };
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload,
+    });
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getInstitutionById.mockResolvedValueOnce(aValidNonAggregatorInstitution);
+
+    const user: any = await authorize(mockConfig)(
+      { identity_token: "identity_token" },
+      {},
+    );
+
+    expect(user.institution.isAggregator).toBe(false);
+  });
+
+  it("should return a valid user with NON aggregator institution type if the onboarded product IO is NOT ACTIVE", async () => {
+    const aValidNonAggregatorInstitution = {
+      ...aValidInstitution,
+      onboarding: [
+        {
+          isAggregator: true,
+          productId: "prod-io",
+          status: "SUSPENDED",
+        },
+      ],
+    };
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload,
+    });
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getInstitutionById.mockResolvedValueOnce(aValidNonAggregatorInstitution);
+
+    const user: any = await authorize(mockConfig)(
+      { identity_token: "identity_token" },
+      {},
+    );
+
+    expect(user.institution.isAggregator).toBe(false);
   });
 });
