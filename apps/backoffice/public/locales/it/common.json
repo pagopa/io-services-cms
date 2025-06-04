@@ -319,7 +319,7 @@
     "operator": "Operatore"
   },
   "routes": {
-    "aggregated-institutions": {
+    "delegated-institutions": {
       "title": "I tuoi enti",
       "description": "Visualizza e gestisci gli enti per il prodotto App IO. Per operare su uno di questi clicca sul menu contestuale in tabella."
     },

@@ -47,7 +47,7 @@ export default function Login() {
   useEffect(() => {
     if (session && router.isReady) {
       if (session.user?.institution.isAggregator) {
-        router.push("/aggregated-institutions");
+        router.push("/delegated-institutions");
       } else {
         router.push("/");
       }

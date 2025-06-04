@@ -6,10 +6,10 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
 
-const pageTitleLocaleKey = "routes.aggregated-institutions.title";
-const pageDescriptionLocaleKey = "routes.aggregated-institutions.description";
+const pageTitleLocaleKey = "routes.delegated-institutions.title";
+const pageDescriptionLocaleKey = "routes.delegated-institutions.description";
 
-export default function AggregatedInstitutions() {
+export default function DelegatedInstitutions() {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
@@ -40,7 +40,7 @@ export async function getStaticProps({ locale }: any) {
   };
 }
 
-AggregatedInstitutions.getLayout = function getLayout(page: ReactElement) {
+DelegatedInstitutions.getLayout = function getLayout(page: ReactElement) {
   return (
     <AppLayout>
       <PageLayout>{page}</PageLayout>

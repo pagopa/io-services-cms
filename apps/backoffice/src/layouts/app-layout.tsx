@@ -41,10 +41,10 @@ export const AppLayout = ({
     if (session?.user?.institution.isAggregator) {
       return [
         {
-          href: "/aggregated-institutions",
+          href: "/delegated-institutions",
           icon: <Dns fontSize="inherit" />,
           linkType: "internal",
-          text: "routes.aggregated-institutions.title",
+          text: "routes.delegated-institutions.title",
         },
       ];
     }
