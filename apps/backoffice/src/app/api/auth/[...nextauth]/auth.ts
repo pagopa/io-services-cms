@@ -2,7 +2,6 @@
 import { Configuration, getConfiguration } from "@/config";
 import { SelfCareIdentity } from "@/generated/api/SelfCareIdentity";
 import { InstitutionResponse } from "@/generated/selfcare/InstitutionResponse";
-import { OnboardedProductResponse } from "@/generated/selfcare/OnboardedProductResponse";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import {
   ManagedInternalError,
@@ -299,10 +298,8 @@ const createSubscriptionManage = (
     ),
   );
 
-export const isAggregatorInstitutionForIO = (
-  onboardedProducts?: readonly OnboardedProductResponse[],
-) =>
-  onboardedProducts?.some(
+export const isAggregator = (institution: InstitutionResponse) =>
+  institution.onboarding?.some(
     (op) =>
       op.isAggregator &&
       op.productId === getConfiguration().BACK_OFFICE_ID &&
@@ -325,9 +322,7 @@ const toUser = ({
   institution: {
     fiscalCode: identityTokenPayload.organization.fiscal_code,
     id: identityTokenPayload.organization.id,
-    isAggregator:
-      getConfiguration().EA_ENABLED &&
-      isAggregatorInstitutionForIO(institution.onboarding),
+    isAggregator: isAggregator(institution),
     logo_url: institution.logo,
     name: identityTokenPayload.organization.name,
     role: identityTokenPayload.organization.roles[0]?.role,

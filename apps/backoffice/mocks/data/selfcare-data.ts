@@ -92,13 +92,6 @@ export const getMockInstitution = (institutionId?: string) => ({
     "SA",
   ]),
   logo: faker.image.url(),
-  onboarding: [
-    {
-      isAggregator: true,
-      productId: "prod-io",
-      status: "ACTIVE",
-    },
-  ],
   origin: "SELC",
   originId: faker.string
     .alphanumeric({ length: { max: 10, min: 5 } })
