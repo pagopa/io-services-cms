@@ -298,6 +298,14 @@ const createSubscriptionManage = (
     ),
   );
 
+export const isAggregator = (institution: InstitutionResponse) =>
+  institution.onboarding?.some(
+    (op) =>
+      op.isAggregator &&
+      op.productId === getConfiguration().BACK_OFFICE_ID &&
+      op.status === "ACTIVE",
+  ) ?? false;
+
 const toUser = ({
   apimUser,
   identityTokenPayload,
@@ -314,6 +322,7 @@ const toUser = ({
   institution: {
     fiscalCode: identityTokenPayload.organization.fiscal_code,
     id: identityTokenPayload.organization.id,
+    isAggregator: isAggregator(institution),
     logo_url: institution.logo,
     name: identityTokenPayload.organization.name,
     role: identityTokenPayload.organization.roles[0]?.role,
