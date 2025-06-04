@@ -6,14 +6,13 @@ import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../../../config";
 import { InstitutionResponse } from "../../../../../generated/selfcare/InstitutionResponse";
 import { IdentityTokenPayload } from "../../types";
-import { authorize, isAggregatorInstitutionForIO } from "../auth";
+import { authorize } from "../auth";
 
 vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
     GROUP_AUTHZ_ENABLED: "true",
-    NEXT_PUBLIC_EA_ENABLED: "true",
   };
 });
 
@@ -89,6 +88,7 @@ const getExpectedUser = (
   apimUser: typeof aValidApimUser,
   manageSubscription: typeof aValidSubscription,
   institution: InstitutionResponse,
+  isAggregator = false,
 ) => ({
   id: jwtPayload.uid,
   name: `${jwtPayload.name} ${jwtPayload.family_name}`,
@@ -97,7 +97,7 @@ const getExpectedUser = (
     id: jwtPayload.organization.id,
     name: jwtPayload.organization.name,
     fiscalCode: jwtPayload.organization.fiscal_code,
-    isAggregator: isAggregatorInstitutionForIO(institution.onboarding),
+    isAggregator,
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo,
   },
