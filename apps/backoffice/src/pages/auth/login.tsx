@@ -39,18 +39,18 @@ export default function Login() {
     manageMixpanelLogin();
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
-      callbackUrl: "/",
       identity_token,
-      //redirect: false
+      redirect: false,
     });
   };
 
   useEffect(() => {
     if (session && router.isReady) {
-      // redirect to the return url or home page
-      // router.push((router.query.returnUrl as string) || "/");
-
-      router.push("/");
+      if (session.user?.institution.isAggregator) {
+        router.push("/aggregated-institutions");
+      } else {
+        router.push("/");
+      }
     } else {
       handleIdentity();
     }
