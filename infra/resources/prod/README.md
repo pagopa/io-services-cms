@@ -25,6 +25,7 @@
 | <a name="module_eventhub"></a> [eventhub](#module\_eventhub) | ../_modules/eventhub | n/a |
 | <a name="module_function_app"></a> [function\_app](#module\_function\_app) | ../_modules/function_app | n/a |
 | <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault) | ../_modules/key_vault | n/a |
+| <a name="module_monitor"></a> [monitor](#module\_monitor) | ../_modules/monitor | n/a |
 
 ## Resources
 

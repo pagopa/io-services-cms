@@ -43,6 +43,7 @@ No requirements.
 | <a name="input_app_be_snet_cidr"></a> [app\_be\_snet\_cidr](#input\_app\_be\_snet\_cidr) | CMS Subnet CIDR | `string` | n/a | yes |
 | <a name="input_domain"></a> [domain](#input\_domain) | Domain name of the application | `string` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
+| <a name="input_error_action_group_id"></a> [error\_action\_group\_id](#input\_error\_action\_group\_id) | Id of the action group to use for error notifications | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region | `string` | n/a | yes |
 | <a name="input_peps_snet_id"></a> [peps\_snet\_id](#input\_peps\_snet\_id) | Id of the subnet which holds private endpoints | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"io"` | no |

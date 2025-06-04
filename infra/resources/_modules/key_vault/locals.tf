@@ -21,6 +21,8 @@ locals {
       activations_event_hub_connection_string          = "ACTIVATIONS-EVENT-HUB-CONNECTION-STRING"
       eh_sc_connectionstring                           = "EH-SC-CONNECTIONSTRING"
       pdv_tokenizer_api_key                            = "PDV-TOKENIZER-API-KEY"
+      slack_svc_monitor_webhook_url                    = "slack-svc-monitor-webhook-url"
+      opsgenie_svc_api_key                             = "opsgenie-svc-api-key"
     }
   }
 }

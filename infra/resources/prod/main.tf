@@ -1,5 +1,33 @@
-data "azurerm_resource_group" "rg" {
-  name = "${local.project}-${local.application_basename}-rg-01"
+
+module "key_vault" {
+  source              = "../_modules/key_vault"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location_short      = local.location_short
+  domain              = local.domain
+  location            = local.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  tags = local.tags
+}
+
+module "monitor" {
+  source              = "../_modules/monitor"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location_short      = local.location_short
+  domain              = local.domain
+  location            = local.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  key_vault = {
+    id = module.key_vault.key_vault_id
+    secrets_name = {
+      slack_svc_monitor_webhook_url = module.key_vault.secrets_name.slack_svc_monitor_webhook_url
+      opsgenie_svc_api_key          = module.key_vault.secrets_name.opsgenie_svc_api_key
+    }
+  }
+
+  tags = local.tags
 }
 
 module "ai_search" {
@@ -18,17 +46,7 @@ module "ai_search" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
-  tags = local.tags
-}
-
-module "key_vault" {
-  source              = "../_modules/key_vault"
-  prefix              = local.prefix
-  env_short           = local.env_short
-  location_short      = local.location_short
-  domain              = local.domain
-  location            = local.location
-  resource_group_name = data.azurerm_resource_group.rg.name
+  error_action_group_id = module.monitor.error_action_group_id
 
   tags = local.tags
 }
@@ -55,6 +73,8 @@ module "function_app" {
     institution_index_name = module.ai_search.search_service_index_aliases.organizations
     services_index_name    = module.ai_search.search_service_index_aliases.services
   }
+
+  error_action_group_id = module.monitor.error_action_group_id
 
   tags = local.tags
 }
@@ -97,6 +117,7 @@ module "cms_function_app" {
   eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
+  error_action_group_id = module.monitor.error_action_group_id
 
   tags = local.tags
 }
@@ -147,6 +168,8 @@ module "eventhub" {
 
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.evt-rg.name
+
+  error_action_group_id = module.monitor.error_action_group_id
 
   tags = local.tags
 }
