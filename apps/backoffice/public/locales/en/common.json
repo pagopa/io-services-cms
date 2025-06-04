@@ -319,6 +319,10 @@
     "operator": "Operator"
   },
   "routes": {
+    "aggregated-institutions": {
+      "title": "Your institutions",
+      "description": "View and manage institutions for the App IO product. To operate on one of these, click on the related table row context menu."
+    },
     "overview": {
       "title": "Overview",
       "description": "Monitor all your activities from here.",
