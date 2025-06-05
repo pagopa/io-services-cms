@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - 4718ca50: Added "isAggregator" handling in BackOffice User Session
-- d8bb5e23: Added new aggregated-institutions initial routing path for users that are delegated for aggregator institution
+- d8bb5e23: Added new delegated-institutions initial routing path for users that are delegated for aggregator institution
 
 ## 1.25.15
 
