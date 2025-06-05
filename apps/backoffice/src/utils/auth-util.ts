@@ -30,10 +30,15 @@ export const hasRequiredAuthorizations = (
     requiredAuthorizations.requiredRole,
   );
 
-/** Check to enable ApiKey Groups features only for test Institution */
+/** Check to enable ApiKey Groups features */
 export const hasApiKeyGroupsFeatures =
   (groupApiKeyEnabled: boolean) => (_session: Session | null) =>
     groupApiKeyEnabled;
+
+/** Check to enable Aggregator Institution features */
+export const hasAggregatorFeatures =
+  (eaEnabled: boolean) => (session: Session | null) =>
+    eaEnabled && session?.user?.institution.isAggregator;
 
 /** Check if user is in one or more Selfcare Group  */
 export const isAtLeastInOneGroup = (session: Session | null) =>
