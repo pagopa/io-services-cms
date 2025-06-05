@@ -1,6 +1,6 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { PageHeader } from "@/components/headers";
 import { AppLayout, PageLayout } from "@/layouts";
+import { authOptions } from "@/lib/auth/auth-options";
 import { Typography } from "@mui/material";
 import { Session, getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
