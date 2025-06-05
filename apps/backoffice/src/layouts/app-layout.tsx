@@ -4,6 +4,7 @@ import { Sidenav, SidenavItem } from "@/components/sidenav";
 import { getConfiguration } from "@/config";
 import styles from "@/styles/app-layout.module.css";
 import { SelfcareRoles } from "@/types/auth";
+import { hasAggregatorFeatures } from "@/utils/auth-util";
 import {
   Category,
   Dns,
@@ -38,7 +39,7 @@ export const AppLayout = ({
     }`;
 
   const getAggregatedInstitutionsSidenavItem = (): SidenavItem[] => {
-    if (session?.user?.institution.isAggregator) {
+    if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
       return [
         {
           href: "/delegated-institutions",

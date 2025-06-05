@@ -1,5 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { hasAggregatorFeatures } from "@/utils/auth-util";
 import { trackLoginEvent } from "@/utils/mix-panel";
 import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
@@ -46,7 +47,7 @@ export default function Login() {
 
   useEffect(() => {
     if (session && router.isReady) {
-      if (session.user?.institution.isAggregator) {
+      if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
         router.push("/delegated-institutions");
       } else {
         router.push("/");
