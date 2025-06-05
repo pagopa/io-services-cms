@@ -1,6 +1,26 @@
 {
-  "backoffice.backoffice": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
-  "cms_function_app.cms_fn": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a",
-  "eventhub.eventhub": "ec7e3d9527cdeb8f9a575b487f7c907825efc04b3bb107933d5a46acf37e70bd",
-  "function_app.app_be_fn": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a"
+  "backoffice.backoffice": {
+    "hash": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
+    "version": "0.1.10",
+    "name": "azure_app_service",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/0.1.10"
+  },
+  "cms_function_app.cms_fn": {
+    "hash": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a",
+    "version": "0.3.1",
+    "name": "azure_function_app",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/0.3.1"
+  },
+  "eventhub.eventhub": {
+    "hash": "ec7e3d9527cdeb8f9a575b487f7c907825efc04b3bb107933d5a46acf37e70bd",
+    "version": "0.0.11",
+    "name": "azure_event_hub",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-event-hub/azurerm/0.0.11"
+  },
+  "function_app.app_be_fn": {
+    "hash": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a",
+    "version": "0.3.1",
+    "name": "azure_function_app",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/0.3.1"
+  }
 }
