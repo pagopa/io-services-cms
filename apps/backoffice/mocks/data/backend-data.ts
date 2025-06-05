@@ -390,6 +390,36 @@ export const getMockBulkPatchService = () => ({
   ],
 });
 
+const getMockDelegatedInstitutions = () => ({
+  id: faker.string.uuid(),
+  name: faker.company.name(),
+});
+
+export const getMockDelegatedInstitutionPagination = (
+  limit?: number,
+  offset?: number,
+) => {
+  const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
+  const purifiedOffset =
+    (offset && offset > 0 && offset < 99) ??
+    faker.number.int({ max: 99, min: 0 });
+
+  const total = [
+    ...Array.from(
+      Array(faker.number.int({ max: MAX_ARRAY_LENGTH, min: 1 })).keys(),
+    ),
+  ];
+
+  return {
+    pagination: {
+      count: total.length,
+      limit: purifiedLimit,
+      offset: purifiedOffset,
+    },
+    value: total.map((_) => getMockDelegatedInstitutions()),
+  };
+};
+
 // **********************************************************************
 // Services import into SelfCare
 // **********************************************************************

@@ -15,6 +15,7 @@ import {
   aMockServiceTopics,
   anInfoVersion,
   getMockBulkPatchService,
+  getMockDelegatedInstitutionPagination,
   getMockGroupUnboundedServices,
   getMockManageSubscription,
   getMockManageSubscriptions,
@@ -788,6 +789,30 @@ export const buildHandlers = () => {
           status: 500,
         }),
       ];
+      return resultArray[0];
+    }),
+    http.get(`${baseURL}/institutions/:institutionId/delegations`, () => {
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify(getMockDelegatedInstitutionPagination()),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 429,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
+
       return resultArray[0];
     }),
     http.get(`${baseURL}/keys/manage`, () => {
