@@ -7,6 +7,7 @@ const nextConfig = {
   i18n,
   output: "standalone",
   experimental: {
+    clientRouterFilter: false, // fix full reload for pages that contains "-"
     instrumentationHook: true,
   },
   // https://github.com/mswjs/msw/issues/1801

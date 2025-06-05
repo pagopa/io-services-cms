@@ -1,20 +1,35 @@
 import { getConfiguration } from "@/config";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
-  Box,
   Button,
   Card,
   CardContent,
+  FormControl,
   Grid,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
   Typography,
 } from "@mui/material";
 import NextLink from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useState } from "react";
 
-import { aMockedIdentiyToken } from "../../../mocks/data/selfcare-data";
+import {
+  aMockedAggregatorInstitutionIdentiyToken,
+  aMockedChangeInstitutionIdentiyToken,
+  aMockedIdentiyToken,
+} from "../../../mocks/data/selfcare-data";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
+  const [currentMockIdentityToken, setCurrentMockIdentityToken] =
+    useState<string>(aMockedIdentiyToken);
+
+  const handleChange = (event: SelectChangeEvent<any>) =>
+    setCurrentMockIdentityToken(event.target.value);
+
   return (
     <Grid
       alignItems="center"
@@ -39,18 +54,36 @@ export default function Selfcare() {
             <Typography variant="body2">
               Gestisci il prodotto per questo ente.
             </Typography>
-            <Box marginTop={3}>
+            <Stack marginTop={3} spacing={2}>
+              <FormControl sx={{ paddingX: 1.25 }}>
+                <Select
+                  defaultValue={aMockedIdentiyToken}
+                  onChange={handleChange}
+                  size="small"
+                  value={currentMockIdentityToken}
+                >
+                  <MenuItem value={aMockedIdentiyToken}>
+                    Amministratore
+                  </MenuItem>
+                  <MenuItem value={aMockedChangeInstitutionIdentiyToken}>
+                    Operatore
+                  </MenuItem>
+                  <MenuItem value={aMockedAggregatorInstitutionIdentiyToken}>
+                    Amministratore EA
+                  </MenuItem>
+                </Select>
+              </FormControl>
               <NextLink
                 href={`${
                   getConfiguration().BACK_OFFICE_LOGIN_PATH
-                }#token=${aMockedIdentiyToken}`}
+                }#token=${currentMockIdentityToken}`}
                 passHref
               >
                 <Button endIcon={<ArrowForward />} variant="outlined">
                   Accedi al BackOffice IO
                 </Button>
               </NextLink>
-            </Box>
+            </Stack>
           </CardContent>
         </Card>
       </Grid>

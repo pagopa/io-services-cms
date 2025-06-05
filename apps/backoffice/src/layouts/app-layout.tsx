@@ -4,8 +4,10 @@ import { Sidenav, SidenavItem } from "@/components/sidenav";
 import { getConfiguration } from "@/config";
 import styles from "@/styles/app-layout.module.css";
 import { SelfcareRoles } from "@/types/auth";
+import { hasAggregatorFeatures } from "@/utils/auth-util";
 import {
   Category,
+  Dns,
   People,
   SupervisedUserCircle,
   ViewSidebar,
@@ -36,8 +38,23 @@ export const AppLayout = ({
       session?.user?.institution.id
     }`;
 
+  const getAggregatedInstitutionsSidenavItem = (): SidenavItem[] => {
+    if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
+      return [
+        {
+          href: "/delegated-institutions",
+          icon: <Dns fontSize="inherit" />,
+          linkType: "internal",
+          text: "routes.delegated-institutions.title",
+        },
+      ];
+    }
+    return [];
+  };
+
   /** List of sidenav menu items _(displayed on left side column)_ */
   const menu: SidenavItem[] = [
+    ...getAggregatedInstitutionsSidenavItem(),
     {
       href: "/",
       icon: <ViewSidebar fontSize="inherit" />,

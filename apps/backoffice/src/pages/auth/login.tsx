@@ -1,5 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { hasAggregatorFeatures } from "@/utils/auth-util";
 import { trackLoginEvent } from "@/utils/mix-panel";
 import mixpanel from "mixpanel-browser";
 import { useRouter } from "next/router";
@@ -39,18 +40,18 @@ export default function Login() {
     manageMixpanelLogin();
     // next-auth signIn to specified CredentialsProvider id (defined in [...nextauth]/route.ts)
     await signIn("access-control", {
-      callbackUrl: "/",
       identity_token,
-      //redirect: false
+      redirect: false,
     });
   };
 
   useEffect(() => {
     if (session && router.isReady) {
-      // redirect to the return url or home page
-      // router.push((router.query.returnUrl as string) || "/");
-
-      router.push("/");
+      if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
+        router.push("/delegated-institutions");
+      } else {
+        router.push("/");
+      }
     } else {
       handleIdentity();
     }

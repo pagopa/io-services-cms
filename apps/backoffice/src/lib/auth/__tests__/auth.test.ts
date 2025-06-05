@@ -2,10 +2,10 @@ import { faker } from "@faker-js/faker/locale/it";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getMockInstitution } from "../../../../../../mocks/data/selfcare-data";
-import { Configuration } from "../../../../../config";
-import { InstitutionResponse } from "../../../../../generated/selfcare/InstitutionResponse";
-import { IdentityTokenPayload } from "../../types";
+import { getMockInstitution } from "../../../../mocks/data/selfcare-data";
+import { Configuration } from "../../../config";
+import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
+import { IdentityTokenPayload } from "../types";
 import { authorize } from "../auth";
 
 vi.hoisted(() => {

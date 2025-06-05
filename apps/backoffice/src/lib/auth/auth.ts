@@ -22,14 +22,14 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import { User } from "next-auth";
 import { CredentialsConfig } from "next-auth/providers/credentials";
 
-import { ApimUser, IdentityTokenPayload, Subscription } from "../types";
+import { ApimUser, IdentityTokenPayload, Subscription } from "./types";
 
 if (
   getConfiguration().SELFCARE_API_MOCKING ||
   getConfiguration().API_APIM_MOCKING
 ) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { setupMocks } = require("../../../../../mocks");
+  const { setupMocks } = require("../../../mocks");
   setupMocks();
 }
 
