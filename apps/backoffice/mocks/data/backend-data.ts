@@ -398,21 +398,19 @@ const getMockDelegatedInstitution = () => ({
 export const getMockDelegatedInstitutionPagination = (
   limit?: number,
   offset?: number,
+  search?: string,
 ) => {
   const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
   const purifiedOffset =
-    (offset && offset > 0 && offset < 99) ??
-    faker.number.int({ max: 99, min: 0 });
+    offset !== undefined && offset >= 0 && offset < 99
+      ? offset
+      : faker.number.int({ max: 99, min: 0 });
 
-  const total = [
-    ...Array.from(
-      Array(faker.number.int({ max: MAX_ARRAY_LENGTH, min: 1 })).keys(),
-    ),
-  ];
+  const total = search ? [1] : [...Array.from(Array(purifiedLimit).keys())];
 
   return {
     pagination: {
-      count: total.length,
+      count: search ? 1 : 100,
       limit: purifiedLimit,
       offset: purifiedOffset,
     },

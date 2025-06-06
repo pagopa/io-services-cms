@@ -321,7 +321,13 @@
   "routes": {
     "delegated-institutions": {
       "title": "Your institutions",
-      "description": "View and manage institutions for the App IO product. To operate on one of these, click on the related table row context menu."
+      "description": "View and manage institutions for the App IO product. To operate on one of these, click on the related table row context menu.",
+      "empty": "There are no delegated institutions.",
+      "tableHeader": {
+        "name": "Institution name",
+        "primaryKey": "Primary manage Api Key",
+        "secondaryKey": "Secondary manage Api Key"
+      }
     },
     "overview": {
       "title": "Overview",
