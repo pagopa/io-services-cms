@@ -390,7 +390,7 @@ export const getMockBulkPatchService = () => ({
   ],
 });
 
-const getMockDelegatedInstitutions = () => ({
+const getMockDelegatedInstitution = () => ({
   id: faker.string.uuid(),
   name: faker.company.name(),
 });
@@ -416,7 +416,7 @@ export const getMockDelegatedInstitutionPagination = (
       limit: purifiedLimit,
       offset: purifiedOffset,
     },
-    value: total.map((_) => getMockDelegatedInstitutions()),
+    value: total.map((_) => getMockDelegatedInstitution()),
   };
 };
 
