@@ -791,30 +791,44 @@ export const buildHandlers = () => {
       ];
       return resultArray[0];
     }),
-    http.get(`${baseURL}/institutions/:institutionId/delegations`, () => {
-      const resultArray = [
-        new HttpResponse(
-          JSON.stringify(getMockDelegatedInstitutionPagination()),
-          {
-            status: 200,
-          },
-        ),
-        new HttpResponse(null, {
-          status: 401,
-        }),
-        new HttpResponse(null, {
-          status: 403,
-        }),
-        new HttpResponse(null, {
-          status: 429,
-        }),
-        new HttpResponse(null, {
-          status: 500,
-        }),
-      ];
+    http.get(
+      `${baseURL}/institutions/:institutionId/delegations`,
+      ({ request }) => {
+        const url = new URL(request.url);
+        const limit = url.searchParams.get("limit");
+        const offset = url.searchParams.get("offset");
+        const search = url.searchParams.get("search");
 
-      return resultArray[0];
-    }),
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(
+              getGetDelegatedInstitutionPagination200Response(
+                limit as string,
+                offset as string,
+                search as string,
+              ),
+            ),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(null, {
+            status: 401,
+          }),
+          new HttpResponse(null, {
+            status: 403,
+          }),
+          new HttpResponse(null, {
+            status: 429,
+          }),
+          new HttpResponse(null, {
+            status: 500,
+          }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
     http.get(`${baseURL}/keys/manage`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
@@ -1237,6 +1251,14 @@ export function getGetInstitution200Response() {
 
 export function getInstitutionGroups200Response(institutionId: string) {
   return getMockInstitutionGroups(institutionId);
+}
+
+export function getGetDelegatedInstitutionPagination200Response(
+  limit: string,
+  offset: string,
+  search: string,
+) {
+  return getMockDelegatedInstitutionPagination(+limit, +offset, search);
 }
 
 export function getGetManageSubscriptions200Response(

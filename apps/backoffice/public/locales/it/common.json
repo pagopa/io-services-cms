@@ -321,7 +321,13 @@
   "routes": {
     "delegated-institutions": {
       "title": "I tuoi enti",
-      "description": "Visualizza e gestisci gli enti per il prodotto App IO. Per operare su uno di questi clicca sul menu contestuale in tabella."
+      "description": "Visualizza e gestisci gli enti per il prodotto App IO. Per operare su uno di questi clicca sul menu contestuale in tabella.",
+      "empty": "Non sono presenti enti aggregati.",
+      "tableHeader": {
+        "name": "Nome dell'ente",
+        "primaryKey": "API Key manage primaria",
+        "secondaryKey": "API Key manage secondaria"
+      }
     },
     "overview": {
       "title": "Panoramica",
