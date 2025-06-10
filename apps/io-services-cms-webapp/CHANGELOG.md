@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.40.20
+
+### Patch Changes
+
+- caded53d: conversion activation's modifiedAt field into millis
+
 ## 1.40.19
 
 ### Patch Changes

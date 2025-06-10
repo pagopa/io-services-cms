@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.25.16
+
+### Patch Changes
+
+- 4718ca50: Added "isAggregator" handling in BackOffice User Session
+- d8bb5e23: Added new aggregated-institutions initial routing path for users that are delegated for aggregator institution
+- 118e3d52: Added delegated institutions basic table view
+
 ## 1.25.15
 
 ### Patch Changes
