@@ -49,9 +49,5 @@ resource "azurerm_monitor_metric_alert" "srch_throttled_queries" {
     action_group_id = var.error_action_group_id
   }
 
-  action {
-    action_group_id = data.azurerm_monitor_action_group.error_action_group_common.id
-  }
-
   tags = var.tags
 }

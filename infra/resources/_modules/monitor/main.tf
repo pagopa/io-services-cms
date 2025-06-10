@@ -6,9 +6,9 @@ resource "azurerm_monitor_action_group" "error_action_group" {
   name                = "${var.prefix}-${var.env_short}-${var.domain}-error-ag-01"
   short_name          = "${var.domain}-error-ag"
 
-  webhook_receiver {
-    name                    = "callslacksvcmonitor"
-    service_uri             = data.azurerm_key_vault_secret.slack_svc_monitor_webhook_url.value
+  email_receiver {
+    name                    = "sendtoslacksvcmonitor"
+    email_address           = data.azurerm_key_vault_secret.slack_svc_monitor_email.value
     use_common_alert_schema = true
   }
 
