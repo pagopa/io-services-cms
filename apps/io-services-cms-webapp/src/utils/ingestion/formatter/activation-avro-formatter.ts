@@ -14,7 +14,8 @@ export const buildAvroActivationObject = (
     activationCosmosRecord.serviceId,
     activationCosmosRecord._ts,
   ].join("-"),
-  modifiedAt: activationCosmosRecord._ts,
+  //converting cosmos _ts from seconds to millis
+  modifiedAt: activationCosmosRecord._ts * 1000,
   serviceId: activationCosmosRecord.serviceId,
   status: activationCosmosRecord.status,
   userPDVId: activationCosmosRecord.userPDVId,
