@@ -14,6 +14,8 @@ import { ReactNode, useState } from "react";
 export interface TableRowMenuAction {
   /** if true, shows menu as danger one _(red text)_ */
   danger?: boolean;
+  /** if true, shows a bottom divider line */
+  hasBottomDivider?: boolean;
   /** menu icon */
   icon: ReactNode;
   /** menu label */
@@ -68,6 +70,7 @@ export const TableRowMenu = ({ actions }: TableRowMenuProps) => {
       >
         {actions.map((action, index) => (
           <MenuItem
+            divider={action.hasBottomDivider}
             key={`row-action-${index}`}
             onClick={() => handleActionClick(action)}
           >
