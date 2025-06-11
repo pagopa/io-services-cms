@@ -19,7 +19,8 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
+| [azurerm_monitor_action_group.offcall_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
+| [azurerm_monitor_action_group.oncall_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
 | [azurerm_key_vault_secret.opsgenie_svc_api_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.slack_svc_monitor_email](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 
@@ -40,5 +41,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_error_action_group_id"></a> [error\_action\_group\_id](#output\_error\_action\_group\_id) | n/a |
+| <a name="output_action_group_ids"></a> [action\_group\_ids](#output\_action\_group\_ids) | Ids of the action groups for monitoring |
 <!-- END_TF_DOCS -->
