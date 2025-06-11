@@ -35,6 +35,28 @@
     "view": "Visualizza"
   },
   "copied": "Copiato",
+  "delegated-institution": {
+    "actions": {
+      "hide": "Nascondi API Key",
+      "show": "Mostra API Key",
+      "regeneratePk": "Rigenera API Key primaria",
+      "regenerateSk": "Rigenera API Key secondaria"
+    },
+    "regeneratePk": {
+      "modal": {
+        "title": "Rigenera API Key primaria",
+        "description": "Rigenerando questa API Key, disattivi quella esistente e ne generi una nuova, con gli stessi attributi.",
+        "button": "Rigenera"
+      }
+    },
+    "regenerateSk": {
+      "modal": {
+        "title": "Rigenera API Key secondaria",
+        "description": "Rigenerando questa API Key, disattivi quella esistente e ne generi una nuova, con gli stessi attributi.",
+        "button": "Rigenera"
+      }
+    }
+  },
   "footer": {
     "legalInfo": "<strong>PagoPA S.p.A.</strong> - Società per azioni con socio unico - Capitale sociale di euro 1,000,000 interamente versato - Sede legale in Roma, Piazza Colonna 370, <br /> CAP 00187 - N. di iscrizione a Registro Imprese di Roma, CF e P.IVA 15376371009",
     "preLogin": {},
