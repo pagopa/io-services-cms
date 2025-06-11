@@ -17,15 +17,16 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
 
 import {
-  aMockedAggregatorInstitutionIdentiyToken,
-  aMockedChangeInstitutionIdentiyToken,
-  aMockedIdentiyToken,
+  aMockedAggregatorInstitutionIdentityToken,
+  aMockedAggregatorInstitutionOperatorIdentityToken,
+  aMockedChangeInstitutionIdentityToken,
+  aMockedIdentityToken,
 } from "../../../mocks/data/selfcare-data";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
   const [currentMockIdentityToken, setCurrentMockIdentityToken] =
-    useState<string>(aMockedIdentiyToken);
+    useState<string>(aMockedIdentityToken);
 
   const handleChange = (event: SelectChangeEvent<any>) =>
     setCurrentMockIdentityToken(event.target.value);
@@ -57,19 +58,24 @@ export default function Selfcare() {
             <Stack marginTop={3} spacing={2}>
               <FormControl sx={{ paddingX: 1.25 }}>
                 <Select
-                  defaultValue={aMockedIdentiyToken}
+                  defaultValue={aMockedIdentityToken}
                   onChange={handleChange}
                   size="small"
                   value={currentMockIdentityToken}
                 >
-                  <MenuItem value={aMockedIdentiyToken}>
+                  <MenuItem value={aMockedIdentityToken}>
                     Amministratore
                   </MenuItem>
-                  <MenuItem value={aMockedChangeInstitutionIdentiyToken}>
+                  <MenuItem value={aMockedChangeInstitutionIdentityToken}>
                     Operatore
                   </MenuItem>
-                  <MenuItem value={aMockedAggregatorInstitutionIdentiyToken}>
+                  <MenuItem value={aMockedAggregatorInstitutionIdentityToken}>
                     Amministratore EA
+                  </MenuItem>
+                  <MenuItem
+                    value={aMockedAggregatorInstitutionOperatorIdentityToken}
+                  >
+                    Operatore EA
                   </MenuItem>
                 </Select>
               </FormControl>
