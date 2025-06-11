@@ -19,9 +19,10 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [azurerm_monitor_action_group.error_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
+| [azurerm_monitor_action_group.offcall_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
+| [azurerm_monitor_action_group.oncall_action_group](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_action_group) | resource |
 | [azurerm_key_vault_secret.opsgenie_svc_api_key](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
-| [azurerm_key_vault_secret.slack_svc_monitor_webhook_url](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
+| [azurerm_key_vault_secret.slack_svc_monitor_email](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 
 ## Inputs
 
@@ -29,7 +30,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_domain"></a> [domain](#input\_domain) | Domain name of the application | `string` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
-| <a name="input_key_vault"></a> [key\_vault](#input\_key\_vault) | Azure KeyVault references | <pre>object({<br/>    id = string<br/>    secrets_name = object({<br/>      slack_svc_monitor_webhook_url = string<br/>      opsgenie_svc_api_key          = string<br/>    })<br/>  })</pre> | n/a | yes |
+| <a name="input_key_vault"></a> [key\_vault](#input\_key\_vault) | Azure KeyVault references | <pre>object({<br/>    id = string<br/>    secrets_name = object({<br/>      slack_svc_monitor_email = string<br/>      opsgenie_svc_api_key    = string<br/>    })<br/>  })</pre> | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Azure region | `string` | n/a | yes |
 | <a name="input_location_short"></a> [location\_short](#input\_location\_short) | Azure region | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | n/a | `string` | `"io"` | no |
@@ -40,5 +41,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_error_action_group_id"></a> [error\_action\_group\_id](#output\_error\_action\_group\_id) | n/a |
+| <a name="output_action_group_ids"></a> [action\_group\_ids](#output\_action\_group\_ids) | Ids of the action groups for monitoring |
 <!-- END_TF_DOCS -->

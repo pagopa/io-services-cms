@@ -2,8 +2,8 @@
 # KeyVault Secrets #
 ####################
 
-data "azurerm_key_vault_secret" "slack_svc_monitor_webhook_url" {
-  name         = var.key_vault.secrets_name.slack_svc_monitor_webhook_url
+data "azurerm_key_vault_secret" "slack_svc_monitor_email" {
+  name         = var.key_vault.secrets_name.slack_svc_monitor_email
   key_vault_id = var.key_vault.id
 }
 

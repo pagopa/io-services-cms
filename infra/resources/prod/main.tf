@@ -22,8 +22,8 @@ module "monitor" {
   key_vault = {
     id = module.key_vault.key_vault_id
     secrets_name = {
-      slack_svc_monitor_webhook_url = module.key_vault.secrets_name.slack_svc_monitor_webhook_url
-      opsgenie_svc_api_key          = module.key_vault.secrets_name.opsgenie_svc_api_key
+      slack_svc_monitor_email = module.key_vault.secrets_name.slack_svc_monitor_email
+      opsgenie_svc_api_key    = module.key_vault.secrets_name.opsgenie_svc_api_key
     }
   }
 
@@ -46,7 +46,7 @@ module "ai_search" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
-  error_action_group_id = module.monitor.error_action_group_id
+  error_action_group_id = module.monitor.action_group_ids.offcall
 
   tags = local.tags
 }
@@ -74,7 +74,7 @@ module "function_app" {
     services_index_name    = module.ai_search.search_service_index_aliases.services
   }
 
-  error_action_group_id = module.monitor.error_action_group_id
+  error_action_group_id = module.monitor.action_group_ids.oncall
 
   tags = local.tags
 }
@@ -117,7 +117,7 @@ module "cms_function_app" {
   eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
-  error_action_group_id = module.monitor.error_action_group_id
+  error_action_group_id = module.monitor.action_group_ids.oncall
 
   tags = local.tags
 }
@@ -169,7 +169,7 @@ module "eventhub" {
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.evt-rg.name
 
-  error_action_group_id = module.monitor.error_action_group_id
+  error_action_group_id = module.monitor.action_group_ids.offcall
 
   tags = local.tags
 }
