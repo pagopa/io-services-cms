@@ -1,3 +1,7 @@
+export const API_KEY_VALUE_PLACEHOLDER = "--------------------------------";
+export const INVALID_API_KEY_VALUE_PLACEHOLDER =
+  "-----INVALID_API_KEY_VALUE------";
+
 /** Utility to check if a string is null, undefined or empty */
 export const isNullUndefinedOrEmpty = (value: null | string | undefined) =>
   !value || value.trim().length === 0;

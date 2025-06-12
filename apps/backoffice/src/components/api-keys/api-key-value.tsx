@@ -1,4 +1,4 @@
-import { obscure } from "@/utils/string-util";
+import { API_KEY_VALUE_PLACEHOLDER, obscure } from "@/utils/string-util";
 import { Box, Stack, Typography } from "@mui/material";
 
 import { CopyToClipboard } from "../copy-to-clipboard";
@@ -31,7 +31,7 @@ export const ApiKeyValue = ({
     >
       <Stack alignItems={"center"} direction="row" spacing={0.5}>
         <LoaderSkeleton loading={keyValue === undefined}>
-          {renderKeyValue(keyValue ?? "--------------------------------")}
+          {renderKeyValue(keyValue ?? API_KEY_VALUE_PLACEHOLDER)}
           <CopyToClipboard
             onCopyClick={onCopyToClipboardClick}
             text={keyValue ?? ""}

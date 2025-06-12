@@ -35,6 +35,28 @@
     "view": "View"
   },
   "copied": "Copied",
+  "delegated-institution": {
+    "actions": {
+      "hide": "Hide API Key",
+      "show": "Show API Key",
+      "regeneratePk": "Regenerate primary API Key",
+      "regenerateSk": "Regenerate secondary API Key"
+    },
+    "regeneratePk": {
+      "modal": {
+        "title": "Regenerate primary API Key",
+        "description": "By regenerating this API Key, you deactivate the existing one and generate a new one, with the same attributes.",
+        "button": "Regenerate"
+      }
+    },
+    "regenerateSk": {
+      "modal": {
+        "title": "Regenerate secondary API Key",
+        "description": "By regenerating this API Key, you deactivate the existing one and generate a new one, with the same attributes.",
+        "button": "Regenerate"
+      }
+    }
+  },
   "footer": {
     "legalInfo": "<strong>PagoPA S.p.A.</strong> - Joint-stock company with sole shareholder - Share capital of 1,000,000 euros fully paid - Registered office in Rome, Piazza Colonna 370, <br /> CAP 00187 - Registration number in the Rome Company Register, Tax Code and VAT number 15376371009",
     "preLogin": {},
