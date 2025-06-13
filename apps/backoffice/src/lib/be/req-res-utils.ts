@@ -56,6 +56,29 @@ export const OFFSET_DEFAULT_DECODER = withDefault(
   String(OFFSET_DEFAULT_VALUE) as unknown as NonNegativeInteger,
 );
 
+/**
+ * Parses a query parameter from the request and decodes it using the provided decoder.
+ * @param request NextRequest to parse the query param from
+ * @param param The name of the query param to parse
+ * @param decoder Decoder to use for parsing the query param value
+ * @returns A Validation of the decoded value, or an error if the decoding fails
+ * @description This function retrieves the value of the specified query parameter from the request's URL search parameters,
+ * decodes it using the provided decoder, and returns a validation result.
+ * If the query parameter is not present or the decoding fails, it returns a validation error.
+ * If the query parameter is present and the decoding succeeds, it returns a validation success with the decoded value.
+ * If you want an optional query parameter, you can use `t.union([decoder, t.null])` as the decoder.
+ * Remember that query parameters are always strings, so the decoder should handle string inputs.
+ * @example
+ * // Example usage:
+ * const result = parseQueryParam(request, "page", PositiveIntegerFromString);
+ * if (result._tag === "Left") {
+ *   // Handle the error case
+ *   console.error("Invalid query parameter:", result.left);
+ * } else {
+ *   // Handle the success case
+ *   console.log("Parsed query parameter:", result.right);
+ * }
+ */
 export const parseQueryParam = <A>(
   request: NextRequest,
   param: string,
@@ -63,21 +86,8 @@ export const parseQueryParam = <A>(
     ReturnType<(typeof request)["nextUrl"]["searchParams"]["get"]>,
     A
   >,
-): t.Validation<A> => {
-  if (request.url === "http://localhost/?foo=bar") {
-    console.log("decoder.name", decoder.name);
-  }
-  return pipe(
-    request.nextUrl.searchParams.get(param),
-    (Z) => {
-      if (request.url === "http://localhost/?foo=bar") {
-        console.log("limit value", Z);
-      }
-      return Z;
-    },
-    decoder.decode,
-  );
-};
+): t.Validation<A> =>
+  pipe(request.nextUrl.searchParams.get(param), decoder.decode);
 
 export const parseBody = async <T>(
   request: NextRequest,
