@@ -1,6 +1,4 @@
-import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
 import {
-  InstitutionNotFoundError,
   handleBadRequestErrorResponse,
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
@@ -15,10 +13,13 @@ import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+
+const DEFAULT_SEARCH_DECODER = t.union([NonEmptyString, t.null]);
 
 /**
  * @description Retrieve all active delegated institutions
+ * @operationId getDelegatedInstitutions
  */
 export const GET = withJWTAuthHandler(
   async (
@@ -43,7 +44,7 @@ export const GET = withJWTAuthHandler(
     const maybeSearch = parseQueryParam(
       request,
       "search",
-      t.union([NonEmptyString, t.null]),
+      DEFAULT_SEARCH_DECODER,
     );
     if (E.isLeft(maybeSearch)) {
       return handleBadRequestErrorResponse(
@@ -56,27 +57,19 @@ export const GET = withJWTAuthHandler(
         params.institutionId,
         maybeLimit.right,
         maybeOffset.right,
+        maybeSearch.right ?? undefined,
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
       console.error(
-        `An Error has occurred while searching institutionId: ${params.institutionId}, caused by: `,
+        `An Error has occurred while retrieving delegations for institutionId: ${params.institutionId}, caused by: `,
         error,
       );
 
-      if (error instanceof InstitutionNotFoundError) {
-        return NextResponse.json(
-          {
-            detail: error.message,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: HTTP_STATUS_NOT_FOUND as any,
-            title: "InstitutionNotFoundError",
-          },
-          { status: HTTP_STATUS_NOT_FOUND },
-        );
-      }
-
-      return handleInternalErrorResponse("InstitutionRetrieveError", error);
+      return handleInternalErrorResponse(
+        "InstitutionDelegationsRetrieveError",
+        error,
+      );
     }
   },
 );

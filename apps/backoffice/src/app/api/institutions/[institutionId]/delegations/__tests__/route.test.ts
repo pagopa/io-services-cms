@@ -1,9 +1,10 @@
 import { faker } from "@faker-js/faker/locale/it";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
+import * as t from "io-ts";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
-import { SubscriptionType } from "../../../../../../generated/api/SubscriptionType";
 import { ManagedInternalError } from "../../../../../../lib/be/errors";
 import { SelfcareRoles } from "../../../../../../types/auth";
 import { GET } from "../route";
@@ -38,19 +39,15 @@ const userMock = {
   },
 } as BackOfficeUser;
 
-const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
-
 const mocks = vi.hoisted(() => {
   const getUser = vi.fn(() => userMock);
   return {
     getUser,
-    upsertManageSubscription: vi.fn(),
-    getManageSubscriptions: vi.fn(),
+    getDelegatedInstitutions: vi.fn(),
     parseBody: vi.fn(),
     parseQueryParam: vi.fn(),
     parseLimitQueryParam: vi.fn(),
     parseOffsetQueryParam: vi.fn(),
-    getGroup: vi.fn(),
     withJWTAuthHandler: vi.fn(
       (
         handler: (
@@ -78,15 +75,11 @@ vi.mock("@/lib/be/req-res-utils", async () => {
   };
 });
 
-vi.mock("@/lib/be/subscriptions/business", () => ({
-  upsertManageSubscription: mocks.upsertManageSubscription,
-  getManageSubscriptions: mocks.getManageSubscriptions,
+vi.mock("@/lib/be/institutions/business", () => ({
+  getDelegatedInstitutions: mocks.getDelegatedInstitutions,
 }));
 vi.mock("@/lib/be/wrappers", () => ({
   withJWTAuthHandler: mocks.withJWTAuthHandler,
-}));
-vi.mock("@/lib/be/institutions/business", () => ({
-  getGroup: mocks.getGroup,
 }));
 
 afterEach(() => {
@@ -95,32 +88,6 @@ afterEach(() => {
 
 describe("Institution's Delegations API", () => {
   describe("Retrieve instutution's delegations API", () => {
-    // it("should return an error response when kind query param is not valid", async () => {
-    //   // given
-    //   mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
-    //   const request = new NextRequest("http://localhost?limit=0");
-
-    //   // when
-    //   const result = await GET(request, {});
-
-    //   // then
-    //   expect(result.status).toBe(400);
-    //   const responseBody = await result.json();
-    //   expect(responseBody.title).toEqual("Bad Request");
-    //   expect(responseBody.detail).toEqual(
-    //     `'kind' query param is not a valid ${SubscriptionType.name}`,
-    //   );
-    //   expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
-    //   expect(mocks.parseQueryParam).toHaveBeenCalledWith(
-    //     request,
-    //     "kind",
-    //     SubscriptionType,
-    //   );
-    //   expect(mocks.parseLimitQueryParam).not.toHaveBeenCalled();
-    //   expect(mocks.parseOffsetQueryParam).not.toHaveBeenCalled();
-    //   expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
-    // });
-
     it("should return an error response when limit query param is not valid", async () => {
       // given
       const errorResponse = "errorResponse";
@@ -132,99 +99,95 @@ describe("Institution's Delegations API", () => {
 
       // then
       expect(result).toBe(errorResponse);
-      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledWith(request);
       expect(mocks.parseOffsetQueryParam).not.toHaveBeenCalled();
-      expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
+      expect(mocks.parseQueryParam).not.toHaveBeenCalled();
+      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
     });
 
     it("should return an error response when offset query param is not valid", async () => {
       // given
-      const kind = "MANAGE_ROOT";
       const limit = 10;
-      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
       mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
       const errorResponse = "errorResponse";
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.left(errorResponse));
-      const request = new NextRequest("http://localhost?offset=-1");
+      const request = new NextRequest("http://localhost");
 
       // when
       const result = await GET(request, {});
 
       // then
       expect(result).toBe(errorResponse);
-      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledWith(request);
-      expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
+      expect(mocks.parseQueryParam).not.toHaveBeenCalled();
+      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
     });
 
-    it("should return forbidden response when kind query param is MANAGE_GROUP, user role is OPERATOR and user groups is empty", async () => {
+    it("should return an error response when search query param is not valid", async () => {
       // given
-      const kind = "MANAGE_GROUP";
       const limit = 10;
       const offset = 5;
-      const request = new NextRequest(
-        `http://localhost?limit=${limit}&offset=${offset}`,
-      );
-      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
       mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
-      mocks.getUser.mockImplementationOnce(() => ({
-        ...userMock,
-        institution: {
-          ...userMock.institution,
-          role: SelfcareRoles.operator,
-        },
-        permissions: {
-          ...userMock.permissions,
-          selcGroups: [],
-        },
-      }));
+      mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
+      const request = new NextRequest("http://localhost");
 
       // when
       const result = await GET(request, {});
 
       // then
-      expect(result.status).toBe(403);
-      const jsonBody = await result.json();
-      expect(jsonBody.detail).toEqual("Role not authorized");
-      expect(mocks.getManageSubscriptions).not.toHaveBeenCalledOnce();
+      expect(result.status).toBe(400);
+      const responseBody = await result.json();
+      expect(responseBody.title).toEqual("Bad Request");
+      expect(responseBody.detail).toEqual(
+        `'search' query param is not a valid ${NonEmptyString.name}`,
+      );
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledWith(
+        request,
+        "search",
+        expect.objectContaining({
+          name: t.union([NonEmptyString, t.null]).name,
+        }),
+      );
+      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
     });
 
-    it("should return an error response when getManageSubscriptions fails", async () => {
+    it("should return an error response when getDelegatedInstitutions fails", async () => {
       // given
-      const kind = "MANAGE_ROOT";
       const limit = 10;
       const offset = 5;
+      const institutionId = "institutionId";
       const request = new NextRequest(
         `http://localhost?limit=${limit}&offset=${offset}`,
       );
-      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
       mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(null));
       const errorMessage = "error message";
-      mocks.getManageSubscriptions.mockRejectedValueOnce(
+      mocks.getDelegatedInstitutions.mockRejectedValueOnce(
         new ManagedInternalError(errorMessage),
       );
 
       // when
-      const result = await GET(request, {});
+      const result = await GET(request, { params: { institutionId } });
 
       // then
       expect(result.status).toBe(500);
       const responseBody = await result.json();
-      expect(responseBody.title).toEqual("SubscriptionsRetrieveError");
+      expect(responseBody.title).toEqual("InstitutionDelegationsRetrieveError");
       expect(responseBody.detail).toEqual(errorMessage);
-      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-        kind,
-        userMock.parameters.userId,
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.getDelegatedInstitutions).toHaveBeenCalledOnce();
+      expect(mocks.getDelegatedInstitutions).toHaveBeenCalledWith(
+        institutionId,
         limit,
         offset,
         undefined,
@@ -232,61 +195,48 @@ describe("Institution's Delegations API", () => {
     });
 
     it.each`
-      scenario                                 | userRole                  | selcGroups
-      ${"user is admin"}                       | ${SelfcareRoles.admin}    | ${undefined}
-      ${"user is not admin and has no groups"} | ${SelfcareRoles.operator} | ${undefined}
-      ${"user is not admin and has groups"}    | ${SelfcareRoles.operator} | ${["g1"]}
+      scenario                     | actualSearch | expectedSearch
+      ${"search param is not set"} | ${null}      | ${undefined}
+      ${"search param is set"}     | ${"foo"}     | ${"foo"}
     `(
-      "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
-      async ({ userRole, selcGroups }) => {
+      "should return the delecations when getDelegatedInstitutions do not fails and $scenario",
+      async ({ actualSearch, expectedSearch }) => {
         // given
-        const kind = "MANAGE_ROOT";
         const limit = 10;
         const offset = 5;
+        const institutionId = "institutionId";
         const request = new NextRequest("http://localhost");
-        mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
         mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
         mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
-        const expectedSubscriptions = [{ id: "id", name: "name" }];
-        mocks.getManageSubscriptions.mockResolvedValueOnce(
-          expectedSubscriptions,
+        mocks.parseQueryParam.mockReturnValueOnce(E.right(actualSearch));
+        const expectedDelegations = {
+          value: [{ id: "id", name: "name" }],
+          pagination: {
+            count: 1,
+            limit,
+            offset,
+          },
+        };
+        mocks.getDelegatedInstitutions.mockResolvedValueOnce(
+          expectedDelegations,
         );
-        mocks.getUser.mockImplementationOnce(() => ({
-          ...userMock,
-          institution: {
-            ...userMock.institution,
-            role: userRole,
-          },
-          permissions: {
-            ...userMock.permissions,
-            selcGroups: selcGroups,
-          },
-        }));
 
         // when
-        const result = await GET(request, {});
+        const result = await GET(request, { params: { institutionId } });
 
         // then
         expect(result.status).toBe(200);
         const responseBody = await result.json();
-        expect(responseBody).toStrictEqual({
-          value: expectedSubscriptions,
-          pagination: {
-            count: expectedSubscriptions.length,
-            limit,
-            offset,
-          },
-        });
+        expect(responseBody).toStrictEqual(expectedDelegations);
         expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
-        expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-          kind,
-          userMock.parameters.userId,
+        expect(mocks.getDelegatedInstitutions).toHaveBeenCalledOnce();
+        expect(mocks.getDelegatedInstitutions).toHaveBeenCalledWith(
+          institutionId,
           limit,
           offset,
-          userRole === SelfcareRoles.admin ? undefined : selcGroups,
+          expectedSearch,
         );
       },
     );
