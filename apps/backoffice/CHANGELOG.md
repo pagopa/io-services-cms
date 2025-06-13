@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.26.0
+
+### Minor Changes
+
+- 332104d0: add getDelegatedInstitutions api handler
+
+### Patch Changes
+
+- 7423632a: Added show, hide, regenerate apikeys table actions on delegated institutions page
+- 9385b80c: Added search by institution name into delegated-institutions page
+- fc2447ae: Removed static banner refs on overview page
+
 ## 1.25.16
 
 ### Patch Changes
