@@ -1,13 +1,12 @@
+import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { institutionGroupBaseHandler } from "../institution-groups-util";
-
-import * as E from "fp-ts/lib/Either";
-import { BackOfficeUserEnriched } from "../../../../../../lib/be/wrappers";
 import {
   GroupFilterType,
   GroupFilterTypeEnum,
 } from "../../../../../../generated/api/GroupFilterType";
+import { BackOfficeUserEnriched } from "../../../../../../lib/be/wrappers";
+import { institutionGroupBaseHandler } from "../institution-groups-util";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
@@ -29,7 +28,7 @@ const mocks = vi.hoisted(() => {
       isAdmin,
       hasSelcGroups,
     })),
-    getQueryParam: vi.fn(),
+    parseQueryParam: vi.fn(),
     retrieveInstitutionGroups: vi.fn(),
     retrieveUnboundInstitutionGroups: vi.fn(),
   };
@@ -39,7 +38,7 @@ vi.mock("@/lib/be/authz", () => ({
   userAuthz: mocks.userAuthz,
 }));
 vi.mock("@/lib/be/req-res-utils", () => ({
-  getQueryParam: mocks.getQueryParam,
+  parseQueryParam: mocks.parseQueryParam,
 }));
 vi.mock("@/lib/be/institutions/business", () => ({
   retrieveUnboundInstitutionGroups: mocks.retrieveUnboundInstitutionGroups,
@@ -87,7 +86,7 @@ describe("institutionGroupsUtil", () => {
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
     mocks.isAdmin.mockReturnValueOnce(false);
-    mocks.getQueryParam.mockReturnValueOnce(
+    mocks.parseQueryParam.mockReturnValueOnce(
       E.right(GroupFilterTypeEnum.UNBOUND),
     );
 
@@ -114,7 +113,7 @@ describe("institutionGroupsUtil", () => {
     const url = new URL("http://localhost");
     const nextRequest = new NextRequest(url);
     const institutionId = "institutionId";
-    mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
+    mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
 
     // when
     const result = await institutionGroupBaseHandler(nextRequest, {
@@ -133,12 +132,11 @@ describe("institutionGroupsUtil", () => {
     expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
     expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
     expect(mocks.isAdmin).not.toHaveBeenCalledOnce();
-    expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-    expect(mocks.getQueryParam).toHaveBeenCalledWith(
+    expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+    expect(mocks.parseQueryParam).toHaveBeenCalledWith(
       nextRequest,
       "filter",
-      GroupFilterType,
-      GroupFilterTypeEnum.ALL,
+      expect.objectContaining({ name: GroupFilterType.name }),
     );
     expect(mocks.retrieveUnboundInstitutionGroups).not.toHaveBeenCalled();
   });
@@ -159,7 +157,7 @@ describe("institutionGroupsUtil", () => {
       const nextRequest = new NextRequest(url);
       const institutionId = "institutionId";
       const error = new Error("error from retrieve");
-      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(filterType));
       institutionGroupsMock.mockRejectedValueOnce(error);
       mocks.isAdmin.mockReturnValueOnce(true);
 
@@ -181,12 +179,11 @@ describe("institutionGroupsUtil", () => {
         expect(mocks.isAdmin).toHaveBeenCalledOnce();
         expect(mocks.isAdmin).toHaveBeenCalledWith();
       }
-      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledWith(
         nextRequest,
         "filter",
-        GroupFilterType,
-        GroupFilterTypeEnum.ALL,
+        expect.objectContaining({ name: GroupFilterType.name }),
       );
       expect(institutionGroupsMock).toHaveBeenCalledOnce();
       expect(institutionGroupsMock).toHaveBeenCalledWith(
@@ -222,7 +219,7 @@ describe("institutionGroupsUtil", () => {
         }
       }
       const groups = selcGroups;
-      mocks.getQueryParam.mockReturnValueOnce(E.right(filterType));
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(filterType));
       if (institutionGroupsMock) {
         institutionGroupsMock.mockResolvedValueOnce(groups);
       }
@@ -248,12 +245,11 @@ describe("institutionGroupsUtil", () => {
         expect(mocks.hasSelcGroups).toHaveBeenCalledOnce();
         expect(mocks.hasSelcGroups).toHaveBeenCalledWith();
       }
-      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledWith(
         nextRequest,
         "filter",
-        GroupFilterType,
-        GroupFilterTypeEnum.ALL,
+        expect.objectContaining({ name: GroupFilterType.name }),
       );
       if (institutionGroupsMock) {
         expect(institutionGroupsMock).toHaveBeenCalledOnce();
