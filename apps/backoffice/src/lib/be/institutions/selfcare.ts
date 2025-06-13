@@ -120,3 +120,32 @@ export const getGroup = async (
 
   return apiResult.right;
 };
+
+export const getInstitutionDelegations = async (
+  institutionId: string,
+  size?: number,
+  page?: number,
+  search?: string,
+): Promise<
+  RightType<
+    ReturnType<
+      ReturnType<typeof getSelfcareClient>["getInstitutionDelegations"]
+    >
+  >
+> => {
+  const apiResult = await getSelfcareClient().getInstitutionDelegations(
+    institutionId,
+    size,
+    page,
+    search,
+  )();
+
+  if (E.isLeft(apiResult)) {
+    throw new ManagedInternalError(
+      "Error calling selfcare getDelegatedInstitutions API",
+      apiResult.left,
+    );
+  }
+
+  return apiResult.right;
+};

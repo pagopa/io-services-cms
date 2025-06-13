@@ -1,5 +1,6 @@
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DelegationResponse } from "../../../generated/selfcare/DelegationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
@@ -14,6 +15,7 @@ const mocks: {
   userInstitutions: UserInstitutions;
   aSelfcareUserId: string;
   institutionGroups: PageOfUserGroupResource;
+  delegations: DelegationResponse[];
 } = {
   institution: { id: "institutionId" } as InstitutionResponse,
   userInstitutions: [
@@ -51,6 +53,16 @@ const mocks: {
     totalElements: 0,
     totalPages: 0,
   },
+  delegations: [
+    {
+      institutionId: "institutionGroupsInstID",
+      institutionName: "institutionGroupsName",
+    },
+    {
+      institutionId: "institutionGroupsInstID2",
+      institutionName: "institutionGroupsName2",
+    },
+  ],
 };
 
 const { create, isAxiosError, getMock } = vi.hoisted(() => {
@@ -302,6 +314,95 @@ describe("Selfcare Client", () => {
         params: {
           institutionId: mocks.institutionGroups.content[0].institutionId,
           status: "ACTIVE",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getDelegations", () => {
+    const institutionId = "instId";
+    const endpoint = `/institutions/${institutionId}/delegations`;
+
+    it("should return the delegated institutions for the given institution", async () => {
+      // given
+      const size = 5;
+      const page = 0;
+      const search = "search";
+
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: mocks.delegations,
+      });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionDelegations(
+        institutionId,
+        size,
+        page,
+        search,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          size,
+          page,
+          search,
+          sort: "ASC",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.delegations);
+      }
+      commonExpectation();
+    });
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          size: undefined,
+          page: undefined,
+          search: undefined,
+          sort: "ASC",
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          size: undefined,
+          page: undefined,
+          search: undefined,
+          sort: "ASC",
         },
       });
       expect(isAxiosError).not.toHaveBeenCalled();
