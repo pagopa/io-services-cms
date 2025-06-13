@@ -15,7 +15,6 @@ import {
 } from "@/lib/be/institutions/selfcare";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { a } from "vitest/dist/chunks/suite.d.FvehnV49.js";
 
 import { GroupNotFoundError } from "../errors";
 import { GroupFilter } from "../selfcare-client";
