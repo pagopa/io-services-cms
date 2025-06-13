@@ -199,7 +199,7 @@ describe("Institution's Delegations API", () => {
       ${"search param is not set"} | ${null}      | ${undefined}
       ${"search param is set"}     | ${"foo"}     | ${"foo"}
     `(
-      "should return the delecations when getDelegatedInstitutions do not fails and $scenario",
+      "should return the delegated institutions when getDelegatedInstitutions do not fails and $scenario",
       async ({ actualSearch, expectedSearch }) => {
         // given
         const limit = 10;
