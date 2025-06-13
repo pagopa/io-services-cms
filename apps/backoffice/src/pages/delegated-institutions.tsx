@@ -3,6 +3,7 @@ import { ApiKeyValueAsync } from "@/components/api-keys/api-key-value-async";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
+import { InstitutionSearchByName } from "@/components/institutions";
 import { buildSnackbarItem } from "@/components/notification";
 import {
   TableRowMenuAction,
@@ -125,7 +126,6 @@ export default function DelegatedInstitutions() {
     offset: 0,
   });
   const [noDelegatedInstitutions, setNoDelegatedInstitutions] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentSearchByInstitutionName, setCurrentSearchByInstitutionName] =
     useState<string>();
 
@@ -312,12 +312,25 @@ export default function DelegatedInstitutions() {
         institutionId: session?.user?.institution.id as string,
         limit: pagination.limit,
         offset: pagination.offset,
+        search: currentSearchByInstitutionName,
       },
       DelegatedInstitutionPagination,
       {
         notify: "errors",
       },
     );
+  };
+
+  const handleSearchByInstitutionNameClick = (name?: string) => {
+    setPagination({
+      ...pagination,
+      offset: 0,
+    });
+    setCurrentSearchByInstitutionName(name);
+  };
+
+  const resetSearchByInstitutionName = () => {
+    setCurrentSearchByInstitutionName(undefined);
   };
 
   // fetch services when table pagination or search by institution name change
@@ -369,15 +382,21 @@ export default function DelegatedInstitutions() {
           emptyStateLabel="routes.delegated-institutions.empty"
         />
       ) : (
-        <TableView
-          columns={tableViewColumns}
-          loading={dipLoading && dipError === undefined}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-          pagination={pagination}
-          rowMenu={getDelegatedInstitutionMenu}
-          rows={delegatedInstitutions ?? (dipError ? [] : undefined)}
-        />
+        <>
+          <InstitutionSearchByName
+            onEmptySearch={resetSearchByInstitutionName}
+            onSearchClick={handleSearchByInstitutionNameClick}
+          />
+          <TableView
+            columns={tableViewColumns}
+            loading={dipLoading && dipError === undefined}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            pagination={pagination}
+            rowMenu={getDelegatedInstitutionMenu}
+            rows={delegatedInstitutions ?? (dipError ? [] : undefined)}
+          />
+        </>
       )}
     </>
   );
