@@ -1,5 +1,5 @@
 import { StateEnum } from "@/generated/api/Group";
-import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
+import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
 import {
@@ -40,7 +40,7 @@ export interface SelfcareClient {
     size?: number,
     page?: number,
     search?: string,
-  ) => TE.TaskEither<Error, readonly DelegationResponse[]>;
+  ) => TE.TaskEither<Error, DelegationWithPaginationResponse>;
   getInstitutionGroups: (
     institutionId: string,
     size?: number,
@@ -220,7 +220,7 @@ const buildSelfcareClient = (): SelfcareClient => {
         TE.tryCatch(
           () =>
             axiosInstance.get(
-              `${institutionsApi}/${institutionId}/delegations`,
+              `${institutionsApi}/${institutionId}/delegations/delegations-with-pagination`,
               {
                 params: {
                   page,
@@ -242,8 +242,7 @@ const buildSelfcareClient = (): SelfcareClient => {
         TE.chainEitherK((response) =>
           pipe(
             response.data,
-            t.readonlyArray(DelegationResponse, "array of DelegationResponse")
-              .decode,
+            DelegationWithPaginationResponse.decode,
             E.mapLeft((e) => pipe(e, readableReport, E.toError)),
           ),
         ),
