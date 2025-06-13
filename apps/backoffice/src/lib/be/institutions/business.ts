@@ -6,6 +6,7 @@ import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstit
 import { InstitutionResponse as SelfcareInstitution } from "@/generated/selfcare/InstitutionResponse";
 import { StatusEnum } from "@/generated/selfcare/UserGroupResource";
 import {
+  getInstitutionDelegations,
   getInstitutionById,
   getInstitutionGroups,
   getGroup as getSelfcareGroup,
@@ -17,6 +18,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { GroupNotFoundError } from "../errors";
 import { GroupFilter } from "../selfcare-client";
 import { getManageSubscriptions } from "../subscriptions/business";
+import { DelegatedInstitutionPagination } from "@/generated/api/DelegatedInstitutionPagination";
+import { a } from "vitest/dist/chunks/suite.d.FvehnV49.js";
 
 // Type utility to extract the resolved type of a Promise
 type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to an Utils monorepo package
@@ -188,4 +191,29 @@ export const getGroup = async (
 ): Promise<Group> => {
   const selfcareGroup = await getSelfcareGroup(groupId, institutionId);
   return toGroup(selfcareGroup);
+};
+
+export const getDelegatedInstitutions = async (
+  institutionId: string,
+  size?: number,
+  page?: number,
+  search?: string,
+): Promise<DelegatedInstitutionPagination> => {
+  const apiResult = await getInstitutionDelegations(
+    institutionId,
+    size,
+    page,
+    search,
+  );
+  return {
+    pagination: {
+      count: apiResult.pageInfo?.totalElements ?? 0,
+      limit: apiResult.pageInfo?.pageSize ?? 0,
+      offset: apiResult.pageInfo?.pageNo ?? 0,
+    },
+    value: (apiResult.delegations ?? []).map((delegation) => ({
+      id: delegation.institutionId ?? "",
+      name: delegation.institutionName ?? "",
+    })),
+  };
 };

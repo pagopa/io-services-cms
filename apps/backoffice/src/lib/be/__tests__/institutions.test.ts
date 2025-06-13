@@ -3,6 +3,7 @@ import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResp
 import { UserInstitutions } from "../../../lib/be/selfcare-client";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import {
   StatusEnum,
@@ -10,6 +11,7 @@ import {
 } from "../../../generated/selfcare/UserGroupResource";
 import { GroupNotFoundError } from "../errors";
 import {
+  getDelegatedInstitutions,
   groupExists,
   retrieveInstitution,
   retrieveInstitutionGroups,
@@ -23,6 +25,7 @@ const mocks: {
   aSelfcareUserId: string;
   institutionGroup: UserGroupResource;
   institutionGroups: PageOfUserGroupResource;
+  institutionDelegations: DelegationWithPaginationResponse;
 } = vi.hoisted(() => ({
   institution: { id: "institutionId" },
   userInstitutions: [
@@ -75,6 +78,24 @@ const mocks: {
     totalElements: 0,
     totalPages: 0,
   },
+  institutionDelegations: {
+    delegations: [
+      {
+        institutionId: "institutionGroupsInstID",
+        institutionName: "institutionGroupsName",
+      },
+      {
+        institutionId: "institutionGroupsInstID2",
+        institutionName: "institutionGroupsName2",
+      },
+    ],
+    pageInfo: {
+      page: 0,
+      size: 0,
+      totalElements: 0,
+      totalPages: 0,
+    },
+  },
 }));
 
 const {
@@ -83,12 +104,14 @@ const {
   getInstitutionGroupsMock,
   getManageSubscriptionsMock,
   getGroupMock,
+  getInstitutionDelegationsMock,
 } = vi.hoisted(() => ({
   getUserAuthorizedInstitutionsMock: vi.fn(),
   getInstitutionByIdMock: vi.fn(),
   getInstitutionGroupsMock: vi.fn(),
   getManageSubscriptionsMock: vi.fn(),
   getGroupMock: vi.fn(),
+  getInstitutionDelegationsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
@@ -99,6 +122,7 @@ vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
     getInstitutionById: getInstitutionByIdMock,
     getInstitutionGroups: getInstitutionGroupsMock,
     getGroup: getGroupMock,
+    getInstitutionDelegations: getInstitutionDelegationsMock,
   };
 });
 
@@ -354,6 +378,64 @@ describe("Institutions", () => {
         1000,
         0,
         undefined,
+      );
+    });
+  });
+
+  describe("getDelegatedInstitutions", () => {
+    const institutionId = "institutionId";
+    const size = 5;
+    const page = 1;
+    const search = "search";
+    it("should return the delegated institutions for the given institution", async () => {
+      // given
+      getInstitutionDelegationsMock.mockResolvedValueOnce({
+        ...mocks.institutionDelegations,
+      });
+
+      // when
+      const result = await getDelegatedInstitutions(
+        institutionId,
+        size,
+        page,
+        search,
+      );
+
+      // then
+      expect(result).toStrictEqual({
+        value: mocks.institutionDelegations.delegations?.map((delegation) => ({
+          id: delegation.institutionId,
+          name: delegation.institutionName,
+        })),
+        pagination: {
+          count: mocks.institutionDelegations.pageInfo?.totalElements ?? 0,
+          limit: mocks.institutionDelegations.pageInfo?.pageSize ?? 0,
+          offset: mocks.institutionDelegations.pageInfo?.pageNo ?? 0,
+        },
+      });
+      expect(getInstitutionDelegationsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
+        institutionId,
+        size,
+        page,
+        search,
+      );
+    });
+
+    it("should rejects when getInstitutionDelegations return an error response", async () => {
+      // given
+      const error = new Error("errorMessage");
+      getInstitutionDelegationsMock.mockRejectedValueOnce(error);
+
+      // when and then
+      expect(
+        getDelegatedInstitutions(institutionId, size, page, search),
+      ).rejects.toThrowError(error);
+      expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
+        institutionId,
+        size,
+        page,
+        search,
       );
     });
   });
