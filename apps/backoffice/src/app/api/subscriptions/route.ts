@@ -17,18 +17,18 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { getGroup } from "@/lib/be/institutions/business";
-import { getQueryParam, parseBody } from "@/lib/be/req-res-utils";
+import {
+  parseBody,
+  parseLimitQueryParam,
+  parseOffsetQueryParam,
+  parseQueryParam,
+} from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   getManageSubscriptions,
   upsertManageSubscription,
 } from "@/lib/be/subscriptions/business";
-import { PositiveInteger, PositiveIntegerFromString } from "@/lib/be/types";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import {
-  NonNegativeInteger,
-  NonNegativeIntegerFromString,
-} from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -94,34 +94,24 @@ export const GET = withJWTAuthHandler(
     { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<ResponseError | SubscriptionPagination>> => {
     const userAuthzUtils = userAuthz(backofficeUser);
-    const maybeKind = getQueryParam(request, "kind", SubscriptionType);
+
+    const maybeKind = parseQueryParam(request, "kind", SubscriptionType);
     if (E.isLeft(maybeKind)) {
       return handleBadRequestErrorResponse(
         `'kind' query param is not a valid ${SubscriptionType.name}`,
       );
     }
-    const maybeLimit = getQueryParam(
-      request,
-      "limit",
-      PositiveIntegerFromString,
-      20 as PositiveInteger,
-    );
+
+    const maybeLimit = parseLimitQueryParam(request);
     if (E.isLeft(maybeLimit)) {
-      return handleBadRequestErrorResponse(
-        `'limit' query param is not a valid ${PositiveInteger.name}`,
-      );
+      return maybeLimit.left;
     }
-    const maybeOffset = getQueryParam(
-      request,
-      "offset",
-      NonNegativeIntegerFromString,
-      0 as NonNegativeInteger,
-    );
+
+    const maybeOffset = parseOffsetQueryParam(request);
     if (E.isLeft(maybeOffset)) {
-      return handleBadRequestErrorResponse(
-        `'offset' query param is not a valid ${NonNegativeInteger.name}`,
-      );
+      return maybeOffset.left;
     }
+
     if (
       maybeKind.right === SubscriptionTypeEnum.MANAGE_GROUP &&
       !userAuthzUtils.isAdmin() &&
@@ -129,6 +119,7 @@ export const GET = withJWTAuthHandler(
     ) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
+
     try {
       const response = await getManageSubscriptions(
         maybeKind.right,

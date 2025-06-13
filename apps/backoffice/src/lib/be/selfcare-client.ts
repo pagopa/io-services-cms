@@ -1,4 +1,5 @@
 import { StateEnum } from "@/generated/api/Group";
+import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
 import {
@@ -34,6 +35,12 @@ export interface SelfcareClient {
   getInstitutionById: (
     id: string,
   ) => TE.TaskEither<AxiosError | Error, InstitutionResponse>;
+  getInstitutionDelegations: (
+    institutionId: string,
+    size?: number,
+    page?: number,
+    search?: string,
+  ) => TE.TaskEither<Error, DelegationWithPaginationResponse>;
   getInstitutionGroups: (
     institutionId: string,
     size?: number,
@@ -207,9 +214,44 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
+  const getInstitutionDelegations: SelfcareClient["getInstitutionDelegations"] =
+    (institutionId, size, page, search) =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            axiosInstance.get(
+              `${institutionsApi}/${institutionId}/delegations/delegations-with-pagination`,
+              {
+                params: {
+                  page,
+                  search,
+                  size,
+                  sort: "ASC",
+                },
+              },
+            ),
+          flow(
+            E.fromPredicate(
+              axios.isAxiosError,
+              (e) =>
+                new Error(`Error calling selfcare getDelegations API: ${e}`),
+            ),
+            E.toUnion,
+          ),
+        ),
+        TE.chainEitherK((response) =>
+          pipe(
+            response.data,
+            DelegationWithPaginationResponse.decode,
+            E.mapLeft((e) => pipe(e, readableReport, E.toError)),
+          ),
+        ),
+      );
+
   return {
     getGroup,
     getInstitutionById,
+    getInstitutionDelegations,
     getInstitutionGroups,
     getUserAuthorizedInstitutions,
   };

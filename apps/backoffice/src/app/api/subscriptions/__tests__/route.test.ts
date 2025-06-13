@@ -1,12 +1,9 @@
 import { faker } from "@faker-js/faker/locale/it";
-import {
-  NonNegativeInteger,
-  NonNegativeIntegerFromString,
-} from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { BackOfficeUser } from "../../../../../types/next-auth";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import {
   StateEnum,
@@ -18,12 +15,6 @@ import {
   ManagedInternalError,
   PreconditionFailedError,
 } from "../../../../lib/be/errors";
-import {
-  PositiveInteger,
-  PositiveIntegerFromString,
-} from "../../../../lib/be/types";
-
-import { BackOfficeUser } from "../../../../../types/next-auth";
 import { SelfcareRoles } from "../../../../types/auth";
 import { GET, PUT } from "../route";
 
@@ -44,6 +35,7 @@ const userMock = {
     logo_url: faker.image.url(),
     name: faker.company.name(),
     role: SelfcareRoles.admin,
+    isAggregator: faker.datatype.boolean(),
   },
   name: faker.person.fullName(),
   parameters: {
@@ -65,7 +57,9 @@ const mocks = vi.hoisted(() => {
     upsertManageSubscription: vi.fn(),
     getManageSubscriptions: vi.fn(),
     parseBody: vi.fn(),
-    getQueryParam: vi.fn(),
+    parseQueryParam: vi.fn(),
+    parseLimitQueryParam: vi.fn(),
+    parseOffsetQueryParam: vi.fn(),
     getGroup: vi.fn(),
     withJWTAuthHandler: vi.fn(
       (
@@ -83,10 +77,16 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/be/req-res-utils", () => ({
-  parseBody: mocks.parseBody,
-  getQueryParam: mocks.getQueryParam,
-}));
+vi.mock("@/lib/be/req-res-utils", async () => {
+  const actual = await vi.importActual("@/lib/be/req-res-utils");
+  return {
+    ...(actual as any),
+    parseBody: mocks.parseBody,
+    parseQueryParam: mocks.parseQueryParam,
+    parseLimitQueryParam: mocks.parseLimitQueryParam,
+    parseOffsetQueryParam: mocks.parseOffsetQueryParam,
+  };
+});
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
   upsertManageSubscription: mocks.upsertManageSubscription,
@@ -327,7 +327,7 @@ describe("Subscription API", () => {
   describe("Retrieve manage subscriptions API", () => {
     it("should return an error response when kind query param is not valid", async () => {
       // given
-      mocks.getQueryParam.mockReturnValueOnce(E.left(void 0));
+      mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
       const request = new NextRequest("http://localhost?limit=0");
 
       // when
@@ -340,40 +340,34 @@ describe("Subscription API", () => {
       expect(responseBody.detail).toEqual(
         `'kind' query param is not a valid ${SubscriptionType.name}`,
       );
-      expect(mocks.getQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getQueryParam).toHaveBeenCalledWith(
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledWith(
         request,
         "kind",
         SubscriptionType,
       );
+      expect(mocks.parseLimitQueryParam).not.toHaveBeenCalled();
+      expect(mocks.parseOffsetQueryParam).not.toHaveBeenCalled();
       expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
     });
 
     it("should return an error response when limit query param is not valid", async () => {
       // given
       const kind = "MANAGE_ROOT";
-      mocks.getQueryParam.mockImplementation((_, param) =>
-        param === "kind" ? E.right(kind) : E.left(void 0),
-      );
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
+      const errorResponse = "errorResponse";
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.left(errorResponse));
       const request = new NextRequest("http://localhost?limit=0");
 
       // when
       const result = await GET(request, {});
 
       // then
-      expect(result.status).toBe(400);
-      const responseBody = await result.json();
-      expect(responseBody.title).toEqual("Bad Request");
-      expect(responseBody.detail).toEqual(
-        `'limit' query param is not a valid ${PositiveInteger.name}`,
-      );
-      expect(mocks.getQueryParam).toHaveBeenCalledTimes(2);
-      expect(mocks.getQueryParam).toHaveBeenLastCalledWith(
-        request,
-        "limit",
-        PositiveIntegerFromString,
-        20,
-      );
+      expect(result).toBe(errorResponse);
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledWith(request);
+      expect(mocks.parseOffsetQueryParam).not.toHaveBeenCalled();
       expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
     });
 
@@ -381,32 +375,21 @@ describe("Subscription API", () => {
       // given
       const kind = "MANAGE_ROOT";
       const limit = 10;
-      mocks.getQueryParam.mockImplementation((_, param) =>
-        param === "kind"
-          ? E.right(kind)
-          : param === "limit"
-            ? E.right(limit)
-            : E.left(void 0),
-      );
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+      const errorResponse = "errorResponse";
+      mocks.parseOffsetQueryParam.mockReturnValueOnce(E.left(errorResponse));
       const request = new NextRequest("http://localhost?offset=-1");
 
       // when
       const result = await GET(request, {});
 
       // then
-      expect(result.status).toBe(400);
-      const responseBody = await result.json();
-      expect(responseBody.title).toEqual("Bad Request");
-      expect(responseBody.detail).toEqual(
-        `'offset' query param is not a valid ${NonNegativeInteger.name}`,
-      );
-      expect(mocks.getQueryParam).toHaveBeenCalledTimes(3);
-      expect(mocks.getQueryParam).toHaveBeenLastCalledWith(
-        request,
-        "offset",
-        NonNegativeIntegerFromString,
-        0,
-      );
+      expect(result).toBe(errorResponse);
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledWith(request);
       expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
     });
 
@@ -418,9 +401,9 @@ describe("Subscription API", () => {
       const request = new NextRequest(
         `http://localhost?limit=${limit}&offset=${offset}`,
       );
-      mocks.getQueryParam.mockImplementation((_, param) =>
-        E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
-      );
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+      mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
       mocks.getUser.mockImplementationOnce(() => ({
         ...userMock,
         institution: {
@@ -451,9 +434,9 @@ describe("Subscription API", () => {
       const request = new NextRequest(
         `http://localhost?limit=${limit}&offset=${offset}`,
       );
-      mocks.getQueryParam.mockImplementation((_, param) =>
-        E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
-      );
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+      mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
       const errorMessage = "error message";
       mocks.getManageSubscriptions.mockRejectedValueOnce(
         new ManagedInternalError(errorMessage),
@@ -467,7 +450,9 @@ describe("Subscription API", () => {
       const responseBody = await result.json();
       expect(responseBody.title).toEqual("SubscriptionsRetrieveError");
       expect(responseBody.detail).toEqual(errorMessage);
-      expect(mocks.getQueryParam).toHaveBeenCalledTimes(3);
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
         kind,
@@ -491,9 +476,9 @@ describe("Subscription API", () => {
         const limit = 10;
         const offset = 5;
         const request = new NextRequest("http://localhost");
-        mocks.getQueryParam.mockImplementation((_, param) =>
-          E.right(param === "kind" ? kind : param === "limit" ? limit : offset),
-        );
+        mocks.parseQueryParam.mockReturnValueOnce(E.right(kind));
+        mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+        mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
         const expectedSubscriptions = [{ id: "id", name: "name" }];
         mocks.getManageSubscriptions.mockResolvedValueOnce(
           expectedSubscriptions,
@@ -524,6 +509,9 @@ describe("Subscription API", () => {
             offset,
           },
         });
+        expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+        expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+        expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
         expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
         expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
           kind,

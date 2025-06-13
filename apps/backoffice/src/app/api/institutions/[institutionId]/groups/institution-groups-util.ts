@@ -14,10 +14,16 @@ import {
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
 } from "@/lib/be/institutions/business";
-import { getQueryParam } from "@/lib/be/req-res-utils";
+import { parseQueryParam } from "@/lib/be/req-res-utils";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
+
+const FILTER_DEFAULT_VALUE = withDefault(
+  GroupFilterType,
+  GroupFilterTypeEnum.ALL,
+);
 
 export const institutionGroupBaseHandler = async (
   request: NextRequest,
@@ -38,11 +44,10 @@ export const institutionGroupBaseHandler = async (
       return handleForbiddenErrorResponse("Unauthorized institutionId");
     }
 
-    const maybeFilter = getQueryParam(
+    const maybeFilter = parseQueryParam(
       request,
       "filter",
-      GroupFilterType,
-      GroupFilterTypeEnum.ALL,
+      FILTER_DEFAULT_VALUE,
     );
     if (E.isLeft(maybeFilter)) {
       return handleBadRequestErrorResponse(
