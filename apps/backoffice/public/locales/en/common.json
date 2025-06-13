@@ -266,6 +266,16 @@
           }
         }
       }
+    },
+    "institution": {
+      "searchByName": {
+        "clear": "Clear filter",
+        "search": "Search",
+        "helperText": "Enter the institution name you want to search for",
+        "validText": "Click on right search icon inside field to perform search",
+        "errorText": "Invslid institution name",
+        "label": "Search by institution name"
+      }
     }
   },
   "subscriptions": {

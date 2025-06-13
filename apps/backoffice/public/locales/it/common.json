@@ -266,6 +266,16 @@
           }
         }
       }
+    },
+    "institution": {
+      "searchByName": {
+        "clear": "Rimuovi filtro",
+        "search": "Cerca",
+        "helperText": "Inserisci il nome dell'ente che vuoi cercare",
+        "validText": "Clicca sull'icona a destra del campo per effettuare la ricerca",
+        "errorText": "Nome ente non valido",
+        "label": "Cerca per nome ente"
+      }
     }
   },
   "subscriptions": {
