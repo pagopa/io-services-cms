@@ -13,7 +13,6 @@ on:
 
 env:
   API_NAME: api_services_cms
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
   DOCKER_IMAGE_TAG: sha256:04d8ead53c772d23b094c2a395292dc159e6f2905e1b13b5f828f31eac6eb27f
@@ -26,6 +25,8 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     environment: opex-prod-cd
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
 
     steps:
       - name: Checkout
