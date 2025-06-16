@@ -1,4 +1,4 @@
 resource_group_name  = "terraform-state-rg"
-storage_account_name = "tfappprodio"
+storage_account_name = "iopitntfst001"
 container_name       = "terraform-state"
-key                  = "opex.io-services-cms.api_services_cms.tfstate"
+key                  = "io-svc.cms.opex.prod.tfstate"
