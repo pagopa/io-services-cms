@@ -18,6 +18,12 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { authOptions } from "@/lib/auth/auth-options";
 import { isAdmin } from "@/utils/auth-util";
 import {
+  trackDelegatedInstitutionsPageEvent,
+  trackEaManageKeyCopyEvent,
+  trackEaManageKeyRegenerateEvent,
+  trackEaManageKeyShowEvent,
+} from "@/utils/mix-panel";
+import {
   INVALID_API_KEY_VALUE_PLACEHOLDER,
   isNullUndefinedOrEmpty,
 } from "@/utils/string-util";
@@ -84,6 +90,9 @@ export default function DelegatedInstitutions() {
             isLoading={di.isLoading}
             isVisible={di.isVisible}
             keyValue={di.primary_key}
+            onCopyToClipboardClick={() =>
+              trackEaManageKeyCopyEvent(di.id, "primary")
+            }
             onRequestCopyToClipboard={() =>
               handleGetManageSubscriptionKeys(di.id)
             }
@@ -101,6 +110,9 @@ export default function DelegatedInstitutions() {
             isLoading={di.isLoading}
             isVisible={di.isVisible}
             keyValue={di.secondary_key}
+            onCopyToClipboardClick={() =>
+              trackEaManageKeyCopyEvent(di.id, "secondary")
+            }
             onRequestCopyToClipboard={() =>
               handleGetManageSubscriptionKeys(di.id)
             }
@@ -188,6 +200,7 @@ export default function DelegatedInstitutions() {
         updateDelegatedInstitutionListItemById(subscriptionId, {
           ...maybeResponse.right.value,
         });
+        trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
       } else {
         getGenericErrorNotification();
       }
@@ -275,6 +288,7 @@ export default function DelegatedInstitutions() {
             isLoading: false,
             isVisible: true,
           });
+          trackEaManageKeyShowEvent(di.id);
         },
       });
     }
@@ -368,6 +382,10 @@ export default function DelegatedInstitutions() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dipData]);
+
+  useEffect(() => {
+    trackDelegatedInstitutionsPageEvent();
+  }, []);
 
   return (
     <>
