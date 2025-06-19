@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.26.1
+
+### Patch Changes
+
+- 40f19e85: Added new mix-panel events for delegated-institutions page
+
 ## 1.26.0
 
 ### Minor Changes
