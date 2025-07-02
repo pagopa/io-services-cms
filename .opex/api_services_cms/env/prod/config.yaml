@@ -1,6 +1,6 @@
 oa3_spec: apps/io-services-cms-webapp/openapi.yaml
 name: opex_api_service_cms
-location: Italy North
+location: West Europe
 timespan: 10m
 evaluation_frequency: 20 # default 10
 evaluation_time_window: 40 # default 20
