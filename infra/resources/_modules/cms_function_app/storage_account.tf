@@ -1,21 +1,25 @@
 module "cms_storage_account" {
-  source = "github.com/pagopa/terraform-azurerm-v3//storage_account?ref=v8.26.3"
+  source  = "pagopa-dx/azure-storage-account/azurerm"
+  version = "~> 1.0"
 
-  name                          = "${var.prefix}${var.env_short}${var.location_short}${var.domain}cmsst01"
-  account_kind                  = "StorageV2"
-  account_tier                  = "Standard"
-  account_replication_type      = "ZRS"
-  access_tier                   = "Hot"
-  blob_versioning_enabled       = true
-  resource_group_name           = var.resource_group_name
-  location                      = var.location
-  advanced_threat_protection    = false
-  public_network_access_enabled = false
+  environment = {
+    prefix          = var.prefix
+    env_short       = var.env_short
+    location        = var.location
+    domain          = var.domain
+    app_name        = "cms"
+    instance_number = "01"
+  }
+  resource_group_name = var.resource_group_name
+  tier                = "l"
+  subnet_pep_id       = var.peps_snet_id
 
-  action = [{
-    action_group_id    = var.error_action_group_id
-    webhook_properties = null
-  }]
+  subservices_enabled = {
+    blob  = true
+    queue = true
+  }
+
+  action_group_id = var.error_action_group_id
 
   tags = var.tags
 }
@@ -114,7 +118,6 @@ resource "azurerm_storage_queue" "request-detail-poison" {
   name                 = "request-detail-poison"
   storage_account_name = module.cms_storage_account.name
 }
-
 
 resource "azurerm_storage_queue" "request-services-publication-ingestion-retry" {
   name                 = "request-services-publication-ingestion-retry"

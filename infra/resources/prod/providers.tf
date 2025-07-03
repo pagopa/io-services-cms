@@ -11,7 +11,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "<= 3.116.0"
+      version = "~> 4.0"
     }
 
     restapi = { # Approved as temporary solution due to lack of support from azurerm provider
