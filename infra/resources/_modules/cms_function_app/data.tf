@@ -22,6 +22,11 @@ data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
   resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
 }
 
+data "azurerm_data_factory" "adf" {
+  name                = "io-p-data-factory"
+  resource_group_name = "io-p-rg-operations"
+}
+
 ####################
 # KeyVault Secrets #
 ####################
@@ -110,5 +115,10 @@ data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
 
 data "azurerm_private_dns_zone" "storage_account_queue" {
   name                = "privatelink.queue.core.windows.net"
+  resource_group_name = var.private_dns_zone_resource_group_name
+}
+
+data "azurerm_private_dns_zone" "storage_account_blob" {
+  name                = "privatelink.blob.core.windows.net"
   resource_group_name = var.private_dns_zone_resource_group_name
 }
