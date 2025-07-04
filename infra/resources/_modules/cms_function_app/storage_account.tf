@@ -168,6 +168,6 @@ resource "azurerm_storage_queue" "sync-group-poison" {
 
 resource "azurerm_storage_container" "activations" {
   name                  = "activations"
-  storage_account_id    = module.cms_storage_account.id
+  storage_account_name  = module.cms_storage_account.name
   container_access_type = "private"
 }
