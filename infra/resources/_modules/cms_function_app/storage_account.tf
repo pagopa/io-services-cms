@@ -6,7 +6,7 @@ module "cms_storage_account" {
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"
   access_tier                   = "Hot"
-  blob_versioning_enabled       = false
+  blob_versioning_enabled       = true
   resource_group_name           = var.resource_group_name
   location                      = var.location
   advanced_threat_protection    = false
@@ -19,6 +19,11 @@ module "cms_storage_account" {
 
   tags = var.tags
 }
+
+
+/***************************************
+ * Storage Queues for CMS Function App *
+ ***************************************/
 
 resource "azurerm_storage_queue" "request-review" {
   name                 = "request-review"
@@ -154,4 +159,15 @@ resource "azurerm_storage_queue" "request-activations-ingestion-retry-poison" {
 resource "azurerm_storage_queue" "sync-group-poison" {
   name                 = "sync-group-poison"
   storage_account_name = module.cms_storage_account.name
+}
+
+
+/*******************************************
+ * Storage Containers for CMS Function App *
+ *******************************************/
+
+resource "azurerm_storage_container" "activations" {
+  name                  = "activations"
+  storage_account_id    = module.cms_storage_account.id
+  container_access_type = "private"
 }
