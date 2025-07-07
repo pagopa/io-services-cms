@@ -3,4 +3,4 @@
 * @pagopa/io-platform-green-unit
 
 /infra/ @pagopa/engineering-team-cloud-eng @pagopa/io-platform-green-unit
-/.github/ @pagopa/engineering-team-cloud-eng
+/.github/ @pagopa/engineering-team-cloud-eng @pagopa/io-platform-green-unit
