@@ -52,29 +52,29 @@ locals {
   db_cms_containers = [
     {
       name                = local.cosmos_containers.services_lifecycle
-      partition_key_paths = "/id"
+      partition_key_paths = ["/id"]
       max_throughput      = 1000
     },
     {
       name                = local.cosmos_containers.services_publication
-      partition_key_paths = "/id"
+      partition_key_paths = ["/id"]
       max_throughput      = 1000
     },
     {
       name                = local.cosmos_containers.services_history
-      partition_key_paths = "/serviceId"
+      partition_key_paths = ["/serviceId"]
       max_throughput      = 1000
     },
     {
       name                = local.cosmos_containers.services_history_test
-      partition_key_paths = "/serviceId"
+      partition_key_paths = ["/serviceId"]
       max_throughput      = 1000
     },
   ]
   db_app_be_containers = [
     {
       name                = "services"
-      partition_key_paths = "/id"
+      partition_key_paths = ["/id"]
       max_throughput      = 2000
     },
   ]
