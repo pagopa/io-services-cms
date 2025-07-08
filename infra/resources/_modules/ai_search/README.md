@@ -19,7 +19,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_srch_snet"></a> [srch\_snet](#module\_srch\_snet) | github.com/pagopa/terraform-azurerm-v3//subnet | v8.19.0 |
+| <a name="module_srch_snet"></a> [srch\_snet](#module\_srch\_snet) | github.com/pagopa/terraform-azurerm-v4//subnet | v7.18.1 |
 
 ## Resources
 

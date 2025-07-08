@@ -17,7 +17,7 @@ No requirements.
 |------|--------|---------|
 | <a name="module_adf_to_blob_data_reader_db"></a> [adf\_to\_blob\_data\_reader\_db](#module\_adf\_to\_blob\_data\_reader\_db) | pagopa-dx/azure-role-assignments/azurerm | ~> 1.0 |
 | <a name="module_cms_fn"></a> [cms\_fn](#module\_cms\_fn) | pagopa-dx/azure-function-app/azurerm | ~> 0.0 |
-| <a name="module_cms_storage_account"></a> [cms\_storage\_account](#module\_cms\_storage\_account) | github.com/pagopa/terraform-azurerm-v3//storage_account | v8.26.3 |
+| <a name="module_cms_storage_account"></a> [cms\_storage\_account](#module\_cms\_storage\_account) | github.com/pagopa/terraform-azurerm-v4//storage_account | v7.18.1 |
 
 ## Resources
 

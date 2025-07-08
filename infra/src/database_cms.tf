@@ -1,6 +1,6 @@
 # Database instance
 module "cosmosdb_account" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_account?ref=v8.44.2"
+  source = "github.com/pagopa/terraform-azurerm-v4.git//cosmosdb_account?ref=v7.18.1"
 
   name                = "${local.project}-cosmos-${local.application_basename}"
   location            = azurerm_resource_group.rg.location
@@ -81,25 +81,25 @@ locals {
 }
 
 module "db_cms_containers" {
-  source   = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v8.44.2"
+  source   = "github.com/pagopa/terraform-azurerm-v4.git//cosmosdb_sql_container?ref=v7.18.1"
   for_each = { for c in local.db_cms_containers : c.name => c }
 
   name                = each.value.name
   resource_group_name = azurerm_resource_group.rg.name
   account_name        = module.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.db_cms.name
-  partition_key_path  = each.value.partition_key_path
+  partition_key_paths = each.value.partition_key_path
   autoscale_settings  = { max_throughput = each.value.max_throughput }
 }
 
 module "db_app_be_containers" {
-  source   = "github.com/pagopa/terraform-azurerm-v3.git//cosmosdb_sql_container?ref=v8.44.2"
+  source   = "github.com/pagopa/terraform-azurerm-v4.git//cosmosdb_sql_container?ref=v7.18.1"
   for_each = { for c in local.db_app_be_containers : c.name => c }
 
   name                = each.value.name
   resource_group_name = azurerm_resource_group.rg.name
   account_name        = module.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.db_app_be.name
-  partition_key_path  = each.value.partition_key_path
+  partition_key_paths = each.value.partition_key_path
   autoscale_settings  = { max_throughput = each.value.max_throughput }
 }
