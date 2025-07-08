@@ -5,7 +5,7 @@ module "srch_snet" {
   virtual_network_name = var.virtual_network.name
   address_prefixes     = local.snet_cidrs
 
-  private_endpoint_network_policies = false
+  private_endpoint_network_policies = "Disabled"
 }
 
 resource "azurerm_private_endpoint" "srch" {

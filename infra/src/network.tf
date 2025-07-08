@@ -9,7 +9,7 @@ module "app_snet" {
   resource_group_name  = var.io_common.resource_group_name
   virtual_network_name = var.io_common.vnet_name
 
-  private_endpoint_network_policies             = true
+  private_endpoint_network_policies             = "Enabled"
   private_link_service_network_policies_enabled = true
 
   service_endpoints = [
@@ -37,7 +37,7 @@ module "postgres_flexible_snet" {
   resource_group_name               = var.io_common.resource_group_name
   virtual_network_name              = var.io_common.vnet_name
   service_endpoints                 = ["Microsoft.Storage"]
-  private_endpoint_network_policies = true
+  private_endpoint_network_policies = "Enabled"
 
   delegation = {
     name = "delegation"
