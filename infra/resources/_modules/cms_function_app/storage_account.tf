@@ -1,16 +1,17 @@
 module "cms_storage_account" {
   source = "github.com/pagopa/terraform-azurerm-v4//storage_account?ref=v7.18.1"
 
-  name                          = "${var.prefix}${var.env_short}${var.location_short}${var.domain}cmsst01"
-  account_kind                  = "StorageV2"
-  account_tier                  = "Standard"
-  account_replication_type      = "ZRS"
-  access_tier                   = "Hot"
-  blob_versioning_enabled       = true
-  resource_group_name           = var.resource_group_name
-  location                      = var.location
-  advanced_threat_protection    = false
-  public_network_access_enabled = false
+  name                             = "${var.prefix}${var.env_short}${var.location_short}${var.domain}cmsst01"
+  account_kind                     = "StorageV2"
+  account_tier                     = "Standard"
+  account_replication_type         = "ZRS"
+  access_tier                      = "Hot"
+  blob_versioning_enabled          = true
+  resource_group_name              = var.resource_group_name
+  location                         = var.location
+  advanced_threat_protection       = false
+  public_network_access_enabled    = false
+  cross_tenant_replication_enabled = true
 
   action = [{
     action_group_id    = var.error_action_group_id
