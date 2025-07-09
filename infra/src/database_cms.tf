@@ -19,6 +19,7 @@ module "cosmosdb_account" {
   main_geo_location_location       = local.itn_location
   main_geo_location_zone_redundant = true
   enable_automatic_failover        = true
+  minimal_tls_version              = "Tls12"
 
   additional_geo_locations = [{
     location          = "spaincentral"
