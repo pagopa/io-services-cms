@@ -19,6 +19,10 @@ module "cms_storage_account" {
     queue = true
   }
 
+  blob_features = {
+    versioning = true
+  }
+
   action_group_id = var.error_action_group_id
 
   tags = var.tags
