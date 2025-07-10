@@ -1,11 +1,11 @@
 module "srch_snet" {
-  source               = "github.com/pagopa/terraform-azurerm-v4//subnet?ref=v7.18.1"
+  source               = "github.com/pagopa/terraform-azurerm-v3//subnet?ref=v8.19.0"
   name                 = "${var.project}-${var.application_basename}-srch-snet-01"
   resource_group_name  = var.virtual_network.resource_group_name
   virtual_network_name = var.virtual_network.name
   address_prefixes     = local.snet_cidrs
 
-  private_endpoint_network_policies = "Disabled"
+  private_endpoint_network_policies_enabled = false
 }
 
 resource "azurerm_private_endpoint" "srch" {
