@@ -1,5 +1,5 @@
 module "key_vault_domain" {
-  source = "github.com/pagopa/terraform-azurerm-v3.git//key_vault?ref=v8.44.2"
+  source = "github.com/pagopa/terraform-azurerm-v4.git//key_vault?ref=v7.18.1"
 
   name                       = "${local.project}-${local.application_basename}-kv"
   location                   = azurerm_resource_group.rg.location
