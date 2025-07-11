@@ -4,25 +4,43 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
 import { ServiceActivations as avroActivation } from "../../../generated/avro/dto/ServiceActivations";
-import { EnrichedLegacyActivationCosmosResource } from "../enriched-types/activation-pdv-enriched";
+import { StatusEnum } from "../../../generated/avro/dto/StatusEnumEnum";
+import { EnrichedActivation } from "../enriched-types/activation-pdv-enriched";
 
 export const buildAvroActivationObject = (
-  activationCosmosRecord: EnrichedLegacyActivationCosmosResource,
-): Omit<avroActivation, "schema" | "subject"> => ({
-  id: [
-    activationCosmosRecord.userPDVId,
-    activationCosmosRecord.serviceId,
-    activationCosmosRecord._ts,
-  ].join("-"),
-  //converting cosmos _ts from seconds to millis
-  modifiedAt: activationCosmosRecord._ts * 1000,
-  serviceId: activationCosmosRecord.serviceId,
-  status: activationCosmosRecord.status,
-  userPDVId: activationCosmosRecord.userPDVId,
-});
+  activation: EnrichedActivation,
+): Omit<avroActivation, "schema" | "subject"> => {
+  const lastUpdate = convertToMilliseconds(activation.lastUpdate);
+  return {
+    id: [activation.userPDVId, activation.serviceId, lastUpdate].join("-"),
+    //converting cosmos _ts from seconds to millis
+    modifiedAt: lastUpdate,
+    serviceId: activation.serviceId,
+    status: toAvroStatus(activation.status),
+    userPDVId: activation.userPDVId,
+  };
+};
+
+const toAvroStatus = (status: EnrichedActivation["status"]): StatusEnum => {
+  switch (status) {
+    case "ACTIVE":
+      return StatusEnum.ACTIVE;
+    case "INACTIVE":
+      return StatusEnum.INACTIVE;
+    case "PENDING":
+      return StatusEnum.PENDING;
+  }
+};
+
+const convertToMilliseconds = (timestamp: number): number => {
+  if (String(timestamp).length === 13) {
+    return timestamp;
+  }
+  return timestamp * 1000;
+};
 
 export const avroActivationFormatter = (
-  item: EnrichedLegacyActivationCosmosResource,
+  item: EnrichedActivation,
 ): E.Either<Error, EventData> =>
   pipe(
     Object.assign(new avroActivation(), buildAvroActivationObject(item)),
