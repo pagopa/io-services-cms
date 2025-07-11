@@ -88,7 +88,6 @@ locals {
       REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
       REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
-      REQUEST_ACTIVATIONS_INGESTION_RETRY_QUEUE          = azurerm_storage_queue.request-activations-ingestion-retry.name
       SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
 
 
@@ -138,6 +137,10 @@ locals {
       PDV_TOKENIZER_BASE_URL  = "https://api.tokenizer.pdv.pagopa.it"
       PDV_TOKENIZER_BASE_PATH = "/tokenizer/v1"
       PDV_TOKENIZER_API_KEY   = data.azurerm_key_vault_secret.pdv_tokenizer_api_key.value
+
+      #Blob storage config
+      ACTIVATION_BLOB_STORAGE_CONNECTIONSTRING = module.cms_storage_account.primary_connection_string
+      ACTIVATIONS_BLOB_CONTAINER               = module.cms_storage_account.activations.name
 
     }
     autoscale_settings = {
