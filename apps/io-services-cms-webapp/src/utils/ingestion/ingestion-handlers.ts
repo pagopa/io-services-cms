@@ -67,6 +67,27 @@ export const createIngestionCosmosDBTriggerHandler =
       ),
     );
 
+// Blob Trigger
+export const createIngestionBlobTriggerHandler =
+  <S, U extends S>(
+    producer: EventHubProducerClient,
+    formatter: RE.ReaderEither<U, Error, EventData>,
+    enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
+  ): RTE.ReaderTaskEither<
+    { items: readonly S[] },
+    Error,
+    IngestionResults<S>[]
+  > =>
+  ({ items }) =>
+    pipe(
+      items,
+      toEvents(formatter, enricher), // format service to the specified avro format
+      TE.chainW(
+        (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub
+      ),
+      TE.map(() => [noAction]), // return noAction if the sendBatch was successful
+    );
+
 // Retry QuqueTrigger
 export const createIngestionRetryQueueTriggerHandler = <S, U extends S>(
   decoder: t.Decoder<unknown, S>, // parse the incoming message

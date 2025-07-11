@@ -59,7 +59,6 @@ module "cms_fn" {
       "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "0"
       "AzureWebJobs.SelfcareGroupWatcher.Disabled"                       = "0"
       "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "1"
-      "AzureWebJobs.OnRequestActivationIngestionRetry.Disabled"          = "1"
 
     }
   )
@@ -93,7 +92,6 @@ module "cms_fn" {
       "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "1"
       "AzureWebJobs.SelfcareGroupWatcher.Disabled"                       = "1"
       "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "1"
-      "AzureWebJobs.OnRequestActivationIngestionRetry.Disabled"          = "1"
     }
   )
 
@@ -124,7 +122,6 @@ module "cms_fn" {
     "AzureWebJobs.ServiceTopicsIngestor.Disabled",
     "AzureWebJobs.SelfcareGroupWatcher.Disabled",
     "AzureWebJobs.IngestionActivationWatcher.Disabled",
-    "AzureWebJobs.OnRequestActivationIngestionRetry.Disabled",
   ]
 
   tier = local.cms.tier
