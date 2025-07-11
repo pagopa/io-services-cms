@@ -6,10 +6,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/0.1.10"
   },
   "cms_function_app.cms_fn": {
-    "hash": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a",
-    "version": "0.3.1",
+    "hash": "514188ed1f7f3775a586d045e4e6aedb635d971451648db5c33e6d4378d6e42a",
+    "version": "2.0.0",
     "name": "azure_function_app",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/0.3.1"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/2.0.0"
   },
   "eventhub.eventhub": {
     "hash": "ec7e3d9527cdeb8f9a575b487f7c907825efc04b3bb107933d5a46acf37e70bd",
@@ -28,5 +28,11 @@
     "version": "1.1.2",
     "name": "azure_role_assignments",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.1.2"
+  },
+  "cms_function_app.cms_storage_account": {
+    "hash": "74bcea37fe35b2d95a2eb2b1e29c0f6ca3ffa8a5475c3e70bd42ef17fc17bd7e",
+    "version": "1.0.0",
+    "name": "azure_storage_account",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/1.0.0"
   }
 }
