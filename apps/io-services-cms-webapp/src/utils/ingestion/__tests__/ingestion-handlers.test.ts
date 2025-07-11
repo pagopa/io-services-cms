@@ -7,6 +7,7 @@ import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  createIngestionBlobTriggerHandler,
   createIngestionCosmosDBTriggerHandler,
   createIngestionRetryQueueTriggerHandler,
 } from "../ingestion-handlers";
@@ -36,8 +37,9 @@ const aFormatter = vi.fn((item: ItemType) =>
   }),
 );
 
-const aFormatterWhichFails = (item: ItemType) =>
-  E.left(new Error("Failed to format item"));
+const aFormatterWhichFails = vi.fn((item: ItemType) =>
+  E.left(new Error("Failed to format item")),
+);
 
 const aProducer = {
   sendBatch: vi.fn(() => Promise.resolve()),
@@ -128,6 +130,50 @@ describe("Generic Ingestion PDND Handlers", () => {
           aFormatter,
         )(context, aValidQueueItem),
       ).rejects.toThrowError("Failed to send batch");
+    });
+  });
+
+  describe("Blob Trigger", async () => {
+    it("should success when all elements are sent to eventhub", async () => {
+      //given when
+      const res = await createIngestionBlobTriggerHandler(
+        aProducer,
+        aFormatter,
+      )({ items: [anItem] })();
+
+      //then
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual([{}]);
+      }
+      expect(aFormatter).toBeCalledTimes(1);
+      expect(aProducer.sendBatch).toBeCalledTimes(1);
+    });
+
+    it("should throw on eventhub error", async () => {
+      //given when
+      const res = await createIngestionBlobTriggerHandler(
+        aProducerWhichFails,
+        aFormatter,
+      )({ items: [anItem] })();
+
+      //then
+      expect(E.isLeft(res)).toBeTruthy();
+      expect(aFormatter).toBeCalledTimes(1);
+      expect(aProducerWhichFails.sendBatch).toBeCalledTimes(1);
+    });
+
+    it("should throw on avro formatter error", async () => {
+      //given when
+      const res = await createIngestionBlobTriggerHandler(
+        aProducer,
+        aFormatterWhichFails,
+      )({ items: [anItem] })();
+
+      //then
+      expect(E.isLeft(res)).toBeTruthy();
+      expect(aFormatterWhichFails).toBeCalledTimes(1);
+      expect(aProducerWhichFails.sendBatch).toBeCalledTimes(0);
     });
   });
 });
