@@ -140,8 +140,7 @@ locals {
 
       #Blob storage config
       ACTIVATION_BLOB_STORAGE_CONNECTIONSTRING = module.cms_storage_account.primary_connection_string
-      ACTIVATIONS_BLOB_CONTAINER               = module.cms_storage_account.activations.name
-
+      ACTIVATIONS_BLOB_CONTAINER               = azurerm_storage_container.activations.name
     }
     autoscale_settings = {
       min     = 3
