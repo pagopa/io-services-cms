@@ -1,3 +1,4 @@
+export { Activation } from "./activation";
 export * as LegacyActivation from "./activation-legacy";
 export * as Activations from "./activations";
 export {
