@@ -16,8 +16,8 @@ No requirements.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_adf_to_blob_data_reader_db"></a> [adf\_to\_blob\_data\_reader\_db](#module\_adf\_to\_blob\_data\_reader\_db) | pagopa-dx/azure-role-assignments/azurerm | ~> 1.0 |
-| <a name="module_cms_fn"></a> [cms\_fn](#module\_cms\_fn) | pagopa-dx/azure-function-app/azurerm | ~> 0.0 |
-| <a name="module_cms_storage_account"></a> [cms\_storage\_account](#module\_cms\_storage\_account) | github.com/pagopa/terraform-azurerm-v3//storage_account | v8.26.3 |
+| <a name="module_cms_fn"></a> [cms\_fn](#module\_cms\_fn) | pagopa-dx/azure-function-app/azurerm | ~> 2.0 |
+| <a name="module_cms_storage_account"></a> [cms\_storage\_account](#module\_cms\_storage\_account) | pagopa-dx/azure-storage-account/azurerm | ~> 1.0 |
 
 ## Resources
 
@@ -26,7 +26,6 @@ No requirements.
 | [azurerm_monitor_autoscale_setting.cms_fn](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_autoscale_setting) | resource |
 | [azurerm_monitor_diagnostic_setting.queue_diagnostic_setting](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
 | [azurerm_monitor_scheduled_query_rules_alert_v2.poison-queue-alert](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_scheduled_query_rules_alert_v2) | resource |
-| [azurerm_private_endpoint.st_queuest_queue](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) | resource |
 | [azurerm_storage_container.activations](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_container) | resource |
 | [azurerm_storage_queue.request-activations-ingestion-retry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
 | [azurerm_storage_queue.request-activations-ingestion-retry-poison](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/storage_queue) | resource |
@@ -76,8 +75,6 @@ No requirements.
 | [azurerm_key_vault_secret.services_publication_event_hub_connection_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_key_vault_secret.services_topics_event_hub_connection_string](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/key_vault_secret) | data source |
 | [azurerm_postgresql_flexible_server.cms_private_pgflex](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/postgresql_flexible_server) | data source |
-| [azurerm_private_dns_zone.storage_account_blob](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/private_dns_zone) | data source |
-| [azurerm_private_dns_zone.storage_account_queue](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_subscription.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subscription) | data source |
 
 ## Inputs
