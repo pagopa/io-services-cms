@@ -296,6 +296,14 @@ export const PDVTokenizerClientConfiguration = t.type({
   PDV_TOKENIZER_BASE_URL: NonEmptyString,
 });
 
+export const BlobStorageClientConfiguration = t.type({
+  ACTIVATIONS_CONTAINER_NAME: NonEmptyString,
+  STORAGE_ACCOUNT_NAME: NonEmptyString,
+});
+export type BlobStorageClientConfiguration = t.TypeOf<
+  typeof BlobStorageClientConfiguration
+>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -339,6 +347,7 @@ export const IConfig = t.intersection([
     PDVTokenizerClientConfiguration,
     ActivationEventHubConfig,
     HttpAgentConfig,
+    BlobStorageClientConfiguration,
   ]),
 ]);
 
