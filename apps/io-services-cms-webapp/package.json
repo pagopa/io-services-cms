@@ -40,6 +40,7 @@
     "@azure/event-hubs": "^5.12.2",
     "@azure/functions": "^3.5.1",
     "@azure/identity": "^4.0.0",
+    "@azure/storage-blob": "^12.27.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
     "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/fetch-utils": "workspace:^",

@@ -1,8 +1,11 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { AzureFunction } from "@azure/functions";
+import { DefaultAzureCredential } from "@azure/identity";
+import { BlobServiceClient } from "@azure/storage-blob";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { Fetch } from "@io-services-cms/fetch-utils";
 import {
+  Activations,
   LegacyActivation,
   LegacyServiceCosmosResource,
   ServiceHistory,
@@ -73,6 +76,7 @@ import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { GroupChangeEvent } from "./utils/sync-group-utils";
 import { handler as onIngestionActivationChangeHandler } from "./watchers/on-activation-ingestion-change";
+import { handler as onLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { makeHandler as makeOnSelfcareGroupChangeHandler } from "./watchers/on-selfcare-group-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
@@ -206,6 +210,11 @@ const serviceHistoryEventHubProducer = new EventHubProducerClient(
 const activationEventHubProducer = new EventHubProducerClient(
   config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
   config.ACTIVATIONS_EVENT_HUB_NAME,
+);
+
+const blobServiceClient = new BlobServiceClient(
+  `https://${config.STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+  new DefaultAzureCredential(),
 );
 
 // entrypoint for all http functions
@@ -432,6 +441,42 @@ export const onSelfcareGroupChangeEntryPoint: AzureFunction = (context, args) =>
               "warn",
             );
             context.bindings.syncGroupPoisonQueue = JSON.stringify(args);
+            return RTE.right([]);
+          },
+        ),
+      ),
+    ),
+    toAzureFunctionHandler,
+  )(context, args);
+
+export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
+  context,
+  args,
+) =>
+  pipe(
+    {
+      blobContainerClient: blobServiceClient.getContainerClient(
+        config.ACTIVATIONS_CONTAINER_NAME,
+      ),
+    },
+    onLegacyActivationChangeHandler,
+    processBatchOf(Activations.LegacyCosmosResource),
+    RTE.orElseW((e) =>
+      pipe(
+        context.executionContext.retryContext?.maxRetryCount ===
+          context.executionContext.retryContext?.retryCount,
+        B.fold(
+          () => RTE.left(e),
+          () => {
+            log(
+              context,
+              e instanceof Error
+                ? e.message
+                : "Something went wrong! Exeeded maxRetryCount, so items will be sent to poison queue",
+              "warn",
+            );
+            context.bindings.activationsSyncFromLegacyPoisonQueue =
+              JSON.stringify(args);
             return RTE.right([]);
           },
         ),
