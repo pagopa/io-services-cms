@@ -1,11 +1,9 @@
-import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
+import { ContainerClient } from "@azure/storage-blob";
 import { Activations, DateUtils } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
-
-import { BlobStorageClientConfiguration } from "../config";
 
 const noAction = {};
 type Actions = "migrationError";
