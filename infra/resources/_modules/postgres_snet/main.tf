@@ -1,4 +1,4 @@
-resource "available_subnet_cidr" "next_cidr" {
+resource "dx_available_subnet_cidr" "next_cidr" {
   virtual_network_id = module.postgres_flexible_itn_snet.id
   prefix_length      = 24 # For a /24 subnet
 }
