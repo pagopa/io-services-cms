@@ -175,7 +175,7 @@ module "eventhub" {
 }
 
 module "postgres_snet" {
-  source               = "../_modules/postgres_snet"
+  source               = "../_modules/postgres"
   prefix               = local.prefix
   env_short            = local.env_short
   project              = local.project
