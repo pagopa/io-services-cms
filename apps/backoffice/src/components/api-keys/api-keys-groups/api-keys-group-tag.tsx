@@ -1,5 +1,6 @@
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import { Warning } from "@mui/icons-material";
+import { useTranslation } from "next-i18next";
 
 import { ApiKeyTag } from "../api-key-tag";
 
@@ -20,11 +21,20 @@ export const ApiKeysGroupTag = ({
   onClick,
   value,
 }: ApiKeysGroupTagProps) => {
+  const { t } = useTranslation();
   const shouldBeDisabled = () =>
     value.state !== StateEnum.active && value.state !== StateEnum.suspended;
 
   const handleOnClick = () =>
     !shouldBeDisabled() && onClick ? onClick() : undefined;
+  const tooltip =
+    value.state === StateEnum.suspended
+      ? t("routes.keys.manage.group.state.suspended.tooltip", {
+          name: value?.name ?? "",
+        })
+      : noWrap
+        ? (value?.name ?? "")
+        : "";
 
   return (
     <ApiKeyTag
@@ -35,13 +45,7 @@ export const ApiKeysGroupTag = ({
       label={value.name}
       noWrap={noWrap}
       onClick={handleOnClick}
-      tooltip={
-        value.state === StateEnum.suspended
-          ? "routes.keys.manage.group.state.suspended.tooltip"
-          : noWrap
-            ? value.name
-            : ""
-      }
+      tooltip={tooltip}
     />
   );
 };
