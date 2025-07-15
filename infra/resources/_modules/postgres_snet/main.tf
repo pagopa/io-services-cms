@@ -8,5 +8,5 @@ module "pgres_snet" {
   name                 = "${var.project}-${var.application_basename}-pgres-snet-01"
   resource_group_name  = var.virtual_network.resource_group_name
   virtual_network_name = var.virtual_network.name
-  address_prefixes     = [available_subnet_cidr.next_cidr.cidr_block]
+  address_prefixes     = [dx_available_subnet_cidr.next_cidr.cidr_block]
 }
