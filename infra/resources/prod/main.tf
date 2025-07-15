@@ -184,6 +184,7 @@ module "postgres_snet" {
   resource_group_name  = data.azurerm_resource_group.rg.name
 
   virtual_network = {
+    id                  = data.azurerm_virtual_network.itn_common.id
     name                = data.azurerm_virtual_network.itn_common.name
     resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
   }

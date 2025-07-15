@@ -54,6 +54,7 @@ variable "application_basename" {
 
 variable "virtual_network" {
   type = object({
+    id                  = string
     name                = string
     resource_group_name = string
   })
