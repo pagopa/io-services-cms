@@ -7,13 +7,14 @@
 |------|---------|
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | 2.48.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.0 |
+| <a name="requirement_dx"></a> [dx](#requirement\_dx) | ~> 0.4 |
 | <a name="requirement_restapi"></a> [restapi](#requirement\_restapi) | <= 1.19.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.35.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.36.0 |
 
 ## Modules
 
@@ -26,6 +27,7 @@
 | <a name="module_function_app"></a> [function\_app](#module\_function\_app) | ../_modules/function_app | n/a |
 | <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault) | ../_modules/key_vault | n/a |
 | <a name="module_monitor"></a> [monitor](#module\_monitor) | ../_modules/monitor | n/a |
+| <a name="module_postgres_snet"></a> [postgres\_snet](#module\_postgres\_snet) | ../_modules/postgres | n/a |
 
 ## Resources
 

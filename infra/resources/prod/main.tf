@@ -173,3 +173,21 @@ module "eventhub" {
 
   tags = local.tags
 }
+
+module "postgres_snet" {
+  source               = "../_modules/postgres"
+  prefix               = local.prefix
+  env_short            = local.env_short
+  project              = local.project
+  location             = local.location
+  application_basename = local.application_basename
+  resource_group_name  = data.azurerm_resource_group.rg.name
+
+  virtual_network = {
+    id                  = data.azurerm_virtual_network.itn_common.id
+    name                = data.azurerm_virtual_network.itn_common.name
+    resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
+  }
+
+  tags = local.tags
+}

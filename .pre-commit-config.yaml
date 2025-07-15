@@ -26,10 +26,7 @@ repos:
         name: terraform_docs on resources
         args:
           - --hook-config=--create-file-if-not-exist=true
-        exclude: |
-          (?x)^(
-            src\/(?:.*\/)?(?:_?modules)\/.*
-          )$
+        exclude: '(\/_?modules\/.*)'
       - id: terraform_validate
         exclude: '(\/_?modules\/.*)'
         args:

@@ -23,6 +23,11 @@ terraform {
       source  = "hashicorp/azuread"
       version = "2.48.0"
     }
+
+    dx = {
+      source  = "pagopa-dx/azure"
+      version = "~> 0.4"
+    }
   }
 }
 
@@ -30,3 +35,5 @@ provider "azurerm" {
   features {}
   storage_use_azuread = true
 }
+
+provider "dx" {}
