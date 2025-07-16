@@ -2,7 +2,10 @@ import { AzureFunction, Context } from "@azure/functions";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { beforeEach, describe, expect, it, test, vi } from "vitest";
-import { onSelfcareGroupChangeEntryPoint } from "../main";
+import {
+  activationsSyncFromLegacyEntryPoint,
+  onSelfcareGroupChangeEntryPoint,
+} from "../main";
 
 const mocks = vi.hoisted(() => {
   const config = {
@@ -25,6 +28,7 @@ const mocks = vi.hoisted(() => {
     SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: "test-history-conn",
     SERVICES_HISTORY_EVENT_HUB_NAME: "test-history-name",
     APPINSIGHTS_INSTRUMENTATIONKEY: "test-key",
+    ACTIVATIONS_CONTAINER_NAME: "test-activations",
   };
 
   const mockEventHubProducer = {
@@ -92,8 +96,6 @@ const mocks = vi.hoisted(() => {
         update: vi.fn(),
       }),
     },
-    ServiceHistory: {},
-
     EventHubProducerClient: vi.fn(() => mockEventHubProducer),
     createBlobService: vi.fn().mockReturnValue({
       createBlockBlobFromText: vi.fn(),
@@ -102,19 +104,44 @@ const mocks = vi.hoisted(() => {
       trackEvent: vi.fn(),
       trackException: vi.fn(),
     }),
-    makeHandler: vi.fn(),
+    makeOnSelfcareGroupChangeHandler: vi.fn(),
+    makeOnLegacyActivationChangeHandler: vi.fn(),
     SUBSCRIPTION_CIDRS_COLLECTION_NAME: "test",
     SERVICE_COLLECTION_NAME: "test",
     envConfig: {},
     makeInfoHandler: vi.fn(() => {}),
     createWebServer: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
-    LegacyServiceCosmosResource: {},
-    LegacyActivation: {},
-    processBatchOf: vi.fn().mockImplementation((...args) => () => {}),
+    processBatchOf: vi.fn(
+      () =>
+        <L = Error, A = unknown>(
+          rte: RTE.ReaderTaskEither<any, L, A>,
+        ): RTE.ReaderTaskEither<any, L, A> =>
+          rte,
+    ),
     createRequestReviewHandler: vi.fn((...args: any[]) => {}),
     createRequestActivationIngestionRetryHandler: vi.fn((...args: any[]) => {}),
-    toAzureFunctionHandler: vi.fn(),
+    toAzureFunctionHandler: vi.fn(
+      <L, R>(
+        procedure: RTE.ReaderTaskEither<
+          {
+            context: Context;
+            inputs: unknown[];
+          },
+          L,
+          R
+        >,
+      ): AzureFunction =>
+        (context, ...inputs) =>
+          pipe(
+            procedure,
+            RTE.getOrElseW((f) => {
+              const error =
+                f instanceof Error ? f : new Error("Unexpected error");
+              throw error;
+            }),
+          )({ context, inputs })(),
+    ),
     setBindings: vi.fn((...args: any[]) => () => {}),
   };
 });
@@ -205,20 +232,25 @@ vi.mock("../ingestion/request-activation-ingestion-retry-handler", () => {
 
 vi.mock("../watchers/on-selfcare-group-change", () => {
   return {
-    makeHandler: mocks.makeHandler,
+    makeHandler: mocks.makeOnSelfcareGroupChangeHandler,
   };
 });
 
-vi.mock("@io-services-cms/models", () => {
+vi.mock("@io-services-cms/models", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
   return {
+    ...actual,
     ServiceLifecycle: {
       ...mocks.ServiceLifecycle,
     },
     ServicePublication: mocks.ServicePublication,
     stores: mocks.stores,
-    ServiceHistory: mocks.ServiceHistory,
-    LegacyServiceCosmosResource: mocks.LegacyServiceCosmosResource,
-    LegacyActivation: mocks.LegacyActivation,
+  };
+});
+
+vi.mock("../watchers/on-legacy-activations-change", () => {
+  return {
+    makeHandler: mocks.makeOnLegacyActivationChangeHandler,
   };
 });
 
@@ -247,8 +279,7 @@ beforeEach(() => {
 test("it works", () => {
   expect(1).toBe(1);
 });
-
-describe("onSelfcareGroupChangeEntryPoint", () => {
+describe("main", () => {
   const mockLogger = {
     error: vi.fn(),
     warn: vi.fn(),
@@ -256,7 +287,6 @@ describe("onSelfcareGroupChangeEntryPoint", () => {
     verbose: vi.fn(),
     metric: vi.fn(),
   };
-
   const createMockContext = (
     retryCount: number = 0,
     maxRetryCount: number = 3,
@@ -282,104 +312,139 @@ describe("onSelfcareGroupChangeEntryPoint", () => {
       log: mockLogger,
     }) as unknown as Context;
 
-  const mockAzureFunctionHandler =
-    <L, R>(
-      procedure: RTE.ReaderTaskEither<
-        {
-          context: Context;
-          inputs: unknown[];
-        },
-        L,
-        R
-      >,
-    ): AzureFunction =>
-    (context, ...inputs) =>
-      pipe(
-        procedure,
-        RTE.getOrElseW((f) => {
-          const error = f instanceof Error ? f : new Error("Unexpected error");
-          throw error;
+  describe("onSelfcareGroupChangeEntryPoint", () => {
+    it("should fail when handler fails when the max retries are not reached", async () => {
+      //given
+      const context = createMockContext(1, 3);
+      const args = [{ testData: "test" }];
+      const error = new Error("error from makeOnSelfcareGroupChangeHandler");
+      mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
+        RTE.left(error),
+      );
+
+      //when and then
+      await expect(
+        onSelfcareGroupChangeEntryPoint(context, args),
+      ).rejects.toThrow(error);
+      expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnSelfcareGroupChangeHandler).toHaveBeenCalledOnce();
+    });
+
+    it("should fail when handler fails when the max retries are reached", async () => {
+      //given
+      const context = createMockContext(3, 3);
+      const args = [{ testData: "test" }];
+      const error = new Error("error from makeOnSelfcareGroupChangeHandler");
+      mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
+        RTE.left(error),
+      );
+
+      //when
+      const result = await onSelfcareGroupChangeEntryPoint(context, args);
+      //then
+      expect(result).toStrictEqual([]);
+      expect(context.bindings.syncGroupPoisonQueue).toStrictEqual(
+        JSON.stringify(args),
+      );
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnSelfcareGroupChangeHandler).toHaveBeenCalledOnce();
+    });
+
+    it("should success", async () => {
+      //given
+      const context = createMockContext(3, 3);
+      const args = [{ testData: "test" }];
+      mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
+        RTE.right(args),
+      );
+
+      //when
+      const result = await onSelfcareGroupChangeEntryPoint(context, args);
+      //then
+      expect(result).toStrictEqual(args);
+      expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
+
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnSelfcareGroupChangeHandler).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("activationsSyncFromLegacyEntryPoint", () => {
+    it("should fail when handler fails when the max retries are not reached", async () => {
+      //given
+      const context = createMockContext(1, 3);
+      const args = [{ testData: "test" }];
+      const error = new Error("error from makeOnLegacyActivationChangeHandler");
+      mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
+        RTE.left(error),
+      );
+
+      //when and then
+      await expect(
+        activationsSyncFromLegacyEntryPoint(context, args),
+      ).rejects.toThrow(error);
+      expect(
+        context.bindings.activationsSyncFromLegacyPoisonQueue,
+      ).toBeUndefined();
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blobContainerClient: expect.objectContaining({
+            containerName: mocks.config.ACTIVATIONS_CONTAINER_NAME,
+          }),
         }),
-      )({ context, inputs })();
-
-  it("should fail when makeOnSelfcareGroupChangeHandler fails when the max retries are not reached", async () => {
-    //given
-    const context = createMockContext(1, 3);
-    const args = [{ testData: "test" }];
-    const error = new Error("error from makeOnSelfcareGroupChangeHandler");
-    mocks.makeHandler.mockImplementationOnce(() => RTE.left(error));
-    mocks.processBatchOf.mockImplementationOnce(
-      () =>
-        <L, A>(
-          rte: RTE.ReaderTaskEither<any, L, A>,
-        ): RTE.ReaderTaskEither<any, L, A> =>
-          rte,
-    );
-
-    mocks.toAzureFunctionHandler.mockImplementationOnce(
-      mockAzureFunctionHandler,
-    );
-
-    //when and then
-    await expect(
-      onSelfcareGroupChangeEntryPoint(context, args),
-    ).rejects.toThrow("error from makeOnSelfcareGroupChangeHandler");
-    expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
-    expect(mocks.processBatchOf).toHaveBeenCalledOnce();
-    expect(mocks.makeHandler).toHaveBeenCalledOnce();
-  });
-
-  it("should fail when makeOnSelfcareGroupChangeHandler fails when the max retries are reached", async () => {
-    //given
-    const context = createMockContext(3, 3);
-    const args = [{ testData: "test" }];
-    const error = new Error("error from makeOnSelfcareGroupChangeHandler");
-    mocks.makeHandler.mockImplementationOnce(() => RTE.left(error));
-    mocks.processBatchOf.mockImplementationOnce(
-      () =>
-        <L, A>(
-          rte: RTE.ReaderTaskEither<any, L, A>,
-        ): RTE.ReaderTaskEither<any, L, A> =>
-          rte,
-    );
-
-    mocks.toAzureFunctionHandler.mockImplementationOnce(
-      mockAzureFunctionHandler,
-    );
-    //when
-    const result = await onSelfcareGroupChangeEntryPoint(context, args);
-    //then
-    expect(result).toStrictEqual([]);
-    expect(context.bindings.syncGroupPoisonQueue).toStrictEqual(
-      JSON.stringify(args),
-    );
-    expect(mocks.processBatchOf).toHaveBeenCalledOnce();
-    expect(mocks.makeHandler).toHaveBeenCalledOnce();
-  });
-
-  it("should success", async () => {
-    //given
-    const context = createMockContext(3, 3);
-    const args = [{ testData: "test" }];
-    mocks.makeHandler.mockImplementationOnce(() => RTE.right(args));
-    mocks.processBatchOf.mockImplementationOnce(
-      () =>
-        <L = Error, A = unknown>(
-          rte: RTE.ReaderTaskEither<any, L, A>,
-        ): RTE.ReaderTaskEither<any, L, A> =>
-          rte,
-    );
-
-    mocks.toAzureFunctionHandler.mockImplementationOnce(
-      mockAzureFunctionHandler,
-    );
-    //when
-    const result = await onSelfcareGroupChangeEntryPoint(context, args);
-    //then
-    expect(result).toStrictEqual(args);
-    expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
-
-    expect(mocks.processBatchOf).toHaveBeenCalledOnce();
-    expect(mocks.makeHandler).toHaveBeenCalledOnce();
+      );
+    });
+    it("should fail when handler fails when the max retries are reached", async () => {
+      //given
+      const context = createMockContext(3, 3);
+      const args = [{ testData: "test" }];
+      const error = new Error("error from makeOnLegacyActivationChangeHandler");
+      mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
+        RTE.left(error),
+      );
+      //when
+      const result = await activationsSyncFromLegacyEntryPoint(context, args);
+      //then
+      expect(result).toStrictEqual([]);
+      expect(
+        context.bindings.activationsSyncFromLegacyPoisonQueue,
+      ).toStrictEqual(JSON.stringify(args));
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blobContainerClient: expect.objectContaining({
+            containerName: mocks.config.ACTIVATIONS_CONTAINER_NAME,
+          }),
+        }),
+      );
+    });
+    it("should success", async () => {
+      //given
+      const context = createMockContext(3, 3);
+      const args = [{ testData: "test" }];
+      mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
+        RTE.right(args),
+      );
+      //when
+      const result = await activationsSyncFromLegacyEntryPoint(context, args);
+      //then
+      expect(result).toStrictEqual(args);
+      expect(
+        context.bindings.activationsSyncFromLegacyPoisonQueue,
+      ).toBeUndefined();
+      expect(mocks.processBatchOf).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
+      expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          blobContainerClient: expect.objectContaining({
+            containerName: mocks.config.ACTIVATIONS_CONTAINER_NAME,
+          }),
+        }),
+      );
+    });
   });
 });

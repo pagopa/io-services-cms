@@ -33,7 +33,7 @@ interface HandlerDependencies {
   readonly blobContainerClient: ContainerClient;
 }
 
-export const handler =
+export const makeHandler =
   ({
     blobContainerClient,
   }: HandlerDependencies): RTE.ReaderTaskEither<

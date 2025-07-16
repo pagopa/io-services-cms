@@ -76,7 +76,7 @@ import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { GroupChangeEvent } from "./utils/sync-group-utils";
 import { handler as onIngestionActivationChangeHandler } from "./watchers/on-activation-ingestion-change";
-import { handler as onLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
+import { makeHandler as makeOnLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { makeHandler as makeOnSelfcareGroupChangeHandler } from "./watchers/on-selfcare-group-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
@@ -459,7 +459,7 @@ export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
         config.ACTIVATIONS_CONTAINER_NAME,
       ),
     },
-    onLegacyActivationChangeHandler,
+    makeOnLegacyActivationChangeHandler,
     processBatchOf(Activations.LegacyCosmosResource),
     RTE.orElseW((e) =>
       pipe(
