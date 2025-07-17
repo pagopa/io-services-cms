@@ -479,7 +479,7 @@
           "state": {
             "suspended": {
               "label": "Group API Keys are suspended",
-              "tooltip": "The group has been suspended in the Reserved Area and its API Keys are blocked."
+              "tooltip": "The group {{name}} has been suspended in the Reserved Area and its API Keys are blocked."
             }
           }
         }
