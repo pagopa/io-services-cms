@@ -7,7 +7,7 @@ module "cms_postgres_flexible_server" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "cms-psql"
+    app_name        = "cms"
     instance_number = "01"
   }
   resource_group_name                  = var.resource_group_name
