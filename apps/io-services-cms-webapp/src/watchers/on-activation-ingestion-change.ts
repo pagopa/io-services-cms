@@ -1,5 +1,5 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { Activation } from "@io-services-cms/models";
+import { Activations } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -21,7 +21,7 @@ export const handler = (
   pdvTokenizerClient: PdvTokenizerClient,
 ): RTE.ReaderTaskEither<
   {
-    items: Activation[];
+    items: Activations.Activation[];
   },
   Error,
   IngestionResults<EnrichedActivation>[]
@@ -29,13 +29,17 @@ export const handler = (
   createIngestionBlobTriggerHandler(
     producer,
     avroActivationFormatter,
-    enricher<Activation>(pdvTokenizerClient),
+    enricher<Activations.Activation>(pdvTokenizerClient),
   );
 
 export const parseBlob =
   () =>
   <R>(
-    processItems: RTE.ReaderTaskEither<{ items: Activation[] }, Error, R>,
+    processItems: RTE.ReaderTaskEither<
+      { items: Activations.Activation[] },
+      Error,
+      R
+    >,
   ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
   ({ context, inputs }) => {
     const blob = inputs[0] as Buffer;
@@ -44,15 +48,7 @@ export const parseBlob =
       pipe(
         blob.toString("utf-8"),
         parseJson,
-        E.map((parsedJson) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { last_update, ...rest } = parsedJson;
-          return {
-            ...rest,
-            lastUpdate: parsedJson.last_update,
-          };
-        }),
-        E.chainW(Activation.decode),
+        E.chainW(Activations.Activation.decode),
         E.mapLeft((e) => {
           if (Array.isArray(e) && e.length !== 0) {
             e.forEach((validationError) =>

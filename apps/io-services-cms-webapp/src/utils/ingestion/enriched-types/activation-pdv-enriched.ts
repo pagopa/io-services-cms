@@ -1,8 +1,8 @@
-import { Activation } from "@io-services-cms/models";
+import { Activations } from "@io-services-cms/models";
 import * as t from "io-ts";
 
 export const EnrichedActivation = t.intersection([
-  Activation,
+  Activations.Activation,
   t.type({ userPDVId: t.string }),
 ]);
 

@@ -9,17 +9,16 @@ import { EnrichedActivation } from "../enriched-types/activation-pdv-enriched";
 
 export const buildAvroActivationObject = (
   activation: EnrichedActivation,
-): Omit<avroActivation, "schema" | "subject"> => {
-  const lastUpdate = convertToMilliseconds(activation.lastUpdate);
-  return {
-    id: [activation.userPDVId, activation.serviceId, lastUpdate].join("-"),
-    //converting cosmos _ts from seconds to millis
-    modifiedAt: lastUpdate,
-    serviceId: activation.serviceId,
-    status: toAvroStatus(activation.status),
-    userPDVId: activation.userPDVId,
-  };
-};
+): Omit<avroActivation, "schema" | "subject"> => ({
+  id: [activation.userPDVId, activation.serviceId, activation.modifiedAt].join(
+    "-",
+  ),
+  //converting cosmos _ts from seconds to millis
+  modifiedAt: activation.modifiedAt,
+  serviceId: activation.serviceId,
+  status: toAvroStatus(activation.status),
+  userPDVId: activation.userPDVId,
+});
 
 const toAvroStatus = (status: EnrichedActivation["status"]): StatusEnum => {
   switch (status) {
@@ -30,13 +29,6 @@ const toAvroStatus = (status: EnrichedActivation["status"]): StatusEnum => {
     case "PENDING":
       return StatusEnum.PENDING;
   }
-};
-
-const convertToMilliseconds = (timestamp: number): number => {
-  if (String(timestamp).length === 13) {
-    return timestamp;
-  }
-  return timestamp * 1000;
 };
 
 export const avroActivationFormatter = (
