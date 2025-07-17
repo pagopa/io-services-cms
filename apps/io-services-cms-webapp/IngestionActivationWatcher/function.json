@@ -4,8 +4,8 @@
       "name": "ingestionActivation",
       "type": "blobTrigger",
       "direction": "in",
-      "path": "%ACTIVATIONS_BLOB_CONTAINER%/{name}",
-      "connection": "ACTIVATION_BLOB_STORAGE_CONNECTIONSTRING"
+      "path": "%ACTIVATIONS_CONTAINER_NAME%/{name}",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING"
     }
   ],
   "scriptFile": "../dist/main.js",
