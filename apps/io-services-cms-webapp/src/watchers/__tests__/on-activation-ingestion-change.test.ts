@@ -1,4 +1,3 @@
-import { Activation } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { describe, it, expect, vi, afterEach } from "vitest";
@@ -73,7 +72,7 @@ describe("parseBlob", () => {
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
       const errorMessageCheck = result.left.message.startsWith(
-        "Failed parsing the blob",
+        "Invalid JSON content",
       );
       expect(errorMessageCheck).toBe(true);
     }

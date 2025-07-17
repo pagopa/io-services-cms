@@ -117,7 +117,9 @@ describe("Generic Ingestion PDND Handlers", () => {
       )(context, aValidQueueItem);
 
       expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toBeCalledWith(anItem);
       expect(aProducer.sendBatch).toBeCalledTimes(1);
+      expect(aProducer.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
     it("should throw on non permanent error(transient error)", async () => {
@@ -147,7 +149,9 @@ describe("Generic Ingestion PDND Handlers", () => {
         expect(res.right).toStrictEqual([{}]);
       }
       expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toBeCalledWith(anItem);
       expect(aProducer.sendBatch).toBeCalledTimes(1);
+      expect(aProducer.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
     it("should throw on eventhub error", async () => {
@@ -158,9 +162,13 @@ describe("Generic Ingestion PDND Handlers", () => {
       )({ items: [anItem] })();
 
       //then
-      expect(E.isLeft(res)).toBeTruthy();
+      if (E.isLeft(res)) {
+        expect(res.left.message).toBe("Failed to send batch");
+      }
       expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toBeCalledWith(anItem);
       expect(aProducerWhichFails.sendBatch).toBeCalledTimes(1);
+      expect(aProducerWhichFails.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
     it("should throw on avro formatter error", async () => {
@@ -171,8 +179,11 @@ describe("Generic Ingestion PDND Handlers", () => {
       )({ items: [anItem] })();
 
       //then
-      expect(E.isLeft(res)).toBeTruthy();
+      if (E.isLeft(res)) {
+        expect(res.left.message).toBe("Failed to format item");
+      }
       expect(aFormatterWhichFails).toBeCalledTimes(1);
+      expect(aFormatterWhichFails).toBeCalledWith(anItem);
       expect(aProducerWhichFails.sendBatch).toBeCalledTimes(0);
     });
   });
