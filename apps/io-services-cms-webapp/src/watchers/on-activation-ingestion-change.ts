@@ -1,5 +1,6 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { Activations } from "@io-services-cms/models";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -32,7 +33,15 @@ export const handler = (
     enricher<Activations.Activation>(pdvTokenizerClient),
   );
 
-export const parseBlob =
+export const parseBlob: () => <R>(
+  processItems: RTE.ReaderTaskEither<
+    {
+      items: Activations.Activation[];
+    },
+    Error,
+    R
+  >,
+) => RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =
   () =>
   <R>(
     processItems: RTE.ReaderTaskEither<
@@ -49,20 +58,16 @@ export const parseBlob =
         blob.toString("utf-8"),
         parseJson,
         E.chainW(Activations.Activation.decode),
-        E.mapLeft((e) => {
-          if (Array.isArray(e) && e.length !== 0) {
-            e.forEach((validationError) =>
-              log(
-                context,
-                `Failed to parse: ${JSON.stringify(validationError)}`,
-                "error",
-              ),
+        E.mapLeft((e) =>
+          pipe(Array.isArray(e) ? readableReport(e) : e, (err) => {
+            log(
+              context,
+              `Cannot parse incoming item into JSON object [${err}]`,
+              "error",
             );
-          } else {
-            log(context, `Failed to parse: ${e}`, "error");
-          }
-          return new Error(`Failed parsing the blob`);
-        }),
+            return new Error(`Failed parsing the blob [${err}]`);
+          }),
+        ),
       ),
       TE.fromEither,
       TE.chainW((decodedItem) => processItems({ items: [decodedItem] })),
