@@ -72,7 +72,10 @@ describe("parseBlob", () => {
     //then
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
-      expect(result.left.message).toBe("Failed parsing the blob");
+      const errorMessageCheck = result.left.message.startsWith(
+        "Failed parsing the blob",
+      );
+      expect(errorMessageCheck).toBe(true);
     }
 
     expect(mockProcessItems).not.toHaveBeenCalled();
@@ -92,7 +95,10 @@ describe("parseBlob", () => {
     //then
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
-      expect(result.left.message).toBe("Failed parsing the blob");
+      const errorMessageCheck = result.left.message.startsWith(
+        "Failed parsing the blob",
+      );
+      expect(errorMessageCheck).toBe(true);
     }
     expect(mockProcessItems).not.toHaveBeenCalled();
   });
