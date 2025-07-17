@@ -18,8 +18,8 @@ data "azurerm_cosmosdb_account" "cosmos_legacy" {
 }
 
 data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
-  name                = "${var.prefix}-${var.env_short}-services-cms-private-pgflex"
-  resource_group_name = "${var.prefix}-${var.env_short}-services-cms-rg"
+  name                = "${var.prefix}-${var.env_short}-${var.location_short}-svc-cms-psql-01"
+  resource_group_name = "${var.prefix}-${var.env_short}-${var.location_short}-svc-rg-01"
 }
 
 data "azurerm_data_factory" "adf" {
