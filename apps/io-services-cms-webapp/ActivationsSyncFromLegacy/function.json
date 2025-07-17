@@ -1,0 +1,32 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "cosmosDBTrigger",
+      "direction": "in",
+      "name": "documents",
+      "connection": "LEGACY_COSMOSDB_CONNECTIONSTRING",
+      "databaseName": "%LEGACY_COSMOSDB_NAME%",
+      "containerName": "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS%",
+      "leaseContainerName": "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE%",
+      "createLeaseContainerIfNotExists": true,
+      "startFromBeginning": true,
+      "maxItemsPerInvocation": 50
+    },
+    {
+      "queueName": "%SYNC_ACTIVATIONS_POISON_QUEUE%",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
+      "name": "activationsSyncFromLegacyPoisonQueue",
+      "type": "queue",
+      "direction": "out"
+    }
+  ],
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 10,
+    "minimumInterval": "00:00:10",
+    "maximumInterval": "00:01:00"
+  },
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "activationsSyncFromLegacyEntryPoint"
+}

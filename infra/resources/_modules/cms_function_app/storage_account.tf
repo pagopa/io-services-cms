@@ -168,6 +168,11 @@ resource "azurerm_storage_queue" "sync-group-poison" {
   storage_account_name = module.cms_storage_account.name
 }
 
+resource "azurerm_storage_queue" "sync-activations-from-legacy-poison" {
+  name                 = "sync-activations-from-legacy-poison"
+  storage_account_name = module.cms_storage_account.name
+}
+
 
 /*******************************************
  * Storage Containers for CMS Function App *

@@ -467,6 +467,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/core-xml@npm:^1.4.3":
+  version: 1.4.5
+  resolution: "@azure/core-xml@npm:1.4.5"
+  dependencies:
+    fast-xml-parser: ^5.0.7
+    tslib: ^2.8.1
+  checksum: e967185b5181fb0a881700210c362b248b87439f04069080b8af4c7e5f1850b6351b4c5ae085a59737cbd731f5840f9dab90b63081acfa921bcf4155794eeb33
+  languageName: node
+  linkType: hard
+
 "@azure/cosmos@npm:^4.0.0":
   version: 4.0.0
   resolution: "@azure/cosmos@npm:4.0.0"
@@ -791,6 +801,27 @@ __metadata:
     events: ^3.0.0
     tslib: ^2.2.0
   checksum: 7f09b4bfae0d73f7cf8f383038edeaf8bc8610960bc24a9b8c140f4084bb3afd62971fb56e2ff5e013168165dcfff7b9a545f6cc837fe2669618184e4b77c107
+  languageName: node
+  linkType: hard
+
+"@azure/storage-blob@npm:^12.27.0":
+  version: 12.27.0
+  resolution: "@azure/storage-blob@npm:12.27.0"
+  dependencies:
+    "@azure/abort-controller": ^2.1.2
+    "@azure/core-auth": ^1.4.0
+    "@azure/core-client": ^1.6.2
+    "@azure/core-http-compat": ^2.0.0
+    "@azure/core-lro": ^2.2.0
+    "@azure/core-paging": ^1.1.1
+    "@azure/core-rest-pipeline": ^1.10.1
+    "@azure/core-tracing": ^1.1.2
+    "@azure/core-util": ^1.6.1
+    "@azure/core-xml": ^1.4.3
+    "@azure/logger": ^1.0.0
+    events: ^3.0.0
+    tslib: ^2.2.0
+  checksum: 063bf878821b1ff488a6e374e7b777922ed66e02c07a2ad257f803bc5c42cfbf6329f8d9baa1b8e7da1e82e19acd018555c7890fe58754d98f1ef7a8f47b1ffa
   languageName: node
   linkType: hard
 
@@ -10421,6 +10452,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-xml-parser@npm:^5.0.7":
+  version: 5.2.5
+  resolution: "fast-xml-parser@npm:5.2.5"
+  dependencies:
+    strnum: ^2.1.0
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: b12daa933bc226bd7df1e1ecbd305e561c83fd6e4a234b5e2728901deca25a9b9522b9d3ebafde41b1f4d87ab814e3efe18c636638580795fdbe4670a556be88
+  languageName: node
+  linkType: hard
+
 "fastq@npm:^1.6.0":
   version: 1.15.0
   resolution: "fastq@npm:1.15.0"
@@ -11943,6 +11985,7 @@ __metadata:
     "@azure/event-hubs": ^5.12.2
     "@azure/functions": ^3.5.1
     "@azure/identity": ^4.0.0
+    "@azure/storage-blob": ^12.27.0
     "@chasdevs/avro-to-typescript": ^1.4.0
     "@io-services-cms/external-clients": "workspace:^"
     "@io-services-cms/fetch-utils": "workspace:^"
@@ -17595,6 +17638,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"strnum@npm:^2.1.0":
+  version: 2.1.1
+  resolution: "strnum@npm:2.1.1"
+  checksum: 566139b218ef13bdde2a69c744852ac41ea167588f624d46c3b3bebb5d1d1775c55bca4702a0ad2a6a66eb4b3b7de4cbbc83e8d40c5835feabebf6f9cc468993
+  languageName: node
+  linkType: hard
+
 "style-to-object@npm:^0.4.0":
   version: 0.4.4
   resolution: "style-to-object@npm:0.4.4"
@@ -18225,6 +18275,13 @@ __metadata:
   version: 2.7.0
   resolution: "tslib@npm:2.7.0"
   checksum: 1606d5c89f88d466889def78653f3aab0f88692e80bb2066d090ca6112ae250ec1cfa9dbfaab0d17b60da15a4186e8ec4d893801c67896b277c17374e36e1d28
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
   languageName: node
   linkType: hard
 
