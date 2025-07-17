@@ -42,15 +42,8 @@ describe("parseBlob", () => {
       fiscalCode: "DRMLRD84H15H282A",
       serviceId: "service1",
       status: "ACTIVE",
-      last_update: 1751901650032,
+      modifiedAt: 1751901650032,
     };
-
-    const expectedDecodedItem: Activation = {
-      fiscalCode: inputData.fiscalCode,
-      serviceId: inputData.serviceId,
-      status: inputData.status,
-      lastUpdate: inputData.last_update,
-    } as unknown as Activation;
 
     const blob = Buffer.from(JSON.stringify(inputData));
     const azureFunctionCall = { context: mockContext, inputs: [blob] };
@@ -63,7 +56,7 @@ describe("parseBlob", () => {
     expect(E.getOrElseW(() => "")(result)).toBe("Processed OK");
 
     expect(mockProcessItems).toHaveBeenCalledWith({
-      items: [expectedDecodedItem],
+      items: [inputData],
     });
   });
 

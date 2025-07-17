@@ -13,7 +13,7 @@ const avroType = avro.Type.forSchema(
 //mocks
 const aEnrichedActivationMock: EnrichedActivation = {
   status: "ACTIVE",
-  lastUpdate: 1751901650032,
+  modifiedAt: 1751901650032,
   userPDVId: "dummy-user-pdv",
   serviceId: "dummyserviceid",
 } as unknown as EnrichedActivation;
