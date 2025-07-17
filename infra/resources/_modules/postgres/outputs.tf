@@ -1,7 +1,7 @@
-output "pgres_snet_id" {
-  value = module.pgres_snet.id
-}
-
-output "pgres_snet_name" {
-  value = module.pgres_snet.name
+output "pgres_snet" {
+  value = {
+    id   = module.pgres_snet.id
+    name = module.pgres_snet.name
+  }
+  description = "Id and name of the postgres snet"
 }

@@ -174,20 +174,31 @@ module "eventhub" {
   tags = local.tags
 }
 
-module "postgres_snet" {
+module "postgres" {
   source               = "../_modules/postgres"
   prefix               = local.prefix
   env_short            = local.env_short
-  project              = local.project
+  location_short       = local.location_short
   location             = local.location
+  project              = local.project
+  domain               = local.domain
   application_basename = local.application_basename
   resource_group_name  = data.azurerm_resource_group.rg.name
+
+  # Cms Fn Binding
+  cms_fn_name         = module.cms_function_app.cms_fn_name
+  cms_fn_principal_id = module.cms_function_app.cms_fn_principal_id
+
+  key_vault_id = module.key_vault.key_vault_id
 
   virtual_network = {
     id                  = data.azurerm_virtual_network.itn_common.id
     name                = data.azurerm_virtual_network.itn_common.name
     resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
   }
+
+  peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
+  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
 
   tags = local.tags
 }
