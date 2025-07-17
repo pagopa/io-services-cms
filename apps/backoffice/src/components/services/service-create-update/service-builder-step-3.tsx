@@ -48,12 +48,14 @@ export const getValidationSchema = (
 export interface ServiceBuilderStep3Props {
   groups?: readonly Group[];
   mode: CreateUpdateMode;
+  session: Session | null;
 }
 
 /** Third step of Service create/update process */
 export const ServiceBuilderStep3 = ({
   groups,
   mode,
+  session,
 }: ServiceBuilderStep3Props) => {
   const { t } = useTranslation();
   const { getFieldState, resetField, watch } = useFormContext();
@@ -66,6 +68,11 @@ export const ServiceBuilderStep3 = ({
 
   const isGroupSelectorVisible = () =>
     mode === "create" && groups && groups?.length > 0;
+
+  const isGroupRequired =
+    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+    isOperator(session) &&
+    isAtLeastInOneGroup(session);
 
   useEffect(() => {
     setAreAuthorizedCidrsDirty(getFieldState("authorized_cidrs").isDirty);
@@ -98,7 +105,9 @@ export const ServiceBuilderStep3 = ({
           sx={{ maxWidth: "185px" }}
         />
       </FormStepSectionWrapper>
-      {isGroupSelectorVisible() && <ServiceGroupSelector groups={groups} />}
+      {isGroupSelectorVisible() && (
+        <ServiceGroupSelector groups={groups} required={isGroupRequired} />
+      )}
       <ServiceExtraConfigurator />
     </>
   );

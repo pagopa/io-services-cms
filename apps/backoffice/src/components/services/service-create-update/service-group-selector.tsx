@@ -9,10 +9,14 @@ import { useTranslation } from "next-i18next";
 
 export interface ServiceGroupSelectorProps {
   groups?: readonly Group[];
+  required?: boolean;
 }
 
 /** Group selector component */
-export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
+export const ServiceGroupSelector = ({
+  groups,
+  required,
+}: ServiceGroupSelectorProps) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
 
@@ -49,6 +53,7 @@ export const ServiceGroupSelector = ({ groups }: ServiceGroupSelectorProps) => {
         label={t("forms.service.metadata.group.label")}
         name="metadata.group_id"
         placeholder={t("forms.service.metadata.group.placeholder")}
+        required={required}
       />
     </FormStepSectionWrapper>
   );

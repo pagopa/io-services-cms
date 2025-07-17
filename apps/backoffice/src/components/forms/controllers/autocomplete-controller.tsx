@@ -14,6 +14,7 @@ export interface AutocompleteControllerProps {
   label?: ReactNode;
   name: string;
   placeholder?: string;
+  required?: boolean;
 }
 
 export interface AutocompleteOption {
@@ -65,6 +66,7 @@ export function AutocompleteController({
                 error={!!error}
                 label={label}
                 placeholder={placeholder}
+                required
               />
             )}
             value={value}
