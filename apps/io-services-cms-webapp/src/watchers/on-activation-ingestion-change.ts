@@ -4,10 +4,9 @@ import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 
 import { AzureFunctionCall } from "../lib/azure/adapters";
-import { log } from "../lib/azure/misc";
 import { EnrichedActivation } from "../utils/ingestion/enriched-types/activation-pdv-enriched";
 import { enricher } from "../utils/ingestion/enricher/pdv-enricher";
 import { avroActivationFormatter } from "../utils/ingestion/formatter/activation-avro-formatter";
@@ -50,23 +49,23 @@ export const parseBlob: () => <R>(
       R
     >,
   ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
-  ({ context, inputs }) => {
+  ({ inputs }) => {
     const blob = inputs[0] as Buffer;
 
     return pipe(
       pipe(
         blob.toString("utf-8"),
         parseJson,
-        E.chainW(Activations.Activation.decode),
-        E.mapLeft((e) =>
-          pipe(Array.isArray(e) ? readableReport(e) : e, (err) => {
-            log(
-              context,
-              `Cannot parse incoming item into JSON object [${err}]`,
-              "error",
-            );
-            return new Error(`Failed parsing the blob [${err}]`);
-          }),
+        E.chainW(
+          flow(
+            Activations.Activation.decode,
+            E.mapLeft(
+              (errors) =>
+                new Error(
+                  `Failed parsing the blob [${readableReport(errors)}]`,
+                ),
+            ),
+          ),
         ),
       ),
       TE.fromEither,
