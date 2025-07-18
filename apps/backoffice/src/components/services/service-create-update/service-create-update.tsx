@@ -134,7 +134,13 @@ export const ServiceCreateUpdate = ({
       validationSchema: getVs2(t),
     },
     {
-      content: <ServiceBuilderStep3 groups={groupsData?.groups} mode={mode} />,
+      content: (
+        <ServiceBuilderStep3
+          groups={groupsData?.groups}
+          mode={mode}
+          session={session}
+        />
+      ),
       description: "forms.service.steps.step3.description",
       label: "forms.service.steps.step3.label",
       validationSchema: getVs3(t, session),
