@@ -47,7 +47,7 @@ describe("parseBlob", () => {
     const blob = Buffer.from(JSON.stringify(inputData));
     const azureFunctionCall = { context: mockContext, inputs: [blob] };
     //when
-    const resultTask = parseBlob()(mockProcessItems)(azureFunctionCall);
+    const resultTask = parseBlob(mockProcessItems)(azureFunctionCall);
     const result = await resultTask();
 
     //then
@@ -65,7 +65,7 @@ describe("parseBlob", () => {
     const azureFunctionCall = { context: mockContext, inputs: [blob] };
 
     //when
-    const resultTask = parseBlob()(mockProcessItems)(azureFunctionCall);
+    const resultTask = parseBlob(mockProcessItems)(azureFunctionCall);
     const result = await resultTask();
 
     //then
@@ -91,7 +91,7 @@ describe("parseBlob", () => {
     const azureFunctionCall = { context: mockContext, inputs: [blob] };
 
     //when
-    const resultTask = parseBlob()(mockProcessItems)(azureFunctionCall);
+    const resultTask = parseBlob(mockProcessItems)(azureFunctionCall);
     const result = await resultTask();
 
     //then
