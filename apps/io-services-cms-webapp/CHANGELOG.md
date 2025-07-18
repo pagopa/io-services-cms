@@ -1,5 +1,18 @@
 # io-services-cms-webapp
 
+## 1.41.0
+
+### Minor Changes
+
+- fa35f6f9: add activations sync from legacy
+
+### Patch Changes
+
+- 2bf0bddc: implentation of ingestion for service activation
+- Updated dependencies [fa35f6f9]
+- Updated dependencies [2bf0bddc]
+  - @io-services-cms/models@1.28.0
+
 ## 1.40.20
 
 ### Patch Changes
