@@ -202,3 +202,8 @@ module "postgres" {
 
   tags = local.tags
 }
+
+import {
+  to = module.postgres.module.cms_postgres_flexible_server.azurerm_postgresql_flexible_server.this
+  id = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/io-p-itn-svc-rg-01/providers/Microsoft.DBforPostgreSQL/flexibleServers/io-p-itn-svc-cms-psql-01"
+}
