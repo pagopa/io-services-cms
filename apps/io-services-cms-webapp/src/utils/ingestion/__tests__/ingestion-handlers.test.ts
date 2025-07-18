@@ -162,6 +162,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       )({ items: [anItem] })();
 
       //then
+      expect(E.isLeft(res)).toBeTruthy();
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to send batch");
       }
@@ -179,6 +180,7 @@ describe("Generic Ingestion PDND Handlers", () => {
       )({ items: [anItem] })();
 
       //then
+      expect(E.isLeft(res)).toBeTruthy();
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to format item");
       }

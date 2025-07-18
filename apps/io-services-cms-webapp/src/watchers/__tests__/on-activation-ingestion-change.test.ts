@@ -82,7 +82,10 @@ describe("parseBlob", () => {
 
   it("should fail and log if the JSON fails schema decoding", async () => {
     //given
-    const inputData = { fiscalCode: "short", last_update: "bad-date" };
+    const inputData = {
+      fiscalCode: "shortFiscalCode",
+      last_update: "bad-date",
+    };
 
     const blob = Buffer.from(JSON.stringify(inputData));
     const azureFunctionCall = { context: mockContext, inputs: [blob] };
@@ -94,10 +97,11 @@ describe("parseBlob", () => {
     //then
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
-      const errorMessageCheck = result.left.message.startsWith(
-        "Failed parsing the blob",
-      );
-      expect(errorMessageCheck).toBe(true);
+      const errorMessage = result.left.message;
+      // Check for the specific errors you expect, regardless of order
+      expect(errorMessage).toContain("at [root.fiscalCode] is not a valid");
+      expect(errorMessage).toContain("at [root.modifiedAt] is not a valid");
+      expect(errorMessage).toContain("at [root.serviceId] is not a valid");
     }
     expect(mockProcessItems).not.toHaveBeenCalled();
   });
