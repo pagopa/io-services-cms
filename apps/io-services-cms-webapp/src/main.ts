@@ -6,7 +6,6 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { Fetch } from "@io-services-cms/fetch-utils";
 import {
   Activations,
-  LegacyActivation,
   LegacyServiceCosmosResource,
   ServiceHistory,
   ServiceLifecycle,
@@ -36,7 +35,6 @@ import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
-import { createRequestActivationIngestionRetryHandler } from "./ingestion/request-activation-ingestion-retry-handler";
 import { createRequestServicesHistoryIngestionRetryHandler } from "./ingestion/request-services-history-ingestion-retry-handler";
 import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
@@ -75,7 +73,10 @@ import { pdvTokenizerClient } from "./utils/pdvTokenizerClient";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { GroupChangeEvent } from "./utils/sync-group-utils";
-import { handler as onIngestionActivationChangeHandler } from "./watchers/on-activation-ingestion-change";
+import {
+  handler as onIngestionActivationChangeHandler,
+  parseBlob,
+} from "./watchers/on-activation-ingestion-change";
 import { makeHandler as makeOnLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { makeHandler as makeOnSelfcareGroupChangeHandler } from "./watchers/on-selfcare-group-change";
@@ -545,15 +546,7 @@ export const onIngestionServiceHistoryChangeEntryPoint = pipe(
 //Ingestion Activations
 export const onIngestionActivationChangeEntryPoint = pipe(
   onIngestionActivationChangeHandler(activationEventHubProducer, pdvTokenizer),
-  processAllOf(LegacyActivation.CosmosResource),
-  setBindings((results) => ({
-    ingestionError: pipe(
-      results,
-      RA.map(RR.lookup("ingestionError")),
-      RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
-    ),
-  })),
+  parseBlob,
   toAzureFunctionHandler,
 );
 
@@ -566,10 +559,4 @@ export const createRequestServicesLifecycleIngestionRetryEntryPoint =
 export const createRequestServicesHistoryIngestionRetryEntryPoint =
   createRequestServicesHistoryIngestionRetryHandler(
     serviceHistoryEventHubProducer,
-  );
-//Ingestion Activation Retry DLQ
-export const createRequestActivationIngestionRetryEntryPoint =
-  createRequestActivationIngestionRetryHandler(
-    activationEventHubProducer,
-    pdvTokenizer,
   );
