@@ -52,7 +52,9 @@ describe("parseBlob", () => {
 
     //then
     expect(E.isRight(result)).toBe(true);
-    expect(E.getOrElseW(() => "")(result)).toBe("Processed OK");
+    if (E.isRight(result)) {
+      expect(result.right).toBe("Processed OK");
+    }
 
     expect(mockProcessItems).toHaveBeenCalledWith({
       items: [inputData],

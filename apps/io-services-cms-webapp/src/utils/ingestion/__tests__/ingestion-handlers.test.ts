@@ -103,8 +103,8 @@ describe("Generic Ingestion PDND Handlers", () => {
         aFormatter,
       )(context, anInvalidQueueItem);
 
-      expect(aFormatter).toBeCalledTimes(0);
-      expect(aProducer.sendBatch).toBeCalledTimes(0);
+      expect(aFormatter).not.toBeCalled();
+      expect(aProducer.sendBatch).not.toBeCalled();
     });
 
     it("should not reject on retry succes", async () => {
@@ -116,9 +116,9 @@ describe("Generic Ingestion PDND Handlers", () => {
         aFormatter,
       )(context, aValidQueueItem);
 
-      expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
-      expect(aProducer.sendBatch).toBeCalledTimes(1);
+      expect(aProducer.sendBatch).toHaveBeenCalledOnce();
       expect(aProducer.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
@@ -148,9 +148,9 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isRight(res)) {
         expect(res.right).toStrictEqual([{}]);
       }
-      expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
-      expect(aProducer.sendBatch).toBeCalledTimes(1);
+      expect(aProducer.sendBatch).toHaveBeenCalledOnce();
       expect(aProducer.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
@@ -166,9 +166,9 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to send batch");
       }
-      expect(aFormatter).toBeCalledTimes(1);
+      expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
-      expect(aProducerWhichFails.sendBatch).toBeCalledTimes(1);
+      expect(aProducerWhichFails.sendBatch).toHaveBeenCalledOnce();
       expect(aProducerWhichFails.sendBatch).toBeCalledWith([{ body: anItem }]);
     });
 
@@ -184,9 +184,9 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to format item");
       }
-      expect(aFormatterWhichFails).toBeCalledTimes(1);
+      expect(aFormatterWhichFails).toHaveBeenCalledOnce();
       expect(aFormatterWhichFails).toBeCalledWith(anItem);
-      expect(aProducerWhichFails.sendBatch).toBeCalledTimes(0);
+      expect(aProducerWhichFails.sendBatch).not.toBeCalled();
     });
   });
 });
