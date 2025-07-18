@@ -15,9 +15,8 @@ module "cms_postgres_flexible_server" {
 
   tier = "m"
 
-  db_version = "16"
+  db_version = "13"
   storage_mb = 32768
-  zone       = 1
 
   administrator_credentials = {
     name     = local.postgres_admin_username
