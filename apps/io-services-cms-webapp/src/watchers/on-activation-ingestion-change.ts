@@ -49,29 +49,21 @@ export const parseBlob: () => <R>(
       R
     >,
   ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
-  ({ inputs }) => {
-    const blob = inputs[0] as Buffer;
-
-    return pipe(
-      pipe(
-        blob.toString("utf-8"),
-        parseJson,
-        E.chainW(
-          flow(
-            Activations.Activation.decode,
-            E.mapLeft(
-              (errors) =>
-                new Error(
-                  `Failed parsing the blob [${readableReport(errors)}]`,
-                ),
-            ),
-          ),
+  ({ inputs }) =>
+    pipe(
+      inputs[0] as Buffer,
+      (blob) => blob.toString("utf-8"),
+      parseJson,
+      E.chain(
+        flow(
+          Activations.Activation.decode,
+          E.mapLeft(flow(readableReport, E.toError)),
         ),
       ),
+
       TE.fromEither,
       TE.chainW((decodedItem) => processItems({ items: [decodedItem] })),
     );
-  };
 
 const parseJson = (
   content: string,
