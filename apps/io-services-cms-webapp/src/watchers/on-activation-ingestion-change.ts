@@ -32,7 +32,7 @@ export const handler = (
     enricher<Activations.Activation>(pdvTokenizerClient),
   );
 
-export const parseBlob: () => <R>(
+export const parseBlob: <R>(
   processItems: RTE.ReaderTaskEither<
     {
       items: Activations.Activation[];
@@ -41,14 +41,7 @@ export const parseBlob: () => <R>(
     R
   >,
 ) => RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =
-  () =>
-  <R>(
-    processItems: RTE.ReaderTaskEither<
-      { items: Activations.Activation[] },
-      Error,
-      R
-    >,
-  ): RTE.ReaderTaskEither<AzureFunctionCall, Error, R> =>
+  (processItems) =>
   ({ inputs }) =>
     pipe(
       inputs[0] as Buffer,
