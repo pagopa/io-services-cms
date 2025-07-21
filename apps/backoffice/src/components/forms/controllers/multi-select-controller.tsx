@@ -110,7 +110,7 @@ export function MultiSelectController({
                   />
                   <ListItemText
                     primary={labels.selectAll}
-                    sx={{ color: "blue" }}
+                    sx={{ color: "#0073E6" }}
                   />
                 </MenuItem>
               )}
@@ -120,7 +120,7 @@ export function MultiSelectController({
                   <Checkbox checked={false} />
                   <ListItemText
                     primary={labels.deselectAll}
-                    sx={{ color: "blue" }}
+                    sx={{ color: "#0073E6" }}
                   />
                 </MenuItem>
               )}

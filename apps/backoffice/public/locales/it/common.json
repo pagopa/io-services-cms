@@ -264,8 +264,8 @@
             "label": "Scegli i servizi che vuoi associare al gruppo",
             "placeholder": "Seleziona i servizi",
             "labels": {
-              "selectAll": "seleziona tutti",
-              "deselectAll": "deseleziona tutti"
+              "selectAll": "Seleziona tutti",
+              "deselectAll": "Deseleziona tutti"
             }
           }
         }
