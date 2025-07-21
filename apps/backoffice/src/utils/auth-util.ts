@@ -48,11 +48,10 @@ export const isAtLeastInOneGroup = (session: Session | null) =>
 export const isGroupRequired = (
   session: Session | null,
   groupApiKeyEnabled: boolean,
-  skipGroupCheck = false,
 ): boolean =>
   hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
   isOperator(session) &&
-  (skipGroupCheck ? true : isAtLeastInOneGroup(session));
+  isAtLeastInOneGroup(session);
 
 /**
  * Can fetch & show Manage ApiKey (root) only for:

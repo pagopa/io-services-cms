@@ -11,7 +11,11 @@ import { ScopeEnum } from "@/generated/api/ServiceBaseMetadata";
 import { ServiceTopicList } from "@/generated/api/ServiceTopicList";
 import useFetch from "@/hooks/use-fetch";
 import { ServiceCreateUpdatePayload } from "@/types/service";
-import { hasManageKeyGroup, isGroupRequired } from "@/utils/auth-util";
+import {
+  hasApiKeyGroupsFeatures,
+  hasManageKeyGroup,
+  isOperator,
+} from "@/utils/auth-util";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useMemo } from "react";
@@ -64,7 +68,8 @@ export const ServiceCreateUpdate = ({
   const { data: groupsData, fetchData: groupsFetchData } = useFetch<Groups>();
 
   const handleOperatorWithSingleGroup = () =>
-    isGroupRequired(session, GROUP_APIKEY_ENABLED, true) &&
+    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
+    isOperator(session) &&
     session?.user?.permissions.selcGroups !== undefined &&
     session.user.permissions.selcGroups.length === 1
       ? session.user.permissions.selcGroups[0]
