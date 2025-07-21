@@ -48,6 +48,7 @@ export const AssociateGroupsCreateUpdate = ({
   const {
     data: groupUnboundedServicesData,
     fetchData: groupUnboundedServicesFetchData,
+    loading: loadingFetch,
   } = useFetch<UnboundedGroupServices>();
 
   const handleCancel = async () => {
@@ -74,6 +75,7 @@ export const AssociateGroupsCreateUpdate = ({
               : []
           }
           groups={groupsData ? [...groupsData.groups] : []}
+          loading={loadingFetch}
         />
       ),
       description: "forms.groups.associate.step.description",
