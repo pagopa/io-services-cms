@@ -30,6 +30,7 @@ export function AutocompleteController({
   label,
   name,
   placeholder,
+  required,
 }: AutocompleteControllerProps) {
   const { t } = useTranslation();
   const { control, formState, register } = useFormContext();
@@ -66,7 +67,7 @@ export function AutocompleteController({
                 error={!!error}
                 label={label}
                 placeholder={placeholder}
-                required
+                required={required}
               />
             )}
             value={value}
