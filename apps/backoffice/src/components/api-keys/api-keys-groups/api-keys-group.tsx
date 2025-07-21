@@ -94,7 +94,9 @@ export const ApiKeyGroup = ({
                 color="warning"
                 icon={<Warning />}
                 label="routes.keys.manage.group.state.suspended.label"
-                tooltip="routes.keys.manage.group.state.suspended.tooltip"
+                tooltip={t("routes.keys.manage.group.state.suspended.tooltip", {
+                  name: apiKey.name,
+                })}
               />
             )}
           </Stack>
