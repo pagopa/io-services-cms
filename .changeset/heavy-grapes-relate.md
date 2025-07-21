@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": minor
 ---
 
-introduced the “Select All” and “Deselect All”
+ApiKeyGroup Bulk Association: introduced “Select All” and “Deselect All” for services multiselect.
