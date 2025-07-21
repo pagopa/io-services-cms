@@ -7,11 +7,7 @@ import {
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
-import {
-  hasApiKeyGroupsFeatures,
-  isAtLeastInOneGroup,
-  isOperator,
-} from "@/utils/auth-util";
+import { isGroupRequired } from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
 import { Session } from "next-auth";
@@ -36,12 +32,9 @@ export const getValidationSchema = (
         text: z.string(),
         url: getOptionalUrlSchema(t),
       }),
-      group_id:
-        hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
-        isOperator(session) &&
-        isAtLeastInOneGroup(session)
-          ? z.string().min(1, { message: t("forms.errors.field.required") })
-          : z.string().optional(),
+      group_id: isGroupRequired(session, GROUP_APIKEY_ENABLED)
+        ? z.string().min(1, { message: t("forms.errors.field.required") })
+        : z.string().optional(),
     }),
   });
 
@@ -61,18 +54,14 @@ export const ServiceBuilderStep3 = ({
   const { getFieldState, resetField, watch } = useFormContext();
   const watchedAuthorizedCidrs = watch("authorized_cidrs");
   const [areAuthorizedCidrsDirty, setAreAuthorizedCidrsDirty] = useState(false);
+  const showGroupSelector = isGroupRequired(session, GROUP_APIKEY_ENABLED);
 
   const handleCancel = () => {
     resetField("authorized_cidrs");
   };
-
+  // console.log(mode, "n mode ->");
   const isGroupSelectorVisible = () =>
     mode === "create" && groups && groups?.length > 0;
-
-  const isGroupRequired =
-    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
-    isOperator(session) &&
-    isAtLeastInOneGroup(session);
 
   useEffect(() => {
     setAreAuthorizedCidrsDirty(getFieldState("authorized_cidrs").isDirty);
@@ -106,7 +95,7 @@ export const ServiceBuilderStep3 = ({
         />
       </FormStepSectionWrapper>
       {isGroupSelectorVisible() && (
-        <ServiceGroupSelector groups={groups} required={isGroupRequired} />
+        <ServiceGroupSelector groups={groups} required={showGroupSelector} />
       )}
       <ServiceExtraConfigurator />
     </>

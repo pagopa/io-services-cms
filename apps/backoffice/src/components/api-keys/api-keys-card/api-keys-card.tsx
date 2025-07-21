@@ -7,11 +7,9 @@ import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
 import {
-  hasApiKeyGroupsFeatures,
   hasManageKeyGroup,
   hasManageKeyRoot,
-  isAtLeastInOneGroup,
-  isOperator,
+  isGroupRequired,
 } from "@/utils/auth-util";
 import { ArrowForward } from "@mui/icons-material";
 import { Box, Divider, Stack, Typography } from "@mui/material";
@@ -45,9 +43,7 @@ export const ApiKeysCard = () => {
   const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
   const hideKeysCta =
-    hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session) &&
-    isOperator(session) &&
-    isAtLeastInOneGroup(session) &&
+    isGroupRequired(session, GROUP_APIKEY_ENABLED) &&
     mspData?.value &&
     mspData.value.length === 0;
 
