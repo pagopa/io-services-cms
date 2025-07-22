@@ -27,6 +27,31 @@ export type MultiSelectControllerProps = {
 
 /** Controller for MUI `Select` component.\
  * Used for collecting multiple user provided information from a list of options. */
+
+const getMultiSelectLogic = (
+  items: { label: string; value: number | string }[],
+  value: (number | string)[],
+  onChange: (val: (number | string)[]) => void,
+) => {
+  const selected = Array.isArray(value) ? value : [];
+  const allSelected = selected.length === items.length;
+
+  const toggleItem = (itemValue: number | string) => {
+    const stringVal = String(itemValue);
+    const newSelected = selected.includes(stringVal)
+      ? selected.filter((v) => v !== stringVal)
+      : [...selected, stringVal];
+    onChange(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    const allValues = items.map((i) => String(i.value));
+    onChange(allSelected ? [] : allValues);
+  };
+
+  return { allSelected, handleSelectAll, selected, toggleItem };
+};
+
 export function MultiSelectController({
   helperText,
   items,
@@ -51,19 +76,8 @@ export function MultiSelectController({
       control={control}
       name={name}
       render={({ field: { onChange, value = [] } }) => {
-        const selected = Array.isArray(value) ? value : [];
-        const allSelected = selected.length === items.length;
-
-        const toggleItem = (itemValue: number | string) => {
-          const newSelected = selected.includes(String(itemValue))
-            ? selected.filter((v) => v !== String(itemValue))
-            : [...selected, String(itemValue)];
-          onChange(newSelected);
-        };
-
-        const handleSelectAll = () => {
-          onChange(allSelected ? [] : items.map((i) => String(i.value)));
-        };
+        const { allSelected, handleSelectAll, selected, toggleItem } =
+          getMultiSelectLogic(items, value, onChange);
 
         return (
           <FormControl error={!!error} fullWidth margin="normal">
@@ -80,9 +94,8 @@ export function MultiSelectController({
               input={<OutlinedInput label={props.label} />}
               labelId={`${name}-label`}
               multiple
-              onChange={() => {
-                //
-              }} // handled manually
+              // eslint-disable-next-line @typescript-eslint/no-empty-function
+              onChange={() => {}}
               renderValue={(selectedItems) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   {(selectedItems as string[]).map((val) => {
@@ -103,9 +116,7 @@ export function MultiSelectController({
                       "forms.groups.associate.services.select.labels.selectAll",
                     )}
               </Button>
-
               <Divider />
-
               {items.map((item) => (
                 <MenuItem
                   key={String(item.value)}
