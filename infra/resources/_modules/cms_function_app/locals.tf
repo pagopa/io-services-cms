@@ -88,7 +88,6 @@ locals {
       REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
       REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
-      REQUEST_ACTIVATIONS_INGESTION_RETRY_QUEUE          = azurerm_storage_queue.request-activations-ingestion-retry.name
       SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
       SYNCH_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE         = azurerm_storage_queue.sync-activations-from-legacy-poison.name
 

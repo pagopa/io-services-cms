@@ -109,9 +109,9 @@ export const ServiceAssistanceChannels = () => {
                   />
                 )
               }
-              label=""
+              label={t("forms.service.assistanceChannels.placeholder")}
               name={`metadata.assistanceChannels[${index}].value`}
-              placeholder={t("forms.service.assistanceChannels.placeholder")}
+              required
             />
           </Grid>
         </Grid>

@@ -1,5 +1,15 @@
 # io-services-cms-models
 
+## 1.28.0
+
+### Minor Changes
+
+- fa35f6f9: add activations sync from legacy
+
+### Patch Changes
+
+- 2bf0bddc: implentation of ingestion for service activation
+
 ## 1.27.2
 
 ### Patch Changes

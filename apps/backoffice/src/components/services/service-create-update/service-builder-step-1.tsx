@@ -192,6 +192,7 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
               label={t("forms.service.metadata.topic.label")}
               name="metadata.topic_id"
               placeholder={t("forms.service.metadata.topic.placeholder")}
+              required
             />
           </Grid>
         </Grid>

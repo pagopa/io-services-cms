@@ -1,13 +1,9 @@
-import { LegacyActivation } from "@io-services-cms/models";
+import { Activations } from "@io-services-cms/models";
 import * as t from "io-ts";
 
-export const EnrichedLegacyActivationCosmosResource: t.IntersectionType<
-  [typeof LegacyActivation.CosmosResource, t.TypeC<{ userPDVId: t.StringC }>]
-> = t.intersection([
-  LegacyActivation.CosmosResource,
+export const EnrichedActivation = t.intersection([
+  Activations.Activation,
   t.type({ userPDVId: t.string }),
 ]);
 
-export type EnrichedLegacyActivationCosmosResource = t.TypeOf<
-  typeof EnrichedLegacyActivationCosmosResource
->;
+export type EnrichedActivation = t.TypeOf<typeof EnrichedActivation>;
