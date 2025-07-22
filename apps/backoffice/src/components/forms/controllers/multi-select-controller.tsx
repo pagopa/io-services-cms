@@ -1,6 +1,7 @@
 import { LoaderSkeleton } from "@/components/loaders";
 import {
   Box,
+  Button,
   Checkbox,
   Chip,
   Divider,
@@ -52,8 +53,6 @@ export function MultiSelectController({
       render={({ field: { onChange, value = [] } }) => {
         const selected = Array.isArray(value) ? value : [];
         const allSelected = selected.length === items.length;
-        const showDeselect = selected.length >= 2;
-        const isIndeterminate = selected.length > 0 && !allSelected;
 
         const toggleItem = (itemValue: number | string) => {
           const newSelected = selected.includes(String(itemValue))
@@ -64,10 +63,6 @@ export function MultiSelectController({
 
         const handleSelectAll = () => {
           onChange(allSelected ? [] : items.map((i) => String(i.value)));
-        };
-
-        const handleDeselectAll = () => {
-          onChange([]);
         };
 
         return (
@@ -99,32 +94,15 @@ export function MultiSelectController({
               )}
               value={selected}
             >
-              {items.length > 1 && (
-                <MenuItem key="select-all" onClick={handleSelectAll}>
-                  <Checkbox
-                    checked={allSelected}
-                    indeterminate={isIndeterminate}
-                  />
-                  <ListItemText
-                    primary={t(
+              <Button color="primary" onClick={handleSelectAll} variant="text">
+                {allSelected
+                  ? t(
+                      "forms.groups.associate.services.select.labels.deselectAll",
+                    )
+                  : t(
                       "forms.groups.associate.services.select.labels.selectAll",
                     )}
-                    sx={{ color: "#0073E6" }}
-                  />
-                </MenuItem>
-              )}
-
-              {showDeselect && (
-                <MenuItem key="deselect-all" onClick={handleDeselectAll}>
-                  <Checkbox checked={false} />
-                  <ListItemText
-                    primary={t(
-                      "forms.groups.associate.services.select.labels.deselectAll",
-                    )}
-                    sx={{ color: "#0073E6" }}
-                  />
-                </MenuItem>
-              )}
+              </Button>
 
               <Divider />
 
