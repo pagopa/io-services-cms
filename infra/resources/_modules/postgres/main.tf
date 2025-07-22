@@ -1,5 +1,5 @@
 module "cms_postgres_flexible_server" {
-  source  = "pagopa/dx-azure-postgres-server/azurerm"
+  source  = "pagopa-dx/azure-postgres-server/azurerm"
   version = "~> 1"
 
   environment = {
