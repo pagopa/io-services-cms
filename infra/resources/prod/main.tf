@@ -202,3 +202,8 @@ module "postgres" {
 
   tags = local.tags
 }
+
+moved {
+  from = module.postgres_snet.module.pgres_snet.azurerm_subnet.this
+  to   = module.postgres.module.pgres_snet.azurerm_subnet.this
+}
