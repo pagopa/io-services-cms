@@ -12,6 +12,7 @@ module "cms_postgres_flexible_server" {
   }
   resource_group_name                  = var.resource_group_name
   private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
+  delegated_subnet_id                  = module.pgres_snet.id
 
   tier = "m"
 
