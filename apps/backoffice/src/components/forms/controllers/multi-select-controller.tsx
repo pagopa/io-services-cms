@@ -13,16 +13,13 @@ import {
   Select,
   SelectProps,
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import React, { ReactNode } from "react";
 import { Controller, get, useFormContext } from "react-hook-form";
 
 export type MultiSelectControllerProps = {
   helperText?: ReactNode;
   items: { label: string; value: number | string }[]; //i’ve narrowed the type to { label: string; value: number | string }. This improves robustness and readability, removing ambiguous cases like arrays or undefined.
-  labels: {
-    deselectAll: string;
-    selectAll: string;
-  };
   loading: boolean;
   name: string;
 } & SelectProps;
@@ -32,13 +29,13 @@ export type MultiSelectControllerProps = {
 export function MultiSelectController({
   helperText,
   items,
-  labels,
   loading,
   name,
   ...props
 }: MultiSelectControllerProps) {
   const { control, formState } = useFormContext();
   const error = get(formState.errors, name);
+  const { t } = useTranslation();
 
   if (loading) {
     return (
@@ -109,7 +106,9 @@ export function MultiSelectController({
                     indeterminate={isIndeterminate}
                   />
                   <ListItemText
-                    primary={labels.selectAll}
+                    primary={t(
+                      "forms.groups.associate.services.select.labels.selectAll",
+                    )}
                     sx={{ color: "#0073E6" }}
                   />
                 </MenuItem>
@@ -119,7 +118,9 @@ export function MultiSelectController({
                 <MenuItem key="deselect-all" onClick={handleDeselectAll}>
                   <Checkbox checked={false} />
                   <ListItemText
-                    primary={labels.deselectAll}
+                    primary={t(
+                      "forms.groups.associate.services.select.labels.deselectAll",
+                    )}
                     sx={{ color: "#0073E6" }}
                   />
                 </MenuItem>

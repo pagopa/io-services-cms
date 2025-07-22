@@ -72,14 +72,6 @@ export const AssociateGroupsBuilderStep = ({
               : []
           }
           label={t("forms.groups.associate.services.select.placeholder")}
-          labels={{
-            deselectAll: t(
-              "forms.groups.associate.services.select.labels.deselectAll",
-            ),
-            selectAll: t(
-              "forms.groups.associate.services.select.labels.selectAll",
-            ),
-          }}
           loading={loading}
           name="services"
           placeholder={t("forms.groups.associate.services.select.placeholder")}
