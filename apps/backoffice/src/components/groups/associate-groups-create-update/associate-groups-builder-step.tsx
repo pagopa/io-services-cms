@@ -25,12 +25,14 @@ export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
 export interface AssociateGroupsBuilderStepProps {
   groupUnboundedServices?: MinifiedService[];
   groups?: Group[];
+  loading: boolean;
 }
 
 /** Group ApiKey create process */
 export const AssociateGroupsBuilderStep = ({
   groupUnboundedServices,
   groups,
+  loading,
 }: AssociateGroupsBuilderStepProps) => {
   const { t } = useTranslation();
 
@@ -70,6 +72,7 @@ export const AssociateGroupsBuilderStep = ({
               : []
           }
           label={t("forms.groups.associate.services.select.placeholder")}
+          loading={loading}
           name="services"
           placeholder={t("forms.groups.associate.services.select.placeholder")}
           required

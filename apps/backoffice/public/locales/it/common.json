@@ -262,7 +262,9 @@
         "services": {
           "select": {
             "label": "Scegli i servizi che vuoi associare al gruppo",
-            "placeholder": "Seleziona i servizi"
+            "placeholder": "Seleziona i servizi",
+            "selectAll": "Seleziona tutti",
+            "deselectAll": "Deseleziona tutti"
           }
         }
       }
