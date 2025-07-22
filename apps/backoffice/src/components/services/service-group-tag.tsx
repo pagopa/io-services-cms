@@ -1,5 +1,6 @@
 import { Group, StateEnum } from "@/generated/api/Group";
 import { Warning } from "@mui/icons-material";
+import { useTranslation } from "next-i18next";
 
 import { ApiKeyTag } from "../api-keys/api-key-tag";
 
@@ -15,20 +16,25 @@ export const ServiceGroupTag = ({
   id,
   noWrap,
   value,
-}: ServiceGroupTagProps) => (
-  <ApiKeyTag
-    color={value.state === StateEnum.SUSPENDED ? "warning" : "default"}
-    disabled={value.state === StateEnum.DELETED}
-    icon={value.state === StateEnum.SUSPENDED ? <Warning /> : undefined}
-    id={id}
-    label={value.name}
-    noWrap={noWrap}
-    tooltip={
-      value.state === StateEnum.SUSPENDED
-        ? "routes.keys.manage.group.state.suspended.tooltip"
-        : noWrap
-          ? value.name
-          : ""
-    }
-  />
-);
+}: ServiceGroupTagProps) => {
+  const { t } = useTranslation();
+  const tooltip =
+    value.state === StateEnum.SUSPENDED
+      ? t("routes.keys.manage.group.state.suspended.tooltip", {
+          name: value?.name ?? "",
+        })
+      : noWrap
+        ? (value?.name ?? "")
+        : "";
+  return (
+    <ApiKeyTag
+      color={value.state === StateEnum.SUSPENDED ? "warning" : "default"}
+      disabled={value.state === StateEnum.DELETED}
+      icon={value.state === StateEnum.SUSPENDED ? <Warning /> : undefined}
+      id={id}
+      label={value.name}
+      noWrap={noWrap}
+      tooltip={tooltip}
+    />
+  );
+};

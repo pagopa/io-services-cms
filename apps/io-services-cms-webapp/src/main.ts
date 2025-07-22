@@ -1,9 +1,11 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { AzureFunction } from "@azure/functions";
+import { DefaultAzureCredential } from "@azure/identity";
+import { BlobServiceClient } from "@azure/storage-blob";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { Fetch } from "@io-services-cms/fetch-utils";
 import {
-  LegacyActivation,
+  Activations,
   LegacyServiceCosmosResource,
   ServiceHistory,
   ServiceLifecycle,
@@ -33,7 +35,6 @@ import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
-import { createRequestActivationIngestionRetryHandler } from "./ingestion/request-activation-ingestion-retry-handler";
 import { createRequestServicesHistoryIngestionRetryHandler } from "./ingestion/request-services-history-ingestion-retry-handler";
 import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
@@ -72,7 +73,11 @@ import { pdvTokenizerClient } from "./utils/pdvTokenizerClient";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
 import { GroupChangeEvent } from "./utils/sync-group-utils";
-import { handler as onIngestionActivationChangeHandler } from "./watchers/on-activation-ingestion-change";
+import {
+  handler as onIngestionActivationChangeHandler,
+  parseBlob,
+} from "./watchers/on-activation-ingestion-change";
+import { makeHandler as makeOnLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { makeHandler as makeOnSelfcareGroupChangeHandler } from "./watchers/on-selfcare-group-change";
 import { handler as onServiceDetailLifecycleChangeHandler } from "./watchers/on-service-detail-lifecycle-change";
@@ -206,6 +211,11 @@ const serviceHistoryEventHubProducer = new EventHubProducerClient(
 const activationEventHubProducer = new EventHubProducerClient(
   config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
   config.ACTIVATIONS_EVENT_HUB_NAME,
+);
+
+const blobServiceClient = new BlobServiceClient(
+  `https://${config.STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
+  new DefaultAzureCredential(),
 );
 
 // entrypoint for all http functions
@@ -440,6 +450,42 @@ export const onSelfcareGroupChangeEntryPoint: AzureFunction = (context, args) =>
     toAzureFunctionHandler,
   )(context, args);
 
+export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
+  context,
+  args,
+) =>
+  pipe(
+    {
+      blobContainerClient: blobServiceClient.getContainerClient(
+        config.ACTIVATIONS_CONTAINER_NAME,
+      ),
+    },
+    makeOnLegacyActivationChangeHandler,
+    processBatchOf(Activations.LegacyCosmosResource),
+    RTE.orElseW((e) =>
+      pipe(
+        context.executionContext.retryContext?.maxRetryCount ===
+          context.executionContext.retryContext?.retryCount,
+        B.fold(
+          () => RTE.left(e),
+          () => {
+            log(
+              context,
+              e instanceof Error
+                ? e.message
+                : "Something went wrong! Exeeded maxRetryCount, so items will be sent to poison queue",
+              "warn",
+            );
+            context.bindings.activationsSyncFromLegacyPoisonQueue =
+              JSON.stringify(args);
+            return RTE.right([]);
+          },
+        ),
+      ),
+    ),
+    toAzureFunctionHandler,
+  )(context, args);
+
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(
   onIngestionServicePublicationChangeHandler(
@@ -500,15 +546,7 @@ export const onIngestionServiceHistoryChangeEntryPoint = pipe(
 //Ingestion Activations
 export const onIngestionActivationChangeEntryPoint = pipe(
   onIngestionActivationChangeHandler(activationEventHubProducer, pdvTokenizer),
-  processAllOf(LegacyActivation.CosmosResource),
-  setBindings((results) => ({
-    ingestionError: pipe(
-      results,
-      RA.map(RR.lookup("ingestionError")),
-      RA.filter(O.isSome),
-      RA.map((item) => pipe(item.value, JSON.stringify)),
-    ),
-  })),
+  parseBlob,
   toAzureFunctionHandler,
 );
 
@@ -521,10 +559,4 @@ export const createRequestServicesLifecycleIngestionRetryEntryPoint =
 export const createRequestServicesHistoryIngestionRetryEntryPoint =
   createRequestServicesHistoryIngestionRetryHandler(
     serviceHistoryEventHubProducer,
-  );
-//Ingestion Activation Retry DLQ
-export const createRequestActivationIngestionRetryEntryPoint =
-  createRequestActivationIngestionRetryHandler(
-    activationEventHubProducer,
-    pdvTokenizer,
   );

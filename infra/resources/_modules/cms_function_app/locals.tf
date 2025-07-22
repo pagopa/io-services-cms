@@ -71,7 +71,7 @@ locals {
       LEGACY_COSMOSDB_CONTAINER_SERVICES              = "services"
       LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS           = "activations"
       LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = "services-cms--legacy-watcher-lease"
-      LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE     = "activations-ingestion-lease"
+      LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE     = "activations-sync-lease"
       LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = 10
 
       // Internal Storage Account Queues
@@ -88,8 +88,8 @@ locals {
       REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
       REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
-      REQUEST_ACTIVATIONS_INGESTION_RETRY_QUEUE          = azurerm_storage_queue.request-activations-ingestion-retry.name
       SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
+      SYNCH_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE         = azurerm_storage_queue.sync-activations-from-legacy-poison.name
 
 
       # List of service ids for which quality control will be bypassed
@@ -139,7 +139,11 @@ locals {
       PDV_TOKENIZER_BASE_PATH = "/tokenizer/v1"
       PDV_TOKENIZER_API_KEY   = data.azurerm_key_vault_secret.pdv_tokenizer_api_key.value
 
+      # Blob Storage configurations
+      STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
+      ACTIVATIONS_CONTAINER_NAME = azurerm_storage_container.activations.name
     }
+
     autoscale_settings = {
       min     = 3
       max     = 30

@@ -153,18 +153,13 @@ resource "azurerm_storage_queue" "request-services-history-ingestion-retry-poiso
   storage_account_name = module.cms_storage_account.name
 }
 
-resource "azurerm_storage_queue" "request-activations-ingestion-retry" {
-  name                 = "request-activations-ingestion-retry"
-  storage_account_name = module.cms_storage_account.name
-}
-
-resource "azurerm_storage_queue" "request-activations-ingestion-retry-poison" {
-  name                 = "request-activations-ingestion-retry-poison"
-  storage_account_name = module.cms_storage_account.name
-}
-
 resource "azurerm_storage_queue" "sync-group-poison" {
   name                 = "sync-group-poison"
+  storage_account_name = module.cms_storage_account.name
+}
+
+resource "azurerm_storage_queue" "sync-activations-from-legacy-poison" {
+  name                 = "sync-activations-from-legacy-poison"
   storage_account_name = module.cms_storage_account.name
 }
 
