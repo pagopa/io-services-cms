@@ -45,6 +45,14 @@ export const isAtLeastInOneGroup = (session: Session | null) =>
   session?.user?.permissions?.selcGroups !== undefined &&
   session?.user?.permissions?.selcGroups?.length > 0;
 
+export const isGroupRequired = (
+  session: Session | null,
+  groupApiKeyEnabled: boolean,
+): boolean =>
+  hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
+  isOperator(session) &&
+  isAtLeastInOneGroup(session);
+
 /**
  * Can fetch & show Manage ApiKey (root) only for:
  * - `groupApiKeyEnabled=false`
