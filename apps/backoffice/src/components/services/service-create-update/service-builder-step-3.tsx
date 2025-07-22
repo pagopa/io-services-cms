@@ -59,7 +59,7 @@ export const ServiceBuilderStep3 = ({
   const handleCancel = () => {
     resetField("authorized_cidrs");
   };
-  // console.log(mode, "n mode ->");
+
   const isGroupSelectorVisible = () =>
     mode === "create" && groups && groups?.length > 0;
 
