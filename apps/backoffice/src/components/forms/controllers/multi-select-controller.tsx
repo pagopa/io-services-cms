@@ -1,7 +1,6 @@
 import { LoaderSkeleton } from "@/components/loaders";
 import {
   Box,
-  Button,
   Checkbox,
   Chip,
   Divider,
@@ -14,8 +13,9 @@ import {
   Select,
   SelectProps,
 } from "@mui/material";
+import { ButtonNaked } from "@pagopa/mui-italia";
 import { useTranslation } from "next-i18next";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Controller, get, useFormContext } from "react-hook-form";
 
 export type MultiSelectControllerProps = {
@@ -37,15 +37,14 @@ const getMultiSelectLogic = (
   const allSelected = selected.length === items.length;
 
   const toggleItem = (itemValue: number | string) => {
-    const stringVal = String(itemValue);
-    const newSelected = selected.includes(stringVal)
-      ? selected.filter((v) => v !== stringVal)
-      : [...selected, stringVal];
+    const newSelected = selected.includes(itemValue)
+      ? selected.filter((v) => v !== itemValue)
+      : [...selected, itemValue];
     onChange(newSelected);
   };
 
   const handleSelectAll = () => {
-    const allValues = items.map((i) => String(i.value));
+    const allValues = items.map((i) => i.value);
     onChange(allSelected ? [] : allValues);
   };
 
@@ -94,35 +93,34 @@ export function MultiSelectController({
               input={<OutlinedInput label={props.label} />}
               labelId={`${name}-label`}
               multiple
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
-              onChange={() => {}}
               renderValue={(selectedItems) => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   {(selectedItems as string[]).map((val) => {
                     const label =
-                      items.find((i) => String(i.value) === val)?.label || val;
+                      items.find((i) => i.value === val)?.label || val;
                     return <Chip key={val} label={label} />;
                   })}
                 </Box>
               )}
               value={selected}
             >
-              <Button color="primary" onClick={handleSelectAll} variant="text">
+              <ButtonNaked
+                color="primary"
+                onClick={handleSelectAll}
+                size="medium"
+                sx={{ fontWeight: 700, padding: "8px 0 16px 28px" }}
+              >
                 {allSelected
-                  ? t(
-                      "forms.groups.associate.services.select.labels.deselectAll",
-                    )
-                  : t(
-                      "forms.groups.associate.services.select.labels.selectAll",
-                    )}
-              </Button>
+                  ? t("forms.groups.associate.services.select.deselectAll")
+                  : t("forms.groups.associate.services.select.selectAll")}
+              </ButtonNaked>
               <Divider />
               {items.map((item) => (
                 <MenuItem
-                  key={String(item.value)}
+                  key={item.value}
                   onClick={() => toggleItem(item.value)}
                 >
-                  <Checkbox checked={selected.includes(String(item.value))} />
+                  <Checkbox checked={selected.includes(item.value)} />
                   <ListItemText primary={item.label} />
                 </MenuItem>
               ))}
