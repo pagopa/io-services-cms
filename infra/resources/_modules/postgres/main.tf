@@ -21,7 +21,7 @@ module "cms_postgres_flexible_server" {
 
   administrator_credentials = {
     name     = local.postgres_admin_username
-    password = random_password.postgres_admin_password[var.postgres_admin_credentials_rotation_id].result
+    password = data.azurerm_key_vault_secret.cms_pgres_admin_pwd.value
   }
 
   subnet_pep_id = var.peps_snet_id

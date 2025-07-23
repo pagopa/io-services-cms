@@ -94,7 +94,7 @@ variable "key_vault_id" {
   description = "Azure KeyVault ID"
 }
 
-variable "pgres_flex_reviewer_usr_pwd_name" {
+variable "cms_pgres_reviewer_usr_pwd_name" {
   type        = string
   description = "Postgres User Name"
 }

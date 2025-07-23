@@ -91,30 +91,17 @@ variable "cms_fn_principal_id" {
   description = "Principal ID of the Services CMS Function App"
 }
 
-variable "key_vault_id" {
-  type        = string
-  description = "Azure KeyVault ID"
+
+###########################
+#  Azure KeyVault Secrets #
+###########################
+
+variable "key_vault" {
+  type = object({
+    id = string
+    secrets_name = object({
+      cms_pgres_admin_pwd = string
+    })
+  })
+  description = "Azure KeyVault references"
 }
-
-############
-# Postgres #
-############
-
-variable "postgres_admin_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
-
-variable "postgres_reviewer_usr_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew reviewer user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
-
-variable "postgres_readonly_usr_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew readonly user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
-

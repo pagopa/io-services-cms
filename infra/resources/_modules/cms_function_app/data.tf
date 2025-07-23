@@ -32,7 +32,7 @@ data "azurerm_data_factory" "adf" {
 ####################
 
 data "azurerm_key_vault_secret" "pgres_flex_reviewer_usr_pwd" {
-  name         = var.pgres_flex_reviewer_usr_pwd_name
+  name         = var.cms_pgres_reviewer_usr_pwd_name
   key_vault_id = var.key_vault_id
 }
 
