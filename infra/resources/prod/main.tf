@@ -205,37 +205,3 @@ module "postgres" {
   tags = local.tags
 }
 
-moved {
-  from = module.postgres_snet.module.pgres_snet.azurerm_subnet.this
-  to   = module.postgres.module.pgres_snet.azurerm_subnet.this
-}
-
-moved {
-  from = module.postgres.azurerm_key_vault_secret.pgres_flex_admin_pwd
-  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_admin_pwd
-}
-
-moved {
-  from = module.postgres.azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd
-  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd
-}
-
-moved {
-  from = module.postgres.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd
-  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd
-}
-
-moved {
-  from = module.postgres.random_password.postgres_admin_password["1682602957131"]
-  to   = module.key_vault.random_password.postgres_admin_password["1682602957131"]
-}
-
-moved {
-  from = module.postgres.random_password.postgres_readonly_usr_password["1682602957131"]
-  to   = module.key_vault.random_password.postgres_readonly_usr_password["1682602957131"]
-}
-
-moved {
-  from = module.postgres.random_password.postgres_reviewer_usr_password["1682602957131"]
-  to   = module.key_vault.random_password.postgres_reviewer_usr_password["1682602957131"]
-}
