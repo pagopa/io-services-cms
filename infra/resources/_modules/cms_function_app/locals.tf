@@ -89,7 +89,7 @@ locals {
       REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
       REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
       SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
-      SYNCH_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE         = azurerm_storage_queue.sync-activations-from-legacy-poison.name
+      SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE          = azurerm_storage_queue.sync-activations-from-legacy-poison.name
 
 
       # List of service ids for which quality control will be bypassed
