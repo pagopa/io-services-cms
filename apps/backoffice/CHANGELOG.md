@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 1.27.0
+
+### Minor Changes
+
+- e56203b3: ApiKeyGroup Bulk Association: introduced “Select All” and “Deselect All” for services multiselect.
+
+### Patch Changes
+
+- 2755bfd1: Added tos and privacy policy static pages
+- 88e5fe5c: Added suspended group name interpolation in tooltips for ServiceGroupTag and ApiKeysGroupTag.
+- e4193d0b: Form create/update service: added required fields where necessary and added common function to check operator groups
+
 ## 1.26.2
 
 ### Patch Changes
