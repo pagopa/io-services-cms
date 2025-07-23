@@ -33,6 +33,16 @@ variable "location" {
   description = "Azure region"
 }
 
+variable "location_short" {
+  type        = string
+  description = "Azure region"
+}
+
+variable "domain" {
+  type        = string
+  description = "Domain name of the application"
+}
+
 variable "tags" {
   type        = map(any)
   description = "Resource tags"
@@ -40,7 +50,7 @@ variable "tags" {
 
 variable "resource_group_name" {
   type        = string
-  description = "Resource group name for the AI Search services"
+  description = "Resource group name for the Function App services"
 }
 
 variable "application_basename" {
@@ -61,3 +71,33 @@ variable "virtual_network" {
   description = "Virtual network to create subnet in"
 }
 
+variable "peps_snet_id" {
+  type        = string
+  description = "Id of the subnet which holds private endpoints"
+}
+
+variable "private_dns_zone_resource_group_name" {
+  type        = string
+  description = "Resource group name of the private DNS zone to use for private endpoints"
+}
+
+variable "cms_fn_name" {
+  type        = string
+  description = "Name of the Services CMS Function App"
+}
+
+variable "cms_fn_principal_id" {
+  type        = string
+  description = "Principal ID of the Services CMS Function App"
+}
+
+
+###########################
+#  Azure KeyVault Secrets #
+###########################
+
+variable "cms_pgres_admin_pwd" {
+  type        = string
+  description = "Postgres Password for CMS Admin User"
+  sensitive   = true
+}

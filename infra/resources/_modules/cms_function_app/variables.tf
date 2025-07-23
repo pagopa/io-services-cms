@@ -94,9 +94,10 @@ variable "key_vault_id" {
   description = "Azure KeyVault ID"
 }
 
-variable "pgres_flex_reviewer_usr_pwd_name" {
+variable "cms_pgres_reviewer_usr_pwd" {
   type        = string
-  description = "Postgres User Name"
+  description = "Postgres Password for CMS Reviewer User"
+  sensitive   = true
 }
 
 variable "jira_token_name" {
@@ -176,5 +177,11 @@ variable "pdv_tokenizer_api_key_name" {
 
 variable "error_action_group_id" {
   description = "Id of the action group to use for error notifications"
+  type        = string
+}
+
+
+variable "pgres_cms_fqdn" {
+  description = "FQDN of the CMS Postgres Flexible Server"
   type        = string
 }

@@ -77,9 +77,10 @@ variable "key_vault_id" {
   type        = string
   description = "Azure KeyVault ID"
 }
-variable "bo_auth_session_secret_name" {
+variable "bo_auth_session_secret" {
   type        = string
   description = "Backoffice Auth Session Secret Name"
+  sensitive   = true
 }
 
 variable "azure_client_secret_credential_client_id_name" {

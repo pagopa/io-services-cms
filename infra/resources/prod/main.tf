@@ -101,7 +101,7 @@ module "cms_function_app" {
 
   # KeyVault Secrets
   key_vault_id                                          = module.key_vault.key_vault_id
-  pgres_flex_reviewer_usr_pwd_name                      = module.key_vault.secrets_name.pgres_flex_reviewer_usr_pwd
+  cms_pgres_reviewer_usr_pwd                            = module.key_vault.secrets_value.cms_pgres_reviewer_usr_pwd
   jira_token_name                                       = module.key_vault.secrets_name.jira_token
   azure_client_secret_credential_secret_name            = module.key_vault.secrets_name.azure_client_secret_credential_secret
   azure_client_secret_credential_client_id_name         = module.key_vault.secrets_name.azure_client_secret_credential_client_id
@@ -118,6 +118,8 @@ module "cms_function_app" {
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
   error_action_group_id = module.monitor.action_group_ids.oncall
+
+  pgres_cms_fqdn = module.postgres.pgres_cms.fqdn
 
   tags = local.tags
 }
@@ -144,7 +146,7 @@ module "backoffice" {
 
   # KeyVault Secrets
   key_vault_id                                  = module.key_vault.key_vault_id
-  bo_auth_session_secret_name                   = module.key_vault.secrets_name.bo_auth_session_secret
+  bo_auth_session_secret                        = module.key_vault.secrets_value.bo_auth_session_secret
   azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
   azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
   legacy_cosmosdb_key_name                      = module.key_vault.secrets_name.legacy_cosmosdb_key
@@ -174,14 +176,22 @@ module "eventhub" {
   tags = local.tags
 }
 
-module "postgres_snet" {
+module "postgres" {
   source               = "../_modules/postgres"
   prefix               = local.prefix
   env_short            = local.env_short
-  project              = local.project
+  location_short       = local.location_short
   location             = local.location
+  project              = local.project
+  domain               = local.domain
   application_basename = local.application_basename
   resource_group_name  = data.azurerm_resource_group.rg.name
+
+  # Cms Fn Binding
+  cms_fn_name         = module.cms_function_app.cms_fn_name
+  cms_fn_principal_id = module.cms_function_app.cms_fn_principal_id
+
+  cms_pgres_admin_pwd = module.key_vault.secrets_value.cms_pgres_admin_pwd
 
   virtual_network = {
     id                  = data.azurerm_virtual_network.itn_common.id
@@ -189,5 +199,43 @@ module "postgres_snet" {
     resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
   }
 
+  peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
+  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+
   tags = local.tags
+}
+
+moved {
+  from = module.postgres_snet.module.pgres_snet.azurerm_subnet.this
+  to   = module.postgres.module.pgres_snet.azurerm_subnet.this
+}
+
+moved {
+  from = module.postgres.azurerm_key_vault_secret.pgres_flex_admin_pwd
+  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_admin_pwd
+}
+
+moved {
+  from = module.postgres.azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd
+  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_readonly_usr_pwd
+}
+
+moved {
+  from = module.postgres.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd
+  to   = module.key_vault.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd
+}
+
+moved {
+  from = module.postgres.random_password.postgres_admin_password["1682602957131"]
+  to   = module.key_vault.random_password.postgres_admin_password["1682602957131"]
+}
+
+moved {
+  from = module.postgres.random_password.postgres_readonly_usr_password["1682602957131"]
+  to   = module.key_vault.random_password.postgres_readonly_usr_password["1682602957131"]
+}
+
+moved {
+  from = module.postgres.random_password.postgres_reviewer_usr_password["1682602957131"]
+  to   = module.key_vault.random_password.postgres_reviewer_usr_password["1682602957131"]
 }
