@@ -101,7 +101,7 @@ module "cms_function_app" {
 
   # KeyVault Secrets
   key_vault_id                                          = module.key_vault.key_vault_id
-  cms_pgres_reviewer_usr_pwd_name                       = module.key_vault.secrets_name.cms_pgres_reviewer_usr_pwd
+  cms_pgres_reviewer_usr_pwd                            = module.key_vault.secrets_value.cms_pgres_reviewer_usr_pwd
   jira_token_name                                       = module.key_vault.secrets_name.jira_token
   azure_client_secret_credential_secret_name            = module.key_vault.secrets_name.azure_client_secret_credential_secret
   azure_client_secret_credential_client_id_name         = module.key_vault.secrets_name.azure_client_secret_credential_client_id
@@ -118,6 +118,8 @@ module "cms_function_app" {
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
 
   error_action_group_id = module.monitor.action_group_ids.oncall
+
+  pgres_cms_fqdn = module.postgres.pgres_cms.fqdn
 
   tags = local.tags
 }
@@ -144,7 +146,7 @@ module "backoffice" {
 
   # KeyVault Secrets
   key_vault_id                                  = module.key_vault.key_vault_id
-  bo_auth_session_secret_name                   = module.key_vault.secrets_name.bo_auth_session_secret
+  bo_auth_session_secret                        = module.key_vault.secrets_value.bo_auth_session_secret
   azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
   azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
   legacy_cosmosdb_key_name                      = module.key_vault.secrets_name.legacy_cosmosdb_key
@@ -189,12 +191,7 @@ module "postgres" {
   cms_fn_name         = module.cms_function_app.cms_fn_name
   cms_fn_principal_id = module.cms_function_app.cms_fn_principal_id
 
-  key_vault = {
-    id = module.key_vault.key_vault_id
-    secrets_name = {
-      cms_pgres_admin_pwd = module.key_vault.secrets_name.cms_pgres_admin_pwd
-    }
-  }
+  cms_pgres_admin_pwd = module.key_vault.secrets_value.cms_pgres_admin_pwd
 
   virtual_network = {
     id                  = data.azurerm_virtual_network.itn_common.id

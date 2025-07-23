@@ -96,12 +96,8 @@ variable "cms_fn_principal_id" {
 #  Azure KeyVault Secrets #
 ###########################
 
-variable "key_vault" {
-  type = object({
-    id = string
-    secrets_name = object({
-      cms_pgres_admin_pwd = string
-    })
-  })
-  description = "Azure KeyVault references"
+variable "cms_pgres_admin_pwd" {
+  type        = string
+  description = "Postgres Password for CMS Admin User"
+  sensitive   = true
 }

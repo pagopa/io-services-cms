@@ -1,7 +1,5 @@
-output "pgres_snet" {
+output "pgres_cms" {
   value = {
-    id   = module.pgres_snet.id
-    name = module.pgres_snet.name
+    fqdn = "${module.cms_postgres_flexible_server.postgres.name}.postgres.database.azure.com"
   }
-  description = "Id and name of the postgres snet"
 }

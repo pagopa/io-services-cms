@@ -17,11 +17,6 @@ data "azurerm_cosmosdb_account" "cosmos_legacy" {
   resource_group_name = "${var.prefix}-${var.env_short}-rg-internal"
 }
 
-data "azurerm_postgresql_flexible_server" "cms_private_pgflex" {
-  name                = "${var.prefix}-${var.env_short}-${var.location_short}-svc-cms-psql-01"
-  resource_group_name = "${var.prefix}-${var.env_short}-${var.location_short}-svc-rg-01"
-}
-
 data "azurerm_data_factory" "adf" {
   name                = "io-p-data-factory"
   resource_group_name = "io-p-rg-operations"
@@ -30,11 +25,6 @@ data "azurerm_data_factory" "adf" {
 ####################
 # KeyVault Secrets #
 ####################
-
-data "azurerm_key_vault_secret" "pgres_flex_reviewer_usr_pwd" {
-  name         = var.cms_pgres_reviewer_usr_pwd_name
-  key_vault_id = var.key_vault_id
-}
 
 data "azurerm_key_vault_secret" "jira_token" {
   name         = var.jira_token_name

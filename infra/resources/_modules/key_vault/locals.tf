@@ -4,7 +4,6 @@ locals {
       asset_storage_connectionstring_secret            = "ASSET-STORAGE-CONNECTIONSTRING-SECRET"
       azure_client_secret_credential_secret            = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
       azure_client_secret_credential_client_id         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
-      bo_auth_session_secret                           = "bo-auth-session-secret"
       jira_token                                       = "JIRA-TOKEN"
       legacy_cosmosdb_connectionstring                 = "legacy-cosmosdb-connectionstring"
       legacy_cosmosdb_key                              = "legacy-cosmosdb-key"

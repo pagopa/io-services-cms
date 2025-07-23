@@ -44,7 +44,7 @@ resource "random_password" "postgres_readonly_usr_password" {
  *************************************/
 
 resource "azurerm_key_vault_secret" "bo_auth_session_secret" {
-  name            = local.key_vault.secrets_name.bo_auth_session_secret
+  name            = "bo-auth-session-secret"
   key_vault_id    = module.key_vault.id
   value           = random_password.bo_auth_session_secret[var.bo_auth_session_secret_rotation_id].result
   content_type    = "string"

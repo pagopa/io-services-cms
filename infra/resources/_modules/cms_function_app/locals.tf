@@ -53,9 +53,9 @@ locals {
       AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
       # PostgreSQL 
-      REVIEWER_DB_HOST     = data.azurerm_postgresql_flexible_server.cms_private_pgflex.fqdn
+      REVIEWER_DB_HOST     = var.pgres_cms_fqdn
       REVIEWER_DB_NAME     = "reviewer"
-      REVIEWER_DB_PASSWORD = data.azurerm_key_vault_secret.pgres_flex_reviewer_usr_pwd.value
+      REVIEWER_DB_PASSWORD = var.cms_pgres_reviewer_usr_pwd
       REVIEWER_DB_PORT     = 6432
       REVIEWER_DB_SCHEMA   = "reviewer"
       REVIEWER_DB_TABLE    = "service_review"
