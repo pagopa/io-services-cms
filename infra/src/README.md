@@ -27,7 +27,6 @@
 | <a name="module_db_app_be_containers"></a> [db\_app\_be\_containers](#module\_db\_app\_be\_containers) | github.com/pagopa/terraform-azurerm-v4.git//cosmosdb_sql_container | v7.18.1 |
 | <a name="module_db_cms_containers"></a> [db\_cms\_containers](#module\_db\_cms\_containers) | github.com/pagopa/terraform-azurerm-v4.git//cosmosdb_sql_container | v7.18.1 |
 | <a name="module_key_vault_domain"></a> [key\_vault\_domain](#module\_key\_vault\_domain) | github.com/pagopa/terraform-azurerm-v4.git//key_vault | v7.18.1 |
-| <a name="module_postgres_flexible_snet"></a> [postgres\_flexible\_snet](#module\_postgres\_flexible\_snet) | github.com/pagopa/terraform-azurerm-v4.git//subnet | v7.18.1 |
 
 ## Resources
 

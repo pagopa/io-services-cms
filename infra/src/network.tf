@@ -28,29 +28,6 @@ module "app_snet" {
 }
 
 #
-# Postgres Flexible Server subnet
-#
-module "postgres_flexible_snet" {
-  source                            = "github.com/pagopa/terraform-azurerm-v4.git//subnet?ref=v7.18.1"
-  name                              = "${local.project}-${local.application_basename}-pgres-flexible-snet"
-  address_prefixes                  = var.subnets_cidrs.postgres
-  resource_group_name               = var.io_common.resource_group_name
-  virtual_network_name              = var.io_common.vnet_name
-  service_endpoints                 = ["Microsoft.Storage"]
-  private_endpoint_network_policies = "Enabled"
-
-  delegation = {
-    name = "delegation"
-    service_delegation = {
-      name = "Microsoft.DBforPostgreSQL/flexibleServers"
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-      ]
-    }
-  }
-}
-
-#
 # Cosmos Private Endpoint
 #
 
