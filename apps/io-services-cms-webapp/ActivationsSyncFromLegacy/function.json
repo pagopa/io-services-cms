@@ -14,7 +14,7 @@
       "maxItemsPerInvocation": 50
     },
     {
-      "queueName": "%SYNC_ACTIVATIONS_POISON_QUEUE%",
+      "queueName": "%SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE%",
       "connection": "INTERNAL_STORAGE_CONNECTION_STRING",
       "name": "activationsSyncFromLegacyPoisonQueue",
       "type": "queue",

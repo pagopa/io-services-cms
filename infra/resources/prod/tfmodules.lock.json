@@ -40,5 +40,17 @@
     "version": "1.0.6",
     "name": "azure_postgres_server",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/1.0.6"
+  },
+  "cms_function_app.function_app_staging_slot_to_blob_data_writer": {
+    "hash": "cec66e15f8a41169c11dbd6822da998c5d01fea9f5e49ec21f0959c340f2ac59",
+    "version": "1.2.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.0"
+  },
+  "cms_function_app.function_app_to_blob_data_writer": {
+    "hash": "cec66e15f8a41169c11dbd6822da998c5d01fea9f5e49ec21f0959c340f2ac59",
+    "version": "1.2.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.0"
   }
 }
