@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.41.1
+
+### Patch Changes
+
+- e72221f3: fix poison queue name for activaton sync from legacy function
+
 ## 1.41.0
 
 ### Minor Changes
