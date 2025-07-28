@@ -1027,7 +1027,7 @@ paths:
   /institutions/{institutionId}/products:
     get:
       tags:
-        - user-products-institutions
+        - institutions
       summary: Retrieve all active institutional products of the user
       description: Retrieve all active institutional products for the given user and institution
       operationId: getUserInstitutionProducts
