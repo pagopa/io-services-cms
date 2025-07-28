@@ -1,7 +1,11 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
-import { getGroup, getInstitutionDelegations } from "../selfcare";
+import {
+  getGroup,
+  getInstitutionDelegations,
+  getInstitutionProducts,
+} from "../selfcare";
 
 // import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
 
@@ -9,14 +13,21 @@ const mocks: {
   getSelfcareClient: Mock;
   getGroup: Mock;
   getInstitutionDelegations: Mock;
+  getInstitutionProducts: Mock;
   isAxiosError: Mock;
 } = vi.hoisted(() => {
   const getGroup = vi.fn();
   const getInstitutionDelegations = vi.fn();
+  const getInstitutionProducts = vi.fn();
   return {
-    getSelfcareClient: vi.fn(() => ({ getGroup, getInstitutionDelegations })),
+    getSelfcareClient: vi.fn(() => ({
+      getGroup,
+      getInstitutionDelegations,
+      getInstitutionProducts,
+    })),
     getGroup,
     getInstitutionDelegations,
+    getInstitutionProducts,
     isAxiosError: vi.fn(),
   };
 });
@@ -133,6 +144,94 @@ describe("Selfcare Institutions", () => {
         undefined,
         undefined,
         undefined,
+      );
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+    const error = "error";
+
+    it("should rejct when getInstitutionProducts fail", async () => {
+      // given
+      mocks.getInstitutionProducts.mockReturnValueOnce(TE.left(error));
+
+      // when and then
+      await expect(() =>
+        getInstitutionProducts(institutionId, userId),
+      ).rejects.toThrowError(
+        "Error calling selfcare getInstitutionProducts API",
+      );
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledWith(
+        institutionId,
+        userId,
+      );
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it("should return the user institution products", async () => {
+      // given
+      const expectedInstitutionProducts = [
+        {
+          contractTemplatePath: "path/to/contractTemplatePath",
+          contractTemplateVersion: "1.0.0",
+          createdAt: "2019-08-24T14:15:22Z",
+          depictImageUrl: "https://depictImageUrl",
+          description: "product description",
+          id: "id1",
+          identityTokenAudience: "identityTokenAudience",
+          logo: "https://logo",
+          logoBgColor: "logoBgColor",
+          parentId: "parentId",
+          roleManagementURL: "https://roleManagementURL",
+          roleMappings: {
+            property1: {
+              multiroleAllowed: true,
+              phasesAdditionAllowed: ["phase1"],
+              roles: [
+                {
+                  code: "code1",
+                  description: "description1",
+                  label: "label1",
+                  productLabel: "productLabel1",
+                },
+              ],
+              skipUserCreation: true,
+            },
+            property2: {
+              multiroleAllowed: true,
+              phasesAdditionAllowed: ["phase2"],
+              roles: [
+                {
+                  code: "code2",
+                  description: "description2",
+                  label: "label2",
+                  productLabel: "productLabel2",
+                },
+              ],
+              skipUserCreation: true,
+            },
+          },
+          title: "product title",
+          urlBO: "urlBO",
+          urlPublic: "urlPublic",
+        },
+      ];
+      mocks.getInstitutionProducts.mockReturnValueOnce(
+        TE.right(expectedInstitutionProducts),
+      );
+
+      // when and then
+      await expect(
+        getInstitutionProducts(institutionId, userId),
+      ).resolves.toStrictEqual(expectedInstitutionProducts);
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledWith(
+        institutionId,
+        userId,
       );
       expect(mocks.isAxiosError).not.toHaveBeenCalled();
     });
