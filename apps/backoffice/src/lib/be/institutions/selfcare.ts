@@ -149,3 +149,32 @@ export const getInstitutionDelegations = async (
 
   return apiResult.right;
 };
+
+/**
+ * Get active institution products by provided institutionId and userId
+ * @param institutionId the institution id
+ * @param userId the user id
+ * @returns the active institution products
+ */
+export const getInstitutionProducts = async (
+  institutionId: string,
+  userId: string,
+): Promise<
+  RightType<
+    ReturnType<ReturnType<typeof getSelfcareClient>["getInstitutionProducts"]>
+  >
+> => {
+  const apiResult = await getSelfcareClient().getInstitutionProducts(
+    institutionId,
+    userId,
+  )();
+
+  if (E.isLeft(apiResult)) {
+    throw new ManagedInternalError(
+      "Error calling selfcare getInstitutionProducts API",
+      apiResult.left,
+    );
+  }
+
+  return apiResult.right;
+};

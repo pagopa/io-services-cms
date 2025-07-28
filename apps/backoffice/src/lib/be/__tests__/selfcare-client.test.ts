@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
+import { ProductResource } from "../../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
 import {
   getSelfcareClient,
@@ -16,6 +17,7 @@ const mocks: {
   aSelfcareUserId: string;
   institutionGroups: PageOfUserGroupResource;
   delegations: DelegationWithPaginationResponse;
+  institutionProducts: ProductResource[];
 } = {
   institution: { id: "institutionId" } as InstitutionResponse,
   userInstitutions: [
@@ -71,6 +73,52 @@ const mocks: {
       totalPages: 1,
     },
   },
+  institutionProducts: [
+    {
+      contractTemplatePath: "path/to/contractTemplatePath",
+      contractTemplateVersion: "1.0.0",
+      createdAt: new Date("2019-08-24T14:15:22Z"),
+      depictImageUrl: "https://depictImageUrl",
+      description: "product description",
+      id: "id1",
+      identityTokenAudience: "identityTokenAudience",
+      logo: "https://logo",
+      logoBgColor: "logoBgColor",
+      parentId: "parentId",
+      roleManagementURL: "https://roleManagementURL",
+      roleMappings: {
+        property1: {
+          multiroleAllowed: true,
+          phasesAdditionAllowed: ["phase1"],
+          roles: [
+            {
+              code: "code1",
+              description: "description1",
+              label: "label1",
+              productLabel: "productLabel1",
+            },
+          ],
+          skipUserCreation: true,
+        },
+        property2: {
+          multiroleAllowed: true,
+          phasesAdditionAllowed: ["phase2"],
+          roles: [
+            {
+              code: "code2",
+              description: "description2",
+              label: "label2",
+              productLabel: "productLabel2",
+            },
+          ],
+          skipUserCreation: true,
+        },
+      },
+      title: "product title",
+      urlBO: "urlBO",
+      urlPublic: "urlPublic",
+    },
+  ],
 };
 
 const { create, isAxiosError, getMock } = vi.hoisted(() => {
@@ -415,6 +463,85 @@ describe("Selfcare Client", () => {
       });
       expect(isAxiosError).not.toHaveBeenCalled();
       expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+    const endpoint = `/institutions/${institutionId}/products`;
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return the user institution products for the given institution and user", async () => {
+      // given
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: mocks.institutionProducts,
+      });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.institutionProducts);
+      }
       commonExpectation();
     });
   });
