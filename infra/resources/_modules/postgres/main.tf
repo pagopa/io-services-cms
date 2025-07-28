@@ -24,8 +24,6 @@ module "cms_postgres_flexible_server" {
     password = var.cms_pgres_admin_pwd
   }
 
-  subnet_pep_id = var.peps_snet_id
-
   ### backup
   backup_retention_days = 7
 
