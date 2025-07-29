@@ -114,8 +114,8 @@ describe("User Institution Products API", () => {
       const request = new NextRequest("http://localhost");
       const expectedProducts = {
         products: [
-          { id: "id", title: "product title", urlBO: "urlBO" },
-          { id: "id2", title: "product title 2", urlBO: "urlBO2" },
+          { id: "id1", title: "product title 1" },
+          { id: "id2", title: "product title 2" },
         ],
       };
       mocks.getUserInstitutionProducts.mockResolvedValueOnce(expectedProducts);

@@ -2042,12 +2042,9 @@ components:
           type: string
         title:
           type: string
-        urlBO:
-          type: string
       required:
         - id
         - title
-        - urlBO
     UserInstitutionProducts:
       type: object
       properties:

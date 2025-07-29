@@ -105,8 +105,7 @@ const mocks: {
     products: [
       {
         id: "id1",
-        title: "product title",
-        urlBO: "urlBO",
+        title: "product title 1",
       },
     ],
   },
@@ -151,7 +150,7 @@ const mocks: {
           skipUserCreation: true,
         },
       },
-      title: "product title",
+      title: "product title 1",
       urlBO: "urlBO",
       urlPublic: "urlPublic",
     },

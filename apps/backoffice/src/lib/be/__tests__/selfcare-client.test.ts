@@ -114,7 +114,7 @@ const mocks: {
           skipUserCreation: true,
         },
       },
-      title: "product title",
+      title: "product title 1",
       urlBO: "urlBO",
       urlPublic: "urlPublic",
     },

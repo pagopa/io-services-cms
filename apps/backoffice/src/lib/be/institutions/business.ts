@@ -234,7 +234,6 @@ export const getUserInstitutionProducts = async (
     products: apiResult.map((product) => ({
       id: product.id,
       title: product.title,
-      urlBO: product.urlBO,
     })),
   };
 };
