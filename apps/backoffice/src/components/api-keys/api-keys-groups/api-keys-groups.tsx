@@ -341,8 +341,8 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         >
           <></>
         </LoaderSkeleton>
-        {mspData &&
-          mspData?.pagination.count > pagination.offset + pagination.limit && (
+        {Array.isArray(mspData?.value) &&
+          mspData.value.length === pagination.limit && (
             <Box textAlign="center">
               <ButtonNaked
                 color="primary"
