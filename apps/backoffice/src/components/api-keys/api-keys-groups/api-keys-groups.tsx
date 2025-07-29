@@ -341,20 +341,19 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         >
           <></>
         </LoaderSkeleton>
-        {Array.isArray(mspData?.value) &&
-          mspData?.value.length === pagination.limit && (
-            <Box textAlign="center">
-              <ButtonNaked
-                color="primary"
-                endIcon={<KeyboardArrowDown fontSize="small" />}
-                onClick={handleLoadMore}
-                size="medium"
-                sx={{ fontWeight: 700, marginTop: 1 }}
-              >
-                {t("routes.keys.manage.group.loadMore")}
-              </ButtonNaked>
-            </Box>
-          )}
+        {mspData?.value.length === pagination.limit && (
+          <Box textAlign="center">
+            <ButtonNaked
+              color="primary"
+              endIcon={<KeyboardArrowDown fontSize="small" />}
+              onClick={handleLoadMore}
+              size="medium"
+              sx={{ fontWeight: 700, marginTop: 1 }}
+            >
+              {t("routes.keys.manage.group.loadMore")}
+            </ButtonNaked>
+          </Box>
+        )}
       </Box>
     </Box>
   );
