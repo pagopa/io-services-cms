@@ -367,7 +367,6 @@
       "title": "Panoramica",
       "description": "Tieni sotto controllo tutte le tue attività da qui.",
       "apiKeys": {
-        "showMore": "mostra altro",
         "groups": {
           "emptyState": {
             "admin": "Assicurati che i gruppi siano stati creati e che le API Key siano state associate. Vai alla sezione API Key per gestire la configurazione.",

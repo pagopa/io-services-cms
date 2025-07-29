@@ -367,7 +367,6 @@
       "title": "Overview",
       "description": "Monitor all your activities from here.",
       "apiKeys": {
-        "showMore": "show more",
         "groups": {
           "emptyState": {
             "admin": "Make sure groups have been created and API Keys have been associated. Go to the API Keys section to manage the configuration.",

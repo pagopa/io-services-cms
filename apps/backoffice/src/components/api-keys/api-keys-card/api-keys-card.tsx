@@ -126,7 +126,7 @@ export const ApiKeysCard = () => {
                     {mspData?.value &&
                       mspData.value.length > MAX_APIKEY_GROUP_TO_DISPLAY && (
                         <ApiKeyTag
-                          label={t("routes.overview.apiKeys.showMore")}
+                          label="..."
                           onClick={() => router.push(KEYS_ROUTE_PATH)}
                         />
                       )}
