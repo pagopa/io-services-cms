@@ -36,10 +36,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/1.0.0"
   },
   "postgres.cms_postgres_flexible_server": {
-    "hash": "d9fd8a832d2469c7cf4a23d0f15632c64b51309400d653b01fbaa33fa7ee411b",
-    "version": "1.0.6",
+    "hash": "9777adb9f883f60142c4607a503d2500f6b179356bb63ee75c442caf938a9a49",
+    "version": "1.0.7",
     "name": "azure_postgres_server",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/1.0.6"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/1.0.7"
   },
   "cms_function_app.function_app_staging_slot_to_blob_data_writer": {
     "hash": "cec66e15f8a41169c11dbd6822da998c5d01fea9f5e49ec21f0959c340f2ac59",
