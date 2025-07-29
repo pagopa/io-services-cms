@@ -58,7 +58,7 @@ module "cms_fn" {
       "AzureWebJobs.OnRequestServicesHistoryIngestionRetry.Disabled"     = "0"
       "AzureWebJobs.ServiceTopicsIngestor.Disabled"                      = "0"
       "AzureWebJobs.SelfcareGroupWatcher.Disabled"                       = "0"
-      "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "1"
+      "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "0"
       "AzureWebJobs.ActivationsSyncFromLegacy.Disabled"                  = "0"
 
     }
