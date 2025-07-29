@@ -11,6 +11,7 @@ import {
   getMockInstitution,
   getMockUserInstitution,
   getSelfCareProblemResponse,
+  getMockInstitutionProducts,
 } from "../data/selfcare-data";
 
 faker.seed(1);
@@ -60,6 +61,28 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(
+      `${baseURL}/institutions/:institutionId/products`,
+      ({ params }) => {
+        const { institutionId } = params;
+        const resultArray = [
+          HttpResponse.json(
+            getMockInstitutionProducts(institutionId as string) as any,
+            {
+              status: 200,
+            },
+          ),
+          HttpResponse.json(getSelfCareProblemResponse(404) as any, {
+            status: 404,
+          }),
+          HttpResponse.json(getSelfCareProblemResponse(500) as any, {
+            status: 500,
+          }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
   ];
 };
 
