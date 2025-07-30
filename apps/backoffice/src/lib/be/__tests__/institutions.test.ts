@@ -454,12 +454,6 @@ describe("Institutions", () => {
   describe("getUserInstitutionProducts", () => {
     const institutionId = "institutionId";
     const userId = "userId";
-    const userInstitutionProducts = {
-      products: institutionProducts.map((product) => ({
-        id: product.id,
-        title: product.title,
-      })),
-    };
 
     it("should rejects when getUserInstitutionProducts return an error response", async () => {
       // given
@@ -484,7 +478,12 @@ describe("Institutions", () => {
       const result = await getUserInstitutionProducts(institutionId, userId);
 
       // then
-      expect(result).toStrictEqual(userInstitutionProducts);
+      expect(result).toStrictEqual({
+        products: institutionProducts.map((product) => ({
+          id: product.id,
+          title: product.title,
+        })),
+      });
       expect(getInstitutionProductsMock).toHaveBeenCalledOnce();
       expect(getInstitutionProductsMock).toHaveBeenCalledWith(
         institutionId,

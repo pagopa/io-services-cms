@@ -12,11 +12,6 @@ import {
 } from "../selfcare-client";
 import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
-// Define institutionProducts outside of vi.hoisted() to use imported functions
-const institutionProducts = getMockInstitutionProducts(
-  "institutionId",
-) as unknown as ProductResource[];
-
 const mocks: {
   institution: InstitutionResponse;
   userInstitutions: UserInstitutions;
@@ -479,6 +474,10 @@ describe("Selfcare Client", () => {
 
     it("should return the user institution products for the given institution and user", async () => {
       // given
+      const institutionProducts = getMockInstitutionProducts(
+        "institutionId",
+      ) as unknown as ProductResource[];
+      
       getMock.mockResolvedValueOnce({
         status: 200,
         data: institutionProducts,
