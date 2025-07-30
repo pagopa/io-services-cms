@@ -163,7 +163,7 @@ export const getMockInstitutionProducts = (_institutionId?: string) => [
   {
     contractTemplatePath: "path/to/contractTemplatePath",
     contractTemplateVersion: "1.0.0",
-    createdAt: "2019-08-24T14:15:22Z",
+    createdAt: new Date("2019-08-24T14:15:22Z"),
     depictImageUrl: "https://depictImageUrl",
     description: "product description",
     id: _institutionId ?? faker.string.uuid(),

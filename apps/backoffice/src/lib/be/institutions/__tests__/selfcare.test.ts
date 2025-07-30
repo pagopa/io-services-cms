@@ -6,6 +6,7 @@ import {
   getInstitutionDelegations,
   getInstitutionProducts,
 } from "../selfcare";
+import { getMockInstitutionProducts } from "../../../../../mocks/data/selfcare-data";
 
 // import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
 
@@ -174,52 +175,8 @@ describe("Selfcare Institutions", () => {
 
     it("should return the user institution products", async () => {
       // given
-      const expectedInstitutionProducts = [
-        {
-          contractTemplatePath: "path/to/contractTemplatePath",
-          contractTemplateVersion: "1.0.0",
-          createdAt: "2019-08-24T14:15:22Z",
-          depictImageUrl: "https://depictImageUrl",
-          description: "product description",
-          id: "id1",
-          identityTokenAudience: "identityTokenAudience",
-          logo: "https://logo",
-          logoBgColor: "logoBgColor",
-          parentId: "parentId",
-          roleManagementURL: "https://roleManagementURL",
-          roleMappings: {
-            property1: {
-              multiroleAllowed: true,
-              phasesAdditionAllowed: ["phase1"],
-              roles: [
-                {
-                  code: "code1",
-                  description: "description1",
-                  label: "label1",
-                  productLabel: "productLabel1",
-                },
-              ],
-              skipUserCreation: true,
-            },
-            property2: {
-              multiroleAllowed: true,
-              phasesAdditionAllowed: ["phase2"],
-              roles: [
-                {
-                  code: "code2",
-                  description: "description2",
-                  label: "label2",
-                  productLabel: "productLabel2",
-                },
-              ],
-              skipUserCreation: true,
-            },
-          },
-          title: "product title 1",
-          urlBO: "urlBO",
-          urlPublic: "urlPublic",
-        },
-      ];
+      const expectedInstitutionProducts =
+        getMockInstitutionProducts(institutionId);
       mocks.getInstitutionProducts.mockReturnValueOnce(
         TE.right(expectedInstitutionProducts),
       );

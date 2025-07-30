@@ -10,6 +10,12 @@ import {
   resetInstance,
   UserInstitutions,
 } from "../selfcare-client";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
+
+// Define institutionProducts outside of vi.hoisted() to use imported functions
+const institutionProducts = getMockInstitutionProducts(
+  "institutionId",
+) as unknown as ProductResource[];
 
 const mocks: {
   institution: InstitutionResponse;
@@ -17,7 +23,6 @@ const mocks: {
   aSelfcareUserId: string;
   institutionGroups: PageOfUserGroupResource;
   delegations: DelegationWithPaginationResponse;
-  institutionProducts: ProductResource[];
 } = {
   institution: { id: "institutionId" } as InstitutionResponse,
   userInstitutions: [
@@ -73,52 +78,6 @@ const mocks: {
       totalPages: 1,
     },
   },
-  institutionProducts: [
-    {
-      contractTemplatePath: "path/to/contractTemplatePath",
-      contractTemplateVersion: "1.0.0",
-      createdAt: new Date("2019-08-24T14:15:22Z"),
-      depictImageUrl: "https://depictImageUrl",
-      description: "product description",
-      id: "id1",
-      identityTokenAudience: "identityTokenAudience",
-      logo: "https://logo",
-      logoBgColor: "logoBgColor",
-      parentId: "parentId",
-      roleManagementURL: "https://roleManagementURL",
-      roleMappings: {
-        property1: {
-          multiroleAllowed: true,
-          phasesAdditionAllowed: ["phase1"],
-          roles: [
-            {
-              code: "code1",
-              description: "description1",
-              label: "label1",
-              productLabel: "productLabel1",
-            },
-          ],
-          skipUserCreation: true,
-        },
-        property2: {
-          multiroleAllowed: true,
-          phasesAdditionAllowed: ["phase2"],
-          roles: [
-            {
-              code: "code2",
-              description: "description2",
-              label: "label2",
-              productLabel: "productLabel2",
-            },
-          ],
-          skipUserCreation: true,
-        },
-      },
-      title: "product title 1",
-      urlBO: "urlBO",
-      urlPublic: "urlPublic",
-    },
-  ],
 };
 
 const { create, isAxiosError, getMock } = vi.hoisted(() => {
@@ -522,7 +481,7 @@ describe("Selfcare Client", () => {
       // given
       getMock.mockResolvedValueOnce({
         status: 200,
-        data: mocks.institutionProducts,
+        data: institutionProducts,
       });
 
       // when
@@ -540,7 +499,7 @@ describe("Selfcare Client", () => {
       expect(isAxiosError).not.toHaveBeenCalled();
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
-        expect(result.right).toEqual(mocks.institutionProducts);
+        expect(result.right).toEqual(institutionProducts);
       }
       commonExpectation();
     });

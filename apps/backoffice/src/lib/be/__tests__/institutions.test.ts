@@ -19,8 +19,8 @@ import {
   retrieveUnboundInstitutionGroups,
   retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
-import { UserInstitutionProducts } from "../../../generated/api/UserInstitutionProducts";
 import { InstitutionProducts } from "../../../lib/be/selfcare-client";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -29,8 +29,6 @@ const mocks: {
   institutionGroup: UserGroupResource;
   institutionGroups: PageOfUserGroupResource;
   institutionDelegations: DelegationWithPaginationResponse;
-  userInstitutionProducts: UserInstitutionProducts;
-  institutionProducts: InstitutionProducts;
 } = vi.hoisted(() => ({
   institution: { id: "institutionId" },
   userInstitutions: [
@@ -101,61 +99,12 @@ const mocks: {
       totalPages: 0,
     },
   },
-  userInstitutionProducts: {
-    products: [
-      {
-        id: "id1",
-        title: "product title 1",
-      },
-    ],
-  },
-  institutionProducts: [
-    {
-      contractTemplatePath: "path/to/contractTemplatePath",
-      contractTemplateVersion: "1.0.0",
-      createdAt: new Date("2019-08-24T14:15:22Z"),
-      depictImageUrl: "https://depictImageUrl",
-      description: "product description",
-      id: "id1",
-      identityTokenAudience: "identityTokenAudience",
-      logo: "https://logo",
-      logoBgColor: "logoBgColor",
-      parentId: "parentId",
-      roleManagementURL: "https://roleManagementURL",
-      roleMappings: {
-        property1: {
-          multiroleAllowed: true,
-          phasesAdditionAllowed: ["phase1"],
-          roles: [
-            {
-              code: "code1",
-              description: "description1",
-              label: "label1",
-              productLabel: "productLabel1",
-            },
-          ],
-          skipUserCreation: true,
-        },
-        property2: {
-          multiroleAllowed: true,
-          phasesAdditionAllowed: ["phase2"],
-          roles: [
-            {
-              code: "code2",
-              description: "description2",
-              label: "label2",
-              productLabel: "productLabel2",
-            },
-          ],
-          skipUserCreation: true,
-        },
-      },
-      title: "product title 1",
-      urlBO: "urlBO",
-      urlPublic: "urlPublic",
-    },
-  ],
 }));
+
+// Define institutionProducts outside of vi.hoisted() to use imported functions
+const institutionProducts = getMockInstitutionProducts(
+  "id1",
+) as unknown as InstitutionProducts;
 
 const {
   getUserAuthorizedInstitutionsMock,
@@ -505,6 +454,12 @@ describe("Institutions", () => {
   describe("getUserInstitutionProducts", () => {
     const institutionId = "institutionId";
     const userId = "userId";
+    const userInstitutionProducts = {
+      products: institutionProducts.map((product) => ({
+        id: product.id,
+        title: product.title,
+      })),
+    };
 
     it("should rejects when getUserInstitutionProducts return an error response", async () => {
       // given
@@ -523,15 +478,13 @@ describe("Institutions", () => {
 
     it("should return the institution products for the given institution and user", async () => {
       // given
-      getInstitutionProductsMock.mockResolvedValueOnce(
-        mocks.institutionProducts,
-      );
+      getInstitutionProductsMock.mockResolvedValueOnce(institutionProducts);
 
       // when
       const result = await getUserInstitutionProducts(institutionId, userId);
 
       // then
-      expect(result).toStrictEqual(mocks.userInstitutionProducts);
+      expect(result).toStrictEqual(userInstitutionProducts);
       expect(getInstitutionProductsMock).toHaveBeenCalledOnce();
       expect(getInstitutionProductsMock).toHaveBeenCalledWith(
         institutionId,
