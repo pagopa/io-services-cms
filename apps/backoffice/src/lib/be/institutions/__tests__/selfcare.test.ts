@@ -1,7 +1,12 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
-import { getGroup, getInstitutionDelegations } from "../selfcare";
+import {
+  getGroup,
+  getInstitutionDelegations,
+  getInstitutionProducts,
+} from "../selfcare";
+import { getMockInstitutionProducts } from "../../../../../mocks/data/selfcare-data";
 
 // import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
 
@@ -9,14 +14,21 @@ const mocks: {
   getSelfcareClient: Mock;
   getGroup: Mock;
   getInstitutionDelegations: Mock;
+  getInstitutionProducts: Mock;
   isAxiosError: Mock;
 } = vi.hoisted(() => {
   const getGroup = vi.fn();
   const getInstitutionDelegations = vi.fn();
+  const getInstitutionProducts = vi.fn();
   return {
-    getSelfcareClient: vi.fn(() => ({ getGroup, getInstitutionDelegations })),
+    getSelfcareClient: vi.fn(() => ({
+      getGroup,
+      getInstitutionDelegations,
+      getInstitutionProducts,
+    })),
     getGroup,
     getInstitutionDelegations,
+    getInstitutionProducts,
     isAxiosError: vi.fn(),
   };
 });
@@ -133,6 +145,50 @@ describe("Selfcare Institutions", () => {
         undefined,
         undefined,
         undefined,
+      );
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("getInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+    const error = "error";
+
+    it("should rejct when getInstitutionProducts fail", async () => {
+      // given
+      mocks.getInstitutionProducts.mockReturnValueOnce(TE.left(error));
+
+      // when and then
+      await expect(() =>
+        getInstitutionProducts(institutionId, userId),
+      ).rejects.toThrowError(
+        "Error calling selfcare getInstitutionProducts API",
+      );
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledWith(
+        institutionId,
+        userId,
+      );
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it("should return the user institution products", async () => {
+      // given
+      const expectedInstitutionProducts =
+        getMockInstitutionProducts(institutionId);
+      mocks.getInstitutionProducts.mockReturnValueOnce(
+        TE.right(expectedInstitutionProducts),
+      );
+
+      // when and then
+      await expect(
+        getInstitutionProducts(institutionId, userId),
+      ).resolves.toStrictEqual(expectedInstitutionProducts);
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionProducts).toHaveBeenCalledWith(
+        institutionId,
+        userId,
       );
       expect(mocks.isAxiosError).not.toHaveBeenCalled();
     });

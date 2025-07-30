@@ -12,12 +12,15 @@ import {
 import { GroupNotFoundError } from "../errors";
 import {
   getDelegatedInstitutions,
+  getUserInstitutionProducts,
   groupExists,
   retrieveInstitution,
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
   retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
+import { InstitutionProducts } from "../../../lib/be/selfcare-client";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -105,6 +108,7 @@ const {
   getManageSubscriptionsMock,
   getGroupMock,
   getInstitutionDelegationsMock,
+  getInstitutionProductsMock,
 } = vi.hoisted(() => ({
   getUserAuthorizedInstitutionsMock: vi.fn(),
   getInstitutionByIdMock: vi.fn(),
@@ -112,6 +116,7 @@ const {
   getManageSubscriptionsMock: vi.fn(),
   getGroupMock: vi.fn(),
   getInstitutionDelegationsMock: vi.fn(),
+  getInstitutionProductsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
@@ -123,6 +128,7 @@ vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
     getInstitutionGroups: getInstitutionGroupsMock,
     getGroup: getGroupMock,
     getInstitutionDelegations: getInstitutionDelegationsMock,
+    getInstitutionProducts: getInstitutionProductsMock,
   };
 });
 
@@ -436,6 +442,50 @@ describe("Institutions", () => {
         size,
         page,
         search,
+      );
+    });
+  });
+
+  describe("getUserInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+
+    it("should rejects when getUserInstitutionProducts return an error response", async () => {
+      // given
+      const error = new Error("errorMessage");
+      getInstitutionProductsMock.mockRejectedValueOnce(error);
+
+      // when and then
+      expect(
+        getUserInstitutionProducts(institutionId, userId),
+      ).rejects.toThrowError(error);
+      expect(getInstitutionProductsMock).toHaveBeenCalledWith(
+        institutionId,
+        userId,
+      );
+    });
+
+    it("should return the institution products for the given institution and user", async () => {
+      // given
+      const institutionProducts = getMockInstitutionProducts(
+        "id1",
+      ) as unknown as InstitutionProducts;
+      getInstitutionProductsMock.mockResolvedValueOnce(institutionProducts);
+
+      // when
+      const result = await getUserInstitutionProducts(institutionId, userId);
+
+      // then
+      expect(result).toStrictEqual({
+        products: institutionProducts.map((product) => ({
+          id: product.id,
+          title: product.title,
+        })),
+      });
+      expect(getInstitutionProductsMock).toHaveBeenCalledOnce();
+      expect(getInstitutionProductsMock).toHaveBeenCalledWith(
+        institutionId,
+        userId,
       );
     });
   });

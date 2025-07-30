@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
+import { ProductResource } from "../../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
 import {
   getSelfcareClient,
   resetInstance,
   UserInstitutions,
 } from "../selfcare-client";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -415,6 +417,89 @@ describe("Selfcare Client", () => {
       });
       expect(isAxiosError).not.toHaveBeenCalled();
       expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+    const endpoint = `/institutions/${institutionId}/products`;
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return the user institution products for the given institution and user", async () => {
+      // given
+      const institutionProducts = getMockInstitutionProducts(
+        "institutionId",
+      ) as unknown as ProductResource[];
+      
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: institutionProducts,
+      });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(institutionProducts);
+      }
       commonExpectation();
     });
   });

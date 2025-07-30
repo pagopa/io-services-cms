@@ -4,12 +4,14 @@ import { Institution as BackofficeInstitution } from "@/generated/api/Institutio
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
+import { UserInstitutionProducts } from "@/generated/api/UserInstitutionProducts";
 import { InstitutionResponse as SelfcareInstitution } from "@/generated/selfcare/InstitutionResponse";
 import { StatusEnum } from "@/generated/selfcare/UserGroupResource";
 import {
   getInstitutionById,
   getInstitutionDelegations,
   getInstitutionGroups,
+  getInstitutionProducts,
   getGroup as getSelfcareGroup,
   getUserAuthorizedInstitutions,
 } from "@/lib/be/institutions/selfcare";
@@ -213,6 +215,25 @@ export const getDelegatedInstitutions = async (
     value: (apiResult.delegations ?? []).map((delegation) => ({
       id: delegation.institutionId ?? "",
       name: delegation.institutionName ?? "",
+    })),
+  };
+};
+
+/**
+ * Get institution products for the given institution and user
+ * @param institutionId the institution id
+ * @param userId the user id
+ * @returns the institution products
+ */
+export const getUserInstitutionProducts = async (
+  institutionId: string,
+  userId: string,
+): Promise<UserInstitutionProducts> => {
+  const apiResult = await getInstitutionProducts(institutionId, userId);
+  return {
+    products: apiResult.map((product) => ({
+      id: product.id,
+      title: product.title,
     })),
   };
 };

@@ -17,6 +17,7 @@ import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
+import { ProductResource } from "../../generated/selfcare/ProductResource";
 import { UserInstitutionResource } from "../../generated/selfcare/UserInstitutionResource";
 import { HealthChecksError } from "./errors";
 
@@ -27,6 +28,12 @@ export const UserInstitutions = t.readonlyArray(
 export type UserInstitutions = t.TypeOf<typeof UserInstitutions>;
 
 export type GroupFilter = "*" | StateEnum;
+
+export const InstitutionProducts = t.readonlyArray(
+  ProductResource,
+  "InstitutionProducts",
+);
+export type InstitutionProducts = t.TypeOf<typeof InstitutionProducts>;
 
 export interface SelfcareClient {
   getGroup: (
@@ -47,6 +54,10 @@ export interface SelfcareClient {
     page?: number,
     state?: GroupFilter,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
+  getInstitutionProducts: (
+    institutionId: string,
+    userId: string,
+  ) => TE.TaskEither<Error, InstitutionProducts>;
   getUserAuthorizedInstitutions: (
     userId: string,
   ) => TE.TaskEither<Error, UserInstitutions>;
@@ -248,11 +259,44 @@ const buildSelfcareClient = (): SelfcareClient => {
         ),
       );
 
+  const getInstitutionProducts: SelfcareClient["getInstitutionProducts"] = (
+    institutionId,
+    userId,
+  ) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(`${institutionsApi}/${institutionId}/products`, {
+            params: {
+              userId,
+            },
+          }),
+        flow(
+          E.fromPredicate(
+            axios.isAxiosError,
+            (e) =>
+              new Error(
+                `Error calling selfcare getInstitutionProducts API: ${e}`,
+              ),
+          ),
+          E.toUnion,
+        ),
+      ),
+      TE.chainEitherK((response) =>
+        pipe(
+          response.data,
+          InstitutionProducts.decode,
+          E.mapLeft((e) => pipe(e, readableReport, E.toError)),
+        ),
+      ),
+    );
+
   return {
     getGroup,
     getInstitutionById,
     getInstitutionDelegations,
     getInstitutionGroups,
+    getInstitutionProducts,
     getUserAuthorizedInstitutions,
   };
 };

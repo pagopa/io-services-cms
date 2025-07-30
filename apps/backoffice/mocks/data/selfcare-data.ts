@@ -158,3 +158,50 @@ export const getSelfCareProblemResponse = (status: number) => ({
   title: faker.lorem.slug(5),
   type: faker.lorem.slug(1),
 });
+
+export const getMockInstitutionProducts = (_institutionId?: string) => [
+  {
+    contractTemplatePath: "path/to/contractTemplatePath",
+    contractTemplateVersion: "1.0.0",
+    createdAt: new Date("2019-08-24T14:15:22Z"),
+    depictImageUrl: "https://depictImageUrl",
+    description: "product description",
+    id: _institutionId ?? faker.string.uuid(),
+    identityTokenAudience: "identityTokenAudience",
+    logo: "https://logo",
+    logoBgColor: "logoBgColor",
+    parentId: "parentId",
+    roleManagementURL: "https://roleManagementURL",
+    roleMappings: {
+      property1: {
+        multiroleAllowed: true,
+        phasesAdditionAllowed: ["phase1"],
+        roles: [
+          {
+            code: "code1",
+            description: "description1",
+            label: "label1",
+            productLabel: "productLabel1",
+          },
+        ],
+        skipUserCreation: true,
+      },
+      property2: {
+        multiroleAllowed: true,
+        phasesAdditionAllowed: ["phase2"],
+        roles: [
+          {
+            code: "code2",
+            description: "description2",
+            label: "label2",
+            productLabel: "productLabel2",
+          },
+        ],
+        skipUserCreation: true,
+      },
+    },
+    title: "product title 1",
+    urlBO: "urlBO",
+    urlPublic: "urlPublic",
+  },
+];
