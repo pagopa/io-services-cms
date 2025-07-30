@@ -101,11 +101,6 @@ const mocks: {
   },
 }));
 
-// Define institutionProducts outside of vi.hoisted() to use imported functions
-const institutionProducts = getMockInstitutionProducts(
-  "id1",
-) as unknown as InstitutionProducts;
-
 const {
   getUserAuthorizedInstitutionsMock,
   getInstitutionByIdMock,
@@ -472,6 +467,9 @@ describe("Institutions", () => {
 
     it("should return the institution products for the given institution and user", async () => {
       // given
+      const institutionProducts = getMockInstitutionProducts(
+        "id1",
+      ) as unknown as InstitutionProducts;
       getInstitutionProductsMock.mockResolvedValueOnce(institutionProducts);
 
       // when
