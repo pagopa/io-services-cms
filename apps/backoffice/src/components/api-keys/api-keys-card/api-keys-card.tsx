@@ -64,9 +64,6 @@ export const ApiKeysCard = () => {
     },
   ];
 
-  const getRemainingApiKeyGroupCount = () =>
-    mspData ? mspData.pagination.count - MAX_APIKEY_GROUP_TO_DISPLAY : 0;
-
   useEffect(() => {
     if (showManageKeyRoot) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys);
@@ -76,7 +73,7 @@ export const ApiKeysCard = () => {
         "getManageSubscriptions",
         {
           kind: SubscriptionTypeEnum.MANAGE_GROUP,
-          limit: MAX_APIKEY_GROUP_TO_DISPLAY,
+          limit: MAX_APIKEY_GROUP_TO_DISPLAY + 1,
         },
         SubscriptionPagination,
         {
@@ -126,9 +123,9 @@ export const ApiKeysCard = () => {
                           value={apiKeyGroup}
                         />
                       ))}
-                    {mspData.pagination.count > MAX_APIKEY_GROUP_TO_DISPLAY && (
+                    {mspData.value.length > MAX_APIKEY_GROUP_TO_DISPLAY && (
                       <ApiKeyTag
-                        label={`+${getRemainingApiKeyGroupCount()}`}
+                        label="..."
                         onClick={() => router.push(KEYS_ROUTE_PATH)}
                       />
                     )}
