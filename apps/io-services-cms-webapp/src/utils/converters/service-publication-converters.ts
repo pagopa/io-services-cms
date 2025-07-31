@@ -7,7 +7,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 import { TopicPostgreSqlConfig } from "../../config";
-import { CategoryEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   ServicePublicationStatusType,
@@ -21,7 +20,7 @@ export const itemToResponse =
   ({
     data: {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
+      metadata: { scope, topic_id, ...metadata },
       ...data
     },
     fsm: { state },
@@ -83,17 +82,5 @@ export const toServiceStatusType = (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
       const _: never = s;
       return ServicePublicationStatusTypeEnum[s];
-  }
-};
-
-export const toCategoryType = (
-  s: ServicePublication.ItemType["data"]["metadata"]["category"],
-): CategoryEnum => {
-  switch (s) {
-    case "STANDARD":
-    case "SPECIAL":
-      return CategoryEnum[s];
-    default:
-      return CategoryEnum.STANDARD;
   }
 };

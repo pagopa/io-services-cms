@@ -9,10 +9,7 @@ import { pipe } from "fp-ts/lib/function";
 import { TopicPostgreSqlConfig } from "../../config";
 import { Cidr } from "../../generated/api/Cidr";
 import { FiscalCode } from "../../generated/api/FiscalCode";
-import {
-  CategoryEnum,
-  ScopeEnum,
-} from "../../generated/api/ServiceBaseMetadata";
+import { ScopeEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
@@ -41,7 +38,7 @@ export const payloadToItem = (
       sandboxFiscalCode,
     ),
     max_allowed_payment_amount,
-    metadata: { ...metadata, category: toCategoryType(metadata.category) },
+    metadata: metadata,
     require_secure_channel,
   },
   id,
@@ -60,7 +57,7 @@ export const itemToResponse =
   ({
     data: {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
+      metadata: { scope, topic_id, ...metadata },
       ...data
     },
     fsm,
@@ -144,17 +141,5 @@ export const toScopeType = (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
       const _: never = s;
       return ScopeEnum[s];
-  }
-};
-
-export const toCategoryType = (
-  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"],
-): CategoryEnum => {
-  switch (s) {
-    case "STANDARD":
-    case "SPECIAL":
-      return CategoryEnum[s];
-    default:
-      return CategoryEnum.STANDARD;
   }
 };
