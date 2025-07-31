@@ -96,8 +96,6 @@ describe("[Services] Adapters", () => {
       ...aValidServiceCreateUpdatePayload,
       metadata: {
         ...aValidServiceCreateUpdatePayload.metadata,
-        category: "",
-        custom_special_flow: "",
         group_id: undefined,
         token_name: "",
         topic_id: undefined,
@@ -118,8 +116,6 @@ describe("[Services] Adapters", () => {
       ...aValidServiceCreateUpdatePayload,
       metadata: {
         ...aValidServiceCreateUpdatePayload.metadata,
-        category: "",
-        custom_special_flow: "",
         group_id: undefined,
         token_name: "",
         topic_id: 0,
