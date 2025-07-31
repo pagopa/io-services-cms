@@ -152,7 +152,6 @@ export const buildMissingService = (
   id: serviceId,
   last_update: lastUpdate.toISOString(),
   metadata: {
-    category: CategoryEnum.STANDARD,
     scope: ScopeEnum.LOCAL,
   },
   name: MISSING_SERVICE_NAME,
