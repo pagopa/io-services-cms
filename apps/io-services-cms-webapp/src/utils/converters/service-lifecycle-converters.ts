@@ -38,7 +38,7 @@ export const payloadToItem = (
       sandboxFiscalCode,
     ),
     max_allowed_payment_amount,
-    metadata: metadata,
+    metadata,
     require_secure_channel,
   },
   id,
@@ -57,7 +57,7 @@ export const itemToResponse =
   ({
     data: {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      metadata: { scope, topic_id, ...metadata },
+      metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
       ...data
     },
     fsm,

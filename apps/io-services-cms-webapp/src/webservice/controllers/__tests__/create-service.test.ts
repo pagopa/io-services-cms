@@ -234,6 +234,7 @@ describe("createService", () => {
             ...payloadToItemResponseMock.data,
             metadata: {
               ...payloadToItemResponseMock.data.metadata,
+              category: "STANDARD",
             },
           },
         },

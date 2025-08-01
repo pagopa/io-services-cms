@@ -20,7 +20,7 @@ export const itemToResponse =
   ({
     data: {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      metadata: { scope, topic_id, ...metadata },
+      metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
       ...data
     },
     fsm: { state },
