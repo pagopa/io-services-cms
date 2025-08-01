@@ -1,5 +1,6 @@
 import { getConfiguration } from "@/config";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
+import { UserInstitutionProducts } from "@/generated/api/UserInstitutionProducts";
 import useFetch from "@/hooks/use-fetch";
 import {
   trackInstitutionSwitchEvent,
@@ -11,44 +12,47 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 
+const { BACK_OFFICE_ID, SELFCARE_ID } = getConfiguration();
+
 export const Header = () => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const { data: institutionsData, fetchData: institutionsFetchData } =
     useFetch<UserAuthorizedInstitutions>();
+  const { data: productsData, fetchData: productsFetchData } =
+    useFetch<UserInstitutionProducts>();
 
   const getSelfcareInstitutionDashboardUrl = () =>
     `${getConfiguration().SELFCARE_URL}/dashboard/${
       session?.user?.institution.id
     }`;
 
-  const products: ProductSwitchItem[] = [
-    {
-      id: getConfiguration().BACK_OFFICE_ID,
-      linkType: "internal",
-      productUrl: "",
-      title: getConfiguration().BACK_OFFICE_TITLE,
-    },
-    {
-      id: getConfiguration().SELFCARE_ID,
-      linkType: "internal",
-      productUrl: getSelfcareInstitutionDashboardUrl(),
-      title: getConfiguration().SELFCARE_TITLE,
-    },
-  ];
+  const reservedAreaProduct: ProductSwitchItem = {
+    id: SELFCARE_ID,
+    linkType: "internal",
+    productUrl: getSelfcareInstitutionDashboardUrl(),
+    title: getConfiguration().SELFCARE_TITLE,
+  };
 
   const [parties, setParties] = useState(Array<PartySwitchItem>());
+  const [products, setProducts] = useState(Array<ProductSwitchItem>());
   const [selectedPartyId, setSelectedPartyId] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState(products[0].id);
+  const [selectedProductId, setSelectedProductId] = useState<string>();
 
   const selectedProductChange = (product: ProductSwitchItem) => {
     trackProductSwitchEvent(product.id);
 
     // no action if user click on current product (i.e.: BackOffice IO)
     if (selectedProductId === product.id) return;
-    // otherwise navigate to product url (i.e.: SelfCare)
-    setSelectedProductId(product.id);
-    window.location.href = product.productUrl;
+    // navigate to product url (i.e.: SelfCare)
+    else if (product.id === SELFCARE_ID) {
+      setSelectedProductId(product.id);
+      window.location.href = product.productUrl;
+    }
+    // otherwise perform token-exchange to change product backoffice
+    else {
+      handleTokenExchange(session?.user?.institution.id as string, product.id);
+    }
   };
 
   const selectedPartyChange = (party: PartySwitchItem) => {
@@ -58,10 +62,14 @@ export const Header = () => {
     setSelectedPartyId(party.id);
     trackInstitutionSwitchEvent(party.id);
 
+    handleTokenExchange(party.id, BACK_OFFICE_ID);
+  };
+
+  const handleTokenExchange = (insitutionId: string, productId: string) => {
     signOut({
       callbackUrl:
         getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +
-        `?institutionId=${party.id}&productId=${products[0].id}`,
+        `?institutionId=${insitutionId}&productId=${productId}`,
     });
   };
 
@@ -108,11 +116,37 @@ export const Header = () => {
   }, [institutionsData]);
 
   useEffect(() => {
+    if (productsData?.products) {
+      const productList: ProductSwitchItem[] = productsData.products.map(
+        ({ id, title }) => ({
+          id,
+          linkType: "internal",
+          productUrl: "",
+          title,
+        }),
+      );
+      setProducts(productList);
+      setSelectedProductId(BACK_OFFICE_ID);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productsData]);
+
+  useEffect(() => {
     setCurrentParty();
     institutionsFetchData(
       "getUserAuthorizedInstitutions",
       {},
       UserAuthorizedInstitutions,
+      {
+        notify: "errors",
+      },
+    );
+    productsFetchData(
+      "getUserInstitutionProducts",
+      {
+        institutionId: session?.user?.institution.id as string,
+      },
+      UserInstitutionProducts,
       {
         notify: "errors",
       },
@@ -127,7 +161,7 @@ export const Header = () => {
       partyId={selectedPartyId}
       partyList={parties}
       productId={selectedProductId}
-      productsList={products}
+      productsList={[reservedAreaProduct, ...products]}
     />
   );
 };
