@@ -16,7 +16,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
-import { STANDARD_CATEGORY } from "../create-service";
+import { ServiceLifecycle } from "@io-services-cms/models";
 
 const {
   validateServiceTopicRequest,
@@ -235,7 +235,8 @@ describe("createService", () => {
             ...payloadToItemResponseMock.data,
             metadata: {
               ...payloadToItemResponseMock.data.metadata,
-              category: STANDARD_CATEGORY,
+              category:
+                "STANDARD" as ServiceLifecycle.definitions.Service["data"]["metadata"]["category"],
             },
           },
         },

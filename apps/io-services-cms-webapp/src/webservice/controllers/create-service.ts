@@ -82,7 +82,7 @@ const createSubscription = (
     ),
   );
 
-export const STANDARD_CATEGORY: ServiceLifecycle.definitions.Service["data"]["metadata"]["category"] =
+const STANDARD_CATEGORY: ServiceLifecycle.definitions.Service["data"]["metadata"]["category"] =
   "STANDARD";
 
 export const makeCreateServiceHandler =
