@@ -16,6 +16,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { STANDARD_CATEGORY } from "../create-service";
 
 const {
   validateServiceTopicRequest,
@@ -234,7 +235,7 @@ describe("createService", () => {
             ...payloadToItemResponseMock.data,
             metadata: {
               ...payloadToItemResponseMock.data.metadata,
-              category: "STANDARD",
+              category: STANDARD_CATEGORY,
             },
           },
         },
