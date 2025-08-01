@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.28.1
+
+### Patch Changes
+
+- b5e5036c: removed category and custom special flow from openapi of cms
+
 ## 1.28.0
 
 ### Minor Changes

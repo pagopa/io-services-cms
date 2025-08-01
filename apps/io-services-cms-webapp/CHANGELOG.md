@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.41.2
+
+### Patch Changes
+
+- 8654e1fa: patch removed category and custom special flow from openapi of cms
+- Updated dependencies [b5e5036c]
+  - @io-services-cms/models@1.28.1
+
 ## 1.41.1
 
 ### Patch Changes
