@@ -3,10 +3,7 @@ import {
   ServiceListItem,
   VisibilityEnum,
 } from "@/generated/api/ServiceListItem";
-import {
-  CategoryEnum,
-  ScopeEnum,
-} from "@/generated/services-cms/ServiceBaseMetadata";
+import { ScopeEnum } from "@/generated/services-cms/ServiceBaseMetadata";
 import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
@@ -71,7 +68,6 @@ export const toServiceListItem =
       metadata: mapServiceGroup(
         {
           ...otherMetadata,
-          category: toCategoryType(otherMetadata.category),
           scope: toScopeType(otherMetadata.scope),
           topic: decodeServiceTopic(topic_id, topicsMap),
         },
@@ -116,18 +112,6 @@ const toScopeType = (
       // eslint-disable-next-line no-case-declarations
       const _: never = s;
       return ScopeEnum[s];
-  }
-};
-
-const toCategoryType = (
-  s: ServiceLifecycle.ItemType["data"]["metadata"]["category"],
-): CategoryEnum => {
-  switch (s) {
-    case "STANDARD":
-    case "SPECIAL":
-      return CategoryEnum[s];
-    default:
-      return CategoryEnum.STANDARD;
   }
 };
 
