@@ -27,7 +27,6 @@ import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../../config";
 import { CreateServicePayload } from "../../generated/api/CreateServicePayload";
-import { CategoryEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { SelfcareUserGroupsMiddleware } from "../../lib/middlewares/selfcare-user-groups-middleware";
 import {
@@ -83,6 +82,9 @@ const createSubscription = (
     ),
   );
 
+const STANDARD_CATEGORY: ServiceLifecycle.definitions.Service["data"]["metadata"]["category"] =
+  "STANDARD";
+
 export const makeCreateServiceHandler =
   ({
     apimService,
@@ -119,8 +121,7 @@ export const makeCreateServiceHandler =
                   ...serviceItem.data,
                   metadata: {
                     ...serviceItem.data.metadata,
-                    category: CategoryEnum.STANDARD,
-                    custom_special_flow: undefined,
+                    category: STANDARD_CATEGORY,
                   },
                 },
               }),

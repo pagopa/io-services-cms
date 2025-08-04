@@ -110,8 +110,6 @@ describe("test service-lifecycle-converters", () => {
       aSandboxFiscalCode as FiscalCode,
     );
     expect(result.data.metadata).toBeDefined();
-    expect(result.data.metadata.category).toBeDefined();
-    expect(result.data.metadata.category).toBe("STANDARD");
   });
 
   test("Converting a Payload have metadata.custom_special_flow the Item should mantain it", () => {
