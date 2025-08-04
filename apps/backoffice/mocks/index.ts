@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { SetupServer } from "msw/node";
 
 /**
  * MSW Setup
@@ -15,7 +16,7 @@ export const setupMocks = () => {
       const { mswWorker } = require("./msw-worker");
       mswWorker.start({ onUnhandledRequest: "bypass" });
     } else {
-      const { mswServer } = require("./msw-server");
+      const { mswServer }: { mswServer: SetupServer } = require("./msw-server");
       mswServer.listen({ onUnhandledRequest: "warn" });
     }
   }
