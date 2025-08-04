@@ -132,19 +132,6 @@ export const getMockInstitution = (institutionId?: string) => ({
   zipCode: faker.location.zipCode(),
 });
 
-export const getMockInstitutionGroups = (_institutionId?: string) => ({
-  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
-    (_, index) =>
-      getMockManageSubscriptionGroup(index === 0 ? "abc123" : undefined),
-  ),
-});
-
-export const getMockManageSubscriptionGroup = (id?: string) => ({
-  id: id ?? faker.string.uuid(),
-  name: faker.word.words({ count: { max: 3, min: 1 } }),
-  state: faker.helpers.arrayElement(["ACTIVE", "SUSPENDED", "DELETED"]),
-});
-
 export const getSelfCareProblemResponse = (status: number) => ({
   detail: faker.lorem.slug(5),
   instance: faker.lorem.slug(1),
@@ -205,3 +192,20 @@ export const getMockInstitutionProducts = (_institutionId?: string) => [
     urlPublic: "urlPublic",
   },
 ];
+
+export const getMockInstitutionGroups = (_institutionId?: string) => ({
+  content: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
+    (_value, _index, _array) => ({
+      description: faker.lorem.slug(1),
+      id: faker.string.uuid(),
+      institutionId: _institutionId ?? faker.string.uuid(),
+      name: "institutionGroupsName",
+      productId: "prod-io",
+      status: "ACTIVE",
+    }),
+  ),
+  number: 0,
+  size: 0,
+  totalElements: 0,
+  totalPages: 0,
+});

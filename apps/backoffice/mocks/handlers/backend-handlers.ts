@@ -31,9 +31,9 @@ import { aMockErrorResponse } from "../data/common-data";
 import {
   aMockCurrentUserAuthorizedInstitution,
   getMockInstitution,
-  getMockInstitutionGroups,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
+import { getMockInstitutionGroups } from "../data/backend-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
