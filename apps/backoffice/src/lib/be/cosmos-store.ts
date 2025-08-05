@@ -4,21 +4,26 @@ import {
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
 import { HealthChecksError } from "./errors";
 
-const Config = t.type({
-  COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
-  COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
-  COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
-  COSMOSDB_URI: NonEmptyString,
-});
-type Config = t.TypeOf<typeof Config>;
+const Config = t.exact(
+  t.type({
+    COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
+    COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
+    COSMOSDB_KEY: NonEmptyString,
+    COSMOSDB_MOCKING: withDefault(t.string, "false").pipe(BooleanFromString),
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
+  }),
+);
+export type Config = t.TypeOf<typeof Config>;
 
 let cosmosConfig: Config;
 let cosmosDatabase: Database;
@@ -29,7 +34,7 @@ let servicePublicationCosmosStore: ReturnType<
   typeof buildServicePublicationCosmosStore
 >;
 
-const getCosmosConfig = (): Config => {
+export const getCosmosConfig = (): Config => {
   if (!cosmosConfig) {
     const result = Config.decode(process.env);
 

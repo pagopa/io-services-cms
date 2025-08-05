@@ -5,6 +5,7 @@
  * and returns the API to control that worker instance.
  */
 import { setupWorker } from "msw/browser";
+
 import { getHandlers } from "./handlers";
 
-export const mswWorker = setupWorker(...getHandlers());
+export const mswWorker = () => setupWorker(...getHandlers());

@@ -9,7 +9,7 @@
       "outputs": [
         "src/generated/**/*"
       ],
-      "outputLogs": "full"
+      "outputLogs": "errors-only"
     },
     "build": {
       "inputs": [

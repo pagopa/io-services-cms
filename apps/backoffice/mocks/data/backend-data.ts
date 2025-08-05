@@ -8,7 +8,7 @@ import {
 import { faker } from "@faker-js/faker/locale/it";
 
 import packageJson from "../../package.json";
-import { getMockManageSubscriptionGroup } from "./selfcare-data";
+import { getMockManageSubscriptionGroup } from "./apim-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -449,4 +449,11 @@ export const getIoServicesError = (status: number) => ({
   detail: faker.lorem.sentence(),
   status: status,
   title: faker.lorem.sentence(),
+});
+
+export const getMockInstitutionGroups = (_institutionId?: string) => ({
+  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
+    (_, index) =>
+      getMockManageSubscriptionGroup(index === 0 ? "abc123" : undefined),
+  ),
 });

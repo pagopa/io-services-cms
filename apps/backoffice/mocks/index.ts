@@ -1,4 +1,6 @@
 import { getConfiguration } from "@/config";
+import { SetupWorker } from "msw/browser";
+import { SetupServer } from "msw/node";
 
 /**
  * MSW Setup
@@ -12,11 +14,15 @@ export const setupMocks = () => {
     process.env.NEXT_PUBLIC_IS_MSW_ENABLED
   ) {
     if (getConfiguration().IS_BROWSER) {
-      const { mswWorker } = require("./msw-worker");
-      mswWorker.start({ onUnhandledRequest: "bypass" });
+      const {
+        mswWorker,
+      }: { mswWorker: () => SetupWorker } = require("./msw-worker");
+      mswWorker().start({ onUnhandledRequest: "bypass" });
     } else {
-      const { mswServer } = require("./msw-server");
-      mswServer.listen({ onUnhandledRequest: "warn" });
+      const {
+        mswServer,
+      }: { mswServer: () => SetupServer } = require("./msw-server");
+      mswServer().listen({ onUnhandledRequest: "warn" });
     }
   }
 };
