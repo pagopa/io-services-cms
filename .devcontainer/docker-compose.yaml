@@ -1,0 +1,39 @@
+name: 'io-svc-cms'
+
+services:
+  # "cosmosdb" is the name of the Docker Compose service, and is also used as the hostname for incoming connections
+  cosmosdb:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+    # mem_limit: 3g
+    # cpu_count: 2
+    environment:
+      # Low partition count to speed startup (note: will actually create 2 partitions)
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 1
+      # Save data across starts
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: 'true'
+      # Use the "https" protocol for the emulator
+      PROTOCOL: https
+
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/docker.md#feature-use
+    init: true
+    depends_on:
+      - cosmosdb
+    environment:
+      # Disable the Corepack download prompt
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      # Set the Node.js environment to development
+      NODE_ENV: development
+      # These names aren't special - they're just used in the Node app to configure the CosmosClient
+      COSMOSDB_EMULATOR_URI: https://cosmosdb:8081
+      # This is the publicly documented emulator key
+      COSMOSDB_EMULATOR_KEY: 'C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=='
+      # Tell Node.js to ignore TLS errors
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+    volumes:
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ..:/workspace:cached
+    network_mode: service:cosmosdb
