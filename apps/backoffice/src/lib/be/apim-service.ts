@@ -6,11 +6,7 @@ import { getAzureAccessToken } from "@/lib/be/azure-access-token";
 import { HealthChecksError, minifyApimError } from "@/lib/be/errors";
 import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import {
-  getKeepAliveAgentOptions,
-  newHttpAgent,
-  newHttpsAgent,
-} from "@pagopa/ts-commons/lib/agent";
+import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -31,17 +27,20 @@ export interface ApimRestClient {
 }
 
 type Config = t.TypeOf<typeof Config>;
-const Config = t.type({
-  API_APIM_MOCKING: BooleanFromString,
-  AZURE_APIM: NonEmptyString,
-  AZURE_APIM_PRODUCT_NAME: NonEmptyString,
-  AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
-  AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
-  AZURE_SUBSCRIPTION_ID: NonEmptyString,
-});
+const Config = t.intersection([
+  t.type({
+    API_APIM_MOCKING: BooleanFromString,
+    AZURE_APIM: NonEmptyString,
+    AZURE_APIM_PRODUCT_NAME: NonEmptyString,
+    AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
+    AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
+    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
+    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
+    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
+    AZURE_SUBSCRIPTION_ID: NonEmptyString,
+  }),
+  HttpAgentConfig,
+]);
 
 let apimConfig: Config;
 let apimService: ApimUtils.ApimService;
@@ -96,8 +95,8 @@ const getAxiosInstance = (azureAccessToken: string) => {
   return axios.create({
     baseURL: apimConfig.AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL,
     headers: { Authorization: `Bearer ${azureAccessToken}` },
-    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env)),
+    httpAgent: Agent.getHttpsAgent(apimConfig),
+    httpsAgent: Agent.getHttpsAgent(apimConfig),
     timeout: 5000,
   });
 };

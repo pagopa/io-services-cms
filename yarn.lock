@@ -11932,6 +11932,7 @@ __metadata:
     "@faker-js/faker": ^8.3.1
     "@hookform/resolvers": ^3.3.1
     "@io-services-cms/external-clients": "workspace:^"
+    "@io-services-cms/fetch-utils": "workspace:^"
     "@io-services-cms/models": "workspace:^"
     "@mui/icons-material": ^5.14.3
     "@mui/lab": ^5.0.0-alpha.142
