@@ -11,7 +11,7 @@ import { SetupServer } from "msw/node";
 export const setupMocks = () => {
   if (
     getConfiguration().IS_MSW_ENABLED ||
-    process.env.NEXT_PUBLIC_IS_MSW_ENABLED
+    process.env.NEXT_PUBLIC_IS_MSW_ENABLED === "true"
   ) {
     if (getConfiguration().IS_BROWSER) {
       const {
