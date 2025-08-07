@@ -1,6 +1,6 @@
 import { ServiceTopicList } from "@/generated/services-cms/ServiceTopicList";
 import { Client, createClient } from "@/generated/services-cms/client";
-import { getFetch } from "@pagopa/ts-commons/lib/agent";
+import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
@@ -19,12 +19,15 @@ export interface TopicsProvider {
   ) => Promise<ServiceTopicList>;
 }
 
-const Config = t.type({
-  API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES: NumberFromString,
-  API_SERVICES_CMS_BASE_PATH: NonEmptyString,
-  API_SERVICES_CMS_MOCKING: BooleanFromString,
-  API_SERVICES_CMS_URL: NonEmptyString,
-});
+const Config = t.intersection([
+  t.type({
+    API_SERIVCES_CMS_TOPICS_CACHE_TTL_MINUTES: NumberFromString,
+    API_SERVICES_CMS_BASE_PATH: NonEmptyString,
+    API_SERVICES_CMS_MOCKING: BooleanFromString,
+    API_SERVICES_CMS_URL: NonEmptyString,
+  }),
+  HttpAgentConfig,
+]);
 
 const getIoServicesCmsClientConfig = () => {
   const result = Config.decode(process.env);
@@ -49,7 +52,7 @@ const buildIoServicesCmsClient = (): Client => {
   return createClient({
     basePath: configuration.API_SERVICES_CMS_BASE_PATH,
     baseUrl: configuration.API_SERVICES_CMS_URL,
-    fetchApi: getFetch(process.env),
+    fetchApi: Agent.fetchWithAgents(configuration),
   });
 };
 

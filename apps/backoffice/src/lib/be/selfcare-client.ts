@@ -2,11 +2,7 @@ import { StateEnum } from "@/generated/api/Group";
 import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
-import {
-  getKeepAliveAgentOptions,
-  newHttpAgent,
-  newHttpsAgent,
-} from "@pagopa/ts-commons/lib/agent";
+import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -64,11 +60,14 @@ export interface SelfcareClient {
 }
 
 type Config = t.TypeOf<typeof Config>;
-const Config = t.type({
-  SELFCARE_API_KEY: NonEmptyString,
-  SELFCARE_API_MOCKING: BooleanFromString,
-  SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
-});
+const Config = t.intersection([
+  t.type({
+    SELFCARE_API_KEY: NonEmptyString,
+    SELFCARE_API_MOCKING: BooleanFromString,
+    SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
+  }),
+  HttpAgentConfig,
+]);
 
 const institutionsApi = "/institutions";
 const usersApi = "/users";
@@ -104,8 +103,8 @@ const getAxiosInstance = (): AxiosInstance => {
   return axios.create({
     baseURL: endpoint,
     headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY },
-    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env)),
+    httpAgent: Agent.getHttpAgent(configuration),
+    httpsAgent: Agent.getHttpsAgent(configuration),
     timeout: 5000,
   });
 };
