@@ -198,38 +198,6 @@ describe("Service Review Proxy", () => {
     expect(E.isRight(serviceReviews)).toBeTruthy();
   });
 
-  it("should retrieve a service review by its ID", async () => {
-    mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve(aSearchJiraIssuesResponse),
-    );
-    const mockFetch = getMockFetchWithStatus(200);
-
-    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
-    const serviceReview = await proxy.getJiraIssueByServiceId(
-      "aServiceId" as NonEmptyString,
-    )();
-
-    expect(mockFetch).toBeCalledWith(expect.any(String), {
-      body:
-        expect.any(String) &&
-        expect.stringContaining(
-          `"jql":"project = ${aJiraClient.config.JIRA_PROJECT_NAME} AND summary ~ 'Review #aServiceId'`,
-        ),
-      headers: expect.any(Object),
-      method: "POST",
-    });
-    expect(E.isRight(serviceReview)).toBeTruthy();
-    if (E.isRight(serviceReview)) {
-      expect(O.isSome(serviceReview.right));
-      if (O.isSome(serviceReview.right)) {
-        expect(E.isRight(JiraIssue.decode(serviceReview.right.value))).toBe(
-          true,
-        );
-      }
-    }
-  });
-
   it("should not retrieve a service review for a wrong service ID", async () => {
     mockFetchJson.mockImplementationOnce(() =>
       Promise.resolve(anEmptySearchJiraIssuesResponse),
@@ -250,29 +218,6 @@ describe("Service Review Proxy", () => {
     expect(E.isRight(serviceReview)).toBeTruthy();
     if (E.isRight(serviceReview)) {
       expect(O.isNone(serviceReview.right));
-    }
-  });
-
-  it("should return a specific Jira API Error if jira client returns a 500 status code", async () => {
-    mockFetchJson.mockImplementationOnce(() =>
-      Promise.resolve({
-        errorMessages: ["A specific JIRA error message"],
-        errors: {},
-      }),
-    );
-    const mockFetch = getMockFetchWithStatus(500);
-
-    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
-    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
-    const serviceReview = await proxy.getJiraIssueByServiceId(
-      "aServiceId" as NonEmptyString,
-    )();
-
-    expect(E.isLeft(serviceReview)).toBeTruthy();
-    if (E.isLeft(serviceReview)) {
-      expect(serviceReview.left.message).toContain(
-        "Jira API searchJiraIssues returns an error",
-      );
     }
   });
 });
