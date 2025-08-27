@@ -17,8 +17,6 @@ const JIRA_CONFIG = {
 
 const aServiceId = "sid" as ServiceId;
 const aSearchJiraIssuesByServiceIdResponse: SearchJiraLegacyIssuesResponse = {
-  startAt: 0,
-  total: 1,
   issues: [
     {
       id: "123456" as NonEmptyString,

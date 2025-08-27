@@ -50,9 +50,6 @@ export interface JiraProxy {
     delegate: Delegate,
     firstPublication: boolean,
   ) => TE.TaskEither<Error, CreateJiraIssueResponse>;
-  readonly getJiraIssueByServiceId: (
-    serviceId: NonEmptyString,
-  ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
   readonly getPendingAndRejectedJiraIssueByServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<Error, O.Option<JiraIssue>>;
@@ -184,7 +181,6 @@ export const jiraProxy = (
     fieldsByKeys: false,
     jql,
     maxResults: 1,
-    startAt: 0,
   });
 
   const buildSearchJiraIssuesByKeyAndStatusPayload = (
@@ -212,14 +208,6 @@ export const jiraProxy = (
       ),
     );
 
-  const buildGetJiraIssueByServiceIdPayload = (serviceId: NonEmptyString) => ({
-    ...buildSearchIssuesBasePayload(
-      `project = ${
-        jiraClient.config.JIRA_PROJECT_NAME
-      } AND summary ~ '${formatIssueTitle(serviceId)}'`,
-    ),
-  });
-
   const buildGetPendingAndRejectedJiraIssueByServiceIdPayload = (
     serviceId: NonEmptyString,
   ) => ({
@@ -231,18 +219,6 @@ export const jiraProxy = (
       )}' AND status IN (NEW , REVIEW , REJECTED)`,
     ),
   });
-
-  const getJiraIssueByServiceId = (
-    serviceId: NonEmptyString,
-  ): TE.TaskEither<Error, O.Option<JiraIssue>> =>
-    pipe(
-      jiraClient.searchJiraIssues(
-        buildGetJiraIssueByServiceIdPayload(serviceId),
-      ),
-      TE.map((response) =>
-        response.issues.length > 0 ? O.some(response.issues[0]) : O.none,
-      ),
-    );
 
   const getPendingAndRejectedJiraIssueByServiceId = (
     serviceId: NonEmptyString,
@@ -258,7 +234,6 @@ export const jiraProxy = (
 
   return {
     createJiraIssue,
-    getJiraIssueByServiceId,
     getPendingAndRejectedJiraIssueByServiceId,
     reOpenJiraIssue,
     searchJiraIssuesByKeyAndStatus,
