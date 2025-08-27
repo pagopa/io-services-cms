@@ -51,7 +51,7 @@ export const Header = () => {
     useState<ProductSwitchItem[]>(initialProducts);
   const [selectedPartyId, setSelectedPartyId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState<string>(
-    products[1].id,
+    initialProducts.find((p) => p.id === BACK_OFFICE_ID)?.id ?? "",
   );
 
   const selectedProductChange = (product: ProductSwitchItem) => {
@@ -132,7 +132,7 @@ export const Header = () => {
 
   useEffect(() => {
     if (!productsData?.products) return;
-    const updatedInitial = initialProducts.map((product) =>
+    const initialProductsUpdated = initialProducts.map((product) =>
       product.id === BACK_OFFICE_ID
         ? {
             ...product,
@@ -151,7 +151,7 @@ export const Header = () => {
         productUrl: "",
         title,
       }));
-    setProducts([...updatedInitial, ...productList]);
+    setProducts([...initialProductsUpdated, ...productList]);
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productsData]);
 
