@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 1.41.2
+
+### Patch Changes
+
+- 8654e1fa: patch removed category and custom special flow from openapi of cms
+- 8c68dda1: Switch jira search api to v3
+- Updated dependencies [b5e5036c]
+  - @io-services-cms/models@1.28.1
+
 ## 1.41.1
 
 ### Patch Changes

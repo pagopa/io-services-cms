@@ -1,5 +1,21 @@
 # io-services-cms-backoffice
 
+## 1.28.0
+
+### Minor Changes
+
+- 1249ca97: added api get user institution products
+
+### Patch Changes
+
+- 8654e1fa: patch removed category and custom special flow from openapi of cms
+- 5da8039c: Fixed "more" label on api-keys-card now based on the length of the response value instead of the pagination count
+- 9adef389: use local package fetch-utils instead of the ones from io-ts-commons
+- b5e5036c: removed category and custom special flow from openapi of cms
+- d757fb3c: change logic for load more on api key of group
+- Updated dependencies [b5e5036c]
+  - @io-services-cms/models@1.28.1
+
 ## 1.27.0
 
 ### Minor Changes
