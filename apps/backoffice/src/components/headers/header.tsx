@@ -131,7 +131,6 @@ export const Header = () => {
   }, [institutionsData]);
 
   useEffect(() => {
-    if (!productsData?.products) return;
     const initialProductsUpdated = initialProducts.map((product) =>
       product.id === BACK_OFFICE_ID
         ? {
@@ -151,6 +150,7 @@ export const Header = () => {
         productUrl: "",
         title,
       }));
+
     setProducts([...initialProductsUpdated, ...productList]);
     //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productsData]);
