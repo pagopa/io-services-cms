@@ -200,7 +200,7 @@ export const getMockInstitutionProducts = (_institutionId?: string) => [
         skipUserCreation: true,
       },
     },
-    title: "IO 2",
+    title: "IO",
     urlBO: "urlBO",
     urlPublic: "urlPublic",
   },

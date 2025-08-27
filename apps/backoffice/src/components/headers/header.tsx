@@ -144,7 +144,7 @@ export const Header = () => {
     );
 
     const productList: ProductSwitchItem[] = (productsData?.products ?? [])
-      .filter((p) => p.id !== BACK_OFFICE_ID) // exluce only BACKOFFICE IO if present in response
+      .filter((p) => p.id !== BACK_OFFICE_ID) // exclude only BACKOFFICE IO if present in response
       .map(({ id, title }) => ({
         id,
         linkType: "internal",
