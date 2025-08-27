@@ -12,32 +12,47 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 
-const { BACK_OFFICE_ID, SELFCARE_ID } = getConfiguration();
+const {
+  BACK_OFFICE_ID,
+  BACK_OFFICE_TITLE,
+  SELFCARE_ID,
+  SELFCARE_TITLE,
+  SELFCARE_TOKEN_EXCHANGE_URL,
+  SELFCARE_URL,
+} = getConfiguration();
 
 export const Header = () => {
   const { t } = useTranslation();
   const { data: session } = useSession();
+
   const { data: institutionsData, fetchData: institutionsFetchData } =
     useFetch<UserAuthorizedInstitutions>();
+
   const { data: productsData, fetchData: productsFetchData } =
     useFetch<UserInstitutionProducts>();
 
-  const getSelfcareInstitutionDashboardUrl = () =>
-    `${getConfiguration().SELFCARE_URL}/dashboard/${
-      session?.user?.institution.id
-    }`;
-
-  const reservedAreaProduct: ProductSwitchItem = {
-    id: SELFCARE_ID,
-    linkType: "internal",
-    productUrl: getSelfcareInstitutionDashboardUrl(),
-    title: getConfiguration().SELFCARE_TITLE,
-  };
+  const initialProducts: ProductSwitchItem[] = [
+    {
+      id: SELFCARE_ID,
+      linkType: "internal",
+      productUrl: `${SELFCARE_URL}/dashboard/${session?.user?.institution.id}`,
+      title: SELFCARE_TITLE,
+    },
+    {
+      id: BACK_OFFICE_ID,
+      linkType: "internal",
+      productUrl: "",
+      title: BACK_OFFICE_TITLE,
+    },
+  ];
 
   const [parties, setParties] = useState(Array<PartySwitchItem>());
-  const [products, setProducts] = useState(Array<ProductSwitchItem>());
+  const [products, setProducts] =
+    useState<ProductSwitchItem[]>(initialProducts);
   const [selectedPartyId, setSelectedPartyId] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState<string>();
+  const [selectedProductId, setSelectedProductId] = useState<string>(
+    products[1].id,
+  );
 
   const selectedProductChange = (product: ProductSwitchItem) => {
     trackProductSwitchEvent(product.id);
@@ -68,7 +83,7 @@ export const Header = () => {
   const handleTokenExchange = (insitutionId: string, productId: string) => {
     signOut({
       callbackUrl:
-        getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +
+        SELFCARE_TOKEN_EXCHANGE_URL +
         `?institutionId=${insitutionId}&productId=${productId}`,
     });
   };
@@ -116,19 +131,28 @@ export const Header = () => {
   }, [institutionsData]);
 
   useEffect(() => {
-    if (productsData?.products) {
-      const productList: ProductSwitchItem[] = productsData.products.map(
-        ({ id, title }) => ({
-          id,
-          linkType: "internal",
-          productUrl: "",
-          title,
-        }),
-      );
-      setProducts(productList);
-      setSelectedProductId(BACK_OFFICE_ID);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!productsData?.products) return;
+    const updatedInitial = initialProducts.map((product) =>
+      product.id === BACK_OFFICE_ID
+        ? {
+            ...product,
+            title:
+              productsData?.products?.find((p) => p.id === BACK_OFFICE_ID)
+                ?.title ?? product.title,
+          }
+        : product,
+    );
+
+    const productList: ProductSwitchItem[] = (productsData?.products ?? [])
+      .filter((p) => p.id !== BACK_OFFICE_ID) // exluce only BACKOFFICE IO if present in response
+      .map(({ id, title }) => ({
+        id,
+        linkType: "internal",
+        productUrl: "",
+        title,
+      }));
+    setProducts([...updatedInitial, ...productList]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productsData]);
 
   useEffect(() => {
@@ -137,19 +161,13 @@ export const Header = () => {
       "getUserAuthorizedInstitutions",
       {},
       UserAuthorizedInstitutions,
-      {
-        notify: "errors",
-      },
+      { notify: "errors" },
     );
     productsFetchData(
       "getUserInstitutionProducts",
-      {
-        institutionId: session?.user?.institution.id as string,
-      },
+      { institutionId: session?.user?.institution.id as string },
       UserInstitutionProducts,
-      {
-        notify: "errors",
-      },
+      { notify: "errors" },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -161,7 +179,7 @@ export const Header = () => {
       partyId={selectedPartyId}
       partyList={parties}
       productId={selectedProductId}
-      productsList={[reservedAreaProduct, ...products]}
+      productsList={products}
     />
   );
 };
