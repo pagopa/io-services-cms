@@ -184,7 +184,6 @@ export const jiraProxy = (
     fieldsByKeys: false,
     jql,
     maxResults: 1,
-    startAt: 0,
   });
 
   const buildSearchJiraIssuesByKeyAndStatusPayload = (

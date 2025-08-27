@@ -90,8 +90,6 @@ const aJiraIssue: JiraIssue = {
 };
 
 const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
-  startAt: 0,
-  total: 12,
   issues: [aJiraIssue],
 };
 
