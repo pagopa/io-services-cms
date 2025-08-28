@@ -738,6 +738,83 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /activations/:
+    post:
+      tags:
+        - activations
+      operationId: getServiceActivationByPOST
+      summary: Get a Service Activation for a User
+      description: Returns the current Activation for a couple Service/User
+      requestBody:
+        description: A fiscal code payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiscalCodePayload'
+        required: true
+      responses:
+        '200':
+          description: Service Activation fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No user activation found for the provided fiscal code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error retrieving the Activation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+    put:
+      tags:
+        - activations
+      operationId: upsertServiceActivation
+      summary: Upsert a Service Activation for a User
+      description: Create or update an Activation for a couple Service/User
+      requestBody:
+        description: A special service's activation body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivationPayload'
+        required: true
+      responses:
+        '200':
+          description: Service Activation created or updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activation'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No user activation found for the provided fiscal code.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
+        '429':
+          description: Too many requests
+        '500':
+          description: The activation cannot be created or updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseError'
 components:
   parameters:
     UserEmail:
@@ -858,3 +935,9 @@ components:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ReviewRequest'
     Timestamp:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+    Activation:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/Activation'
+    ActivationPayload:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ActivationPayload'
+    FiscalCodePayload:
+      $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/FiscalCodePayload'
