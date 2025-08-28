@@ -159,8 +159,8 @@ export const getSelfCareProblemResponse = (status: number) => ({
   type: faker.lorem.slug(1),
 });
 
-export const getMockInstitutionProducts = (_institutionId?: string) => [
-  {
+export const getMockInstitutionProducts = (_institutionId?: string) => {
+  const product = {
     contractTemplatePath: "path/to/contractTemplatePath",
     contractTemplateVersion: "1.0.0",
     createdAt: new Date("2019-08-24T14:15:22Z"),
@@ -203,137 +203,24 @@ export const getMockInstitutionProducts = (_institutionId?: string) => [
     title: "IO",
     urlBO: "urlBO",
     urlPublic: "urlPublic",
-  },
-  {
-    contractTemplatePath: "path/to/contractTemplatePath",
-    contractTemplateVersion: "1.0.0",
-    createdAt: new Date("2019-08-24T14:15:22Z"),
-    depictImageUrl: "https://depictImageUrl",
-    description: "Prod 1",
-    id: "prod-1",
-    identityTokenAudience: "identityTokenAudience",
-    logo: "https://logo",
-    logoBgColor: "logoBgColor",
-    parentId: "parentId",
-    roleManagementURL: "https://roleManagementURL",
-    roleMappings: {
-      property1: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase1"],
-        roles: [
-          {
-            code: "code1",
-            description: "description1",
-            label: "label1",
-            productLabel: "productLabel1",
-          },
-        ],
-        skipUserCreation: true,
-      },
-      property2: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase2"],
-        roles: [
-          {
-            code: "code2",
-            description: "description2",
-            label: "label2",
-            productLabel: "productLabel2",
-          },
-        ],
-        skipUserCreation: true,
-      },
-    },
-    title: "product title 1",
-    urlBO: "urlBO",
-    urlPublic: "urlPublic",
-  },
-  {
-    contractTemplatePath: "path/to/contractTemplatePath",
-    contractTemplateVersion: "1.0.0",
-    createdAt: new Date("2019-08-24T14:15:22Z"),
-    depictImageUrl: "https://depictImageUrl",
-    description: "Prod 2",
-    id: "prod-2",
-    identityTokenAudience: "identityTokenAudience",
-    logo: "https://logo",
-    logoBgColor: "logoBgColor",
-    parentId: "parentId",
-    roleManagementURL: "https://roleManagementURL",
-    roleMappings: {
-      property1: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase1"],
-        roles: [
-          {
-            code: "code1",
-            description: "description1",
-            label: "label1",
-            productLabel: "productLabel1",
-          },
-        ],
-        skipUserCreation: true,
-      },
-      property2: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase2"],
-        roles: [
-          {
-            code: "code2",
-            description: "description2",
-            label: "label2",
-            productLabel: "productLabel2",
-          },
-        ],
-        skipUserCreation: true,
-      },
-    },
-    title: "product title 2",
-    urlBO: "urlBO",
-    urlPublic: "urlPublic",
-  },
-  {
-    contractTemplatePath: "path/to/contractTemplatePath",
-    contractTemplateVersion: "1.0.0",
-    createdAt: new Date("2019-08-24T14:15:22Z"),
-    depictImageUrl: "https://depictImageUrl",
-    description: "Prod 3",
-    id: "prod-3",
-    identityTokenAudience: "identityTokenAudience",
-    logo: "https://logo",
-    logoBgColor: "logoBgColor",
-    parentId: "parentId",
-    roleManagementURL: "https://roleManagementURL",
-    roleMappings: {
-      property1: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase1"],
-        roles: [
-          {
-            code: "code1",
-            description: "description1",
-            label: "label1",
-            productLabel: "productLabel1",
-          },
-        ],
-        skipUserCreation: true,
-      },
-      property2: {
-        multiroleAllowed: true,
-        phasesAdditionAllowed: ["phase2"],
-        roles: [
-          {
-            code: "code2",
-            description: "description2",
-            label: "label2",
-            productLabel: "productLabel2",
-          },
-        ],
-        skipUserCreation: true,
-      },
-    },
-    title: "product title 3",
-    urlBO: "urlBO",
-    urlPublic: "urlPublic",
-  },
-];
+  };
+
+  type ObjectProduct = typeof product; //typing created to avoid warnings on any
+  const createOtherProducts = (obj: ObjectProduct): ObjectProduct[] => {
+    // To avoid writing n blocks of products, this allows random generation of 1 to 5 products.
+    const count = faker.number.int({ max: 5, min: 1 });
+    const products: ObjectProduct[] = [];
+
+    for (let index = 1; index <= count; index++) {
+      products.push({
+        ...obj,
+        description: `product ${index}`,
+        id: `prod-${index}`,
+        title: `product title ${index}`,
+      });
+    }
+    return products;
+  };
+
+  return [product, ...createOtherProducts(product)];
+};
