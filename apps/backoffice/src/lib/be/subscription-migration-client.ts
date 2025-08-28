@@ -1,11 +1,7 @@
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
-import {
-  getKeepAliveAgentOptions,
-  newHttpAgent,
-  newHttpsAgent,
-} from "@pagopa/ts-commons/lib/agent";
+import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -35,11 +31,14 @@ export interface SubscriptionsMigrationClient {
 }
 
 type Config = t.TypeOf<typeof Config>;
-const Config = t.type({
-  SUBSCRIPTION_MIGRATION_API_KEY: NonEmptyString,
-  SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString,
-  SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
-});
+const Config = t.intersection([
+  t.type({
+    SUBSCRIPTION_MIGRATION_API_KEY: NonEmptyString,
+    SUBSCRIPTION_MIGRATION_API_MOCKING: BooleanFromString,
+    SUBSCRIPTION_MIGRATION_API_URL: NonEmptyString,
+  }),
+  HttpAgentConfig,
+]);
 
 type MigrationDataAdapter = t.TypeOf<typeof MigrationDataAdapter>;
 const MigrationDataAdapter = t.partial({
@@ -83,8 +82,8 @@ const getAxiosInstance: () => AxiosInstance = () => {
     headers: {
       "X-Functions-Key": configuration.SUBSCRIPTION_MIGRATION_API_KEY,
     },
-    httpAgent: newHttpAgent(getKeepAliveAgentOptions(process.env)),
-    httpsAgent: newHttpsAgent(getKeepAliveAgentOptions(process.env)),
+    httpAgent: Agent.getHttpAgent(configuration),
+    httpsAgent: Agent.getHttpsAgent(configuration),
     timeout: 9000,
   });
 };

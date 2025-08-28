@@ -1,7 +1,10 @@
 import { getConfiguration } from "@/config";
+import { getCosmosConfig } from "@/lib/be/cosmos-store";
+
 import { buildHandlers as apimHandlers } from "./apim-handlers";
 import { buildHandlers as backendHandlers } from "./backend-handlers";
 import { buildHandlers as cdnHandlers } from "./cdn-handlers";
+import { buildHandlers as cosmosHandlers } from "./cosmos-handlers";
 import { buildHandlers as cosmosLegacyHandlers } from "./cosmos-legacy-handlers";
 import { buildHandlers as selfcareHandlers } from "./selfcare-handlers";
 import { buildHandlers as servicesCmsHandlers } from "./services-cms-handlers";
@@ -28,6 +31,10 @@ export const getHandlers = () => {
   }
   if (config.LEGACY_COSMOSDB_MOCKING) {
     handlers.push(...cosmosLegacyHandlers());
+  }
+  const cosmosConfig = getCosmosConfig();
+  if (cosmosConfig.COSMOSDB_MOCKING) {
+    handlers.push(...cosmosHandlers(cosmosConfig));
   }
   return handlers;
 };

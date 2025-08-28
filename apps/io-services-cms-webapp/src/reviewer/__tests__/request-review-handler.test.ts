@@ -168,9 +168,6 @@ const mainMockJiraProxy = {
       return TE.of(aSearchJiraIssuesResponse);
     },
   ),
-  getJiraIssueByServiceId: vi.fn((serviceId: NonEmptyString) => {
-    return TE.of(O.none);
-  }),
   getPendingAndRejectedJiraIssueByServiceId: vi.fn(
     (serviceId: NonEmptyString) => {
       return TE.of(O.none);

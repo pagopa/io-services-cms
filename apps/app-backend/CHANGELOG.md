@@ -1,5 +1,12 @@
 # io-services-app-backend
 
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies [b5e5036c]
+  - @io-services-cms/models@1.28.1
+
 ## 1.1.5
 
 ### Patch Changes

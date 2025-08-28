@@ -11,7 +11,7 @@ import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
 
 import { IConfig } from "../../config";
-import { JIRA_REST_API_PATH, SearchJiraIssuesPayload } from "./jira-client";
+import { JIRA_REST_API_PATH_V3, SearchJiraIssuesPayload } from "./jira-client";
 
 export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
@@ -34,16 +34,10 @@ export const JiraLegacyIssue = t.type({
 });
 export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
-export const SearchJiraLegacyIssuesResponse = t.intersection([
-  t.type({
-    issues: t.readonlyArray(JiraLegacyIssue),
-    startAt: t.number,
-    total: t.number,
-  }),
-  t.partial({
-    warningMessages: t.readonlyArray(t.string),
-  }),
-]);
+export const SearchJiraLegacyIssuesResponse = t.type({
+  issues: t.readonlyArray(JiraLegacyIssue),
+});
+
 export type SearchJiraLegacyIssuesResponse = t.TypeOf<
   typeof SearchJiraLegacyIssuesResponse
 >;
@@ -94,12 +88,11 @@ export const jiraLegacyClient = (
       fieldsByKeys: false,
       jql: `project = ${config.LEGACY_JIRA_PROJECT_NAME} AND issuetype = Task AND labels = ${JIRA_SERVICE_TAG_PREFIX}${serviceId} ORDER BY created DESC`,
       maxResults: 1,
-      startAt: 0,
     };
 
     return pipe(
       fetchApiWithRetry(
-        `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`,
+        `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH_V3}search/jql`,
         fetchApi,
         {
           body: JSON.stringify(bodyData),

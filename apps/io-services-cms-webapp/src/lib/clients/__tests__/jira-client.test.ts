@@ -34,12 +34,9 @@ const aSearchIssuesPayload = {
   fields: ["status", "comment"],
   fieldsByKeys: false,
   maxResults: 15,
-  startAt: 0,
   jql: "project = IEST",
 };
 const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
-  startAt: 0,
-  total: 12,
   issues: [
     {
       id: "122796" as NonEmptyString,

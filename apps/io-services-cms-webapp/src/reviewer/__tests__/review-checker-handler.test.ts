@@ -177,7 +177,6 @@ const mainMockServiceReviewDao = {
 const mainMockJiraProxy = {
   createJiraIssue: vi.fn(),
   searchJiraIssuesByKeyAndStatus: vi.fn(),
-  getJiraIssueByServiceId: vi.fn(),
   getPendingJiraIssueByServiceId: vi.fn(),
 };
 

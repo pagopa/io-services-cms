@@ -1,21 +1,22 @@
 /**
  * MSW configuration for Vitest (used as setupFile in vitest.config.ts)
  */
-import { afterAll, afterEach, beforeAll } from "vitest";
-import { mswServerTest } from "./msw-server";
 import { loadEnvConfig } from "@next/env";
+import { afterAll, afterEach, beforeAll } from "vitest";
 
-let mswServer: ReturnType<typeof mswServerTest>;
+import { mswServer } from "./msw-server";
+
+loadEnvConfig(process.cwd());
 // Start server before all tests
+const _mswServer = mswServer();
+
 beforeAll(() => {
-  loadEnvConfig(process.cwd());
   // this done to correctly load the environment variables on msw handlers
-  mswServer = mswServerTest();
-  mswServer.listen({ onUnhandledRequest: "error" });
+  _mswServer.listen({ onUnhandledRequest: "error" });
 });
 
 //  Close server after all tests
-afterAll(() => mswServer.close());
+afterAll(() => _mswServer.close());
 
 // Reset handlers after each test `important for test isolation`
-afterEach(() => mswServer.resetHandlers());
+afterEach(() => _mswServer.resetHandlers());

@@ -13,6 +13,7 @@ import nodeFetch from "node-fetch-commonjs";
 import { JiraConfig } from "../../config";
 
 export const JIRA_REST_API_PATH = "/rest/api/2/";
+export const JIRA_REST_API_PATH_V3 = "/rest/api/3/";
 const NO_BODY_REQUEST = "no body on request";
 
 export const CreateJiraIssueResponse = t.type({
@@ -45,16 +46,10 @@ export const JiraIssue = t.type({
 });
 export type JiraIssue = t.TypeOf<typeof JiraIssue>;
 
-export const SearchJiraIssuesResponse = t.intersection([
-  t.type({
-    issues: t.readonlyArray(JiraIssue),
-    startAt: t.number,
-    total: t.number,
-  }),
-  t.partial({
-    warningMessages: t.readonlyArray(t.string),
-  }),
-]);
+export const SearchJiraIssuesResponse = t.type({
+  issues: t.readonlyArray(JiraIssue),
+});
+
 export type SearchJiraIssuesResponse = t.TypeOf<
   typeof SearchJiraIssuesResponse
 >;
@@ -64,7 +59,6 @@ const SearchJiraIssuesPayload = t.type({
   fieldsByKeys: t.boolean,
   jql: t.string,
   maxResults: t.number,
-  startAt: t.number,
 });
 export type SearchJiraIssuesPayload = t.TypeOf<typeof SearchJiraIssuesPayload>;
 
@@ -344,7 +338,7 @@ export const jiraClient = (
         TE.tryCatch(
           () =>
             fetchApi(
-              `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH}search`,
+              `${config.JIRA_NAMESPACE_URL}${JIRA_REST_API_PATH_V3}search/jql`,
               {
                 body: bodyStringified,
                 headers: jiraHeaders,
