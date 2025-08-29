@@ -1,5 +1,6 @@
 import { getConfiguration } from "@/config";
 import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
+import { UserInstitutionProducts } from "@/generated/api/UserInstitutionProducts";
 import useFetch from "@/hooks/use-fetch";
 import {
   trackInstitutionSwitchEvent,
@@ -11,44 +12,62 @@ import { signOut, useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useState } from "react";
 
+const {
+  BACK_OFFICE_ID,
+  BACK_OFFICE_TITLE,
+  SELFCARE_ID,
+  SELFCARE_TITLE,
+  SELFCARE_TOKEN_EXCHANGE_URL,
+  SELFCARE_URL,
+} = getConfiguration();
+
 export const Header = () => {
   const { t } = useTranslation();
   const { data: session } = useSession();
+
   const { data: institutionsData, fetchData: institutionsFetchData } =
     useFetch<UserAuthorizedInstitutions>();
 
-  const getSelfcareInstitutionDashboardUrl = () =>
-    `${getConfiguration().SELFCARE_URL}/dashboard/${
-      session?.user?.institution.id
-    }`;
+  const { data: productsData, fetchData: productsFetchData } =
+    useFetch<UserInstitutionProducts>();
 
-  const products: ProductSwitchItem[] = [
+  const initialProducts: ProductSwitchItem[] = [
     {
-      id: getConfiguration().BACK_OFFICE_ID,
+      id: SELFCARE_ID,
       linkType: "internal",
-      productUrl: "",
-      title: getConfiguration().BACK_OFFICE_TITLE,
+      productUrl: `${SELFCARE_URL}/dashboard/${session?.user?.institution.id}`,
+      title: SELFCARE_TITLE,
     },
     {
-      id: getConfiguration().SELFCARE_ID,
+      id: BACK_OFFICE_ID,
       linkType: "internal",
-      productUrl: getSelfcareInstitutionDashboardUrl(),
-      title: getConfiguration().SELFCARE_TITLE,
+      productUrl: "",
+      title: BACK_OFFICE_TITLE,
     },
   ];
 
   const [parties, setParties] = useState(Array<PartySwitchItem>());
+  const [products, setProducts] =
+    useState<ProductSwitchItem[]>(initialProducts);
   const [selectedPartyId, setSelectedPartyId] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState(products[0].id);
+  const [selectedProductId, setSelectedProductId] = useState<string>(
+    initialProducts.find((p) => p.id === BACK_OFFICE_ID)?.id ?? "",
+  );
 
   const selectedProductChange = (product: ProductSwitchItem) => {
     trackProductSwitchEvent(product.id);
 
     // no action if user click on current product (i.e.: BackOffice IO)
     if (selectedProductId === product.id) return;
-    // otherwise navigate to product url (i.e.: SelfCare)
-    setSelectedProductId(product.id);
-    window.location.href = product.productUrl;
+    // navigate to product url (i.e.: SelfCare)
+    else if (product.id === SELFCARE_ID) {
+      setSelectedProductId(product.id);
+      window.location.href = product.productUrl;
+    }
+    // otherwise perform token-exchange to change product backoffice
+    else {
+      handleTokenExchange(session?.user?.institution.id as string, product.id);
+    }
   };
 
   const selectedPartyChange = (party: PartySwitchItem) => {
@@ -58,10 +77,14 @@ export const Header = () => {
     setSelectedPartyId(party.id);
     trackInstitutionSwitchEvent(party.id);
 
+    handleTokenExchange(party.id, BACK_OFFICE_ID);
+  };
+
+  const handleTokenExchange = (insitutionId: string, productId: string) => {
     signOut({
       callbackUrl:
-        getConfiguration().SELFCARE_TOKEN_EXCHANGE_URL +
-        `?institutionId=${party.id}&productId=${products[0].id}`,
+        SELFCARE_TOKEN_EXCHANGE_URL +
+        `?institutionId=${insitutionId}&productId=${productId}`,
     });
   };
 
@@ -108,14 +131,43 @@ export const Header = () => {
   }, [institutionsData]);
 
   useEffect(() => {
+    const initialProductsUpdated = initialProducts.map((product) =>
+      product.id === BACK_OFFICE_ID
+        ? {
+            ...product,
+            title:
+              productsData?.products?.find((p) => p.id === BACK_OFFICE_ID)
+                ?.title ?? product.title,
+          }
+        : product,
+    );
+
+    const productList: ProductSwitchItem[] = (productsData?.products ?? [])
+      .filter((p) => p.id !== BACK_OFFICE_ID) // exclude only BACKOFFICE IO if present in response
+      .map(({ id, title }) => ({
+        id,
+        linkType: "internal",
+        productUrl: "",
+        title,
+      }));
+
+    setProducts([...initialProductsUpdated, ...productList]);
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productsData]);
+
+  useEffect(() => {
     setCurrentParty();
     institutionsFetchData(
       "getUserAuthorizedInstitutions",
       {},
       UserAuthorizedInstitutions,
-      {
-        notify: "errors",
-      },
+      { notify: "errors" },
+    );
+    productsFetchData(
+      "getUserInstitutionProducts",
+      { institutionId: session?.user?.institution.id as string },
+      UserInstitutionProducts,
+      { notify: "errors" },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

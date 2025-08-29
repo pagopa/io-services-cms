@@ -146,14 +146,14 @@ export const getSelfCareProblemResponse = (status: number) => ({
   type: faker.lorem.slug(1),
 });
 
-export const getMockInstitutionProducts = (_institutionId?: string) => [
-  {
+export const getMockInstitutionProducts = (_institutionId?: string) => {
+  const product = {
     contractTemplatePath: "path/to/contractTemplatePath",
     contractTemplateVersion: "1.0.0",
     createdAt: new Date("2019-08-24T14:15:22Z"),
     depictImageUrl: "https://depictImageUrl",
-    description: "product description",
-    id: _institutionId ?? faker.string.uuid(),
+    description: "product IO",
+    id: "prod-io",
     identityTokenAudience: "identityTokenAudience",
     logo: "https://logo",
     logoBgColor: "logoBgColor",
@@ -187,11 +187,31 @@ export const getMockInstitutionProducts = (_institutionId?: string) => [
         skipUserCreation: true,
       },
     },
-    title: "product title 1",
+    title: "IO",
     urlBO: "urlBO",
     urlPublic: "urlPublic",
-  },
-];
+  };
+
+  type ObjectProduct = typeof product; //typing created to avoid warnings on any
+
+  const createOtherProducts = (obj: ObjectProduct): ObjectProduct[] => {
+    // To avoid writing n blocks of products, this allows random generation of 1 to 5 products.
+    const count = faker.number.int({ max: 5, min: 1 });
+    const products: ObjectProduct[] = [];
+
+    for (let index = 1; index <= count; index++) {
+      products.push({
+        ...obj,
+        description: `product ${index}`,
+        id: `prod-${index}`,
+        title: `product title ${index}`,
+      });
+    }
+    return products;
+  };
+
+  return [product, ...createOtherProducts(product)];
+};
 
 export const getMockInstitutionGroups = (_institutionId?: string) => ({
   content: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
