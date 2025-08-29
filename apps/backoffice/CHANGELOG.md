@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.0
+
+### Minor Changes
+
+- 4628c3de: Added dynamic product switching integrated with getUserinstitutionProducts
+
 ## 1.28.0
 
 ### Minor Changes
