@@ -62,7 +62,9 @@ export const Header = () => {
     // navigate to product url (i.e.: SelfCare)
     else if (product.id === SELFCARE_ID) {
       setSelectedProductId(product.id);
-      window.location.href = product.productUrl;
+      signOut({
+        callbackUrl: product.productUrl,
+      });
     }
     // otherwise perform token-exchange to change product backoffice
     else {
