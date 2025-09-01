@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../../config";
-import { SearchJiraIssuesResponse, jiraClient } from "../jira-client";
+import { jiraClient, StringFromADF } from "../jira-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
@@ -36,7 +36,8 @@ const aSearchIssuesPayload = {
   maxResults: 15,
   jql: "project = IEST",
 };
-const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
+
+const aSearchJiraIssuesResponse = {
   issues: [
     {
       id: "122796" as NonEmptyString,
@@ -44,9 +45,23 @@ const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
       fields: {
         comment: {
           comments: [
-            { body: "Questo è un commento" },
-            { body: "Questo è un altro commento" },
-            { body: "Un *commento* formattato … {{codice}} ." },
+            {
+              body: {
+                version: 1,
+                type: "doc",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Questo è un commento",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
           ],
         },
         status: {
@@ -226,7 +241,8 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
     const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssues(aSearchIssuesPayload)();
-
+    console.log("ISSUES");
+    console.log(issues);
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body: expect.any(String),
       headers: expect.any(Object),
@@ -389,5 +405,66 @@ describe("[JiraAPIClient] applyJiraIssueTransition", () => {
     });
 
     expect(E.isRight(issue)).toBeTruthy();
+  });
+});
+
+describe("[JiraAPIClient] type check for StringFromADF", () => {
+  const validADF = {
+    version: 1,
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "Questo è un commento",
+          },
+        ],
+      },
+    ],
+  };
+
+  const validADFString = JSON.stringify(validADF);
+
+  it("should decode a valid ADF object to string", () => {
+    const result = StringFromADF.decode(validADF);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(validADFString);
+    }
+  });
+
+  it("should encode a valid JSON string back to ADF object", () => {
+    const result = StringFromADF.encode(validADFString);
+    expect(result).toEqual(validADF);
+  });
+
+  it("should fail to decode an invalid ADF object", () => {
+    const invalidADF = {
+      type: "doc",
+      invalidField: "value",
+    };
+
+    const result = StringFromADF.decode(invalidADF);
+    expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should fail to decode a non-object input", () => {
+    const result = StringFromADF.decode("not an object");
+    expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should validate string type correctly", () => {
+    expect(StringFromADF.is("valid string")).toBe(true);
+    expect(StringFromADF.is(123)).toBe(false);
+    expect(StringFromADF.is(null)).toBe(false);
+    expect(StringFromADF.is({})).toBe(false);
+  });
+
+  it("should throw error when encoding malformed JSON string", () => {
+    expect(() => StringFromADF.encode("invalid json")).toThrow(
+      "Cannot parse a malformed json string",
+    );
   });
 });
