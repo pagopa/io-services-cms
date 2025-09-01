@@ -11,6 +11,7 @@ import {
   buildIssueItemPairs,
   updateReview,
 } from "../review-checker-handler";
+import { JiraProxy } from "../../utils/jira-proxy";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -193,15 +194,13 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
       () =>
         TE.of({
-          startAt: 0,
-          total: 3,
           issues: [aJiraIssue1, aJiraIssue2, aJiraIssue3],
         }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy,
+      mainMockJiraProxy as unknown as JiraProxy,
     )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -227,15 +226,13 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
       () =>
         TE.of({
-          startAt: 0,
-          total: 0,
           issues: [],
         }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy,
+      mainMockJiraProxy as unknown as JiraProxy,
     )([])();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -248,15 +245,13 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
     mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
       () =>
         TE.of({
-          startAt: 0,
-          total: 0,
           issues: [],
         }),
     );
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy,
+      mainMockJiraProxy as unknown as JiraProxy,
     )(anItemList)();
 
     expect(E.isRight(result)).toBeTruthy();
@@ -272,7 +267,7 @@ describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
 
     const result = await buildIssueItemPairs(
       mockContext,
-      mainMockJiraProxy,
+      mainMockJiraProxy as unknown as JiraProxy,
     )(anItemList)();
 
     expect(E.isLeft(result)).toBeTruthy();
