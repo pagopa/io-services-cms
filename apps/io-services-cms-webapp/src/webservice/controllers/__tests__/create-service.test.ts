@@ -27,6 +27,7 @@ const {
   itemToResponseResponseMock,
   logErrorResponseMock,
   getLoggerMock,
+  cosmosdbInstanceMock,
 } = vi.hoisted(() => {
   //const payloadToItemResponseMock = "payloadToItemResponse";
   const payloadToItemResponseMock = {
@@ -47,6 +48,9 @@ const {
     itemToResponseResponseMock,
     logErrorResponseMock,
     getLoggerMock: vi.fn(() => ({ logErrorResponse: logErrorResponseMock })),
+    cosmosdbInstanceMock: {
+      container: vi.fn(() => ({})),
+    },
   };
 });
 
@@ -61,6 +65,10 @@ vi.mock("../../../utils/converters/service-lifecycle-converters", () => ({
 
 vi.mock("../../../utils/logger", () => ({
   getLogger: getLoggerMock,
+}));
+
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: cosmosdbInstanceMock,
 }));
 
 const aNewService = {
@@ -147,7 +155,6 @@ describe("createService", () => {
     fsmPublicationClient: vi.fn(),
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: vi.fn(),
     serviceTopicDao: vi.fn(),
   } as unknown as WebServerDependencies);
 

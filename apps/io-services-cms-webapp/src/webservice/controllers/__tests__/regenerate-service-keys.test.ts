@@ -94,6 +94,7 @@ const {
   mapApimRestErrorWrapperMock,
   logErrorResponseMock,
   getLoggerMock,
+  cosmosdbInstanceMock,
 } = vi.hoisted(() => {
   const checkServiceMock = vi.fn<any[], any>(() => TE.right(undefined));
   const mapApimRestErrorMock = vi.fn();
@@ -108,6 +109,9 @@ const {
     mapApimRestErrorWrapperMock: vi.fn(() => mapApimRestErrorMock),
     logErrorResponseMock,
     getLoggerMock: vi.fn(() => ({ logErrorResponse: logErrorResponseMock })),
+    cosmosdbInstanceMock: {
+      container: vi.fn(() => ({})),
+    },
   };
 });
 
@@ -129,6 +133,10 @@ vi.mock("@io-services-cms/external-clients", async (importOriginal) => {
     ApimUtils: { ...ApimUtils, mapApimRestError: mapApimRestErrorWrapperMock },
   };
 });
+
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: cosmosdbInstanceMock,
+}));
 
 beforeEach(() => {
   vi.restoreAllMocks();

@@ -141,6 +141,12 @@ vi.mock("../../../utils/check-service", () => ({
   checkService: vi.fn(() => checkServiceMock),
 }));
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
