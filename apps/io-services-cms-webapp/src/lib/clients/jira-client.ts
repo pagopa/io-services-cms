@@ -1,9 +1,9 @@
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
+import Converter from "adf-to-md";
 import * as E from "fp-ts/lib/Either";
 import { toError } from "fp-ts/lib/Either";
-import * as J from "fp-ts/lib/Json";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
@@ -38,37 +38,26 @@ export const StringFromADF = new t.Type<string, ADF>(
     pipe(
       i,
       ADF.decode,
-      E.chain(
-        flow(
-          J.stringify,
-          E.mapLeft((e) =>
-            typeof e === "string"
-              ? e
-              : e instanceof Error
-                ? e.message
-                : "Cannot stringify a malformed json",
-          ),
-          E.fold(
-            (e) => t.failure(i, ctx, e),
-            (s) => t.success(s),
+      E.mapLeft(readableReport),
+      E.chain((adf) =>
+        pipe(
+          E.tryCatch(
+            () => {
+              const convertResult = Converter.convert(adf);
+              return convertResult.result;
+            },
+            flow(E.toError, (e) => e.message),
           ),
         ),
       ),
-    ),
-  flow(
-    J.parse,
-    E.chainW(
-      flow(
-        E.fromPredicate(
-          ADF.is,
-          (_) => new Error("The json string is not parseable as ADF object"),
-        ),
+      E.fold(
+        (e) => t.failure(i, ctx, e),
+        (s) => t.success(s),
       ),
     ),
-    E.getOrElseW((_) => {
-      throw new Error("Cannot parse a malformed json string");
-    }),
-  ),
+  () => {
+    throw new Error("Cannot convert markdown to adf object");
+  },
 );
 
 export const JiraIssue = t.type({

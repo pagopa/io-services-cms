@@ -241,7 +241,7 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
     const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssues(aSearchIssuesPayload)();
-    
+
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body: expect.any(String),
       headers: expect.any(Object),
@@ -408,6 +408,7 @@ describe("[JiraAPIClient] applyJiraIssueTransition", () => {
 });
 
 describe("[JiraAPIClient] type check for StringFromADF", () => {
+  const comment = "Questo è un commento";
   const validADF = {
     version: 1,
     type: "doc",
@@ -417,7 +418,7 @@ describe("[JiraAPIClient] type check for StringFromADF", () => {
         content: [
           {
             type: "text",
-            text: "Questo è un commento",
+            text: comment,
           },
         ],
       },
@@ -430,13 +431,14 @@ describe("[JiraAPIClient] type check for StringFromADF", () => {
     const result = StringFromADF.decode(validADF);
     expect(E.isRight(result)).toBeTruthy();
     if (E.isRight(result)) {
-      expect(result.right).toBe(validADFString);
+      expect(result.right).toBe(comment);
     }
   });
 
-  it("should encode a valid JSON string back to ADF object", () => {
-    const result = StringFromADF.encode(validADFString);
-    expect(result).toEqual(validADF);
+  it("should throw error when encoding", () => {
+    expect(() => StringFromADF.encode(validADFString)).toThrow(
+      "Cannot convert markdown to adf object",
+    );
   });
 
   it("should fail to decode an invalid ADF object", () => {
@@ -449,6 +451,25 @@ describe("[JiraAPIClient] type check for StringFromADF", () => {
     expect(E.isLeft(result)).toBeTruthy();
   });
 
+  it("should fail to decode an invalid nested ADF object", () => {
+    const invalidADF = {
+      version: 1,
+      type: "doc",
+      content: [
+        {
+          invalidType: "invalid",
+        },
+      ],
+    };
+
+    const result = StringFromADF.decode(invalidADF);
+
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe("");
+    }
+  });
+
   it("should fail to decode a non-object input", () => {
     const result = StringFromADF.decode("not an object");
     expect(E.isLeft(result)).toBeTruthy();
@@ -459,11 +480,5 @@ describe("[JiraAPIClient] type check for StringFromADF", () => {
     expect(StringFromADF.is(123)).toBe(false);
     expect(StringFromADF.is(null)).toBe(false);
     expect(StringFromADF.is({})).toBe(false);
-  });
-
-  it("should throw error when encoding malformed JSON string", () => {
-    expect(() => StringFromADF.encode("invalid json")).toThrow(
-      "Cannot parse a malformed json string",
-    );
   });
 });

@@ -48,6 +48,7 @@
     "@pagopa/express-azure-functions": "^4.0.1",
     "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/ts-commons": "^13.1.1",
+    "adf-to-md": "^1.2.1",
     "avsc": "^5.7.7",
     "body-parser": "^1.20.2",
     "dotenv-cli": "^7.2.1",
