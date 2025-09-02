@@ -241,8 +241,7 @@ describe("[JiraAPIClient] searchJiraIssues", () => {
     const client = jiraClient(JIRA_CONFIG, mockFetch);
 
     const issues = await client.searchJiraIssues(aSearchIssuesPayload)();
-    console.log("ISSUES");
-    console.log(issues);
+    
     expect(mockFetch).toBeCalledWith(expect.any(String), {
       body: expect.any(String),
       headers: expect.any(Object),
