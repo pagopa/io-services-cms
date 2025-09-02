@@ -745,6 +745,11 @@ paths:
       operationId: getServiceActivationByPOST
       summary: Get a Service Activation for a User
       description: Returns the current Activation for a couple Service/User
+      parameters:
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserID'
       requestBody:
         description: A fiscal code payload
         content:
@@ -783,6 +788,11 @@ paths:
       operationId: upsertServiceActivation
       summary: Upsert a Service Activation for a User
       description: Create or update an Activation for a couple Service/User
+      parameters:
+        - $ref: '#/components/parameters/UserGroups'
+        - $ref: '#/components/parameters/SubscriptionID'
+        - $ref: '#/components/parameters/UserEmail'
+        - $ref: '#/components/parameters/UserID'
       requestBody:
         description: A special service's activation body payload
         content:

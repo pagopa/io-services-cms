@@ -349,12 +349,20 @@ ServiceTopic:
   required:
     - id
     - name
-ActivationStatus:
-  type: string
-  enum:
-    - ACTIVE
-    - INACTIVE
-    - PENDING
+ActivationPayload:
+  type: object
+  properties:
+    status:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - PENDING
+    fiscal_code:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+  required:
+    - fiscal_code
+    - status
 Activation:
   type: object
   properties:
@@ -366,7 +374,11 @@ Activation:
     fiscal_code:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
     status:
-      $ref: '#/ActivationStatus'
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - PENDING
     modified_at:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
   required:
@@ -374,16 +386,6 @@ Activation:
     - fiscal_code
     - status
     - modified_at
-ActivationPayload:
-  type: object
-  properties:
-    fiscal_code:
-      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
-    status:
-      $ref: '#/ActivationStatus'
-  required:
-    - fiscal_code
-    - status
 FiscalCodePayload:
   type: object
   properties:
