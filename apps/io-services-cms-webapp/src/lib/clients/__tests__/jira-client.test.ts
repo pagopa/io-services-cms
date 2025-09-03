@@ -451,7 +451,7 @@ describe("[JiraAPIClient] type check for StringFromADF", () => {
     expect(E.isLeft(result)).toBeTruthy();
   });
 
-  it("should fail to decode an invalid nested ADF object", () => {
+  it("should return an empty string whend try to decode an invalid nested ADF object", () => {
     const invalidADF = {
       version: 1,
       type: "doc",
