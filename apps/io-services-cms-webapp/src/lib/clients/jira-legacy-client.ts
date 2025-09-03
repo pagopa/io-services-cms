@@ -1,6 +1,5 @@
 import { ServiceId } from "@io-services-cms/models/service-lifecycle/definitions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as T from "fp-ts/Task";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -11,38 +10,26 @@ import * as t from "io-ts";
 import nodeFetch from "node-fetch-commonjs";
 
 import { IConfig } from "../../config";
-import { JIRA_REST_API_PATH_V3, SearchJiraIssuesPayload } from "./jira-client";
+import {
+  JIRA_REST_API_PATH_V3,
+  JiraIssue,
+  SearchJiraIssuesPayload,
+} from "./jira-client";
 
 export const JIRA_SERVICE_TAG_PREFIX = "devportal-service-";
 
-export const JiraLegacyIssue = t.type({
-  fields: t.intersection([
-    t.type({
-      comment: t.type({
-        comments: t.readonlyArray(t.type({ body: t.string })),
-      }),
-      status: t.type({
-        name: t.string,
-      }),
-    }),
-    t.partial({
-      statuscategorychangedate: t.string,
-    }),
-  ]),
-  id: NonEmptyString,
-  key: NonEmptyString,
-});
-export type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
+const JiraLegacyIssue = JiraIssue;
+type JiraLegacyIssue = t.TypeOf<typeof JiraLegacyIssue>;
 
-export const SearchJiraLegacyIssuesResponse = t.type({
+const SearchJiraLegacyIssuesResponse = t.type({
   issues: t.readonlyArray(JiraLegacyIssue),
 });
 
-export type SearchJiraLegacyIssuesResponse = t.TypeOf<
+type SearchJiraLegacyIssuesResponse = t.TypeOf<
   typeof SearchJiraLegacyIssuesResponse
 >;
 
-export interface JiraLegacyOptions {
+interface JiraLegacyOptions {
   defaultRetryAfter?: number;
   maxRetry?: number;
 }

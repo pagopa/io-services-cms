@@ -1,3 +1,6 @@
+import type { Root } from "mdast";
+
+import { DocNode } from "@atlaskit/adf-schema/schema";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
@@ -6,8 +9,10 @@ import { toError } from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { TaskEither } from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import { fromADF } from "mdast-util-from-adf";
+import { toMarkdown } from "mdast-util-to-markdown";
 import nodeFetch from "node-fetch-commonjs";
 
 import { JiraConfig } from "../../config";
@@ -23,10 +28,48 @@ export const CreateJiraIssueResponse = t.type({
 export type CreateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 export type UpdateJiraIssueResponse = t.TypeOf<typeof CreateJiraIssueResponse>;
 
+const ADF = t.type({
+  content: t.readonlyArray(t.unknown),
+  type: t.string,
+  version: t.number,
+});
+type ADF = t.TypeOf<typeof ADF>;
+
+export const StringFromADF = new t.Type<string, ADF>(
+  "StringFromADF",
+  (s): s is string => typeof s === "string",
+  (i, ctx) =>
+    pipe(
+      i,
+      ADF.decode,
+      E.mapLeft(readableReport),
+      E.chain(
+        E.tryCatchK(
+          (adf) => fromADF(adf as DocNode) as Root,
+          flow(E.toError, (e) => e.message),
+        ),
+      ),
+      E.chain(
+        E.tryCatchK(
+          toMarkdown,
+          flow(E.toError, (e) => e.message),
+        ),
+      ),
+      E.map((s) => (s.endsWith("\n") ? s.substring(0, s.length - 1) : s)),
+      E.fold(
+        (e) => t.failure(i, ctx, e),
+        (s) => t.success(s),
+      ),
+    ),
+  () => {
+    throw new Error("Cannot convert markdown to adf object");
+  },
+);
+
 export const JiraIssue = t.type({
   fields: t.type({
     comment: t.type({
-      comments: t.readonlyArray(t.type({ body: t.string })),
+      comments: t.readonlyArray(t.type({ body: StringFromADF })),
     }),
     status: t.intersection([
       t.type({

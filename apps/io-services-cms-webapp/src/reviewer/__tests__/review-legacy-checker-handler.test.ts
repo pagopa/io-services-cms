@@ -130,8 +130,6 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            startAt: 0,
-            total: 2,
             issues: [aJiraIssue1, aJiraIssue2],
           }),
       );
@@ -157,8 +155,6 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            startAt: 0,
-            total: 0,
             issues: [],
           }),
       );
@@ -175,8 +171,6 @@ describe("Service Review Legacy Checker Handler tests", () => {
       mainMockJiraProxy.searchJiraIssuesByKeyAndStatus.mockImplementationOnce(
         () =>
           TE.of({
-            startAt: 0,
-            total: 0,
             issues: [],
           }),
       );

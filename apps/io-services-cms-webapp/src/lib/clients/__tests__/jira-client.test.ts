@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../../config";
-import { SearchJiraIssuesResponse, jiraClient } from "../jira-client";
+import { jiraClient, StringFromADF } from "../jira-client";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 
@@ -36,7 +36,8 @@ const aSearchIssuesPayload = {
   maxResults: 15,
   jql: "project = IEST",
 };
-const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
+
+const aSearchJiraIssuesResponse = {
   issues: [
     {
       id: "122796" as NonEmptyString,
@@ -44,9 +45,23 @@ const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
       fields: {
         comment: {
           comments: [
-            { body: "Questo è un commento" },
-            { body: "Questo è un altro commento" },
-            { body: "Un *commento* formattato … {{codice}} ." },
+            {
+              body: {
+                version: 1,
+                type: "doc",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Questo è un commento",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
           ],
         },
         status: {
@@ -389,5 +404,78 @@ describe("[JiraAPIClient] applyJiraIssueTransition", () => {
     });
 
     expect(E.isRight(issue)).toBeTruthy();
+  });
+});
+
+describe("[JiraAPIClient] type check for StringFromADF", () => {
+  const comment = "Questo è un commento";
+  const validADF = {
+    version: 1,
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: comment,
+          },
+        ],
+      },
+    ],
+  };
+
+  const validADFString = JSON.stringify(validADF);
+
+  it("should decode a valid ADF object to string", () => {
+    const result = StringFromADF.decode(validADF);
+    expect(E.isRight(result)).toBeTruthy();
+    if (E.isRight(result)) {
+      expect(result.right).toBe(comment);
+    }
+  });
+
+  it("should throw error when encoding", () => {
+    expect(() => StringFromADF.encode(validADFString)).toThrow(
+      "Cannot convert markdown to adf object",
+    );
+  });
+
+  it("should fail to decode an invalid ADF object", () => {
+    const invalidADF = {
+      type: "doc",
+      invalidField: "value",
+    };
+
+    const result = StringFromADF.decode(invalidADF);
+    expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should fail to decode an invalid nested ADF object", () => {
+    const invalidADF = {
+      version: 1,
+      type: "doc",
+      content: [
+        {
+          invalidType: "invalid",
+        },
+      ],
+    };
+
+    const result = StringFromADF.decode(invalidADF);
+
+    expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should fail to decode a non-object input", () => {
+    const result = StringFromADF.decode("not an object");
+    expect(E.isLeft(result)).toBeTruthy();
+  });
+
+  it("should validate string type correctly", () => {
+    expect(StringFromADF.is("valid string")).toBe(true);
+    expect(StringFromADF.is(123)).toBe(false);
+    expect(StringFromADF.is(null)).toBe(false);
+    expect(StringFromADF.is({})).toBe(false);
   });
 });

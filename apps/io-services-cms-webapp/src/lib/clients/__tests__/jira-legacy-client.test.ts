@@ -3,10 +3,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../../config";
-import {
-  SearchJiraLegacyIssuesResponse,
-  jiraLegacyClient,
-} from "../jira-legacy-client";
+import { jiraLegacyClient } from "../jira-legacy-client";
 
 const JIRA_CONFIG = {
   JIRA_NAMESPACE_URL: "anUrl",
@@ -16,14 +13,32 @@ const JIRA_CONFIG = {
 } as config.IConfig;
 
 const aServiceId = "sid" as ServiceId;
-const aSearchJiraIssuesByServiceIdResponse: SearchJiraLegacyIssuesResponse = {
+const aSearchJiraIssuesByServiceIdResponse = {
   issues: [
     {
       id: "123456" as NonEmptyString,
       key: "IES-17" as NonEmptyString,
       fields: {
         comment: {
-          comments: [{ body: "aCommentBody" }],
+          comments: [
+            {
+              body: {
+                version: 1,
+                type: "doc",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: "Questo è un commento",
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
         },
         status: {
           name: "DONE", // equivalent to "APPROVED" for cms jira-client

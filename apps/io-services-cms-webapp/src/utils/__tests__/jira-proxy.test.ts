@@ -4,12 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { describe, expect, it, vitest } from "vitest";
 import * as config from "../../config";
-import {
-  JiraAPIClient,
-  JiraIssue,
-  SearchJiraIssuesResponse,
-  jiraClient,
-} from "../../lib/clients/jira-client";
+import { JiraAPIClient, jiraClient } from "../../lib/clients/jira-client";
 import { Delegate, JiraIssueStatusFilter, jiraProxy } from "../jira-proxy";
 
 const JIRA_CONFIG = {
@@ -71,15 +66,29 @@ const aDelegate = {
   ],
 } as Delegate;
 
-const aJiraIssue: JiraIssue = {
+const aJiraIssue = {
   id: "122796" as NonEmptyString,
   key: "IEST-17" as NonEmptyString,
   fields: {
     comment: {
       comments: [
-        { body: "Questo è un commento" },
-        { body: "Questo è un altro commento" },
-        { body: "Un *commento* formattato … {{codice}} ." },
+        {
+          body: {
+            version: 1,
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Questo è un commento",
+                  },
+                ],
+              },
+            ],
+          },
+        },
       ],
     },
     status: {
@@ -89,11 +98,11 @@ const aJiraIssue: JiraIssue = {
   },
 };
 
-const aSearchJiraIssuesResponse: SearchJiraIssuesResponse = {
+const aSearchJiraIssuesResponse = {
   issues: [aJiraIssue],
 };
 
-const anEmptySearchJiraIssuesResponse: SearchJiraIssuesResponse = {
+const anEmptySearchJiraIssuesResponse = {
   ...aSearchJiraIssuesResponse,
   issues: [],
 };
