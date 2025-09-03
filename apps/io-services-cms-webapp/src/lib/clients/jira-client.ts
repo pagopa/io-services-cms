@@ -39,18 +39,15 @@ export const StringFromADF = new t.Type<string, ADF>(
       i,
       ADF.decode,
       E.mapLeft(readableReport),
-      E.chain((adf) =>
-        E.tryCatch(
-          () => {
-            const result = Converter.convert(adf);
-            return result.result;
-          },
+      E.chain(
+        E.tryCatchK(
+          Converter.convert,
           flow(E.toError, (e) => e.message),
         ),
       ),
       E.fold(
         (e) => t.failure(i, ctx, e),
-        (s) => t.success(s),
+        (s) => t.success(s.result),
       ),
     ),
   () => {
