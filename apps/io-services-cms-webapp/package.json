@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-webapp",
-  "version": "1.41.3",
+  "version": "1.41.4",
   "files": [
     "**/function.json",
     "dist",
