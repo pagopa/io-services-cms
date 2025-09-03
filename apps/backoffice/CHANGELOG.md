@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.1
+
+### Patch Changes
+
+- da4368e4: Fix switch to Reserved Area
+
 ## 1.29.0
 
 ### Minor Changes

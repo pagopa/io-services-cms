@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.41.3
+
+### Patch Changes
+
+- 948cb63b: add new type for comments of api search jira v3
+
 ## 1.41.2
 
 ### Patch Changes
