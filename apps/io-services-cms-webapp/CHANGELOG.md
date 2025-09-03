@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.41.4
+
+### Patch Changes
+
+- 1dabef6d: change lib converter from adf to markdown
+
 ## 1.41.3
 
 ### Patch Changes
