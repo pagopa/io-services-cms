@@ -11,7 +11,17 @@ export const MarkdownView = ({ children }: MarkdownViewProps) => (
     <Markdown
       allowedElements={["p", "strong", "em", "ul", "ol", "li", "a"]}
       components={{
-        a: (props) => <a {...props} target="_blank" />,
+        a: (props) => (
+          <a
+            {...props}
+            style={{
+              color: "#0B3EE3",
+              fontWeight: 600,
+              textDecoration: "underline",
+            }}
+            target="_blank"
+          />
+        ),
       }}
       unwrapDisallowed
     >
