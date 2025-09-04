@@ -1,8 +1,7 @@
 import { ErrorOutline } from "@mui/icons-material";
-import { Typography } from "@mui/material";
-import { Trans } from "next-i18next";
 
 import { DrawerBaseContent } from "../drawer-provider";
+import { MarkdownView } from "../markdown-view";
 
 export interface ServiceRejectReasonContentProps {
   value?: string;
@@ -12,7 +11,7 @@ export interface ServiceRejectReasonContentProps {
 export const ServiceRejectReasonContent = ({
   value,
 }: ServiceRejectReasonContentProps) => {
-  const getAllRejectionReasons = () => value?.replaceAll("|", "<br />");
+  const getAllRejectionReasons = () => value?.replaceAll("|", "\n\n");
 
   return (
     <DrawerBaseContent
@@ -24,13 +23,7 @@ export const ServiceRejectReasonContent = ({
       minWidth="320px"
       width="26vw"
     >
-      <Typography marginTop={1} variant="body2">
-        {value ? (
-          <Trans i18nKey="service.rejected.reason.value">
-            {getAllRejectionReasons()}
-          </Trans>
-        ) : null}
-      </Typography>
+      <MarkdownView>{getAllRejectionReasons()}</MarkdownView>
     </DrawerBaseContent>
   );
 };

@@ -66,20 +66,7 @@ export const ServicePreview = ({
           <Grid item paddingRight={1} paddingTop={1} xs="auto">
             <AccountBalanceRounded color="disabled" fontSize="large" />
           </Grid>
-          <Grid
-            item
-            marginTop={3}
-            sx={{
-              "& a": {
-                color: "#0073E6",
-                fontWeight: 600,
-                textDecoration: "underline",
-              },
-              fontSize: "16px",
-              lineHeight: "22px",
-            }}
-            xs={12}
-          >
+          <Grid item marginTop={3} xs={12}>
             <MarkdownView>{description}</MarkdownView>
           </Grid>
         </Grid>
