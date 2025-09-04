@@ -535,8 +535,7 @@
         "message": "This service requires modifications before it can be published in the IO app.",
         "reason": {
           "label": "Read the reasons for refusal here.",
-          "title": "Reasons for refusal",
-          "value": "<0>{value}</0>"
+          "title": "Reasons for refusal"
         }
       },
       "submitted": "This service is <strong>under review</strong>. While waiting for the response from our PagoPA team, the service cannot be modified."

@@ -535,8 +535,7 @@
         "message": "Questo servizio richiede delle modifiche prima di poter essere pubblicato in app IO.",
         "reason": {
           "label": "Leggi qui i motivi del rifiuto.",
-          "title": "Motivi del rifiuto",
-          "value": "<0>{value}</0>"
+          "title": "Motivi del rifiuto"
         }
       },
       "submitted": "Questo servizio è <strong>in revisione</strong>. In attesa della risposta del nostro team PagoPA, il servizio non può essere modificato."
