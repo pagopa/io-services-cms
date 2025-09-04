@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.2
+
+### Patch Changes
+
+- b3989669: Add markdown rendering to service rejection reason
+
 ## 1.29.1
 
 ### Patch Changes
