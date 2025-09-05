@@ -3,6 +3,9 @@
   "dockerComposeFile": "docker-compose.yaml",
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
+  "containerEnv": {
+    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}"
+  },
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
@@ -25,7 +28,8 @@
   },
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-    "install-yarn-and-deps": "yarn install"
+    "install-yarn-and-deps": "yarn install",
+    "install-pre-commit": "pre-commit install"
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [
@@ -39,7 +43,7 @@
         "ms-azuretools.vscode-azure-github-copilot",
         "ms-vscode.vscode-websearchforcopilot",
         "azurite.azurite",
-        "azapi-vscode.azapi",
+        "ms-azuretools.vscode-azureterraform",
         "github.vscode-github-actions",
         "github.vscode-pull-request-github",
         "-arcanis.vscode-zipfs",
@@ -51,6 +55,8 @@
         "dbaeumer.vscode-eslint",
         "github.copilot",
         "github.copilot-chat",
+        "ms-vsliveshare.vsliveshare",
+        "eamodio.gitlens",
         "ms-azuretools.vscode-docker",
         "ms-azuretools.vscode-cosmosdb"
       ],

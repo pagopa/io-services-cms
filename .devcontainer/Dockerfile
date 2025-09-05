@@ -1,6 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:debian@sha256:6155a486f236fd5127b76af33086029d64f64cf49dd504accb6e5f949098eb7e
+FROM mcr.microsoft.com/devcontainers/base:debian@sha256:ce2e9e611939e611b737362c045bb6d3449bb3efb84898525d724aace1737b90
 
 # Add aliases
 RUN echo 'alias ll="ls -la"' >> /etc/bash.bashrc
-
-CMD ["sleep", "infinity"]
