@@ -181,7 +181,9 @@ const legacyServicesContainer = cosmosdbClient
 
 const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 
-const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
+const assetBlobService = createBlobService(
+  config.ASSET_STORAGE_CONNECTIONSTRING,
+);
 
 // eventhub producer for ServicePublication
 const servicePublicationEventHubProducer = new EventHubProducerClient(
@@ -221,9 +223,12 @@ const blobServiceClient = new BlobServiceClient(
 // entrypoint for all http functions
 export const httpEntryPoint = pipe(
   {
+    activationsContainerClient: blobServiceClient.getContainerClient(
+      config.ACTIVATIONS_CONTAINER_NAME,
+    ),
     apimService,
+    assetBlobService,
     basePath: BASE_PATH,
-    blobService,
     config,
     fsmLifecycleClientCreator,
     fsmPublicationClient,
