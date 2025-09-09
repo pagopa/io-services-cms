@@ -317,9 +317,10 @@ describe("[Service Review Checker Handler] updateReview", () => {
 
     expect(mockFsmLifecycleClient.reject).toBeCalledTimes(1);
     expect(mockFsmLifecycleClient.reject).toBeCalledWith(aService2.id, {
-      reason: aJiraIssue2.fields.comment.comments
-        .map((value) => value.body)
-        .join("|"),
+      reason:
+        aJiraIssue2.fields.comment.comments[
+          aJiraIssue2.fields.comment.comments.length - 1
+        ].body,
     });
 
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);
@@ -372,9 +373,10 @@ describe("[Service Review Checker Handler] updateReview", () => {
 
     expect(mockFsmLifecycleClient.reject).toBeCalledTimes(1);
     expect(mockFsmLifecycleClient.reject).toBeCalledWith(aService4.id, {
-      reason: aJiraIssue4.fields.comment.comments
-        .map((value) => value.body)
-        .join("|"),
+      reason:
+        aJiraIssue4.fields.comment.comments[
+          aJiraIssue4.fields.comment.comments.length - 1
+        ].body,
     });
 
     expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(2);

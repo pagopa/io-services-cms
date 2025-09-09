@@ -256,9 +256,10 @@ describe("Service Review Legacy Checker Handler tests", () => {
         ...aService2,
         fsm: {
           state: "rejected",
-          reason: aJiraIssue2.fields.comment.comments
-            .map((value) => value.body)
-            .join("|"),
+          reason:
+            aJiraIssue2.fields.comment.comments[
+              aJiraIssue2.fields.comment.comments.length - 1
+            ].body,
         },
       });
 
