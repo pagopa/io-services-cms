@@ -38,12 +38,7 @@ const makeServiceLifecycleApply = (
     case "REJECTED":
       return pipe(
         {
-          reason:
-            jiraIssue.fields.comment.comments.length > 0
-              ? jiraIssue.fields.comment.comments[
-                  jiraIssue.fields.comment.comments.length - 1
-                ].body
-              : "",
+          reason: jiraIssue.fields.comment.comments.at(-1)?.body ?? "",
         },
         (data) => fsmLifecycleClient.reject(serviceReview.service_id, data),
         TE.map((_) => void 0),

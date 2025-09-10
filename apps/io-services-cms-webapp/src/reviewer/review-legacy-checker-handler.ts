@@ -174,12 +174,7 @@ const buildUpdatedServiceLifecycleItem =
           ...service,
           fsm: {
             ...service.fsm,
-            reason:
-              jiraIssue.fields.comment.comments.length > 0
-                ? jiraIssue.fields.comment.comments[
-                    jiraIssue.fields.comment.comments.length - 1
-                  ].body
-                : "",
+            reason: jiraIssue.fields.comment.comments.at(-1)?.body ?? "",
             state: "rejected",
           },
         };
