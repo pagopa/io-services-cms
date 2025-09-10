@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.0
+
+### Minor Changes
+
+- 62aa8a12: save only last comment of a jira ticket
+
 ## 1.41.4
 
 ### Patch Changes
