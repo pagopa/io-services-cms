@@ -159,6 +159,20 @@ const aJiraIssue4: JiraIssue = {
   },
 };
 
+const aJiraIssueWithoutComments: JiraIssue = {
+  id: anItem2.ticket_id,
+  key: anItem2.ticket_key,
+  fields: {
+    comment: {
+      comments: [],
+    },
+    status: {
+      name: "REJECTED",
+    },
+    statuscategorychangedate: "2023-05-12T15:24:09.173+0200" as NonEmptyString,
+  },
+};
+
 const anInsertQueryResult: QueryResult = {
   command: "string",
   rowCount: 1,
@@ -478,5 +492,39 @@ describe("[Service Review Checker Handler] updateReview", () => {
     expect(mockFsmLifecycleClient.approve).toBeCalled();
     expect(mockServiceReviewDao.updateStatus).toBeCalled();
     expect(mockServiceReviewDao_onUpdateStatus).toBeCalled();
+  });
+
+  it("should update ONE PENDING service review given ONE IssueItemPairs, with REJECTED jira status and reason must be an empty string", async () => {
+    const mockFsmLifecycleClient = {
+      reject: vi.fn(() =>
+        TE.right({
+          ...aService2,
+          fsm: { state: "rejected" },
+        }),
+      ),
+    } as unknown as ServiceLifecycle.FsmClient;
+    const result = await updateReview(
+      mockContext,
+      mainMockServiceReviewDao,
+      mockFsmLifecycleClient,
+    )([
+      {
+        issue: aJiraIssueWithoutComments,
+        item: anItem2,
+      },
+    ] as unknown as IssueItemPair[])();
+
+    expect(E.isRight(result)).toBeTruthy();
+
+    expect(mockFsmLifecycleClient.reject).toBeCalledTimes(1);
+    expect(mockFsmLifecycleClient.reject).toBeCalledWith(aService2.id, {
+      reason: "",
+    });
+
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledTimes(1);
+    expect(mainMockServiceReviewDao.updateStatus).toBeCalledWith({
+      ...anItem2,
+      status: aJiraIssueWithoutComments.fields.status.name,
+    });
   });
 });
