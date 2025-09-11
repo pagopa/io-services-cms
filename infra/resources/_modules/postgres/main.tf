@@ -16,7 +16,7 @@ module "cms_postgres_flexible_server" {
 
   tier = "m"
 
-  db_version = "13"
+  db_version = "16"
   storage_mb = 32768
 
   administrator_credentials = {
