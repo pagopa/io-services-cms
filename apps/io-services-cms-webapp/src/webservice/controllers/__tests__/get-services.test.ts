@@ -19,6 +19,12 @@ import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 const aName1 = "a-name-1";
 const aName2 = "a-name-2";
 const aName3 = "a-name-3";

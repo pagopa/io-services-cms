@@ -34,6 +34,12 @@ vi.mock("../../../utils/service-topic-dao", () => ({
   getDao: getServiceTopicDao,
 }));
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 const ownerId = `/an/owner/${anUserId}`;
