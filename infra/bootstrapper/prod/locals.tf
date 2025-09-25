@@ -60,7 +60,7 @@ locals {
     Environment    = "Prod"
     BusinessUnit   = "App IO"
     ManagementTeam = "IO Enti & Servizi"
-    Source         = "https://github.com/pagopa/io-services-cms/blob/main/infra/repository"
+    Source         = "https://github.com/pagopa/io-services-cms/blob/main/infra/bootstrapper/prod"
     CostCenter     = "TS000 - Tecnologia e Servizi"
   }
 }
