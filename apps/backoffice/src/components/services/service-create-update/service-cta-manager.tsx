@@ -12,12 +12,7 @@ import { useTranslation } from "next-i18next";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-// RHF helpers tipizzati  compose/parse già esistenti
 import CtaControlsButtons from "./cta-controls-buttons";
-
-{
-  /* <ReportProblemRounded /> */
-}
 
 export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
