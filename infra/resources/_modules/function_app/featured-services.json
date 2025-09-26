@@ -1,6 +1,12 @@
 {
   "services": [
     {
+      "id": "01JV4M365CHAZN5C0FDR62DCVD",
+      "name": "Carta della Cultura",
+      "organization_name": "Ministero della cultura",
+      "version": 1759276800000
+    },
+    {
       "id": "01JEXVQSRV2XRX9XDWQ5XQ6A8T",
       "name": "Motorizzazione Civile - Le mie patenti",
       "organization_name": "Ministero delle infrastrutture e dei trasporti",
