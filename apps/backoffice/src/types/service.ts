@@ -44,6 +44,7 @@ export interface ServiceMetadata {
 }
 
 export type AssistanceChannelType = "email" | "pec" | "phone" | "support_url";
+
 export interface AssistanceChannel {
   type: AssistanceChannelType;
   value: string;
@@ -54,6 +55,16 @@ export interface AssistanceChannelsMetadata {
   phone?: string;
   support_url?: string;
 }
+export interface Cta {
+  preUrl: string;
+  text: string;
+  url: string;
+}
+
+export interface Ctas {
+  cta_1: Cta;
+  cta_2: Cta;
+}
 
 export interface ServiceCreateUpdatePayloadMetadata {
   address: string;
@@ -61,10 +72,7 @@ export interface ServiceCreateUpdatePayloadMetadata {
   app_ios: string;
   assistanceChannels: AssistanceChannel[];
   category?: string;
-  cta: {
-    text: string;
-    url: string;
-  };
+  cta: Ctas;
   custom_special_flow?: string;
   group_id?: string;
   privacy_url: string;

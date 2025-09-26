@@ -142,8 +142,20 @@
         "description": "Queste funzionalità ti permettono di arricchire il servizio con tanti parametri aggiuntivi. Alcuni di questi richiedono la firma di un contratto ad hoc.",
         "arriving": "In arrivo",
         "cta": {
-          "label": "Pulsante con link esterno",
-          "description": "Aggiungi un pulsante che rimanda ad una pagina web con più informazioni sul servizio."
+          "label": "Pulsante con link",
+          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On. Scopri di più",
+          "addSecondaryButton": "aggiungi pulsante secondario",
+          "removeSecondaryButton": "rimuovi pulsante secondario",
+          "form": {
+            "selectLabel": "Tipo di pulsante",
+            "externalLink": "Link esterno all'app",
+            "singleSignOn": "Link in single Sign-on",
+            "internalLink": "Link interno all'app (deeplink)",
+            "placeholder": "",
+            "btnWithLink": {
+              "alertSingleSignOn": "Per far funzionare il pulsante con il link in Single Sign-on, devi assicurarti di aver completato l'integrazione nei sistemi dell'ente.  [Leggi qui per le specifiche tecniche](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/nome-del-servizio)."
+            }
+          }
         },
         "fims": {
           "label": "Protocollo FIMS",
@@ -173,13 +185,14 @@
         },
         "cta": {
           "text": {
-            "helperText": "",
+            "helperText": "<a style=\"color: #0073E6;\" href=\"https://mimancalink.com\" target=\"_blank\">Leggi quì</a> le specifiche tecniche ",
             "label": "Etichetta del pulsante",
             "placeholder": ""
           },
           "url": {
             "helperText": "",
             "label": "URL esterna",
+            "labelInternal": "URL interna",
             "placeholder": ""
           }
         },

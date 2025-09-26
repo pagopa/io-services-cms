@@ -10,6 +10,7 @@ import {
   AssistanceChannel,
   AssistanceChannelType,
   AssistanceChannelsMetadata,
+  Ctas,
   Service,
   ServiceCreateUpdatePayload,
 } from "@/types/service";
@@ -118,7 +119,7 @@ export const fromServiceLifecycleToServiceCreateUpdatePayload = (
     app_android: sl.metadata.app_android ?? "",
     app_ios: sl.metadata.app_ios ?? "",
     assistanceChannels: convertAssistanceChannelsObjToArray(sl.metadata),
-    cta: buildCtaObj(sl.metadata.cta),
+    cta: buildCtaObj(sl.metadata.cta ?? ""),
     group_id: sl.metadata.group?.id,
     privacy_url: sl.metadata.privacy_url ?? "",
     scope: sl.metadata.scope,
@@ -140,7 +141,7 @@ const buildBaseServicePayload =
     max_allowed_payment_amount: s.max_allowed_payment_amount,
     metadata: {
       ...s.metadata,
-      cta: buildCtaString(s.metadata.cta),
+      cta: buildCtaStringForPayload(s.metadata.cta),
       ...assistanceChannels,
     },
     require_secure_channel: s.require_secure_channel,
@@ -176,22 +177,72 @@ const convertAssistanceChannelsObjToArray = (
   }
   return channels;
 };
+const buildCtaStringForPayload = (ctaObj: Ctas): string | undefined => {
+  const text1 = ctaObj?.cta_1?.text?.trim() ?? "";
+  if (text1 === "") return undefined;
 
-const buildCtaString = (ctaObj: { text: string; url: string }) => {
-  if (ctaObj.text !== "" && ctaObj.url !== "") {
-    return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\nen:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\n---`;
-  }
-  return "";
+  // const hasCta2 = !!ctaObj?.cta_2 && (ctaObj.cta_2.text?.trim?.() ?? "") !== "";
+  const hasCta2 = (ctaObj?.cta_2?.text?.trim() ?? "") !== "";
+
+  return hasCta2
+    ? buildCtaString(ctaObj.cta_1, ctaObj.cta_2)
+    : buildCtaString(ctaObj.cta_1);
 };
 
-const buildCtaObj = (ctaString?: string) => {
+const buildCtaString = (
+  ctaObj: { preUrl: string; text: string; url: string },
+  ctaObj2?: { preUrl: string; text: string; url: string },
+) => {
+  const cta_2 = ctaObj2?.text
+    ? `  cta_2: \n    text: \"${ctaObj2.text}\"\n    action: \"${ctaObj2.preUrl}${ctaObj2.url}\"\n`
+    : ``;
+  return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.preUrl}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.preUrl}${ctaObj.url}\"\n${cta_2}---`;
+};
+
+const buildCtaObj = (ctaString?: string): Ctas => {
+  // Read the CTA value from the service payload and build the object used to populate the form.
+  // We use the `preUrl` field to store the select value and determine the link type
   if (NonEmptyString.is(ctaString)) {
+    const itBlock = ctaString.split("en:")[0]; // we take only italian block
+    const hasCta_2 = itBlock.includes("cta_2:"); // we take only the cta_2 block. if different from undefined we have cta_2
+    const cta_2 = itBlock.split("cta_2:")[1]; // take the source string on the right of cta_2 string from payload
+
+    const PRE_URL_RE = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
+
+    const splitPreUrl = (s: string) => {
+      const m = s.match(PRE_URL_RE);
+      return m
+        ? { preUrl: m[1], url: s.replace(PRE_URL_RE, "") }
+        : { preUrl: "", url: s };
+    };
+
+    const text1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
+    const act1 = getCtaValueFromCtaString(ctaString, "action");
+
+    const { preUrl: pre1, url: url1 } = splitPreUrl(act1);
+    //parsing url, we get the preurl value and put in preurl and we get url value without preurl
+
+    let text2 = "",
+      pre2 = "",
+      url2 = "";
+    if (hasCta_2) {
+      text2 = getCtaValueFromCtaString(cta_2, "text"); // we get value only from cta_2
+      const act2 = getCtaValueFromCtaString(cta_2, "action");
+
+      ({ preUrl: pre2, url: url2 } = splitPreUrl(act2));
+      //parsing url, we get the preurl value and put in preurl and we get url value without preurl
+    }
+
     return {
-      text: getCtaValueFromCtaString(ctaString, "text"),
-      url: getCtaValueFromCtaString(ctaString, "action"),
+      cta_1: { preUrl: pre1, text: text1, url: url1 },
+      cta_2: { preUrl: pre2, text: text2, url: url2 },
     };
   }
-  return { text: "", url: "" };
+
+  return {
+    cta_1: { preUrl: "", text: "", url: "" }, //default value for form are cta complete and all value ""
+    cta_2: { preUrl: "", text: "", url: "" },
+  };
 };
 
 const getCtaValueFromCtaString = (
@@ -209,7 +260,6 @@ const getCtaValueFromCtaString = (
   }
   return "";
 };
-
 /**
  * Remove empty/undefined properties from object.\
  * Since the form using react-hook-form needs controlled inputs, all fields are initialized to an empty string.

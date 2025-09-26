@@ -88,8 +88,8 @@ export const ServiceCreateUpdate = ({
         assistanceChannels: [{ type: "email", value: "" }],
         category: "",
         cta: {
-          text: "",
-          url: "",
+          cta_1: { preUrl: "", text: "", url: "" },
+          cta_2: { preUrl: "", text: "", url: "" },
         },
         custom_special_flow: "",
         group_id: handleOperatorWithSingleGroup(),

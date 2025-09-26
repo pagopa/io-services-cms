@@ -108,6 +108,16 @@ export const aMockServiceCTADouble = `---\nit:\n  cta_1: \n    text: \"${faker.l
   2,
 )}\"\n    action: \"iohandledlink://${faker.internet.url()}\"\n---`;
 
+export const aMockServiceCTADoubleDifferentLink = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2,
+)}\"\n    action: \"ioit://${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
+  2,
+)}\"\n    action: \"iosso://${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+  2,
+)}\"\n    action: \"ioit://${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
+  2,
+)}\"\n    action: \"iosso://${faker.internet.url()}\"\n---`;
+
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   authorized_cidrs: [
     ...Array.from(Array(faker.number.int({ max: 5, min: 1 })).keys()),
@@ -139,7 +149,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     category: faker.helpers.arrayElement(["SPECIAL", "STANDARD"]),
     cta: faker.helpers.arrayElement([
       aMockServiceCTASingle,
-      aMockServiceCTADouble,
+      aMockServiceCTADoubleDifferentLink,
       undefined,
     ]),
     custom_special_flow: faker.lorem.slug(1),

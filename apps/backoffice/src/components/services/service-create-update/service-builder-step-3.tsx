@@ -3,7 +3,7 @@ import { FormStepSectionWrapper } from "@/components/forms";
 import { TextFieldArrayController } from "@/components/forms/controllers";
 import {
   arrayOfIPv4CidrSchema,
-  getOptionalUrlSchema,
+  getUrlSchema,
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
@@ -21,22 +21,66 @@ import { ServiceGroupSelector } from "./service-group-selector";
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
+const makeCtaBlock = (t: TFunction<"translation", undefined>) => {
+  const isUrl = (s: string) => getUrlSchema(t).safeParse(s).success;
+
+  return (
+    z
+      .object({
+        preUrl: z.string().trim().default(""),
+        text: z.string().trim().default(""),
+        url: z.string().trim().default(""),
+      })
+      // if the block is partially filled in, validate each field on its own path
+      .refine((v) => !(v.preUrl || v.text || v.url) || v.preUrl.length >= 2, {
+        message: t("forms.errors.field.required"),
+        path: ["preUrl"],
+      })
+      .refine((v) => !(v.preUrl || v.text || v.url) || v.text.length >= 2, {
+        message: t("forms.errors.field.required"),
+        path: ["text"],
+      })
+      .refine((v) => !(v.preUrl || v.text || v.url) || isUrl(v.url), {
+        message: t("forms.errors.field.url"),
+        path: ["url"],
+      })
+  );
+};
+
 export const getValidationSchema = (
   t: TFunction<"translation", undefined>,
   session: Session | null,
-) =>
-  z.object({
+) => {
+  const ctaSchema = z
+    .object({
+      cta_1: makeCtaBlock(t),
+      cta_2: makeCtaBlock(t).optional(),
+    })
+    .refine(
+      (v) => {
+        const empty = (b?: { preUrl: string; text: string; url: string }) =>
+          !b || (!b.preUrl && !b.text && !b.url);
+        // ok if all CTA is empty
+        if (empty(v.cta_1) && empty(v.cta_2)) return true;
+        // else cta_1 can not to be empty
+        return !empty(v.cta_1);
+      },
+      {
+        message: t("forms.errors.field.required"),
+        path: ["cta_1", "preUrl"],
+      },
+    );
+
+  return z.object({
     authorized_cidrs: arrayOfIPv4CidrSchema,
     metadata: z.object({
-      cta: z.object({
-        text: z.string(),
-        url: getOptionalUrlSchema(t),
-      }),
+      cta: ctaSchema.optional(),
       group_id: isGroupRequired(session, GROUP_APIKEY_ENABLED)
         ? z.string().min(1, { message: t("forms.errors.field.required") })
         : z.string().optional(),
     }),
   });
+};
 
 export interface ServiceBuilderStep3Props {
   groups?: readonly Group[];
