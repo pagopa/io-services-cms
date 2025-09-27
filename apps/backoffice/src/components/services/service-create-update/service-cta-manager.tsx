@@ -8,7 +8,6 @@ import {
 import { Link, ReportProblemRounded } from "@mui/icons-material";
 import { Box, Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
-// service-cta-manager.tsx
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -35,13 +34,14 @@ export const ServiceCtaManager: React.FC = () => {
     },
   ];
 
-  const linkCtype = ["iohandledlink://", "iosso://", "ioit://"];
+  const linkCtaType = ["iohandledlink://", "iosso://", "ioit://"];
 
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
+    //let us observe the value of the select stored referring to the current slot
     const kind = watch(`metadata.cta.${slot}.preUrl`);
 
     const helperCtaInternal =
-      kind === linkCtype[2] ? (
+      kind === linkCtaType[2] ? (
         <span
           dangerouslySetInnerHTML={{
             __html: t("forms.service.metadata.cta.text.helperText"),
@@ -50,7 +50,7 @@ export const ServiceCtaManager: React.FC = () => {
       ) : undefined;
 
     const labelCtaInternal =
-      kind === linkCtype[2]
+      kind === linkCtaType[2]
         ? t("forms.service.metadata.cta.url.labelInternal")
         : t("forms.service.metadata.cta.url.label");
 
@@ -73,7 +73,7 @@ export const ServiceCtaManager: React.FC = () => {
 
           <Grid item md={6} xs={12} />
 
-          {kind === linkCtype[1] && (
+          {kind === linkCtaType[1] && (
             <Grid item xs={12}>
               <Banner
                 description={t(
@@ -95,7 +95,7 @@ export const ServiceCtaManager: React.FC = () => {
 
           <Grid item md={6} xs={12}>
             <UrlFieldController
-              hideCheckUrl={kind === linkCtype[0] ? false : true}
+              hideCheckUrl={kind === linkCtaType[0] ? false : true}
               label={labelCtaInternal}
               name={`metadata.cta.${slot}.url`}
               placeholder={t("forms.service.metadata.cta.url.placeholder")}
@@ -138,7 +138,6 @@ export const ServiceCtaManager: React.FC = () => {
   };
   return (
     <Box>
-      {" "}
       {renderCtaSection("cta_1")}
       {hasCta2Field !== "" ? (
         <Box mt={2}>{renderCtaSection("cta_2")}</Box>

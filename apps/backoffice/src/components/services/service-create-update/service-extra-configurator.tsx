@@ -42,10 +42,6 @@ export const ServiceExtraConfigurator = () => {
 
   const handleListItemClick = (type: ServiceExtraConfigurationType) => {
     if (type === "cta") {
-      const cta1_isExist = getValues("metadata.cta");
-      console.log(getValues("metadata"), " metadata");
-      console.log(cta1_isExist, " cta1_isExist -->>");
-
       setIsCtaVisible(true);
     }
     closeDrawer();

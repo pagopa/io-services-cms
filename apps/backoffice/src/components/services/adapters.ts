@@ -181,7 +181,6 @@ const buildCtaStringForPayload = (ctaObj: Ctas): string | undefined => {
   const text1 = ctaObj?.cta_1?.text?.trim() ?? "";
   if (text1 === "") return undefined;
 
-  // const hasCta2 = !!ctaObj?.cta_2 && (ctaObj.cta_2.text?.trim?.() ?? "") !== "";
   const hasCta2 = (ctaObj?.cta_2?.text?.trim() ?? "") !== "";
 
   return hasCta2
@@ -204,7 +203,7 @@ const buildCtaObj = (ctaString?: string): Ctas => {
   // We use the `preUrl` field to store the select value and determine the link type
   if (NonEmptyString.is(ctaString)) {
     const itBlock = ctaString.split("en:")[0]; // we take only italian block
-    const hasCta_2 = itBlock.includes("cta_2:"); // we take only the cta_2 block. if different from undefined we have cta_2
+    const hasCta_2 = itBlock.includes("cta_2:"); // check the word cta_2: if found return true ( so we know that we have cta_2 )
     const cta_2 = itBlock.split("cta_2:")[1]; // take the source string on the right of cta_2 string from payload
 
     const PRE_URL_RE = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
