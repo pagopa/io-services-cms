@@ -72,11 +72,10 @@ describe("[Services] Adapters", () => {
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isRight(result));
+
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual(anApiServicePayloadResult);
     }
-
-    // expect(right).toStrictEqual(anApiServicePayloadResult);
   });
 
   it("should return a Validation error if an invalid frontend service payload is provided", () => {
@@ -85,11 +84,11 @@ describe("[Services] Adapters", () => {
       name: "",
     };
 
-    const res = fromServiceCreateUpdatePayloadToApiServicePayload(
+    const result = fromServiceCreateUpdatePayloadToApiServicePayload(
       anInvalidServiceCreateUpdatePayload,
-    ) as t.Validation<ApiServicePayload>;
+    ) as t.Validation<ServiceCreateUpdatePayload>;
 
-    expect(E.isLeft(res)).toBe(true);
+    expect(E.isLeft(result));
   });
 
   it("should return a valid frontend service payload if a valid Api ServiceLifecycle is provided", () => {
@@ -127,101 +126,4 @@ describe("[Services] Adapters", () => {
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
-
-  // it("FE → API con UNA CTA (validation Right + CTAS(it) corretto)", () => {
-  //   const res = fromServiceCreateUpdatePayloadToApiServicePayload(
-  //     aValidServiceCreateUpdatePayload,
-  //   ) as t.Validation<ApiServicePayload>;
-  //   const right = decodeOrPrint(res).right;
-
-  //   // 1) è una stringa di front-matter
-  //   expect(typeof right.metadata.cta).toBe("string");
-
-  //   // 2) controlla il contenuto semantico del ramo 'it'
-  //   expectItCtasEqual(right.metadata.cta as string, {
-  //     cta_1: { text: "aCtaText", action: "iohandledlink://aCtaUrl" },
-  //     // niente cta_2 attesa
-  //   });
-  // });
-
-  // it("FE → API con DUE CTA (validation Right + CTAS(it) corretto)", () => {
-  //   const feDouble: ServiceCreateUpdatePayload = {
-  //     ...aValidServiceCreateUpdatePayload,
-  //     metadata: {
-  //       ...aValidServiceCreateUpdatePayload.metadata,
-  //       cta: {
-  //         cta_1: { text: "aCtaText1", url: "iohandledlink://aCtaUrl1" },
-  //         cta_2: { text: "aCtaText2", url: "iohandledlink://aCtaUrl2" },
-  //       },
-  //     },
-  //   };
-
-  //   const res = fromServiceCreateUpdatePayloadToApiServicePayload(
-  //     feDouble,
-  //   ) as t.Validation<ApiServicePayload>;
-  //   const right = decodeOrPrint(res).right;
-
-  //   expect(typeof right.metadata.cta).toBe("string");
-  //   expectItCtasEqual(right.metadata.cta as string, {
-  //     cta_1: { text: "aCtaText1", action: "iohandledlink://aCtaUrl1" },
-  //     cta_2: { text: "aCtaText2", action: "iohandledlink://aCtaUrl2" },
-  //   });
-  // });
-
-  // it("API → FE round-trip (senza topic)", () => {
-  //   const res = fromServiceCreateUpdatePayloadToApiServicePayload(
-  //     aValidServiceCreateUpdatePayload,
-  //   ) as t.Validation<ApiServicePayload>;
-  //   const api = decodeOrPrint(res).right;
-
-  //   const fe = fromServiceLifecycleToServiceCreateUpdatePayload(api);
-  //   // allinea eventuali campi opzionali che il mapper setta/azzera
-  //   const expected = {
-  //     ...aValidServiceCreateUpdatePayload,
-  //     metadata: {
-  //       ...aValidServiceCreateUpdatePayload.metadata,
-  //       group_id: undefined,
-  //       token_name: "",
-  //       topic_id: undefined,
-  //     },
-  //   };
-  //   expect(fe).toStrictEqual(expected);
-  // });
-
-  // it("should return a valid Api ServicePayload if a valid frontend service payload is provided with two cta", () => {
-  //   const feDouble: ServiceCreateUpdatePayload = {
-  //     ...aValidServiceCreateUpdatePayload,
-  //     metadata: {
-  //       ...aValidServiceCreateUpdatePayload.metadata,
-  //       topic_id: 1,
-  //       cta: {
-  //         cta_1: { text: "aCtaText1", url: "iohandledlink://aCtaUrl1" },
-  //         cta_2: { text: "aCtaText2", url: "iohandledlink://aCtaUrl2" },
-  //       },
-  //     },
-  //   };
-
-  //   const res = fromServiceCreateUpdatePayloadToApiServicePayload(
-  //     feDouble,
-  //   ) as t.Validation<ApiServicePayload>;
-
-  //   // dentro adapters.test.ts, subito dopo che calcoli `res`
-  //   if (E.isLeft(res)) {
-  //     // stampa leggibile dell'errore
-  //     // (importa `import * as t from "io-ts"` in testa al file se non c'è)
-  //     // eslint-disable-next-line no-console
-  //     console.error(
-  //       "\nDECODE ERROR\n" + PathReporter.report(res).join("\n") + "\n",
-  //     );
-  //   }
-
-  //   expect(E.isRight(res)).toBe(true);
-  //   const right = (res as E.Right<ApiServicePayload>).right;
-  //   if (E.isLeft(res)) {
-  //     // @ts-ignore
-  //     console.log(t.draw(res.left));
-  //   }
-
-  //   expect(right.metadata.cta).toBe(aCtaDoubleResult);
-  // });
 });

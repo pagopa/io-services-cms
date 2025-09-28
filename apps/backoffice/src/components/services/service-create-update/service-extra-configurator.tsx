@@ -21,7 +21,7 @@ import { useTranslation } from "next-i18next";
 import { ReactNode, useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ServiceCtaManager } from "./service-cta-manager";
+import { ServiceCtaManager } from "../../cta-manager/service-cta-manager";
 
 export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 

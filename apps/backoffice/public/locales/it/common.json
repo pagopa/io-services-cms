@@ -185,7 +185,7 @@
         },
         "cta": {
           "text": {
-            "helperText": "<a style=\"color: #0073E6;\" href=\"https://mimancalink.com\" target=\"_blank\">Leggi quì</a> le specifiche tecniche ",
+            "helperText": "<a style=\"color: #0073E6;\" href=\"https://google.com\" target=\"_blank\">Leggi quì</a> le specifiche tecniche ",
             "label": "Etichetta del pulsante",
             "placeholder": ""
           },

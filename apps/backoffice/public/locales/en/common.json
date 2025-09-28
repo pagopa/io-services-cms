@@ -185,7 +185,7 @@
         },
         "cta": {
           "text": {
-            "helperText": "<a style=\"color: #0073E6;\" href=\"https://mimancalink.com\" target=\"_blank\">Read</a> the technical specifications here",
+            "helperText": "<a style=\"color: #0073E6;\" href=\"https://google.com\" target=\"_blank\">Read</a> the technical specifications here",
             "label": "Button label",
             "placeholder": ""
           },
