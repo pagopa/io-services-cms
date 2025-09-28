@@ -17,8 +17,8 @@ export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
   const { clearErrors, setValue, watch } = useFormContext();
 
-  const hasCta2Field = watch("metadata.cta.cta_2.preUrl");
-  const initialStateBtn = hasCta2Field !== "" ? true : false;
+  const hasCta2PreUrl = watch("metadata.cta.cta_2.preUrl");
+  const initialStateBtn = hasCta2PreUrl !== "" ? true : false;
   const selectItems = [
     {
       label: t("forms.service.extraConfig.cta.form.externalLink"),
@@ -110,7 +110,7 @@ export const ServiceCtaManager: React.FC = () => {
               removeLabel={t(
                 "forms.service.extraConfig.cta.removeSecondaryButton",
               )}
-              show={slot === "cta_1" && hasCta2Field !== "" ? false : true}
+              show={slot === "cta_1" && hasCta2PreUrl !== "" ? false : true}
             />
           }
         </Grid>
@@ -139,7 +139,7 @@ export const ServiceCtaManager: React.FC = () => {
   return (
     <Box>
       {renderCtaSection("cta_1")}
-      {hasCta2Field !== "" ? (
+      {hasCta2PreUrl !== "" ? (
         <Box mt={2}>{renderCtaSection("cta_2")}</Box>
       ) : null}
     </Box>
