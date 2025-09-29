@@ -32,9 +32,9 @@ export const ServiceExtraConfigurator = () => {
   const [isCtaVisible, setIsCtaVisible] = useState(false);
   const { clearErrors, getValues, setValue } = useFormContext();
 
-  const cta_isExist =
+  const ctaExists =
     !!getValues("metadata.cta") &&
-    ["text", "url", "preUrl"].some(
+    ["text", "url", "urlPrefix"].some(
       (field) =>
         !!(getValues(`metadata.cta.cta_1.${field}` as any) ?? "").trim(),
     );
@@ -46,10 +46,10 @@ export const ServiceExtraConfigurator = () => {
     closeDrawer();
   };
   const removeCtaConfiguration = () => {
-    setValue("metadata.cta.cta_1.preUrl", "");
+    setValue("metadata.cta.cta_1.urlPrefix", "");
     setValue("metadata.cta.cta_1.text", "");
     setValue("metadata.cta.cta_1.url", "");
-    setValue("metadata.cta.cta_2.preUrl", "");
+    setValue("metadata.cta.cta_2.urlPrefix", "");
     setValue("metadata.cta.cta_2.text", "");
     setValue("metadata.cta.cta_2.url", "");
     clearErrors(["metadata.cta", "metadata.cta.cta_1", "metadata.cta.cta_2"]);
@@ -133,10 +133,10 @@ export const ServiceExtraConfigurator = () => {
   };
 
   useEffect(() => {
-    if (cta_isExist) {
+    if (ctaExists) {
       setIsCtaVisible(true);
     }
-  }, [cta_isExist]);
+  }, [ctaExists]);
 
   return (
     <Box marginTop={5}>

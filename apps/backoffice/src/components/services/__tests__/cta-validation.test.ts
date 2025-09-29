@@ -14,7 +14,7 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            preUrl: "iohandledlink://",
+            urlPrefix: "iohandledlink://",
             text: "Primary button",
             url: "https://example.com/page",
           },
@@ -31,12 +31,12 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            preUrl: "iohandledlink://",
+            urlPrefix: "iohandledlink://",
             text: "Primary button",
             url: "https://example.com/page",
           },
           cta_2: {
-            preUrl: "iohandledlink://",
+            urlPrefix: "iohandledlink://",
             text: "Secondary button",
             url: "https://example.com/other",
           },
@@ -53,12 +53,12 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            preUrl: "",
+            urlPrefix: "",
             text: "",
             url: "",
           },
           cta_2: {
-            preUrl: "iohandledlink://",
+            urlPrefix: "iohandledlink://",
             text: "Secondary button",
             url: "https://example.com/other",
           },
@@ -75,7 +75,7 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            preUrl: "iohandledlink://",
+            urlPrefix: "iohandledlink://",
             text: "Primary button",
             url: "notaurl",
           },
@@ -91,8 +91,8 @@ describe("CTA validation", () => {
       authorized_cidrs: [],
       metadata: {
         cta: {
-          cta_1: { preUrl: "", text: "", url: "" },
-          cta_2: { preUrl: "", text: "", url: "" },
+          cta_1: { urlPrefix: "", text: "", url: "" },
+          cta_2: { urlPrefix: "", text: "", url: "" },
         },
       },
     };

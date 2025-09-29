@@ -19,8 +19,12 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     privacy_url: "aPrivacyUrl",
     address: "anAddress",
     cta: {
-      cta_1: { preUrl: "iohandledlink://", text: "aCtaText1", url: "aCtaUrl1" },
-      cta_2: { preUrl: "", text: "", url: "" },
+      cta_1: {
+        urlPrefix: "iohandledlink://",
+        text: "aCtaText1",
+        url: "aCtaUrl1",
+      },
+      cta_2: { urlPrefix: "", text: "", url: "" },
     },
     scope: "LOCAL",
     assistanceChannels: [

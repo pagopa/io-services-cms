@@ -27,20 +27,23 @@ const makeCtaBlock = (t: TFunction<"translation", undefined>) => {
   return (
     z
       .object({
-        preUrl: z.string().trim().default(""),
         text: z.string().trim().default(""),
         url: z.string().trim().default(""),
+        urlPrefix: z.string().trim().default(""),
       })
       // if the block is partially filled in, validate each field on its own path
-      .refine((v) => !(v.preUrl || v.text || v.url) || v.preUrl.length >= 2, {
-        message: t("forms.errors.field.required"),
-        path: ["preUrl"],
-      })
-      .refine((v) => !(v.preUrl || v.text || v.url) || v.text.length >= 2, {
+      .refine(
+        (v) => !(v.urlPrefix || v.text || v.url) || v.urlPrefix.length >= 2,
+        {
+          message: t("forms.errors.field.required"),
+          path: ["urlPrefix"],
+        },
+      )
+      .refine((v) => !(v.urlPrefix || v.text || v.url) || v.text.length >= 2, {
         message: t("forms.errors.field.required"),
         path: ["text"],
       })
-      .refine((v) => !(v.preUrl || v.text || v.url) || isUrl(v.url), {
+      .refine((v) => !(v.urlPrefix || v.text || v.url) || isUrl(v.url), {
         message: t("forms.errors.field.url"),
         path: ["url"],
       })
@@ -58,8 +61,8 @@ export const getValidationSchema = (
     })
     .refine(
       (v) => {
-        const empty = (b?: { preUrl: string; text: string; url: string }) =>
-          !b || (!b.preUrl && !b.text && !b.url);
+        const empty = (b?: { text: string; url: string; urlPrefix: string }) =>
+          !b || (!b.urlPrefix && !b.text && !b.url);
         // ok if all CTA is empty
         if (empty(v.cta_1) && empty(v.cta_2)) return true;
         // else cta_1 can not to be empty
@@ -67,7 +70,7 @@ export const getValidationSchema = (
       },
       {
         message: t("forms.errors.field.required"),
-        path: ["cta_1", "preUrl"],
+        path: ["cta_1", "urlPrefix"],
       },
     );
 

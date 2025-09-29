@@ -189,37 +189,37 @@ const buildCtaStringForPayload = (ctaObj: Ctas): string | undefined => {
 };
 
 const buildCtaString = (
-  ctaObj: { preUrl: string; text: string; url: string },
-  ctaObj2?: { preUrl: string; text: string; url: string },
+  ctaObj: { text: string; url: string; urlPrefix: string },
+  ctaObj2?: { text: string; url: string; urlPrefix: string },
 ) => {
   const cta_2 = ctaObj2?.text
-    ? `  cta_2: \n    text: \"${ctaObj2.text}\"\n    action: \"${ctaObj2.preUrl}${ctaObj2.url}\"\n`
+    ? `  cta_2: \n    text: \"${ctaObj2.text}\"\n    action: \"${ctaObj2.urlPrefix}${ctaObj2.url}\"\n`
     : ``;
-  return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.preUrl}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.preUrl}${ctaObj.url}\"\n${cta_2}---`;
+  return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}---`;
 };
 
 const buildCtaObj = (ctaString?: string): Ctas => {
   // Read the CTA value from the service payload and build the object used to populate the form.
-  // We use the `preUrl` field to store the select value and determine the link type
+  // We use the `urlPrefix` field to store the select value and determine the link type
   if (NonEmptyString.is(ctaString)) {
     const itBlock = ctaString.split("en:")[0]; // we take only italian block
     const hasCta_2 = itBlock.includes("cta_2:"); // check the word cta_2: if found return true ( so we know that we have cta_2 )
     const cta_2 = itBlock.split("cta_2:")[1]; // take the source string on the right of cta_2 string from payload
 
-    const PRE_URL_RE = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
+    const URL_PREFIX_REGEX = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
 
-    const splitPreUrl = (s: string) => {
-      const m = s.match(PRE_URL_RE);
+    const splitUrlPrefix = (s: string) => {
+      const m = s.match(URL_PREFIX_REGEX);
       return m
-        ? { preUrl: m[1], url: s.replace(PRE_URL_RE, "") }
-        : { preUrl: "", url: s };
+        ? { url: s.replace(URL_PREFIX_REGEX, ""), urlPrefix: m[1] }
+        : { url: s, urlPrefix: "" };
     };
 
     const text1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
     const act1 = getCtaValueFromCtaString(ctaString, "action");
 
-    const { preUrl: pre1, url: url1 } = splitPreUrl(act1);
-    //parsing url, we get the preurl value and put in preurl and we get url value without preurl
+    const { url: url1, urlPrefix: pre1 } = splitUrlPrefix(act1);
+    //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
 
     let text2 = "",
       pre2 = "",
@@ -228,19 +228,19 @@ const buildCtaObj = (ctaString?: string): Ctas => {
       text2 = getCtaValueFromCtaString(cta_2, "text"); // we get value only from cta_2
       const act2 = getCtaValueFromCtaString(cta_2, "action");
 
-      ({ preUrl: pre2, url: url2 } = splitPreUrl(act2));
-      //parsing url, we get the preurl value and put in preurl and we get url value without preurl
+      ({ url: url2, urlPrefix: pre2 } = splitUrlPrefix(act2));
+      //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
     }
 
     return {
-      cta_1: { preUrl: pre1, text: text1, url: url1 },
-      cta_2: { preUrl: pre2, text: text2, url: url2 },
+      cta_1: { text: text1, url: url1, urlPrefix: pre1 },
+      cta_2: { text: text2, url: url2, urlPrefix: pre2 },
     };
   }
 
   return {
-    cta_1: { preUrl: "", text: "", url: "" }, //default value for form are cta complete and all value ""
-    cta_2: { preUrl: "", text: "", url: "" },
+    cta_1: { text: "", url: "", urlPrefix: "" }, //default value for form are cta complete and all value ""
+    cta_2: { text: "", url: "", urlPrefix: "" },
   };
 };
 

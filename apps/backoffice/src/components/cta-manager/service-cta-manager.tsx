@@ -17,8 +17,8 @@ export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
   const { clearErrors, setValue, watch } = useFormContext();
 
-  const hasCta2PreUrl = watch("metadata.cta.cta_2.preUrl");
-  const initialStateBtn = hasCta2PreUrl !== "" ? true : false;
+  const hasCta2UrlPrefix = watch("metadata.cta.cta_2.urlPrefix");
+  const initialStateBtn = hasCta2UrlPrefix !== "" ? true : false;
   const selectItems = [
     {
       label: t("forms.service.extraConfig.cta.form.externalLink"),
@@ -38,7 +38,7 @@ export const ServiceCtaManager: React.FC = () => {
 
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
     //let us observe the value of the select stored referring to the current slot
-    const kind = watch(`metadata.cta.${slot}.preUrl`);
+    const kind = watch(`metadata.cta.${slot}.urlPrefix`);
 
     const helperCtaInternal =
       kind === linkCtaType[2] ? (
@@ -63,7 +63,7 @@ export const ServiceCtaManager: React.FC = () => {
               helperText={helperCtaInternal}
               items={selectItems}
               label={t("forms.service.extraConfig.cta.form.selectLabel")}
-              name={`metadata.cta.${slot}.preUrl`}
+              name={`metadata.cta.${slot}.urlPrefix`}
             />
           </Grid>
 
@@ -106,7 +106,7 @@ export const ServiceCtaManager: React.FC = () => {
               removeLabel={t(
                 "forms.service.extraConfig.cta.removeSecondaryButton",
               )}
-              show={slot === "cta_1" && hasCta2PreUrl !== "" ? false : true}
+              show={slot === "cta_1" && hasCta2UrlPrefix !== "" ? false : true}
             />
           }
         </Grid>
@@ -118,16 +118,16 @@ export const ServiceCtaManager: React.FC = () => {
     setValue(
       "metadata.cta.cta_2",
       {
-        preUrl: "iohandledlink://",
         text: "",
         url: "",
+        urlPrefix: "iohandledlink://",
       },
       { shouldDirty: true, shouldValidate: true },
     );
   };
 
   const removeSecondary = () => {
-    setValue("metadata.cta.cta_2.preUrl", "");
+    setValue("metadata.cta.cta_2.urlPrefix", "");
     setValue("metadata.cta.cta_2.text", "");
     setValue("metadata.cta.cta_2.url", "");
     clearErrors(["metadata.cta.cta_2"]);
@@ -140,7 +140,7 @@ export const ServiceCtaManager: React.FC = () => {
         title={t("forms.service.extraConfig.cta.label")}
       >
         {renderCtaSection("cta_1")}
-        {hasCta2PreUrl !== "" ? (
+        {hasCta2UrlPrefix !== "" ? (
           <Box mt={2}>
             <Divider />
             {renderCtaSection("cta_2")}

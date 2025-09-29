@@ -56,9 +56,9 @@ export interface AssistanceChannelsMetadata {
   support_url?: string;
 }
 export interface Cta {
-  preUrl: string;
   text: string;
   url: string;
+  urlPrefix: string;
 }
 
 export interface Ctas {
