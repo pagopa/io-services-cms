@@ -6,7 +6,7 @@ import {
   UrlFieldController,
 } from "@/components/forms/controllers";
 import { Link, ReportProblemRounded } from "@mui/icons-material";
-import { Box, Grid } from "@mui/material";
+import { Box, Divider, Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import React from "react";
 import { useFormContext } from "react-hook-form";
@@ -55,11 +55,7 @@ export const ServiceCtaManager: React.FC = () => {
         : t("forms.service.metadata.cta.url.label");
 
     return (
-      <FormStepSectionWrapper
-        description={t("forms.service.extraConfig.cta.description")}
-        icon={<Link />}
-        title={t("forms.service.extraConfig.cta.label")}
-      >
+      <>
         <Grid columnSpacing={2} container rowSpacing={1}>
           <Grid item md={6} xs={12}>
             <SelectController
@@ -114,7 +110,7 @@ export const ServiceCtaManager: React.FC = () => {
             />
           }
         </Grid>
-      </FormStepSectionWrapper>
+      </>
     );
   };
 
@@ -138,10 +134,19 @@ export const ServiceCtaManager: React.FC = () => {
   };
   return (
     <Box>
-      {renderCtaSection("cta_1")}
-      {hasCta2PreUrl !== "" ? (
-        <Box mt={2}>{renderCtaSection("cta_2")}</Box>
-      ) : null}
+      <FormStepSectionWrapper
+        description={t("forms.service.extraConfig.cta.description")}
+        icon={<Link />}
+        title={t("forms.service.extraConfig.cta.label")}
+      >
+        {renderCtaSection("cta_1")}
+        {hasCta2PreUrl !== "" ? (
+          <Box mt={2}>
+            <Divider />
+            {renderCtaSection("cta_2")}
+          </Box>
+        ) : null}
+      </FormStepSectionWrapper>
     </Box>
   );
 };
