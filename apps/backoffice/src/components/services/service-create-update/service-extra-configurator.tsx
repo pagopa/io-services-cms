@@ -29,7 +29,6 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { closeDrawer, openDrawer } = useDrawer();
-  // const { setValue } = useFormContext();
   const [isCtaVisible, setIsCtaVisible] = useState(false);
   const { clearErrors, getValues, setValue } = useFormContext();
 
