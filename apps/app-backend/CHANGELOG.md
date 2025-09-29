@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.2.0
+
+### Minor Changes
+
+- cb23b9b6: add sessionId parameter in API request to the Azure Search index to remove duplicates
+
 ## 1.1.6
 
 ### Patch Changes
