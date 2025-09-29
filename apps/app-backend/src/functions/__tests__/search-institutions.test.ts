@@ -23,6 +23,7 @@ const mockSearchInstitutions = {
   fullTextSearch: vi
     .fn()
     .mockImplementation(() => TE.right(mockSearchInstitutionsResult)),
+  getDocumentCount: vi.fn(),
 } as AzureSearchClient<Institution>;
 
 describe("Search Institutions Tests", () => {
@@ -70,6 +71,7 @@ describe("Search Institutions Tests", () => {
             20,
         }),
       ),
+      getDocumentCount: vi.fn(),
     } as AzureSearchClient<Institution>;
 
     const req: H.HttpRequest = {
@@ -118,6 +120,7 @@ describe("Search Institutions Tests", () => {
             20,
         }),
       ),
+      getDocumentCount: vi.fn(),
     } as AzureSearchClient<Institution>;
 
     const req: H.HttpRequest = {
@@ -326,6 +329,7 @@ describe("Search Institutions Tests", () => {
       fullTextSearch: vi
         .fn()
         .mockImplementation(() => TE.left(new Error(errorMessage))),
+      getDocumentCount: vi.fn(),
     } as AzureSearchClient<Institution>;
 
     const req: H.HttpRequest = {
@@ -448,6 +452,44 @@ describe("Search Institutions Tests", () => {
             title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
+        }),
+      ),
+    );
+  });
+
+  it("Should pass sessionId parameter when provided", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        search: "Test",
+        sessionId: "session-123",
+      },
+    };
+
+    const result = await makeSearchInstitutionsHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchInstitutions,
+    })();
+
+    expect(mockSearchInstitutions.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        searchText: "Test",
+        sessionId: "session-123",
+        orderBy: undefined,
+      }),
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            institutions: mockSearchInstitutionsResult.resources,
+            count: mockSearchInstitutionsResult.count,
+            limit: mockedConfiguration.PAGINATION_DEFAULT_LIMIT,
+            offset: 0,
+          },
+          statusCode: 200,
         }),
       ),
     );

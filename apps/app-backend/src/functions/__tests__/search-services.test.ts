@@ -21,6 +21,7 @@ const mockSearchServices = {
   fullTextSearch: vi
     .fn()
     .mockImplementation(() => TE.right(mockSearchServicesResult)),
+  getDocumentCount: vi.fn(),
 } as AzureSearchClient<ServiceMinified>;
 
 describe("Search Services Tests", () => {
@@ -109,6 +110,7 @@ describe("Search Services Tests", () => {
       fullTextSearch: vi
         .fn()
         .mockImplementation(() => TE.left(new Error(errorMessage))),
+      getDocumentCount: vi.fn(),
     } as AzureSearchClient<ServiceMinified>;
 
     const req: H.HttpRequest = {
@@ -209,6 +211,50 @@ describe("Search Services Tests", () => {
             title: "Invalid 'offset' supplied in request query",
           },
           statusCode: 400,
+        }),
+      ),
+    );
+  });
+
+  it("Should pass sessionId parameter when provided", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      query: {
+        limit: "10",
+        offset: "0",
+        sessionId: "session-123",
+      },
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(mockSearchServices.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        filter: "orgFiscalCode eq '01234567891'",
+        top: 10,
+        skip: 0,
+        orderBy: [DEFAULT_ORDER_BY],
+        sessionId: "session-123",
+      }),
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: {
+            services: mockSearchServicesResult.resources,
+            count: mockSearchServicesResult.count,
+            limit: 10,
+            offset: 0,
+          },
+          statusCode: 200,
         }),
       ),
     );
