@@ -30,6 +30,7 @@ interface SearchInstitutionsRequestQueryParams {
   offset: O.Option<number>;
   scope: O.Option<ScopeType>;
   search: O.Option<NonEmptyString>;
+  sessionId: O.Option<NonEmptyString>;
 }
 export const DEFAULT_ORDER_BY = "name asc";
 
@@ -101,6 +102,7 @@ const executeSearch: (
             O.toUndefined,
           ),
           searchText: pipe(requestQueryParams.search, O.toUndefined),
+          sessionId: pipe(requestQueryParams.sessionId, O.toUndefined),
         }),
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -144,6 +146,7 @@ const extractQueryParams: (
       ),
       scope: OptionalQueryParamMiddleware("scope", ScopeType),
       search: OptionalQueryParamMiddleware("search", NonEmptyString),
+      sessionId: OptionalQueryParamMiddleware("sessionId", NonEmptyString),
     }),
     RTE.chain((queryParams) =>
       pipe(

@@ -24,6 +24,7 @@ export interface FullTextSearchParam {
   readonly scoringProfile?: string;
   readonly searchParams?: string[];
   readonly searchText?: string;
+  readonly sessionId?: string;
   readonly skip?: number;
   readonly top?: number;
 }
@@ -68,6 +69,7 @@ export const makeAzureSearchClient = <T>(
     scoringProfile,
     searchParams,
     searchText,
+    sessionId,
     skip,
     top,
   }) =>
@@ -81,6 +83,7 @@ export const makeAzureSearchClient = <T>(
             scoringParameters,
             scoringProfile,
             searchFields: searchParams,
+            sessionId,
             skip,
             top,
           }),
