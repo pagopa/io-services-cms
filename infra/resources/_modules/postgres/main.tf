@@ -33,4 +33,6 @@ module "cms_postgres_flexible_server" {
   alerts_enabled       = true
 
   tags = var.tags
+
+  create_replica = false
 }
