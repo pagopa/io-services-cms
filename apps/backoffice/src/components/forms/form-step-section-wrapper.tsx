@@ -2,10 +2,13 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 
+import { MarkdownView } from "../markdown-view";
+
 export interface FormStepSectionWrapperProps {
   children: ReactNode;
   description?: string;
   icon?: ReactNode;
+  markDownDescription?: boolean;
   title?: string;
 }
 
@@ -14,6 +17,7 @@ export const FormStepSectionWrapper = ({
   children,
   description,
   icon,
+  markDownDescription = false,
   title,
 }: FormStepSectionWrapperProps) => {
   useTranslation();
@@ -39,7 +43,11 @@ export const FormStepSectionWrapper = ({
       )}
       {description && (
         <Typography color="text.secondary" marginBottom={2} variant="body2">
-          {description}
+          {markDownDescription ? (
+            <MarkdownView>{description}</MarkdownView>
+          ) : (
+            description
+          )}
         </Typography>
       )}
       {children}

@@ -1,4 +1,5 @@
 import { useDrawer } from "@/components/drawer-provider";
+import { MarkdownView } from "@/components/markdown-view";
 import {
   AddCircleOutline,
   Link,
@@ -83,7 +84,7 @@ export const ServiceExtraConfigurator = () => {
               ) : null}
             </Stack>
           }
-          secondary={t(options.description)}
+          secondary={<MarkdownView>{t(options.description)}</MarkdownView>}
         />
       </ListItemButton>
     </ListItem>

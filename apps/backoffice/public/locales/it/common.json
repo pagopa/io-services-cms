@@ -143,7 +143,7 @@
         "arriving": "In arrivo",
         "cta": {
           "label": "Pulsante con link",
-          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On. Scopri di più",
+          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.[Scopri di più](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione)",
           "addSecondaryButton": "aggiungi pulsante secondario",
           "removeSecondaryButton": "rimuovi pulsante secondario",
           "form": {
