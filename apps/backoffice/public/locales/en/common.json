@@ -143,7 +143,7 @@
         "arriving": "Arriving",
         "cta": {
           "label": "Button with link",
-          "description": "Add one or two buttons to the service tab to direct citizens to an external link, an internal link, or directly to a post-login area thanks to Single Sign-On. Find out more",
+          "description": "Add one or two buttons to the service tab to direct citizens to an external link, an internal link, or directly to a post-login area thanks to Single Sign-On. [Find out more](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione)",
           "addSecondaryButton": "add secondary button",
           "removeSecondaryButton": "remove secondary button",
           "form": {
