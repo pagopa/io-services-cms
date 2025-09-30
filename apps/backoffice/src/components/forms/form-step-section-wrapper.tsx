@@ -8,7 +8,6 @@ export interface FormStepSectionWrapperProps {
   children: ReactNode;
   description?: string;
   icon?: ReactNode;
-  markDownDescription?: boolean;
   title?: string;
 }
 
@@ -17,7 +16,6 @@ export const FormStepSectionWrapper = ({
   children,
   description,
   icon,
-  markDownDescription = false,
   title,
 }: FormStepSectionWrapperProps) => {
   useTranslation();
@@ -42,12 +40,13 @@ export const FormStepSectionWrapper = ({
         </Stack>
       )}
       {description && (
-        <Typography color="text.secondary" marginBottom={2} variant="body2">
-          {markDownDescription ? (
-            <MarkdownView>{description}</MarkdownView>
-          ) : (
-            description
-          )}
+        <Typography
+          color="text.secondary"
+          component="div"
+          marginBottom={2}
+          variant="body2"
+        >
+          <MarkdownView>{description}</MarkdownView>
         </Typography>
       )}
       {children}

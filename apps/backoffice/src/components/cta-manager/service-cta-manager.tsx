@@ -137,7 +137,6 @@ export const ServiceCtaManager: React.FC = () => {
       <FormStepSectionWrapper
         description={t("forms.service.extraConfig.cta.description")}
         icon={<Link />}
-        markDownDescription={true}
         title={t("forms.service.extraConfig.cta.label")}
       >
         {renderCtaSection("cta_1")}

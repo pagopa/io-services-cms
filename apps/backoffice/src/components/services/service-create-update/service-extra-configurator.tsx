@@ -85,6 +85,7 @@ export const ServiceExtraConfigurator = () => {
             </Stack>
           }
           secondary={<MarkdownView>{t(options.description)}</MarkdownView>}
+          secondaryTypographyProps={{ component: "div" }}
         />
       </ListItemButton>
     </ListItem>
