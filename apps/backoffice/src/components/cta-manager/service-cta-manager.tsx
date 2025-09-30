@@ -144,7 +144,7 @@ export const ServiceCtaManager: React.FC = () => {
         {hasCta2UrlPrefix !== "" ? (
           <Box mt={2}>
             <Divider />
-            {renderCtaSection("cta_2")}
+            <Box mt={1}>{renderCtaSection("cta_2")}</Box>
           </Box>
         ) : null}
       </FormStepSectionWrapper>
