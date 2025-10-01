@@ -1,13 +1,9 @@
+import ButtonAddRemove from "@/components/buttons/button-add-remove";
 import { useDrawer } from "@/components/drawer-provider";
 import { MarkdownView } from "@/components/markdown-view";
-import {
-  AddCircleOutline,
-  Link,
-  RemoveCircleOutline,
-} from "@mui/icons-material";
+import { Link } from "@mui/icons-material";
 import {
   Box,
-  Button,
   Chip,
   List,
   ListItem,
@@ -143,25 +139,13 @@ export const ServiceExtraConfigurator = () => {
   return (
     <Box marginTop={5}>
       {isCtaVisible ? <ServiceCtaManager /> : null}
-
-      {isCtaVisible ? (
-        <Button
-          color="error"
-          onClick={removeCtaConfiguration}
-          startIcon={<RemoveCircleOutline />}
-          variant="text"
-        >
-          {t("forms.service.extraConfig.remove")}
-        </Button>
-      ) : (
-        <Button
-          onClick={openExtraConfigurationDrawer}
-          startIcon={<AddCircleOutline />}
-          variant="text"
-        >
-          {t("forms.service.extraConfig.label")}
-        </Button>
-      )}
+      <ButtonAddRemove
+        addLabel={t("forms.service.extraConfig.label")}
+        initialStateRemove={isCtaVisible}
+        onAdd={openExtraConfigurationDrawer}
+        onRemove={removeCtaConfiguration}
+        removeLabel={t("forms.service.extraConfig.remove")}
+      />
     </Box>
   );
 };

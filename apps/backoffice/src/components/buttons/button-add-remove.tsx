@@ -2,7 +2,7 @@ import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import { Button, Grid } from "@mui/material";
 import React from "react";
 
-export interface CtaControlsRowProps {
+export interface ButtonAddRemoveRowProps {
   addLabel: string;
   initialStateRemove?: boolean;
   onAdd?: () => void;
@@ -11,7 +11,7 @@ export interface CtaControlsRowProps {
   show?: boolean;
 }
 
-export const CtaControlsButtons: React.FC<CtaControlsRowProps> = ({
+export const ButtonAddRemove: React.FC<ButtonAddRemoveRowProps> = ({
   addLabel,
   initialStateRemove = false,
   onAdd,
@@ -49,4 +49,4 @@ export const CtaControlsButtons: React.FC<CtaControlsRowProps> = ({
   );
 };
 
-export default CtaControlsButtons;
+export default ButtonAddRemove;

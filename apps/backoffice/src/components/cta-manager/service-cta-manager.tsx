@@ -11,7 +11,7 @@ import { useTranslation } from "next-i18next";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-import CtaControlsButtons from "./cta-controls-buttons";
+import ButtonAddRemove from "../buttons/button-add-remove";
 
 export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
@@ -98,7 +98,7 @@ export const ServiceCtaManager: React.FC = () => {
             />
           </Grid>
           {
-            <CtaControlsButtons
+            <ButtonAddRemove
               addLabel={t("forms.service.extraConfig.cta.addSecondaryButton")}
               initialStateRemove={initialStateBtn}
               onAdd={addSecondary}
