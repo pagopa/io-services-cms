@@ -7,6 +7,7 @@ import {
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
+import { Cta } from "@/types/service";
 import { isGroupRequired } from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
@@ -61,8 +62,9 @@ export const getValidationSchema = (
     })
     .refine(
       (v) => {
-        const empty = (b?: { text: string; url: string; urlPrefix: string }) =>
-          !b || (!b.urlPrefix && !b.text && !b.url);
+        const empty = (ctaObject?: Cta) =>
+          !ctaObject ||
+          (!ctaObject.urlPrefix && !ctaObject.text && !ctaObject.url);
         // ok if all CTA is empty
         if (empty(v.cta_1) && empty(v.cta_2)) return true;
         // else cta_1 can not to be empty
