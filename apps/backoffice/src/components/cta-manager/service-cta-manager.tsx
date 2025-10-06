@@ -18,7 +18,7 @@ export const ServiceCtaManager: React.FC = () => {
   const { clearErrors, setValue, watch } = useFormContext();
 
   const hasCta2UrlPrefix = watch("metadata.cta.cta_2.urlPrefix");
-  const initialStateBtn = hasCta2UrlPrefix !== "" ? true : false;
+  const initialStateButtonRemove = hasCta2UrlPrefix !== "" ? true : false;
   const selectItems = [
     {
       label: t("forms.service.extraConfig.cta.form.externalLink"),
@@ -100,7 +100,7 @@ export const ServiceCtaManager: React.FC = () => {
           {
             <ButtonAddRemove
               addLabel={t("forms.service.extraConfig.cta.addSecondaryButton")}
-              initialStateRemove={initialStateBtn}
+              initialStateRemove={initialStateButtonRemove}
               onAdd={addSecondary}
               onRemove={removeSecondary}
               removeLabel={t(

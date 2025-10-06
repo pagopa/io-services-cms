@@ -42,7 +42,7 @@ export const FormStepSectionWrapper = ({
       {description && (
         <Typography
           color="text.secondary"
-          component="div"
+          component="div" // Prevents Typography from rendering a <p>: MarkdownView already outputs <p>, otherwise we'd get nested <p> (validateDOMNesting)
           marginBottom={2}
           variant="body2"
         >

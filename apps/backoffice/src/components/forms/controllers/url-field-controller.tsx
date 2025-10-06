@@ -61,7 +61,6 @@ export function UrlFieldController({
                 startIcon={<OpenInNew />}
               >
                 {t("forms.testUrl")}
-                {/* rendere invisibile quando inseriamo i link delle cta per i servizi su extra */}
               </ButtonNaked>
             </Grid>
           )}

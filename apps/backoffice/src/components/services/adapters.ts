@@ -208,11 +208,14 @@ const buildCtaObj = (ctaString?: string): Ctas => {
 
     const URL_PREFIX_REGEX = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
 
-    const splitUrlPrefix = (s: string) => {
-      const m = s.match(URL_PREFIX_REGEX);
-      return m
-        ? { url: s.replace(URL_PREFIX_REGEX, ""), urlPrefix: m[1] }
-        : { url: s, urlPrefix: "" };
+    const splitUrlPrefix = (urlValue: string) => {
+      const matchedObject = urlValue.match(URL_PREFIX_REGEX);
+      return matchedObject // if no match return null, otherwise an array in 0 position original source and in  position from [1] to n the matched group value from URL_PREFIX_REGEX, in our case we match only one group, so only in matchedObject[1]
+        ? {
+            url: urlValue.replace(URL_PREFIX_REGEX, ""),
+            urlPrefix: matchedObject[1],
+          }
+        : { url: urlValue, urlPrefix: "" };
     };
 
     const text1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
