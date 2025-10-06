@@ -7,6 +7,7 @@ import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
   fromServiceLifecycleToServiceCreateUpdatePayload,
 } from "../adapters";
+import { URL_SCHEMES } from "../../cta-manager/constants";
 
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   name: "aServiceName",
@@ -20,7 +21,7 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     address: "anAddress",
     cta: {
       cta_1: {
-        urlPrefix: "iohandledlink://",
+        urlPrefix: URL_SCHEMES.HANDLED_LINK,
         text: "aCtaText1",
         url: "aCtaUrl1",
       },

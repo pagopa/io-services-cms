@@ -141,7 +141,7 @@ export const ServiceExtraConfigurator = () => {
       {isCtaVisible ? <ServiceCtaManager /> : null}
       <ButtonAddRemove
         addLabel={t("forms.service.extraConfig.label")}
-        initialStateRemove={isCtaVisible}
+        isRemoveActionVisible={isCtaVisible}
         onAdd={openExtraConfigurationDrawer}
         onRemove={removeCtaConfiguration}
         removeLabel={t("forms.service.extraConfig.remove")}

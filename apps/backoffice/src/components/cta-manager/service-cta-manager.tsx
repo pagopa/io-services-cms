@@ -12,36 +12,23 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import ButtonAddRemove from "../buttons/button-add-remove";
+import { SELECT_ITEMS, URL_SCHEMES } from "./constants";
 
 export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
-  const { clearErrors, setValue, watch } = useFormContext();
+  const { setValue, watch } = useFormContext();
 
   const hasCta2UrlPrefix = watch("metadata.cta.cta_2.urlPrefix");
   const initialStateButtonRemove = hasCta2UrlPrefix !== "" ? true : false;
-  const selectItems = [
-    {
-      label: t("forms.service.extraConfig.cta.form.externalLink"),
-      value: "iohandledlink://",
-    },
-    {
-      label: t("forms.service.extraConfig.cta.form.singleSignOn"),
-      value: "iosso://",
-    },
-    {
-      label: t("forms.service.extraConfig.cta.form.internalLink"),
-      value: "ioit://",
-    },
-  ];
-
-  const linkCtaType = ["iohandledlink://", "iosso://", "ioit://"];
+  const selectItems = SELECT_ITEMS(t);
 
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
     //let us observe the value of the select stored referring to the current slot
     const kind = watch(`metadata.cta.${slot}.urlPrefix`);
+    const showAddRemove = !(initialStateButtonRemove && slot === "cta_1");
 
     const helperCtaInternal =
-      kind === linkCtaType[2] ? (
+      kind === URL_SCHEMES.INTERNAL ? (
         <span
           dangerouslySetInnerHTML={{
             __html: t("forms.service.metadata.cta.text.helperText"),
@@ -50,7 +37,7 @@ export const ServiceCtaManager: React.FC = () => {
       ) : undefined;
 
     const labelCtaInternal =
-      kind === linkCtaType[2]
+      kind === URL_SCHEMES.INTERNAL
         ? t("forms.service.metadata.cta.url.labelInternal")
         : t("forms.service.metadata.cta.url.label");
 
@@ -69,7 +56,7 @@ export const ServiceCtaManager: React.FC = () => {
 
           <Grid item md={6} xs={12} />
 
-          {kind === linkCtaType[1] && (
+          {kind === URL_SCHEMES.SSO && (
             <Grid item xs={12}>
               <Banner
                 description={t(
@@ -91,47 +78,39 @@ export const ServiceCtaManager: React.FC = () => {
 
           <Grid item md={6} xs={12}>
             <UrlFieldController
-              hideCheckUrl={kind === linkCtaType[0] ? false : true}
+              hideCheckUrl={kind === URL_SCHEMES.HANDLED_LINK ? false : true}
               label={labelCtaInternal}
               name={`metadata.cta.${slot}.url`}
               placeholder={t("forms.service.metadata.cta.url.placeholder")}
             />
           </Grid>
-          {
+          {showAddRemove && (
             <ButtonAddRemove
               addLabel={t("forms.service.extraConfig.cta.addSecondaryButton")}
-              initialStateRemove={initialStateButtonRemove}
-              onAdd={addSecondary}
-              onRemove={removeSecondary}
+              isRemoveActionVisible={initialStateButtonRemove}
+              onAdd={addSecondaryCta}
+              onRemove={removeSecondaryCta}
               removeLabel={t(
                 "forms.service.extraConfig.cta.removeSecondaryButton",
               )}
-              show={slot === "cta_1" && hasCta2UrlPrefix !== "" ? false : true}
             />
-          }
+          )}
         </Grid>
       </>
     );
   };
 
-  const addSecondary = () => {
+  const configureSecondaryCta = (enable: boolean) => {
     setValue(
       "metadata.cta.cta_2",
-      {
-        text: "",
-        url: "",
-        urlPrefix: "iohandledlink://",
-      },
+      { text: "", url: "", urlPrefix: enable ? URL_SCHEMES.HANDLED_LINK : "" },
       { shouldDirty: true, shouldValidate: true },
     );
   };
 
-  const removeSecondary = () => {
-    setValue("metadata.cta.cta_2.urlPrefix", "");
-    setValue("metadata.cta.cta_2.text", "");
-    setValue("metadata.cta.cta_2.url", "");
-    clearErrors(["metadata.cta.cta_2"]);
-  };
+  const addSecondaryCta = () => configureSecondaryCta(true);
+  const removeSecondaryCta = () => configureSecondaryCta(false);
+
   return (
     <Box>
       <FormStepSectionWrapper

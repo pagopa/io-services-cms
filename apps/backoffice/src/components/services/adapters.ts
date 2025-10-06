@@ -19,6 +19,8 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
 
+import { DEFAULT_CTA, URL_PREFIX_REGEX } from "../cta-manager/constants";
+
 const adaptServiceCommonData = (
   service: ServiceLifecycle | ServicePublication,
 ) => ({
@@ -198,10 +200,6 @@ const buildCtaString = (
     : ``;
   return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}---`;
 };
-
-const DEFAULT_CTA: Cta = { text: "", url: "", urlPrefix: "" };
-
-const URL_PREFIX_REGEX = /^(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/;
 
 const splitUrlPrefix = (urlValue: string) => {
   const matchedObject = urlValue.match(URL_PREFIX_REGEX);

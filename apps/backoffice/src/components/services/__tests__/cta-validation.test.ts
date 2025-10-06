@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("@pagopa/mui-italia/dist/theme/theme", () => ({ default: {} }));
 vi.mock("@pagopa/mui-italia", () => ({ default: {} }));
 import { getValidationSchema } from "../service-create-update/service-builder-step-3";
+import { URL_SCHEMES } from "../../cta-manager/constants";
 
 const validation = (s: string) => s;
 
@@ -14,7 +15,7 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            urlPrefix: "iohandledlink://",
+            urlPrefix: URL_SCHEMES.HANDLED_LINK,
             text: "Primary button",
             url: "https://example.com/page",
           },
@@ -31,12 +32,12 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            urlPrefix: "iohandledlink://",
+            urlPrefix: URL_SCHEMES.HANDLED_LINK,
             text: "Primary button",
             url: "https://example.com/page",
           },
           cta_2: {
-            urlPrefix: "iohandledlink://",
+            urlPrefix: URL_SCHEMES.HANDLED_LINK,
             text: "Secondary button",
             url: "https://example.com/other",
           },
@@ -58,7 +59,7 @@ describe("CTA validation", () => {
             url: "",
           },
           cta_2: {
-            urlPrefix: "iohandledlink://",
+            urlPrefix: URL_SCHEMES.HANDLED_LINK,
             text: "Secondary button",
             url: "https://example.com/other",
           },
@@ -75,7 +76,7 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            urlPrefix: "iohandledlink://",
+            urlPrefix: URL_SCHEMES.HANDLED_LINK,
             text: "Primary button",
             url: "notaurl",
           },

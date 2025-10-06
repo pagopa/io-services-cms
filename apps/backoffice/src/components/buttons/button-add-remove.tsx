@@ -4,49 +4,42 @@ import React from "react";
 
 export interface ButtonAddRemoveRowProps {
   addLabel: string;
-  initialStateRemove?: boolean;
+  isRemoveActionVisible?: boolean;
   onAdd?: () => void;
   onRemove?: () => void;
   removeLabel: string;
-  show?: boolean;
 }
 
 export const ButtonAddRemove: React.FC<ButtonAddRemoveRowProps> = ({
   addLabel,
-  initialStateRemove = false,
+  isRemoveActionVisible = false,
   onAdd,
   onRemove,
   removeLabel,
-  show = true,
-}) => {
-  if (!show) return null;
-
-  return (
-    <>
-      <Grid item md={6} xs={12}>
-        {initialStateRemove ? (
-          <Button
-            color="error"
-            onClick={onRemove}
-            startIcon={<RemoveCircleOutline />}
-            variant="text"
-          >
-            {removeLabel}
-          </Button>
-        ) : (
-          <Button
-            color="primary"
-            onClick={onAdd}
-            startIcon={<AddCircleOutline />}
-            variant="text"
-          >
-            {addLabel}
-          </Button>
-        )}
-      </Grid>
-      <Grid item md={6} xs={12} />
-    </>
-  );
-};
+}) => (
+  <>
+    <Grid item md={6} xs={12}>
+      {isRemoveActionVisible ? (
+        <Button
+          color="error"
+          onClick={onRemove}
+          startIcon={<RemoveCircleOutline />}
+          variant="text"
+        >
+          {removeLabel}
+        </Button>
+      ) : (
+        <Button
+          color="primary"
+          onClick={onAdd}
+          startIcon={<AddCircleOutline />}
+          variant="text"
+        >
+          {addLabel}
+        </Button>
+      )}
+    </Grid>
+  </>
+);
 
 export default ButtonAddRemove;
