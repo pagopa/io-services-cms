@@ -10,6 +10,7 @@ import {
   AssistanceChannel,
   AssistanceChannelType,
   AssistanceChannelsMetadata,
+  Cta,
   Ctas,
   Service,
   ServiceCreateUpdatePayload,
@@ -198,54 +199,39 @@ const buildCtaString = (
   return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}---`;
 };
 
+const DEFAULT_CTA: Cta = { text: "", url: "", urlPrefix: "" };
+
+const URL_PREFIX_REGEX = /^(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/;
+
+const splitUrlPrefix = (urlValue: string) => {
+  const m = urlValue.match(URL_PREFIX_REGEX);
+  return m
+    ? { url: urlValue.slice(m[0].length), urlPrefix: m[1] }
+    : { url: urlValue, urlPrefix: "" };
+};
+
+const parseCta = (source: string): Cta => {
+  const text = getCtaValueFromCtaString(source, "text") ?? "";
+  const action = getCtaValueFromCtaString(source, "action") ?? "";
+  const { url, urlPrefix } = splitUrlPrefix(action);
+  return { text, url, urlPrefix };
+};
+
 const buildCtaObj = (ctaString?: string): Ctas => {
-  // Read the CTA value from the service payload and build the object used to populate the form.
-  // We use the `urlPrefix` field to store the select value and determine the link type
-  if (NonEmptyString.is(ctaString)) {
-    const itBlock = ctaString.split("en:")[0]; // we take only italian block
-    const hasCta_2 = itBlock.includes("cta_2:"); // check the word cta_2: if found return true ( so we know that we have cta_2 )
-    const cta_2 = itBlock.split("cta_2:")[1]; // take the source string on the right of cta_2 string from payload
-
-    const URL_PREFIX_REGEX = /(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/; // our value to match for parsing from url to setup the select
-
-    const splitUrlPrefix = (urlValue: string) => {
-      const matchedObject = urlValue.match(URL_PREFIX_REGEX);
-      return matchedObject // if no match return null, otherwise an array in 0 position original source and in  position from [1] to n the matched group value from URL_PREFIX_REGEX, in our case we match only one group, so only in matchedObject[1]
-        ? {
-            url: urlValue.replace(URL_PREFIX_REGEX, ""),
-            urlPrefix: matchedObject[1],
-          }
-        : { url: urlValue, urlPrefix: "" };
-    };
-
-    const textCta_1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
-    const actionCta_1 = getCtaValueFromCtaString(ctaString, "action");
-
-    const { url: urlCta_1, urlPrefix: urlPrefixCta_1 } =
-      splitUrlPrefix(actionCta_1);
-    //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
-
-    let textCta_2 = "",
-      urlPrefixCta_2 = "",
-      urlCta_2 = "";
-    if (hasCta_2) {
-      textCta_2 = getCtaValueFromCtaString(cta_2, "text"); // we get value only from cta_2
-      const actionCta_2 = getCtaValueFromCtaString(cta_2, "action");
-
-      ({ url: urlCta_2, urlPrefix: urlPrefixCta_2 } =
-        splitUrlPrefix(actionCta_2));
-      //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
-    }
-
-    return {
-      cta_1: { text: textCta_1, url: urlCta_1, urlPrefix: urlPrefixCta_1 },
-      cta_2: { text: textCta_2, url: urlCta_2, urlPrefix: urlPrefixCta_2 },
-    };
+  if (!NonEmptyString.is(ctaString)) {
+    return { cta_1: { ...DEFAULT_CTA }, cta_2: { ...DEFAULT_CTA } };
   }
 
+  // we take only italian block
+  const itBlock = ctaString.split("en:")[0] ?? ctaString;
+
+  // check the word cta_2: if found return true ( so we know that we have cta_2 )
+  const hasCta_2 = itBlock.includes("cta_2:");
+  const cta2Block = hasCta_2 ? itBlock.split("cta_2:")[1] : ""; // take the source string on the right of cta_2 string from payload
+
   return {
-    cta_1: { text: "", url: "", urlPrefix: "" }, //default value for form are cta complete and all value ""
-    cta_2: { text: "", url: "", urlPrefix: "" },
+    cta_1: parseCta(itBlock),
+    cta_2: hasCta_2 ? parseCta(cta2Block) : { ...DEFAULT_CTA },
   };
 };
 
