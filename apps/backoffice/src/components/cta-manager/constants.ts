@@ -17,18 +17,17 @@ export const DEFAULT_CTA = {
   urlPrefix: "",
 } as const;
 
-export const SELECT_ITEMS = (t: TFunction) =>
-  [
-    {
-      label: t("forms.service.extraConfig.cta.form.externalLink"),
-      value: URL_SCHEMES.HANDLED_LINK,
-    },
-    {
-      label: t("forms.service.extraConfig.cta.form.singleSignOn"),
-      value: URL_SCHEMES.SSO,
-    },
-    {
-      label: t("forms.service.extraConfig.cta.form.internalLink"),
-      value: URL_SCHEMES.INTERNAL,
-    },
-  ] as const satisfies { label: string; value: UrlScheme }[];
+export const SELECT_ITEMS = (t: TFunction) => [
+  {
+    label: t("forms.service.extraConfig.cta.form.externalLink"),
+    value: URL_SCHEMES.HANDLED_LINK,
+  },
+  {
+    label: t("forms.service.extraConfig.cta.form.singleSignOn"),
+    value: URL_SCHEMES.SSO,
+  },
+  {
+    label: t("forms.service.extraConfig.cta.form.internalLink"),
+    value: URL_SCHEMES.INTERNAL,
+  },
+];
