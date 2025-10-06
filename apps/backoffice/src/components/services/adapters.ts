@@ -218,26 +218,28 @@ const buildCtaObj = (ctaString?: string): Ctas => {
         : { url: urlValue, urlPrefix: "" };
     };
 
-    const text1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
-    const act1 = getCtaValueFromCtaString(ctaString, "action");
+    const textCta_1 = getCtaValueFromCtaString(ctaString, "text"); // we get value only from cta_1
+    const actionCta_1 = getCtaValueFromCtaString(ctaString, "action");
 
-    const { url: url1, urlPrefix: pre1 } = splitUrlPrefix(act1);
+    const { url: urlCta_1, urlPrefix: urlPrefixCta_1 } =
+      splitUrlPrefix(actionCta_1);
     //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
 
-    let text2 = "",
-      pre2 = "",
-      url2 = "";
+    let textCta_2 = "",
+      urlPrefixCta_2 = "",
+      urlCta_2 = "";
     if (hasCta_2) {
-      text2 = getCtaValueFromCtaString(cta_2, "text"); // we get value only from cta_2
-      const act2 = getCtaValueFromCtaString(cta_2, "action");
+      textCta_2 = getCtaValueFromCtaString(cta_2, "text"); // we get value only from cta_2
+      const actionCta_2 = getCtaValueFromCtaString(cta_2, "action");
 
-      ({ url: url2, urlPrefix: pre2 } = splitUrlPrefix(act2));
+      ({ url: urlCta_2, urlPrefix: urlPrefixCta_2 } =
+        splitUrlPrefix(actionCta_2));
       //parsing url, we get the urlprefix value and put in urlprefix and we get url value without urlprefix
     }
 
     return {
-      cta_1: { text: text1, url: url1, urlPrefix: pre1 },
-      cta_2: { text: text2, url: url2, urlPrefix: pre2 },
+      cta_1: { text: textCta_1, url: urlCta_1, urlPrefix: urlPrefixCta_1 },
+      cta_2: { text: textCta_2, url: urlCta_2, urlPrefix: urlPrefixCta_2 },
     };
   }
 
