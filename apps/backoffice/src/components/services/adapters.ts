@@ -204,9 +204,12 @@ const DEFAULT_CTA: Cta = { text: "", url: "", urlPrefix: "" };
 const URL_PREFIX_REGEX = /^(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/;
 
 const splitUrlPrefix = (urlValue: string) => {
-  const m = urlValue.match(URL_PREFIX_REGEX);
-  return m
-    ? { url: urlValue.slice(m[0].length), urlPrefix: m[1] }
+  const matchedObject = urlValue.match(URL_PREFIX_REGEX);
+  return matchedObject
+    ? {
+        url: urlValue.slice(matchedObject[0].length),
+        urlPrefix: matchedObject[1],
+      }
     : { url: urlValue, urlPrefix: "" };
 };
 
