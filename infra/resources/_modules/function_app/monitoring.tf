@@ -39,20 +39,6 @@ module "function_profile_autoscale" {
   }
 
   scale_metrics = {
-    requests = {
-      statistic_increase        = "Max"
-      time_window_increase      = 1
-      time_aggregation          = "Maximum"
-      upper_threshold           = 2000
-      increase_by               = 2
-      cooldown_increase         = 3
-      statistic_decrease        = "Average"
-      time_window_decrease      = 5
-      time_aggregation_decrease = "Average"
-      lower_threshold           = 500
-      decrease_by               = 1
-      cooldown_decrease         = 5
-    }
     cpu = {
       upper_threshold           = 40
       lower_threshold           = 15
@@ -67,7 +53,14 @@ module "function_profile_autoscale" {
       time_window_increase      = 1
       time_window_decrease      = 5
     }
-    memory = null
+    memory = {
+      upper_threshold           = 85
+      increase_by               = 1
+      cooldown_increase         = 3
+      statistic_increase        = "Average"
+      time_aggregation_increase = "Average"
+      time_window_increase      = 1
+    }
   }
 
   tags = var.tags
