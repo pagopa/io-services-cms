@@ -19,7 +19,7 @@ export const ServiceCtaManager: React.FC = () => {
   const { setValue, watch } = useFormContext();
 
   const cta2UrlPrefixValue = watch("metadata.cta.cta_2.urlPrefix");
-  const isRemoveActionVisible = cta2UrlPrefixValue !== "" ? true : false;
+  const isRemoveActionVisible = cta2UrlPrefixValue !== "";
   const selectItems = CTA_KIND_SELECT_ITEMS(t);
 
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
@@ -72,9 +72,7 @@ export const ServiceCtaManager: React.FC = () => {
 
           <Grid item md={6} xs={12}>
             <UrlFieldController
-              hideCheckUrl={
-                kind !== CTA_PREFIX_URL_SCHEMES.EXTERNAL ? true : false
-              }
+              hideCheckUrl={kind !== CTA_PREFIX_URL_SCHEMES.EXTERNAL}
               label={
                 kind === CTA_PREFIX_URL_SCHEMES.INTERNAL
                   ? t("forms.service.metadata.cta.url.labelInternal")
