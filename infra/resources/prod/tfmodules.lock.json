@@ -12,10 +12,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/2.0.2"
   },
   "eventhub.eventhub": {
-    "hash": "ec7e3d9527cdeb8f9a575b487f7c907825efc04b3bb107933d5a46acf37e70bd",
-    "version": "0.0.11",
+    "hash": "dbe7be54650ef9e344642733ae5e6b9ce385e97a7e40af2278cdb44581d59146",
+    "version": "0.1.0",
     "name": "azure_event_hub",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-event-hub/azurerm/0.0.11"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-event-hub/azurerm/0.1.0"
   },
   "function_app.app_be_fn": {
     "hash": "367548c5df2a42f5273583c0de4181c865bd419a4d0aca3cffa2ba19a90c210a",
@@ -30,10 +30,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/1.0.1"
   },
   "postgres.cms_postgres_flexible_server": {
-    "hash": "9777adb9f883f60142c4607a503d2500f6b179356bb63ee75c442caf938a9a49",
-    "version": "1.0.7",
+    "hash": "ea2e8346c654c998e9d1569c00869661d472db49dd163ddb483f7e48216c0732",
+    "version": "2.0.0",
     "name": "azure_postgres_server",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/1.0.7"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/2.0.0"
   },
   "cms_function_app.function_app_staging_slot_to_blob_data_writer": {
     "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
@@ -46,5 +46,11 @@
     "version": "1.2.1",
     "name": "azure_role_assignments",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
+  },
+  "function_app.function_profile_autoscale": {
+    "hash": "42ca301a262ca7cb78e9dfb2072922e778328460b91e9859d1bf2af974f9518a",
+    "version": "2.0.0",
+    "name": "azure_app_service_plan_autoscaler",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service-plan-autoscaler/azurerm/2.0.0"
   }
 }

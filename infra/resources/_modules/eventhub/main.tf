@@ -23,7 +23,7 @@ module "eventhub" {
   action_group_id = var.error_action_group_id
   metric_alerts   = local.evhns.metric_alerts
 
-  tier = local.evhns.tier
+  use_case = local.evhns.use_case
 
   tags = var.tags
 }

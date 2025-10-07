@@ -1,7 +1,8 @@
 
 locals {
   evhns = {
-    tier = "m"
+
+    use_case = "default"
 
     eventhubs = [{
       name                   = "services-lifecycle"
