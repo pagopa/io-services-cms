@@ -73,7 +73,7 @@ export const ServiceCtaManager: React.FC = () => {
           <Grid item md={6} xs={12}>
             <UrlFieldController
               hideCheckUrl={
-                kind === CTA_PREFIX_URL_SCHEMES.EXTERNAL ? false : true
+                kind !== CTA_PREFIX_URL_SCHEMES.EXTERNAL ? true : false
               }
               label={
                 kind === CTA_PREFIX_URL_SCHEMES.INTERNAL
@@ -100,7 +100,7 @@ export const ServiceCtaManager: React.FC = () => {
     );
   };
 
-  const configureSecondaryCta = (isActionAddEnable: boolean) => {
+  const configureDefaultDataSecondaryCta = (isActionAddEnable: boolean) => {
     setValue(
       "metadata.cta.cta_2",
       {
@@ -112,8 +112,8 @@ export const ServiceCtaManager: React.FC = () => {
     );
   };
 
-  const addSecondaryCta = () => configureSecondaryCta(true);
-  const removeSecondaryCta = () => configureSecondaryCta(false);
+  const addSecondaryCta = () => configureDefaultDataSecondaryCta(true);
+  const removeSecondaryCta = () => configureDefaultDataSecondaryCta(false);
 
   return (
     <Box>
