@@ -4,7 +4,8 @@
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
   "containerEnv": {
-    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}"
+    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}",
+    "ARM_SUBSCRIPTION_ID": "${localEnv:ARM_SUBSCRIPTION_ID}"
   },
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {},
