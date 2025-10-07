@@ -15,7 +15,7 @@ export const Banner = ({ description, icon, severity, title }: BannerProps) => (
     className="banner"
     icon={icon}
     severity={severity}
-    sx={{ border: "none !important", marginBottom: 1.5 }}
+    sx={{ marginBottom: 1.5 }}
     variant="standard"
   >
     <AlertTitle>{title}</AlertTitle>
