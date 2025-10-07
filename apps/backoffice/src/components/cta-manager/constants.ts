@@ -15,7 +15,7 @@ export const DEFAULT_CTA = {
   urlPrefix: "",
 } as const;
 
-export const SELECT_ITEMS = (t: TFunction) => [
+export const CTA_KIND_SELECT_ITEMS = (t: TFunction) => [
   {
     label: t("forms.service.extraConfig.cta.form.externalLink"),
     value: CTA_PREFIX_URL_SCHEMES.EXTERNAL,

@@ -12,34 +12,20 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 import ButtonAddRemove from "../buttons/button-add-remove";
-import { CTA_PREFIX_URL_SCHEMES, SELECT_ITEMS } from "./constants";
+import { CTA_KIND_SELECT_ITEMS, CTA_PREFIX_URL_SCHEMES } from "./constants";
 
 export const ServiceCtaManager: React.FC = () => {
   const { t } = useTranslation();
   const { setValue, watch } = useFormContext();
 
-  const hasCta2UrlPrefix = watch("metadata.cta.cta_2.urlPrefix");
-  const isRemoveActionVisible = hasCta2UrlPrefix !== "" ? true : false;
-  const selectItems = SELECT_ITEMS(t);
+  const cta2UrlPrefixValue = watch("metadata.cta.cta_2.urlPrefix");
+  const isRemoveActionVisible = cta2UrlPrefixValue !== "" ? true : false;
+  const selectItems = CTA_KIND_SELECT_ITEMS(t);
 
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
     //let us observe the value of the select stored referring to the current slot
     const kind = watch(`metadata.cta.${slot}.urlPrefix`);
     const showAddRemove = !(isRemoveActionVisible && slot === "cta_1");
-
-    const helperCtaInternal =
-      kind === CTA_PREFIX_URL_SCHEMES.INTERNAL ? (
-        <span
-          dangerouslySetInnerHTML={{
-            __html: t("forms.service.metadata.cta.text.helperText"),
-          }}
-        />
-      ) : undefined;
-
-    const labelCtaInternal =
-      kind === CTA_PREFIX_URL_SCHEMES.INTERNAL
-        ? t("forms.service.metadata.cta.url.labelInternal")
-        : t("forms.service.metadata.cta.url.label");
 
     return (
       <>
@@ -47,7 +33,15 @@ export const ServiceCtaManager: React.FC = () => {
           <Grid item md={6} xs={12}>
             <SelectController
               displayEmpty
-              helperText={helperCtaInternal}
+              helperText={
+                kind === CTA_PREFIX_URL_SCHEMES.INTERNAL ? (
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: t("forms.service.metadata.cta.text.helperText"),
+                    }}
+                  />
+                ) : undefined
+              }
               items={selectItems}
               label={t("forms.service.extraConfig.cta.form.selectLabel")}
               name={`metadata.cta.${slot}.urlPrefix`}
@@ -81,7 +75,11 @@ export const ServiceCtaManager: React.FC = () => {
               hideCheckUrl={
                 kind === CTA_PREFIX_URL_SCHEMES.EXTERNAL ? false : true
               }
-              label={labelCtaInternal}
+              label={
+                kind === CTA_PREFIX_URL_SCHEMES.INTERNAL
+                  ? t("forms.service.metadata.cta.url.labelInternal")
+                  : t("forms.service.metadata.cta.url.label")
+              }
               name={`metadata.cta.${slot}.url`}
               placeholder={t("forms.service.metadata.cta.url.placeholder")}
             />
@@ -125,7 +123,7 @@ export const ServiceCtaManager: React.FC = () => {
         title={t("forms.service.extraConfig.cta.label")}
       >
         {renderCtaSection("cta_1")}
-        {hasCta2UrlPrefix !== "" ? (
+        {cta2UrlPrefixValue !== "" ? (
           <Box mt={2}>
             <Divider />
             <Box mt={1}>{renderCtaSection("cta_2")}</Box>
