@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import { URL_SCHEMES } from "@/components/cta-manager/constants";
+import { CTA_PREFIX_URL_SCHEMES } from "@/components/cta-manager/constants";
 import { Cidr } from "@/generated/api/Cidr";
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import {
@@ -95,29 +95,29 @@ export const aMockServiceTopicsArray = [
 
 export const aMockServiceCTASingle = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}\"\n---`;
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}\"\n---`;
 
 export const aMockServiceCTADouble = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.HANDLED_LINK}${faker.internet.url()}\"\n---`;
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.EXTERNAL}${faker.internet.url()}\"\n---`;
 
 export const aMockServiceCTADoubleDifferentLink = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.INTERNAL}${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.INTERNAL}${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.SSO}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.SSO}${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.INTERNAL}${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.INTERNAL}${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
   2,
-)}\"\n    action: \"${URL_SCHEMES.SSO}${faker.internet.url()}\"\n---`;
+)}\"\n    action: \"${CTA_PREFIX_URL_SCHEMES.SSO}${faker.internet.url()}\"\n---`;
 
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   authorized_cidrs: [

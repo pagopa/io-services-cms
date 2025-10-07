@@ -17,29 +17,27 @@ export const ButtonAddRemove: React.FC<ButtonAddRemoveRowProps> = ({
   onRemove,
   removeLabel,
 }) => (
-  <>
-    <Grid item md={6} xs={12}>
-      {isRemoveActionVisible ? (
-        <Button
-          color="error"
-          onClick={onRemove}
-          startIcon={<RemoveCircleOutline />}
-          variant="text"
-        >
-          {removeLabel}
-        </Button>
-      ) : (
-        <Button
-          color="primary"
-          onClick={onAdd}
-          startIcon={<AddCircleOutline />}
-          variant="text"
-        >
-          {addLabel}
-        </Button>
-      )}
-    </Grid>
-  </>
+  <Grid item md={6} xs={12}>
+    {isRemoveActionVisible ? (
+      <Button
+        color="error"
+        onClick={onRemove}
+        startIcon={<RemoveCircleOutline />}
+        variant="text"
+      >
+        {removeLabel}
+      </Button>
+    ) : (
+      <Button
+        color="primary"
+        onClick={onAdd}
+        startIcon={<AddCircleOutline />}
+        variant="text"
+      >
+        {addLabel}
+      </Button>
+    )}
+  </Grid>
 );
 
 export default ButtonAddRemove;

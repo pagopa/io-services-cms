@@ -7,7 +7,7 @@ import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
   fromServiceLifecycleToServiceCreateUpdatePayload,
 } from "../adapters";
-import { URL_SCHEMES } from "../../cta-manager/constants";
+import { CTA_PREFIX_URL_SCHEMES } from "../../cta-manager/constants";
 
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   name: "aServiceName",
@@ -21,7 +21,7 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     address: "anAddress",
     cta: {
       cta_1: {
-        urlPrefix: URL_SCHEMES.HANDLED_LINK,
+        urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
         text: "aCtaText1",
         url: "aCtaUrl1",
       },
@@ -41,8 +41,16 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   max_allowed_payment_amount: 0,
 };
 
-const aCtaResult =
-  '---\nit:\n  cta_1: \n    text: "aCtaText1"\n    action: "iohandledlink://aCtaUrl1"\nen:\n  cta_1: \n    text: "aCtaText1"\n    action: "iohandledlink://aCtaUrl1"\n---';
+const aCtaResult = `---
+it:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+en:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+---`;
 
 const anApiServicePayloadResult = {
   name: aValidServiceCreateUpdatePayload.name,
