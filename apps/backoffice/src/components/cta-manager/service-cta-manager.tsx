@@ -5,7 +5,7 @@ import {
   TextFieldController,
   UrlFieldController,
 } from "@/components/forms/controllers";
-import { Link, ReportProblemRounded } from "@mui/icons-material";
+import { Link } from "@mui/icons-material";
 import { Box, Divider, Grid } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import React from "react";
@@ -47,7 +47,6 @@ export const ServiceCtaManager: React.FC = () => {
                 description={t(
                   "forms.service.extraConfig.cta.form.btnWithLink.alertSingleSignOn",
                 )}
-                icon={<ReportProblemRounded />}
                 severity="warning"
               />
             </Grid>
