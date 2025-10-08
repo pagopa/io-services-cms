@@ -143,7 +143,7 @@
         "arriving": "Arriving",
         "cta": {
           "label": "Button with link",
-          "description": "Add one or two buttons to the service tab to direct citizens to an external link, an internal link, or directly to a post-login area thanks to Single Sign-On. [Find out more](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione)",
+          "description": "Add one or two buttons to the service tab to direct citizens to an external link, an internal link, or directly to a post-login area thanks to Single Sign-On.",
           "addSecondaryButton": "add secondary button",
           "removeSecondaryButton": "remove secondary button",
           "form": {
@@ -153,7 +153,7 @@
             "internalLink": "Internal link within the app (deeplink)",
             "placeholder": "",
             "btnWithLink": {
-              "alertSingleSignOn": "To make the button with the link work in Single Sign-on, you must ensure that you have completed the integration into the institution's systems [Read here for technical specifications](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/nome-del-servizio)"
+              "alertSingleSignOn": "To enable the button with links in Single Sign-On, you must have completed the integration within the institution's systems. For further information, please contact our  [support](mailto:support@pagopa.gov.it)"
             }
           }
         },
@@ -185,7 +185,7 @@
         },
         "cta": {
           "text": {
-            "helperText": "<a style=\"color: #0073E6;\" href=\"https://google.com\" target=\"_blank\">Read</a> the technical specifications here",
+            "helperText": "",
             "label": "Button label",
             "placeholder": ""
           },

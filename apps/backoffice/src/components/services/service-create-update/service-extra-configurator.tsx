@@ -1,6 +1,5 @@
 import ButtonAddRemove from "@/components/buttons/button-add-remove";
 import { useDrawer } from "@/components/drawer-provider";
-import { MarkdownView } from "@/components/markdown-view";
 import { Link } from "@mui/icons-material";
 import {
   Box,
@@ -80,8 +79,7 @@ export const ServiceExtraConfigurator = () => {
               ) : null}
             </Stack>
           }
-          secondary={<MarkdownView>{t(options.description)}</MarkdownView>}
-          secondaryTypographyProps={{ component: "div" }}
+          secondary={t(options.description)}
         />
       </ListItemButton>
     </ListItem>

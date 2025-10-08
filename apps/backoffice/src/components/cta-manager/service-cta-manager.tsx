@@ -33,15 +33,6 @@ export const ServiceCtaManager: React.FC = () => {
           <Grid item md={6} xs={12}>
             <SelectController
               displayEmpty
-              helperText={
-                kind === CTA_PREFIX_URL_SCHEMES.INTERNAL ? (
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: t("forms.service.metadata.cta.text.helperText"),
-                    }}
-                  />
-                ) : undefined
-              }
               items={selectItems}
               label={t("forms.service.extraConfig.cta.form.selectLabel")}
               name={`metadata.cta.${slot}.urlPrefix`}

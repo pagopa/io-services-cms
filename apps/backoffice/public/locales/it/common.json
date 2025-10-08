@@ -143,17 +143,17 @@
         "arriving": "In arrivo",
         "cta": {
           "label": "Pulsante con link",
-          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.[Scopri di più](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/descrizione)",
+          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.",
           "addSecondaryButton": "aggiungi pulsante secondario",
           "removeSecondaryButton": "rimuovi pulsante secondario",
           "form": {
             "selectLabel": "Tipo di pulsante",
             "externalLink": "Link esterno all'app",
-            "singleSignOn": "Link in single Sign-on",
+            "singleSignOn": "Link in Single Sign-on",
             "internalLink": "Link interno all'app (deeplink)",
             "placeholder": "",
             "btnWithLink": {
-              "alertSingleSignOn": "Per far funzionare il pulsante con il link in Single Sign-on, devi assicurarti di aver completato l'integrazione nei sistemi dell'ente.  [Leggi qui per le specifiche tecniche](https://docs.pagopa.it/manuale-servizi/come-si-crea-un-servizio/la-scheda-servizio/nome-del-servizio)."
+              "alertSingleSignOn": "Per abilitare il pulsante con link in Single Sign-On, è necessario aver completato l'integrazione all'interno dei sistemi dell'ente. Per ulteriori informazioni, ti invitiamo a contattare il nostro  [supporto](mailto:support@pagopa.gov.it)"
             }
           }
         },
@@ -185,7 +185,7 @@
         },
         "cta": {
           "text": {
-            "helperText": "<a style=\"color: #0073E6;\" href=\"https://google.com\" target=\"_blank\">Leggi quì</a> le specifiche tecniche ",
+            "helperText": "",
             "label": "Etichetta del pulsante",
             "placeholder": ""
           },
