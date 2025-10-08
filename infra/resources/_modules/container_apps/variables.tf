@@ -65,12 +65,26 @@ variable "subnet_cidr" {
   description = "Subnet CIDR for Container App Environment"
 }
 
-variable "private_dns_zone_resource_group_name" {
+variable "private_dns_zone_resource_group_id" {
   type        = string
-  description = "Resource group name of the private DNS zone to use for private endpoints"
+  description = "Resource group id of the private DNS zone to use for private endpoints"
 }
 
 variable "log_analytics_workspace_id" {
   type        = string
   description = "Id of the Log Analytics Workspace to use for Container Apps diagnostics"
+}
+
+variable "key_vault" {
+  type = object({
+    name     = string
+    use_rbac = optional(bool, false)
+  })
+  description = "KeyVault to use to store Function host keys"
+}
+
+variable "appi_connection_string" {
+  type        = string
+  sensitive   = true
+  description = "Application Insights connection string"
 }
