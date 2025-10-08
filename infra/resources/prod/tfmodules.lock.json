@@ -52,5 +52,11 @@
     "version": "2.0.0",
     "name": "azure_app_service_plan_autoscaler",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service-plan-autoscaler/azurerm/2.0.0"
+  },
+  "container_apps.svc_container_app_environment_itn": {
+    "hash": "97f9c6f79adc987c1d8b607a99fcc6ecc65a6a76cada97f1d7731e343b560c63",
+    "version": "1.0.2",
+    "name": "azure_container_app_environment",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-container-app-environment/azurerm/1.0.2"
   }
 }
