@@ -27,6 +27,6 @@ data "azurerm_resource_group" "rg" {
 }
 
 data "azurerm_log_analytics_workspace" "common" {
-  name                = "${local.project}-${local.env_short}-law-common"
-  resource_group_name = "${local.project}-${local.env_short}-rg-common"
+  name                = "${local.prefix}-${local.env_short}-law-common"
+  resource_group_name = "${local.prefix}-${local.env_short}-rg-common"
 }
