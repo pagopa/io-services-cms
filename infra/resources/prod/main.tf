@@ -79,7 +79,6 @@ module "function_app" {
   tags = local.tags
 }
 
-
 module "cms_function_app" {
   source              = "../_modules/cms_function_app"
   prefix              = local.prefix
@@ -123,7 +122,6 @@ module "cms_function_app" {
 
   tags = local.tags
 }
-
 
 module "backoffice" {
   source              = "../_modules/backoffice"
@@ -205,3 +203,28 @@ module "postgres" {
   tags = local.tags
 }
 
+resource "dx_available_subnet_cidr" "next_cidr_cae" {
+  virtual_network_id = data.azurerm_virtual_network.itn_common.id
+  prefix_length      = 23
+}
+
+module "container_apps" {
+  source              = "../_modules/container_apps"
+  prefix              = local.prefix
+  env_short           = local.env_short
+  location            = local.location
+  domain              = local.domain
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.common.id
+
+  subnet_cidr                          = dx_available_subnet_cidr.next_cidr_cae.cidr_block
+  peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
+  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+  virtual_network = {
+    name                = data.azurerm_virtual_network.itn_common.name
+    resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
+  }
+
+  tags = local.tags
+}
