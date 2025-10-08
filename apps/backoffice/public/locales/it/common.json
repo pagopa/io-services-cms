@@ -153,7 +153,7 @@
             "internalLink": "Link interno all'app (deeplink)",
             "placeholder": "",
             "btnWithLink": {
-              "alertSingleSignOn": "Per abilitare il pulsante con link in Single Sign-On, è necessario aver completato l'integrazione all'interno dei sistemi dell'ente. Per ulteriori informazioni, ti invitiamo a contattare il nostro  [supporto](mailto:support@pagopa.gov.it)"
+              "alertSingleSignOn": "Per abilitare il pulsante con link in Single Sign-On, è necessario aver completato l'integrazione all'interno dei sistemi dell'ente. Per ulteriori informazioni, ti invitiamo a contattare il nostro  [supporto](mailto:user@example.it)"
             }
           }
         },
