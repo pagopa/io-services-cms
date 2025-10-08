@@ -77,8 +77,9 @@ variable "log_analytics_workspace_id" {
 
 variable "key_vault" {
   type = object({
-    name     = string
-    use_rbac = optional(bool, false)
+    name                = string
+    resource_group_name = string
+    use_rbac            = optional(bool, false)
   })
   description = "KeyVault to use to store Function host keys"
 }

@@ -227,7 +227,8 @@ module "container_apps" {
   }
 
   key_vault = {
-    name = module.key_vault.name
+    name                = module.key_vault.name
+    resource_group_name = module.key_vault.resource_group_name
   }
 
   appi_connection_string = data.azurerm_application_insights.ai_common.connection_string

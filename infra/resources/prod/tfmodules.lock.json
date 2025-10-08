@@ -58,5 +58,11 @@
     "version": "1.0.2",
     "name": "azure_container_app_environment",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-container-app-environment/azurerm/1.0.2"
+  },
+  "container_apps.ca_key_vault": {
+    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
+    "version": "1.2.1",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
   }
 }
