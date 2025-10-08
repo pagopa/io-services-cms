@@ -16,4 +16,20 @@ module "ca_key_vault" {
       }
     }
   ]
+
+  cosmos = [
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
+      description         = "Allow the Container App to access CosmosDB"
+      role                = "writer"
+      database            = local.app_be.cosmosdb_name
+    }
+  ]
+}
+
+resource "azurerm_role_assignment" "app_be_fn_to_ai_search_reader" {
+  scope                = var.ai_search.id
+  role_definition_name = "Search Index Data Reader"
+  principal_id         = module.backend_func_itn.principal_id
 }

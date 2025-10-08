@@ -89,3 +89,18 @@ variable "appi_connection_string" {
   sensitive   = true
   description = "Application Insights connection string"
 }
+
+
+##################
+#  Function App  #
+##################
+variable "ai_search" {
+  type = object({
+    id                     = string
+    url                    = string
+    service_version        = string
+    institution_index_name = string
+    services_index_name    = string
+  })
+  description = "AI Search input parameters"
+}

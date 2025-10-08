@@ -231,6 +231,14 @@ module "container_apps" {
     resource_group_name = module.key_vault.resource_group_name
   }
 
+  ai_search = {
+    id                     = module.ai_search.search_service_id
+    url                    = module.ai_search.search_service_url
+    service_version        = "2024-03-01-Preview"
+    institution_index_name = module.ai_search.search_service_index_aliases.organizations
+    services_index_name    = module.ai_search.search_service_index_aliases.services
+  }
+
   appi_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
   tags = local.tags

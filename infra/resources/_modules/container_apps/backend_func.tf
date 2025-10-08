@@ -14,6 +14,7 @@ module "backend_func_itn" {
   container_app_environment_id = module.svc_container_app_environment_itn.id
   user_assigned_identity_id    = module.svc_container_app_environment_itn.user_assigned_identity.id
   target_port                  = 80
+  revision_mode                = "Single"
 
   function_settings = {
     key_vault_name                         = var.key_vault.name
@@ -24,20 +25,18 @@ module "backend_func_itn" {
 
   container_app_templates = [
     {
-      image = "mcr.microsoft.com/azure-functions/dotnet8-quickstart-demo:1.0"
-      name  = "quickstart"
+      image = "ghcr.io/pagopa/io-services-app-backend:latest"
+      name  = "appbackend"
 
-      app_settings = {
-        key1 = "value1"
-      }
+      app_settings = local.app_be.app_settings
 
       liveness_probe = {
-        path = "/"
+        path = "/api/v1/info"
       }
       # readiness_probe = {
       #   path = "/"
       # }
-    },
+    }
   ]
 
   tags = var.tags
