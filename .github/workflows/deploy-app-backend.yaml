@@ -30,6 +30,6 @@ jobs:
       dockerfile_context: .
       docker_image_name: pagopa/io-services-app-backend
       docker_image_description: 'Test app for function container app'
-      container_app: dx-d-itn-modules-test-ca-01
-      resource_group_name: dx-d-itn-modules-rg-01
+      container_app: io-p-itn-svc-app-be-func-02
+      resource_group_name: io-p-itn-svc-rg-01
       environment: app-prod
