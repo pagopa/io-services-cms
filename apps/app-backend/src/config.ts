@@ -92,6 +92,7 @@ export const IConfig = t.intersection([
 export const envConfig = {
   ...process.env,
   FEATURED_ITEMS_STORAGE_ACCOUNT_NAME:
+    process.env.STORAGE_ACCOUNT_NAME ??
     process.env.AzureWebJobsStorage__accountName,
   isProduction: process.env.NODE_ENV === "production",
 };
