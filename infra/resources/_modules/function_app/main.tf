@@ -4,7 +4,7 @@
 
 module "app_be_fn" {
   source  = "pagopa-dx/azure-function-app/azurerm"
-  version = "~> 0.0"
+  version = "~> 2.0"
 
   environment = {
     prefix          = var.prefix

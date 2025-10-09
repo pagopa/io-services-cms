@@ -218,13 +218,28 @@ module "container_apps" {
 
   log_analytics_workspace_id = data.azurerm_log_analytics_workspace.common.id
 
-  subnet_cidr                          = dx_available_subnet_cidr.next_cidr_cae.cidr_block
-  peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
-  private_dns_zone_resource_group_name = data.azurerm_resource_group.weu-common.name
+  subnet_cidr                        = dx_available_subnet_cidr.next_cidr_cae.cidr_block
+  peps_snet_id                       = data.azurerm_subnet.private_endpoints_subnet.id
+  private_dns_zone_resource_group_id = data.azurerm_resource_group.weu-common.id
   virtual_network = {
     name                = data.azurerm_virtual_network.itn_common.name
     resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
   }
+
+  key_vault = {
+    name                = module.key_vault.name
+    resource_group_name = module.key_vault.resource_group_name
+  }
+
+  ai_search = {
+    id                     = module.ai_search.search_service_id
+    url                    = module.ai_search.search_service_url
+    service_version        = "2024-03-01-Preview"
+    institution_index_name = module.ai_search.search_service_index_aliases.organizations
+    services_index_name    = module.ai_search.search_service_index_aliases.services
+  }
+
+  appi_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
   tags = local.tags
 }

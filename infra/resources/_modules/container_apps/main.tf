@@ -13,7 +13,7 @@ module "svc_container_app_environment_itn" {
   resource_group_name = var.resource_group_name
 
   log_analytics_workspace_id           = var.log_analytics_workspace_id
-  private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
+  private_dns_zone_resource_group_name = local.private_dns_zone_resource_group_name
   subnet_pep_id                        = var.peps_snet_id
   subnet_cidr                          = var.subnet_cidr
 

@@ -1,11 +1,11 @@
 locals {
+  private_dns_zone_resource_group_name = provider::azurerm::parse_resource_id(var.private_dns_zone_resource_group_id)["resource_name"]
+  subscription_id                      = provider::azurerm::parse_resource_id(var.private_dns_zone_resource_group_id)["subscription_id"]
+
   app_be = {
-    tier          = "xl"
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"
-
-      STORAGE_ACCOUNT_NAME = module.storage_account.name
 
       FEATURED_ITEMS_CONTAINER_NAME      = "static-content"
       FEATURED_SERVICES_FILE_NAME        = "featured-services.json"
@@ -22,4 +22,3 @@ locals {
     }
   }
 }
-
