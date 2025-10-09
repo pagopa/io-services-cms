@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.2.1
+
+### Patch Changes
+
+- cf1f5bcb: handle STORAGE_ACCOUNT_NAME env var
+
 ## 1.2.0
 
 ### Minor Changes
