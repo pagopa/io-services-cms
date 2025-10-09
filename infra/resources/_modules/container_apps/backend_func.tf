@@ -15,12 +15,26 @@ module "backend_func_itn" {
   user_assigned_identity_id    = module.svc_container_app_environment_itn.user_assigned_identity.id
   target_port                  = 80
   revision_mode                = "Single"
+  tier                         = "l"
 
   function_settings = {
     key_vault_name                         = var.key_vault.name
     subnet_pep_id                          = var.peps_snet_id
     private_dns_zone_resource_group_id     = var.private_dns_zone_resource_group_id
     application_insights_connection_string = var.appi_connection_string
+  }
+
+  autoscaler = {
+    replicas = {
+      minimum = 3
+      maximum = 200
+    }
+    http_scalers = [
+      {
+        name                = "http-scale-rule"
+        concurrent_requests = 20
+      }
+    ]
   }
 
   container_app_templates = [

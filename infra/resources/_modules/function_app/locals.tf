@@ -1,6 +1,6 @@
 locals {
   app_be = {
-    tier          = "l"
+    tier          = "xl"
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"
