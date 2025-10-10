@@ -23,7 +23,7 @@ module "storage_account" {
   }
 
   containers = [{
-    name = "static-content"
+    name = "static-content" // TODO: refactor with a local variable
   }]
 
   action_group_id = var.error_action_group_id

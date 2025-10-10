@@ -64,7 +64,7 @@ resource "azurerm_role_assignment" "infra_cd_rg_st_queue_contributor" {
 resource "azurerm_role_assignment" "admins_group_rg" {
   scope                = azurerm_resource_group.rg.id
   role_definition_name = "Owner"
-  principal_id         = data.azuread_group.adgroup_admin.object_id
+  principal_id         = data.azuread_group.adgroup_svc_admins.object_id
   description          = "Allow AD Admin group the complete ownership at monorepository resource group scope"
 }
 

@@ -22,8 +22,18 @@ module "ca_key_vault" {
       account_name        = data.azurerm_cosmosdb_account.cosmos.name
       resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
       description         = "Allow the Container App to access CosmosDB"
-      role                = "writer"
+      role                = "reader"
       database            = local.app_be.cosmosdb_name
+      collections         = ["services"] // TODO: refactor with a local variable
+    }
+  ]
+
+  storage_blob = [{
+    storage_account_name = "iopitnsvcappbest01" // TODO: refactor with a local variable or with a module output
+    resource_group_name  = "io-p-itn-svc-rg-01" // TODO: refactor with a local variable or with a module output
+    description          = "Allow Container App to readonly access Blob Storage"
+    role                 = "reader"
+    container_name       = "static-content" // TODO: refactor with a local variable
     }
   ]
 }

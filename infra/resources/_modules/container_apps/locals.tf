@@ -7,6 +7,8 @@ locals {
     app_settings = {
       NODE_ENV = "production"
 
+      STORAGE_ACCOUNT_NAME = "iopitnsvcappbest01"
+
       FEATURED_ITEMS_CONTAINER_NAME      = "static-content"
       FEATURED_SERVICES_FILE_NAME        = "featured-services.json"
       FEATURED_INSTITUTIONS_FILE_NAME    = "featured-institutions.json"

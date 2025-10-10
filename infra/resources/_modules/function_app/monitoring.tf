@@ -40,11 +40,11 @@ module "function_profile_autoscale" {
 
   scale_metrics = {
     cpu = {
-      upper_threshold           = 40
+      upper_threshold           = 50
       lower_threshold           = 15
       increase_by               = 2
       decrease_by               = 1
-      cooldown_increase         = 3
+      cooldown_increase         = 5
       cooldown_decrease         = 5
       statistic_increase        = "Max"
       statistic_decrease        = "Average"
@@ -56,7 +56,7 @@ module "function_profile_autoscale" {
     memory = {
       upper_threshold           = 85
       increase_by               = 1
-      cooldown_increase         = 3
+      cooldown_increase         = 5
       statistic_increase        = "Average"
       time_aggregation_increase = "Average"
       time_window_increase      = 1

@@ -10,8 +10,8 @@ locals {
       FEATURED_ITEMS_CONTAINER_NAME      = "static-content"
       FEATURED_SERVICES_FILE_NAME        = "featured-services.json"
       FEATURED_INSTITUTIONS_FILE_NAME    = "featured-institutions.json"
-      COSMOSDB_NAME                      = "app-backend"
-      COSMOSDB_CONTAINER_SERVICE_DETAILS = "services"
+      COSMOSDB_NAME                      = "app-backend" // TODO: refactor with a centralized local variable
+      COSMOSDB_CONTAINER_SERVICE_DETAILS = "services"    // TODO: refactor with a centralized local variable
 
       AZURE_SEARCH_ENDPOINT                = var.ai_search.url
       AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
