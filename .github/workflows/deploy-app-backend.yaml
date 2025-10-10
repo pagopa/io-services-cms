@@ -1,14 +1,6 @@
-name: Deploy App Backend
+name: Deploy App Backend Container App
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - apps/app-backend/**
-      - packages/**
-      - .github/workflows/deploy-app-backend.yaml
+on: workflow_dispatch
 
 permissions:
   contents: read
@@ -18,7 +10,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy App Backend
+    name: Deploy App Backend as Container App
     concurrency:
       group: ${{ github.workflow }}-cd
       # Override this configuration to prevent cancelling a running deploy.
