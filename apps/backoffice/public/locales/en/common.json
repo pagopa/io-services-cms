@@ -153,7 +153,7 @@
             "internalLink": "Internal link within the app (deeplink)",
             "placeholder": "",
             "btnWithLink": {
-              "alertSingleSignOn": "To enable the button with links in Single Sign-On, you must have completed the integration within the institution's systems. For further information, please contact our  [support](mailto:user@example.it)"
+              "alertSingleSignOn": "To enable the button with links in Single Sign-On, you must have completed the integration within the institution's systems. For further information, please contact our  [support](mailto:io‑service‑management@pagopa.it)"
             }
           }
         },
