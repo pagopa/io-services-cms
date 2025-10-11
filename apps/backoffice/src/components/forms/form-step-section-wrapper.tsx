@@ -2,6 +2,8 @@ import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { ReactNode } from "react";
 
+import { MarkdownView } from "../markdown-view";
+
 export interface FormStepSectionWrapperProps {
   children: ReactNode;
   description?: string;
@@ -38,8 +40,13 @@ export const FormStepSectionWrapper = ({
         </Stack>
       )}
       {description && (
-        <Typography color="text.secondary" marginBottom={2} variant="body2">
-          {description}
+        <Typography
+          color="text.secondary"
+          component="div" // Prevents Typography from rendering a <p>: MarkdownView already outputs <p>, otherwise we'd get nested <p> (validateDOMNesting)
+          marginBottom={2}
+          variant="body2"
+        >
+          <MarkdownView>{description}</MarkdownView>
         </Typography>
       )}
       {children}
