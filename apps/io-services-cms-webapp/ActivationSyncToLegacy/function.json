@@ -1,0 +1,13 @@
+{
+  "bindings": [
+    {
+      "name": "activation",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "%ACTIVATIONS_CONTAINER_NAME%/{name}",
+      "connection": "INTERNAL_STORAGE_CONNECTION_STRING"
+    }
+  ],
+  "scriptFile": "../dist/main.js",
+  "entryPoint": "activationsSyncToLegacyEntryPoint"
+}
