@@ -32,7 +32,7 @@ module "backend_func_itn" {
     http_scalers = [
       {
         name                = "http-scale-rule"
-        concurrent_requests = 20
+        concurrent_requests = 1000
       }
     ]
   }
