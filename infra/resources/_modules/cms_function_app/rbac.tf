@@ -9,7 +9,7 @@ module "function_app_to_blob_data_writer" {
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "To allow migrating the activations of special services's"
     role                 = "writer"
-    container_name       = azurerm_storage_container.activations.name
+    container_name       = local.containers.activations.name
     }
   ]
 }
@@ -24,7 +24,7 @@ module "function_app_staging_slot_to_blob_data_writer" {
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "To allow migrating the activations of special services's"
     role                 = "writer"
-    container_name       = azurerm_storage_container.activations.name
+    container_name       = local.containers.activations.name
     }
   ]
 }
