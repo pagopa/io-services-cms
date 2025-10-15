@@ -15,7 +15,7 @@ module "backend_func_itn" {
   user_assigned_identity_id    = module.svc_container_app_environment_itn.user_assigned_identity.id
   target_port                  = 80
   revision_mode                = "Single"
-  tier                         = "l"
+  tier                         = "m"
 
   function_settings = {
     key_vault_name                         = var.key_vault.name
@@ -32,7 +32,7 @@ module "backend_func_itn" {
     http_scalers = [
       {
         name                = "http-scale-rule"
-        concurrent_requests = 1000
+        concurrent_requests = 75
       }
     ]
   }
