@@ -144,13 +144,11 @@ resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
     category = "StorageWrite"
   }
 
-  metric {
+  enabled_metric {
     category = "Capacity"
-    enabled  = false
   }
-  metric {
+  enabled_metric {
     category = "Transaction"
-    enabled  = false
   }
 }
 
