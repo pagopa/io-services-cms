@@ -1,9 +1,28 @@
 
 locals {
+  queues = [
+    { name = "request-review", hasPoison : true },
+    { name = "request-publication", hasPoison : true },
+    { name = "request-historicization", hasPoison : true },
+    { name = "request-sync-legacy", hasPoison : true },
+    { name = "request-sync-cms", hasPoison : true },
+    { name = "request-review-legacy", hasPoison : true },
+    { name = "request-validation", hasPoison : true },
+    { name = "request-deletion", hasPoison : true },
+    { name = "request-detail", hasPoison : true },
+    { name = "request-services-publication-ingestion-retry", hasPoison : true },
+    { name = "request-services-lifecycle-ingestion-retry", hasPoison : true },
+    { name = "request-services-history-ingestion-retry", hasPoison : true },
+    { name = "sync-group-poison" },
+    { name = "sync-activations-from-legacy-poison" }
+  ]
+  containers = {
+    "activations" = { name = "activations" }
+  }
   cms = {
     tier          = "standard"
     cosmosdb_name = "db-services-cms"
-    app_settings = {
+    app_settings = merge({
       NODE_ENV = "production"
 
       // Keepalive fields are all optionals
@@ -74,24 +93,6 @@ locals {
       LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE     = "activations-sync-lease"
       LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = 10
 
-      // Internal Storage Account Queues
-      # Queues
-      REQUEST_REVIEW_QUEUE                               = azurerm_storage_queue.request-review.name
-      REQUEST_PUBLICATION_QUEUE                          = azurerm_storage_queue.request-publication.name
-      REQUEST_HISTORICIZATION_QUEUE                      = azurerm_storage_queue.request-historicization.name
-      REQUEST_SYNC_LEGACY_QUEUE                          = azurerm_storage_queue.request-sync-legacy.name
-      REQUEST_SYNC_CMS_QUEUE                             = azurerm_storage_queue.request-sync-cms.name
-      REQUEST_REVIEW_LEGACY_QUEUE                        = azurerm_storage_queue.request-review-legacy.name
-      REQUEST_VALIDATION_QUEUE                           = azurerm_storage_queue.request-validation.name
-      REQUEST_DELETION_QUEUE                             = azurerm_storage_queue.request-deletion.name
-      REQUEST_DETAIL_QUEUE                               = azurerm_storage_queue.request-detail.name
-      REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
-      REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
-      REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
-      SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
-      SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE          = azurerm_storage_queue.sync-activations-from-legacy-poison.name
-
-
       # List of service ids for which quality control will be bypassed
       SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
 
@@ -141,8 +142,11 @@ locals {
 
       # Blob Storage configurations
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
-      ACTIVATIONS_CONTAINER_NAME = azurerm_storage_container.activations.name
-    }
+      ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
+      }, {
+      // Queues
+      for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
+    })
 
     autoscale_settings = {
       min     = 3
