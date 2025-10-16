@@ -13,6 +13,10 @@ import {
   stores,
 } from "@io-services-cms/models";
 import {
+  ACTIVATION_COLLECTION_NAME,
+  ActivationModel,
+} from "@pagopa/io-functions-commons/dist/src/models/activation";
+import {
   SERVICE_COLLECTION_NAME,
   ServiceModel,
 } from "@pagopa/io-functions-commons/dist/src/models/service";
@@ -77,6 +81,7 @@ import {
   handler as onIngestionActivationChangeHandler,
   parseBlob,
 } from "./watchers/on-activation-ingestion-change";
+import { makeHandler as makeOnActivationChangeHandler } from "./watchers/on-activations-change";
 import { makeHandler as makeOnLegacyActivationChangeHandler } from "./watchers/on-legacy-activations-change";
 import { handler as onLegacyServiceChangeHandler } from "./watchers/on-legacy-service-change";
 import { makeHandler as makeOnSelfcareGroupChangeHandler } from "./watchers/on-selfcare-group-change";
@@ -179,7 +184,13 @@ const legacyServicesContainer = cosmosdbClient
   .database(config.LEGACY_COSMOSDB_NAME)
   .container(SERVICE_COLLECTION_NAME);
 
+const legacyActivationContainer = cosmosdbClient
+  .database(config.LEGACY_COSMOSDB_NAME)
+  .container(ACTIVATION_COLLECTION_NAME);
+
 const legacyServiceModel = new ServiceModel(legacyServicesContainer);
+
+const legacyActivationModel = new ActivationModel(legacyActivationContainer);
 
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
@@ -485,6 +496,13 @@ export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
     ),
     toAzureFunctionHandler,
   )(context, args);
+
+// activation sync to legacy
+export const activationsSyncToLegacyEntryPoint = pipe(
+  { legacyActivationModel },
+  makeOnActivationChangeHandler,
+  toAzureFunctionHandler,
+);
 
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(
