@@ -68,7 +68,7 @@ interface Dependencies {
   // An instance of APIM Client
   apimService: ApimUtils.ApimService;
   // Client to Azure Blob Storage
-  blobService: BlobService;
+  assetBlobService: BlobService;
   fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   telemetryClient: TelemetryClient;
 }
@@ -131,7 +131,7 @@ const uploadImage =
 export const makeUploadServiceLogoHandler =
   ({
     apimService,
-    blobService,
+    assetBlobService,
     fsmLifecycleClientCreator,
     telemetryClient,
   }: Dependencies): IUploadServiceLogoHandler =>
@@ -153,7 +153,7 @@ export const makeUploadServiceLogoHandler =
           validateImage,
           TE.fromEither,
           TE.chainW(() =>
-            uploadImage(blobService)(lowerCaseServiceId, bufferImage),
+            uploadImage(assetBlobService)(lowerCaseServiceId, bufferImage),
           ),
         ),
       ),
