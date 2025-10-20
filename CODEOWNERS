@@ -1,6 +1,4 @@
 # see https://help.github.com/en/articles/about-code-owners#example-of-a-codeowners-file
 
-- @pagopa/io-institutions-n-services
-
-/infra/ @pagopa/io-institutions-n-services @pagopa/engineering-team-devex
-/.github/ @pagopa/io-institutions-n-services @pagopa/engineering-team-devex
+* @pagopa/io-institutions-n-services
+/infra/bootstrapper/ @pagopa/io-institutions-n-services @pagopa/engineering-team-devex
