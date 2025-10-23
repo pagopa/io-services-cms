@@ -2,6 +2,7 @@ import { getConfiguration } from "@/config";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { ROUTER_PATHS } from "../router/routerPaths";
 import { authorize } from "./auth";
 
 const maxAgeSeconds = 2 * 60 * 60; // 2 hours
@@ -45,9 +46,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: maxAgeSeconds,
   },
   pages: {
-    error: "/auth/error",
+    error: ROUTER_PATHS.AUTH_ERROR,
     signIn: getConfiguration().BACK_OFFICE_LOGIN_PATH,
-    signOut: "/auth/logout",
+    signOut: ROUTER_PATHS.LOGOUT,
   },
   providers: [
     CredentialsProvider({

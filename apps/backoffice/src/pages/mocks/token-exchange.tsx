@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Grid, Typography } from "@mui/material";
 import { useRouter } from "next/router";
@@ -26,10 +27,12 @@ export default function TokenExchange() {
       )
     ) {
       console.log("token-exchange");
+
       router.push(
-        `${
-          getConfiguration().BACK_OFFICE_LOGIN_PATH
-        }#token=${aMockedChangeInstitutionIdentityToken}`,
+        ROUTER_PATHS.TOKEN_EXCHANGE(
+          getConfiguration().BACK_OFFICE_LOGIN_PATH,
+          aMockedChangeInstitutionIdentityToken,
+        ),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

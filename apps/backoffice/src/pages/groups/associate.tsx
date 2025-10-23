@@ -4,6 +4,7 @@ import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import { SelfcareRoles } from "@/types/auth";
 import { trackBulkGroupAssignmentEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
@@ -12,7 +13,6 @@ import { ReactElement } from "react";
 
 const pageTitleLocaleKey = "routes.groups.associate.title";
 const pageDescriptionLocaleKey = "routes.groups.associate.description";
-const servicesPageUrl = "/services";
 
 export default function AssociateGroups() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function AssociateGroups() {
       trackBulkGroupAssignmentEndEvent("error");
     }
     // redirect to services page
-    router.push(servicesPageUrl);
+    router.push(ROUTER_PATHS.SERVICES);
   };
 
   return (
@@ -42,7 +42,7 @@ export default function AssociateGroups() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(servicesPageUrl)}
+        onExitClick={() => router.push(ROUTER_PATHS.SERVICES)}
         showExit
         title={pageTitleLocaleKey}
       />

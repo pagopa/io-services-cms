@@ -5,6 +5,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { Subscription } from "@/generated/api/Subscription";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -12,8 +13,6 @@ import { ReactElement } from "react";
 
 const pageTitleLocaleKey = "routes.new-group-api-key.title";
 const pageDescriptionLocaleKey = "routes.new-group-api-key.description";
-const keysPageUrl = "/keys";
-
 export default function NewGroupApiKey() {
   const router = useRouter();
   const { fetchData: upsertSubFetchData } = useFetch<Subscription>();
@@ -33,7 +32,7 @@ export default function NewGroupApiKey() {
       trackGroupKeyGenerateEndEvent("error");
     }
     // redirect to keys page
-    router.push(keysPageUrl);
+    router.push(ROUTER_PATHS.KEYS);
   };
 
   return (
@@ -41,7 +40,7 @@ export default function NewGroupApiKey() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(keysPageUrl)}
+        onExitClick={() => router.push(ROUTER_PATHS.KEYS)}
         showExit
         title={pageTitleLocaleKey}
       />

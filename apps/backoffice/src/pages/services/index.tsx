@@ -26,6 +26,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import {
   hasApiKeyGroupsFeatures,
   isAtLeastInOneGroup,
@@ -59,7 +60,6 @@ import { ReactElement, ReactNode, useEffect, useState } from "react";
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
 
-const CREATE_SERVICE_ROUTE = "/services/new-service";
 const DEFAULT_PAGE_LIMIT = 10;
 const TEXT_SECONDARY_COLOR_STYLE = { color: "text.secondary" };
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
@@ -149,7 +149,7 @@ export default function Services() {
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
-              : router.push(`/services/${service.id}`)
+              : router.push(ROUTER_PATHS.SERVICE_ID(service.id))
           }
           size="large"
           startIcon={
@@ -256,9 +256,9 @@ export default function Services() {
     version: ServiceVersionSwitcherType,
   ) => {
     router.push(
-      `/services/${serviceId}${
-        version === "publication" ? "?release=true" : ""
-      }`,
+      version === "publication"
+        ? ROUTER_PATHS.SERVICE_ID_RELEASE_TRUE(serviceId)
+        : ROUTER_PATHS.SERVICE_ID(serviceId),
     );
   };
 
@@ -279,7 +279,7 @@ export default function Services() {
   const handleEdit = (service: ServiceListItem) => {
     trackServiceEditStartEvent("services", service.id);
 
-    router.push(`/services/${service.id}/edit-service`);
+    router.push(ROUTER_PATHS.EDIT_SERVICE(service.id));
   };
 
   const handleCreateService = async () => {
@@ -304,7 +304,7 @@ export default function Services() {
       }
     }
     trackServiceCreateStartEvent();
-    router.push(CREATE_SERVICE_ROUTE);
+    router.push(ROUTER_PATHS.CREATE_SERVICE);
   };
 
   /**
@@ -569,7 +569,7 @@ export default function Services() {
       {noService ? (
         <EmptyStateLayer
           ctaLabel="service.actions.create"
-          ctaRoute={CREATE_SERVICE_ROUTE}
+          ctaRoute={ROUTER_PATHS.CREATE_SERVICE}
           emptyStateLabel="routes.services.empty"
           requiredPermissions={["ApiServiceWrite"]}
         />

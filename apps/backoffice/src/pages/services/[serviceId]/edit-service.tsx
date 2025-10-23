@@ -8,6 +8,7 @@ import { ServiceCreateUpdate } from "@/components/services/service-create-update
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import {
   trackServiceEditAbortEvent,
@@ -23,8 +24,6 @@ import { ReactElement, useEffect, useState } from "react";
 
 const pageTitleLocaleKey = "routes.edit-service.title";
 const pageDescriptionLocaleKey = "routes.edit-service.description";
-
-const SERVICES_ROUTE_PATH = "/services";
 
 export default function EditService() {
   const { t } = useTranslation();
@@ -66,18 +65,18 @@ export default function EditService() {
       trackServiceEditEndEvent("error", serviceId);
     }
     // redirect to service details in both cases
-    router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);
+    router.push(ROUTER_PATHS.SERVICE_ID(serviceId));
   };
 
   const handleAbort = () => {
     trackServiceEditAbortEvent(stepIndex);
-    router.push(`${SERVICES_ROUTE_PATH}/${serviceId}`);
+    router.push(ROUTER_PATHS.SERVICE_ID(serviceId));
   };
 
   useEffect(() => {
     serviceFetchData("getService", { serviceId }, ServiceLifecycle, {
       notify: "errors",
-      redirect: { href: SERVICES_ROUTE_PATH, on: "errors" },
+      redirect: { href: ROUTER_PATHS.SERVICES, on: "errors" },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

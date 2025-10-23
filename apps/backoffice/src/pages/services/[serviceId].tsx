@@ -17,6 +17,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTER_PATHS } from "@/lib/router/routerPaths";
 import { Service } from "@/types/service";
 import {
   trackServiceDetailsPageEvent,
@@ -97,7 +98,7 @@ export default function ServiceDetails() {
     await noContentFetchData("deleteService", { serviceId }, tt.unknown, {
       notify: "all",
     });
-    router.push("/services"); // redirect to parent services page
+    router.push(ROUTER_PATHS.SERVICES); // redirect to parent services page
   };
 
   const handleSubmitReview = async (auto_publish: boolean) => {
@@ -134,7 +135,7 @@ export default function ServiceDetails() {
   const handleEdit = () => {
     trackServiceEditStartEvent("serviceDetails", serviceId);
 
-    router.push(`/services/${serviceId}/edit-service`);
+    router.push(ROUTER_PATHS.EDIT_SERVICE(serviceId));
   };
 
   const navigateToServiceLifecycle = () =>
@@ -204,7 +205,7 @@ export default function ServiceDetails() {
       />
       <AppPreview
         // hide edit shortcut in release mode
-        editUrl={release ? undefined : `/services/${serviceId}/edit-service`}
+        editUrl={release ? undefined : ROUTER_PATHS.EDIT_SERVICE(serviceId)}
         itemToPreview={currentService}
         onClose={() => setShowPreview(false)}
         showPreview={showPreview}
