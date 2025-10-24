@@ -32,8 +32,28 @@ module "backend_func_itn" {
     http_scalers = [
       {
         name                = "http-scale-rule"
-        concurrent_requests = 75
+        concurrent_requests = 50
       }
+    ]
+    custom_scalers = [
+      {
+        name             = "cpu-scale-rule"
+        custom_rule_type = "cpu"
+        metadata = {
+          type  = "Utilization"
+          value = "70"
+        }
+      },
+      # {
+      #   name             = "cron-scale-rule"
+      #   custom_rule_type = "cron"
+      #   metadata = {
+      #     desiredReplicas = "11"
+      #     end             = "5 12 23 10 *"
+      #     start           = "0 12 23 10 *"
+      #     timezone        = "Europe/Rome"
+      #   }
+      # }
     ]
   }
 
@@ -45,11 +65,11 @@ module "backend_func_itn" {
       app_settings = local.app_be.app_settings
 
       liveness_probe = {
+        transport = "TCP"
+      }
+      readiness_probe = {
         path = "/api/v1/info"
       }
-      # readiness_probe = {
-      #   path = "/"
-      # }
     }
   ]
 

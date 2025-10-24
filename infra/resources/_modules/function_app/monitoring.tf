@@ -40,8 +40,8 @@ module "function_profile_autoscale" {
 
   scale_metrics = {
     cpu = {
-      upper_threshold           = 50
-      lower_threshold           = 15
+      upper_threshold           = 55
+      lower_threshold           = 30
       increase_by               = 2
       decrease_by               = 1
       cooldown_increase         = 5
