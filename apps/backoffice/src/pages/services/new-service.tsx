@@ -5,7 +5,7 @@ import { ServiceCreateUpdate } from "@/components/services/service-create-update
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import {
   trackServiceCreateAbortEvent,
@@ -57,12 +57,12 @@ export default function NewService() {
       trackServiceCreateEndEvent("error");
     }
     // redirect to services list in both cases
-    router.push(ROUTER_PATHS.SERVICES);
+    router.push(ROUTES.SERVICES.LIST);
   };
 
   const handleAbort = () => {
     trackServiceCreateAbortEvent(stepIndex);
-    router.push(ROUTER_PATHS.SERVICES);
+    router.push(ROUTES.SERVICES.LIST);
   };
 
   return (

@@ -4,7 +4,7 @@ import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { SelfcareRoles } from "@/types/auth";
 import { trackBulkGroupAssignmentEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
@@ -34,7 +34,7 @@ export default function AssociateGroups() {
       trackBulkGroupAssignmentEndEvent("error");
     }
     // redirect to services page
-    router.push(ROUTER_PATHS.SERVICES);
+    router.push(ROUTES.SERVICES.LIST);
   };
 
   return (
@@ -42,7 +42,7 @@ export default function AssociateGroups() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(ROUTER_PATHS.SERVICES)}
+        onExitClick={() => router.push(ROUTES.SERVICES.LIST)}
         showExit
         title={pageTitleLocaleKey}
       />

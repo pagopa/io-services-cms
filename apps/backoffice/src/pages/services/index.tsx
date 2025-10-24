@@ -26,7 +26,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import {
   hasApiKeyGroupsFeatures,
   isAtLeastInOneGroup,
@@ -149,7 +149,7 @@ export default function Services() {
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
-              : router.push(ROUTER_PATHS.SERVICE_ID(service.id))
+              : router.push(ROUTES.SERVICES.DETAILS(service.id))
           }
           size="large"
           startIcon={
@@ -257,8 +257,8 @@ export default function Services() {
   ) => {
     router.push(
       version === "publication"
-        ? ROUTER_PATHS.SERVICE_ID_RELEASE_TRUE(serviceId)
-        : ROUTER_PATHS.SERVICE_ID(serviceId),
+        ? ROUTES.SERVICES.DETAILS(serviceId, true)
+        : ROUTES.SERVICES.DETAILS(serviceId),
     );
   };
 
@@ -279,7 +279,7 @@ export default function Services() {
   const handleEdit = (service: ServiceListItem) => {
     trackServiceEditStartEvent("services", service.id);
 
-    router.push(ROUTER_PATHS.EDIT_SERVICE(service.id));
+    router.push(ROUTES.SERVICES.EDIT(service.id));
   };
 
   const handleCreateService = async () => {
@@ -304,7 +304,7 @@ export default function Services() {
       }
     }
     trackServiceCreateStartEvent();
-    router.push(ROUTER_PATHS.CREATE_SERVICE);
+    router.push(ROUTES.SERVICES.CREATE);
   };
 
   /**
@@ -569,7 +569,7 @@ export default function Services() {
       {noService ? (
         <EmptyStateLayer
           ctaLabel="service.actions.create"
-          ctaRoute={ROUTER_PATHS.CREATE_SERVICE}
+          ctaRoute={ROUTES.SERVICES.CREATE}
           emptyStateLabel="routes.services.empty"
           requiredPermissions={["ApiServiceWrite"]}
         />

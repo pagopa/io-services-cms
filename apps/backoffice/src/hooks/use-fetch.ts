@@ -3,7 +3,7 @@
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/api/client";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -234,7 +234,7 @@ const useFetch = <RC>() => {
 
         // Check 401 Unauthorized
         if (response.status === 401) {
-          push(ROUTER_PATHS.LOGOUT);
+          push(ROUTES.AUTH.LOGOUT);
           return {
             error: {
               kind: "httpError",

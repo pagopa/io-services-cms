@@ -8,7 +8,7 @@ import { ServiceCreateUpdate } from "@/components/services/service-create-update
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import {
   trackServiceEditAbortEvent,
@@ -65,18 +65,18 @@ export default function EditService() {
       trackServiceEditEndEvent("error", serviceId);
     }
     // redirect to service details in both cases
-    router.push(ROUTER_PATHS.SERVICE_ID(serviceId));
+    router.push(ROUTES.SERVICES.DETAILS(serviceId));
   };
 
   const handleAbort = () => {
     trackServiceEditAbortEvent(stepIndex);
-    router.push(ROUTER_PATHS.SERVICE_ID(serviceId));
+    router.push(ROUTES.SERVICES.DETAILS(serviceId));
   };
 
   useEffect(() => {
     serviceFetchData("getService", { serviceId }, ServiceLifecycle, {
       notify: "errors",
-      redirect: { href: ROUTER_PATHS.SERVICES, on: "errors" },
+      redirect: { href: ROUTES.SERVICES.LIST, on: "errors" },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

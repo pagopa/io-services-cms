@@ -5,7 +5,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { Subscription } from "@/generated/api/Subscription";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -32,7 +32,7 @@ export default function NewGroupApiKey() {
       trackGroupKeyGenerateEndEvent("error");
     }
     // redirect to keys page
-    router.push(ROUTER_PATHS.KEYS);
+    router.push(ROUTES.KEYS.LIST);
   };
 
   return (
@@ -40,7 +40,7 @@ export default function NewGroupApiKey() {
       <PageHeader
         description={pageDescriptionLocaleKey}
         hideBreadcrumbs
-        onExitClick={() => router.push(ROUTER_PATHS.KEYS)}
+        onExitClick={() => router.push(ROUTES.KEYS.LIST)}
         showExit
         title={pageTitleLocaleKey}
       />

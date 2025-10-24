@@ -1,5 +1,5 @@
 import { getConfiguration } from "@/config";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Grid, Typography } from "@mui/material";
 import { useRouter } from "next/router";
@@ -29,7 +29,7 @@ export default function TokenExchange() {
       console.log("token-exchange");
 
       router.push(
-        ROUTER_PATHS.TOKEN_EXCHANGE(
+        ROUTES.TOKEN_EXCHANGE(
           getConfiguration().BACK_OFFICE_LOGIN_PATH,
           aMockedChangeInstitutionIdentityToken,
         ),

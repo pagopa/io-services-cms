@@ -6,7 +6,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
-import { ROUTER_PATHS } from "@/lib/router/routerPaths";
+import { ROUTES } from "@/lib/routes/routesPaths";
 import {
   hasApiKeyGroupsFeatures,
   hasManageKeyGroup,
@@ -117,7 +117,7 @@ export const ApiKeysCard = () => {
                         <ApiKeysGroupTag
                           key={apiKeyGroup.id}
                           onClick={() =>
-                            router.push(ROUTER_PATHS.KEYS_ID(apiKeyGroup.id))
+                            router.push(ROUTES.KEYS.DETAILS(apiKeyGroup.id))
                           }
                           value={apiKeyGroup}
                         />
@@ -125,7 +125,7 @@ export const ApiKeysCard = () => {
                     {mspData.value.length > MAX_APIKEY_GROUP_TO_DISPLAY && (
                       <ApiKeyTag
                         label="..."
-                        onClick={() => router.push(ROUTER_PATHS.KEYS)}
+                        onClick={() => router.push(ROUTES.KEYS.LIST)}
                       />
                     )}
                   </Box>
@@ -136,7 +136,7 @@ export const ApiKeysCard = () => {
         </Stack>
         {!hideKeysCta && (
           <Box id="card-cta" marginTop={3}>
-            <NextLink href={ROUTER_PATHS.KEYS}>
+            <NextLink href={ROUTES.KEYS.LIST}>
               <ButtonNaked
                 color="primary"
                 endIcon={<ArrowForward />}
