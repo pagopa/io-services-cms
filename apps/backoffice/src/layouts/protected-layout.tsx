@@ -1,6 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { RequiredAuthorizations } from "@/types/auth";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { useRouter } from "next/router";

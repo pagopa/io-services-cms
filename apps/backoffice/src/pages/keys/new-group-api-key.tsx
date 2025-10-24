@@ -5,7 +5,7 @@ import { CreateManageGroupSubscription } from "@/generated/api/CreateManageGroup
 import { Subscription } from "@/generated/api/Subscription";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";

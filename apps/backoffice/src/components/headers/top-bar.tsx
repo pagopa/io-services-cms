@@ -1,5 +1,5 @@
 import { getConfiguration } from "@/config";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { HeaderAccount, JwtUser, RootLinkType } from "@pagopa/mui-italia";
 import { useRouter } from "next/router";
 

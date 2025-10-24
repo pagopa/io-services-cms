@@ -1,6 +1,7 @@
 import { getConfiguration } from "@/config";
 import { GroupFilterTypeEnum } from "@/generated/api/GroupFilterType";
 import { client } from "@/hooks/use-fetch";
+import { ROUTES } from "@/lib/routes";
 import { SelfcareRoles } from "@/types/auth";
 import { hasApiKeyGroupsFeatures } from "@/utils/auth-util";
 import { trackBulkGroupAssignmentStartEvent } from "@/utils/mix-panel";
@@ -14,7 +15,6 @@ import { useTranslation } from "next-i18next";
 import { AccessControl } from "../access-control";
 import { useDialog } from "../dialog-provider";
 
-const ASSOCIATE_GROUP_ROUTE = "/groups/associate";
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
 const checkAtLeastOneGroupUnboundedServiceExists = async () => {
@@ -80,7 +80,7 @@ export const ButtonAssociateGroup = () => {
 
     if (atLeastOneGroupUnboundedServiceExists) {
       trackBulkGroupAssignmentStartEvent();
-      router.push(ASSOCIATE_GROUP_ROUTE);
+      router.push(ROUTES.ASSOCIATE_GROUP);
     } else {
       await showDialog({
         confirmButtonLabel: t("buttons.close"),

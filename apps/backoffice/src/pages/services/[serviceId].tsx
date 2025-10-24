@@ -17,7 +17,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { Service } from "@/types/service";
 import {
   trackServiceDetailsPageEvent,

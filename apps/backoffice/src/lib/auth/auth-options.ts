@@ -1,8 +1,8 @@
 import { getConfiguration } from "@/config";
+import { ROUTES } from "@/lib/routes";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { ROUTES } from "../routes/routesPaths";
 import { authorize } from "./auth";
 
 const maxAgeSeconds = 2 * 60 * 60; // 2 hours

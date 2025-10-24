@@ -1,6 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { hasAggregatorFeatures } from "@/utils/auth-util";
 import { trackLoginEvent } from "@/utils/mix-panel";
 import mixpanel from "mixpanel-browser";

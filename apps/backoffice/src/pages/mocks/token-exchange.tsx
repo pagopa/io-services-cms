@@ -1,5 +1,5 @@
 import { getConfiguration } from "@/config";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Grid, Typography } from "@mui/material";
 import { useRouter } from "next/router";

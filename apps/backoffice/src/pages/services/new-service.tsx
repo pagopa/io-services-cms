@@ -5,7 +5,7 @@ import { ServiceCreateUpdate } from "@/components/services/service-create-update
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import {
   trackServiceCreateAbortEvent,

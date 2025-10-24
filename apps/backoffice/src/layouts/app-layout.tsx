@@ -2,7 +2,7 @@ import { AppFooter } from "@/components/footer";
 import { Header, TopBar } from "@/components/headers";
 import { Sidenav, SidenavItem } from "@/components/sidenav";
 import { getConfiguration } from "@/config";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import styles from "@/styles/app-layout.module.css";
 import { SelfcareRoles } from "@/types/auth";
 import { hasAggregatorFeatures } from "@/utils/auth-util";

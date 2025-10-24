@@ -1,6 +1,7 @@
 import { UrlObject } from "url";
 
 export const ROUTES = {
+  ASSOCIATE_GROUP: "/groups/associate",
   AUTH: {
     ERROR: "/auth/error",
     LOGIN: (loginPath: string, returnUrl: string): UrlObject => ({
@@ -16,7 +17,6 @@ export const ROUTES = {
     LIST: "/keys",
     NEW_GROUP_API_KEY: "/keys/new-group-api-key",
   },
-  LOGOUT: "/auth/logout",
   SERVICES: {
     CREATE: "/services/new-service",
     DETAILS: (serviceId: string, releaseMode?: boolean) =>

@@ -6,7 +6,7 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import useFetch from "@/hooks/use-fetch";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import {
   hasApiKeyGroupsFeatures,
   hasManageKeyGroup,

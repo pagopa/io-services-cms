@@ -26,7 +26,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import {
   hasApiKeyGroupsFeatures,
   isAtLeastInOneGroup,

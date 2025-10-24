@@ -4,7 +4,7 @@ import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { ROUTES } from "@/lib/routes/routesPaths";
+import { ROUTES } from "@/lib/routes";
 import { SelfcareRoles } from "@/types/auth";
 import { trackBulkGroupAssignmentEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
