@@ -1,5 +1,6 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { getConfiguration } from "@/config";
+import { ROUTES } from "@/lib/routes";
 import { RequiredAuthorizations } from "@/types/auth";
 import { hasRequiredAuthorizations } from "@/utils/auth-util";
 import { useRouter } from "next/router";
@@ -37,10 +38,12 @@ export const ProtectedLayout = ({
     // with a return url to the current page
     if (unauthenticated || unauthorized) {
       console.log("not authenticated or authorized");
-      router.push({
-        pathname: getConfiguration().BACK_OFFICE_LOGIN_PATH,
-        query: { returnUrl: router.asPath },
-      });
+      router.push(
+        ROUTES.AUTH.LOGIN(
+          getConfiguration().BACK_OFFICE_LOGIN_PATH,
+          router.asPath,
+        ),
+      );
     }
   }, [loading, unauthenticated, unauthorized, session, sessionStatus, router]);
 

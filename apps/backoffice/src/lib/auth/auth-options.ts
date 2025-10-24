@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { ROUTES } from "@/lib/routes";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -45,9 +46,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: maxAgeSeconds,
   },
   pages: {
-    error: "/auth/error",
+    error: ROUTES.AUTH.ERROR,
     signIn: getConfiguration().BACK_OFFICE_LOGIN_PATH,
-    signOut: "/auth/logout",
+    signOut: ROUTES.AUTH.LOGOUT,
   },
   providers: [
     CredentialsProvider({

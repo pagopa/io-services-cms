@@ -8,6 +8,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTES } from "@/lib/routes";
 import {
   hasManageKeyGroup,
   hasManageKeyRoot,
@@ -58,7 +59,7 @@ export default function Keys() {
 
   const handleGenerateGroupApiKey = () => {
     trackGroupKeyGenerateStartEvent();
-    router.push("/keys/new-group-api-key");
+    router.push(ROUTES.KEYS.NEW_GROUP_API_KEY);
   };
 
   useEffect(() => {
