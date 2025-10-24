@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.3
+
+### Patch Changes
+
+- 77042712: centralised route paths
+
 ## 1.29.2
 
 ### Patch Changes
