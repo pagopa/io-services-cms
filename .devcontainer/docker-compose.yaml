@@ -32,7 +32,7 @@ services:
 
   # "cosmosdb" is the name of the Docker Compose service, and is also used as the hostname for incoming connections
   cosmosdb:
-    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview@sha256:a0cadff3c1b601e35c2a1e0812483c374fec9b100f9fa5f39abc512a0ca3f504
     networks:
       - dev-network
     profiles: ['cosmosdb']
