@@ -26,7 +26,7 @@ module "backend_func_itn" {
 
   autoscaler = {
     replicas = {
-      minimum = 3
+      minimum = 40
       maximum = 200
     }
     http_scalers = [
@@ -44,16 +44,14 @@ module "backend_func_itn" {
           value = "70"
         }
       },
-      # {
-      #   name             = "cron-scale-rule"
-      #   custom_rule_type = "cron"
-      #   metadata = {
-      #     desiredReplicas = "11"
-      #     end             = "5 12 23 10 *"
-      #     start           = "0 12 23 10 *"
-      #     timezone        = "Europe/Rome"
-      #   }
-      # }
+      {
+        name             = "memory-scale-rule"
+        custom_rule_type = "memory"
+        metadata = {
+          type  = "Utilization"
+          value = "80"
+        }
+      }
     ]
   }
 
