@@ -5,7 +5,6 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import { ApimUtils } from "@io-services-cms/external-clients";
 import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
@@ -317,7 +316,6 @@ export const IConfig = t.intersection([
     ]),
     t.intersection([
       CosmosConfig,
-      ApimUtils.definitions.AzureClientSecretCredential,
       ApimConfig,
       QueueConfig,
       ServiceIdQualityCheckExclusionList,

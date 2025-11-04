@@ -70,10 +70,7 @@ const getApimConfig = (): Config => {
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
-  const apimClient = ApimUtils.getApimClient(
-    apimConfig,
-    apimConfig.AZURE_SUBSCRIPTION_ID,
-  );
+  const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID);
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,

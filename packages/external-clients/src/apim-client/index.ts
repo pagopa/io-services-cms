@@ -12,7 +12,7 @@ import {
   UserCreateParameters,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
-import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
+import { DefaultAzureCredential } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
@@ -34,7 +34,6 @@ import {
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
 import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
-import { AzureClientSecretCredential } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -83,21 +82,8 @@ const chainApimMappedError = <T>(
     ),
   );
 
-export function getApimClient(
-  clientSecretCreds: AzureClientSecretCredential,
-  subscriptionId: string,
-): ApiManagementClient {
-  return new ApiManagementClient(
-    new ClientSecretCredential(
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
-      {
-        authorityHost: AzureAuthorityHosts.AzurePublicCloud,
-      },
-    ),
-    subscriptionId,
-  );
+export function getApimClient(subscriptionId: string): ApiManagementClient {
+  return new ApiManagementClient(new DefaultAzureCredential(), subscriptionId);
 }
 
 export interface ApimService {
