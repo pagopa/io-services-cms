@@ -1,4 +1,5 @@
 import { EventData, EventHubProducerClient } from "@azure/event-hubs";
+import * as RA from "fp-ts/ReadonlyArray";
 import * as A from "fp-ts/lib/Array";
 import * as E from "fp-ts/lib/Either";
 import * as RE from "fp-ts/lib/ReaderEither";
@@ -73,6 +74,7 @@ export const createIngestionBlobTriggerHandler =
     producer: EventHubProducerClient,
     formatter: RE.ReaderEither<U, Error, EventData>,
     enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
+    filter: (item: S) => boolean,
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     Error,
@@ -81,6 +83,7 @@ export const createIngestionBlobTriggerHandler =
   ({ items }) =>
     pipe(
       items,
+      RA.filter(filter),
       toEvents(formatter, enricher), // format service to the specified avro format
       TE.chainW(
         (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub

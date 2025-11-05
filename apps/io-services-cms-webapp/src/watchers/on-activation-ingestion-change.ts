@@ -6,7 +6,9 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 
+import { FiscalCode } from "../generated/api/FiscalCode";
 import { AzureFunctionCall } from "../lib/azure/adapters";
+import { isTestUser } from "../utils/filter-test-user";
 import { EnrichedActivation } from "../utils/ingestion/enriched-types/activation-pdv-enriched";
 import { enricher } from "../utils/ingestion/enricher/pdv-enricher";
 import { avroActivationFormatter } from "../utils/ingestion/formatter/activation-avro-formatter";
@@ -19,6 +21,7 @@ import { PdvTokenizerClient } from "../utils/pdvTokenizerClient";
 export const handler = (
   producer: EventHubProducerClient,
   pdvTokenizerClient: PdvTokenizerClient,
+  filterTestFiscalCodes: readonly FiscalCode[],
 ): RTE.ReaderTaskEither<
   {
     items: Activations.Activation[];
@@ -30,6 +33,8 @@ export const handler = (
     producer,
     avroActivationFormatter,
     enricher<Activations.Activation>(pdvTokenizerClient),
+    (activation) =>
+      !isTestUser(new Set(filterTestFiscalCodes))(activation.fiscalCode),
   );
 
 export const parseBlob: <R>(
