@@ -1,7 +1,11 @@
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { parseBlob } from "../on-activation-ingestion-change";
+import { handler, parseBlob } from "../on-activation-ingestion-change";
+import { EventHubProducerClient } from "@azure/event-hubs";
+import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
+import { Activations } from "@io-services-cms/models";
+import { FiscalCode } from "../../generated/api/FiscalCode";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -106,5 +110,105 @@ describe("parseBlob", () => {
       expect(errorMessage).toContain("at [root.serviceId] is not a valid");
     }
     expect(mockProcessItems).not.toHaveBeenCalled();
+  });
+});
+
+describe("handler", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const mockProducer = {
+    sendBatch: vi.fn(() => Promise.resolve()),
+  } as unknown as EventHubProducerClient;
+
+  const mockPdvTokenizerClient = {} as PdvTokenizerClient;
+
+  const testFiscalCode1: FiscalCode = "RSSMRA80T01H501K" as FiscalCode;
+  const testFiscalCode2: FiscalCode = "RSSMRA80T02H501M" as FiscalCode;
+  const normalFiscalCode: FiscalCode = "RSSMRA80T03H501N" as FiscalCode;
+
+  const createActivation = (
+    fiscalCode: FiscalCode,
+  ): Activations.Activation => ({
+    fiscalCode,
+    serviceId: "service1" as Activations.Activation["serviceId"],
+    status: "ACTIVE" as Activations.Activation["status"],
+    modifiedAt: 1751901650032 as Activations.Activation["modifiedAt"],
+  });
+
+   // Mock createIngestionBlobTriggerHandler to simulate the filter function
+   let capturedFilter: ((activation: Activations.Activation) => boolean) | undefined;
+   mocks.createIngestionBlobTriggerHandler.mockImplementation(
+     (_producer, _formatter, _enricher, filter) => {
+       capturedFilter = filter;
+       return RTE.right([{}]);
+     },
+   );
+
+  it("should filter 2 test fiscal codes from activations", async () => {
+    const filterTestFiscalCodes = [testFiscalCode1, testFiscalCode2];
+    const activations = [
+      createActivation(testFiscalCode1),
+      createActivation(testFiscalCode2),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(mocks.createIngestionBlobTriggerHandler).toHaveBeenCalledOnce();
+    expect(capturedFilter).toBeDefined();
+
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCode1))).toBe(false);
+      expect(capturedFilter(createActivation(testFiscalCode2))).toBe(false);
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should not remove any fiscal codes from activations", async () => {
+    const filterTestFiscalCodes = [testFiscalCode1];
+    const activations = [createActivation(normalFiscalCode)];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should handle empty test fiscal codes list and not remove any fiscal codes from activations", async () => {
+    const filterTestFiscalCodes: readonly FiscalCode[] = [];
+    const activations = [
+      createActivation(testFiscalCode1),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCode1))).toBe(true);
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
   });
 });
