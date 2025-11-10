@@ -1,9 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { Context } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {

@@ -128,6 +128,8 @@ describe("handler", () => {
   const testFiscalCode2: FiscalCode = "RSSMRA80T02H501M" as FiscalCode;
   const normalFiscalCode: FiscalCode = "RSSMRA80T03H501N" as FiscalCode;
 
+  const prefixCfTest = "LVTEST";
+
   const createActivation = (
     fiscalCode: FiscalCode,
   ): Activations.Activation => ({
@@ -137,17 +139,21 @@ describe("handler", () => {
     modifiedAt: 1751901650032 as Activations.Activation["modifiedAt"],
   });
 
-   // Mock createIngestionBlobTriggerHandler to simulate the filter function
-   let capturedFilter: ((activation: Activations.Activation) => boolean) | undefined;
-   mocks.createIngestionBlobTriggerHandler.mockImplementation(
-     (_producer, _formatter, _enricher, filter) => {
-       capturedFilter = filter;
-       return RTE.right([{}]);
-     },
-   );
+  // Mock createIngestionBlobTriggerHandler to simulate the filter function
+  let capturedFilter:
+    | ((activation: Activations.Activation) => boolean)
+    | undefined;
+  mocks.createIngestionBlobTriggerHandler.mockImplementation(
+    (_producer, _formatter, _enricher, filter) => {
+      capturedFilter = filter;
+      return RTE.right([{}]);
+    },
+  );
 
   it("should filter 2 test fiscal codes from activations", async () => {
     const filterTestFiscalCodes = [testFiscalCode1, testFiscalCode2];
+    const prefixesCfTest = [prefixCfTest];
+
     const activations = [
       createActivation(testFiscalCode1),
       createActivation(testFiscalCode2),
@@ -158,6 +164,7 @@ describe("handler", () => {
       mockProducer,
       mockPdvTokenizerClient,
       filterTestFiscalCodes,
+      prefixesCfTest,
     );
 
     await handlerInstance({ items: activations })();
@@ -174,12 +181,15 @@ describe("handler", () => {
 
   it("should not remove any fiscal codes from activations", async () => {
     const filterTestFiscalCodes = [testFiscalCode1];
+    const prefixesCfTest = [prefixCfTest];
+
     const activations = [createActivation(normalFiscalCode)];
 
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
       filterTestFiscalCodes,
+      prefixesCfTest,
     );
 
     await handlerInstance({ items: activations })();
@@ -192,6 +202,8 @@ describe("handler", () => {
 
   it("should handle empty test fiscal codes list and not remove any fiscal codes from activations", async () => {
     const filterTestFiscalCodes: readonly FiscalCode[] = [];
+    const prefixesCfTest = [prefixCfTest];
+
     const activations = [
       createActivation(testFiscalCode1),
       createActivation(normalFiscalCode),
@@ -201,6 +213,7 @@ describe("handler", () => {
       mockProducer,
       mockPdvTokenizerClient,
       filterTestFiscalCodes,
+      prefixesCfTest,
     );
 
     await handlerInstance({ items: activations })();
@@ -208,6 +221,132 @@ describe("handler", () => {
     expect(capturedFilter).toBeDefined();
     if (capturedFilter) {
       expect(capturedFilter(createActivation(testFiscalCode1))).toBe(true);
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should filter fiscal codes that start with prefix of a fiscal code", async () => {
+    const filterTestFiscalCodes: readonly FiscalCode[] = [];
+    const prefixesCfTest = [prefixCfTest];
+    const testFiscalCodeWithPrefix: FiscalCode =
+      "LVTEST00A00A014X" as FiscalCode;
+
+    const activations = [
+      createActivation(testFiscalCodeWithPrefix),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+      prefixesCfTest,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCodeWithPrefix))).toBe(
+        false,
+      );
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should filter fiscal codes that start with any prefix of fiscal codes", async () => {
+    const filterTestFiscalCodes: readonly FiscalCode[] = [];
+    const prefixesCfTest = [prefixCfTest, "EEEEEE"];
+    const testFiscalCodeWithPrefix1: FiscalCode =
+      "LVTEST00A00A014X" as FiscalCode;
+    const testFiscalCodeWithPrefix2: FiscalCode =
+      "EEEEEE00E00E000A" as FiscalCode;
+
+    const activations = [
+      createActivation(testFiscalCodeWithPrefix1),
+      createActivation(testFiscalCodeWithPrefix2),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+      prefixesCfTest,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCodeWithPrefix1))).toBe(
+        false,
+      );
+      expect(capturedFilter(createActivation(testFiscalCodeWithPrefix2))).toBe(
+        false,
+      );
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should handle empty prefixes array and not filter by prefix", async () => {
+    const filterTestFiscalCodes: readonly FiscalCode[] = [testFiscalCode1];
+    const emptyPrefixes: string[] = [];
+    const testFiscalCodeWithPrefix: FiscalCode =
+      "LVTEST00A00A014X" as FiscalCode;
+
+    const activations = [
+      createActivation(testFiscalCode1),
+      createActivation(testFiscalCodeWithPrefix),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+      emptyPrefixes,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCode1))).toBe(false);
+      expect(capturedFilter(createActivation(testFiscalCodeWithPrefix))).toBe(
+        true,
+      );
+      expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
+    }
+  });
+
+  it("should filter fiscal codes from both list and prefix matches", async () => {
+    const filterTestFiscalCodes: readonly FiscalCode[] = [testFiscalCode1];
+    const prefixesCfTest = [prefixCfTest];
+    const testFiscalCodeWithPrefix: FiscalCode =
+      "LVTEST00A00A014X" as FiscalCode;
+
+    const activations = [
+      createActivation(testFiscalCode1),
+      createActivation(testFiscalCodeWithPrefix),
+      createActivation(normalFiscalCode),
+    ];
+
+    const handlerInstance = handler(
+      mockProducer,
+      mockPdvTokenizerClient,
+      filterTestFiscalCodes,
+      prefixesCfTest,
+    );
+
+    await handlerInstance({ items: activations })();
+
+    expect(capturedFilter).toBeDefined();
+    if (capturedFilter) {
+      expect(capturedFilter(createActivation(testFiscalCode1))).toBe(false);
+      expect(capturedFilter(createActivation(testFiscalCodeWithPrefix))).toBe(
+        false,
+      );
       expect(capturedFilter(createActivation(normalFiscalCode))).toBe(true);
     }
   });
