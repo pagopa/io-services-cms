@@ -8,11 +8,6 @@ locals {
       BACKOFFICE_HOST          = "selfcare.io.pagopa.it"
       IS_MSW_ENABLED           = false
 
-      # Azure
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
-
       # Apim connection
       AZURE_SUBSCRIPTION_ID     = data.azurerm_subscription.current.subscription_id
       AZURE_APIM                = data.azurerm_api_management.apim_itn.name

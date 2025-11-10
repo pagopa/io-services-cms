@@ -34,9 +34,6 @@ const Config = t.intersection([
     AZURE_APIM_PRODUCT_NAME: NonEmptyString,
     AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
-    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
     AZURE_SUBSCRIPTION_ID: NonEmptyString,
   }),
   HttpAgentConfig,
@@ -70,10 +67,7 @@ const getApimConfig = (): Config => {
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
-  const apimClient = ApimUtils.getApimClient(
-    apimConfig,
-    apimConfig.AZURE_SUBSCRIPTION_ID,
-  );
+  const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID);
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
