@@ -42,12 +42,6 @@ vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
-    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID:
-      "AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID",
-    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET:
-      "AZURE_CLIENT_SECRET_CREDENTIAL_SECRET",
-    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID:
-      "AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID",
     AZURE_APIM_PRODUCT_NAME: "AZURE_APIM_PRODUCT_NAME",
     AZURE_SUBSCRIPTION_ID: "AZURE_SUBSCRIPTION_ID",
     AZURE_APIM_RESOURCE_GROUP: "AZURE_APIM_RESOURCE_GROUP",
@@ -61,15 +55,7 @@ vi.hoisted(() => {
 const ApimUtils = vi.hoisted(() => {
   const apimClientMock = { foo: "foo" };
   return {
-    getApimClient: vi.fn((clientSecretCreds, subscriptionId) => {
-      expect(clientSecretCreds).containSubset({
-        AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID:
-          "AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID",
-        AZURE_CLIENT_SECRET_CREDENTIAL_SECRET:
-          "AZURE_CLIENT_SECRET_CREDENTIAL_SECRET",
-        AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID:
-          "AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID",
-      });
+    getApimClient: vi.fn((subscriptionId) => {
       expect(subscriptionId).toEqual("AZURE_SUBSCRIPTION_ID");
       return apimClientMock;
     }),

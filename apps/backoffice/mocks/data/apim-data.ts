@@ -1,8 +1,9 @@
-import { Configuration } from "@/config";
 import { faker } from "@faker-js/faker/locale/it";
 
-export const getOpenIdConfig = (configuration: Configuration) => ({
-  authorization_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/authorize`,
+export const getOpenIdConfig = (
+  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: string,
+) => ({
+  authorization_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/authorize`,
   claims_supported: [
     "sub",
     "iss",
@@ -26,14 +27,14 @@ export const getOpenIdConfig = (configuration: Configuration) => ({
   ],
   cloud_graph_host_name: "graph.windows.net",
   cloud_instance_name: "microsoftonline.com",
-  device_authorization_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/devicecode`,
-  end_session_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/logout`,
+  device_authorization_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/devicecode`,
+  end_session_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/logout`,
   frontchannel_logout_supported: true,
   http_logout_supported: true,
   id_token_signing_alg_values_supported: ["RS256"],
-  issuer: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0`,
-  jwks_uri: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/discovery/v2.0/keys`,
-  kerberos_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/kerberos`,
+  issuer: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0`,
+  jwks_uri: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/discovery/v2.0/keys`,
+  kerberos_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/kerberos`,
   msgraph_host: "graph.microsoft.com",
   rbac_url: "https://pas.windows.net",
   request_uri_parameter_supported: false,
@@ -47,7 +48,7 @@ export const getOpenIdConfig = (configuration: Configuration) => ({
   scopes_supported: ["openid", "profile", "email", "offline_access"],
   subject_types_supported: ["pairwise"],
   tenant_region_scope: "EU",
-  token_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
+  token_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
   token_endpoint_auth_methods_supported: [
     "client_secret_post",
     "private_key_jwt",
@@ -130,6 +131,7 @@ const getUser = ({
   AZURE_SUBSCRIPTION_ID,
   groups = ["Developer", "ApiServiceWrite"],
   userId = faker.string.uuid(),
+  // eslint-disable-next-line perfectionist/sort-objects
   userEmail = `org.${userId}@selfcare.io.pagopa.com`,
 }: {
   AZURE_APIM: string;
@@ -159,7 +161,9 @@ const getUser = ({
   type: "Microsoft.ApiManagement/service/users",
 });
 
-export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({
+export const getDiscoveryInstanceResponse = (
+  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: string,
+) => ({
   "api-version": "1.1",
   metadata: [
     {
@@ -193,7 +197,7 @@ export const getDiscoveryInstanceResponse = (configuration: Configuration) => ({
       preferred_network: "login-us.microsoftonline.com",
     },
   ],
-  tenant_discovery_endpoint: `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
+  tenant_discovery_endpoint: `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
 });
 
 export const getMockManageSubscriptionGroup = (id?: string) => ({

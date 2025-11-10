@@ -17,9 +17,6 @@ export interface Configuration {
   AZURE_APIM: string;
   AZURE_APIM_PRODUCT_NAME: NonEmptyString;
   AZURE_APIM_RESOURCE_GROUP: string;
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString;
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString;
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   // Apim Configuration
   AZURE_SUBSCRIPTION_ID: string;
   // BackOffice settings
@@ -93,12 +90,6 @@ export function getConfiguration(): Configuration {
     AZURE_APIM_PRODUCT_NAME: process.env
       .AZURE_APIM_PRODUCT_NAME as NonEmptyString, //FIXME: fix cast
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString, //FIXME: fix cast
     AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string, //FIXME: fix cast
     // BackOffice settings
     BACK_OFFICE_ID: process.env.NEXT_PUBLIC_BACK_OFFICE_ID as string,

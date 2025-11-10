@@ -20,16 +20,21 @@ import {
 import { aMockErrorResponse } from "../data/common-data";
 
 export const buildHandlers = () => {
+  const AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID =
+    process.env.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID || "";
   const configuration = getConfiguration();
 
   return [
     http.get(
-      `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
+      `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
       () => {
         const resultArray = [
-          HttpResponse.json(getOpenIdConfig(configuration) as any, {
-            status: 200,
-          }),
+          HttpResponse.json(
+            getOpenIdConfig(AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID) as any,
+            {
+              status: 200,
+            },
+          ),
           HttpResponse.json(getWellKnown500Response(), {
             status: 500,
           }),
@@ -43,7 +48,9 @@ export const buildHandlers = () => {
       () => {
         const resultArray = [
           HttpResponse.json(
-            getDiscoveryInstanceResponse(configuration) as any,
+            getDiscoveryInstanceResponse(
+              AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
+            ) as any,
             {
               status: 200,
             },
@@ -99,7 +106,7 @@ export const buildHandlers = () => {
       },
     ),
     http.post(
-      `https://login.microsoftonline.com/${configuration.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
+      `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
       () => {
         const resultArray = [
           HttpResponse.json(anOauth2TokenResponse, {

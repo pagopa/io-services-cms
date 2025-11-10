@@ -67,10 +67,6 @@ locals {
       AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = local.apim.product_name
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
 
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value # TODO: remove me
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value    # TODO: remove me
-      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id                                 # TODO: remove me
-
       # PostgreSQL 
       REVIEWER_DB_HOST     = var.pgres_cms_fqdn
       REVIEWER_DB_NAME     = "reviewer"
