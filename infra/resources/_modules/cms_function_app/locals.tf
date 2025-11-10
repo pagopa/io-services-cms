@@ -139,6 +139,11 @@ locals {
       # Blob Storage configurations
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
       ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
+
+      # Fiscale code test value
+      INTERNAL_TEST_FISCAL_CODES = "PRVPRV25A01H501B"
+      # Prefix fiscal code (comma separated if more than 1 prefix)
+      PREFIX_CF_TEST = "LVTEST,EEEEEE,AAAAAA,XXXXXP,YYYYYP,KKKKKP,QQQQQP,WWWWWP,ZZZZZP,JJJJJP,GGGGGP,UEETST"
       }, {
       // Queues
       for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
