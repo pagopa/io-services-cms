@@ -14,7 +14,7 @@ const fiscalCode3 = "RSSMRA80T03H501N" as FiscalCode;
 const testFiscalCode1 = "LVTEST00A00A014X" as FiscalCode;
 const testFiscalCode2 = "EEEEEE00E00E000A" as FiscalCode;
 
-const prefixCfTest = "LVTEST";
+const prefixCfTest = "LVTEST00";
 const otherPrefixCfTest = "EEEEEE";
 
 describe("filter-test-user", () => {
