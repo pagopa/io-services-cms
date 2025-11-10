@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 1.29.3
+
+### Patch Changes
+
+- 77042712: centralised route paths
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+- 0a610b55: updated browserlist-db on build
+- Updated dependencies [38e3ae89]
+  - @io-services-cms/external-clients@1.8.2
+
 ## 1.29.2
 
 ### Patch Changes
