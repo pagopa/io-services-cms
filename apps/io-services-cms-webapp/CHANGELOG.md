@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 1.42.1
+
+### Patch Changes
+
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+- Updated dependencies [38e3ae89]
+  - @io-services-cms/external-clients@1.8.2
+
 ## 1.42.0
 
 ### Minor Changes
