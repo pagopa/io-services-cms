@@ -8,7 +8,7 @@ module "bo_roles" {
     name                = data.azurerm_api_management.apim_itn.name
     resource_group_name = data.azurerm_api_management.apim_itn.resource_group_name
     description         = "To allow interaction with APIM"
-    role                = "reader"
+    role                = "owner"
   }]
 }
 
@@ -21,6 +21,6 @@ module "bo_staging_slot_roles" {
     name                = data.azurerm_api_management.apim_itn.name
     resource_group_name = data.azurerm_api_management.apim_itn.resource_group_name
     description         = "To allow interaction with APIM"
-    role                = "reader"
+    role                = "owner"
   }]
 }
