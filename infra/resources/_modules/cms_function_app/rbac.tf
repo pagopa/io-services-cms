@@ -16,7 +16,7 @@ module "cms_fn_roles" {
     name                = local.apim.name
     resource_group_name = local.apim.resource_group_name
     description         = "To allow Function App to work with APIM"
-    role                = "writer"
+    role                = "owner"
   }]
 }
 
@@ -37,6 +37,6 @@ module "cms_fn_staging_slot_roles" {
     name                = local.apim.name
     resource_group_name = local.apim.resource_group_name
     description         = "To allow Function App (staging slot) to work with APIM"
-    role                = "writer"
+    role                = "owner"
   }]
 }
