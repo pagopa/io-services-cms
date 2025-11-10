@@ -545,7 +545,8 @@ export const onIngestionActivationChangeEntryPoint = pipe(
   onIngestionActivationChangeHandler(
     activationEventHubProducer,
     pdvTokenizer,
-    config.INTERNAL_TEST_FISCAL_CODES_COMPRESSED,
+    config.INTERNAL_TEST_FISCAL_CODES,
+    config.PREFIX_CF_TEST,
   ),
   parseBlob,
   toAzureFunctionHandler,

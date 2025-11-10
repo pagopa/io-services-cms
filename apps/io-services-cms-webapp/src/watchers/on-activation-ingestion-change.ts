@@ -22,6 +22,7 @@ export const handler = (
   producer: EventHubProducerClient,
   pdvTokenizerClient: PdvTokenizerClient,
   filterTestFiscalCodes: readonly FiscalCode[],
+  prefixCfTest: readonly string[],
 ): RTE.ReaderTaskEither<
   {
     items: Activations.Activation[];
@@ -34,7 +35,10 @@ export const handler = (
     avroActivationFormatter,
     enricher<Activations.Activation>(pdvTokenizerClient),
     (activation) =>
-      !isTestUser(new Set(filterTestFiscalCodes))(activation.fiscalCode),
+      !isTestUser(
+        new Set(filterTestFiscalCodes),
+        prefixCfTest,
+      )(activation.fiscalCode),
   );
 
 export const parseBlob: <R>(
