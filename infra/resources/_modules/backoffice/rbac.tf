@@ -5,8 +5,8 @@ module "bo_roles" {
   principal_id    = module.backoffice.app_service.app_service.principal_id
   subscription_id = data.azurerm_subscription.current.subscription_id
   apim = [{
-    name                = local.apim.name
-    resource_group_name = local.apim.resource_group_name
+    name                = data.azurerm_api_management.apim_itn.name
+    resource_group_name = data.azurerm_api_management.apim_itn.resource_group_name
     description         = "To allow interaction with APIM"
     role                = "writer"
   }]
@@ -18,8 +18,8 @@ module "bo_staging_slot_roles" {
   principal_id    = module.backoffice.app_service.app_service.slot.principal_id
   subscription_id = data.azurerm_subscription.current.subscription_id
   apim = [{
-    name                = local.apim.name
-    resource_group_name = local.apim.resource_group_name
+    name                = data.azurerm_api_management.apim_itn.name
+    resource_group_name = data.azurerm_api_management.apim_itn.resource_group_name
     description         = "To allow interaction with APIM"
     role                = "writer"
   }]
