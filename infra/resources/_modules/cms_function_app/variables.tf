@@ -105,16 +105,6 @@ variable "jira_token_name" {
   description = "Connection Token to Jira"
 }
 
-variable "azure_client_secret_credential_client_id_name" {
-  type        = string
-  description = "Azure Client Secret Credential Client Id Name"
-}
-
-variable "azure_client_secret_credential_secret_name" {
-  type        = string
-  description = "Azure Client Secret Credential Secret Name"
-}
-
 variable "serviceid_quality_check_exclusion_list_name" {
   type        = string
   description = "Service quality check exclusion list"
