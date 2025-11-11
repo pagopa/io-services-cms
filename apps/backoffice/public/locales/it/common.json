@@ -585,9 +585,14 @@
     },
     "submitReview": {
       "modal": {
-        "title": "Vuoi inviare questo servizio in revisione?",
-        "description": "Il servizio verrà revisionato dal team di IO. Monitora in <strong>Servizi</strong> l’esito della revisione: <br/><ul><li>se il servizio viene <strong>approvato</strong>, verrà automaticamente pubblicato;</li><li>nel caso in cui il servizio venga <strong>rifiutato</strong>, potrai consultare la motivazione e apportare le modifiche necessarie per poterlo inviare nuovamente in revisione.</li></ul>",
-        "button": "Invia in revisione"
+        "title": "Vuoi inviare il servizio in revisione?",
+        "description": "Il team di IO controllerà i contenuti del servizio. Controlla lo stato nella <br/>sezione Servizi per conoscere l'esito della revisione",
+        "checkBoxLabel": "Pubblica dopo l'approvazione",
+        "button": "Invia in revisione",
+        "action": {
+          "messageSuccess": "Servizio inviato in revisione",
+          "messageError": "Invio non riuscito. Riprova."
+        }
       }
     },
     "unpublish": {

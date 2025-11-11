@@ -1,8 +1,10 @@
 import { AccessControl } from "@/components/access-control";
+import { CheckboxToggleWithLabel } from "@/components/checkbox";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
+import { buildSnackbarItem } from "@/components/notification";
 import {
   ServiceContextMenuActions,
   ServiceGroupTag,
@@ -38,6 +40,7 @@ import {
   trackServiceEditStartEvent,
   trackServicesPageEvent,
 } from "@/utils/mix-panel";
+import { waitUntil } from "@/utils/wait-until";
 import {
   Add,
   Block,
@@ -55,7 +58,8 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { useSnackbar } from "notistack";
+import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -117,6 +121,9 @@ export default function Services() {
   const { data: session } = useSession();
   const router = useRouter();
   const showDialog = useDialog();
+
+  const [autoPublish, setAutoPublish] = useState<boolean>(true);
+  const autoPublishRef = useRef(autoPublish);
 
   const getTableViewColumnGroup = (): TableViewColumn<ServiceListItem>[] =>
     hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session)
@@ -230,7 +237,9 @@ export default function Services() {
     fetchData: servicesFetchData,
     loading: servicesLoading,
   } = useFetch<ServiceList>();
-  const { fetchData: noContentFetchData } = useFetch<unknown>();
+  const { fetchData: noContentFetchData, loading: loadingNoContent } =
+    useFetch<unknown>();
+  const { enqueueSnackbar } = useSnackbar();
 
   const [services, setServices] = useState<ServiceListItem[]>();
   const [pagination, setPagination] = useState({
@@ -314,6 +323,7 @@ export default function Services() {
    */
   const addRowMenuItem = (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     icon: ReactNode;
     onClickFn?: () => void;
@@ -337,6 +347,16 @@ export default function Services() {
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.submitReview,
+      body: (
+        <CheckboxToggleWithLabel
+          initial={autoPublish}
+          label={"service.submitReview.modal.checkBoxLabel"}
+          onChange={(next) => {
+            autoPublishRef.current = next;
+            setAutoPublish(next);
+          }}
+        />
+      ),
       icon: <FactCheck color="primary" fontSize="inherit" />,
       serviceId: service.id,
     });
@@ -412,14 +432,29 @@ export default function Services() {
   /** handle actions click: open confirmation modal and on confirm click, perform b4f call action */
   const handleConfirmationModal = async (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     serviceId: string;
   }) => {
-    const raiseClickEvent = await showDialog({
+    const dialogBaseConfig = {
+      body: options.body ?? null,
       confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
       title: t(`service.${options.action}.modal.title`),
-    });
+    };
+
+    const raiseClickEvent = await showDialog(
+      options.action === ServiceContextMenuActions.submitReview
+        ? {
+            ...dialogBaseConfig,
+            confirmAction: async () => {
+              await waitUntil(() => loadingNoContent);
+              await Promise.resolve(handleSubmitReview(options.serviceId));
+              return true;
+            },
+          }
+        : dialogBaseConfig,
+    );
     if (raiseClickEvent) {
       switch (options.action) {
         case ServiceContextMenuActions.delete:
@@ -429,7 +464,6 @@ export default function Services() {
           await handlePublish(options.serviceId);
           break;
         case ServiceContextMenuActions.submitReview:
-          await handleSubmitReview(options.serviceId, true); // TODO capire lato UX/UI come gestire l'auto_publish
           break;
         case ServiceContextMenuActions.unpublish:
           await handleUnpublish(options.serviceId);
@@ -459,19 +493,34 @@ export default function Services() {
       notify: "all",
     });
   };
-
-  const handleSubmitReview = async (
-    serviceId: string,
-    auto_publish: boolean,
-  ) => {
-    await noContentFetchData(
+  const handleSubmitReview = async (serviceId: string): Promise<boolean> => {
+    const value = autoPublishRef.current;
+    // niente notify: messaggi custom qui
+    const { success } = await noContentFetchData(
       "reviewService",
-      { body: { auto_publish }, serviceId },
+      { body: { auto_publish: value }, serviceId },
       tt.unknown,
-      {
-        notify: "all",
-      },
     );
+
+    if (success) {
+      enqueueSnackbar(
+        buildSnackbarItem({
+          message: t("service.submitReview.modal.action.messageSuccess"),
+          severity: "success",
+          title: "",
+        }),
+      );
+      return true;
+    }
+
+    enqueueSnackbar(
+      buildSnackbarItem({
+        message: t("service.submitReview.modal.action.messageError"),
+        severity: "error",
+        title: "",
+      }),
+    );
+    return false;
   };
 
   const getServices = () => {

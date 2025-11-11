@@ -5,6 +5,7 @@ import {
   ServicePublicationStatusType,
   ServicePublicationStatusTypeEnum,
 } from "@/generated/api/ServicePublicationStatusType";
+import { waitUntil } from "@/utils/wait-until";
 import {
   Check,
   Close,
@@ -23,10 +24,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import { ButtonWithTooltip } from "../buttons";
-import { useDialog } from "../dialog-provider";
+import { useDialog } from "../dialog-provider"; // lo usi già nel hook
 
 export enum ServiceContextMenuActions {
   delete = "delete",
@@ -38,13 +39,15 @@ export enum ServiceContextMenuActions {
 }
 
 export interface ServiceContextMenuProps {
+  body?: ReactNode;
+  getSubmitReviewLoading?: () => boolean;
   lifecycleStatus?: ServiceLifecycleStatus;
   onDeleteClick: () => void;
   onEditClick: () => void;
   onHistoryClick: () => void;
   onPreviewClick: () => void;
   onPublishClick: () => void;
-  onSubmitReviewClick: () => void;
+  onSubmitReviewClick: () => Promise<boolean>;
   onUnpublishClick: () => void;
   publicationStatus?: ServicePublicationStatusType;
   /** If `true` shows ServicePublication actions only */
@@ -54,6 +57,8 @@ export interface ServiceContextMenuProps {
 /** Service context menu */
 // eslint-disable-next-line max-lines-per-function
 export const ServiceContextMenu = ({
+  body,
+  getSubmitReviewLoading,
   lifecycleStatus,
   onDeleteClick,
   onEditClick,
@@ -67,6 +72,7 @@ export const ServiceContextMenu = ({
 }: ServiceContextMenuProps) => {
   const { t } = useTranslation();
   const showDialog = useDialog();
+  // console.log(confirmButtonLoading, " confirmButtonLoading->");
 
   const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<HTMLElement | null>(
     null,
@@ -82,15 +88,29 @@ export const ServiceContextMenu = ({
     setEditMenuAnchorEl(null);
   };
 
-  /** handle actions click: open confirmation modal and on confirm click, raise event */
   const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
-    handleEditMenuClose();
-    const raiseClickEvent = await showDialog({
+    const dialogBaseConfig = {
+      body: body ?? null,
       confirmButtonLabel: t(`service.${action}.modal.button`),
       message: t(`service.${action}.modal.description`),
       title: t(`service.${action}.modal.title`),
-    });
-    if (raiseClickEvent) {
+    };
+
+    const confirmed = await showDialog(
+      action === ServiceContextMenuActions.submitReview
+        ? {
+            ...dialogBaseConfig,
+            confirmAction: async () => {
+              if (getSubmitReviewLoading) {
+                await waitUntil(() => getSubmitReviewLoading?.());
+              }
+              await Promise.resolve(onSubmitReviewClick());
+              return true;
+            },
+          }
+        : dialogBaseConfig,
+    );
+    if (confirmed) {
       switch (action) {
         case ServiceContextMenuActions.delete:
           onDeleteClick();
@@ -104,11 +124,10 @@ export const ServiceContextMenu = ({
         case ServiceContextMenuActions.publish:
           onPublishClick();
           break;
-        case ServiceContextMenuActions.submitReview:
-          onSubmitReviewClick();
-          break;
         case ServiceContextMenuActions.unpublish:
           onUnpublishClick();
+          break;
+        case ServiceContextMenuActions.submitReview:
           break;
         default:
           console.warn("unhandled action " + action);

@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,6 +15,7 @@ interface DialogOptions {
   body?: ReactNode;
   /** label for cancel button: if specified, overwrite default value */
   cancelButtonLabel?: string;
+  confirmAction?: () => Promise<boolean>; // true=ok, false=non ok
   /** label for confirm button: if specified, overwrite default value */
   confirmButtonLabel?: string;
   hideCancelButton?: boolean;
@@ -42,6 +44,7 @@ const DialogProvider: React.FC<{
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<DialogOptions>({ title: "" });
   const [promiseInfo, setPromiseInfo] = useState<PromiseInfo>();
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false);
 
   const showDialog: ShowDialogHandler = (options) =>
     // When the dialog is shown, keep the promise info so we can resolve later
@@ -50,11 +53,20 @@ const DialogProvider: React.FC<{
       setOptions(options);
       setOpen(true);
     });
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (isConfirmLoading) return; // evita doppi click
     // if the Confirm button gets clicked, resolve with `true`
-    setOpen(false);
-    promiseInfo?.resolve(true);
-    setPromiseInfo(undefined);
+    try {
+      setIsConfirmLoading(true);
+      const result = (await options.confirmAction?.()) ?? true;
+      setOpen(false);
+      promiseInfo?.resolve(result);
+    } catch (e) {
+      /* empty */
+    } finally {
+      setIsConfirmLoading(false);
+      setPromiseInfo(undefined);
+    }
   };
 
   const handleCancel = () => {
@@ -68,6 +80,7 @@ const DialogProvider: React.FC<{
     <>
       <DialogBaseView
         {...options}
+        isConfirmLoading={isConfirmLoading}
         isOpen={open}
         onClose={handleCancel}
         onConfirm={handleConfirm}
@@ -80,6 +93,7 @@ const DialogProvider: React.FC<{
 };
 
 export interface DialogBaseViewProps extends DialogOptions {
+  isConfirmLoading: boolean;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -92,7 +106,10 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
     <Dialog
       data-testid="bo-io-dialog-provider"
       disableScrollLock
-      onClose={props.onClose}
+      onClose={() => {
+        if (props.isConfirmLoading) return;
+        props.onClose();
+      }}
       open={props.isOpen}
     >
       <DialogTitle>{props.title}</DialogTitle>
@@ -107,8 +124,16 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
       <DialogActions sx={{ padding: "16px 24px" }}>
         {!props.hideCancelButton && (
           <Button
+            aria-disabled={props.isConfirmLoading}
             data-testid="bo-io-dialog-provider-cancel-button"
-            onClick={props.onClose}
+            onClick={(e) => {
+              if (props.isConfirmLoading) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              props.onClose();
+            }}
             variant="outlined"
           >
             {props.cancelButtonLabel
@@ -118,13 +143,24 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
         )}
         {!props.hideConfirmButton && (
           <Button
+            autoFocus
             data-testid="bo-io-dialog-provider-confirm-button"
             onClick={props.onConfirm}
             variant="contained"
           >
-            {props.confirmButtonLabel
-              ? t(props.confirmButtonLabel)
-              : t("buttons.confirm")}
+            <span
+              style={{
+                display: props.isConfirmLoading ? "none" : "visible",
+              }}
+            >
+              {props.confirmButtonLabel
+                ? t(props.confirmButtonLabel)
+                : t("buttons.confirm")}
+            </span>
+
+            {props.isConfirmLoading && (
+              <CircularProgress color="inherit" size={20} />
+            )}
           </Button>
         )}
       </DialogActions>

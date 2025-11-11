@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DialogProvider from "../../dialog-provider";
@@ -38,11 +44,11 @@ describe("[ButtonExit] Component", () => {
 
     const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
-    await fireEvent.click(
-      screen.getByTestId("bo-io-dialog-provider-confirm-button"),
-    );
+    await screen.findByTestId("bo-io-dialog-provider");
 
-    expect(onClick).toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId("bo-io-dialog-provider-confirm-button"));
+
+    await waitFor(() => expect(onClick).toHaveBeenCalled());
   });
 
   it("should be clicked with cancel", async () => {
@@ -50,10 +56,11 @@ describe("[ButtonExit] Component", () => {
 
     const button = screen.getByTestId(BO_IO_BUTTON_EXIT);
     fireEvent.click(button);
-    await fireEvent.click(
-      screen.getByTestId("bo-io-dialog-provider-cancel-button"),
-    );
 
-    expect(onClick).not.toHaveBeenCalled();
+    await screen.findByTestId("bo-io-dialog-provider");
+
+    fireEvent.click(screen.getByTestId("bo-io-dialog-provider-cancel-button"));
+
+    await waitFor(() => expect(onClick).not.toHaveBeenCalled());
   });
 });
