@@ -18,16 +18,6 @@ data "azurerm_key_vault_secret" "jira_token" {
   key_vault_id = module.key_vault_domain.id
 }
 
-data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-SECRET"
-  key_vault_id = module.key_vault_domain.id
-}
-
-data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-  name         = "AZURE-CLIENT-SECRET-CREDENTIAL-CLIENT-ID"
-  key_vault_id = module.key_vault_domain.id
-}
-
 data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   name         = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
   key_vault_id = module.key_vault_domain.id

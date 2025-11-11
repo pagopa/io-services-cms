@@ -33,16 +33,6 @@ data "azurerm_api_management_product" "apim_itn_product_services" {
 # KeyVault Secrets #
 ####################
 
-data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-  name         = var.azure_client_secret_credential_client_id_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-  name         = var.azure_client_secret_credential_secret_name
-  key_vault_id = var.key_vault_id
-}
-
 data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
   name         = var.legacy_cosmosdb_key_name
   key_vault_id = var.key_vault_id

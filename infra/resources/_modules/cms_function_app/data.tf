@@ -31,16 +31,6 @@ data "azurerm_key_vault_secret" "jira_token" {
   key_vault_id = var.key_vault_id
 }
 
-data "azurerm_key_vault_secret" "azure_client_secret_credential_secret" {
-  name         = var.azure_client_secret_credential_secret_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "azure_client_secret_credential_client_id" {
-  name         = var.azure_client_secret_credential_client_id_name
-  key_vault_id = var.key_vault_id
-}
-
 data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   name         = var.serviceid_quality_check_exclusion_list_name
   key_vault_id = var.key_vault_id
