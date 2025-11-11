@@ -30,7 +30,7 @@
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     "install-yarn-and-deps": "yarn install",
-    "install-pre-commit": "pre-commit install"
+    "install-pre-commit": "pre-commit install --install-hooks"
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [
