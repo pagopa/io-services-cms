@@ -1,9 +1,9 @@
 {
   "backoffice.backoffice": {
-    "hash": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
-    "version": "0.1.10",
+    "hash": "574eefa5a3e46ae05349a2a08c1035017b22abe9be747491f1b6fbbfc6d5d332",
+    "version": "2.0.1",
     "name": "azure_app_service",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/0.1.10"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/2.0.1"
   },
   "cms_function_app.cms_fn": {
     "hash": "df3f3bc0271d19115b3430a732b96d5818173aa0a5be97986b0d614cbf6f74cc",

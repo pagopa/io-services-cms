@@ -1,7 +1,7 @@
 
 locals {
   backoffice = {
-    tier = "standard"
+    size = "P0v3"
     base_app_settings = {
       NODE_ENV                 = "production"
       WEBSITE_RUN_FROM_PACKAGE = "1"
