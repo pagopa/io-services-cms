@@ -2,10 +2,10 @@ export const wait = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 export const waitUntil = async (
-  predicate: () => boolean,
+  condition: () => boolean,
   interval = 50,
 ): Promise<void> => {
-  while (predicate()) {
+  while (condition()) {
     await wait(interval);
   }
 };

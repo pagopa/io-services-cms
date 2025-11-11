@@ -27,7 +27,7 @@ import { useTranslation } from "next-i18next";
 import { ReactNode, useState } from "react";
 
 import { ButtonWithTooltip } from "../buttons";
-import { useDialog } from "../dialog-provider"; // lo usi già nel hook
+import { useDialog } from "../dialog-provider";
 
 export enum ServiceContextMenuActions {
   delete = "delete",
@@ -72,7 +72,6 @@ export const ServiceContextMenu = ({
 }: ServiceContextMenuProps) => {
   const { t } = useTranslation();
   const showDialog = useDialog();
-  // console.log(confirmButtonLoading, " confirmButtonLoading->");
 
   const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<HTMLElement | null>(
     null,
@@ -88,6 +87,7 @@ export const ServiceContextMenu = ({
     setEditMenuAnchorEl(null);
   };
 
+  /** handle actions click: open confirmation modal and on confirm click, raise event */
   const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
     const dialogBaseConfig = {
       body: body ?? null,

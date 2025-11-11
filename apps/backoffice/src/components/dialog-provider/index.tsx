@@ -54,7 +54,7 @@ const DialogProvider: React.FC<{
       setOpen(true);
     });
   const handleConfirm = async () => {
-    if (isConfirmLoading) return; // evita doppi click
+    if (isConfirmLoading) return;
     // if the Confirm button gets clicked, resolve with `true`
     try {
       setIsConfirmLoading(true);

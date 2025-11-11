@@ -495,7 +495,6 @@ export default function Services() {
   };
   const handleSubmitReview = async (serviceId: string): Promise<boolean> => {
     const value = autoPublishRef.current;
-    // niente notify: messaggi custom qui
     const { success } = await noContentFetchData(
       "reviewService",
       { body: { auto_publish: value }, serviceId },
