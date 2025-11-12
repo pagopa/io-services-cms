@@ -588,11 +588,7 @@
         "title": "Would you like to send the service for review?",
         "description": "The IO team will review the service content. Check the status in the <br/>Services section to find out the outcome of the review.",
         "checkBoxLabel": "Publish after approval",
-        "button": "Send for review",
-        "action": {
-          "messageSuccess": "Service sent for review",
-          "messageError": "Failed to send. Please try again."
-        }
+        "button": "Send for review"
       }
     },
     "unpublish": {

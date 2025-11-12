@@ -588,11 +588,7 @@
         "title": "Vuoi inviare il servizio in revisione?",
         "description": "Il team di IO controllerà i contenuti del servizio. Controlla lo stato nella <br/>sezione Servizi per conoscere l'esito della revisione",
         "checkBoxLabel": "Pubblica dopo l'approvazione",
-        "button": "Invia in revisione",
-        "action": {
-          "messageSuccess": "Servizio inviato in revisione",
-          "messageError": "Invio non riuscito. Riprova."
-        }
+        "button": "Invia in revisione"
       }
     },
     "unpublish": {

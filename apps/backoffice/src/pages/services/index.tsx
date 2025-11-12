@@ -4,7 +4,6 @@ import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
-import { buildSnackbarItem } from "@/components/notification";
 import {
   ServiceContextMenuActions,
   ServiceGroupTag,
@@ -40,7 +39,6 @@ import {
   trackServiceEditStartEvent,
   trackServicesPageEvent,
 } from "@/utils/mix-panel";
-import { waitUntil } from "@/utils/wait-until";
 import {
   Add,
   Block,
@@ -58,7 +56,6 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useSnackbar } from "notistack";
 import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
@@ -237,9 +234,7 @@ export default function Services() {
     fetchData: servicesFetchData,
     loading: servicesLoading,
   } = useFetch<ServiceList>();
-  const { fetchData: noContentFetchData, loading: loadingNoContent } =
-    useFetch<unknown>();
-  const { enqueueSnackbar } = useSnackbar();
+  const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   const [services, setServices] = useState<ServiceListItem[]>();
   const [pagination, setPagination] = useState({
@@ -436,25 +431,13 @@ export default function Services() {
     danger?: boolean;
     serviceId: string;
   }) => {
-    const dialogBaseConfig = {
+    const raiseClickEvent = await showDialog({
       body: options.body ?? null,
       confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
       title: t(`service.${options.action}.modal.title`),
-    };
+    });
 
-    const raiseClickEvent = await showDialog(
-      options.action === ServiceContextMenuActions.submitReview
-        ? {
-            ...dialogBaseConfig,
-            confirmAction: async () => {
-              await waitUntil(() => loadingNoContent);
-              await Promise.resolve(handleSubmitReview(options.serviceId));
-              return true;
-            },
-          }
-        : dialogBaseConfig,
-    );
     if (raiseClickEvent) {
       switch (options.action) {
         case ServiceContextMenuActions.delete:
@@ -464,6 +447,7 @@ export default function Services() {
           await handlePublish(options.serviceId);
           break;
         case ServiceContextMenuActions.submitReview:
+          await handleSubmitReview(options.serviceId);
           break;
         case ServiceContextMenuActions.unpublish:
           await handleUnpublish(options.serviceId);
@@ -493,33 +477,16 @@ export default function Services() {
       notify: "all",
     });
   };
-  const handleSubmitReview = async (serviceId: string): Promise<boolean> => {
+  const handleSubmitReview = async (serviceId: string) => {
     const value = autoPublishRef.current;
-    const { success } = await noContentFetchData(
+    await noContentFetchData(
       "reviewService",
       { body: { auto_publish: value }, serviceId },
       tt.unknown,
+      {
+        notify: "all",
+      },
     );
-
-    if (success) {
-      enqueueSnackbar(
-        buildSnackbarItem({
-          message: t("service.submitReview.modal.action.messageSuccess"),
-          severity: "success",
-          title: "",
-        }),
-      );
-      return true;
-    }
-
-    enqueueSnackbar(
-      buildSnackbarItem({
-        message: t("service.submitReview.modal.action.messageError"),
-        severity: "error",
-        title: "",
-      }),
-    );
-    return false;
   };
 
   const getServices = () => {

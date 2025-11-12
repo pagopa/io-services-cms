@@ -1,13 +1,6 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DialogProvider, { useDialog } from "../index";
-import { act } from "react-dom/test-utils";
 
 const BO_IO_DIALOG_PROVIDER = "bo-io-dialog-provider";
 const BO_IO_BUTTON = "bo-io-button-exit";
@@ -61,10 +54,8 @@ describe("[DialogProvider] Component", () => {
     render(getDialogProviderComponent());
 
     const button = screen.getByTestId(BO_IO_BUTTON);
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    const dialog = await screen.findByTestId(BO_IO_DIALOG_PROVIDER);
+    fireEvent.click(button);
+    const dialog = screen.getByTestId(BO_IO_DIALOG_PROVIDER);
     expect(dialog).toBeDefined();
   });
 
@@ -72,39 +63,29 @@ describe("[DialogProvider] Component", () => {
     render(getDialogProviderComponent());
 
     const button = screen.getByTestId(BO_IO_BUTTON);
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    await screen.findByTestId(BO_IO_DIALOG_PROVIDER);
-    await act(async () => {
-      fireEvent.click(screen.getByText("confirm"));
-    });
-    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
+    fireEvent.click(button);
+    await fireEvent.click(screen.getByText("confirm"));
+
+    expect(onConfirm).toHaveBeenCalled();
   });
 
   it("should trigger cancel button", async () => {
     render(getDialogProviderComponent());
 
     const button = screen.getByTestId(BO_IO_BUTTON);
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    await screen.findByTestId(BO_IO_DIALOG_PROVIDER);
-    await act(async () => {
-      fireEvent.click(screen.getByText("cancel"));
-    });
-    await waitFor(() => expect(onCancel).toHaveBeenCalled());
+    fireEvent.click(button);
+    await fireEvent.click(screen.getByText("cancel"));
+
+    expect(onCancel).toHaveBeenCalled();
   });
 
   it("Should show the prop values for confirm and cancel buttons", async () => {
     render(getDialogProviderComponent());
 
     const button = screen.getByTestId(BO_IO_BUTTON);
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    const confirmButton = await screen.findByText("confirm");
-    const cancelButton = await screen.findByText("cancel");
+    fireEvent.click(button);
+    const confirmButton = await screen.getByText("confirm");
+    const cancelButton = await screen.getByText("cancel");
 
     expect(confirmButton).toBeDefined();
     expect(cancelButton).toBeDefined();
@@ -117,11 +98,9 @@ describe("[DialogProvider] Component", () => {
     render(getDialogProviderComponent());
 
     const button = screen.getByTestId(BO_IO_BUTTON);
-    await act(async () => {
-      fireEvent.click(button);
-    });
-    const confirmButton = await screen.findByText("buttons.confirm");
-    const cancelButton = await screen.findByText("buttons.cancel");
+    fireEvent.click(button);
+    const confirmButton = await screen.getByText("buttons.confirm");
+    const cancelButton = await screen.getByText("buttons.cancel");
 
     expect(confirmButton).toBeDefined();
     expect(cancelButton).toBeDefined();

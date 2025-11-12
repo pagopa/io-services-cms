@@ -2,7 +2,6 @@ import { ApiKeys, AuthorizedCidrs } from "@/components/api-keys";
 import { AppPreview } from "@/components/app-preview";
 import { CheckboxToggleWithLabel } from "@/components/checkbox";
 import { PageHeader } from "@/components/headers";
-import { buildSnackbarItem } from "@/components/notification";
 import {
   ServiceAlerts,
   ServiceContextMenu,
@@ -14,10 +13,10 @@ import {
 } from "@/components/services";
 import { ServiceHistory } from "@/generated/api/ServiceHistory";
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
-import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { ServicePublication } from "@/generated/api/ServicePublication";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ROUTES } from "@/lib/routes";
@@ -34,7 +33,6 @@ import * as tt from "io-ts";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useRef, useState } from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
@@ -65,10 +63,7 @@ export default function ServiceDetails() {
   const { data: spData, fetchData: spFetchData } =
     useFetch<ServicePublication>();
   const { data: skData, fetchData: skFetchData } = useFetch<SubscriptionKeys>();
-  const { fetchData: noContentFetchData, loading: loadingResponse } =
-    useFetch<unknown>();
-
-  const { enqueueSnackbar } = useSnackbar();
+  const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   /** set current service to display _(`Lifecycle` or `Publication` version)_ */
   const manageCurrentService = () =>
@@ -111,36 +106,17 @@ export default function ServiceDetails() {
     router.push(ROUTES.SERVICES.LIST); // redirect to parent services page
   };
 
-  const handleSubmitReview = async (): Promise<boolean> => {
+  const handleSubmitReview = async () => {
     const value = autoPublishRef.current;
-
-    const { success } = await noContentFetchData(
+    await noContentFetchData(
       "reviewService",
       { body: { auto_publish: value }, serviceId },
       tt.unknown,
+      {
+        notify: "all",
+      },
     );
-
-    if (success) {
-      enqueueSnackbar(
-        buildSnackbarItem({
-          message: t("service.submitReview.modal.action.messageSuccess"),
-          severity: "success",
-          title: "",
-        }),
-      );
-      fetchServiceLifecycle();
-      return true;
-    }
-
-    enqueueSnackbar(
-      buildSnackbarItem({
-        message: t("service.submitReview.modal.action.messageError"),
-        severity: "error",
-        title: "",
-      }),
-    );
-
-    return false;
+    fetchServiceLifecycle(); // reload ServiceLifecycle
   };
 
   const handleHistory = (trackEvent: boolean, continuationToken?: string) => {
@@ -183,10 +159,6 @@ export default function ServiceDetails() {
     spFetchData("getPublishedService", { serviceId }, ServicePublication);
 
   useEffect(() => {
-    autoPublishRef.current = autoPublish;
-  }, [autoPublish]);
-
-  useEffect(() => {
     fetchServiceLifecycle();
     fetchServicePublication();
     skFetchData("getServiceKeys", { serviceId }, SubscriptionKeys, {
@@ -222,18 +194,13 @@ export default function ServiceDetails() {
                 />
               ) : undefined
             }
-            getSubmitReviewLoading={
-              slData?.status?.value === ServiceLifecycleStatusTypeEnum.draft
-                ? () => loadingResponse
-                : undefined
-            }
             lifecycleStatus={slData?.status}
             onDeleteClick={handleDelete}
             onEditClick={handleEdit}
             onHistoryClick={() => handleHistory(true)}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
-            onSubmitReviewClick={handleSubmitReview}
+            onSubmitReviewClick={() => handleSubmitReview()} // TODO capire lato UX/UI come gestire l'auto_publish
             onUnpublishClick={handleUnpublish}
             publicationStatus={spData?.status}
             releaseMode={release}
