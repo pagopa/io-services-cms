@@ -93,21 +93,25 @@ const DialogProvider: React.FC<{
 };
 
 export interface DialogBaseViewProps extends DialogOptions {
-  isConfirmLoading: boolean;
+  isConfirmLoading?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
 
-export const DialogBaseView = (props: DialogBaseViewProps) => {
+export const DialogBaseView = ({
+  isConfirmLoading = false,
+  ...props
+}: DialogBaseViewProps) => {
   const { t } = useTranslation();
+  const loading = !!isConfirmLoading;
 
   return (
     <Dialog
       data-testid="bo-io-dialog-provider"
       disableScrollLock
       onClose={() => {
-        if (props.isConfirmLoading) return;
+        if (loading) return;
         props.onClose();
       }}
       open={props.isOpen}
@@ -124,10 +128,10 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
       <DialogActions sx={{ padding: "16px 24px" }}>
         {!props.hideCancelButton && (
           <Button
-            aria-disabled={props.isConfirmLoading}
+            aria-disabled={loading}
             data-testid="bo-io-dialog-provider-cancel-button"
             onClick={(e) => {
-              if (props.isConfirmLoading) {
+              if (loading) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
@@ -150,7 +154,7 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
           >
             <span
               style={{
-                display: props.isConfirmLoading ? "none" : "visible",
+                display: loading ? "none" : "visible",
               }}
             >
               {props.confirmButtonLabel
@@ -158,9 +162,7 @@ export const DialogBaseView = (props: DialogBaseViewProps) => {
                 : t("buttons.confirm")}
             </span>
 
-            {props.isConfirmLoading && (
-              <CircularProgress color="inherit" size={20} />
-            )}
+            {loading && <CircularProgress color="inherit" size={20} />}
           </Button>
         )}
       </DialogActions>
