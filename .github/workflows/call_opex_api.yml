@@ -1,0 +1,48 @@
+on:
+  workflow_call:
+    inputs:
+      api-name:
+        required: true
+        type: string
+      environment:
+        required: false
+        type: string
+    secrets:
+      ARM_CLIENT_ID:
+        required: true
+      ARM_SUBSCRIPTION_ID:
+        required: true
+      ARM_TENANT_ID:
+        required: true
+
+env:
+  DOCKER_IMAGE_TAG: sha256:eb3354b7e5c07e9557182828489fc0bf8092dd80886035429268d019250f5cd3
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    environment: opex-prod-cd
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+
+    steps:
+      - name: Checkout
+        id: checkout
+        # from https://github.com/actions/checkout/commits/main
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      # from https://github.com/pagopa/opex-dashboard-azure-action/
+      - uses: pagopa/opex-dashboard-azure-action@3ad80a5e4a2d5a8f342615637072f21b687320ce # action v1.2.1
+        with:
+          environment: ${{ inputs.environment }}
+          api-name: ${{ inputs.api-name }}
+          config: .opex/${{ inputs.api-name }}/env/${{ inputs.environment }}/config.yaml
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          # from https://github.com/pagopa/opex-dashboard-azure-action/pkgs/container/opex-dashboard-azure-action
+          docker-version: ${{ env.DOCKER_IMAGE_TAG }}
