@@ -128,7 +128,7 @@ describe("handler", () => {
   const testFiscalCode2: FiscalCode = "RSSMRA80T02H501M" as FiscalCode;
   const normalFiscalCode: FiscalCode = "RSSMRA80T03H501N" as FiscalCode;
 
-  const prefixCfTest = "LVTEST00";
+  const prefixCfTest = "LVTEST00A00";
 
   const createActivation = (
     fiscalCode: FiscalCode,
