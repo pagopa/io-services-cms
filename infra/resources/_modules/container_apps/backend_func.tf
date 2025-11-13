@@ -26,13 +26,13 @@ module "backend_func_itn" {
 
   autoscaler = {
     replicas = {
-      minimum = 40
+      minimum = 50
       maximum = 200
     }
     http_scalers = [
       {
         name                = "http-scale-rule"
-        concurrent_requests = 50
+        concurrent_requests = 40
       }
     ]
     custom_scalers = [
