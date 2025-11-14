@@ -175,17 +175,3 @@ variable "pgres_cms_fqdn" {
   description = "FQDN of the CMS Postgres Flexible Server"
   type        = string
 }
-
-variable "test_fiscal_codes_users" {
-  description = "Test fiscal codes users object from io-infra test_users module"
-  type = object({
-    all                = string
-    internal_flat      = string
-    internal_load_flat = string
-    store_review_flat  = string
-    eu_covid_cert_flat = string
-    cdc_flat           = string
-    light              = string
-    unique_email_test  = list(string)
-  })
-}
