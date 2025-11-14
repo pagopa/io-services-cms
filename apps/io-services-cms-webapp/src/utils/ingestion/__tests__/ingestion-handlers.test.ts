@@ -220,10 +220,36 @@ describe("Generic Ingestion PDND Handlers", () => {
       }
       expect(aFilterThatRejects).toHaveBeenCalledTimes(2);
       expect(aFilterThatRejects).toHaveBeenNthCalledWith(1, anItem, 0, items);
-      expect(aFilterThatRejects).toHaveBeenNthCalledWith(2, { ...anItem, id: "anotherItemId" }, 1, items);    
+      expect(aFilterThatRejects).toHaveBeenNthCalledWith(2, { ...anItem, id: "anotherItemId" }, 1, items);
       expect(aFormatter).not.toHaveBeenCalled();
       expect(aProducer.sendBatch).toHaveBeenCalledOnce();
       expect(aProducer.sendBatch).toBeCalledWith([]);
+    });
+
+    it("should process all items when filter is undefined and the filter function should not be called", async () => {
+      //given
+      const items = [anItem, { ...anItem, id: "anotherItemId" }];
+      const res = await createIngestionBlobTriggerHandler(
+        aProducer,
+        aFormatter,
+        undefined,
+        undefined,
+      )({ items })();
+
+      //then
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual([{}]);
+      }
+      expect(aFilter).not.toHaveBeenCalled();
+      expect(aFormatter).toHaveBeenCalledTimes(2);
+      expect(aFormatter).toHaveBeenNthCalledWith(1, anItem);
+      expect(aFormatter).toHaveBeenNthCalledWith(2, { ...anItem, id: "anotherItemId" });
+      expect(aProducer.sendBatch).toHaveBeenCalledOnce();
+      expect(aProducer.sendBatch).toBeCalledWith([
+        { body: anItem },
+        { body: { ...anItem, id: "anotherItemId" } },
+      ]);
     });
   });
 });
