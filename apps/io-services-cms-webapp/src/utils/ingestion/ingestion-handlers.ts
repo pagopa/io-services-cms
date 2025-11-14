@@ -74,7 +74,7 @@ export const createIngestionBlobTriggerHandler =
     producer: EventHubProducerClient,
     formatter: RE.ReaderEither<U, Error, EventData>,
     enricher: RTE.ReaderTaskEither<S, Error, U> = noEnricher,
-    filter: (item: S) => boolean,
+    filter?: (item: S) => boolean,
   ): RTE.ReaderTaskEither<
     { items: readonly S[] },
     Error,
@@ -82,8 +82,7 @@ export const createIngestionBlobTriggerHandler =
   > =>
   ({ items }) =>
     pipe(
-      items,
-      RA.filter(filter),
+      filter ? RA.filter(filter)(items) : items,
       toEvents(formatter, enricher), // format service to the specified avro format
       TE.chainW(
         (events) => TE.tryCatch(() => producer.sendBatch(events), E.toError), // send the formatted service to the eventhub
