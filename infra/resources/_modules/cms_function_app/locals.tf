@@ -140,8 +140,15 @@ locals {
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
       ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
 
-      # Fiscale code test value
-      INTERNAL_TEST_FISCAL_CODES = "EEEEEE00E00E000A,EEEEEE00E00E000B,EEEEEE00E00E000C,EEEEEE00E00E000D,EEEEEE00E00E000E,AAAAAA00A00A000A,AAAAAA00A00A000B,AAAAAA00A00A000C,AAAAAA00A00A000D,AAAAAA00A00A000E,PRVPRV25A01H501B,XXXXXP25A01H501L,YYYYYP25A01H501K,KKKKKP25A01H501U,QQQQQP25A01H501S,WWWWWP25A01H501A,ZZZZZP25A01H501J,JJJJJP25A01H501X,GGGGGP25A01H501Z,UEETST00A00A000X,UEETST00A00A001X"
+      # Fiscale codes test value - concatenation of specific test fiscal codes users from io-infra test_users module
+      INTERNAL_TEST_FISCAL_CODES = join(",", [
+        var.test_fiscal_codes_users.internal_flat,
+        var.test_fiscal_codes_users.internal_load_flat,
+        var.test_fiscal_codes_users.store_review_flat,
+        var.test_fiscal_codes_users.eu_covid_cert_flat,
+        var.test_fiscal_codes_users.unique_email_test,
+        "AAAAAA00A00A000A"
+      ])
       # Prefix fiscal code (comma separated if more than 1 prefix)
       PREFIX_CF_TEST = "LVTEST00A00"
       }, {

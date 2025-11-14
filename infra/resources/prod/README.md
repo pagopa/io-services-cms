@@ -30,6 +30,7 @@
 | <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault) | ../_modules/key_vault | n/a |
 | <a name="module_monitor"></a> [monitor](#module\_monitor) | ../_modules/monitor | n/a |
 | <a name="module_postgres"></a> [postgres](#module\_postgres) | ../_modules/postgres | n/a |
+| <a name="module_test_fiscal_codes_users"></a> [test\_fiscal\_codes\_users](#module\_test\_fiscal\_codes\_users) | git::https://github.com/pagopa/io-infra.git//src/_modules/test_users | main |
 
 ## Resources
 

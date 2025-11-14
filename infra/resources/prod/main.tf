@@ -1,4 +1,8 @@
 
+module "test_fiscal_codes_users" {
+  source = "git::https://github.com/pagopa/io-infra.git//src/_modules/test_users?ref=main"
+}
+
 module "key_vault" {
   source              = "../_modules/key_vault"
   prefix              = local.prefix
@@ -97,6 +101,9 @@ module "cms_function_app" {
   ai_common_connection_string          = data.azurerm_application_insights.ai_common.connection_string
   cms_snet_cidr                        = local.cms_snet_cidr
   bo_snet_cidr                         = local.bo_snet_cidr
+
+  # Test Fiscal Codes Users
+  test_fiscal_codes_users = module.test_fiscal_codes_users.users
 
   # KeyVault Secrets
   key_vault_id                                          = module.key_vault.key_vault_id
