@@ -6,6 +6,7 @@ import { EventHubProducerClient } from "@azure/event-hubs";
 import { PdvTokenizerClient } from "../../utils/pdvTokenizerClient";
 import { Activations } from "@io-services-cms/models";
 import { FiscalCode } from "../../generated/api/FiscalCode";
+import { TestFiscalCodeConfiguration } from "../../config";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -153,6 +154,10 @@ describe("handler", () => {
   it("should filter 2 test fiscal codes from activations", async () => {
     const filterTestFiscalCodes = [testFiscalCode1, testFiscalCode2];
     const prefixesCfTest = [prefixCfTest];
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [
       createActivation(testFiscalCode1),
@@ -163,8 +168,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -182,14 +186,17 @@ describe("handler", () => {
   it("should not remove any fiscal codes from activations", async () => {
     const filterTestFiscalCodes = [testFiscalCode1];
     const prefixesCfTest = [prefixCfTest];
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [createActivation(normalFiscalCode)];
 
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -203,6 +210,10 @@ describe("handler", () => {
   it("should handle empty test fiscal codes list and not remove any fiscal codes from activations", async () => {
     const filterTestFiscalCodes: readonly FiscalCode[] = [];
     const prefixesCfTest = [prefixCfTest];
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [
       createActivation(testFiscalCode1),
@@ -212,8 +223,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -230,6 +240,10 @@ describe("handler", () => {
     const prefixesCfTest = [prefixCfTest];
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [
       createActivation(testFiscalCodeWithPrefix),
@@ -239,8 +253,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -261,6 +274,10 @@ describe("handler", () => {
       "LVTEST00A00A014X" as FiscalCode;
     const testFiscalCodeWithPrefix2: FiscalCode =
       "EEEEEE00E00E000A" as FiscalCode;
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [
       createActivation(testFiscalCodeWithPrefix1),
@@ -271,8 +288,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -294,6 +310,10 @@ describe("handler", () => {
     const emptyPrefixes: string[] = [];
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: emptyPrefixes,
+    };
 
     const activations = [
       createActivation(testFiscalCode1),
@@ -304,8 +324,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      emptyPrefixes,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();
@@ -325,6 +344,10 @@ describe("handler", () => {
     const prefixesCfTest = [prefixCfTest];
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
+    const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
+      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      PREFIX_CF_TEST: prefixesCfTest,
+    };
 
     const activations = [
       createActivation(testFiscalCode1),
@@ -335,8 +358,7 @@ describe("handler", () => {
     const handlerInstance = handler(
       mockProducer,
       mockPdvTokenizerClient,
-      filterTestFiscalCodes,
-      prefixesCfTest,
+      testFiscalCodeConfig,
     );
 
     await handlerInstance({ items: activations })();

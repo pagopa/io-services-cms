@@ -4,8 +4,9 @@ import { describe, expect, it } from "vitest";
 import {
   isTestUser,
   PrefixCfTestArrayDecoder,
-  TestUsersArrayDecoder,
+  TestFiscalCodesUsersDecoder,
 } from "../filter-test-user";
+import { TestFiscalCodeConfiguration } from "../../config";
 
 const fiscalCode1 = "RSSMRA80T01H501K" as FiscalCode;
 const fiscalCode2 = "RSSMRA80T02H501M" as FiscalCode;
@@ -20,85 +21,109 @@ const otherPrefixCfTest = "EEEEEE";
 describe("filter-test-user", () => {
   describe("isTestUser", () => {
     it("should return true when fiscal code is in the test users set", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1, fiscalCode2]);
-      const prefixesCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
+          fiscalCode1,
+          fiscalCode2,
+        ]),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, prefixesCfTest)(fiscalCode1);
+      const result = isTestUser(config)(fiscalCode1);
 
       expect(result).toBe(true);
     });
 
     it("should return false when fiscal code is not in the test users set and not starts with a prefix of a fiscal code", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1, fiscalCode2]);
-      const prefixesCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
+          fiscalCode1,
+          fiscalCode2,
+        ]),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, prefixesCfTest)(fiscalCode3);
+      const result = isTestUser(config)(fiscalCode3);
 
       expect(result).toBe(false);
     });
 
     it("should return false when test users set is empty and not starts with a prefix of a fiscal code", () => {
-      const testUsersSet = new Set<FiscalCode>();
-      const prefixesCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>(),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, prefixesCfTest)(fiscalCode1);
+      const result = isTestUser(config)(fiscalCode1);
 
       expect(result).toBe(false);
     });
 
     it("should return true when fiscal code starts with a prefix of a fiscal code", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1, fiscalCode2]);
-      const prefixesCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
+          fiscalCode1,
+          fiscalCode2,
+        ]),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, prefixesCfTest)(testFiscalCode1);
+      const result = isTestUser(config)(testFiscalCode1);
 
       expect(result).toBe(true);
     });
 
     it("should return true when fiscal code starts with any prefixes of fiscal codes", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1, fiscalCode2]);
-      const multiplePrefixes = [prefixCfTest, otherPrefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
+          fiscalCode1,
+          fiscalCode2,
+        ]),
+        PREFIX_CF_TEST: [prefixCfTest, otherPrefixCfTest],
+      };
 
-      expect(isTestUser(testUsersSet, multiplePrefixes)(testFiscalCode1)).toBe(
-        true,
-      );
-      expect(isTestUser(testUsersSet, multiplePrefixes)(testFiscalCode2)).toBe(
-        true,
-      );
+      expect(isTestUser(config)(testFiscalCode1)).toBe(true);
+      expect(isTestUser(config)(testFiscalCode2)).toBe(true);
     });
 
     it("should return false when prefixes array is empty and fiscal code is not in set", () => {
-      const testUsersSet = new Set<FiscalCode>();
-      const emptyPrefixes: string[] = [];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>(),
+        PREFIX_CF_TEST: [],
+      };
 
-      const result = isTestUser(testUsersSet, emptyPrefixes)(fiscalCode1);
+      const result = isTestUser(config)(fiscalCode1);
 
       expect(result).toBe(false);
     });
 
     it("should return true when fiscal code is in set even if it doesn't match any prefix", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1]);
-      const arrayPrefixCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, arrayPrefixCfTest)(fiscalCode1);
+      const result = isTestUser(config)(fiscalCode1);
 
       expect(result).toBe(true);
     });
 
     it("should return true when fiscal code matches prefix even if it's not in set", () => {
-      const testUsersSet = new Set<FiscalCode>([fiscalCode1]);
-      const prefixesCfTest = [prefixCfTest];
+      const config: TestFiscalCodeConfiguration = {
+        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
+        PREFIX_CF_TEST: [prefixCfTest],
+      };
 
-      const result = isTestUser(testUsersSet, prefixesCfTest)(testFiscalCode1);
+      const result = isTestUser(config)(testFiscalCode1);
 
       expect(result).toBe(true);
     });
   });
 
-  describe("TestUsersArrayDecoder", () => {
+  describe("TestFiscalCodesUsersDecoder", () => {
     it("should decode a valid comma-separated list of fiscal codes", () => {
       const fiscalCodes = `${fiscalCode1},${fiscalCode2}`;
-      const result = TestUsersArrayDecoder.decode(fiscalCodes);
+      const result = TestFiscalCodesUsersDecoder.decode(fiscalCodes);
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -110,7 +135,7 @@ describe("filter-test-user", () => {
 
     it("should decode a single fiscal code", () => {
       const fiscalCode = fiscalCode1;
-      const result = TestUsersArrayDecoder.decode(fiscalCode);
+      const result = TestFiscalCodesUsersDecoder.decode(fiscalCode);
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
@@ -119,10 +144,10 @@ describe("filter-test-user", () => {
       }
     });
 
-    it("should decode an empty string to an empty array", () => {
+    it("should decode an empty string to an empty set", () => {
       const emptyString = "";
 
-      const result = TestUsersArrayDecoder.decode(emptyString);
+      const result = TestFiscalCodesUsersDecoder.decode(emptyString);
 
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
