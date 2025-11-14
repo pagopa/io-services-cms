@@ -146,7 +146,7 @@ locals {
         var.test_fiscal_codes_users.internal_load_flat,
         var.test_fiscal_codes_users.store_review_flat,
         var.test_fiscal_codes_users.eu_covid_cert_flat,
-        var.test_fiscal_codes_users.unique_email_test,
+        join(",", var.test_fiscal_codes_users.unique_email_test),
         "AAAAAA00A00A000A"
       ])
       # Prefix fiscal code (comma separated if more than 1 prefix)

@@ -186,6 +186,6 @@ variable "test_fiscal_codes_users" {
     eu_covid_cert_flat = string
     cdc_flat           = string
     light              = string
-    unique_email_test  = string
+    unique_email_test  = list(string)
   })
 }
