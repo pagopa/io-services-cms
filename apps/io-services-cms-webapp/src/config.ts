@@ -25,7 +25,7 @@ import { FiscalCode } from "./generated/api/FiscalCode";
 import { CommaSeparatedListOf } from "./utils/comma-separated-list";
 import {
   PrefixCfTestArrayDecoder,
-  TestUsersArrayDecoder,
+  TestFiscalCodesUsersDecoder,
 } from "./utils/filter-test-user";
 
 // used for internal job dispatch, temporary files, etc...
@@ -307,13 +307,17 @@ export type BlobStorageClientConfiguration = t.TypeOf<
   typeof BlobStorageClientConfiguration
 >;
 
-const InternalTestFiscalCodesConfiguration = t.type({
-  INTERNAL_TEST_FISCAL_CODES: withDefault(TestUsersArrayDecoder, []),
-});
-
-const PrefixCfTest = t.type({
+const TestFiscalCodeConfiguration = t.type({
+  INTERNAL_TEST_FISCAL_CODES: withDefault(
+    TestFiscalCodesUsersDecoder,
+    new Set(),
+  ),
   PREFIX_CF_TEST: withDefault(PrefixCfTestArrayDecoder, []),
 });
+
+export type TestFiscalCodeConfiguration = t.TypeOf<
+  typeof TestFiscalCodeConfiguration
+>;
 
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
@@ -354,13 +358,11 @@ export const IConfig = t.intersection([
     ]),
   ]),
   t.intersection([
-    t.intersection([
-      PDVTokenizerClientConfiguration,
-      ActivationEventHubConfig,
-      HttpAgentConfig,
-      BlobStorageClientConfiguration,
-    ]),
-    t.intersection([InternalTestFiscalCodesConfiguration, PrefixCfTest]),
+    PDVTokenizerClientConfiguration,
+    ActivationEventHubConfig,
+    HttpAgentConfig,
+    BlobStorageClientConfiguration,
+    TestFiscalCodeConfiguration,
   ]),
 ]);
 

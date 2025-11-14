@@ -1,20 +1,24 @@
 import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
+import * as S from "fp-ts/lib/string";
 import { string } from "io-ts";
+import { readonlySetFromArray } from "io-ts-types";
 
+import { TestFiscalCodeConfiguration } from "../config";
 /**
- * Function to check if a fiscal code is in the test users set or match a fiscal code prefix.
+ * Function to check if a fiscal code is in the test users set or matches a fiscal code prefix.
  *
- * @param testUsersSet - Set of test user fiscal codes
- * @param prefixCfTest - Array of prefix strings to check if a fiscal code starts with
+ * @param testFiscalCodeConfig - Configuration object containing test fiscal codes and prefixes
  * @returns Function that checks if a fiscal code is a test user or not
  */
 export const isTestUser: (
-  testUsersSet: Set<FiscalCode>,
-  prefixCfTest: readonly string[],
-) => (cf: FiscalCode) => boolean = (testUsersSet, prefixCfTest) => (cf) =>
-  testUsersSet.has(cf) || prefixCfTest.some((prefix) => cf.startsWith(prefix));
+  testFiscalCodeConfig: TestFiscalCodeConfiguration,
+) => (cf: FiscalCode) => boolean = (testFiscalCodeConfig) => (cf) =>
+  testFiscalCodeConfig.INTERNAL_TEST_FISCAL_CODES.has(cf) ||
+  testFiscalCodeConfig.PREFIX_CF_TEST.some((prefix) => cf.startsWith(prefix));
 
-export const TestUsersArrayDecoder = CommaSeparatedListOf(FiscalCode);
+export const TestFiscalCodesUsersDecoder = CommaSeparatedListOf(
+  FiscalCode,
+).pipe(readonlySetFromArray(FiscalCode, S.Ord));
 
 export const PrefixCfTestArrayDecoder = CommaSeparatedListOf(string);
