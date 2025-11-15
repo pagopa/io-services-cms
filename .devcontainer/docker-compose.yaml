@@ -45,3 +45,4 @@ services:
       AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: 'true'
       # Use the "https" protocol for the emulator
       PROTOCOL: https
+      GATEWAY_PUBLIC_ENDPOINT: https://cosmosdb:8081

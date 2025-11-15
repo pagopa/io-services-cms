@@ -60,6 +60,7 @@ module "cms_fn" {
       "AzureWebJobs.SelfcareGroupWatcher.Disabled"                       = "0"
       "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "0"
       "AzureWebJobs.ActivationsSyncFromLegacy.Disabled"                  = "0"
+      "AzureWebJobs.ActivationsSyncToLegacy.Disabled"                    = "1"
 
     }
   )
@@ -94,6 +95,7 @@ module "cms_fn" {
       "AzureWebJobs.SelfcareGroupWatcher.Disabled"                       = "1"
       "AzureWebJobs.IngestionActivationWatcher.Disabled"                 = "1"
       "AzureWebJobs.ActivationsSyncFromLegacy.Disabled"                  = "1"
+      "AzureWebJobs.ActivationsSyncToLegacy.Disabled"                    = "1"
     }
   )
 
@@ -125,6 +127,7 @@ module "cms_fn" {
     "AzureWebJobs.SelfcareGroupWatcher.Disabled",
     "AzureWebJobs.IngestionActivationWatcher.Disabled",
     "AzureWebJobs.ActivationsSyncFromLegacy.Disabled",
+    "AzureWebJobs.ActivationsSyncToLegacy.Disabled",
   ]
 
   tier = local.cms.tier
