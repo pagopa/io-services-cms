@@ -14,9 +14,9 @@ import { TestFiscalCodeConfiguration } from "../config";
 export const isTestUser: (
   testFiscalCodeConfig: TestFiscalCodeConfiguration,
 ) => (cf: FiscalCode) => boolean =
-  ({ INTERNAL_TEST_FISCAL_CODES, PREFIX_CF_TEST }) =>
+  ({ PREFIX_CF_TEST, TEST_FISCAL_CODES }) =>
   (cf) =>
-    INTERNAL_TEST_FISCAL_CODES.has(cf) ||
+    TEST_FISCAL_CODES.has(cf) ||
     PREFIX_CF_TEST.some((prefix) => cf.startsWith(prefix));
 
 export const TestFiscalCodesUsersDecoder = CommaSeparatedListOf(
