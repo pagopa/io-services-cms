@@ -141,7 +141,7 @@ locals {
       ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
 
       # Fiscale codes test value - concatenation of specific test fiscal codes users from io-infra test_users module
-      INTERNAL_TEST_FISCAL_CODES = join(",", [
+      TEST_FISCAL_CODES = join(",", [
         module.test_fiscal_codes_users.users.internal_flat,
         module.test_fiscal_codes_users.users.internal_load_flat,
         module.test_fiscal_codes_users.users.store_review_flat,
