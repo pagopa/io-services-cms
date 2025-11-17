@@ -542,7 +542,11 @@ export const onIngestionServiceHistoryChangeEntryPoint = pipe(
 
 //Ingestion Activations
 export const onIngestionActivationChangeEntryPoint = pipe(
-  onIngestionActivationChangeHandler(activationEventHubProducer, pdvTokenizer),
+  onIngestionActivationChangeHandler(
+    activationEventHubProducer,
+    pdvTokenizer,
+    config,
+  ),
   parseBlob,
   toAzureFunctionHandler,
 );

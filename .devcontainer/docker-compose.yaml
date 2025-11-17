@@ -20,6 +20,15 @@ services:
       cosmosdb:
         condition: service_started
         required: false
+      azurite:
+        condition: service_started
+        required: false
+      eventhubs:
+        condition: service_started
+        required: false
+      kafka-ui:
+        condition: service_started
+        required: false
     environment:
       # Disable the Corepack download prompt
       COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
@@ -45,3 +54,47 @@ services:
       AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: 'true'
       # Use the "https" protocol for the emulator
       PROTOCOL: https
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    profiles: ['storage']
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
+    networks:
+      - dev-network
+
+  eventhubs:
+    image: mcr.microsoft.com/azure-messaging/eventhubs-emulator:latest@sha256:25ec4141efb69933a0c82e6a787fa147a3895519e7d236d4c41ba568e03100eb
+    depends_on:
+      - azurite
+    ports:
+      - '5672:5672'
+      - '9092:9092'
+      - '9093:9093'
+    volumes:
+      - './eventhubs-emulator.json:/Eventhubs_Emulator/ConfigFiles/Config.json'
+    environment:
+      ACCEPT_EULA: Y
+      BLOB_SERVER: azurite
+      METADATA_SERVER: azurite
+    networks:
+      - dev-network
+    profiles: ['eventhub']
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest@sha256:8f2ff02d64b0a7a2b71b6b3b3148b85f66d00ec20ad40c30bdcd415d46d31818
+    depends_on:
+      - eventhubs
+    ports:
+      - '8002:8080'
+    environment:
+      KAFKA_CLUSTERS_0_NAME: 'local'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'eventhubs:9092'
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: 'SASL_PLAINTEXT'
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: 'PLAIN'
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="Endpoint=sb://eventhubs;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";'
+    networks:
+      - dev-network
+    profiles: ['eventhub']

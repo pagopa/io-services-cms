@@ -23,6 +23,10 @@ import * as t from "io-ts";
 
 import { FiscalCode } from "./generated/api/FiscalCode";
 import { CommaSeparatedListOf } from "./utils/comma-separated-list";
+import {
+  PrefixCfTestArrayDecoder,
+  TestFiscalCodesUsersDecoder,
+} from "./utils/filter-test-user";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
@@ -303,6 +307,18 @@ export type BlobStorageClientConfiguration = t.TypeOf<
   typeof BlobStorageClientConfiguration
 >;
 
+const TestFiscalCodeConfiguration = t.type({
+  INTERNAL_TEST_FISCAL_CODES: withDefault(
+    TestFiscalCodesUsersDecoder,
+    new Set(),
+  ),
+  PREFIX_CF_TEST: withDefault(PrefixCfTestArrayDecoder, []),
+});
+
+export type TestFiscalCodeConfiguration = t.TypeOf<
+  typeof TestFiscalCodeConfiguration
+>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -346,6 +362,7 @@ export const IConfig = t.intersection([
     ActivationEventHubConfig,
     HttpAgentConfig,
     BlobStorageClientConfiguration,
+    TestFiscalCodeConfiguration,
   ]),
 ]);
 

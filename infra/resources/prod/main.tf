@@ -1,4 +1,3 @@
-
 module "key_vault" {
   source              = "../_modules/key_vault"
   prefix              = local.prefix

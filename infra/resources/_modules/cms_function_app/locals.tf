@@ -139,6 +139,18 @@ locals {
       # Blob Storage configurations
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
       ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
+
+      # Fiscale codes test value - concatenation of specific test fiscal codes users from io-infra test_users module
+      INTERNAL_TEST_FISCAL_CODES = join(",", [
+        module.test_fiscal_codes_users.users.internal_flat,
+        module.test_fiscal_codes_users.users.internal_load_flat,
+        module.test_fiscal_codes_users.users.store_review_flat,
+        module.test_fiscal_codes_users.users.eu_covid_cert_flat,
+        join(",", module.test_fiscal_codes_users.users.unique_email_test),
+        "AAAAAA00A00A000A"
+      ])
+      # Prefix fiscal code (comma separated if more than 1 prefix)
+      PREFIX_CF_TEST = "LVTEST00A00"
       }, {
       // Queues
       for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
