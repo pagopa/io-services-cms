@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.2
+
+### Patch Changes
+
+- 61b47763: add test fiscal code filter on ingestion activation
+
 ## 1.42.1
 
 ### Patch Changes
