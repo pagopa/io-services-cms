@@ -155,7 +155,7 @@ describe("handler", () => {
     const filterTestFiscalCodes = [testFiscalCode1, testFiscalCode2];
     const prefixesCfTest = [prefixCfTest];
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 
@@ -187,7 +187,7 @@ describe("handler", () => {
     const filterTestFiscalCodes = [testFiscalCode1];
     const prefixesCfTest = [prefixCfTest];
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 
@@ -211,7 +211,7 @@ describe("handler", () => {
     const filterTestFiscalCodes: readonly FiscalCode[] = [];
     const prefixesCfTest = [prefixCfTest];
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 
@@ -241,7 +241,7 @@ describe("handler", () => {
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 
@@ -275,7 +275,7 @@ describe("handler", () => {
     const testFiscalCodeWithPrefix2: FiscalCode =
       "EEEEEE00E00E000A" as FiscalCode;
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 
@@ -311,7 +311,7 @@ describe("handler", () => {
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: emptyPrefixes,
     };
 
@@ -345,7 +345,7 @@ describe("handler", () => {
     const testFiscalCodeWithPrefix: FiscalCode =
       "LVTEST00A00A014X" as FiscalCode;
     const testFiscalCodeConfig: TestFiscalCodeConfiguration = {
-      INTERNAL_TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
+      TEST_FISCAL_CODES: new Set(filterTestFiscalCodes),
       PREFIX_CF_TEST: prefixesCfTest,
     };
 

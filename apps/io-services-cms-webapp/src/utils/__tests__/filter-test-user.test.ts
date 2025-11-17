@@ -22,10 +22,7 @@ describe("filter-test-user", () => {
   describe("isTestUser", () => {
     it("should return true when fiscal code is in the test users set", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
-          fiscalCode1,
-          fiscalCode2,
-        ]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1, fiscalCode2]),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
@@ -36,10 +33,7 @@ describe("filter-test-user", () => {
 
     it("should return false when fiscal code is not in the test users set and not starts with a prefix of a fiscal code", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
-          fiscalCode1,
-          fiscalCode2,
-        ]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1, fiscalCode2]),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
@@ -50,7 +44,7 @@ describe("filter-test-user", () => {
 
     it("should return false when test users set is empty and not starts with a prefix of a fiscal code", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>(),
+        TEST_FISCAL_CODES: new Set<FiscalCode>(),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
@@ -61,10 +55,7 @@ describe("filter-test-user", () => {
 
     it("should return true when fiscal code starts with a prefix of a fiscal code", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
-          fiscalCode1,
-          fiscalCode2,
-        ]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1, fiscalCode2]),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
@@ -75,10 +66,7 @@ describe("filter-test-user", () => {
 
     it("should return true when fiscal code starts with any prefixes of fiscal codes", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([
-          fiscalCode1,
-          fiscalCode2,
-        ]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1, fiscalCode2]),
         PREFIX_CF_TEST: [prefixCfTest, otherPrefixCfTest],
       };
 
@@ -88,7 +76,7 @@ describe("filter-test-user", () => {
 
     it("should return false when prefixes array is empty and fiscal code is not in set", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>(),
+        TEST_FISCAL_CODES: new Set<FiscalCode>(),
         PREFIX_CF_TEST: [],
       };
 
@@ -99,7 +87,7 @@ describe("filter-test-user", () => {
 
     it("should return true when fiscal code is in set even if it doesn't match any prefix", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
@@ -110,7 +98,7 @@ describe("filter-test-user", () => {
 
     it("should return true when fiscal code matches prefix even if it's not in set", () => {
       const config: TestFiscalCodeConfiguration = {
-        INTERNAL_TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
+        TEST_FISCAL_CODES: new Set<FiscalCode>([fiscalCode1]),
         PREFIX_CF_TEST: [prefixCfTest],
       };
 
