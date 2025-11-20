@@ -30,3 +30,14 @@ data "azurerm_log_analytics_workspace" "common" {
   name                = "${local.prefix}-${local.env_short}-law-common"
   resource_group_name = "${local.prefix}-${local.env_short}-rg-common"
 }
+
+data "azurerm_api_management" "apim_external" {
+  name                = "${local.project}-apim-01"
+  resource_group_name = "${local.project}-common-rg-01"
+}
+
+data "azurerm_api_management_product" "apim_external_product_services" {
+  product_id          = "io-services-api"
+  api_management_name = data.azurerm_api_management.apim_external.name
+  resource_group_name = data.azurerm_api_management.apim_external.resource_group_name
+}

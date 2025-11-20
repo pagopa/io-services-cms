@@ -238,3 +238,15 @@ module "container_apps" {
 
   tags = local.tags
 }
+
+module "apim_external" {
+  source = "../_modules/apim_external"
+
+  api_management = {
+    name                = data.azurerm_api_management.apim_external.name
+    resource_group_name = data.azurerm_api_management.apim_external.resource_group_name
+    product_id          = data.azurerm_api_management_product.apim_external_product_services.product_id
+  }
+  cms_hostname           = module.cms_function_app.cms_fn_default_hostname
+  ai_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
+}
