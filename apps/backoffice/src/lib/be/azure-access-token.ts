@@ -6,7 +6,7 @@ import * as t from "io-ts";
 
 import { HealthChecksError } from "./errors";
 
-//Instanza contentente le credenziali per accedere ad Azure
+// Istanza contenente le credenziali per accedere ad Azure
 let accessToken: AccessToken;
 
 type Config = t.TypeOf<typeof Config>;
@@ -33,7 +33,23 @@ const getAzureConfig = (): Config => {
   return azureConfig;
 };
 
+const isMockEnabled = () => process.env.USE_MOCK_AZURE_CREDENTIAL === "true";
+
 const refreshAzureAccessToken = async (): Promise<AccessToken> => {
+  if (isMockEnabled()) {
+    const now = Date.now();
+    const mockToken: AccessToken = {
+      expiresOnTimestamp: now + 60 * 60 * 1000,
+      token: "mock-azure-access-token",
+    };
+
+    console.debug(
+      "[Azure AccessToken] Using MOCK token for local dev (USE_MOCK_AZURE_CREDENTIAL=true)",
+    );
+
+    return mockToken;
+  }
+
   const apimConfig = getAzureConfig();
 
   let tokenResponse: AccessToken;
@@ -43,12 +59,12 @@ const refreshAzureAccessToken = async (): Promise<AccessToken> => {
       apimConfig.AZURE_CREDENTIALS_SCOPE_URL,
     );
   } catch (e) {
-    console.error("Error retrieving on Azure Access Token", e);
+    console.error("Error retrieving Azure Access Token", e);
     throw e;
   }
 
   if (!tokenResponse.token) {
-    throw new Error("Error retrieving on Azure Access Token => null response");
+    throw new Error("Error retrieving Azure Access Token => null response");
   }
 
   return tokenResponse;
@@ -59,24 +75,24 @@ export const getAzureAccessToken = async (): Promise<string> => {
   if (!accessToken) {
     accessToken = await refreshAzureAccessToken();
     console.debug(
-      `Azure AccessToken initialized: Expiration Date is => $${new Date(
+      `Azure AccessToken initialized: Expiration Date is => ${new Date(
         accessToken.expiresOnTimestamp,
       )}`,
     );
   } else {
-    // Lazy Referesh accessToken
+    // Lazy refresh accessToken
     const now = new Date();
     const expires = new Date(accessToken.expiresOnTimestamp);
     if (now > expires) {
       accessToken = await refreshAzureAccessToken();
       console.debug(
-        `Azure AccessToken has expired and was refreshed: Old Expiration Date was => $${expires}, New Expiration Date is => $${new Date(
+        `Azure AccessToken has expired and was refreshed: Old Expiration Date was => ${expires}, New Expiration Date is => ${new Date(
           accessToken.expiresOnTimestamp,
         )}`,
       );
     } else {
       console.debug(
-        `Azure AccessToken is still good expired and was refreshed: Expiration Date was => $${expires}`,
+        `Azure AccessToken is still valid: Expiration Date is => ${expires}`,
       );
     }
   }
@@ -85,6 +101,13 @@ export const getAzureAccessToken = async (): Promise<string> => {
 
 export const getAzureAccessTokenHealth: () => Promise<void> = async () => {
   try {
+    if (isMockEnabled()) {
+      console.debug(
+        "[Azure AccessToken] Health check skipped (USE_MOCK_AZURE_CREDENTIAL=true)",
+      );
+      return;
+    }
+
     getAzureConfig();
   } catch (e) {
     throw new HealthChecksError("azure-access-token", e);

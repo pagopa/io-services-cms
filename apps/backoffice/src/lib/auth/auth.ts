@@ -42,10 +42,89 @@ type SubscriptionContract = RightType<
   ReturnType<ReturnType<typeof getApimService>["getSubscription"]>
 >;
 
+const isDevMockMode = (config: Configuration) =>
+  process.env.NODE_ENV !== "production" &&
+  (config.SELFCARE_API_MOCKING || config.API_APIM_MOCKING);
+
+const toDevMockUser = (
+  identityTokenPayload: IdentityTokenPayload,
+  institution: InstitutionResponse,
+  config: Configuration,
+): User => {
+  const apimEmail = formatApimAccountEmailForSelfcareOrganization(
+    identityTokenPayload.organization,
+  );
+
+  return {
+    email: identityTokenPayload.email,
+    id: identityTokenPayload.uid,
+    institution: {
+      fiscalCode: identityTokenPayload.organization.fiscal_code,
+      id: identityTokenPayload.organization.id,
+      isAggregator: isAggregator(institution),
+      logo_url: institution.logo,
+      name: identityTokenPayload.organization.name,
+      role: identityTokenPayload.organization.roles[0]?.role,
+    },
+    name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
+    parameters: {
+      // valori fittizi ma coerenti col dominio
+      subscriptionId: "mock-subscription-id",
+      userEmail: apimEmail,
+      userId: "mock-user-id",
+    },
+    permissions: {
+      // diamo al mock user i permessi standard per lavorare in UI
+      apimGroups: ["ApiServiceWrite"],
+      selcGroups: config.GROUP_AUTHZ_ENABLED
+        ? identityTokenPayload.organization.groups
+        : undefined,
+    },
+  };
+};
+
 export const authorize =
   (config: Configuration): CredentialsConfig["authorize"] =>
-  (credentials) =>
-    pipe(
+  (credentials) => {
+    /**
+     * BRANCH 1 – DEV + MOCK:
+     * non chiamiamo APIM, non facciamo getUserByEmail né subscription,
+     * ma costruiamo un utente mock.
+     */
+    if (isDevMockMode(config)) {
+      console.info(
+        "[AUTH] Dev mock mode attivo: salto APIM (getUserByEmail, subscription) e uso utente MOCK",
+      );
+
+      return pipe(
+        credentials,
+        SelfCareIdentity.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        E.map((selfCareIdentity) => selfCareIdentity.identity_token),
+        TE.fromEither,
+        TE.chainW(verifyToken(config)),
+        TE.bindTo("identityTokenPayload"),
+        TE.bindW("institution", ({ identityTokenPayload }) =>
+          TE.tryCatch(
+            () =>
+              pipe(identityTokenPayload.organization.id, getInstitutionById),
+            extractTryCatchError,
+          ),
+        ),
+        TE.map(({ identityTokenPayload, institution }) =>
+          toDevMockUser(identityTokenPayload, institution, config),
+        ),
+        TE.getOrElse((e) => {
+          handlerErrorLog(
+            "An error has occurred when authorize user (dev mock mode)",
+            e,
+          );
+          throw e;
+        }),
+      )();
+    }
+
+    return pipe(
       credentials,
       SelfCareIdentity.decode,
       E.mapLeft(flow(readableReport, E.toError)),
@@ -71,6 +150,7 @@ export const authorize =
         throw e;
       }),
     )();
+  };
 
 const verifyToken =
   (config: Configuration) =>

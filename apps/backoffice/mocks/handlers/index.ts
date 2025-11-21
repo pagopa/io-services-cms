@@ -2,6 +2,7 @@ import { getConfiguration } from "@/config";
 import { getCosmosConfig } from "@/lib/be/cosmos-store";
 
 import { buildHandlers as apimHandlers } from "./apim-handlers";
+import { buildHandlers as azureMetadataHandlers } from "./azure-metadata-handlers";
 import { buildHandlers as backendHandlers } from "./backend-handlers";
 import { buildHandlers as cdnHandlers } from "./cdn-handlers";
 import { buildHandlers as cosmosHandlers } from "./cosmos-handlers";
@@ -25,6 +26,7 @@ export const getHandlers = () => {
   }
   if (config.API_APIM_MOCKING) {
     handlers.push(...apimHandlers());
+    handlers.push(...azureMetadataHandlers());
   }
   if (config.SUBSCRIPTION_MIGRATION_API_MOCKING) {
     handlers.push(...subscriptionsMigrationHandlers());
