@@ -13,7 +13,6 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
-import * as t from "io-ts";
 import { Json } from "io-ts-types";
 import lodash from "lodash";
 
@@ -34,46 +33,6 @@ interface ValidationError {
   serviceId: Queue.RequestReviewItem["id"];
 }
 
-type ValidSecureChannelFalseConfig = t.TypeOf<
-  typeof ValidSecureChannelFalseConfig
->;
-const ValidSecureChannelFalseConfig = t.type({
-  data: t.intersection([
-    t.type({
-      require_secure_channel: t.literal(false),
-    }),
-    t.type({
-      metadata: t.type({
-        tos_url: t.union([t.null, t.undefined]),
-      }),
-    }),
-  ]),
-});
-
-type ValidSecureChannelTrueConfig = t.TypeOf<
-  typeof ValidSecureChannelTrueConfig
->;
-const ValidSecureChannelTrueConfig = t.type({
-  data: t.intersection([
-    t.type({
-      require_secure_channel: t.literal(true),
-    }),
-    t.type({
-      metadata: t.type({
-        tos_url:
-          Queue.RequestReviewItemStrict.types[0].types[0].props.data.types[1]
-            .props.metadata.types[1].props.tos_url,
-      }),
-    }),
-  ]),
-});
-
-type ValidSecureChannelService = t.TypeOf<typeof ValidSecureChannelService>;
-const ValidSecureChannelService = t.union([
-  ValidSecureChannelFalseConfig,
-  ValidSecureChannelTrueConfig,
-]);
-
 const EVENT_PREFIX = "services-cms.review";
 
 enum EventNameEnum {
@@ -88,16 +47,10 @@ const validate =
     item: Queue.RequestReviewItem,
   ): E.Either<ValidationError, Queue.RequestReviewItemStrict> =>
     pipe(
-      item,
-      ValidSecureChannelService.decode,
-      E.chain((s) =>
-        pipe(
-          isServiceAllowedForQualitySkip(config, item.id),
-          B.fold(
-            () => Queue.RequestReviewItemQualityStrict.decode(s),
-            () => Queue.RequestReviewItemStrict.decode(s),
-          ),
-        ),
+      isServiceAllowedForQualitySkip(config, item.id),
+      B.fold(
+        () => Queue.RequestReviewItemQualityStrict.decode(item),
+        () => Queue.RequestReviewItemStrict.decode(item),
       ),
       E.mapLeft(
         flow(readableReport, (errorMessage) => ({
