@@ -52,9 +52,9 @@ module "function_profile_autoscale" {
       time_aggregation_increase = "Maximum"
       time_aggregation_decrease = "Average"
       increase_by               = 2
-      cooldown_increase         = 1
+      cooldown_increase         = 5
       decrease_by               = 1
-      cooldown_decrease         = 1
+      cooldown_decrease         = 5
       upper_threshold           = 1500
       lower_threshold           = 300
     }
