@@ -48,7 +48,7 @@ module "function_profile_autoscale" {
       time_aggregation_increase = "Average"
       time_window_increase      = 1
     }
-    reqrequests = {
+    requests = {
       time_aggregation_increase = "Maximum"
       time_aggregation_decrease = "Average"
       increase_by               = 2
