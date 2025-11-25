@@ -27,36 +27,40 @@ module "function_profile_autoscale" {
 
   scale_metrics = {
     cpu = {
-      upper_threshold           = 60
-      lower_threshold           = 30
-      increase_by               = 2
-      decrease_by               = 1
-      cooldown_increase         = 5
-      cooldown_decrease         = 5
+      upper_threshold           = 65
       statistic_increase        = "Max"
-      statistic_decrease        = "Average"
       time_aggregation_increase = "Maximum"
-      time_aggregation_decrease = "Average"
       time_window_increase      = 1
+      increase_by               = 2
+      cooldown_increase         = 5
+      lower_threshold           = 30
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
       time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
     memory = {
       upper_threshold           = 85
-      increase_by               = 1
-      cooldown_increase         = 5
       statistic_increase        = "Average"
       time_aggregation_increase = "Average"
       time_window_increase      = 1
+      increase_by               = 1
+      cooldown_increase         = 5
     }
     requests = {
+      upper_threshold           = 500
+      statistic_increase        = "Max"
       time_aggregation_increase = "Maximum"
-      time_aggregation_decrease = "Average"
+      time_window_increase      = 1
       increase_by               = 2
       cooldown_increase         = 5
+      lower_threshold           = 50
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
       decrease_by               = 1
       cooldown_decrease         = 5
-      upper_threshold           = 1500
-      lower_threshold           = 300
     }
   }
 

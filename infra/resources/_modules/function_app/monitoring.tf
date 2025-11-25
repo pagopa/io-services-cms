@@ -49,14 +49,18 @@ module "function_profile_autoscale" {
       time_window_increase      = 1
     }
     requests = {
+      upper_threshold           = 1500
+      statistic_increase        = "Max"
       time_aggregation_increase = "Maximum"
-      time_aggregation_decrease = "Average"
+      time_window_increase      = 1
       increase_by               = 2
       cooldown_increase         = 5
+      lower_threshold           = 300
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
       decrease_by               = 1
       cooldown_decrease         = 5
-      upper_threshold           = 1500
-      lower_threshold           = 300
     }
   }
 
