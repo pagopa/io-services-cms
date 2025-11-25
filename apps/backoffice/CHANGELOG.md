@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.4
+
+### Patch Changes
+
+- 3cc6eb28: Remove correlation between require_secure_channel and tos_url in service create/update funnel
+
 ## 1.29.3
 
 ### Patch Changes
