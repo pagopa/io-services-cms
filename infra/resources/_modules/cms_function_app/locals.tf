@@ -151,8 +151,6 @@ locals {
       ])
       # Prefix fiscal code (comma separated if more than 1 prefix)
       PREFIX_CF_TEST = "LVTEST00A00"
-
-      USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST = "01GMDFQREKAWQ1GBK24HBMGYRD"
       }, {
       // Queues
       for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
