@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.3
+
+### Patch Changes
+
+- 87c7ec91: remove check on required secure channel and tos url
+
 ## 1.42.2
 
 ### Patch Changes
