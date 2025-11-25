@@ -9,7 +9,6 @@ import { SupportAgent } from "@mui/icons-material";
 import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
 import { TFunction } from "i18next";
 import { useTranslation } from "next-i18next";
-import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 
 import { ServiceAssistanceChannels } from "./service-assistance-channels";
@@ -61,34 +60,21 @@ const getAssistanceChannelsSchema = (t: TFunction<"translation", undefined>) =>
     );
 
 export const getValidationSchema = (t: TFunction<"translation", undefined>) =>
-  z
-    .object({
-      metadata: z.object({
-        app_android: getOptionalUrlSchema(t),
-        app_ios: getOptionalUrlSchema(t),
-        assistanceChannels: getAssistanceChannelsSchema(t),
-        privacy_url: getUrlSchema(t),
-        tos_url: getOptionalUrlSchema(t),
-        web_url: getOptionalUrlSchema(t),
-      }),
-      require_secure_channel: z.boolean(),
-    })
-    .refine(
-      (schema) =>
-        schema.require_secure_channel === false ||
-        (schema.require_secure_channel === true &&
-          schema.metadata.tos_url !== ""),
-      {
-        message: t("forms.errors.field.privacyCritical"),
-        path: ["metadata.tos_url"],
-      },
-    );
+  z.object({
+    metadata: z.object({
+      app_android: getOptionalUrlSchema(t),
+      app_ios: getOptionalUrlSchema(t),
+      assistanceChannels: getAssistanceChannelsSchema(t),
+      privacy_url: getUrlSchema(t),
+      tos_url: getOptionalUrlSchema(t),
+      web_url: getOptionalUrlSchema(t),
+    }),
+    require_secure_channel: z.boolean(),
+  });
 
 /** Second step of Service create/update process */
 export const ServiceBuilderStep2 = () => {
   const { t } = useTranslation();
-  const { watch } = useFormContext();
-  const requiredTosUrl = watch("require_secure_channel");
 
   return (
     <>
@@ -103,19 +89,16 @@ export const ServiceBuilderStep2 = () => {
           placeholder={t("forms.service.metadata.privacyUrl.placeholder")}
           required
         />
+        <UrlFieldController
+          label={t("forms.service.metadata.tosUrl.label")}
+          name="metadata.tos_url"
+          placeholder={t("forms.service.metadata.tosUrl.placeholder")}
+        />
         <SwitchController
           helperText={t("forms.service.requireSecureChannel.helperText")}
           label={t("forms.service.requireSecureChannel.label")}
           name="require_secure_channel"
         />
-        {requiredTosUrl ? (
-          <UrlFieldController
-            label={t("forms.service.metadata.tosUrl.label")}
-            name="metadata.tos_url"
-            placeholder={t("forms.service.metadata.tosUrl.placeholder")}
-            required={requiredTosUrl}
-          />
-        ) : null}
       </FormStepSectionWrapper>
       <FormStepSectionWrapper
         icon={<SupportAgent />}
