@@ -4,10 +4,8 @@ import {
   ServicePublication,
   stores,
 } from "@io-services-cms/models";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 
@@ -18,7 +16,6 @@ const Config = t.exact(
     COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
     COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
     COSMOSDB_KEY: NonEmptyString,
-    COSMOSDB_MOCKING: withDefault(t.string, "false").pipe(BooleanFromString),
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
   }),
