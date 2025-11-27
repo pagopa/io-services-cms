@@ -154,7 +154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/arm-apimanagement@npm:10.0.0":
+"@azure/arm-apimanagement@npm:^10.0.0":
   version: 10.0.0
   resolution: "@azure/arm-apimanagement@npm:10.0.0"
   dependencies:
@@ -3730,7 +3730,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@io-services-cms/external-clients@workspace:packages/external-clients"
   dependencies:
-    "@azure/arm-apimanagement": 10.0.0
+    "@azure/arm-apimanagement": ^10.0.0
     "@azure/identity": ^4.0.0
     "@pagopa/io-functions-commons": ^29.1.2
     "@pagopa/openapi-codegen-ts": ^13.1.0
@@ -12143,7 +12143,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "io-services-cms-backoffice@workspace:apps/backoffice"
   dependencies:
-    "@azure/arm-apimanagement": 10.0.0
+    "@azure/arm-apimanagement": ^10.0.0
     "@azure/cosmos": ^4.0.0
     "@azure/identity": ^4.0.0
     "@emotion/react": ^11.11.1
@@ -12200,7 +12200,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "io-services-cms-webapp@workspace:apps/io-services-cms-webapp"
   dependencies:
-    "@azure/arm-apimanagement": 10.0.0
+    "@azure/arm-apimanagement": ^10.0.0
     "@azure/cosmos": ^4.0.0
     "@azure/event-hubs": ^5.12.2
     "@azure/functions": ^3.5.1
