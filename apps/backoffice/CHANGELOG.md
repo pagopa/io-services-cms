@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.5
+
+### Patch Changes
+
+- d705328e: fix APIM mocks
+
 ## 1.29.4
 
 ### Patch Changes
