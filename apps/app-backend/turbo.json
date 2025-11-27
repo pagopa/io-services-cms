@@ -1,9 +1,25 @@
 {
   "extends": ["//"],
   "tasks": {
+    "api-definitions:bundle": {
+      "inputs": ["api/internal.yaml.template"],
+      "outputs": ["api/internal.yaml"],
+      "outputLogs": "errors-only"
+    },
+    "api-definitions:internal": {
+      "inputs": ["api/internal.yaml"],
+      "outputs": ["src/generated/definitions/*"],
+      "dependsOn": ["api-definitions:bundle"],
+      "outputLogs": "errors-only"
+    },
+    "generate:version": {
+      "inputs": ["package.json"],
+      "outputs": ["src/generated/version.ts"],
+      "dependsOn": ["api-definitions:internal"],
+      "outputLogs": "errors-only"
+    },
     "generate": {
-      "inputs": ["api/*"],
-      "outputs": ["src/generated/**/*"]
+      "dependsOn": ["api-definitions:internal", "generate:version"]
     }
   }
 }

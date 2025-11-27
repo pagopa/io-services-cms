@@ -10,9 +10,7 @@ import { HttpResponse, http } from "msw";
 import {
   aListSecretsResponse,
   anOauth2TokenResponse,
-  getDiscoveryInstanceResponse,
   getListByServiceResponse,
-  getOpenIdConfig,
   getProductListByServiceResponse,
   getSubscriptionResponse,
   getUserResponse,
@@ -20,49 +18,9 @@ import {
 import { aMockErrorResponse } from "../data/common-data";
 
 export const buildHandlers = () => {
-  const AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID =
-    process.env.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID || "";
   const configuration = getConfiguration();
 
   return [
-    http.get(
-      `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/v2.0/.well-known/openid-configuration`,
-      () => {
-        const resultArray = [
-          HttpResponse.json(
-            getOpenIdConfig(AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID) as any,
-            {
-              status: 200,
-            },
-          ),
-          HttpResponse.json(getWellKnown500Response(), {
-            status: 500,
-          }),
-        ];
-
-        return resultArray[0];
-      },
-    ),
-    http.get(
-      `https://login.microsoftonline.com/common/discovery/instance`,
-      () => {
-        const resultArray = [
-          HttpResponse.json(
-            getDiscoveryInstanceResponse(
-              AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-            ) as any,
-            {
-              status: 200,
-            },
-          ),
-          HttpResponse.json(getWellKnown500Response(), {
-            status: 500,
-          }),
-        ];
-
-        return resultArray[0];
-      },
-    ),
     http.get(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/users`,
       ({ request }) => {
@@ -105,27 +63,24 @@ export const buildHandlers = () => {
         return resultArray[0];
       },
     ),
-    http.post(
-      `https://login.microsoftonline.com/${AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID}/oauth2/v2.0/token`,
-      () => {
-        const resultArray = [
-          HttpResponse.json(anOauth2TokenResponse, {
-            status: 200,
-          }),
-          new HttpResponse(null, {
-            status: 401,
-          }),
-          new HttpResponse(null, {
-            status: 403,
-          }),
-          new HttpResponse(null, {
-            status: 500,
-          }),
-        ];
+    http.get(`http://169.254.169.254/metadata/identity/oauth2/token`, () => {
+      const resultArray = [
+        HttpResponse.json(anOauth2TokenResponse, {
+          status: 200,
+        }),
+        new HttpResponse(null, {
+          status: 401,
+        }),
+        new HttpResponse(null, {
+          status: 403,
+        }),
+        new HttpResponse(null, {
+          status: 500,
+        }),
+      ];
 
-        return resultArray[0];
-      },
-    ),
+      return resultArray[0];
+    }),
     http.post(
       `https://management.azure.com/subscriptions/${configuration.AZURE_SUBSCRIPTION_ID}/resourceGroups/${configuration.AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${configuration.AZURE_APIM}/subscriptions/:subscriptionId/listSecrets`,
       () => {
