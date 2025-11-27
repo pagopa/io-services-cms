@@ -23,7 +23,7 @@
     "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json --out-dir ./src/generated/selfcare --response-decoders"
   },
   "dependencies": {
-    "@azure/arm-apimanagement": "8.1.2",
+    "@azure/arm-apimanagement": "10.0.0",
     "@azure/cosmos": "^4.0.0",
     "@azure/identity": "^4.0.0",
     "@emotion/react": "^11.11.1",

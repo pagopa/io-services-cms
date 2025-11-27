@@ -169,21 +169,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/arm-apimanagement@npm:8.1.2":
-  version: 8.1.2
-  resolution: "@azure/arm-apimanagement@npm:8.1.2"
-  dependencies:
-    "@azure/abort-controller": ^1.0.0
-    "@azure/core-auth": ^1.3.0
-    "@azure/core-client": ^1.5.0
-    "@azure/core-lro": ^2.2.0
-    "@azure/core-paging": ^1.2.0
-    "@azure/core-rest-pipeline": ^1.8.0
-    tslib: ^2.2.0
-  checksum: 041e50cfef2aa410a8b8653ab6cf5dfcd907c0e7f74dc98d4061aced8299f759fea59154b4b378316562dca7983d995551eb29854499bcd5c2345c9c3c543329
-  languageName: node
-  linkType: hard
-
 "@azure/core-amqp@npm:^4.3.2":
   version: 4.3.2
   resolution: "@azure/core-amqp@npm:4.3.2"
@@ -275,21 +260,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-client@npm:^1.5.0":
-  version: 1.7.3
-  resolution: "@azure/core-client@npm:1.7.3"
-  dependencies:
-    "@azure/abort-controller": ^1.0.0
-    "@azure/core-auth": ^1.4.0
-    "@azure/core-rest-pipeline": ^1.9.1
-    "@azure/core-tracing": ^1.0.0
-    "@azure/core-util": ^1.0.0
-    "@azure/logger": ^1.0.0
-    tslib: ^2.2.0
-  checksum: 155a188b75b2d5ea783d5fde50479337c41796736f0fced1576466c8251e429195c229f2aff0bf897761f15c19d8fd0deea9a54aab514bd3584e37140e3f0cdc
-  languageName: node
-  linkType: hard
-
 "@azure/core-client@npm:^1.9.3":
   version: 1.10.1
   resolution: "@azure/core-client@npm:1.10.1"
@@ -346,15 +316,6 @@ __metadata:
   dependencies:
     tslib: ^2.6.2
   checksum: 4b57f953998473ee784c3ea774a8b54f4be0ec239bd43cbabe28113ca18f141455289713302d4fcd802898dd7ab58380ff575b7ce9400ec1ec20c505791c0b25
-  languageName: node
-  linkType: hard
-
-"@azure/core-paging@npm:^1.2.0":
-  version: 1.5.0
-  resolution: "@azure/core-paging@npm:1.5.0"
-  dependencies:
-    tslib: ^2.2.0
-  checksum: 156230f0fdf757a0353a2aac6d012d385ed88f8ab5bccf00eee27d8d75843e681674b2d10ed43309669f9cb93bf8d9d000232896593b6fcf399fa391442a59c5
   languageName: node
   linkType: hard
 
@@ -437,23 +398,6 @@ __metadata:
     https-proxy-agent: ^7.0.0
     tslib: ^2.6.2
   checksum: 828ad9b2e0a5fc78164702b3ff9e92ac3447d5f02cbf936b807bda9e013cff8976926d4bdb80f497605a71fb4074ce3c890cdf6c2ac509e75c3969cd6c3c3f30
-  languageName: node
-  linkType: hard
-
-"@azure/core-rest-pipeline@npm:^1.8.0":
-  version: 1.11.0
-  resolution: "@azure/core-rest-pipeline@npm:1.11.0"
-  dependencies:
-    "@azure/abort-controller": ^1.0.0
-    "@azure/core-auth": ^1.4.0
-    "@azure/core-tracing": ^1.0.1
-    "@azure/core-util": ^1.3.0
-    "@azure/logger": ^1.0.0
-    form-data: ^4.0.0
-    http-proxy-agent: ^5.0.0
-    https-proxy-agent: ^5.0.0
-    tslib: ^2.2.0
-  checksum: e65b03022ba342b7788d3146eed5ddd36c7c99edf210bafd81aa55a921da08161735eb08b9177aceba5986eede53f13f8a3d064f03950b68348d877d098a6803
   languageName: node
   linkType: hard
 
@@ -12199,7 +12143,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "io-services-cms-backoffice@workspace:apps/backoffice"
   dependencies:
-    "@azure/arm-apimanagement": 8.1.2
+    "@azure/arm-apimanagement": 10.0.0
     "@azure/cosmos": ^4.0.0
     "@azure/identity": ^4.0.0
     "@emotion/react": ^11.11.1
