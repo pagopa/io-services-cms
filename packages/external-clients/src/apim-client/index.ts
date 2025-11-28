@@ -599,18 +599,14 @@ const getUserSubscriptions = (
 
       const subscriptionList: SubscriptionContract[] = [];
 
-      for await (const page of subscriptionListResponse.byPage({
-        maxPageSize: limit,
-      })) {
+      for await (const page of subscriptionListResponse.byPage()) {
         subscriptionList.push(...page);
         if (limit !== undefined || offset !== undefined) {
           /**
-           * FIXME: PagedAsyncIterableIterator returns:
-           * - first filtered page (what we are filtering)
-           * - all pages (starting from first value)
+           * PagedAsyncIterableIterator returns:
+           * - n = (total number of elements / top) arrays
+           * - we filter only the first page (what we are filtering)
            * For this reason the `break` below is used to get only the first page in case the pagination is required (whether the offset or limit is defined).
-           * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
-           * seems not to work, so we downgrade package to 8.x.x version.
            */
           break;
         }

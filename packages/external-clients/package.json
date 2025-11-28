@@ -24,7 +24,7 @@
     "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
   },
   "dependencies": {
-    "@azure/arm-apimanagement": "8.1.2",
+    "@azure/arm-apimanagement": "^10.0.0",
     "@azure/identity": "^4.0.0",
     "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/ts-commons": "^13.1.1",
