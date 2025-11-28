@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.3
+
+### Patch Changes
+
+- 9ea20575: bump version of azure library arm-apimanagement to v.10 in cms, backoffice and external-clients package projects
+
 ## 1.8.2
 
 ### Patch Changes
