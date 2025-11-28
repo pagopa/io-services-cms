@@ -1,4 +1,3 @@
-import * as AzureIdentity from "@azure/identity";
 import * as E from "fp-ts/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -13,12 +12,6 @@ import * as searchSDK from "@azure/search-documents";
 
 const mockSearchMethod = vi.fn();
 const getDocumentsCountMock = vi.fn();
-
-const mockAzureIdentity = vi
-  .spyOn(AzureIdentity, "DefaultAzureCredential")
-  .mockReturnValue({
-    a: "s",
-  } as unknown as AzureIdentity.DefaultAzureCredential);
 
 const mockAzureSearchClientContructor = vi
   .spyOn(searchSDK, "SearchClient")
@@ -65,7 +58,7 @@ describe("Azure Search Client Tests", () => {
       expect(mockAzureSearchClientContructor).toBeCalledWith(
         "anEndpoint",
         "anIndexName",
-        new DefaultAzureCredential(),
+        expect.any(DefaultAzureCredential),
         {
           serviceVersion: "aServiceVersion",
         },
