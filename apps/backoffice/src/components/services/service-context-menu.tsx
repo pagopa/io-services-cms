@@ -23,7 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import { ButtonWithTooltip } from "../buttons";
 import { useDialog } from "../dialog-provider";
@@ -38,6 +38,7 @@ export enum ServiceContextMenuActions {
 }
 
 export interface ServiceContextMenuProps {
+  body?: ReactNode;
   lifecycleStatus?: ServiceLifecycleStatus;
   onDeleteClick: () => void;
   onEditClick: () => void;
@@ -54,6 +55,7 @@ export interface ServiceContextMenuProps {
 /** Service context menu */
 // eslint-disable-next-line max-lines-per-function
 export const ServiceContextMenu = ({
+  body,
   lifecycleStatus,
   onDeleteClick,
   onEditClick,
@@ -86,6 +88,7 @@ export const ServiceContextMenu = ({
   const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
     handleEditMenuClose();
     const raiseClickEvent = await showDialog({
+      body: body ?? null,
       confirmButtonLabel: t(`service.${action}.modal.button`),
       message: t(`service.${action}.modal.description`),
       title: t(`service.${action}.modal.title`),
