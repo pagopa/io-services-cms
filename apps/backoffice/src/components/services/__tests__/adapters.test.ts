@@ -7,6 +7,7 @@ import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
   fromServiceLifecycleToServiceCreateUpdatePayload,
 } from "../adapters";
+import { CTA_PREFIX_URL_SCHEMES } from "../../cta-manager/constants";
 
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   name: "aServiceName",
@@ -18,7 +19,14 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     tos_url: "aTosUrl",
     privacy_url: "aPrivacyUrl",
     address: "anAddress",
-    cta: { text: "aCtaText", url: "iohandledlink://aCtaUrl" },
+    cta: {
+      cta_1: {
+        urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+        text: "aCtaText1",
+        url: "aCtaUrl1",
+      },
+      cta_2: { urlPrefix: "", text: "", url: "" },
+    },
     scope: "LOCAL",
     assistanceChannels: [
       { type: "email", value: "aValidEmail" },
@@ -33,8 +41,16 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   max_allowed_payment_amount: 0,
 };
 
-const aCtaResult =
-  '---\nit:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\nen:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\n---';
+const aCtaResult = `---
+it:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+en:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+---`;
 
 const anApiServicePayloadResult = {
   name: aValidServiceCreateUpdatePayload.name,
