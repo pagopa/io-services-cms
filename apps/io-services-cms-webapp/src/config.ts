@@ -308,8 +308,8 @@ export type BlobStorageClientConfiguration = t.TypeOf<
 >;
 
 const TestFiscalCodeConfiguration = t.type({
-  PREFIX_CF_TEST: withDefault(PrefixCfTestArrayDecoder, []),
-  TEST_FISCAL_CODES: withDefault(TestFiscalCodesUsersDecoder, new Set()),
+  PREFIX_CF_TEST: PrefixCfTestArrayDecoder,
+  TEST_FISCAL_CODES: TestFiscalCodesUsersDecoder,
 });
 
 export type TestFiscalCodeConfiguration = t.TypeOf<
