@@ -33,24 +33,7 @@ export const TestFiscalCodesUsersDecoder = new t.Type<
   (set) => Array.from(set).join(","),
 );
 
-export const PrefixCfTestArrayDecoder = new t.Type<
-  readonly string[],
-  string | undefined
->(
-  "PrefixCfTestArrayDecoder",
-  (p): p is readonly string[] => Array.isArray(p),
-  (p, ctx) =>
-    p === undefined || p === ""
-      ? t.success([])
-      : pipe(
-          CommaSeparatedListOf(string).decode(p),
-          E.fold(
-            (e) => t.failure(p, ctx, readableReport(e)),
-            (arr) => t.success(arr),
-          ),
-        ),
-  (arr) => arr.join(","),
-);
+export const PrefixCfTestArrayDecoder = CommaSeparatedListOf(string);
 
 /**
  * Function to check if a fiscal code is in the test users set or matches a fiscal code prefix.
