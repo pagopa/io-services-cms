@@ -201,5 +201,14 @@ describe("filter-test-user", () => {
         expect(result.right).toHaveLength(0);
       }
     });
+
+    it("should decode an undefined to an empty array", () => {
+      const result = PrefixCfTestArrayDecoder.decode(undefined);
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual([]);
+      }
+    });
   });
 });
