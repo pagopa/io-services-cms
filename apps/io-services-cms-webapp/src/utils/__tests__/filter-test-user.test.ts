@@ -142,6 +142,29 @@ describe("filter-test-user", () => {
         expect(result.right).toHaveLength(0);
       }
     });
+
+    it("should decode an undefined to an empty set", () => {
+      const result = TestFiscalCodesUsersDecoder.decode(undefined);
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(new Set<FiscalCode>());
+      }
+    });
+
+    it("should fail to decode when one fiscal code in the list is invalid", () => {
+      const mixedFiscalCodes = `${fiscalCode1},INVALID,${fiscalCode2}`;
+      const result = TestFiscalCodesUsersDecoder.decode(mixedFiscalCodes);
+
+      expect(E.isLeft(result)).toBeTruthy();
+    });
+
+    it("should fail to decode a fiscal code with wrong format", () => {
+      const wrongFormat = "12345";
+      const result = TestFiscalCodesUsersDecoder.decode(wrongFormat);
+
+      expect(E.isLeft(result)).toBeTruthy();
+    });
   });
 
   describe("PrefixCfTestArrayDecoder", () => {
@@ -176,6 +199,15 @@ describe("filter-test-user", () => {
       expect(E.isRight(result)).toBeTruthy();
       if (E.isRight(result)) {
         expect(result.right).toHaveLength(0);
+      }
+    });
+
+    it("should decode an undefined to an empty array", () => {
+      const result = PrefixCfTestArrayDecoder.decode(undefined);
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual([]);
       }
     });
   });
