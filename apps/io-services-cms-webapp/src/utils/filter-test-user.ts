@@ -1,10 +1,11 @@
-import { CommaSeparatedListOf } from "@pagopa/ts-commons/lib/comma-separated-list";
 import { FiscalCode } from "@pagopa/ts-commons/lib/strings";
 import * as S from "fp-ts/lib/string";
 import { string } from "io-ts";
 import { readonlySetFromArray } from "io-ts-types";
 
 import { TestFiscalCodeConfiguration } from "../config";
+import { CommaSeparatedListOf } from "./comma-separated-list";
+
 /**
  * Function to check if a fiscal code is in the test users set or matches a fiscal code prefix.
  *
