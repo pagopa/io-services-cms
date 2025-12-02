@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.5
+
+### Patch Changes
+
+- 1f2a3ae7: fix decoder test fiscal codes
+
 ## 1.42.4
 
 ### Patch Changes
