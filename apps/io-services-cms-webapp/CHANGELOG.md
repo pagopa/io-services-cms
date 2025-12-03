@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.7
+
+### Patch Changes
+
+- 7eac2971: Bump body-parser from 1.20.2 to 1.20.3
+
 ## 1.42.6
 
 ### Patch Changes
