@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.4
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+
 ## 1.8.3
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 1.29.7
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+- Updated dependencies [24b16966]
+  - @io-services-cms/external-clients@1.8.4
+
 ## 1.29.6
 
 ### Patch Changes

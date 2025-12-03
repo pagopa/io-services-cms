@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 1.2.2
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+
 ## 1.2.1
 
 ### Patch Changes
