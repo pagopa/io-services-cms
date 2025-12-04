@@ -1,4 +1,5 @@
 import { AccessControl } from "@/components/access-control";
+import { CheckboxToggleWithLabel } from "@/components/checkbox";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
@@ -55,7 +56,7 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useRef, useState } from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
@@ -117,6 +118,9 @@ export default function Services() {
   const { data: session } = useSession();
   const router = useRouter();
   const showDialog = useDialog();
+
+  const [autoPublish, setAutoPublish] = useState<boolean>(true);
+  const autoPublishRef = useRef(autoPublish);
 
   const getTableViewColumnGroup = (): TableViewColumn<ServiceListItem>[] =>
     hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session)
@@ -314,6 +318,7 @@ export default function Services() {
    */
   const addRowMenuItem = (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     icon: ReactNode;
     onClickFn?: () => void;
@@ -337,6 +342,16 @@ export default function Services() {
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.submitReview,
+      body: (
+        <CheckboxToggleWithLabel
+          initial={autoPublish}
+          label={"service.submitReview.modal.checkBoxLabel"}
+          onChange={(next) => {
+            autoPublishRef.current = next;
+            setAutoPublish(next);
+          }}
+        />
+      ),
       icon: <FactCheck color="primary" fontSize="inherit" />,
       serviceId: service.id,
     });
@@ -412,14 +427,17 @@ export default function Services() {
   /** handle actions click: open confirmation modal and on confirm click, perform b4f call action */
   const handleConfirmationModal = async (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     serviceId: string;
   }) => {
     const raiseClickEvent = await showDialog({
+      body: options.body ?? null,
       confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
       title: t(`service.${options.action}.modal.title`),
     });
+
     if (raiseClickEvent) {
       switch (options.action) {
         case ServiceContextMenuActions.delete:
@@ -429,7 +447,7 @@ export default function Services() {
           await handlePublish(options.serviceId);
           break;
         case ServiceContextMenuActions.submitReview:
-          await handleSubmitReview(options.serviceId, true); // TODO capire lato UX/UI come gestire l'auto_publish
+          await handleSubmitReview(options.serviceId);
           break;
         case ServiceContextMenuActions.unpublish:
           await handleUnpublish(options.serviceId);
@@ -459,14 +477,11 @@ export default function Services() {
       notify: "all",
     });
   };
-
-  const handleSubmitReview = async (
-    serviceId: string,
-    auto_publish: boolean,
-  ) => {
+  const handleSubmitReview = async (serviceId: string) => {
+    const value = autoPublishRef.current;
     await noContentFetchData(
       "reviewService",
-      { body: { auto_publish }, serviceId },
+      { body: { auto_publish: value }, serviceId },
       tt.unknown,
       {
         notify: "all",
