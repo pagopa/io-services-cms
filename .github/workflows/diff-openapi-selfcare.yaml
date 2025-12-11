@@ -7,7 +7,7 @@ on:
     - cron: '0 22 * * *'
   workflow_dispatch:
   push:
-    
+
 jobs:
   diff_json:
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
         id: diff_openapi_selfcare_notify
         uses: pagopa/dx/.github/actions/slack-notification@main
         with:
-          id: Different openapi selfcare detected'
+          id: 'Different openapi selfcare detected'
           title: ':x: Different openapi selfcare'
           text: 'Differences were found in openapi selfcare between local and remote version.\n Check the GHA output to see the differences.'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
