@@ -47,6 +47,10 @@ jobs:
             echo "Differences NOT found"
           fi
 
+      - name: Debug output
+        run: |
+            echo "OUTPUT: '${{ steps.diff.outputs.has_diff_openapi_selfcare }}'"    
+
       - name: Upload diff artifact
         if: steps.diff.outputs.has_diff_openapi_selfcare == true
         uses: actions/upload-artifact@v4
