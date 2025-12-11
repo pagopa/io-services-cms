@@ -10,7 +10,7 @@
       "url": "https://${host}/${basePath}"
     }
   ],
-  "tags": [
+  "tag": [
     {
       "name": "Institution",
       "description": "Institution V 2 Controller"
@@ -32,7 +32,7 @@
       "description": "User group endpoint CRUD operations"
     }
   ],
-  "paths": {
+  "path": {
     "/delegations": {
       "get": {
         "tags": [
@@ -2129,8 +2129,8 @@
       }
     }
   },
-  "components": {
-    "schemas": {
+  "component": {
+    "schema": {
       "DelegationResponse": {
         "title": "DelegationResponse",
         "type": "object",
