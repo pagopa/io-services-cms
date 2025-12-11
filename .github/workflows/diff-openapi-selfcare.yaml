@@ -10,8 +10,18 @@ on:
 jobs:
   diff_json:
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
+      # Exit with error if SLACK_WEBHOOK_URL is not set
+      - name: Check Slack Webhook
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL is not set. Please set the secret."
+            exit 1
+          fi
+
       - name: Check out current repo
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
         with:
@@ -40,3 +50,13 @@ jobs:
         with:
           name: diff-openapi-selfcare
           path: diff_openapi_selfcare_output.txt
+
+      - name: Different openapi selfcare notification
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        id: diff_openapi_selfcare_notify
+        uses: pagopa/dx/.github/actions/slack-notification@main
+        with:
+          id: Different openapi selfcare detected'
+          title: ':x: Different openapi selfcare'
+          text: 'Differences were found in openapi selfcare between local and remote version.\n Check the GHA output to see the differences.'
+          slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
