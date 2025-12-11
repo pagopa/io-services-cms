@@ -5,8 +5,7 @@ name: 'Diff openapi selfcare'
 on:
   schedule:
     - cron: '0 22 * * *'
-  workflow_dispatch:
-  push:  
+  workflow_dispatch:  
 
 jobs:
   diff_json:
