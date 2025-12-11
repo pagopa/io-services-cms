@@ -5,12 +5,12 @@
     "description": "This service is the proxy for external services",
     "version": "2.0.0"
   },
-  "server": [
+  "servers": [
     {
       "url": "https://${host}/${basePath}"
     }
   ],
-  "tag": [
+  "tags": [
     {
       "name": "Institution",
       "description": "Institution V 2 Controller"
@@ -32,7 +32,7 @@
       "description": "User group endpoint CRUD operations"
     }
   ],
-  "path": {
+  "paths": {
     "/delegations": {
       "get": {
         "tags": [
@@ -2129,8 +2129,8 @@
       }
     }
   },
-  "component": {
-    "schema": {
+  "components": {
+    "schemas": {
       "DelegationResponse": {
         "title": "DelegationResponse",
         "type": "object",
