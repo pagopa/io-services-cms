@@ -52,14 +52,14 @@ jobs:
             echo "OUTPUT: '${{ steps.diff.outputs.has_diff_openapi_selfcare }}'"    
 
       - name: Upload diff artifact
-        if: steps.diff.outputs.has_diff_openapi_selfcare == true
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: diff-openapi-selfcare
           path: diff_openapi_selfcare_output.txt
 
       - name: Different openapi selfcare notification
-        if: steps.diff.outputs.has_diff_openapi_selfcare == true
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
         id: diff_openapi_selfcare_notify
         uses: pagopa/dx/.github/actions/slack-notification@main
         with:
