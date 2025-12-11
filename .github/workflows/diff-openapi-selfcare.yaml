@@ -6,7 +6,8 @@ on:
   schedule:
     - cron: '0 22 * * *'
   workflow_dispatch:
-
+  push:
+    
 jobs:
   diff_json:
     runs-on: ubuntu-latest
