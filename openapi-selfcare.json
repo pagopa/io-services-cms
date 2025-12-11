@@ -5,7 +5,7 @@
     "description": "This service is the proxy for external services",
     "version": "2.0.0"
   },
-  "servers": [
+  "server": [
     {
       "url": "https://${host}/${basePath}"
     }
