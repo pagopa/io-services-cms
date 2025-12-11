@@ -5,7 +5,7 @@ name: 'Diff openapi selfcare'
 on:
   schedule:
     - cron: '0 22 * * *'
-  workflow_dispatch:  
+  workflow_dispatch:
 
 jobs:
   diff_json:
@@ -37,22 +37,24 @@ jobs:
           jq --sort-keys . openapi-selfcare.json > openapi-selfcare-local-sorted.json
           jq --sort-keys . openapi-selfcare-remote.json > openapi-selfcare-remote-sorted.json
 
-          echo "Confronto JSON..."
+          echo "Confronto JSON openapi..."
           if ! diff -u openapi-selfcare-local-sorted.json openapi-selfcare-remote-sorted.json > diff_openapi_selfcare_output.txt; then
             echo "has_diff_openapi_selfcare=true" >> $GITHUB_OUTPUT
+            echo "Differences found"
           else
             echo "has_diff_openapi_selfcare=false" >> $GITHUB_OUTPUT
+            echo "Differences NOT found"
           fi
 
       - name: Upload diff artifact
-        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        if: steps.diff.outputs.has_diff_openapi_selfcare == true
         uses: actions/upload-artifact@v4
         with:
           name: diff-openapi-selfcare
           path: diff_openapi_selfcare_output.txt
 
       - name: Different openapi selfcare notification
-        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        if: steps.diff.outputs.has_diff_openapi_selfcare == true
         id: diff_openapi_selfcare_notify
         uses: pagopa/dx/.github/actions/slack-notification@main
         with:
