@@ -1,8 +1,4 @@
-import {
-  AccessToken,
-  AzureAuthorityHosts,
-  ClientSecretCredential,
-} from "@azure/identity";
+import { AccessToken, DefaultAzureCredential } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -15,9 +11,6 @@ let accessToken: AccessToken;
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString,
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString,
   AZURE_CREDENTIALS_SCOPE_URL: NonEmptyString,
 });
 
@@ -45,14 +38,7 @@ const refreshAzureAccessToken = async (): Promise<AccessToken> => {
 
   let tokenResponse: AccessToken;
   try {
-    const credential = new ClientSecretCredential(
-      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
-      apimConfig.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
-      {
-        authorityHost: AzureAuthorityHosts.AzurePublicCloud,
-      },
-    );
+    const credential = new DefaultAzureCredential();
     tokenResponse = await credential.getToken(
       apimConfig.AZURE_CREDENTIALS_SCOPE_URL,
     );

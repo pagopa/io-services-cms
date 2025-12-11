@@ -63,6 +63,7 @@ const aValidRequestValidationItem = {
       address: "via tal dei tali 123",
       email: "service@email.it",
       scope: "LOCAL",
+      tos_url: "https://localhost",
     },
     organization: {
       name: "anOrganizationName",
@@ -84,6 +85,7 @@ const aNonValidRequestValidationItem = {
     metadata: {
       email: "service@email.it",
       scope: "LOCAL",
+      tos_url: "https://localhost",
     },
     organization: {
       name: "anOrganizationName",
@@ -105,6 +107,7 @@ const aNoContactRequestValidationItem = {
     metadata: {
       privacy_url: "https://url.com",
       scope: "LOCAL",
+      tos_url: "https://localhost",
     },
     organization: {
       name: "anOrganizationName",
@@ -125,12 +128,13 @@ const aSpecificService = {
     max_allowed_payment_amount: 123,
     metadata: {
       scope: "LOCAL",
+      tos_url: "https://localhost",
     },
     organization: {
       name: "anOrganizationName",
       fiscal_code: "12345678901",
     },
-    require_secure_channel: false,
+    require_secure_channel: true,
     authorized_cidrs: [],
   },
   version: "aVersion",
@@ -166,76 +170,7 @@ describe("Service Validation Handler", () => {
     expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
   });
 
-  it("should fail when incoming item has not a valid SecureChannel configuration and reject fails", async () => {
-    const anInvalidSecureChannelItem = {
-      ...aValidRequestValidationItem,
-      data: {
-        ...aValidRequestValidationItem.data,
-        require_secure_channel: false,
-        metadata: {
-          ...aValidRequestValidationItem.data.metadata,
-          tos_url: "http://localhost",
-        },
-      },
-    };
-    const errorMessage = "reject fail";
-    fsmLifecycleClientMock.reject.mockReturnValue(
-      TE.left(new Error(errorMessage)),
-    );
-
-    const res = await createServiceValidationHandler(dependenciesMock)({
-      item: anInvalidSecureChannelItem,
-    })();
-    expect(E.isLeft(res)).toBeTruthy();
-    if (E.isLeft(res)) {
-      expect(res.left.message).toStrictEqual(errorMessage);
-    }
-
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledOnce();
-    expect(fsmLifecycleClientMock.reject).toHaveBeenCalledWith(
-      anInvalidSecureChannelItem.id,
-      expect.objectContaining({
-        reason: expect.stringMatching(/is not a valid/),
-      }),
-    );
-    expect(fsmLifecycleClientMock.approve).not.toHaveBeenCalled();
-    expect(fsmPublicationClientMock.getStore().fetch).not.toHaveBeenCalled();
-    expect(appinsightsMocks.trackEvent).not.toHaveBeenCalled();
-  });
-
   it.each([
-    {
-      scenario:
-        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelFalseConfig)",
-      item: {
-        ...aValidRequestValidationItem,
-        data: {
-          ...aValidRequestValidationItem.data,
-          require_secure_channel: false,
-          metadata: {
-            ...aValidRequestValidationItem.data.metadata,
-            tos_url: "http://localhost",
-          },
-        },
-      },
-      expected: /tos_url(?=.*is not a valid)/,
-    },
-    {
-      scenario:
-        "incoming item has not a valid SecureChannel configuration (invalid ValidSecureChannelTrueConfig)",
-      item: {
-        ...aValidRequestValidationItem,
-        data: {
-          ...aValidRequestValidationItem.data,
-          require_secure_channel: true,
-          metadata: {
-            ...aValidRequestValidationItem.data.metadata,
-            tos_url: "invalid url",
-          },
-        },
-      },
-      expected: /tos_url\] is not a valid/,
-    },
     {
       scenario: "incoming item fails strict validation",
       item: {

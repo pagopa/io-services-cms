@@ -4,7 +4,7 @@
 
 module "backoffice" {
   source  = "pagopa-dx/azure-app-service/azurerm"
-  version = "~> 0.1.5"
+  version = "~> 2.0.1"
 
   environment = {
     prefix          = var.prefix
@@ -33,7 +33,7 @@ module "backoffice" {
 
   sticky_app_setting_names = local.backoffice.sticky_settings
 
-  tier = local.backoffice.tier
+  size = local.backoffice.size
 
   tags = var.tags
 }

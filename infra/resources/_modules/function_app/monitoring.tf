@@ -18,22 +18,9 @@ module "function_profile_autoscale" {
   }
 
   scheduler = {
-    high_load = {
-      name    = "high_load_profile"
-      minimum = 3
-      default = 12
-      start = {
-        hour    = 19
-        minutes = 30
-      }
-      end = {
-        hour    = 22
-        minutes = 59
-      }
-    },
     normal_load = {
       minimum = 3
-      default = 11
+      default = 8
     },
     maximum = 30
   }
@@ -60,6 +47,20 @@ module "function_profile_autoscale" {
       statistic_increase        = "Average"
       time_aggregation_increase = "Average"
       time_window_increase      = 1
+    }
+    requests = {
+      upper_threshold           = 1500
+      statistic_increase        = "Max"
+      time_aggregation_increase = "Maximum"
+      time_window_increase      = 1
+      increase_by               = 2
+      cooldown_increase         = 5
+      lower_threshold           = 300
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
   }
 

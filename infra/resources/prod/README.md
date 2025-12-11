@@ -22,6 +22,7 @@
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ai_search"></a> [ai\_search](#module\_ai\_search) | ../_modules/ai_search | n/a |
+| <a name="module_apim_external"></a> [apim\_external](#module\_apim\_external) | ../_modules/apim_external | n/a |
 | <a name="module_backoffice"></a> [backoffice](#module\_backoffice) | ../_modules/backoffice | n/a |
 | <a name="module_cms_function_app"></a> [cms\_function\_app](#module\_cms\_function\_app) | ../_modules/cms_function_app | n/a |
 | <a name="module_container_apps"></a> [container\_apps](#module\_container\_apps) | ../_modules/container_apps | n/a |
@@ -36,6 +37,8 @@
 | Name | Type |
 |------|------|
 | [dx_available_subnet_cidr.next_cidr_cae](https://registry.terraform.io/providers/pagopa-dx/azure/latest/docs/resources/available_subnet_cidr) | resource |
+| [azurerm_api_management.apim_external](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/api_management) | data source |
+| [azurerm_api_management_product.apim_external_product_services](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/api_management_product) | data source |
 | [azurerm_application_insights.ai_common](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/application_insights) | data source |
 | [azurerm_log_analytics_workspace.common](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/log_analytics_workspace) | data source |
 | [azurerm_resource_group.evt-rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |

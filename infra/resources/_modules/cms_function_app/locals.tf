@@ -62,14 +62,10 @@ locals {
       LEGACY_JIRA_PROJECT_NAME = "IES"
 
       # Apim connection
-      AZURE_APIM                           = "io-p-itn-apim-01"
-      AZURE_APIM_RESOURCE_GROUP            = "io-p-itn-common-rg-01"
+      AZURE_APIM                           = local.apim.name
+      AZURE_APIM_RESOURCE_GROUP            = local.apim.resource_group_name
+      AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = local.apim.product_name
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
-      AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = "io-services-api"
-
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
       # PostgreSQL 
       REVIEWER_DB_HOST     = var.pgres_cms_fqdn
@@ -143,6 +139,18 @@ locals {
       # Blob Storage configurations
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
       ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
+
+      # Fiscale codes test value - concatenation of specific test fiscal codes users from io-infra test_users module
+      TEST_FISCAL_CODES = join(",", [
+        module.test_fiscal_codes_users.users.internal_flat,
+        module.test_fiscal_codes_users.users.internal_load_flat,
+        module.test_fiscal_codes_users.users.store_review_flat,
+        module.test_fiscal_codes_users.users.eu_covid_cert_flat,
+        join(",", module.test_fiscal_codes_users.users.unique_email_test),
+        "AAAAAA00A00A000A"
+      ])
+      # Prefix fiscal code (comma separated if more than 1 prefix)
+      PREFIX_CF_TEST = "LVTEST00A00"
       }, {
       // Queues
       for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
@@ -153,5 +161,10 @@ locals {
       max     = 30
       default = 3
     }
+  }
+  apim = {
+    name                = "io-p-itn-apim-01"
+    resource_group_name = "io-p-itn-common-rg-01"
+    product_name        = "io-services-api"
   }
 }

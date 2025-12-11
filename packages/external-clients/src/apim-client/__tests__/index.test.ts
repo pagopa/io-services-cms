@@ -582,7 +582,11 @@ describe("ApimService Test", () => {
       const error: ApimRestError = {
         statusCode: 500,
         name: "apim error",
-        details: "managed error from apim",
+        details: {
+          error: {
+            message: "managed error from apim"
+          }
+        },
       };
       mockApimClient.subscription.delete.mockRejectedValueOnce(error);
 

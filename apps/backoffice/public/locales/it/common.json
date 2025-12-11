@@ -97,7 +97,6 @@
         "required": "Campo obbligatorio",
         "max": "Puoi inserire massimo {{max}} caratteri",
         "url": "Formato Url non valido",
-        "privacyCritical": "Campo obbligatorio per un servizio sensibile",
         "sameSelectedValue": "Il valore selezionato è lo stesso valore di partenza"
       }
     },

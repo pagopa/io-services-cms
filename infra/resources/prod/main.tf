@@ -1,4 +1,3 @@
-
 module "key_vault" {
   source              = "../_modules/key_vault"
   prefix              = local.prefix
@@ -102,8 +101,6 @@ module "cms_function_app" {
   key_vault_id                                          = module.key_vault.key_vault_id
   cms_pgres_reviewer_usr_pwd                            = module.key_vault.secrets_value.cms_pgres_reviewer_usr_pwd
   jira_token_name                                       = module.key_vault.secrets_name.jira_token
-  azure_client_secret_credential_secret_name            = module.key_vault.secrets_name.azure_client_secret_credential_secret
-  azure_client_secret_credential_client_id_name         = module.key_vault.secrets_name.azure_client_secret_credential_client_id
   serviceid_quality_check_exclusion_list_name           = module.key_vault.secrets_name.serviceid_quality_check_exclusion_list
   legacy_cosmosdb_connectionstring_name                 = module.key_vault.secrets_name.legacy_cosmosdb_connectionstring
   legacy_cosmosdb_key_name                              = module.key_vault.secrets_name.legacy_cosmosdb_key
@@ -143,13 +140,11 @@ module "backoffice" {
   cms_fn_default_hostname = module.cms_function_app.cms_fn_default_hostname
 
   # KeyVault Secrets
-  key_vault_id                                  = module.key_vault.key_vault_id
-  bo_auth_session_secret                        = module.key_vault.secrets_value.bo_auth_session_secret
-  azure_client_secret_credential_client_id_name = module.key_vault.secrets_name.azure_client_secret_credential_client_id
-  azure_client_secret_credential_secret_name    = module.key_vault.secrets_name.azure_client_secret_credential_secret
-  legacy_cosmosdb_key_name                      = module.key_vault.secrets_name.legacy_cosmosdb_key
-  selfcare_api_key_name                         = module.key_vault.secrets_name.selfcare_api_key
-  subscription_migration_api_key_name           = module.key_vault.secrets_name.subscription_migration_api_key
+  key_vault_id                        = module.key_vault.key_vault_id
+  bo_auth_session_secret              = module.key_vault.secrets_value.bo_auth_session_secret
+  legacy_cosmosdb_key_name            = module.key_vault.secrets_name.legacy_cosmosdb_key
+  selfcare_api_key_name               = module.key_vault.secrets_name.selfcare_api_key
+  subscription_migration_api_key_name = module.key_vault.secrets_name.subscription_migration_api_key
 
   tags = local.tags
 }
@@ -242,4 +237,16 @@ module "container_apps" {
   appi_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
   tags = local.tags
+}
+
+module "apim_external" {
+  source = "../_modules/apim_external"
+
+  api_management = {
+    name                = data.azurerm_api_management.apim_external.name
+    resource_group_name = data.azurerm_api_management.apim_external.resource_group_name
+    product_id          = data.azurerm_api_management_product.apim_external_product_services.product_id
+  }
+  cms_hostname           = module.cms_function_app.cms_fn_default_hostname
+  ai_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
 }

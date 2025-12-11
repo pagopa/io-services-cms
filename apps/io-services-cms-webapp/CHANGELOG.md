@@ -1,5 +1,53 @@
 # io-services-cms-webapp
 
+## 1.42.7
+
+### Patch Changes
+
+- 7eac2971: Bump body-parser from 1.20.2 to 1.20.3
+
+## 1.42.6
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+- Updated dependencies [24b16966]
+  - @io-services-cms/external-clients@1.8.4
+
+## 1.42.5
+
+### Patch Changes
+
+- 1f2a3ae7: fix decoder test fiscal codes
+
+## 1.42.4
+
+### Patch Changes
+
+- 9ea20575: bump version of azure library arm-apimanagement to v.10 in cms, backoffice and external-clients package projects
+- Updated dependencies [9ea20575]
+  - @io-services-cms/external-clients@1.8.3
+
+## 1.42.3
+
+### Patch Changes
+
+- 87c7ec91: remove check on required secure channel and tos url
+
+## 1.42.2
+
+### Patch Changes
+
+- 61b47763: add test fiscal code filter on ingestion activation
+
+## 1.42.1
+
+### Patch Changes
+
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+- Updated dependencies [38e3ae89]
+  - @io-services-cms/external-clients@1.8.2
+
 ## 1.42.0
 
 ### Minor Changes

@@ -1,9 +1,9 @@
 {
   "backoffice.backoffice": {
-    "hash": "b62072527f0a19c5c5313120cff6897c2046cf8853475518b420dee619b65728",
-    "version": "0.1.10",
+    "hash": "574eefa5a3e46ae05349a2a08c1035017b22abe9be747491f1b6fbbfc6d5d332",
+    "version": "2.0.1",
     "name": "azure_app_service",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/0.1.10"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service/azurerm/2.0.1"
   },
   "cms_function_app.cms_fn": {
     "hash": "df3f3bc0271d19115b3430a732b96d5818173aa0a5be97986b0d614cbf6f74cc",
@@ -35,18 +35,6 @@
     "name": "azure_postgres_server",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-postgres-server/azurerm/2.0.0"
   },
-  "cms_function_app.function_app_staging_slot_to_blob_data_writer": {
-    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
-    "version": "1.2.1",
-    "name": "azure_role_assignments",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
-  },
-  "cms_function_app.function_app_to_blob_data_writer": {
-    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
-    "version": "1.2.1",
-    "name": "azure_role_assignments",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
-  },
   "function_app.function_profile_autoscale": {
     "hash": "42ca301a262ca7cb78e9dfb2072922e778328460b91e9859d1bf2af974f9518a",
     "version": "2.0.0",
@@ -60,10 +48,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-container-app-environment/azurerm/1.0.2"
   },
   "container_apps.ca_key_vault": {
-    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
-    "version": "1.2.1",
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
     "name": "azure_role_assignments",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
   },
   "function_app.storage_account": {
     "hash": "0e4bd3881f59056e0d49ac38c09b9ebfb885c60527bfdc33ac290d50c707753c",
@@ -72,15 +60,45 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/2.0.0"
   },
   "function_app.rbac_app_be_fn_staging_slot": {
-    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
-    "version": "1.2.1",
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
     "name": "azure_role_assignments",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
   },
   "function_app.rbac_app_be_fn": {
-    "hash": "9d429fd0aba8a29c1a0dbb6005e7dd72a79d9d8dda5076220eb9f0c8bef438ae",
-    "version": "1.2.1",
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
     "name": "azure_role_assignments",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.2.1"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
+  },
+  "cms_function_app.cms_fn_roles": {
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
+  },
+  "cms_function_app.cms_fn_staging_slot_roles": {
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
+  },
+  "backoffice.bo_roles": {
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
+  },
+  "backoffice.bo_staging_slot_roles": {
+    "hash": "a9a9a967e4d17992cf757c66d248bab4413bde68057322486cb0c210b1776326",
+    "version": "1.3.0",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.0"
+  },
+  "cms_function_app.function_profile_autoscale": {
+    "hash": "42ca301a262ca7cb78e9dfb2072922e778328460b91e9859d1bf2af974f9518a",
+    "version": "2.0.0",
+    "name": "azure_app_service_plan_autoscaler",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service-plan-autoscaler/azurerm/2.0.0"
   }
 }

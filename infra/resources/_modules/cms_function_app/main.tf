@@ -1,3 +1,11 @@
+###################################
+#  Test Fiscal Codes Users Module #
+###################################
+
+module "test_fiscal_codes_users" {
+  source = "git::https://github.com/pagopa/io-infra.git//src/_modules/test_users?ref=main"
+}
+
 ##################
 #  Function App  #
 ##################

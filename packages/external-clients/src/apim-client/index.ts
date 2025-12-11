@@ -12,7 +12,7 @@ import {
   UserCreateParameters,
   UserGetResponse,
 } from "@azure/arm-apimanagement";
-import { AzureAuthorityHosts, ClientSecretCredential } from "@azure/identity";
+import { DefaultAzureCredential } from "@azure/identity";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   IResponseErrorInternal,
@@ -34,7 +34,6 @@ import {
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
 import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
-import { AzureClientSecretCredential } from "./definitions";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
@@ -83,21 +82,8 @@ const chainApimMappedError = <T>(
     ),
   );
 
-export function getApimClient(
-  clientSecretCreds: AzureClientSecretCredential,
-  subscriptionId: string,
-): ApiManagementClient {
-  return new ApiManagementClient(
-    new ClientSecretCredential(
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID,
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID,
-      clientSecretCreds.AZURE_CLIENT_SECRET_CREDENTIAL_SECRET,
-      {
-        authorityHost: AzureAuthorityHosts.AzurePublicCloud,
-      },
-    ),
-    subscriptionId,
-  );
+export function getApimClient(subscriptionId: string): ApiManagementClient {
+  return new ApiManagementClient(new DefaultAzureCredential(), subscriptionId);
 }
 
 export interface ApimService {
@@ -613,18 +599,14 @@ const getUserSubscriptions = (
 
       const subscriptionList: SubscriptionContract[] = [];
 
-      for await (const page of subscriptionListResponse.byPage({
-        maxPageSize: limit,
-      })) {
+      for await (const page of subscriptionListResponse.byPage()) {
         subscriptionList.push(...page);
         if (limit !== undefined || offset !== undefined) {
           /**
-           * FIXME: PagedAsyncIterableIterator returns:
-           * - first filtered page (what we are filtering)
-           * - all pages (starting from first value)
+           * PagedAsyncIterableIterator returns:
+           * - n = (total number of elements / top) arrays
+           * - we filter only the first page (what we are filtering)
            * For this reason the `break` below is used to get only the first page in case the pagination is required (whether the offset or limit is defined).
-           * **NOTE:** with latest `@azure/arm-apimanagement@9.0.0` the `byPage` iterator,
-           * seems not to work, so we downgrade package to 8.x.x version.
            */
           break;
         }

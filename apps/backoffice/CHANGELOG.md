@@ -1,5 +1,43 @@
 # io-services-cms-backoffice
 
+## 1.29.7
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+- Updated dependencies [24b16966]
+  - @io-services-cms/external-clients@1.8.4
+
+## 1.29.6
+
+### Patch Changes
+
+- 9ea20575: bump version of azure library arm-apimanagement to v.10 in cms, backoffice and external-clients package projects
+- Updated dependencies [9ea20575]
+  - @io-services-cms/external-clients@1.8.3
+
+## 1.29.5
+
+### Patch Changes
+
+- d705328e: fix APIM mocks
+
+## 1.29.4
+
+### Patch Changes
+
+- 3cc6eb28: Remove correlation between require_secure_channel and tos_url in service create/update funnel
+
+## 1.29.3
+
+### Patch Changes
+
+- 77042712: centralised route paths
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+- 0a610b55: updated browserlist-db on build
+- Updated dependencies [38e3ae89]
+  - @io-services-cms/external-clients@1.8.2
+
 ## 1.29.2
 
 ### Patch Changes
