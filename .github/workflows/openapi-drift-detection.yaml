@@ -25,7 +25,7 @@ jobs:
 
       - name: Download local Selfcare OpenAPI YAML
         run: |
-          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
+          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
 
       - name: Download remote Selfcare OpenAPI YAML
         run: |
