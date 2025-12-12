@@ -18,12 +18,14 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
-      # Exit with error if SLACK_WEBHOOK_URL is not set
       - name: Check Slack Webhook
+        id: check_slack_webhook
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "SLACK_WEBHOOK_URL is not set. Please set the secret."
-            exit 1
+            echo "slack_webhook_set=false" >> $GITHUB_OUTPUT
+          else
+            echo "slack_webhook_set=true" >> $GITHUB_OUTPUT  
           fi
 
       - name: Download local Selfcare OpenAPI YAML
@@ -45,35 +47,24 @@ jobs:
           else
             echo "has_diff_openapi_selfcare=false" >> $GITHUB_OUTPUT
             echo "Differences NOT found"
-          fi 
+          fi
 
-      - name: Upload diff artifact
+      - name: Upload artifacts
         if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
-          name: diff-openapi-selfcare
-          path: diff_openapi_selfcare_output.txt
-
-      - name: Upload local Selfcare OpenAPI artifact
-        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: openapi-selfcare-local
-          path: openapi-selfcare-local.yaml
-       
-      - name: Upload remote Selfcare OpenAPI artifact
-        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: openapi-selfcare-remote
-          path: openapi-selfcare-remote.yaml     
+          name: selfcare-openapi-drift
+          path: |
+            openapi-selfcare-local.yaml
+            openapi-selfcare-remote.yaml 
+            diff_openapi_selfcare_output.txt
 
       - name: Selfcare OpenAPI drift notification
-        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true' && steps.check_slack_webhook.outputs.slack_webhook_set == 'true'
         id: drift_openapi_selfcare_notify
         uses: pagopa/dx/.github/actions/slack-notification@main
         with:
           id: 'Selfcare OpenAPI drift detected'
-          title: ':x: Selfcare OpenAPI Drift Detection'
-          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          title: ':x: The workflow *OpenAPI Drift Detection* has failed.'
+          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
