@@ -1,5 +1,6 @@
 export * from "./adapters";
 export * from "./service-alerts";
+export * from "./service-autopublish-checkbox";
 export * from "./service-context-menu";
 export * from "./service-group-tag";
 export * from "./service-history";

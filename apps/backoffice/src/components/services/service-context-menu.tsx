@@ -23,10 +23,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 
 import { ButtonWithTooltip } from "../buttons";
 import { useDialog } from "../dialog-provider";
+import { ServiceAutopublishCheckbox } from "./service-autopublish-checkbox";
 
 export enum ServiceContextMenuActions {
   delete = "delete",
@@ -44,7 +45,7 @@ export interface ServiceContextMenuProps {
   onHistoryClick: () => void;
   onPreviewClick: () => void;
   onPublishClick: () => void;
-  onSubmitReviewClick: () => void;
+  onSubmitReviewClick: (autoPublish: boolean) => void;
   onUnpublishClick: () => void;
   publicationStatus?: ServicePublicationStatusType;
   /** If `true` shows ServicePublication actions only */
@@ -71,7 +72,14 @@ export const ServiceContextMenu = ({
   const [editMenuAnchorEl, setEditMenuAnchorEl] = useState<HTMLElement | null>(
     null,
   );
+  const [autoPublish, setAutoPublish] = useState<boolean>(false);
+  const autoPublishRef = useRef(autoPublish);
   const isEditMenuOpen = Boolean(editMenuAnchorEl);
+
+  const handleAutoPublishChange = useCallback((checked: boolean) => {
+    autoPublishRef.current = checked;
+    setAutoPublish(checked);
+  }, []);
 
   /** handle edit menu opening */
   const handleEditMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -83,9 +91,14 @@ export const ServiceContextMenu = ({
   };
 
   /** handle actions click: open confirmation modal and on confirm click, raise event */
-  const handleConfirmationModal = async (action: ServiceContextMenuActions) => {
+  const handleConfirmationModal = async (
+    action: ServiceContextMenuActions,
+    body?: ReactNode,
+  ) => {
     handleEditMenuClose();
+    handleAutoPublishChange(false); //reset auto publish state
     const raiseClickEvent = await showDialog({
+      body,
       confirmButtonLabel: t(`service.${action}.modal.button`),
       message: t(`service.${action}.modal.description`),
       title: t(`service.${action}.modal.title`),
@@ -105,7 +118,7 @@ export const ServiceContextMenu = ({
           onPublishClick();
           break;
         case ServiceContextMenuActions.submitReview:
-          onSubmitReviewClick();
+          onSubmitReviewClick(autoPublishRef.current);
           break;
         case ServiceContextMenuActions.unpublish:
           onUnpublishClick();
@@ -193,7 +206,10 @@ export const ServiceContextMenu = ({
             lifecycleStatus?.value !== ServiceLifecycleStatusTypeEnum.draft
           }
           onClick={(_) =>
-            handleConfirmationModal(ServiceContextMenuActions.submitReview)
+            handleConfirmationModal(
+              ServiceContextMenuActions.submitReview,
+              <ServiceAutopublishCheckbox onChange={handleAutoPublishChange} />,
+            )
           }
           size="medium"
           variant="contained"

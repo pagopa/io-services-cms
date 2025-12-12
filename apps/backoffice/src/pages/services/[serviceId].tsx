@@ -182,7 +182,7 @@ export default function ServiceDetails() {
             onHistoryClick={() => handleHistory(true)}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
-            onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
+            onSubmitReviewClick={handleSubmitReview}
             onUnpublishClick={handleUnpublish}
             publicationStatus={spData?.status}
             releaseMode={release}
