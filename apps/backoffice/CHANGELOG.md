@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.29.8
+
+### Patch Changes
+
+- f6b23070: add parser for offset and limit query params in Service List API
+
 ## 1.29.7
 
 ### Patch Changes
