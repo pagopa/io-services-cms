@@ -4,8 +4,9 @@ name: 'OpenAPI Drift Detection'
 
 on:
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '0 06 * * *'
   workflow_dispatch:
+  push:
 
 jobs:
   selfcare:
@@ -51,6 +52,20 @@ jobs:
           name: diff-openapi-selfcare
           path: diff_openapi_selfcare_output.txt
 
+      - name: Upload local Selfcare OpenAPI artifact
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-selfcare-local
+          path: openapi-selfcare-local.yaml
+       
+      - name: Upload remote Selfcare OpenAPI artifact
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-selfcare-remote
+          path: openapi-selfcare-remote.yaml     
+
       - name: Selfcare OpenAPI drift notification
         if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
         id: drift_openapi_selfcare_notify
@@ -58,5 +73,5 @@ jobs:
         with:
           id: 'Selfcare OpenAPI drift detected'
           title: ':x: Selfcare OpenAPI Drift Detection'
-          text: 'Differences were found in Selfcare OpenAPI between local and remote version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
