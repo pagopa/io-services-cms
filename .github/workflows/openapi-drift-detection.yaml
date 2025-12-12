@@ -28,7 +28,6 @@ jobs:
       - name: Compare files
         id: diff
         run: |
-
           echo "Compare Selfcare OpenAPI files..."
           if ! diff -u openapi-selfcare-local.yaml openapi-selfcare-remote.yaml > diff_openapi_selfcare_output.txt; then
             echo "has_diff_openapi_selfcare=true" >> $GITHUB_OUTPUT
