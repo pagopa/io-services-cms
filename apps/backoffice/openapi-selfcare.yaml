@@ -1,6 +1,6 @@
-openapi: 3.0.2
+openapi: 3.0.1
 info:
-  title: External api service
+  title: External API service
   description: This service is the proxy for external services
   version: v2
 servers:
@@ -1634,7 +1634,7 @@ paths:
                 title: string
                 type: string
   '/tokens/products/{productId}':
-    head:
+    get:
       tags:
         - Token
       summary: Retrieve tokens given the product identifier
@@ -1659,60 +1659,6 @@ paths:
           schema:
             type: integer
             format: int32
-      responses:
-        '200':
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/TokenListResponse'
-              examples:
-                default:
-                  value: 
-        '400':
-          description: Bad Request
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-              example:
-                detail: string
-                instance: string
-                invalidParams:
-                  - name: string
-                    reason: string
-                status: 500
-                title: string
-                type: string
-        '404':
-          description: Not Found
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-              example:
-                detail: string
-                instance: string
-                invalidParams:
-                  - name: string
-                    reason: string
-                status: 500
-                title: string
-                type: string
-  '/test/{id}':
-     get:
-      tags:
-        - Token
-      summary: Test
-      description: Test
-      operationId: Test
-      parameters:
-        - name: id
-          in: path
-          description: Product's unique identifier
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -2998,5 +2944,3 @@ tags:
     description: Institution Controller
   - name: product
     description: Product Controller
-test:
-  - test    
