@@ -24,7 +24,8 @@ jobs:
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "SLACK_WEBHOOK_URL is not set. Please set the secret."
             echo "slack_webhook_set=false" >> $GITHUB_OUTPUT
-          else
+            else
+            echo "::warning::SLACK_WEBHOOK_URL is set."
             echo "slack_webhook_set=true" >> $GITHUB_OUTPUT  
           fi
 
