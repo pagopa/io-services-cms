@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.0.1
 info:
   title: External API service
   description: This service is the proxy for external services
