@@ -52,10 +52,10 @@ import {
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useRouter } from "next/router";
 import {
   ReactElement,
   ReactNode,
