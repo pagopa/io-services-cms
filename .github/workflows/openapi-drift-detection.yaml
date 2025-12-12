@@ -28,7 +28,7 @@ jobs:
 
       - name: Download local Selfcare OpenAPI YAML
         run: |
-          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
+          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
 
       - name: Download remote Selfcare OpenAPI YAML
         run: |
@@ -75,5 +75,5 @@ jobs:
         with:
           id: 'Selfcare OpenAPI drift detected'
           title: ':x: Selfcare OpenAPI Drift Detection'
-          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
