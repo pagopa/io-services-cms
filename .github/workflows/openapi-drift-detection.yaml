@@ -9,7 +9,8 @@ on:
   push:
 
 jobs:
-  diff_json:
+  selfcare:
+    name: Selfcare OpenAPI Drift Detection
     runs-on: ubuntu-latest
     env:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -23,23 +24,20 @@ jobs:
             exit 1
           fi
 
-      - name: Check out current repo
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
-        with:
-          fetch-depth: 2
-
-      - name: Download remote selfcare openapi JSON
+      - name: Download local Selfcare OpenAPI YAML
         run: |
-          curl -sSL https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json -o openapi-selfcare-remote.json
+          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
 
-      - name: Compare JSON files
+      - name: Download remote Selfcare OpenAPI YAML
+        run: |
+          curl -sS https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml -o openapi-selfcare-remote.yaml
+
+      - name: Compare files
         id: diff
         run: |
-          jq --sort-keys . openapi-selfcare.json > openapi-selfcare-local-sorted.json
-          jq --sort-keys . openapi-selfcare-remote.json > openapi-selfcare-remote-sorted.json
 
-          echo "Confronto JSON openapi..."
-          if ! diff -u openapi-selfcare-local-sorted.json openapi-selfcare-remote-sorted.json > diff_openapi_selfcare_output.txt; then
+          echo "Compare Selfcare OpenAPI files..."
+          if ! diff -u openapi-selfcare-local.yaml openapi-selfcare-remote.yaml > diff_openapi_selfcare_output.txt; then
             echo "has_diff_openapi_selfcare=true" >> $GITHUB_OUTPUT
             echo "Differences found"
           else
@@ -54,12 +52,12 @@ jobs:
           name: diff-openapi-selfcare
           path: diff_openapi_selfcare_output.txt
 
-      - name: Different openapi selfcare notification
+      - name: Selfcare OpenAPI drift notification
         if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
-        id: diff_openapi_selfcare_notify
+        id: drift_openapi_selfcare_notify
         uses: pagopa/dx/.github/actions/slack-notification@main
         with:
-          id: 'Different openapi selfcare detected'
-          title: ':x: Different openapi selfcare'
-          text: 'Differences were found in openapi selfcare between local and remote version.\n Check the workflow:\n URL:https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          id: 'Selfcare OpenAPI drift detected'
+          title: ':x: Selfcare OpenAPI Drift Detection'
+          text: 'Differences were found in Selfcare OpenAPI between local and remote version.\n Check the workflow:\n URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
