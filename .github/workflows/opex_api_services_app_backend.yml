@@ -1,4 +1,4 @@
-name: Opex Dashboard openapi - Services cms
+name: Opex Dashboard openapi - App Backend
 
 # Controls when the workflow will run
 on:
@@ -7,15 +7,15 @@ on:
     branches:
       - master
     paths:
-      - 'apps/io-services-cms-webapp/openapi.yaml'
-      - '.github/workflows/opex_api_services_cms.yml'
-      - '.opex/api_services_cms/**'
+      - 'apps/app-backend/api/internal.yaml'
+      - '.github/workflows/opex_api_services_app_backend.yml'
+      - '.opex/api_services_app_backend/**'
 
 jobs:
   call-opex-workflow:
     uses: ./.github/workflows/call_opex_api.yml
     with:
-      api-name: api_services_cms
+      api-name: api_services_app_backend
       environment: prod
     secrets:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
