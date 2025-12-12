@@ -45,6 +45,7 @@ export enum EventNameEnum {
   CreateService = "create",
   DeleteService = "delete",
   EditService = "edit",
+  GetServiceActivation = "activation.get",
   GetServiceHistory = "history.get",
   GetServiceKeys = "keys.get",
   GetServiceLifecycle = "lifecycle.get",
@@ -56,4 +57,5 @@ export enum EventNameEnum {
   RegenerateServiceKeys = "keys.regenerate",
   UnpublishService = "unpublish",
   UploadServiceLogo = "logo.put",
+  UpsertServiceActivation = "activation.upsert",
 }
