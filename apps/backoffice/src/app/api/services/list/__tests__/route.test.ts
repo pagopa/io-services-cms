@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { faker } from "@faker-js/faker/locale/it";
 import { ServiceLifecycle } from "@io-services-cms/models";
@@ -17,6 +17,7 @@ const backofficeUserMock: BackOfficeUser = {
     fiscalCode: faker.string.numeric(),
     role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
     logo_url: faker.image.url(),
+    isAggregator: false
   },
   permissions: { apimGroups: faker.helpers.multiple(faker.string.alpha) },
   parameters: {
@@ -82,6 +83,10 @@ vi.mock("@/lib/be/wrappers", () => ({
 }));
 
 describe("Retrieve Services List API", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("when no limit and offset queryParam are provided should call with the default", async () => {
     const nextRequest = new NextRequest(new URL("http://localhost"));
     const result = await GET(nextRequest, {});
@@ -90,7 +95,7 @@ describe("Retrieve Services List API", () => {
     expect(retrieveServiceListMock).toHaveBeenCalledWith(
       nextRequest,
       backofficeUserMock,
-      100,
+      20,
       0,
       undefined,
     );
@@ -141,5 +146,29 @@ describe("Retrieve Services List API", () => {
       0,
       "aServiceId",
     );
+  });
+
+  it("should return 400 when limit query param is invalid", async () => {
+    const url = new URL("http://localhost");
+    url.searchParams.set("limit", "not-a-number");
+
+    const nextRequest = new NextRequest(url);
+
+    const result = await GET(nextRequest, {});
+
+    expect(result.status).toBe(400);
+    expect(retrieveServiceListMock).not.toHaveBeenCalled();
+  });
+
+  it("should return 400 when offset query param is invalid", async () => {
+    const url = new URL("http://localhost");
+    url.searchParams.set("offset", "-1");
+
+    const nextRequest = new NextRequest(url);
+
+    const result = await GET(nextRequest, {});
+
+    expect(result.status).toBe(400);
+    expect(retrieveServiceListMock).not.toHaveBeenCalled();
   });
 });
