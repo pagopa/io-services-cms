@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '0 06 * * *'
   workflow_dispatch:
-  push:  
+  
 
 jobs:
   selfcare:
