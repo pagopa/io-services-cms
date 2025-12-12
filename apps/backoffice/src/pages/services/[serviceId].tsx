@@ -28,9 +28,9 @@ import {
 } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
-import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useRouter } from "next/router";
 import { ReactElement, useEffect, useState } from "react";
 
 const RELEASE_QUERY_PARAM = "?release=true";
@@ -182,7 +182,7 @@ export default function ServiceDetails() {
             onHistoryClick={() => handleHistory(true)}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
-            onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
+            onSubmitReviewClick={handleSubmitReview}
             onUnpublishClick={handleUnpublish}
             publicationStatus={spData?.status}
             releaseMode={release}
