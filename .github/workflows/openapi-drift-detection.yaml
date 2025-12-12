@@ -9,7 +9,6 @@ on:
     - cron: '0 06 * * *'
   workflow_dispatch:
   
-
 jobs:
   selfcare:
     name: Selfcare OpenAPI Drift Detection
