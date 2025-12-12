@@ -8601,6 +8601,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie@npm:^0.7.0":
+  version: 0.7.2
+  resolution: "cookie@npm:0.7.2"
+  checksum: 9bf8555e33530affd571ea37b615ccad9b9a34febbf2c950c86787088eb00a8973690833b0f8ebd6b69b753c62669ea60cec89178c1fb007bf0749abed74f93e
+  languageName: node
+  linkType: hard
+
 "cookiejar@npm:^2.1.4":
   version: 2.1.4
   resolution: "cookiejar@npm:2.1.4"
@@ -13009,7 +13016,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.11.4, jose@npm:^4.14.4":
+"jose@npm:^4.14.4":
   version: 4.14.6
   resolution: "jose@npm:4.14.6"
   checksum: eae81a234e7bf1446b1bd80722b3462b014e3835b155c3a7799c1c5043163a53a0dc28d347004151b031e6b7b863403aabf8814d9cc217ce21f8c2f3ebd4b335
@@ -14679,27 +14686,30 @@ __metadata:
   linkType: hard
 
 "next-auth@npm:^4.24.5":
-  version: 4.24.5
-  resolution: "next-auth@npm:4.24.5"
+  version: 4.24.13
+  resolution: "next-auth@npm:4.24.13"
   dependencies:
     "@babel/runtime": ^7.20.13
     "@panva/hkdf": ^1.0.2
-    cookie: ^0.5.0
-    jose: ^4.11.4
+    cookie: ^0.7.0
+    jose: ^4.15.5
     oauth: ^0.9.15
     openid-client: ^5.4.0
     preact: ^10.6.3
     preact-render-to-string: ^5.1.19
     uuid: ^8.3.2
   peerDependencies:
-    next: ^12.2.5 || ^13 || ^14
-    nodemailer: ^6.6.5
-    react: ^17.0.2 || ^18
-    react-dom: ^17.0.2 || ^18
+    "@auth/core": 0.34.3
+    next: ^12.2.5 || ^13 || ^14 || ^15 || ^16
+    nodemailer: ^7.0.7
+    react: ^17.0.2 || ^18 || ^19
+    react-dom: ^17.0.2 || ^18 || ^19
   peerDependenciesMeta:
+    "@auth/core":
+      optional: true
     nodemailer:
       optional: true
-  checksum: 7cc49385123690ccb908f4552b75012717c4e45205a9fdc7cf48cd730dbcc7823a3e33e2a2073ecf1edae5c1980123f68678fd4af9198ea21ab0decb630cc71e
+  checksum: 05a2312a764dd9bd5e2c8dc3b70866d187db7dc209697628d9e026f66c96d319164ca251d79cc47c31d28648024906b4a2a916b11cbe9962d61a6bb2ee7d474d
   languageName: node
   linkType: hard
 
