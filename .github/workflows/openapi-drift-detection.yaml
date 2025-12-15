@@ -8,6 +8,7 @@ on:
   schedule:
     - cron: '0 06 * * *'
   workflow_dispatch:
+  push:  
   
 jobs:
   selfcare:
@@ -19,17 +20,17 @@ jobs:
     steps:
       - name: Download local Selfcare OpenAPI YAML
         run: |
-          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml -o openapi-selfcare-local.yaml
+          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.json -o openapi-selfcare-local.json
 
       - name: Download remote Selfcare OpenAPI YAML
         run: |
-          curl -sS https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml -o openapi-selfcare-remote.yaml
+          curl -sS https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json -o openapi-selfcare-remote.json
 
       - name: Compare files
         id: diff
         run: |
           echo "Compare Selfcare OpenAPI files..."
-          if ! diff -u openapi-selfcare-local.yaml openapi-selfcare-remote.yaml > diff_openapi_selfcare_output.txt; then
+          if ! diff -u openapi-selfcare-local.json openapi-selfcare-remote.json > diff_openapi_selfcare_output.txt; then
             echo "has_diff_openapi_selfcare=true" >> $GITHUB_OUTPUT
             echo "Differences found"
           else
@@ -43,8 +44,8 @@ jobs:
         with:
           name: selfcare-openapi-drift
           path: |
-            openapi-selfcare-local.yaml
-            openapi-selfcare-remote.yaml 
+            openapi-selfcare-local.json
+            openapi-selfcare-remote.json 
             diff_openapi_selfcare_output.txt
          
       - name: Check Slack Webhook
@@ -64,5 +65,5 @@ jobs:
         with:
           id: 'Selfcare OpenAPI drift detected'
           title: ':x: The workflow *OpenAPI Drift Detection* has failed.'
-          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.yaml|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.yaml|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/feats/gha-diff-openapi-selfcare/apps/backoffice/openapi-selfcare.json|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
