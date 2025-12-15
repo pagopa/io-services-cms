@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.30.0
+
+### Minor Changes
+
+- 542b1f38: Manage autopublish on service "submit to review" action
+
 ## 1.29.8
 
 ### Patch Changes
