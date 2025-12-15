@@ -586,7 +586,7 @@
       "modal": {
         "title": "Vuoi inviare il servizio in revisione?",
         "description": "Il team di IO controllerà i contenuti del servizio. Controlla lo stato nella sezione Servizi per conoscere l'esito della revisione.",
-        "publishAfterApproval": "Pubblica dopo l'approvazione",
+        "publishAfterApproval": "Pubblica il servizio dopo l'approvazione",
         "button": "Invia in revisione"
       }
     },

@@ -586,7 +586,7 @@
       "modal": {
         "title": "Do you want to send the service for review?",
         "description": "The IO team will review the service content. Check the status in the Services section to see the review outcome.",
-        "publishAfterApproval": "Publish after approval",
+        "publishAfterApproval": "Publish the service after approval",
         "button": "Send for review"
       }
     },
