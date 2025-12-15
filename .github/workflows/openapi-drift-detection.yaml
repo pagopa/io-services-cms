@@ -1,0 +1,68 @@
+# This workflow will perform a diff between selfacare openapi saved locally and remote.
+
+name: 'OpenAPI Drift Detection'
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: '0 06 * * *'
+  workflow_dispatch: 
+  
+jobs:
+  selfcare:
+    name: Selfcare OpenAPI Drift Detection
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - name: Download local Selfcare OpenAPI
+        run: |
+          curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.json -o openapi-selfcare-local.json
+
+      - name: Download remote Selfcare OpenAPI
+        run: |
+          curl -sS https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json -o openapi-selfcare-remote.json
+
+      - name: Compare files
+        id: diff
+        run: |
+          echo "Compare Selfcare OpenAPI files..."
+          if ! diff -u openapi-selfcare-local.json openapi-selfcare-remote.json > diff_openapi_selfcare_output.txt; then
+            echo "has_diff_openapi_selfcare=true" >> $GITHUB_OUTPUT
+            echo "Differences found"
+          else
+            echo "has_diff_openapi_selfcare=false" >> $GITHUB_OUTPUT
+            echo "Differences NOT found"
+          fi
+
+      - name: Upload artifacts
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true'
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: selfcare-openapi-drift
+          path: |
+            openapi-selfcare-local.json
+            openapi-selfcare-remote.json 
+            diff_openapi_selfcare_output.txt
+         
+      - name: Check Slack Webhook
+        id: check_slack_webhook
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::warning::SLACK_WEBHOOK_URL is not set. Please set the secret."
+            echo "slack_webhook_set=false" >> $GITHUB_OUTPUT
+          else
+            echo "slack_webhook_set=true" >> $GITHUB_OUTPUT  
+          fi      
+
+      - name: Selfcare OpenAPI drift notification
+        if: steps.diff.outputs.has_diff_openapi_selfcare == 'true' && steps.check_slack_webhook.outputs.slack_webhook_set == 'true'
+        id: drift_openapi_selfcare_notify
+        uses: pagopa/dx/.github/actions/slack-notification@main
+        with:
+          id: 'Selfcare OpenAPI drift detected'
+          title: ':x: The workflow *OpenAPI Drift Detection* has failed.'
+          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.json|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}
