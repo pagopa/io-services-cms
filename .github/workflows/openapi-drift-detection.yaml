@@ -17,11 +17,11 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
-      - name: Download local Selfcare OpenAPI YAML
+      - name: Download local Selfcare OpenAPI
         run: |
           curl -sS https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.json -o openapi-selfcare-local.json
 
-      - name: Download remote Selfcare OpenAPI YAML
+      - name: Download remote Selfcare OpenAPI
         run: |
           curl -sS https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json -o openapi-selfcare-remote.json
 
