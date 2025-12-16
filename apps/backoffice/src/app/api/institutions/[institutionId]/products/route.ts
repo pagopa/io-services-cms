@@ -1,5 +1,6 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { getUserInstitutionProducts } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
@@ -26,9 +27,9 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(userInstitutionProducts);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving institution products for institutionId: ${params.institutionId}, caused by: `,
-        error,
+        { error },
       );
 
       return handleInternalErrorResponse(

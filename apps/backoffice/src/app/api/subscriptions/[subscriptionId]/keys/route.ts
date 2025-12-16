@@ -9,6 +9,7 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -46,7 +47,7 @@ export const GET = withJWTAuthHandler(
       const subscriptionKeysResponse = await retrieveManageSubscriptionApiKeys(
         params.subscriptionId,
       );
-      console.log("subscriptionKeysResponse", subscriptionKeysResponse);
+      logger.info("subscriptionKeysResponse", { subscriptionKeysResponse });
       return sanitizedNextResponseJson(subscriptionKeysResponse);
     } catch (error) {
       handlerErrorLog(

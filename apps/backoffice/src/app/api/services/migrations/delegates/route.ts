@@ -1,4 +1,5 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveOrganizationDelegates } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
@@ -19,10 +20,10 @@ export const GET = withJWTAuthHandler(
 
       return sanitizedNextResponseJson(response);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving Delegates for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse(
         "InstitutionDelegatesRetrieveError",
