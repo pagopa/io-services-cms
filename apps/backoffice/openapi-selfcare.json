@@ -30,6 +30,12 @@
     {
       "name": "UserGroup",
       "description": "User group endpoint CRUD operations"
+    },
+    {
+      "name": "ContractTemplate"
+    },
+    {
+      "name": "Product"
     }
   ],
   "paths": {
@@ -1033,6 +1039,790 @@
             ]
           }
         ]
+      }
+    },
+    "/contract-template": {
+      "post": {
+        "summary": "Upload a new contract template version",
+        "description": "Upload an html file as a new contract template version to be used in product configuration",
+        "operationId": "uploadContractTemplate",
+        "tags": [
+          "ContractTemplate"
+        ],
+        "parameters": [
+          {
+            "name": "createdBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9 ]+$"
+            },
+            "required": true
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractTemplateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "summary": "List contract templates available",
+        "description": "List and filter all the contract templates available",
+        "operationId": "listContractTemplates",
+        "tags": [
+          "ContractTemplate"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractTemplateResponseList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
+    "/contract-template/{contractTemplateId}": {
+      "get": {
+        "summary": "Download a contract template version",
+        "description": "Download the html file of a specific contract template version",
+        "operationId": "downloadContractTemplate",
+        "tags": [
+          "ContractTemplate"
+        ],
+        "parameters": [
+          {
+            "name": "contractTemplateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileType",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "HTML"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
+    "/product": {
+      "patch": {
+        "summary": "Partially update a product by ID",
+        "description": "Partially updates an existing product identified by its productId. Only the non-null fields provided in the request body will be updated; all other fields will remain unchanged.",
+        "operationId": "patchProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "createdBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductPatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product successfully patched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid patch document, invalid productId, or field constraint violation",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Not Found - No product found with the specified productId",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected error occurred while applying the patch",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "summary": "Get product by productId",
+        "description": "Retrieve a product by its unique identifier.",
+        "operationId": "getProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Cancel product by ID",
+        "description": "Marks the product as DELETED if it exists.",
+        "operationId": "deleteProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create or update a product configuration",
+        "description": "Creates a new product configuration or updates the existing one when a match is found",
+        "operationId": "createProduct",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "createdBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
+    "/product/origins": {
+      "get": {
+        "summary": "Get product origins by productId",
+        "description": "Retrieve the list of institution origins for the given product.",
+        "operationId": "getProductOriginsById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Origins found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductOriginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
+    "/webhooks": {
+      "post": {
+        "summary": "Create a new webhook",
+        "description": "Create a new webhook configuration",
+        "operationId": "createWebhook",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "requesterProductId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/webhooks/{productId}": {
+      "put": {
+        "summary": "Update webhook",
+        "description": "Update an existing webhook configuration",
+        "operationId": "updateWebhookbyProductId",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requesterProductId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get webhook by ID",
+        "description": "Retrieve a specific webhook configuration",
+        "operationId": "getWebhookbyProductId",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "requesterProductId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
       }
     },
     "/institutions/{institutionId}/contract": {
@@ -2812,6 +3602,652 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ContractTemplateResponse": {
+        "type": "object",
+        "properties": {
+          "contractTemplateId": {
+            "type": "string"
+          },
+          "contractTemplatePath": {
+            "type": "string"
+          },
+          "contractTemplateVersion": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "fileType": {
+            "$ref": "#/components/schemas/ContractTemplateFileType"
+          }
+        }
+      },
+      "Instant": {
+        "type": "string",
+        "format": "date-time",
+        "examples": [
+          "2022-03-10T16:15:50Z"
+        ]
+      },
+      "ContractTemplateFileType": {
+        "type": "string",
+        "enum": [
+          "HTML",
+          "PDF"
+        ]
+      },
+      "Problem4": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string"
+          },
+          "instance": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "ContractTemplateResponseList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractTemplateResponse"
+            }
+          }
+        }
+      },
+      "ProductBaseResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          }
+        }
+      },
+      "ProductStatus": {
+        "type": "string",
+        "enum": [
+          "TESTING",
+          "ACTIVE",
+          "DELETED",
+          "SUSPEND"
+        ]
+      },
+      "ProductPatchRequest": {
+        "type": "object",
+        "required": [
+          "productId"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visualConfiguration": {
+            "$ref": "#/components/schemas/VisualConfiguration"
+          },
+          "features": {
+            "$ref": "#/components/schemas/Features"
+          },
+          "roleMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleMapping"
+            }
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractTemplateConfig"
+            }
+          },
+          "institutionOrigins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          },
+          "emailTemplates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmailTemplateConfig"
+            }
+          },
+          "backOfficeEnvironmentConfigurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
+            }
+          }
+        }
+      },
+      "VisualConfiguration": {
+        "type": "object",
+        "properties": {
+          "logoUrl": {
+            "type": "string"
+          },
+          "depictImageUrl": {
+            "type": "string"
+          },
+          "logoBgColor": {
+            "type": "string"
+          }
+        }
+      },
+      "Features": {
+        "type": "object",
+        "properties": {
+          "allowCompanyOnboarding": {
+            "type": "boolean"
+          },
+          "allowIndividualOnboarding": {
+            "type": "boolean"
+          },
+          "allowedInstitutionTaxCode": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "delegable": {
+            "type": "boolean"
+          },
+          "invoiceable": {
+            "type": "boolean"
+          },
+          "expirationDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RoleMapping": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "multiroleAllowed": {
+            "type": "boolean"
+          },
+          "phasesAdditionAllowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "skipUserCreation": {
+            "type": "boolean"
+          },
+          "backOfficeRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackOfficeRole"
+            }
+          }
+        }
+      },
+      "BackOfficeRole": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "productLabel": {
+            "type": "string"
+          }
+        }
+      },
+      "ContractTemplateConfig": {
+        "type": "object",
+        "properties": {
+          "contractId": {
+            "type": "string"
+          },
+          "onboardingType": {
+            "$ref": "#/components/schemas/OnboardingType"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "institutionType": {
+            "$ref": "#/components/schemas/InstitutionType1"
+          },
+          "contractType": {
+            "$ref": "#/components/schemas/ContractType"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generated": {
+            "type": "boolean"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "workflowState": {
+            "type": "string"
+          },
+          "workflowType": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowType"
+            }
+          }
+        }
+      },
+      "OnboardingType": {
+        "type": "string",
+        "enum": [
+          "INSTITUTION",
+          "INSTITUTION_AGGREGATOR",
+          "USER",
+          "USER_AGGREGATOR"
+        ]
+      },
+      "InstitutionType1": {
+        "type": "string",
+        "enum": [
+          "PA",
+          "PG",
+          "GSP",
+          "SA",
+          "PT",
+          "SCP",
+          "PSP",
+          "AS",
+          "REC",
+          "CON",
+          "PRV",
+          "PRV_PF",
+          "GPU",
+          "SCEC",
+          "DEFAULT"
+        ]
+      },
+      "ContractType": {
+        "type": "string",
+        "enum": [
+          "CONTRACT",
+          "ATTACHMENT"
+        ]
+      },
+      "WorkflowType": {
+        "type": "string",
+        "enum": [
+          "CONTRACT_REGISTRATION",
+          "FOR_APPROVE",
+          "FOR_APPROVE_PT",
+          "FOR_APPROVE_GPU",
+          "CONFIRMATION",
+          "USERS",
+          "USERS_IMPORT",
+          "IMPORT",
+          "IMPORT_AGGREGATION",
+          "CONTRACT_REGISTRATION_AGGREGATOR",
+          "CONFIRMATION_AGGREGATE",
+          "INCREMENT_REGISTRATION_AGGREGATOR",
+          "CONFIRMATION_AGGREGATOR",
+          "USERS_PG",
+          "USERS_EA"
+        ]
+      },
+      "OriginEntry": {
+        "type": "object",
+        "properties": {
+          "institutionType": {
+            "$ref": "#/components/schemas/InstitutionType1"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin1"
+          },
+          "labelKey": {
+            "type": "string"
+          }
+        }
+      },
+      "Origin1": {
+        "type": "string",
+        "enum": [
+          "IPA",
+          "SELC",
+          "ANAC",
+          "ADE",
+          "INFOCAMERE",
+          "IVASS",
+          "PDND_INFOCAMERE"
+        ]
+      },
+      "EmailTemplateConfig": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/WorkflowType"
+          },
+          "institutionType": {
+            "$ref": "#/components/schemas/InstitutionType1"
+          },
+          "path": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OnboardingStatus"
+          }
+        }
+      },
+      "OnboardingStatus": {
+        "type": "string",
+        "enum": [
+          "REQUEST",
+          "TOBEVALIDATED",
+          "PENDING",
+          "COMPLETED",
+          "FAILED",
+          "REJECTED",
+          "DELETED"
+        ]
+      },
+      "BackOfficeEnvironmentConfiguration": {
+        "type": "object",
+        "properties": {
+          "env": {
+            "type": "string"
+          },
+          "urlPublic": {
+            "type": "string"
+          },
+          "urlBO": {
+            "type": "string"
+          },
+          "identityTokenAudience": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductResponse": {
+        "type": "object",
+        "required": [
+          "productId"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visualConfiguration": {
+            "$ref": "#/components/schemas/VisualConfiguration"
+          },
+          "features": {
+            "$ref": "#/components/schemas/Features"
+          },
+          "roleMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleMapping"
+            }
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractTemplateConfig"
+            }
+          },
+          "institutionOrigins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          },
+          "emailTemplates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmailTemplateConfig"
+            }
+          },
+          "backOfficeEnvironmentConfigurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/ProductMetadata"
+          }
+        }
+      },
+      "ProductMetadata": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "createdBy": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductCreateRequest": {
+        "type": "object",
+        "required": [
+          "productId"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visualConfiguration": {
+            "$ref": "#/components/schemas/VisualConfiguration"
+          },
+          "features": {
+            "$ref": "#/components/schemas/Features"
+          },
+          "roleMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleMapping"
+            }
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractTemplateConfig"
+            }
+          },
+          "institutionOrigins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          },
+          "emailTemplates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmailTemplateConfig"
+            }
+          },
+          "backOfficeEnvironmentConfigurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
+            }
+          }
+        }
+      },
+      "ProductOriginResponse": {
+        "type": "object",
+        "properties": {
+          "origins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          }
+        }
+      },
+      "WebhookRequest": {
+        "type": "object",
+        "required": [
+          "url",
+          "httpMethod"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "httpMethod": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "retryPolicy": {
+            "$ref": "#/components/schemas/RetryPolicyRequest"
+          }
+        }
+      },
+      "RetryPolicyRequest": {
+        "type": "object",
+        "properties": {
+          "maxAttempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "initialDelayMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxDelayMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "backoffMultiplier": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
