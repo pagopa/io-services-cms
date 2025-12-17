@@ -1,4 +1,4 @@
-# This workflow will perform a diff between selfacare openapi saved locally and remote
+# This workflow will perform a diff between selfacare openapi saved locally and remote.
 
 name: 'OpenAPI Drift Detection'
 permissions:
