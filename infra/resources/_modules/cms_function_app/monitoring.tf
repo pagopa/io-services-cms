@@ -47,6 +47,12 @@ module "function_profile_autoscale" {
       time_window_increase      = 1
       increase_by               = 1
       cooldown_increase         = 5
+      lower_threshold           = 55
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
     requests = {
       upper_threshold           = 500
