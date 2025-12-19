@@ -4,6 +4,7 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { retrieveInstitution } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,9 +28,9 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while searching institutionId: ${params.institutionId}, caused by: `,
-        error,
+        { error },
       );
 
       if (error instanceof InstitutionNotFoundError) {

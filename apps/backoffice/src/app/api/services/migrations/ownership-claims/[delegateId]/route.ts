@@ -1,5 +1,6 @@
 import { HTTP_STATUS_ACCEPTED } from "@/config/constants";
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   claimOwnershipForDelegate,
@@ -34,10 +35,10 @@ export const POST = withJWTAuthHandler(
         status: HTTP_STATUS_ACCEPTED,
       });
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while requesting Ownership Claims for delegate ${params.delegateId}, intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse("OwnershipClaimsRequestError", error);
     }
@@ -66,10 +67,10 @@ export const GET = withJWTAuthHandler(
 
       return sanitizedNextResponseJson(response);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving delegate ${params.delegateId} Ownership claims for intitution having fiscalCode ${backofficeUser.institution.fiscalCode},
          requested by selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse(
         "OwnershipClaimsDelegateRetrieveError",

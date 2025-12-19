@@ -4,6 +4,7 @@ import {
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveUnboundedGroupServices } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
@@ -26,9 +27,9 @@ export const GET = withJWTAuthHandler(
 
       return sanitizedNextResponseJson({ unboundedServices: result });
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving group-unbounded services for user having userId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse(
         "GroupUnboundServicesRetrieveError",

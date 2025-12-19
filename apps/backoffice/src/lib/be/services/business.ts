@@ -25,6 +25,7 @@ import {
   handleInternalErrorResponse,
 } from "../errors";
 import { getGroup, retrieveInstitutionGroups } from "../institutions/business";
+import { logger } from "../logger";
 import { BackOfficeUserEnriched } from "../wrappers";
 import { getSubscriptions } from "./apim";
 import {
@@ -338,9 +339,9 @@ export async function forwardIoServicesCmsRequest<
     return sanitizedNextResponseJson(mappedValue, result.right.status);
   } catch (error) {
     // FIXME: raise a Manage Exception to let manage log and "error response" by controller handler
-    console.error(
+    logger.error(
       `Unmanaged error while forwarding io-services-cms '${operationId}' request, the reason was =>`,
-      error,
+      { error },
     );
     return handleInternalErrorResponse(
       "InternalError",

@@ -3,6 +3,7 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { getDelegatedInstitutions } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import {
   parseLimitQueryParam,
   parseOffsetQueryParam,
@@ -61,9 +62,9 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving delegations for institutionId: ${params.institutionId}, caused by: `,
-        error,
+        { error },
       );
 
       return handleInternalErrorResponse(

@@ -1,4 +1,5 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import { logger } from "@/lib/be/logger";
 import {
   parseLimitQueryParam,
   parseOffsetQueryParam,
@@ -43,9 +44,9 @@ export const GET = withJWTAuthHandler(
 
       return sanitizedNextResponseJson(result);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving service list for user having userId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse("ServiceListRetrieveError", error);
     }

@@ -1,4 +1,5 @@
 import { HealthChecksError } from "./errors";
+import { logger } from "./logger";
 
 type HealthStatus =
   | { failures: { errorMessage: string; service: string }[]; status: "fail" }
@@ -15,9 +16,9 @@ export default async function healthcheck(
   if (failures.length > 0) {
     // log all HealthChecksError
     failures.forEach((f) =>
-      console.error(
+      logger.error(
         `[HEALTH CHECK ERROR ${f.externalServiceName}] ${f.message} =>`,
-        f.innerError,
+        { error: f.innerError },
       ),
     );
 

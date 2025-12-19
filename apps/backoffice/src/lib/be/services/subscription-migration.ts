@@ -4,6 +4,7 @@ import { MigrationItemList } from "@/generated/api/MigrationItemList";
 import { ManagedInternalError } from "@/lib/be/errors";
 import * as E from "fp-ts/lib/Either";
 
+import { logger } from "../logger";
 import { getSubscriptionsMigrationClient } from "../subscription-migration-client";
 
 export const getLatestOwnershipClaimStatus = async (
@@ -15,7 +16,7 @@ export const getLatestOwnershipClaimStatus = async (
     )();
 
   if (E.isLeft(apiResult)) {
-    console.error(
+    logger.error(
       `An error has occurred while calling subscriptions migration getLatestOwnershipClaimStatus API, caused by: ${apiResult.left}`,
     );
     throw new ManagedInternalError(
@@ -37,7 +38,7 @@ export const getOwnershipClaimStatus = async (
     )();
 
   if (E.isLeft(apiResult)) {
-    console.error(
+    logger.error(
       `An error has occurred while calling subscriptions migration getOwnershipClaimStatus API, caused by: ${apiResult.left}`,
     );
     throw new ManagedInternalError(
@@ -58,7 +59,7 @@ export const claimOwnership = async (
   )();
 
   if (E.isLeft(apiResult)) {
-    console.error(
+    logger.error(
       `An error has occurred while calling subscriptions migration claimOwnership API, caused by: ${apiResult.left}`,
     );
     throw new ManagedInternalError(
@@ -76,7 +77,7 @@ export const getDelegatesByOrganization = async (
     )();
 
   if (E.isLeft(apiResult)) {
-    console.error(
+    logger.error(
       `An error has occurred while calling subscriptions migration getDelegatesByOrganization API, caused by: ${apiResult.left}`,
     );
     throw new ManagedInternalError(
