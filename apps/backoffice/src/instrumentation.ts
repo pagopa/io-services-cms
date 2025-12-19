@@ -1,6 +1,6 @@
 export async function register() {
   if (
-    process.env.NODE_ENV !== "production" &&
+    process.env.NODE_ENV === "production" &&
     process.env.NEXT_RUNTIME === "nodejs"
   ) {
     // Dynamically import the tracing modules only if the code is running server-side on Node.js
