@@ -42,3 +42,7 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 ignore_features.tf
+
+
+# PNPM
+.pnpm-store
