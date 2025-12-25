@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:20-alpine AS builder
+FROM public.ecr.aws/docker/library/node:20-alpine@sha256:658d0f63e501824d6c23e06d4bb95c71e7d704537c9d9272f488ac03a370d448 AS builder
 
 COPY . /workspace
 
@@ -23,7 +23,7 @@ RUN yarn workspaces focus io-services-app-backend --production
 
 # To enable ssh & remote debugging on app service change the base image to the one below
 # FROM mcr.microsoft.com/azure-functions/node:4-node20-appservice
-FROM mcr.microsoft.com/azure-functions/node:4-node20 AS runtime
+FROM mcr.microsoft.com/azure-functions/node:4-node20@sha256:81c579debf2f953ab90d3573f35bf1557ed818f50c9610acd64a1dc29fb967b4 AS runtime
 
 ENV AzureWebJobsScriptRoot=/home/site/apps/app-backend \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
