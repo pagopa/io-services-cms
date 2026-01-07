@@ -1,12 +1,6 @@
 {
   "services": [
     {
-      "id": "01K8BG9QEVTHY17EDS79Z3FB29",
-      "name": "Bonus Elettrodomestici",
-      "organization_name": "Ministero delle Imprese e del Made in Italy",
-      "version": 1762966141502
-    },
-    {
       "id": "01JE6PSBA1612HS15ZW22FFY7T",
       "name": "Documenti su IO",
       "organization_name": "IO - L'app dei servizi pubblici",
