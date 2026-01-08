@@ -73,7 +73,7 @@ export const makeGetServiceLifecycleInternalHandler =
 
 export const applyRequestMiddelwares = (
   handler: GetServiceLifecycleInternalHandler,
-) => {
+): ReturnType<typeof wrapRequestHandler> => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
     ContextMiddleware(),

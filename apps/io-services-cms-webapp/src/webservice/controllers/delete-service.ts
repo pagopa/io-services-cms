@@ -99,7 +99,7 @@ export const makeDeleteServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: DeleteServiceHandler) => {
+  (handler: DeleteServiceHandler): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),

@@ -72,7 +72,7 @@ export const makeGetServicePublicationInternalHandler =
 
 export const applyRequestMiddelwares = (
   handler: GetServicePublicationServiceInternalHandler,
-) => {
+): ReturnType<typeof wrapRequestHandler> => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
     ContextMiddleware(),

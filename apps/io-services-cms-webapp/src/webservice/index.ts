@@ -9,7 +9,7 @@ import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/ex
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { BlobService } from "azure-storage";
 import bodyParser from "body-parser";
-import express from "express";
+import express, { Express } from "express";
 import { pipe } from "fp-ts/lib/function";
 
 import { IConfig } from "../config";
@@ -122,7 +122,7 @@ export const createWebServer = ({
   serviceTopicDao,
   subscriptionCIDRsModel,
   telemetryClient,
-}: WebServerDependencies) => {
+}: WebServerDependencies): Express => {
   // mount all routers on router
   const router = express.Router();
   router.use(bodyParser.json({ limit: "5mb" }));
