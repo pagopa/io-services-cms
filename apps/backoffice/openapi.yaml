@@ -238,8 +238,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /services/patch:
-    put:
+    patch:
       tags:
         - services
       summary: Bulk patch existing services by ID
