@@ -152,6 +152,12 @@ importers:
       '@mui/system':
         specifier: ^5.14.5
         version: 5.14.10(@emotion/react@11.11.1(@types/react@18.2.43)(react@18.2.0))(@emotion/styled@11.11.0(@emotion/react@11.11.1(@types/react@18.2.43)(react@18.2.0))(@types/react@18.2.43)(react@18.2.0))(@types/react@18.2.43)(react@18.2.0)
+      '@opentelemetry/api':
+        specifier: ^1.3.0
+        version: 1.9.0
+      '@opentelemetry/instrumentation':
+        specifier: ^0.51.0
+        version: 0.51.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-undici':
         specifier: ^0.3.0
         version: 0.3.0(@opentelemetry/api@1.9.0)
@@ -231,9 +237,15 @@ importers:
       '@faker-js/faker':
         specifier: ^8.3.1
         version: 8.3.1
+      '@next/env':
+        specifier: ^13.5.6
+        version: 13.5.6
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0
         version: 13.1.0(chokidar@3.6.0)
+      '@pagopa/ts-commons':
+        specifier: ^13.1.1
+        version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@svgr/webpack':
         specifier: ^8.1.0
         version: 8.1.0(typescript@5.2.2)
@@ -315,11 +327,17 @@ importers:
       adf-to-md:
         specifier: ^1.2.1
         version: 1.2.1(eslint-plugin-import@2.28.1(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.2.2))(eslint@8.57.1))(eslint@8.57.1)
+      applicationinsights:
+        specifier: ^2.9.5
+        version: 2.9.5
       avsc:
         specifier: ^5.7.7
         version: 5.7.7
+      azure-storage:
+        specifier: ^2.10.5
+        version: 2.10.7
       body-parser:
-        specifier: ^1.20.3
+        specifier: ^1.20.4
         version: 1.20.4
       dotenv-cli:
         specifier: ^7.2.1
@@ -360,10 +378,16 @@ importers:
       upng-js:
         specifier: ^2.1.0
         version: 2.1.0
+      winston:
+        specifier: ^3.8.2
+        version: 3.8.2
     devDependencies:
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0
         version: 13.1.0(chokidar@3.6.0)
+      '@types/body-parser':
+        specifier: ^1.19.6
+        version: 1.19.6
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.21
@@ -418,6 +442,9 @@ importers:
       newtype-ts:
         specifier: ^0.3.5
         version: 0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5))
+      ulid:
+        specifier: ^3.0.2
+        version: 3.0.2
     devDependencies:
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0
@@ -2731,6 +2758,9 @@ packages:
 
   '@types/body-parser@1.19.2':
     resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
+
+  '@types/body-parser@1.19.6':
+    resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
 
   '@types/bunyan@1.8.9':
     resolution: {integrity: sha512-ZqS9JGpBxVOvsawzmVt30sP++gSQMTejCkIAQ3VdadOcRE8izTyW66hufvwLeH+YEGP6Js2AW7Gz+RMyvrEbmw==}
@@ -7424,6 +7454,10 @@ packages:
     resolution: {integrity: sha512-keqHubrlpvT6G2wH0OEfSW4mquYRcbe/J8NMmveoQOjUqmo+hXtO+ORCpWhdbZ7k72UtY61BL7haGxW6enBnjw==}
     hasBin: true
 
+  ulid@3.0.2:
+    resolution: {integrity: sha512-yu26mwteFYzBAot7KVMqFGCVpsF6g8wXfJzQUHvu1no3+rRRSFcSV2nKeYvNPLD2J4b08jYBDhHUjeH0ygIl9w==}
+    hasBin: true
+
   unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
 
@@ -10693,6 +10727,11 @@ snapshots:
       '@babel/types': 7.27.0
 
   '@types/body-parser@1.19.2':
+    dependencies:
+      '@types/connect': 3.4.35
+      '@types/node': 20.10.8
+
+  '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.35
       '@types/node': 20.10.8
@@ -16067,6 +16106,8 @@ snapshots:
   typical@4.0.0: {}
 
   ulid@2.3.0: {}
+
+  ulid@3.0.2: {}
 
   unbox-primitive@1.0.2:
     dependencies:
