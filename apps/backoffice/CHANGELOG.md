@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.30.2
+
+### Patch Changes
+
+- c373dcc9: bump backoffice next-auth version to 4.24.13
+
 ## 1.30.1
 
 ### Patch Changes
