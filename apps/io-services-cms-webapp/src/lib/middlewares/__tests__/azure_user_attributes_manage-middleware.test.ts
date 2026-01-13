@@ -12,8 +12,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("winston");
-
 interface IHeaders {
   readonly [key: string]: string | undefined;
 }

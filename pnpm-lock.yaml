@@ -378,9 +378,6 @@ importers:
       upng-js:
         specifier: ^2.1.0
         version: 2.1.0
-      winston:
-        specifier: ^3.8.2
-        version: 3.8.2
     devDependencies:
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0

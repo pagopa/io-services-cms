@@ -66,8 +66,7 @@
     "pg-cursor": "^2.9.0",
     "upng-js": "^2.1.0",
     "applicationinsights": "^2.9.5",
-    "azure-storage": "^2.10.5",
-    "winston": "^3.8.2"
+    "azure-storage": "^2.10.5"
   },
   "imports": {
     "#package.json": "./package.json"
