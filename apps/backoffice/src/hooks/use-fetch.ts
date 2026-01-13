@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
-import { Client, createClient } from "@/generated/api/client";
+import { Client } from "@/generated/api/client";
+import { createClientWithUpperCaseMethod } from "@/lib/be/wrapper-create-api-client";
 import { ROUTES } from "@/lib/routes";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -86,13 +87,11 @@ const manageHttpResponseStatusCode = (
 /**
  * IO Services CMS generated Api Client
  *
- * Client without defaults: we need to create it inside `useFetch()`
- * because a React Hook should not be called at the top level.
- * React Hooks must be called in a React function component or a custom React Hook function. */
-export const client: Client = createClient({
-  baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-  fetchApi: fetch as any as typeof fetch,
-});
+ * Wrapper that creates the api client with uppercase HTTP methods
+ */
+export const client: Client = createClientWithUpperCaseMethod(
+  getConfiguration().API_BACKEND_BASE_URL,
+);
 
 /** List of all client operations */
 type ClientOperations = typeof client;
