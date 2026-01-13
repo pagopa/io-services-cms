@@ -4,6 +4,7 @@ import {
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
+import { logger } from "@/lib/be/logger";
 import { retrieveUnboundedGroupServices } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,9 +28,9 @@ export const GET = withJWTAuthHandler(
         status: existsAtLeastOneService ? 200 : 204,
       });
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while checking the existence of group-unbounded services for user having userId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse(
         "GroupUnboundServicesCheckExistenceError",

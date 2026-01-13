@@ -1,5 +1,6 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
 import { retrieveUserAuthorizedInstitutions } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
@@ -19,9 +20,9 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
+      logger.error(
         `An Error has occurred while retrieving authorized institution for user having selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}, caused by: `,
-        error,
+        { error },
       );
       return handleInternalErrorResponse("InstitutionsRetrieveError", error);
     }
