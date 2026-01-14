@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 1.30.4
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+- Updated dependencies [9673294c]
+  - @io-services-cms/external-clients@1.8.6
+  - @io-services-cms/fetch-utils@1.0.2
+  - @io-services-cms/models@1.28.3
+
 ## 1.30.3
 
 ### Patch Changes

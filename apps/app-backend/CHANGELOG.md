@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 1.2.4
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+- Updated dependencies [9673294c]
+  - @io-services-cms/models@1.28.3
+
 ## 1.2.3
 
 ### Patch Changes
