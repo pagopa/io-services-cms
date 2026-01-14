@@ -4,7 +4,7 @@ import { buildSnackbarItem } from "@/components/notification";
 import { getConfiguration } from "@/config";
 import { Client, createClient } from "@/generated/api/client";
 import { ROUTES } from "@/lib/routes";
-import { createFetchWithUpperCaseHttpMethod } from "@/utils/wrapper-create-fetch";
+import { fetchWithUpperCaseHttpMethod } from "@/utils/wrapper-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -92,7 +92,7 @@ const manageHttpResponseStatusCode = (
  * React Hooks must be called in a React function component or a custom React Hook function. */
 export const client: Client = createClient({
   baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-  fetchApi: createFetchWithUpperCaseHttpMethod(),
+  fetchApi: fetchWithUpperCaseHttpMethod(),
 });
 
 /** List of all client operations */

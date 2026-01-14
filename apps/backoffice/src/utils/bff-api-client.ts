@@ -5,7 +5,7 @@ import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { createFetchWithUpperCaseHttpMethod } from "./wrapper-create-fetch";
+import { fetchWithUpperCaseHttpMethod } from "./wrapper-fetch";
 
 export interface BffApiClient {
   fetchData: <T extends keyof ClientOperations, RC>(
@@ -40,7 +40,7 @@ const getClientInstance = (): Client => {
 const buildClientInstance = (): Client =>
   createClient({
     baseUrl: getConfiguration().API_BACKEND_BASE_URL,
-    fetchApi: createFetchWithUpperCaseHttpMethod(),
+    fetchApi: fetchWithUpperCaseHttpMethod(),
   });
 
 const buildBffApiClient = (): BffApiClient => {

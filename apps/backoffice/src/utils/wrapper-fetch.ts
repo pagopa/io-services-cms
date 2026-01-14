@@ -13,7 +13,7 @@
  *
  * @returns A fetch implementation that normalizes HTTP methods to uppercase
  */
-export const createFetchWithUpperCaseHttpMethod =
+export const fetchWithUpperCaseHttpMethod =
   (fetchFn: typeof fetch = fetch): typeof fetch =>
   async (input, init) => {
     const initMaiusc =

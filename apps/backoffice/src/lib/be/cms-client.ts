@@ -1,6 +1,6 @@
 import { ServiceTopicList } from "@/generated/services-cms/ServiceTopicList";
 import { Client, createClient } from "@/generated/services-cms/client";
-import { createFetchWithUpperCaseHttpMethod } from "@/utils/wrapper-create-fetch";
+import { fetchWithUpperCaseHttpMethod } from "@/utils/wrapper-fetch";
 import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
@@ -53,7 +53,7 @@ const buildIoServicesCmsClient = (): Client => {
   return createClient({
     basePath: configuration.API_SERVICES_CMS_BASE_PATH,
     baseUrl: configuration.API_SERVICES_CMS_URL,
-    fetchApi: createFetchWithUpperCaseHttpMethod(
+    fetchApi: fetchWithUpperCaseHttpMethod(
       Agent.fetchWithAgents(configuration),
     ),
   });

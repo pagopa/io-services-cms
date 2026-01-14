@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createFetchWithUpperCaseHttpMethod } from "../wrapper-create-fetch";
+import { fetchWithUpperCaseHttpMethod } from "../wrapper-fetch";
 
-describe("createFetchWithUpperCaseHttpMethod", () => {
+describe("fetchWithUpperCaseHttpMethod", () => {
   let mockFetch: ReturnType<typeof vi.fn>;
-  let customFetch: ReturnType<typeof createFetchWithUpperCaseHttpMethod>;
+  let customFetch: ReturnType<typeof fetchWithUpperCaseHttpMethod>;
 
   beforeEach(() => {
     mockFetch = vi.fn().mockResolvedValue({
@@ -12,7 +12,7 @@ describe("createFetchWithUpperCaseHttpMethod", () => {
       status: 200,
     });
     global.fetch = mockFetch;
-    customFetch = createFetchWithUpperCaseHttpMethod();
+    customFetch = fetchWithUpperCaseHttpMethod();
   });
 
   it("should convert lowercase HTTP method to uppercase", async () => {
@@ -76,7 +76,7 @@ describe("createFetchWithUpperCaseHttpMethod", () => {
     });
 
     const customFetchWithCustomFn =
-      createFetchWithUpperCaseHttpMethod(customMockFetch);
+      fetchWithUpperCaseHttpMethod(customMockFetch);
 
     await customFetchWithCustomFn("http://localhost:3000", { method: "patch" });
 
@@ -87,7 +87,7 @@ describe("createFetchWithUpperCaseHttpMethod", () => {
   });
 
   it("should use global fetch when no custom fetch is provided", async () => {
-    const defaultCustomFetch = createFetchWithUpperCaseHttpMethod();
+    const defaultCustomFetch = fetchWithUpperCaseHttpMethod();
 
     await defaultCustomFetch("http://localhost:3000", { method: "post" });
 
