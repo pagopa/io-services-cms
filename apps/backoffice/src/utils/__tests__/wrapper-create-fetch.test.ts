@@ -4,7 +4,7 @@ import { createFetchWithUpperCaseHttpMethod } from "../wrapper-create-fetch";
 
 describe("createFetchWithUpperCaseHttpMethod", () => {
   let mockFetch: ReturnType<typeof vi.fn>;
-  const customFetch = createFetchWithUpperCaseHttpMethod();
+  let customFetch: ReturnType<typeof createFetchWithUpperCaseHttpMethod>;
 
   beforeEach(() => {
     mockFetch = vi.fn().mockResolvedValue({
@@ -12,6 +12,7 @@ describe("createFetchWithUpperCaseHttpMethod", () => {
       status: 200,
     });
     global.fetch = mockFetch;
+    customFetch = createFetchWithUpperCaseHttpMethod();
   });
 
   it("should convert lowercase HTTP method to uppercase", async () => {
@@ -64,6 +65,33 @@ describe("createFetchWithUpperCaseHttpMethod", () => {
       headers: {
         "Content-Type": "application/json",
       },
+      method: "POST",
+    });
+  });
+
+  it("should use custom fetch function when provided", async () => {
+    const customMockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+    });
+
+    const customFetchWithCustomFn =
+      createFetchWithUpperCaseHttpMethod(customMockFetch);
+
+    await customFetchWithCustomFn("http://localhost:3000", { method: "patch" });
+
+    expect(customMockFetch).toHaveBeenCalledWith("http://localhost:3000", {
+      method: "PATCH",
+    });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("should use global fetch when no custom fetch is provided", async () => {
+    const defaultCustomFetch = createFetchWithUpperCaseHttpMethod();
+
+    await defaultCustomFetch("http://localhost:3000", { method: "post" });
+
+    expect(mockFetch).toHaveBeenCalledWith("http://localhost:3000", {
       method: "POST",
     });
   });
