@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.28.2
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+
 ## 1.28.1
 
 ### Patch Changes

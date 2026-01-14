@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 1.2.3
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+- Updated dependencies [0b0b1871]
+  - @io-services-cms/models@1.28.2
+
 ## 1.2.2
 
 ### Patch Changes
