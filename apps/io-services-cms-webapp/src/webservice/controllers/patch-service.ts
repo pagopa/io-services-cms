@@ -90,7 +90,8 @@ export const makePatchServiceHandler =
     );
 
 export const applyRequestMiddelwares =
-  (config: IConfig) => (handler: EditServiceHandler) => {
+  (config: IConfig) =>
+  (handler: EditServiceHandler): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the client IP from the request
       ClientIpMiddleware,

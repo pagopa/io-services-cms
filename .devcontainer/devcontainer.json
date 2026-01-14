@@ -17,7 +17,7 @@
       "installTerraformDocs": true
     },
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "20.19.0",
+      "version": "20.19.5",
       "installYarnUsingApt": false,
       "pnpmVersion": "none",
       "nvmInstallPath": "/opt/nvm"
@@ -30,7 +30,7 @@
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     // Use interactive bash (-i) to load NVM and the correct PATH
-    "install-yarn-and-deps": "/bin/bash -i -c 'corepack enable && yarn install'",
+    "install-yarn-and-deps": "/bin/bash -i -c 'corepack enable && pnpm install'",
     // Do the same for pre-commit for safety
     "install-pre-commit": "/bin/bash -i -c 'pre-commit install --install-hooks'"
   },

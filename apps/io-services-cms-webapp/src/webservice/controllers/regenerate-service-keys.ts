@@ -112,7 +112,9 @@ export const makeRegenerateServiceKeysHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: RegenerateServiceKeysHandler) => {
+  (
+    handler: RegenerateServiceKeysHandler,
+  ): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),

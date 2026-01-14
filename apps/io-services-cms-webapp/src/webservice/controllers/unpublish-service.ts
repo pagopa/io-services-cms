@@ -106,7 +106,7 @@ export const makeUnpublishServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: UnPublishServiceHandler) => {
+  (handler: UnPublishServiceHandler): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),

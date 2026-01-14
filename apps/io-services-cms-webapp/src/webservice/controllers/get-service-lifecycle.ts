@@ -85,7 +85,9 @@ export const makeGetServiceLifecycleHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: GetServiceLifecycleHandler) => {
+  (
+    handler: GetServiceLifecycleHandler,
+  ): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),

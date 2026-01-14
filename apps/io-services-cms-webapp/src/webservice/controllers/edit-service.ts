@@ -116,7 +116,7 @@ export const makeEditServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: EditServiceHandler) => {
+  (handler: EditServiceHandler): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the client IP from the request
       ClientIpMiddleware,
