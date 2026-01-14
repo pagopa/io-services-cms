@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.6
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+
 ## 1.8.5
 
 ### Patch Changes

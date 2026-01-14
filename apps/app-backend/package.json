@@ -1,6 +1,6 @@
 {
   "name": "io-services-app-backend",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "bundledDependencies": true,
   "files": [
     "dist",

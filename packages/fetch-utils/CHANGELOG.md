@@ -1,5 +1,11 @@
 # @io-services-cms/fetch-utils
 
+## 1.0.2
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+
 ## 1.0.1
 
 ### Patch Changes
