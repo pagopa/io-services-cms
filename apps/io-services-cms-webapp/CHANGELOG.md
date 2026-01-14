@@ -1,5 +1,15 @@
 # io-services-cms-webapp
 
+## 1.42.8
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+- Updated dependencies [0b0b1871]
+  - @io-services-cms/external-clients@1.8.5
+  - @io-services-cms/fetch-utils@1.0.1
+  - @io-services-cms/models@1.28.2
+
 ## 1.42.7
 
 ### Patch Changes
