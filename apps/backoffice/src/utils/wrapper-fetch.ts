@@ -11,6 +11,7 @@
  * This wrapper intercepts all fetch calls and converts the HTTP method to uppercase
  * before sending the request, ensuring compatibility with Next.js route handlers.
  *
+ * @param fetchFn - Optional custom fetch function to wrap. Defaults to global fetch.
  * @returns A fetch implementation that normalizes HTTP methods to uppercase
  */
 export const fetchWithUpperCaseHttpMethod =
