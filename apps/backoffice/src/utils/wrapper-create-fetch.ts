@@ -1,5 +1,3 @@
-import { Client, createClient } from "@/generated/api/client";
-
 /**
  * Fetch wrapper that converts HTTP methods to uppercase.
  *
@@ -15,7 +13,7 @@ import { Client, createClient } from "@/generated/api/client";
  *
  * @returns A fetch implementation that normalizes HTTP methods to uppercase
  */
-const createFetchWithUpperCaseMethod =
+export const createFetchWithUpperCaseHttpMethod =
   (): typeof fetch => async (input, init) => {
     const initMaiusc =
       init && init.method
@@ -26,10 +24,3 @@ const createFetchWithUpperCaseMethod =
         : init;
     return fetch(input, initMaiusc);
   };
-
-export function createClientWithUpperCaseMethod(baseUrl: string): Client {
-  return createClient({
-    baseUrl,
-    fetchApi: createFetchWithUpperCaseMethod(),
-  });
-}
