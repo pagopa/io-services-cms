@@ -11,7 +11,7 @@
   "scripts": {
     "build": "shx rm -rf dist && tsc",
     "build:watch": "pnpm build -w",
-    "build:package": "npm-pack-zip --add-version",
+    "build:package": "sh build-package.sh",
     "extensions:install": "func extensions install",
     "format": "prettier --write .",
     "test": "vitest run",

@@ -3,6 +3,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 pnpmfileChecksum: sha256-FMjTmt1bCo0SOOG7o/y8rRzputl19yL2BTfTrVHFYS4=
 
@@ -308,13 +309,13 @@ importers:
         version: 1.4.0
       '@io-services-cms/external-clients':
         specifier: workspace:^
-        version: link:../../packages/external-clients
+        version: file:packages/external-clients(@azure/functions@3.5.1)(express@4.18.2)
       '@io-services-cms/fetch-utils':
         specifier: workspace:^
         version: link:../../packages/fetch-utils
       '@io-services-cms/models':
         specifier: workspace:^
-        version: link:../../packages/io-services-cms-models
+        version: file:packages/io-services-cms-models(@azure/functions@3.5.1)(express@4.18.2)
       '@pagopa/express-azure-functions':
         specifier: ^4.0.1
         version: 4.0.1(express@4.18.2)
@@ -1848,6 +1849,12 @@ packages:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
 
+  '@io-services-cms/external-clients@file:packages/external-clients':
+    resolution: {directory: packages/external-clients, type: directory}
+
+  '@io-services-cms/models@file:packages/io-services-cms-models':
+    resolution: {directory: packages/io-services-cms-models, type: directory}
+
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
@@ -1906,7 +1913,7 @@ packages:
   '@mui/base@5.0.0-beta.11':
     resolution: {integrity: sha512-FdKZGPd8qmC3ZNke7CNhzcEgToc02M6WYZc9hcBsNQ17bgAd3s9F//1bDDYgMVBYxDM71V0sv/hBHlOY4I1ZVA==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -1918,7 +1925,7 @@ packages:
   '@mui/base@5.0.0-beta.16':
     resolution: {integrity: sha512-OYxhC81c9bO0wobGcM8rrY5bRwpCXAI21BL0P2wz/2vTv4ek7ALz9+U5M8wgdmtRNUhmCmAB4L2WRwFRf5Cd8Q==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -7754,6 +7761,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -9645,6 +9653,42 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/object-schema@2.0.3': {}
+
+  '@io-services-cms/external-clients@file:packages/external-clients(@azure/functions@3.5.1)(express@4.18.2)':
+    dependencies:
+      '@azure/arm-apimanagement': 10.0.0
+      '@azure/identity': 4.13.0
+      '@pagopa/io-functions-commons': 29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+      '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+      fp-ts: 2.16.5
+      io-ts: 2.2.21(fp-ts@2.16.5)
+      io-ts-types: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
+      monocle-ts: 2.3.13(fp-ts@2.16.5)
+      newtype-ts: 0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5))
+      ulid: 3.0.2
+    transitivePeerDependencies:
+      - '@azure/functions'
+      - applicationinsights-native-metrics
+      - encoding
+      - express
+      - supports-color
+
+  '@io-services-cms/models@file:packages/io-services-cms-models(@azure/functions@3.5.1)(express@4.18.2)':
+    dependencies:
+      '@azure/cosmos': 4.0.0
+      '@pagopa/io-functions-commons': 29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+      '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+      fp-ts: 2.16.5
+      io-ts: 2.2.21(fp-ts@2.16.5)
+      io-ts-types: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
+      monocle-ts: 2.3.13(fp-ts@2.16.5)
+      newtype-ts: 0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5))
+    transitivePeerDependencies:
+      - '@azure/functions'
+      - applicationinsights-native-metrics
+      - encoding
+      - express
+      - supports-color
 
   '@isaacs/cliui@8.0.2':
     dependencies:
