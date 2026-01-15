@@ -186,7 +186,7 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
-    http.put(`${baseURL}/services/patch`, () => {
+    http.patch(`${baseURL}/services`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getBulkPatchService207Response()), {
           status: 207,
@@ -390,7 +390,7 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
-    http.put(`${baseURL}/services/:serviceId/patch`, () => {
+    http.patch(`${baseURL}/services/:serviceId`, () => {
       const resultArray = [
         new HttpResponse(null, {
           status: 204,
