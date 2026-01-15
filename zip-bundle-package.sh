@@ -15,7 +15,7 @@ echo "Building package: ${ZIP_NAME}"
 rm -rf "${DEPLOY_DIR}"
 
 # Deploy using pnpm (--filter=. selects current package)
-pnpm deploy --filter=. --prod "${DEPLOY_DIR}"
+pnpm deploy --filter=. --legacy --prod "${DEPLOY_DIR}"
 
 # Create zip from the deployed directory
 cd "${DEPLOY_DIR}" && zip -r "../${ZIP_NAME}" . && cd ..

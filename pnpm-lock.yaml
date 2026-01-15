@@ -3,7 +3,6 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
-  injectWorkspacePackages: true
 
 pnpmfileChecksum: sha256-FMjTmt1bCo0SOOG7o/y8rRzputl19yL2BTfTrVHFYS4=
 
@@ -309,13 +308,13 @@ importers:
         version: 1.4.0
       '@io-services-cms/external-clients':
         specifier: workspace:^
-        version: file:packages/external-clients(@azure/functions@3.5.1)(express@4.18.2)
+        version: link:../../packages/external-clients
       '@io-services-cms/fetch-utils':
         specifier: workspace:^
         version: link:../../packages/fetch-utils
       '@io-services-cms/models':
         specifier: workspace:^
-        version: file:packages/io-services-cms-models(@azure/functions@3.5.1)(express@4.18.2)
+        version: link:../../packages/io-services-cms-models
       '@pagopa/express-azure-functions':
         specifier: ^4.0.1
         version: 4.0.1(express@4.18.2)
@@ -1848,12 +1847,6 @@ packages:
   '@humanwhocodes/object-schema@2.0.3':
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     deprecated: Use @eslint/object-schema instead
-
-  '@io-services-cms/external-clients@file:packages/external-clients':
-    resolution: {directory: packages/external-clients, type: directory}
-
-  '@io-services-cms/models@file:packages/io-services-cms-models':
-    resolution: {directory: packages/io-services-cms-models, type: directory}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -9653,42 +9646,6 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/object-schema@2.0.3': {}
-
-  '@io-services-cms/external-clients@file:packages/external-clients(@azure/functions@3.5.1)(express@4.18.2)':
-    dependencies:
-      '@azure/arm-apimanagement': 10.0.0
-      '@azure/identity': 4.13.0
-      '@pagopa/io-functions-commons': 29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
-      '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
-      fp-ts: 2.16.5
-      io-ts: 2.2.21(fp-ts@2.16.5)
-      io-ts-types: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
-      monocle-ts: 2.3.13(fp-ts@2.16.5)
-      newtype-ts: 0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5))
-      ulid: 3.0.2
-    transitivePeerDependencies:
-      - '@azure/functions'
-      - applicationinsights-native-metrics
-      - encoding
-      - express
-      - supports-color
-
-  '@io-services-cms/models@file:packages/io-services-cms-models(@azure/functions@3.5.1)(express@4.18.2)':
-    dependencies:
-      '@azure/cosmos': 4.0.0
-      '@pagopa/io-functions-commons': 29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
-      '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
-      fp-ts: 2.16.5
-      io-ts: 2.2.21(fp-ts@2.16.5)
-      io-ts-types: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
-      monocle-ts: 2.3.13(fp-ts@2.16.5)
-      newtype-ts: 0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5))
-    transitivePeerDependencies:
-      - '@azure/functions'
-      - applicationinsights-native-metrics
-      - encoding
-      - express
-      - supports-color
 
   '@isaacs/cliui@8.0.2':
     dependencies:

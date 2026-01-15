@@ -10,7 +10,7 @@
   "bundledDependencies": true,
   "scripts": {
     "build": "rm -rf ./dist & tsc",
-    "build:package": "sh build-package.sh",
+    "build:package": "sh ../../zip-bundle-package.sh",
     "format": "prettier --write .",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
