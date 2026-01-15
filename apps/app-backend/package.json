@@ -22,6 +22,7 @@
     "lint:api": "sh api-lint.sh",
     "lint:fix": "eslint --fix \"src/**\"",
     "start": "func start -- --javascript",
+    "generate": "pnpm run api-definitions:bundle && pnpm run api-definitions:internal && pnpm run generate:version",
     "api-definitions:bundle": "shx rm -rf ./src/generated && bundle-api-spec -i ./api/internal.yaml.template -o ./api/internal.yaml",
     "api-definitions:internal": "gen-api-models --api-spec ./api/internal.yaml --out-dir ./src/generated/definitions/internal --request-types --response-decoders",
     "generate:version": "sh generate-version.sh -o ./src/generated/ -v $npm_package_version -n io-services-app-backend"
