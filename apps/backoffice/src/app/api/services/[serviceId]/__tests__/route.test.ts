@@ -276,7 +276,7 @@ describe("Services API", () => {
         }
         expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
         expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
-          "patchServiceWorkaround",
+          "patchService",
           {
             backofficeUser: backofficeUserMock,
             jsonBody: requestPayload,
