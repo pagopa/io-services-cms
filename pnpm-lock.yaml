@@ -241,8 +241,8 @@ importers:
         specifier: ^13.5.6
         version: 13.5.6
       '@pagopa/openapi-codegen-ts':
-        specifier: ^13.1.0
-        version: 13.1.0(chokidar@3.6.0)
+        specifier: ^14.2.0
+        version: 14.2.0(chokidar@3.6.0)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -1906,7 +1906,7 @@ packages:
   '@mui/base@5.0.0-beta.11':
     resolution: {integrity: sha512-FdKZGPd8qmC3ZNke7CNhzcEgToc02M6WYZc9hcBsNQ17bgAd3s9F//1bDDYgMVBYxDM71V0sv/hBHlOY4I1ZVA==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -1918,7 +1918,7 @@ packages:
   '@mui/base@5.0.0-beta.16':
     resolution: {integrity: sha512-OYxhC81c9bO0wobGcM8rrY5bRwpCXAI21BL0P2wz/2vTv4ek7ALz9+U5M8wgdmtRNUhmCmAB4L2WRwFRf5Cd8Q==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -2445,6 +2445,13 @@ packages:
   '@pagopa/openapi-codegen-ts@13.1.0':
     resolution: {integrity: sha512-VKXkZtIGzklWgRK/GzsmefnHW9Mc9j0tukDxgRz4T3BfKXX0xoy5t0Es6AygRmg2WhF998wSVoQZF/9yhSgEZA==}
     hasBin: true
+
+  '@pagopa/openapi-codegen-ts@14.2.0':
+    resolution: {integrity: sha512-sop1+MxfLP2Od2sxDvHxJ7poVmZKBP0REVMQDPrCpNe9Wv1vvLJN8WqonUjkLfL3fLmKM0B6AS4B67Nigm1uKA==}
+    hasBin: true
+    peerDependencies:
+      fp-ts: ^2.16.5
+      io-ts: ^2.2.21
 
   '@pagopa/ts-commons@10.15.0':
     resolution: {integrity: sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==}
@@ -7754,6 +7761,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -10406,6 +10414,24 @@ snapshots:
     dependencies:
       '@pagopa/ts-commons': 10.15.0
       fs-extra: 6.0.1
+      nunjucks: 3.2.4(chokidar@3.6.0)
+      openapi-types: 10.0.0
+      prettier: 1.19.1
+      safe-identifier: 0.4.2
+      swagger-parser: 10.0.3(openapi-types@10.0.0)
+      write-yaml-file: 4.2.0
+      yargs: 15.4.1
+    transitivePeerDependencies:
+      - chokidar
+      - encoding
+      - supports-color
+
+  '@pagopa/openapi-codegen-ts@14.2.0(chokidar@3.6.0)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
+    dependencies:
+      '@pagopa/ts-commons': 10.15.0
+      fp-ts: 2.16.5
+      fs-extra: 6.0.1
+      io-ts: 2.2.21(fp-ts@2.16.5)
       nunjucks: 3.2.4(chokidar@3.6.0)
       openapi-types: 10.0.0
       prettier: 1.19.1
