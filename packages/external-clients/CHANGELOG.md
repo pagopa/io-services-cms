@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.7
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+
 ## 1.8.6
 
 ### Patch Changes

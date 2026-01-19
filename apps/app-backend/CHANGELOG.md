@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 1.2.5
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+- Updated dependencies [321dcc37]
+  - @io-services-cms/models@1.28.4
+
 ## 1.2.4
 
 ### Patch Changes
