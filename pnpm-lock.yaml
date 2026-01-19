@@ -1906,7 +1906,7 @@ packages:
   '@mui/base@5.0.0-beta.11':
     resolution: {integrity: sha512-FdKZGPd8qmC3ZNke7CNhzcEgToc02M6WYZc9hcBsNQ17bgAd3s9F//1bDDYgMVBYxDM71V0sv/hBHlOY4I1ZVA==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -1918,7 +1918,7 @@ packages:
   '@mui/base@5.0.0-beta.16':
     resolution: {integrity: sha512-OYxhC81c9bO0wobGcM8rrY5bRwpCXAI21BL0P2wz/2vTv4ek7ALz9+U5M8wgdmtRNUhmCmAB4L2WRwFRf5Cd8Q==}
     engines: {node: '>=12.0.0'}
-    deprecated: This package has been replaced by @base-ui-components/react
+    deprecated: This package has been replaced by @base-ui/react
     peerDependencies:
       '@types/react': ^17.0.0 || ^18.0.0
       react: ^17.0.0 || ^18.0.0
@@ -7754,6 +7754,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
