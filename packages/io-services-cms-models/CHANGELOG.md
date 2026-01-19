@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.28.4
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+
 ## 1.28.3
 
 ### Patch Changes

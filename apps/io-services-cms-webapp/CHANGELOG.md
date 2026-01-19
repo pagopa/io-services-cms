@@ -1,5 +1,15 @@
 # io-services-cms-webapp
 
+## 1.42.10
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+- Updated dependencies [321dcc37]
+  - @io-services-cms/external-clients@1.8.7
+  - @io-services-cms/fetch-utils@1.0.3
+  - @io-services-cms/models@1.28.4
+
 ## 1.42.9
 
 ### Patch Changes
