@@ -2,127 +2,71 @@
 # Autoscalers #
 ###############
 
-resource "azurerm_monitor_autoscale_setting" "cms_fn" {
-  name                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-cms-func-as-01"
+module "function_profile_autoscale" {
+  source  = "pagopa-dx/azure-app-service-plan-autoscaler/azurerm"
+  version = "~> 2.0"
+
   resource_group_name = module.cms_fn.function_app.resource_group_name
   location            = var.location
-  target_resource_id  = module.cms_fn.function_app.plan.id
+  app_service_plan_id = module.cms_fn.function_app.plan.id
+  target_service = {
+    function_apps = [
+      {
+        name = module.cms_fn.function_app.function_app.name
+      }
+    ]
+  }
 
-  profile {
-    name = "default"
+  scheduler = {
+    normal_load = {
+      minimum = 3
+      default = 5
+    },
+    maximum = 30
+  }
 
-    capacity {
-      default = local.cms.autoscale_settings.default
-      minimum = local.cms.autoscale_settings.min
-      maximum = local.cms.autoscale_settings.max
+  scale_metrics = {
+    cpu = {
+      upper_threshold           = 65
+      statistic_increase        = "Max"
+      time_aggregation_increase = "Maximum"
+      time_window_increase      = 1
+      increase_by               = 2
+      cooldown_increase         = 5
+      lower_threshold           = 30
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
-
-    rule {
-      metric_trigger {
-        metric_name              = "Requests"
-        metric_resource_id       = module.cms_fn.function_app.function_app.id
-        metric_namespace         = "microsoft.web/sites"
-        time_grain               = "PT1M"
-        statistic                = "Average"
-        time_window              = "PT1M"
-        time_aggregation         = "Average"
-        operator                 = "GreaterThan"
-        threshold                = 3000
-        divide_by_instance_count = false
-      }
-
-      scale_action {
-        direction = "Increase"
-        type      = "ChangeCount"
-        value     = "2"
-        cooldown  = "PT1M"
-      }
+    memory = {
+      upper_threshold           = 85
+      statistic_increase        = "Average"
+      time_aggregation_increase = "Average"
+      time_window_increase      = 1
+      increase_by               = 1
+      cooldown_increase         = 5
+      lower_threshold           = 55
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
-
-    rule {
-      metric_trigger {
-        metric_name              = "CpuPercentage"
-        metric_resource_id       = module.cms_fn.function_app.plan.id
-        metric_namespace         = "microsoft.web/serverfarms"
-        time_grain               = "PT1M"
-        statistic                = "Average"
-        time_window              = "PT5M"
-        time_aggregation         = "Average"
-        operator                 = "GreaterThan"
-        threshold                = 60
-        divide_by_instance_count = false
-      }
-
-      scale_action {
-        direction = "Increase"
-        type      = "ChangeCount"
-        value     = "2"
-        cooldown  = "PT5M"
-      }
-    }
-
-    rule {
-      metric_trigger {
-        metric_name        = "MemoryPercentage"
-        metric_resource_id = module.cms_fn.function_app.plan.id
-        metric_namespace   = "microsoft.web/serverfarms"
-        time_grain         = "PT1M"
-        statistic          = "Average"
-        time_window        = "PT5M"
-        time_aggregation   = "Average"
-        operator           = "GreaterThan"
-        threshold          = 85
-      }
-      scale_action {
-        direction = "Increase"
-        type      = "ChangeCount"
-        value     = "2"
-        cooldown  = "PT5M"
-      }
-    }
-
-    rule {
-      metric_trigger {
-        metric_name              = "Requests"
-        metric_resource_id       = module.cms_fn.function_app.function_app.id
-        metric_namespace         = "microsoft.web/sites"
-        time_grain               = "PT1M"
-        statistic                = "Average"
-        time_window              = "PT7M"
-        time_aggregation         = "Average"
-        operator                 = "LessThan"
-        threshold                = 2000
-        divide_by_instance_count = false
-      }
-
-      scale_action {
-        direction = "Decrease"
-        type      = "ChangeCount"
-        value     = "1"
-        cooldown  = "PT5M"
-      }
-    }
-
-    rule {
-      metric_trigger {
-        metric_name              = "CpuPercentage"
-        metric_resource_id       = module.cms_fn.function_app.plan.id
-        metric_namespace         = "microsoft.web/serverfarms"
-        time_grain               = "PT1M"
-        statistic                = "Average"
-        time_window              = "PT7M"
-        time_aggregation         = "Average"
-        operator                 = "LessThan"
-        threshold                = 30
-        divide_by_instance_count = false
-      }
-
-      scale_action {
-        direction = "Decrease"
-        type      = "ChangeCount"
-        value     = "1"
-        cooldown  = "PT5M"
-      }
+    requests = {
+      upper_threshold           = 500
+      statistic_increase        = "Max"
+      time_aggregation_increase = "Maximum"
+      time_window_increase      = 1
+      increase_by               = 2
+      cooldown_increase         = 5
+      lower_threshold           = 50
+      statistic_decrease        = "Average"
+      time_aggregation_decrease = "Average"
+      time_window_decrease      = 5
+      decrease_by               = 1
+      cooldown_decrease         = 5
     }
   }
 
@@ -144,13 +88,11 @@ resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_setting" {
     category = "StorageWrite"
   }
 
-  metric {
+  enabled_metric {
     category = "Capacity"
-    enabled  = false
   }
-  metric {
+  enabled_metric {
     category = "Transaction"
-    enabled  = false
   }
 }
 

@@ -4,6 +4,7 @@ import { EmptyStateLayer } from "@/components/empty-state";
 import { ButtonAssociateGroup } from "@/components/groups";
 import { PageHeader } from "@/components/headers";
 import {
+  ServiceAutopublishCheckbox,
   ServiceContextMenuActions,
   ServiceGroupTag,
   ServiceSearchById,
@@ -26,6 +27,7 @@ import {
 } from "@/generated/api/ServiceListItem";
 import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTES } from "@/lib/routes";
 import {
   hasApiKeyGroupsFeatures,
   isAtLeastInOneGroup,
@@ -54,12 +56,18 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const pageTitleLocaleKey = "routes.services.title";
 const pageDescriptionLocaleKey = "routes.services.description";
 
-const CREATE_SERVICE_ROUTE = "/services/new-service";
 const DEFAULT_PAGE_LIMIT = 10;
 const TEXT_SECONDARY_COLOR_STYLE = { color: "text.secondary" };
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
@@ -118,6 +126,14 @@ export default function Services() {
   const router = useRouter();
   const showDialog = useDialog();
 
+  const [autoPublish, setAutoPublish] = useState<boolean>(false);
+  const autoPublishRef = useRef(autoPublish);
+
+  const handleAutoPublishChange = useCallback((checked: boolean) => {
+    autoPublishRef.current = checked;
+    setAutoPublish(checked);
+  }, []);
+
   const getTableViewColumnGroup = (): TableViewColumn<ServiceListItem>[] =>
     hasApiKeyGroupsFeatures(GROUP_APIKEY_ENABLED)(session)
       ? [
@@ -149,7 +165,7 @@ export default function Services() {
           onClick={() =>
             hasTwoDifferentVersions(service)
               ? openServiceVersionSwitcher(service)
-              : router.push(`/services/${service.id}`)
+              : router.push(ROUTES.SERVICES.DETAILS(service.id))
           }
           size="large"
           startIcon={
@@ -256,9 +272,9 @@ export default function Services() {
     version: ServiceVersionSwitcherType,
   ) => {
     router.push(
-      `/services/${serviceId}${
-        version === "publication" ? "?release=true" : ""
-      }`,
+      version === "publication"
+        ? ROUTES.SERVICES.DETAILS(serviceId, true)
+        : ROUTES.SERVICES.DETAILS(serviceId),
     );
   };
 
@@ -279,7 +295,7 @@ export default function Services() {
   const handleEdit = (service: ServiceListItem) => {
     trackServiceEditStartEvent("services", service.id);
 
-    router.push(`/services/${service.id}/edit-service`);
+    router.push(ROUTES.SERVICES.EDIT(service.id));
   };
 
   const handleCreateService = async () => {
@@ -304,7 +320,7 @@ export default function Services() {
       }
     }
     trackServiceCreateStartEvent();
-    router.push(CREATE_SERVICE_ROUTE);
+    router.push(ROUTES.SERVICES.CREATE);
   };
 
   /**
@@ -314,6 +330,7 @@ export default function Services() {
    */
   const addRowMenuItem = (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     icon: ReactNode;
     onClickFn?: () => void;
@@ -337,6 +354,7 @@ export default function Services() {
   const submitReviewRowMenuItem = (service: ServiceListItem) =>
     addRowMenuItem({
       action: ServiceContextMenuActions.submitReview,
+      body: <ServiceAutopublishCheckbox onChange={handleAutoPublishChange} />,
       icon: <FactCheck color="primary" fontSize="inherit" />,
       serviceId: service.id,
     });
@@ -412,10 +430,13 @@ export default function Services() {
   /** handle actions click: open confirmation modal and on confirm click, perform b4f call action */
   const handleConfirmationModal = async (options: {
     action: ServiceContextMenuActions;
+    body?: ReactNode;
     danger?: boolean;
     serviceId: string;
   }) => {
+    handleAutoPublishChange(false); //reset auto publish state
     const raiseClickEvent = await showDialog({
+      body: options.body,
       confirmButtonLabel: t(`service.${options.action}.modal.button`),
       message: t(`service.${options.action}.modal.description`),
       title: t(`service.${options.action}.modal.title`),
@@ -429,7 +450,7 @@ export default function Services() {
           await handlePublish(options.serviceId);
           break;
         case ServiceContextMenuActions.submitReview:
-          await handleSubmitReview(options.serviceId, true); // TODO capire lato UX/UI come gestire l'auto_publish
+          await handleSubmitReview(options.serviceId, autoPublishRef.current);
           break;
         case ServiceContextMenuActions.unpublish:
           await handleUnpublish(options.serviceId);
@@ -569,7 +590,7 @@ export default function Services() {
       {noService ? (
         <EmptyStateLayer
           ctaLabel="service.actions.create"
-          ctaRoute={CREATE_SERVICE_ROUTE}
+          ctaRoute={ROUTES.SERVICES.CREATE}
           emptyStateLabel="routes.services.empty"
           requiredPermissions={["ApiServiceWrite"]}
         />

@@ -46,7 +46,9 @@ export const makeGetServiceTopicsHandler =
       TE.toUnion,
     )();
 
-export const applyRequestMiddelwares = (handler: GetServiceTopicsHandler) => {
+export const applyRequestMiddelwares = (
+  handler: GetServiceTopicsHandler,
+): ReturnType<typeof wrapRequestHandler> => {
   const middlewaresWrap = withRequestMiddlewares(
     // extract the Azure functions context
     ContextMiddleware(),

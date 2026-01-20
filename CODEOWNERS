@@ -1,6 +1,4 @@
 # see https://help.github.com/en/articles/about-code-owners#example-of-a-codeowners-file
 
-* @pagopa/io-platform-green-unit
-
-/infra/ @pagopa/engineering-team-cloud-eng @pagopa/io-platform-green-unit
-/.github/ @pagopa/engineering-team-cloud-eng @pagopa/io-platform-green-unit
+* @pagopa/io-institutions-n-services
+/infra/bootstrapper/ @pagopa/io-institutions-n-services @pagopa/engineering-team-devex

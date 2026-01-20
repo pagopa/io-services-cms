@@ -2,18 +2,21 @@
   "extends": ["//"],
   "tasks": {
     "generate:tokenizer-client": {
-      "outputs": ["src/generated/pdv-tokenizer-api/*"]
+      "outputs": ["src/generated/pdv-tokenizer-api/*"],
+      "outputLogs": "errors-only"
     },
     "generate:definitions": {
       "inputs": [
         "openapi.yaml",
         "../../packages/io-services-cms-models/openapi/*.yaml"
       ],
-      "outputs": ["src/generated/api/**/*"]
+      "outputs": ["src/generated/api/**/*"],
+      "outputLogs": "errors-only"
     },
     "generate:avro": {
       "inputs": ["avro/**"],
-      "outputs": ["src/generated/avro/**/*"]
+      "outputs": ["src/generated/avro/**/*"],
+      "outputLogs": "errors-only"
     },
     "generate": {
       "dependsOn": [

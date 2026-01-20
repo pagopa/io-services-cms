@@ -245,7 +245,7 @@ export const makeGetServicesHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: GetServicesHandler) => {
+  (handler: GetServicesHandler): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the client IP from the request
       ClientIpMiddleware,

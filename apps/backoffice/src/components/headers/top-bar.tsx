@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { ROUTES } from "@/lib/routes";
 import { HeaderAccount, JwtUser, RootLinkType } from "@pagopa/mui-italia";
 import { useRouter } from "next/router";
 
@@ -39,7 +40,7 @@ export const TopBar = ({ hideAssistance, user }: TopBarProps) => {
       onLogin={() => {
         console.log("User login");
       }}
-      onLogout={() => router.push("/auth/logout")}
+      onLogout={() => router.push(ROUTES.AUTH.LOGOUT)}
       rootLink={pagoPALink}
     />
   );

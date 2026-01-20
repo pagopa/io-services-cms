@@ -1,0 +1,27 @@
+name: Deploy App Backend Container App
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  attestations: write
+
+jobs:
+  deploy:
+    name: Deploy App Backend as Container App
+    concurrency:
+      group: ${{ github.workflow }}-cd
+      # Override this configuration to prevent cancelling a running deploy.
+      cancel-in-progress: false
+    uses: pagopa/dx/.github/workflows/release-azure-containerapp-v1.yaml@main
+    secrets: inherit
+    with:
+      dockerfile_path: ./apps/app-backend/Dockerfile
+      dockerfile_context: .
+      docker_image_name: pagopa/io-services-app-backend
+      docker_image_description: 'Test app for function container app'
+      container_app: io-p-itn-svc-app-be-func-02
+      resource_group_name: io-p-itn-svc-rg-01
+      environment: app-prod

@@ -97,10 +97,7 @@ const BASE_PATH = require("../host.json").extensions.http.routePrefix;
 const config = getConfigOrThrow();
 
 // client to interact with Api Management
-const apimClient = ApimUtils.getApimClient(
-  config,
-  config.AZURE_SUBSCRIPTION_ID,
-);
+const apimClient = ApimUtils.getApimClient(config.AZURE_SUBSCRIPTION_ID);
 
 // Apim Service, used to operates on Apim resources
 const apimService = ApimUtils.getApimService(
@@ -545,7 +542,11 @@ export const onIngestionServiceHistoryChangeEntryPoint = pipe(
 
 //Ingestion Activations
 export const onIngestionActivationChangeEntryPoint = pipe(
-  onIngestionActivationChangeHandler(activationEventHubProducer, pdvTokenizer),
+  onIngestionActivationChangeHandler(
+    activationEventHubProducer,
+    pdvTokenizer,
+    config,
+  ),
   parseBlob,
   toAzureFunctionHandler,
 );

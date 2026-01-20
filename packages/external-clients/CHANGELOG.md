@@ -1,5 +1,41 @@
 # @io-services-cms/external-clients
 
+## 1.8.7
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+
+## 1.8.6
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+
+## 1.8.5
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+
+## 1.8.4
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+
+## 1.8.3
+
+### Patch Changes
+
+- 9ea20575: bump version of azure library arm-apimanagement to v.10 in cms, backoffice and external-clients package projects
+
+## 1.8.2
+
+### Patch Changes
+
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+
 ## 1.8.1
 
 ### Patch Changes

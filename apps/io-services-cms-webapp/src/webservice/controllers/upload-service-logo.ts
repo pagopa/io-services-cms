@@ -179,7 +179,9 @@ export const makeUploadServiceLogoHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: IUploadServiceLogoHandler) => {
+  (
+    handler: IUploadServiceLogoHandler,
+  ): ReturnType<typeof wrapRequestHandler> => {
     const middlewaresWrap = withRequestMiddlewares(
       // extract the Azure functions context
       ContextMiddleware(),

@@ -2,6 +2,7 @@ import { AppFooter } from "@/components/footer";
 import { Header, TopBar } from "@/components/headers";
 import { Sidenav, SidenavItem } from "@/components/sidenav";
 import { getConfiguration } from "@/config";
+import { ROUTES } from "@/lib/routes";
 import styles from "@/styles/app-layout.module.css";
 import { SelfcareRoles } from "@/types/auth";
 import { hasAggregatorFeatures } from "@/utils/auth-util";
@@ -42,7 +43,7 @@ export const AppLayout = ({
     if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
       return [
         {
-          href: "/delegated-institutions",
+          href: ROUTES.DELEGATED_INSTITUTIONS,
           icon: <Dns fontSize="inherit" />,
           linkType: "internal",
           text: "routes.delegated-institutions.title",
@@ -56,20 +57,20 @@ export const AppLayout = ({
   const menu: SidenavItem[] = [
     ...getAggregatedInstitutionsSidenavItem(),
     {
-      href: "/",
+      href: ROUTES.HOME,
       icon: <ViewSidebar fontSize="inherit" />,
       linkType: "internal",
       text: "routes.overview.title",
     },
     {
-      href: "/services",
+      href: ROUTES.SERVICES.LIST,
       icon: <Category fontSize="inherit" />,
       linkType: "internal",
       text: "routes.services.title",
     },
     {
       hasBottomDivider: true,
-      href: "/keys",
+      href: ROUTES.KEYS.LIST,
       icon: <VpnKey fontSize="inherit" />,
       linkType: "internal",
       requiredPermissions: ["ApiServiceWrite"],

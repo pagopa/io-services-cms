@@ -1,8 +1,11 @@
 import { handleInternalErrorResponse } from "@/lib/be/errors";
+import {
+  parseLimitQueryParam,
+  parseOffsetQueryParam,
+} from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveServiceList } from "@/lib/be/services/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest } from "next/server";
 
@@ -17,14 +20,24 @@ export const GET = withJWTAuthHandler(
     try {
       const serviceId = request.nextUrl.searchParams.get("id");
 
-      const limit = serviceId ? 1 : getLimitQueryParam(request);
-      const offset = serviceId ? 0 : getOffsetQueryParam(request);
+      const maybeLimit = serviceId ? E.right(1) : parseLimitQueryParam(request);
+      const maybeOffset = serviceId
+        ? E.right(0)
+        : parseOffsetQueryParam(request);
+
+      if (E.isLeft(maybeLimit)) {
+        return maybeLimit.left;
+      }
+
+      if (E.isLeft(maybeOffset)) {
+        return maybeOffset.left;
+      }
 
       const result = await retrieveServiceList(
         request,
         backofficeUser,
-        limit,
-        offset,
+        maybeLimit.right,
+        maybeOffset.right,
         serviceId ?? undefined,
       );
 
@@ -38,17 +51,3 @@ export const GET = withJWTAuthHandler(
     }
   },
 );
-
-const getLimitQueryParam = (request: NextRequest): number => {
-  const rawlimit = NumberFromString.decode(
-    request.nextUrl.searchParams.get("limit"),
-  );
-  return E.isLeft(rawlimit) || rawlimit.right > 100 ? 100 : rawlimit.right;
-};
-
-const getOffsetQueryParam = (request: NextRequest): number => {
-  const rawoffset = NumberFromString.decode(
-    request.nextUrl.searchParams.get("offset"),
-  );
-  return E.isLeft(rawoffset) || rawoffset.right < 0 ? 0 : rawoffset.right;
-};

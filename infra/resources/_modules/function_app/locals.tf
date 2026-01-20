@@ -1,15 +1,17 @@
 locals {
   app_be = {
-    tier          = "l"
+    tier          = "xl"
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"
 
+      STORAGE_ACCOUNT_NAME = module.storage_account.name
+
       FEATURED_ITEMS_CONTAINER_NAME      = "static-content"
       FEATURED_SERVICES_FILE_NAME        = "featured-services.json"
       FEATURED_INSTITUTIONS_FILE_NAME    = "featured-institutions.json"
-      COSMOSDB_NAME                      = "app-backend"
-      COSMOSDB_CONTAINER_SERVICE_DETAILS = "services"
+      COSMOSDB_NAME                      = "app-backend" // TODO: refactor with a centralized local variable
+      COSMOSDB_CONTAINER_SERVICE_DETAILS = "services"    // TODO: refactor with a centralized local variable
 
       AZURE_SEARCH_ENDPOINT                = var.ai_search.url
       AZURE_SEARCH_SERVICE_VERSION         = var.ai_search.service_version
@@ -17,11 +19,6 @@ locals {
       AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
 
-    }
-    autoscale_settings = {
-      min     = 3
-      max     = 30
-      default = 3
     }
   }
 }

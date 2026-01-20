@@ -1,5 +1,97 @@
 # io-services-cms-backoffice
 
+## 1.30.5
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+- Updated dependencies [321dcc37]
+  - @io-services-cms/external-clients@1.8.7
+  - @io-services-cms/fetch-utils@1.0.3
+  - @io-services-cms/models@1.28.4
+
+## 1.30.4
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+- Updated dependencies [9673294c]
+  - @io-services-cms/external-clients@1.8.6
+  - @io-services-cms/fetch-utils@1.0.2
+  - @io-services-cms/models@1.28.3
+
+## 1.30.3
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+- Updated dependencies [0b0b1871]
+  - @io-services-cms/external-clients@1.8.5
+  - @io-services-cms/fetch-utils@1.0.1
+  - @io-services-cms/models@1.28.2
+
+## 1.30.2
+
+### Patch Changes
+
+- c373dcc9: bump backoffice next-auth version to 4.24.13
+
+## 1.30.1
+
+### Patch Changes
+
+- d663dda5: update Selfcare OpenAPI json file
+
+## 1.30.0
+
+### Minor Changes
+
+- 542b1f38: Manage autopublish on service "submit to review" action
+
+## 1.29.8
+
+### Patch Changes
+
+- f6b23070: add parser for offset and limit query params in Service List API
+
+## 1.29.7
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+- Updated dependencies [24b16966]
+  - @io-services-cms/external-clients@1.8.4
+
+## 1.29.6
+
+### Patch Changes
+
+- 9ea20575: bump version of azure library arm-apimanagement to v.10 in cms, backoffice and external-clients package projects
+- Updated dependencies [9ea20575]
+  - @io-services-cms/external-clients@1.8.3
+
+## 1.29.5
+
+### Patch Changes
+
+- d705328e: fix APIM mocks
+
+## 1.29.4
+
+### Patch Changes
+
+- 3cc6eb28: Remove correlation between require_secure_channel and tos_url in service create/update funnel
+
+## 1.29.3
+
+### Patch Changes
+
+- 77042712: centralised route paths
+- 38e3ae89: Use Managed Identity instead of Service Principal to interact with APIM
+- 0a610b55: updated browserlist-db on build
+- Updated dependencies [38e3ae89]
+  - @io-services-cms/external-clients@1.8.2
+
 ## 1.29.2
 
 ### Patch Changes

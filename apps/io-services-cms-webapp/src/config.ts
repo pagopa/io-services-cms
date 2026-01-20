@@ -5,7 +5,6 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
-import { ApimUtils } from "@io-services-cms/external-clients";
 import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
@@ -24,6 +23,10 @@ import * as t from "io-ts";
 
 import { FiscalCode } from "./generated/api/FiscalCode";
 import { CommaSeparatedListOf } from "./utils/comma-separated-list";
+import {
+  PrefixCfTestArrayDecoder,
+  TestFiscalCodesUsersDecoder,
+} from "./utils/filter-test-user";
 
 // used for internal job dispatch, temporary files, etc...
 const InternalStorageAccount = t.type({
@@ -304,6 +307,15 @@ export type BlobStorageClientConfiguration = t.TypeOf<
   typeof BlobStorageClientConfiguration
 >;
 
+const TestFiscalCodeConfiguration = t.type({
+  PREFIX_CF_TEST: PrefixCfTestArrayDecoder,
+  TEST_FISCAL_CODES: TestFiscalCodesUsersDecoder,
+});
+
+export type TestFiscalCodeConfiguration = t.TypeOf<
+  typeof TestFiscalCodeConfiguration
+>;
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -317,7 +329,6 @@ export const IConfig = t.intersection([
     ]),
     t.intersection([
       CosmosConfig,
-      ApimUtils.definitions.AzureClientSecretCredential,
       ApimConfig,
       QueueConfig,
       ServiceIdQualityCheckExclusionList,
@@ -348,6 +359,7 @@ export const IConfig = t.intersection([
     ActivationEventHubConfig,
     HttpAgentConfig,
     BlobStorageClientConfiguration,
+    TestFiscalCodeConfiguration,
   ]),
 ]);
 

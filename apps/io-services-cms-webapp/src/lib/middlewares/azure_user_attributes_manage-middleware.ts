@@ -16,8 +16,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
 
-import winston = require("winston");
-
 // The user email will be passed in this header by the API Gateway
 const HEADER_USER_EMAIL = "x-user-email";
 
@@ -106,11 +104,6 @@ export const AzureUserAttributesManageMiddleware =
         ])();
 
       if (E.isLeft(errorOrMaybeAuthorizedCIDRs)) {
-        winston.error(
-          `No CIDRs found for subscription|${subscriptionId}|${JSON.stringify(
-            errorOrMaybeAuthorizedCIDRs.left,
-          )}`,
-        );
         return E.left<
           IResponse<"IResponseErrorQuery">,
           IAzureUserAttributesManage

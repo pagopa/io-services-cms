@@ -1,5 +1,47 @@
 # io-services-app-backend
 
+## 1.2.5
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+- Updated dependencies [321dcc37]
+  - @io-services-cms/models@1.28.4
+
+## 1.2.4
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+- Updated dependencies [9673294c]
+  - @io-services-cms/models@1.28.3
+
+## 1.2.3
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+- Updated dependencies [0b0b1871]
+  - @io-services-cms/models@1.28.2
+
+## 1.2.2
+
+### Patch Changes
+
+- 24b16966: bump version of @azure/identity to v.4.13.0
+
+## 1.2.1
+
+### Patch Changes
+
+- cf1f5bcb: handle STORAGE_ACCOUNT_NAME env var
+
+## 1.2.0
+
+### Minor Changes
+
+- cb23b9b6: add sessionId parameter in API request to the Azure Search index to remove duplicates
+
 ## 1.1.6
 
 ### Patch Changes

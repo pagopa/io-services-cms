@@ -166,7 +166,7 @@ const getNotDeletedDuplicatesOnServiceLifecycle =
 
 export const applyRequestMiddelwares = (
   handler: CheckServiceDuplicationInternalHandler,
-) => {
+): ReturnType<typeof wrapRequestHandler> => {
   const middlewaresWrap = withRequestMiddlewares(
     RequiredQueryParamMiddleware("serviceName", NonEmptyString),
     RequiredQueryParamMiddleware("organizationFiscalCode", NonEmptyString),

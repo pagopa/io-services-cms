@@ -17,6 +17,7 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTES } from "@/lib/routes";
 import { Service } from "@/types/service";
 import {
   trackServiceDetailsPageEvent,
@@ -97,7 +98,7 @@ export default function ServiceDetails() {
     await noContentFetchData("deleteService", { serviceId }, tt.unknown, {
       notify: "all",
     });
-    router.push("/services"); // redirect to parent services page
+    router.push(ROUTES.SERVICES.LIST); // redirect to parent services page
   };
 
   const handleSubmitReview = async (auto_publish: boolean) => {
@@ -134,7 +135,7 @@ export default function ServiceDetails() {
   const handleEdit = () => {
     trackServiceEditStartEvent("serviceDetails", serviceId);
 
-    router.push(`/services/${serviceId}/edit-service`);
+    router.push(ROUTES.SERVICES.EDIT(serviceId));
   };
 
   const navigateToServiceLifecycle = () =>
@@ -181,7 +182,7 @@ export default function ServiceDetails() {
             onHistoryClick={() => handleHistory(true)}
             onPreviewClick={handlePreview}
             onPublishClick={handlePublish}
-            onSubmitReviewClick={() => handleSubmitReview(true)} // TODO capire lato UX/UI come gestire l'auto_publish
+            onSubmitReviewClick={handleSubmitReview}
             onUnpublishClick={handleUnpublish}
             publicationStatus={spData?.status}
             releaseMode={release}
@@ -204,7 +205,7 @@ export default function ServiceDetails() {
       />
       <AppPreview
         // hide edit shortcut in release mode
-        editUrl={release ? undefined : `/services/${serviceId}/edit-service`}
+        editUrl={release ? undefined : ROUTES.SERVICES.EDIT(serviceId)}
         itemToPreview={currentService}
         onClose={() => setShowPreview(false)}
         showPreview={showPreview}

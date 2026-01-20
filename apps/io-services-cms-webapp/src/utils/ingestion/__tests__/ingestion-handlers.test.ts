@@ -1,9 +1,7 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { Context } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import * as t from "io-ts";
-import { pipe } from "fp-ts/lib/function";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -41,6 +39,10 @@ const aFormatterWhichFails = vi.fn((item: ItemType) =>
   E.left(new Error("Failed to format item")),
 );
 
+const aFilter = vi.fn(() => true);
+
+const aFilterThatRejects = vi.fn(() => false);
+
 const aProducer = {
   sendBatch: vi.fn(() => Promise.resolve()),
 } as unknown as EventHubProducerClient;
@@ -68,7 +70,7 @@ const anInvalidQueueItem = { mock: "aMock" } as unknown as Json;
 
 describe("Generic Ingestion PDND Handlers", () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
   describe("CosmosDBTrigger", () => {
     it.each`
@@ -141,6 +143,8 @@ describe("Generic Ingestion PDND Handlers", () => {
       const res = await createIngestionBlobTriggerHandler(
         aProducer,
         aFormatter,
+        undefined,
+        aFilter,
       )({ items: [anItem] })();
 
       //then
@@ -148,6 +152,8 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isRight(res)) {
         expect(res.right).toStrictEqual([{}]);
       }
+      expect(aFilter).toHaveBeenCalledOnce();
+      expect(aFilter).toBeCalledWith(anItem, 0, [anItem]);
       expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
       expect(aProducer.sendBatch).toHaveBeenCalledOnce();
@@ -159,6 +165,8 @@ describe("Generic Ingestion PDND Handlers", () => {
       const res = await createIngestionBlobTriggerHandler(
         aProducerWhichFails,
         aFormatter,
+        undefined,
+        aFilter,
       )({ items: [anItem] })();
 
       //then
@@ -166,6 +174,8 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to send batch");
       }
+      expect(aFilter).toHaveBeenCalled();
+      expect(aFilter).toBeCalledWith(anItem, 0, [anItem]);
       expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
       expect(aProducerWhichFails.sendBatch).toHaveBeenCalledOnce();
@@ -177,6 +187,8 @@ describe("Generic Ingestion PDND Handlers", () => {
       const res = await createIngestionBlobTriggerHandler(
         aProducer,
         aFormatterWhichFails,
+        undefined,
+        aFilter,
       )({ items: [anItem] })();
 
       //then
@@ -184,9 +196,60 @@ describe("Generic Ingestion PDND Handlers", () => {
       if (E.isLeft(res)) {
         expect(res.left.message).toBe("Failed to format item");
       }
+      expect(aFilter).toHaveBeenCalled();
+      expect(aFilter).toBeCalledWith(anItem, 0, [anItem]);
       expect(aFormatterWhichFails).toHaveBeenCalledOnce();
       expect(aFormatterWhichFails).toBeCalledWith(anItem);
       expect(aProducerWhichFails.sendBatch).not.toBeCalled();
+    });
+
+    it("should filter items based on filter function", async () => {
+      //given
+      const items = [anItem, { ...anItem, id: "anotherItemId" }];
+      const res = await createIngestionBlobTriggerHandler(
+        aProducer,
+        aFormatter,
+        undefined,
+        aFilterThatRejects,
+      )({ items })();
+
+      //then
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual([{}]);
+      }
+      expect(aFilterThatRejects).toHaveBeenCalledTimes(2);
+      expect(aFilterThatRejects).toHaveBeenNthCalledWith(1, anItem, 0, items);
+      expect(aFilterThatRejects).toHaveBeenNthCalledWith(2, { ...anItem, id: "anotherItemId" }, 1, items);
+      expect(aFormatter).not.toHaveBeenCalled();
+      expect(aProducer.sendBatch).toHaveBeenCalledOnce();
+      expect(aProducer.sendBatch).toBeCalledWith([]);
+    });
+
+    it("should process all items when filter is undefined and the filter function should not be called", async () => {
+      //given
+      const items = [anItem, { ...anItem, id: "anotherItemId" }];
+      const res = await createIngestionBlobTriggerHandler(
+        aProducer,
+        aFormatter,
+        undefined,
+        undefined,
+      )({ items })();
+
+      //then
+      expect(E.isRight(res)).toBeTruthy();
+      if (E.isRight(res)) {
+        expect(res.right).toStrictEqual([{}]);
+      }
+      expect(aFilter).not.toHaveBeenCalled();
+      expect(aFormatter).toHaveBeenCalledTimes(2);
+      expect(aFormatter).toHaveBeenNthCalledWith(1, anItem);
+      expect(aFormatter).toHaveBeenNthCalledWith(2, { ...anItem, id: "anotherItemId" });
+      expect(aProducer.sendBatch).toHaveBeenCalledOnce();
+      expect(aProducer.sendBatch).toBeCalledWith([
+        { body: anItem },
+        { body: { ...anItem, id: "anotherItemId" } },
+      ]);
     });
   });
 });

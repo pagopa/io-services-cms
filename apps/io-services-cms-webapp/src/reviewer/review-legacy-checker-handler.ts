@@ -174,9 +174,7 @@ const buildUpdatedServiceLifecycleItem =
           ...service,
           fsm: {
             ...service.fsm,
-            reason: jiraIssue.fields.comment.comments
-              .map((value) => value.body)
-              .join("|"),
+            reason: jiraIssue.fields.comment.comments.at(-1)?.body ?? "",
             state: "rejected",
           },
         };

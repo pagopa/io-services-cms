@@ -83,16 +83,6 @@ variable "bo_auth_session_secret" {
   sensitive   = true
 }
 
-variable "azure_client_secret_credential_client_id_name" {
-  type        = string
-  description = "Azure Client Secret Credential Client Id Name"
-}
-
-variable "azure_client_secret_credential_secret_name" {
-  type        = string
-  description = "Azure Client Secret Credential Secret Name"
-}
-
 variable "legacy_cosmosdb_key_name" {
   type        = string
   description = "Legacy CosmosDB Key Name"

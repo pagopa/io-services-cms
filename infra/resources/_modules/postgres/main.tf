@@ -14,9 +14,9 @@ module "cms_postgres_flexible_server" {
   private_dns_zone_resource_group_name = var.private_dns_zone_resource_group_name
   delegated_subnet_id                  = module.pgres_snet.id
 
-  tier = "m"
+  use_case = "default"
 
-  db_version = "13"
+  db_version = "16"
   storage_mb = 32768
 
   administrator_credentials = {
@@ -33,4 +33,6 @@ module "cms_postgres_flexible_server" {
   alerts_enabled       = true
 
   tags = var.tags
+
+  create_replica = false
 }

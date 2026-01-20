@@ -1,9 +1,28 @@
 
 locals {
+  queues = [
+    { name = "request-review", hasPoison : true },
+    { name = "request-publication", hasPoison : true },
+    { name = "request-historicization", hasPoison : true },
+    { name = "request-sync-legacy", hasPoison : true },
+    { name = "request-sync-cms", hasPoison : true },
+    { name = "request-review-legacy", hasPoison : true },
+    { name = "request-validation", hasPoison : true },
+    { name = "request-deletion", hasPoison : true },
+    { name = "request-detail", hasPoison : true },
+    { name = "request-services-publication-ingestion-retry", hasPoison : true },
+    { name = "request-services-lifecycle-ingestion-retry", hasPoison : true },
+    { name = "request-services-history-ingestion-retry", hasPoison : true },
+    { name = "sync-group-poison" },
+    { name = "sync-activations-from-legacy-poison" }
+  ]
+  containers = {
+    "activations" = { name = "activations" }
+  }
   cms = {
     tier          = "standard"
     cosmosdb_name = "db-services-cms"
-    app_settings = {
+    app_settings = merge({
       NODE_ENV = "production"
 
       // Keepalive fields are all optionals
@@ -43,14 +62,10 @@ locals {
       LEGACY_JIRA_PROJECT_NAME = "IES"
 
       # Apim connection
-      AZURE_APIM                           = "io-p-itn-apim-01"
-      AZURE_APIM_RESOURCE_GROUP            = "io-p-itn-common-rg-01"
+      AZURE_APIM                           = local.apim.name
+      AZURE_APIM_RESOURCE_GROUP            = local.apim.resource_group_name
+      AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = local.apim.product_name
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
-      AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = "io-services-api"
-
-      AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID = data.azurerm_key_vault_secret.azure_client_secret_credential_client_id.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_SECRET    = data.azurerm_key_vault_secret.azure_client_secret_credential_secret.value
-      AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID = data.azurerm_client_config.current.tenant_id
 
       # PostgreSQL 
       REVIEWER_DB_HOST     = var.pgres_cms_fqdn
@@ -73,24 +88,6 @@ locals {
       LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = "services-cms--legacy-watcher-lease"
       LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE     = "activations-sync-lease"
       LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION = 10
-
-      // Internal Storage Account Queues
-      # Queues
-      REQUEST_REVIEW_QUEUE                               = azurerm_storage_queue.request-review.name
-      REQUEST_PUBLICATION_QUEUE                          = azurerm_storage_queue.request-publication.name
-      REQUEST_HISTORICIZATION_QUEUE                      = azurerm_storage_queue.request-historicization.name
-      REQUEST_SYNC_LEGACY_QUEUE                          = azurerm_storage_queue.request-sync-legacy.name
-      REQUEST_SYNC_CMS_QUEUE                             = azurerm_storage_queue.request-sync-cms.name
-      REQUEST_REVIEW_LEGACY_QUEUE                        = azurerm_storage_queue.request-review-legacy.name
-      REQUEST_VALIDATION_QUEUE                           = azurerm_storage_queue.request-validation.name
-      REQUEST_DELETION_QUEUE                             = azurerm_storage_queue.request-deletion.name
-      REQUEST_DETAIL_QUEUE                               = azurerm_storage_queue.request-detail.name
-      REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE = azurerm_storage_queue.request-services-publication-ingestion-retry.name
-      REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE   = azurerm_storage_queue.request-services-lifecycle-ingestion-retry.name
-      REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE     = azurerm_storage_queue.request-services-history-ingestion-retry.name
-      SYNC_GROUP_POISON_QUEUE                            = azurerm_storage_queue.sync-group-poison.name
-      SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE          = azurerm_storage_queue.sync-activations-from-legacy-poison.name
-
 
       # List of service ids for which quality control will be bypassed
       SERVICEID_QUALITY_CHECK_EXCLUSION_LIST = data.azurerm_key_vault_secret.serviceid_quality_check_exclusion_list.value
@@ -141,13 +138,33 @@ locals {
 
       # Blob Storage configurations
       STORAGE_ACCOUNT_NAME       = module.cms_storage_account.name
-      ACTIVATIONS_CONTAINER_NAME = azurerm_storage_container.activations.name
-    }
+      ACTIVATIONS_CONTAINER_NAME = local.containers.activations.name
+
+      # Fiscale codes test value - concatenation of specific test fiscal codes users from io-infra test_users module
+      TEST_FISCAL_CODES = join(",", [
+        module.test_fiscal_codes_users.users.internal_flat,
+        module.test_fiscal_codes_users.users.internal_load_flat,
+        module.test_fiscal_codes_users.users.store_review_flat,
+        module.test_fiscal_codes_users.users.eu_covid_cert_flat,
+        join(",", module.test_fiscal_codes_users.users.unique_email_test),
+        "AAAAAA00A00A000A"
+      ])
+      # Prefix fiscal code (comma separated if more than 1 prefix)
+      PREFIX_CF_TEST = "LVTEST00A00"
+      }, {
+      // Queues
+      for queue in local.queues : "${replace(upper(queue.name), "-", "_")}_QUEUE" => queue.name
+    })
 
     autoscale_settings = {
       min     = 3
       max     = 30
       default = 3
     }
+  }
+  apim = {
+    name                = "io-p-itn-apim-01"
+    resource_group_name = "io-p-itn-common-rg-01"
+    product_name        = "io-services-api"
   }
 }

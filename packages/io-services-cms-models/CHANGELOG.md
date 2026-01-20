@@ -1,5 +1,23 @@
 # io-services-cms-models
 
+## 1.28.4
+
+### Patch Changes
+
+- 321dcc37: empty update to rebuild the application
+
+## 1.28.3
+
+### Patch Changes
+
+- 9673294c: empty update for release rerun
+
+## 1.28.2
+
+### Patch Changes
+
+- 0b0b1871: Moved project to pnpm
+
 ## 1.28.1
 
 ### Patch Changes

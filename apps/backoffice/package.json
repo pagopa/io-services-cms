@@ -1,31 +1,31 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "1.29.2",
+  "version": "1.30.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:pre-package": "cp -r .next/static .next/standalone/apps/backoffice/.next && cp -r public .next/standalone/apps/backoffice",
-    "build:package": "yarn build:pre-package && (cd .next/standalone/apps/backoffice && zip -r -q ../../../../${npm_package_name}-${npm_package_version}.zip . -x package.json)",
+    "build:pre-package": "cp -r .next/static .next/standalone/apps/backoffice/.next && cp -r public .next/standalone/apps/backoffice && cp -r .next/standalone/node_modules .next/standalone/apps/backoffice/",
+    "build:package": "pnpm build:pre-package && (cd .next/standalone/apps/backoffice && zip -r -q ../../../../${npm_package_name}-${npm_package_version}.zip . -x package.json)",
     "start": "./node_modules/next/dist/bin/next start",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "test": "yarn test:b4f && yarn test:fe",
+    "test": "pnpm test:b4f && pnpm test:fe",
     "test:b4f": "vitest run --config ./vitest.config.node.ts",
     "test:fe": "vitest run --config ./vitest.config.react.ts",
-    "coverage": "yarn coverage:b4f && yarn coverage:fe",
+    "coverage": "pnpm coverage:b4f && pnpm coverage:fe",
     "coverage:b4f": "vitest run --config ./vitest.config.node.ts --coverage",
     "coverage:fe": "vitest run --config ./vitest.config.react.ts --coverage",
     "generate:api-definitions": "rm -rf ./src/generated/api && gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --request-types --response-decoders --client",
     "generate:services-cms": "rm -rf ./src/generated/services-cms && gen-api-models --api-spec ../io-services-cms-webapp/openapi.yaml --out-dir ./src/generated/services-cms --request-types --response-decoders --client",
-    "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json --out-dir ./src/generated/selfcare --response-decoders"
+    "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec ./openapi-selfcare.json --out-dir ./src/generated/selfcare --response-decoders"
   },
   "dependencies": {
-    "@azure/arm-apimanagement": "8.1.2",
+    "@azure/arm-apimanagement": "^10.0.0",
     "@azure/cosmos": "^4.0.0",
-    "@azure/identity": "^4.0.0",
+    "@azure/identity": "^4.13.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@hookform/resolvers": "^3.3.1",
@@ -37,6 +37,8 @@
     "@mui/material": "^5.14.5",
     "@mui/system": "^5.14.5",
     "@opentelemetry/instrumentation-undici": "^0.3.0",
+    "@opentelemetry/api": "^1.3.0",
+    "@opentelemetry/instrumentation": "^0.51.0",
     "@pagopa/io-functions-commons": "^29.1.2",
     "@pagopa/mui-italia": "^1.0.1",
     "applicationinsights": "^3.1.0",
@@ -74,7 +76,11 @@
     "@vitejs/plugin-react": "^4.2.1",
     "eslint-config-next": "^13.5.6",
     "msw": "^2.0.11",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
+    "@next/env": "^13.5.6",
+    "@pagopa/ts-commons": "^13.1.1"
   },
   "msw": {
     "workerDirectory": "public"

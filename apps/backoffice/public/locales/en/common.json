@@ -97,7 +97,6 @@
         "required": "Required field",
         "max": "You can enter a maximum of {{max}} characters",
         "url": "Invalid Url",
-        "privacyCritical": "Mandatory field for a sensitive service",
         "sameSelectedValue": "The selected value is the same as the starting value"
       }
     },
@@ -598,8 +597,9 @@
     },
     "submitReview": {
       "modal": {
-        "title": "Do you want to send this service for review?",
-        "description": "The service will be reviewed by the IO team. Monitor the outcome of the review in <strong>Services</strong>: <br/><ul><li>if the service is <strong>approved</strong>, it will be automatically published;</li><li> in the event that the service is <strong>rejected</strong>, you will be able to consult the reason and make the necessary changes to be able to send it again for review.</li></ul>",
+        "title": "Do you want to send the service for review?",
+        "description": "The IO team will review the service content. Check the status in the Services section to see the review outcome.",
+        "publishAfterApproval": "Publish the service after approval",
         "button": "Send for review"
       }
     },

@@ -17,9 +17,6 @@ export interface Configuration {
   AZURE_APIM: string;
   AZURE_APIM_PRODUCT_NAME: NonEmptyString;
   AZURE_APIM_RESOURCE_GROUP: string;
-  AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: NonEmptyString;
-  AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: NonEmptyString;
-  AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: NonEmptyString;
   // Apim Configuration
   AZURE_SUBSCRIPTION_ID: string;
   // BackOffice settings
@@ -36,8 +33,11 @@ export interface Configuration {
   BACKOFFICE_HOST: string;
 
   CDN_URL: string;
+  COSMOSDB_MOCKING: boolean;
+  COSMOSDB_URI: string;
   EA_ENABLED: boolean; // BFF & FE feature flag for Aggregator Institution (Ente Aggregatore)
   GROUP_APIKEY_ENABLED: boolean; // frontend feature flag
+
   GROUP_AUTHZ_ENABLED: boolean; // backend feature flag
   // window guards (useful to configure MSW to work in the browser or in Node environment)
   IS_BROWSER: boolean;
@@ -45,7 +45,6 @@ export interface Configuration {
   // NodeJS Environment mode
   IS_DEVELOPMENT: boolean;
   IS_MSW_ENABLED: boolean;
-
   IS_PRODUCTION: boolean;
   IS_SERVER: boolean;
   IS_TEST: boolean;
@@ -55,18 +54,18 @@ export interface Configuration {
   // Legacy CosmosDB configuration
   LEGACY_COSMOSDB_URI: string;
   SELFCARE_API_MOCKING: boolean;
+
   SELFCARE_EXTERNAL_API_BASE_URL: string;
 
   // Selfcare
   SELFCARE_ID: string;
-
   SELFCARE_JWKS_URL: string;
   SELFCARE_TITLE: string;
   SELFCARE_TOKEN_EXCHANGE_URL: string;
+
   SELFCARE_URL: string;
 
   SERVICES_LOGO_PATH: string;
-
   // Subscriptions migration configuration
   SUBSCRIPTION_MIGRATION_API_MOCKING: boolean;
 }
@@ -93,12 +92,6 @@ export function getConfiguration(): Configuration {
     AZURE_APIM_PRODUCT_NAME: process.env
       .AZURE_APIM_PRODUCT_NAME as NonEmptyString, //FIXME: fix cast
     AZURE_APIM_RESOURCE_GROUP: process.env.AZURE_APIM_RESOURCE_GROUP as string, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_CLIENT_ID as NonEmptyString, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_SECRET: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_SECRET as NonEmptyString, //FIXME: fix cast
-    AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID: process.env
-      .AZURE_CLIENT_SECRET_CREDENTIAL_TENANT_ID as NonEmptyString, //FIXME: fix cast
     AZURE_SUBSCRIPTION_ID: process.env.AZURE_SUBSCRIPTION_ID as string, //FIXME: fix cast
     // BackOffice settings
     BACK_OFFICE_ID: process.env.NEXT_PUBLIC_BACK_OFFICE_ID as string,
@@ -120,10 +113,13 @@ export function getConfiguration(): Configuration {
     BACKOFFICE_HOST: process.env.BACKOFFICE_HOST as string,
 
     CDN_URL: process.env.NEXT_PUBLIC_CDN_URL as string,
+    COSMOSDB_MOCKING: process.env.COSMOSDB_MOCKING === "true",
+    COSMOSDB_URI: process.env.COSMOSDB_URI as string,
     EA_ENABLED: process.env.NEXT_PUBLIC_EA_ENABLED?.toLowerCase() === "true",
     GROUP_APIKEY_ENABLED:
       process.env.NEXT_PUBLIC_GROUP_APIKEY_ENABLED?.toLocaleLowerCase() ===
       "true",
+
     GROUP_AUTHZ_ENABLED:
       process.env.GROUP_AUTHZ_ENABLED?.toLowerCase() === "true",
     // window guards (useful to configure MSW to work in the browser or in Node environment)
@@ -131,34 +127,33 @@ export function getConfiguration(): Configuration {
 
     // NodeJS Environment mode
     IS_DEVELOPMENT: process.env.NODE_ENV === "development",
+
     IS_MSW_ENABLED: process.env.IS_MSW_ENABLED === "true",
-
     IS_PRODUCTION: process.env.NODE_ENV === "production",
-
     IS_SERVER: typeof window === "undefined",
+
     IS_TEST: process.env.NODE_ENV === "test",
     LEGACY_COSMOSDB_KEY: process.env.LEGACY_COSMOSDB_KEY as string,
-
     LEGACY_COSMOSDB_MOCKING: process.env.API_APIM_MOCKING === "true",
     LEGACY_COSMOSDB_NAME: process.env.LEGACY_COSMOSDB_NAME as string,
     // Legacy CosmosDB configuration
     LEGACY_COSMOSDB_URI: process.env.LEGACY_COSMOSDB_URI as string,
     SELFCARE_API_MOCKING: process.env.SELFCARE_API_MOCKING === "true",
+
     SELFCARE_EXTERNAL_API_BASE_URL: process.env
       .SELFCARE_EXTERNAL_API_BASE_URL as string,
 
     // Selfcare
     SELFCARE_ID: process.env.NEXT_PUBLIC_SELFCARE_ID as string,
-
     SELFCARE_JWKS_URL: ((process.env.NEXT_PUBLIC_SELFCARE_URL as string) +
       process.env.SELFCARE_JWKS_PATH) as string,
     SELFCARE_TITLE: process.env.NEXT_PUBLIC_SELFCARE_TITLE as string,
     SELFCARE_TOKEN_EXCHANGE_URL: process.env
       .NEXT_PUBLIC_SELFCARE_TOKEN_EXCHANGE_URL as string,
+
     SELFCARE_URL: process.env.NEXT_PUBLIC_SELFCARE_URL as string,
 
     SERVICES_LOGO_PATH: process.env.NEXT_PUBLIC_SERVICES_LOGO_PATH as string,
-
     // Subscriptions migration configuration
     SUBSCRIPTION_MIGRATION_API_MOCKING:
       process.env.SUBSCRIPTION_MIGRATION_API_MOCKING === "true",

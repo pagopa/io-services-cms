@@ -34,26 +34,20 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
-        with:
-          node-version-file: '.node-version'
-          cache: 'yarn'
-          cache-dependency-path: |
-            yarn.lock
-            package.json
-            apps/**/package.json
-            packages/**/package.json
+        uses: pagopa/dx/.github/actions/node-setup@main
+        env:
+          TURBO_CACHE_DIR: .turbo
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Tag
         id: changesets
         uses: changesets/action@v1
         with:
-          version: yarn run version
-          publish: yarn run release
-          commit: 'ci(changesets): version packages'
+          version: pnpm run version
+          publish: pnpm run release
+          commit: "ci(changesets): version packages"
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -89,24 +83,18 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v3
-        with:
-          node-version-file: '.node-version'
-          cache: 'yarn'
-          cache-dependency-path: |
-            yarn.lock
-            package.json
-            apps/**/package.json
-            packages/**/package.json
+        uses: pagopa/dx/.github/actions/node-setup@main
+        env:
+          TURBO_CACHE_DIR: .turbo
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: yarn build --filter ${{ matrix.package.name }}
+        run: pnpm build --filter ${{ matrix.package.name }}
 
       - name: Package
-        run: yarn workspace ${{ matrix.package.name }} run build:package
+        run: pnpm --filter ${{ matrix.package.name }} build:package
 
       - name: Create draft release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1

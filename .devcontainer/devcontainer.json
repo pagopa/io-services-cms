@@ -4,19 +4,20 @@
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
   "containerEnv": {
-    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}"
+    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}",
+    "ARM_SUBSCRIPTION_ID": "${localEnv:ARM_SUBSCRIPTION_ID}"
   },
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/terraform:1": {
-      "version": "1.10.4",
+      "version": "1.14.2",
       "tflint": "latest",
       "installTFsec": true,
       "installTerraformDocs": true
     },
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "20.19.0",
+      "version": "20.19.5",
       "installYarnUsingApt": false,
       "pnpmVersion": "none",
       "nvmInstallPath": "/opt/nvm"
@@ -28,8 +29,10 @@
   },
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-    "install-yarn-and-deps": "yarn install",
-    "install-pre-commit": "pre-commit install"
+    // Use interactive bash (-i) to load NVM and the correct PATH
+    "install-yarn-and-deps": "/bin/bash -i -c 'corepack enable && pnpm install'",
+    // Do the same for pre-commit for safety
+    "install-pre-commit": "/bin/bash -i -c 'pre-commit install --install-hooks'"
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [

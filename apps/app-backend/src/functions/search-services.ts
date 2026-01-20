@@ -7,6 +7,7 @@ import {
   NonNegativeInteger,
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/Option";
 import { sequenceS } from "fp-ts/lib/Apply";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -29,6 +30,7 @@ interface SearchServicesRequestParams {
   institutionId: OrganizationFiscalCode;
   limit: number;
   offset: O.Option<number>;
+  sessionId: O.Option<NonEmptyString>;
 }
 
 export const DEFAULT_ORDER_BY = "name asc";
@@ -53,6 +55,7 @@ const executeSearch: (
           ...paginationProperties,
           filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
           orderBy: [DEFAULT_ORDER_BY],
+          sessionId: pipe(requestQueryParams.sessionId, O.toUndefined),
         }),
       ),
       TE.map(({ paginationProperties, results }) => ({
@@ -107,6 +110,7 @@ const extractParams: (
           ),
         ),
       ),
+      sessionId: OptionalQueryParamMiddleware("sessionId", NonEmptyString),
     }),
   );
 

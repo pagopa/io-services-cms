@@ -5,6 +5,7 @@ import { ServiceCreateUpdate } from "@/components/services/service-create-update
 import { ServiceLifecycle } from "@/generated/api/ServiceLifecycle";
 import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
+import { ROUTES } from "@/lib/routes";
 import { ServiceCreateUpdatePayload } from "@/types/service";
 import {
   trackServiceCreateAbortEvent,
@@ -20,8 +21,6 @@ import { ReactElement, useState } from "react";
 
 const pageTitleLocaleKey = "routes.new-service.title";
 const pageDescriptionLocaleKey = "routes.new-service.description";
-
-const SERVICES_ROUTE_PATH = "/services";
 
 export default function NewService() {
   const { t } = useTranslation();
@@ -58,12 +57,12 @@ export default function NewService() {
       trackServiceCreateEndEvent("error");
     }
     // redirect to services list in both cases
-    router.push(SERVICES_ROUTE_PATH);
+    router.push(ROUTES.SERVICES.LIST);
   };
 
   const handleAbort = () => {
     trackServiceCreateAbortEvent(stepIndex);
-    router.push(SERVICES_ROUTE_PATH);
+    router.push(ROUTES.SERVICES.LIST);
   };
 
   return (

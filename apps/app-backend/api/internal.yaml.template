@@ -7,7 +7,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 0.0.0
+  version: 1.0.13
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -73,6 +73,13 @@ paths:
             minimum: 0
             maximum: 100
             default: 0
+        - name: sessionId
+          in: query
+          description: An unique identifier of the session
+          required: false
+          schema:
+            type: string
+            minLength: 1  
       responses:
         "200":
           description: successful operation
@@ -147,6 +154,13 @@ paths:
             minimum: 0
             maximum: 100
             default: 0
+        - name: sessionId
+          in: query
+          description: An unique identifier of the session
+          required: false
+          schema:
+            type: string
+            minLength: 1 
       responses:
         "200":
           description: successful operation
