@@ -241,8 +241,8 @@ importers:
         specifier: ^13.5.6
         version: 13.5.6
       '@pagopa/openapi-codegen-ts':
-        specifier: ^13.1.0
-        version: 13.1.0(chokidar@3.6.0)
+        specifier: ^14.2.0
+        version: 14.2.0(chokidar@3.6.0)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -2445,6 +2445,13 @@ packages:
   '@pagopa/openapi-codegen-ts@13.1.0':
     resolution: {integrity: sha512-VKXkZtIGzklWgRK/GzsmefnHW9Mc9j0tukDxgRz4T3BfKXX0xoy5t0Es6AygRmg2WhF998wSVoQZF/9yhSgEZA==}
     hasBin: true
+
+  '@pagopa/openapi-codegen-ts@14.2.0':
+    resolution: {integrity: sha512-sop1+MxfLP2Od2sxDvHxJ7poVmZKBP0REVMQDPrCpNe9Wv1vvLJN8WqonUjkLfL3fLmKM0B6AS4B67Nigm1uKA==}
+    hasBin: true
+    peerDependencies:
+      fp-ts: ^2.16.5
+      io-ts: ^2.2.21
 
   '@pagopa/ts-commons@10.15.0':
     resolution: {integrity: sha512-MTmD0geIN9L9vnEYjPTE7v6Bu+IRTFMre+3K4LWYjy1AaRmYcpSrc9HTZgyCRW8uLCvw1BmDKcKtSiETM817kw==}
@@ -10407,6 +10414,24 @@ snapshots:
     dependencies:
       '@pagopa/ts-commons': 10.15.0
       fs-extra: 6.0.1
+      nunjucks: 3.2.4(chokidar@3.6.0)
+      openapi-types: 10.0.0
+      prettier: 1.19.1
+      safe-identifier: 0.4.2
+      swagger-parser: 10.0.3(openapi-types@10.0.0)
+      write-yaml-file: 4.2.0
+      yargs: 15.4.1
+    transitivePeerDependencies:
+      - chokidar
+      - encoding
+      - supports-color
+
+  '@pagopa/openapi-codegen-ts@14.2.0(chokidar@3.6.0)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
+    dependencies:
+      '@pagopa/ts-commons': 10.15.0
+      fp-ts: 2.16.5
+      fs-extra: 6.0.1
+      io-ts: 2.2.21(fp-ts@2.16.5)
       nunjucks: 3.2.4(chokidar@3.6.0)
       openapi-types: 10.0.0
       prettier: 1.19.1
