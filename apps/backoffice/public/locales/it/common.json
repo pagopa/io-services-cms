@@ -142,9 +142,9 @@
         "arriving": "In arrivo",
         "cta": {
           "label": "Pulsante con link",
-          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per inidirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.",
-          "addSecondaryButton": "aggiungi pulsante secondario",
-          "removeSecondaryButton": "rimuovi pulsante secondario",
+          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per indirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.",
+          "addSecondaryButton": "Aggiungi pulsante secondario",
+          "removeSecondaryButton": "Rimuovi pulsante secondario",
           "form": {
             "selectLabel": "Tipo di pulsante",
             "externalLink": "Link esterno all'app",
