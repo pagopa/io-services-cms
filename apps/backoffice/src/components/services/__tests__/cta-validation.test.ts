@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("@pagopa/mui-italia/dist/theme/theme", () => ({ default: {} }));
 vi.mock("@pagopa/mui-italia", () => ({ default: {} }));
 import { getValidationSchema } from "../service-create-update/service-builder-step-3";
-import { CTA_PREFIX_URL_SCHEMES } from "../../cta-manager/constants";
+import { CTA_PREFIX_URL_SCHEMES } from "../service-create-update/cta-manager/constants";
 
 const validation = (s: string) => s;
 
@@ -15,9 +15,16 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
+            enabled: true,
             urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
             text: "Primary button",
             url: "https://example.com/page",
+          },
+          cta_2: {
+            enabled: false,
+            urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+            text: "",
+            url: "",
           },
         },
       },
@@ -32,11 +39,13 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
+            enabled: true,
             urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
             text: "Primary button",
             url: "https://example.com/page",
           },
           cta_2: {
+            enabled: true,
             urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
             text: "Secondary button",
             url: "https://example.com/other",
@@ -54,11 +63,13 @@ describe("CTA validation", () => {
       metadata: {
         cta: {
           cta_1: {
-            urlPrefix: "",
+            enabled: false,
+            urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
             text: "",
             url: "",
           },
           cta_2: {
+            enabled: true,
             urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
             text: "Secondary button",
             url: "https://example.com/other",

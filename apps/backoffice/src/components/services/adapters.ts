@@ -19,7 +19,10 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
 
-import { DEFAULT_CTA, URL_PREFIX_REGEX } from "../cta-manager/constants";
+import {
+  DEFAULT_CTA,
+  URL_PREFIX_REGEX,
+} from "./service-create-update/cta-manager/constants";
 
 const adaptServiceCommonData = (
   service: ServiceLifecycle | ServicePublication,
@@ -212,18 +215,19 @@ const splitUrlPrefix = (urlValue: string) => {
 };
 
 const parseCta = (source: string): Cta => {
+  const enabled = true;
   const text = getCtaValueFromCtaString(source, "text") ?? "";
   const action = getCtaValueFromCtaString(source, "action") ?? "";
   const { url, urlPrefix } = splitUrlPrefix(action);
-  return { text, url, urlPrefix };
+  return { enabled, text, url, urlPrefix };
 };
 
 const buildCtaObj = (ctaString?: string): Ctas => {
   if (!NonEmptyString.is(ctaString)) {
-    return { cta_1: { ...DEFAULT_CTA }, cta_2: { ...DEFAULT_CTA } };
+    return { cta_1: DEFAULT_CTA, cta_2: DEFAULT_CTA };
   }
 
-  // we take only italian block
+  // English language not currently supported (only Italian)
   const itBlock = ctaString.split("en:")[0] ?? ctaString;
 
   // check the word cta_2: if found return true ( so we know that we have cta_2 )

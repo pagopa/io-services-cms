@@ -1,5 +1,7 @@
 import type { TFunction } from "i18next";
 
+import { Cta } from "@/types/service";
+
 export const CTA_PREFIX_URL_SCHEMES = {
   EXTERNAL: "iohandledlink://",
   INTERNAL: "ioit://",
@@ -8,11 +10,11 @@ export const CTA_PREFIX_URL_SCHEMES = {
 
 export const URL_PREFIX_REGEX = /^(iosso:\/\/|ioit:\/\/|iohandledlink:\/\/)/;
 
-// default cta
-export const DEFAULT_CTA = {
+export const DEFAULT_CTA: Cta = {
+  enabled: false,
   text: "",
   url: "",
-  urlPrefix: "",
+  urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
 } as const;
 
 export const CTA_KIND_SELECT_ITEMS = (t: TFunction) => [

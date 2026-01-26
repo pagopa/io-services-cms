@@ -4,7 +4,7 @@ import React from "react";
 
 export interface ButtonAddRemoveRowProps {
   addLabel: string;
-  isRemoveActionVisible?: boolean;
+  kind?: "add" | "remove";
   onAdd?: () => void;
   onRemove?: () => void;
   removeLabel: string;
@@ -12,13 +12,13 @@ export interface ButtonAddRemoveRowProps {
 
 export const ButtonAddRemove: React.FC<ButtonAddRemoveRowProps> = ({
   addLabel,
-  isRemoveActionVisible = false,
+  kind = "add",
   onAdd,
   onRemove,
   removeLabel,
 }) => (
   <Grid item md={6} xs={12}>
-    {isRemoveActionVisible ? (
+    {kind === "remove" ? (
       <Button
         color="error"
         onClick={onRemove}

@@ -7,7 +7,6 @@ import {
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
-import { Cta } from "@/types/service";
 import { isGroupRequired } from "@/utils/auth-util";
 import { PinDrop } from "@mui/icons-material";
 import { TFunction } from "i18next";
@@ -25,30 +24,34 @@ const { GROUP_APIKEY_ENABLED } = getConfiguration();
 const makeCtaBlock = (t: TFunction<"translation", undefined>) => {
   const isUrl = (s: string) => getUrlSchema(t).safeParse(s).success;
 
-  return (
-    z
-      .object({
-        text: z.string().trim().default(""),
-        url: z.string().trim().default(""),
-        urlPrefix: z.string().trim().default(""),
-      })
-      // if the block is partially filled in, validate each field on its own path
-      .refine(
-        (v) => !(v.urlPrefix || v.text || v.url) || v.urlPrefix.length >= 2,
-        {
-          message: t("forms.errors.field.required"),
-          path: ["urlPrefix"],
-        },
-      )
-      .refine((v) => !(v.urlPrefix || v.text || v.url) || v.text.length >= 2, {
-        message: t("forms.errors.field.required"),
-        path: ["text"],
-      })
-      .refine((v) => !(v.urlPrefix || v.text || v.url) || isUrl(v.url), {
-        message: t("forms.errors.field.url"),
-        path: ["url"],
-      })
-  );
+  return z
+    .object({
+      enabled: z.boolean().default(false),
+      text: z.string().trim().default(""),
+      url: z.string().trim().default(""),
+      urlPrefix: z.string().trim(),
+    })
+    .superRefine((data, ctx) => {
+      // If the user has enabled the CTA
+      if (data.enabled) {
+        // The text must have at least 2 characters
+        if (data.text.length < 2) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("forms.errors.field.required"),
+            path: ["text"],
+          });
+        }
+        // The URL must be valid (and not empty)
+        if (!data.url || !isUrl(data.url)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("forms.errors.field.url"),
+            path: ["url"],
+          });
+        }
+      }
+    });
 };
 
 export const getValidationSchema = (
@@ -58,23 +61,18 @@ export const getValidationSchema = (
   const ctaSchema = z
     .object({
       cta_1: makeCtaBlock(t),
-      cta_2: makeCtaBlock(t).optional(),
+      cta_2: makeCtaBlock(t),
     })
-    .refine(
-      (v) => {
-        const empty = (ctaObject?: Cta) =>
-          !ctaObject ||
-          (!ctaObject.urlPrefix && !ctaObject.text && !ctaObject.url);
-        // ok if all CTA is empty
-        if (empty(v.cta_1) && empty(v.cta_2)) return true;
-        // else cta_1 can not to be empty
-        return !empty(v.cta_1);
-      },
-      {
-        message: t("forms.errors.field.required"),
-        path: ["cta_1", "urlPrefix"],
-      },
-    );
+    .superRefine((data, ctx) => {
+      // 1. If cta_2 is enabled, cta_1 must also be enabled
+      if (data.cta_2.enabled && !data.cta_1.enabled) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("forms.errors.field.required"),
+          path: ["cta_1", "text"],
+        });
+      }
+    });
 
   return z.object({
     authorized_cidrs: arrayOfIPv4CidrSchema,

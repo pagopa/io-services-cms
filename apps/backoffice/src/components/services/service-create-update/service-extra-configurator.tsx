@@ -12,12 +12,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import _ from "lodash";
 import { useTranslation } from "next-i18next";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ServiceCtaManager } from "../../cta-manager/service-cta-manager";
+import { CTA_PREFIX_URL_SCHEMES } from "./cta-manager/constants";
+import { ServiceCtaManager } from "./cta-manager/service-cta-manager";
 
 export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 
@@ -25,15 +25,10 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { closeDrawer, openDrawer } = useDrawer();
-  const [isCtaVisible, setIsCtaVisible] = useState(false);
-  const { clearErrors, getValues, setValue } = useFormContext();
-
-  const ctaExists =
-    !!getValues("metadata.cta") &&
-    ["text", "url", "urlPrefix"].some(
-      (field) =>
-        !!(getValues(`metadata.cta.cta_1.${field}` as any) ?? "").trim(),
-    );
+  const { clearErrors, getValues, setValue, trigger } = useFormContext();
+  const [isCtaVisible, setIsCtaVisible] = useState<boolean>(
+    getValues("metadata.cta.cta_1.enabled"),
+  );
 
   const handleListItemClick = (type: ServiceExtraConfigurationType) => {
     if (type === "cta") {
@@ -41,14 +36,21 @@ export const ServiceExtraConfigurator = () => {
     }
     closeDrawer();
   };
+
   const removeCtaConfiguration = () => {
-    setValue("metadata.cta.cta_1.urlPrefix", "");
-    setValue("metadata.cta.cta_1.text", "");
-    setValue("metadata.cta.cta_1.url", "");
-    setValue("metadata.cta.cta_2.urlPrefix", "");
-    setValue("metadata.cta.cta_2.text", "");
-    setValue("metadata.cta.cta_2.url", "");
-    clearErrors(["metadata.cta", "metadata.cta.cta_1", "metadata.cta.cta_2"]);
+    const emptyCta = {
+      enabled: false,
+      text: "",
+      url: "",
+      urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+    };
+
+    setValue("metadata.cta", {
+      cta_1: emptyCta,
+      cta_2: emptyCta,
+    });
+    trigger("metadata.cta");
+    clearErrors("metadata.cta");
     setIsCtaVisible(false);
   };
 
@@ -128,18 +130,12 @@ export const ServiceExtraConfigurator = () => {
     openDrawer(content);
   };
 
-  useEffect(() => {
-    if (ctaExists) {
-      setIsCtaVisible(true);
-    }
-  }, [ctaExists]);
-
   return (
     <Box marginTop={5}>
       {isCtaVisible ? <ServiceCtaManager /> : null}
       <ButtonAddRemove
         addLabel={t("forms.service.extraConfig.label")}
-        isRemoveActionVisible={isCtaVisible}
+        kind={isCtaVisible ? "remove" : "add"}
         onAdd={openExtraConfigurationDrawer}
         onRemove={removeCtaConfiguration}
         removeLabel={t("forms.service.extraConfig.remove")}
