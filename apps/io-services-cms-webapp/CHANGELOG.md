@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 1.42.11
+
+### Patch Changes
+
+- 0a6680db: remove openapi-codegen patch method workaround
+
 ## 1.42.10
 
 ### Patch Changes
