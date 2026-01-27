@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 
+import { CTA_PREFIX_URL_SCHEMES } from "./cta-manager/constants";
 import { ServiceExtraConfigurator } from "./service-extra-configurator";
 import { ServiceGroupSelector } from "./service-group-selector";
 
@@ -32,17 +33,26 @@ const makeCtaBlock = (t: TFunction<"translation", undefined>) => {
       urlPrefix: z.string().trim(),
     })
     .superRefine((data, ctx) => {
-      // If the user has enabled the CTA
-      if (data.enabled) {
-        // The text must have at least 2 characters
-        if (data.text.length < 2) {
+      if (!data.enabled) return;
+      if (data.text.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("forms.errors.field.required"),
+          path: ["text"],
+        });
+      }
+
+      if (data.urlPrefix === CTA_PREFIX_URL_SCHEMES.INTERNAL) {
+        // If it's internal cta (ioit://), only check that there is some text (not empty)
+        if (data.url.length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: t("forms.errors.field.required"),
-            path: ["text"],
+            path: ["url"],
           });
         }
-        // The URL must be valid (and not empty)
+      } else {
+        // Otherwise, use the classic URL validation
         if (!data.url || !isUrl(data.url)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
