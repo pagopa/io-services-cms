@@ -1,17 +1,8 @@
+import ButtonAddRemove from "@/components/buttons/button-add-remove";
 import { useDrawer } from "@/components/drawer-provider";
-import { FormStepSectionWrapper } from "@/components/forms";
-import {
-  TextFieldController,
-  UrlFieldController,
-} from "@/components/forms/controllers";
-import {
-  AddCircleOutline,
-  Link,
-  RemoveCircleOutline,
-} from "@mui/icons-material";
+import { Link } from "@mui/icons-material";
 import {
   Box,
-  Button,
   Chip,
   List,
   ListItem,
@@ -22,8 +13,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState } from "react";
 import { useFormContext } from "react-hook-form";
+
+import { CTA_PREFIX_URL_SCHEMES } from "./cta-manager/constants";
+import { ServiceCtaManager } from "./cta-manager/service-cta-manager";
 
 export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 
@@ -31,25 +25,34 @@ export type ServiceExtraConfigurationType = "cta" | "fims" | "idpay";
 export const ServiceExtraConfigurator = () => {
   const { t } = useTranslation();
   const { closeDrawer, openDrawer } = useDrawer();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { formState, getValues, setValue } = useFormContext();
-  const [isCtaVisible, setIsCtaVisible] = useState(false);
+  const { clearErrors, getValues, setValue, trigger } = useFormContext();
+  const [isCtaVisible, setIsCtaVisible] = useState<boolean>(
+    getValues("metadata.cta.cta_1.enabled"),
+  );
 
   const handleListItemClick = (type: ServiceExtraConfigurationType) => {
-    if (type === "cta") setIsCtaVisible(true);
+    if (type === "cta") {
+      setIsCtaVisible(true);
+    }
     closeDrawer();
   };
 
-  const handleRemoveCta = () => {
-    setIsCtaVisible(false);
-    setValue("metadata.cta.text", "");
-    setValue("metadata.cta.url", "");
-  };
+  const removeCtaConfiguration = () => {
+    const emptyCta = {
+      enabled: false,
+      text: "",
+      url: "",
+      urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+    };
 
-  const areCtaUrlAndTextEmpty = () =>
-    getValues(["metadata.cta.text", "metadata.cta.url"]).filter(
-      (value) => value.trim() === "",
-    ).length === 2;
+    setValue("metadata.cta", {
+      cta_1: emptyCta,
+      cta_2: emptyCta,
+    });
+    trigger("metadata.cta");
+    clearErrors("metadata.cta");
+    setIsCtaVisible(false);
+  };
 
   const renderExtraConfigListItem = (options: {
     arriving?: boolean;
@@ -127,50 +130,16 @@ export const ServiceExtraConfigurator = () => {
     openDrawer(content);
   };
 
-  const renderCta = () => (
-    <FormStepSectionWrapper
-      icon={<Link />}
-      key={1}
-      title={t("forms.service.extraConfig.cta.label")}
-    >
-      <TextFieldController
-        label={t("forms.service.metadata.cta.text.label")}
-        name="metadata.cta.text"
-        placeholder={t("forms.service.metadata.cta.text.placeholder")}
-        required
-      />
-      <UrlFieldController
-        label={t("forms.service.metadata.cta.url.label")}
-        name="metadata.cta.url"
-        placeholder={t("forms.service.metadata.cta.url.placeholder")}
-        required
-      />
-      <Button
-        color="error"
-        onClick={handleRemoveCta}
-        startIcon={<RemoveCircleOutline />}
-        variant="text"
-      >
-        {t("forms.service.extraConfig.remove")}
-      </Button>
-    </FormStepSectionWrapper>
-  );
-
-  useEffect(() => {
-    setIsCtaVisible(!areCtaUrlAndTextEmpty());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <Box marginTop={5}>
-      {isCtaVisible ? renderCta() : null}
-      <Button
-        onClick={openExtraConfigurationDrawer}
-        startIcon={<AddCircleOutline />}
-        variant="text"
-      >
-        {t("forms.service.extraConfig.label")}
-      </Button>
+      {isCtaVisible ? <ServiceCtaManager /> : null}
+      <ButtonAddRemove
+        addLabel={t("forms.service.extraConfig.label")}
+        kind={isCtaVisible ? "remove" : "add"}
+        onAdd={openExtraConfigurationDrawer}
+        onRemove={removeCtaConfiguration}
+        removeLabel={t("forms.service.extraConfig.remove")}
+      />
     </Box>
   );
 };

@@ -20,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { useEffect, useMemo } from "react";
 
+import { CTA_PREFIX_URL_SCHEMES } from "./cta-manager/constants";
 import {
   ServiceBuilderStep1,
   getValidationSchema as getVs1,
@@ -88,8 +89,18 @@ export const ServiceCreateUpdate = ({
         assistanceChannels: [{ type: "email", value: "" }],
         category: "",
         cta: {
-          text: "",
-          url: "",
+          cta_1: {
+            enabled: false,
+            text: "",
+            url: "",
+            urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+          },
+          cta_2: {
+            enabled: false,
+            text: "",
+            url: "",
+            urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+          },
         },
         custom_special_flow: "",
         group_id: handleOperatorWithSingleGroup(),

@@ -5,8 +5,9 @@ import { ServicePayload as ApiServicePayload } from "../../../generated/api/Serv
 import { ServiceCreateUpdatePayload } from "../../../types/service";
 import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
-  fromServiceLifecycleToServiceCreateUpdatePayload,
+  fromServiceLifecycleToServiceCreateUpdatePayload
 } from "../adapters";
+import { CTA_PREFIX_URL_SCHEMES } from "../service-create-update/cta-manager/constants";
 
 const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
   name: "aServiceName",
@@ -18,25 +19,46 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
     tos_url: "aTosUrl",
     privacy_url: "aPrivacyUrl",
     address: "anAddress",
-    cta: { text: "aCtaText", url: "iohandledlink://aCtaUrl" },
+    cta: {
+      cta_1: {
+        enabled: true,
+        urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+        text: "aCtaText1",
+        url: "aCtaUrl1"
+      },
+      cta_2: {
+        enabled: false,
+        urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
+        text: "",
+        url: ""
+      }
+    },
     scope: "LOCAL",
     assistanceChannels: [
       { type: "email", value: "aValidEmail" },
       { type: "pec", value: "aValidPec" },
       { type: "phone", value: "aValidPhoneNumber" },
-      { type: "support_url", value: "aValidUrl" },
-    ],
+      { type: "support_url", value: "aValidUrl" }
+    ]
   },
   require_secure_channel: false,
   authorized_cidrs: ["0.0.0.0/0"],
   authorized_recipients: [],
-  max_allowed_payment_amount: 0,
+  max_allowed_payment_amount: 0
 };
 
-const aCtaResult =
-  '---\nit:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\nen:\n  cta_1: \n    text: "aCtaText"\n    action: "iohandledlink://aCtaUrl"\n---';
+const aCtaResult = `---
+it:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+en:
+  cta_1: 
+    text: "aCtaText1"
+    action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
+---`;
 
-const anApiServicePayloadResult = {
+const anApiServicePayloadResult = ({
   name: aValidServiceCreateUpdatePayload.name,
   description: aValidServiceCreateUpdatePayload.description,
   metadata: {
@@ -54,18 +76,18 @@ const anApiServicePayloadResult = {
     privacy_url: aValidServiceCreateUpdatePayload.metadata.privacy_url,
     address: aValidServiceCreateUpdatePayload.metadata.address,
     cta: aCtaResult,
-    scope: aValidServiceCreateUpdatePayload.metadata.scope,
+    scope: aValidServiceCreateUpdatePayload.metadata.scope
   },
   require_secure_channel: false,
   authorized_cidrs: ["0.0.0.0/0"],
   authorized_recipients: [],
-  max_allowed_payment_amount: 0,
-} as unknown as ApiServicePayload;
+  max_allowed_payment_amount: 0
+} as unknown) as ApiServicePayload;
 
 describe("[Services] Adapters", () => {
   it("should return a valid Api ServicePayload if a valid frontend service payload is provided", () => {
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      aValidServiceCreateUpdatePayload,
+      aValidServiceCreateUpdatePayload
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isRight(result));
@@ -78,11 +100,11 @@ describe("[Services] Adapters", () => {
   it("should return a Validation error if an invalid frontend service payload is provided", () => {
     const anInvalidServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
-      name: "",
+      name: ""
     };
 
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      anInvalidServiceCreateUpdatePayload,
+      anInvalidServiceCreateUpdatePayload
     ) as t.Validation<ServiceCreateUpdatePayload>;
 
     expect(E.isLeft(result));
@@ -90,7 +112,7 @@ describe("[Services] Adapters", () => {
 
   it("should return a valid frontend service payload if a valid Api ServiceLifecycle is provided", () => {
     const result = fromServiceLifecycleToServiceCreateUpdatePayload(
-      anApiServicePayloadResult,
+      anApiServicePayloadResult
     );
     const aServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
@@ -98,8 +120,8 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         group_id: undefined,
         token_name: "",
-        topic_id: undefined,
-      },
+        topic_id: undefined
+      }
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
@@ -109,8 +131,8 @@ describe("[Services] Adapters", () => {
       ...anApiServicePayloadResult,
       metadata: {
         ...anApiServicePayloadResult.metadata,
-        topic: { id: 0, name: "Altro" },
-      },
+        topic: { id: 0, name: "Altro" }
+      }
     });
     const aServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
@@ -118,8 +140,8 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         group_id: undefined,
         token_name: "",
-        topic_id: 0,
-      },
+        topic_id: 0
+      }
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });

@@ -141,8 +141,20 @@
         "description": "These features allow you to enrich the service with many additional parameters. Some of these require the signing of an ad hoc contract.",
         "arriving": "Arriving",
         "cta": {
-          "label": "Button with external link",
-          "description": "Add a button that takes you to a web page with more information about the service."
+          "label": "Button with link",
+          "description": "Add one or two buttons to the service tab to direct citizens to an external link, an internal link, or directly to a post-login area thanks to Single Sign-On.",
+          "addSecondaryButton": "Add secondary button",
+          "removeSecondaryButton": "Remove secondary button",
+          "form": {
+            "selectLabel": "Button type",
+            "externalLink": "External link to the app",
+            "singleSignOn": "Single Sign-on Link",
+            "internalLink": "Internal link within the app (deeplink)",
+            "placeholder": "",
+            "btnWithLink": {
+              "alertSingleSignOn": "To enable the button with links in Single Sign-On, you must have completed the integration within the institution's systems. For further information, please contact our  [support](mailto:io‑service‑management@pagopa.it)"
+            }
+          }
         },
         "fims": {
           "label": "FIMS Protocol",
@@ -179,6 +191,7 @@
           "url": {
             "helperText": "",
             "label": "External URL",
+            "labelInternal": "internal URL",
             "placeholder": ""
           }
         },

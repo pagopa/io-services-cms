@@ -3,7 +3,7 @@ import { FormStepSectionWrapper } from "@/components/forms";
 import { TextFieldArrayController } from "@/components/forms/controllers";
 import {
   arrayOfIPv4CidrSchema,
-  getOptionalUrlSchema,
+  getUrlSchema,
 } from "@/components/forms/schemas";
 import { getConfiguration } from "@/config";
 import { Group } from "@/generated/api/Group";
@@ -16,27 +16,84 @@ import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 
+import { CTA_PREFIX_URL_SCHEMES } from "./cta-manager/constants";
 import { ServiceExtraConfigurator } from "./service-extra-configurator";
 import { ServiceGroupSelector } from "./service-group-selector";
 
 const { GROUP_APIKEY_ENABLED } = getConfiguration();
 
+const makeCtaBlock = (t: TFunction<"translation", undefined>) => {
+  const isUrl = (s: string) => getUrlSchema(t).safeParse(s).success;
+
+  return z
+    .object({
+      enabled: z.boolean().default(false),
+      text: z.string().trim().default(""),
+      url: z.string().trim().default(""),
+      urlPrefix: z.string().trim(),
+    })
+    .superRefine((data, ctx) => {
+      if (!data.enabled) return;
+      if (data.text.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("forms.errors.field.required"),
+          path: ["text"],
+        });
+      }
+
+      if (data.urlPrefix === CTA_PREFIX_URL_SCHEMES.INTERNAL) {
+        // If it's internal cta (ioit://), only check that there is some text (not empty)
+        if (data.url.length === 0) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("forms.errors.field.required"),
+            path: ["url"],
+          });
+        }
+      } else {
+        // Otherwise, use the classic URL validation
+        if (!data.url || !isUrl(data.url)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: t("forms.errors.field.url"),
+            path: ["url"],
+          });
+        }
+      }
+    });
+};
+
 export const getValidationSchema = (
   t: TFunction<"translation", undefined>,
   session: Session | null,
-) =>
-  z.object({
+) => {
+  const ctaSchema = z
+    .object({
+      cta_1: makeCtaBlock(t),
+      cta_2: makeCtaBlock(t),
+    })
+    .superRefine((data, ctx) => {
+      // 1. If cta_2 is enabled, cta_1 must also be enabled
+      if (data.cta_2.enabled && !data.cta_1.enabled) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: t("forms.errors.field.required"),
+          path: ["cta_1", "text"],
+        });
+      }
+    });
+
+  return z.object({
     authorized_cidrs: arrayOfIPv4CidrSchema,
     metadata: z.object({
-      cta: z.object({
-        text: z.string(),
-        url: getOptionalUrlSchema(t),
-      }),
+      cta: ctaSchema.optional(),
       group_id: isGroupRequired(session, GROUP_APIKEY_ENABLED)
         ? z.string().min(1, { message: t("forms.errors.field.required") })
         : z.string().optional(),
     }),
   });
+};
 
 export interface ServiceBuilderStep3Props {
   groups?: readonly Group[];
