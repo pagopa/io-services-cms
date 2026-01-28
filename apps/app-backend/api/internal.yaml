@@ -15,10 +15,13 @@ tags:
     description: Retrieve resources details
   - name: featured
     description: Retrieve featured items
+security:
+  - ApiKeyAuth: []
 paths:
   /info:
     get:
       operationId: info
+      security: []
       responses:
         '200':
           description: Success
@@ -248,6 +251,11 @@ paths:
         '504':
           description: Gateway timeout
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Functions-Key
   schemas:
     ApplicationInfo:
       type: object
