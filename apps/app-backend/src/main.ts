@@ -70,7 +70,7 @@ const GetFeaturedServices = GetFeaturedServicesFn(config)({
   blobServiceClient,
 });
 app.http("GetFeaturedServices", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetFeaturedServices,
   methods: ["GET"],
   route: "services/featured",
@@ -80,7 +80,7 @@ const GetFeaturedInstitutions = GetFeaturedInstitutionsFn(config)({
   blobServiceClient,
 });
 app.http("GetFeaturedInstitutions", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetFeaturedInstitutions,
   methods: ["GET"],
   route: "institutions/featured",
@@ -90,7 +90,7 @@ const SearchInstitutions = SearchInstitutionsFn(config)({
   searchClient: institutionsSearchClient,
 });
 app.http("SearchInstitutions", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: SearchInstitutions,
   methods: ["GET"],
   route: "institutions",
@@ -100,7 +100,7 @@ const SearchServices = SearchServicesFn(config)({
   searchClient: servicesSearchClient,
 });
 app.http("SearchServices", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: SearchServices,
   methods: ["GET"],
   route: "institutions/{institutionId}/services",
@@ -108,7 +108,7 @@ app.http("SearchServices", {
 
 const GetServiceById = GetServiceByIdFn(serviceDetailsContainerDependency);
 app.http("GetServiceById", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetServiceById,
   methods: ["GET"],
   route: "services/{serviceId}",
