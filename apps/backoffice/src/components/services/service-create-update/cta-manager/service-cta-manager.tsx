@@ -24,7 +24,6 @@ export const ServiceCtaManager: React.FC = () => {
   const renderCtaSection = (slot: "cta_1" | "cta_2") => {
     // watch the value of the select stored referring to the current slot
     const kind = watch(`metadata.cta.${slot}.urlPrefix`);
-    console.log("kind", kind);
 
     return (
       <>
