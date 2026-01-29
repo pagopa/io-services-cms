@@ -10,12 +10,19 @@ import {
   AssistanceChannel,
   AssistanceChannelType,
   AssistanceChannelsMetadata,
+  Cta,
+  Ctas,
   Service,
   ServiceCreateUpdatePayload,
 } from "@/types/service";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { pipe } from "fp-ts/lib/function";
 import _ from "lodash";
+
+import {
+  DEFAULT_CTA,
+  URL_PREFIX_REGEX,
+} from "./service-create-update/cta-manager/constants";
 
 const adaptServiceCommonData = (
   service: ServiceLifecycle | ServicePublication,
@@ -118,7 +125,7 @@ export const fromServiceLifecycleToServiceCreateUpdatePayload = (
     app_android: sl.metadata.app_android ?? "",
     app_ios: sl.metadata.app_ios ?? "",
     assistanceChannels: convertAssistanceChannelsObjToArray(sl.metadata),
-    cta: buildCtaObj(sl.metadata.cta),
+    cta: buildCtaObj(sl.metadata.cta ?? ""),
     group_id: sl.metadata.group?.id,
     privacy_url: sl.metadata.privacy_url ?? "",
     scope: sl.metadata.scope,
@@ -140,7 +147,7 @@ const buildBaseServicePayload =
     max_allowed_payment_amount: s.max_allowed_payment_amount,
     metadata: {
       ...s.metadata,
-      cta: buildCtaString(s.metadata.cta),
+      cta: buildCtaStringForPayload(s.metadata.cta),
       ...assistanceChannels,
     },
     require_secure_channel: s.require_secure_channel,
@@ -176,22 +183,61 @@ const convertAssistanceChannelsObjToArray = (
   }
   return channels;
 };
+const buildCtaStringForPayload = (ctaObj: Ctas): string | undefined => {
+  const text1 = ctaObj?.cta_1?.text?.trim() ?? "";
+  if (text1 === "") return undefined;
 
-const buildCtaString = (ctaObj: { text: string; url: string }) => {
-  if (ctaObj.text !== "" && ctaObj.url !== "") {
-    return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\nen:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.url}\"\n---`;
-  }
-  return "";
+  const hasCta2 = (ctaObj?.cta_2?.text?.trim() ?? "") !== "";
+
+  return hasCta2
+    ? buildCtaString(ctaObj.cta_1, ctaObj.cta_2)
+    : buildCtaString(ctaObj.cta_1);
 };
 
-const buildCtaObj = (ctaString?: string) => {
-  if (NonEmptyString.is(ctaString)) {
-    return {
-      text: getCtaValueFromCtaString(ctaString, "text"),
-      url: getCtaValueFromCtaString(ctaString, "action"),
-    };
+const buildCtaString = (
+  ctaObj: { text: string; url: string; urlPrefix: string },
+  ctaObj2?: { text: string; url: string; urlPrefix: string },
+) => {
+  const cta_2 = ctaObj2?.text
+    ? `  cta_2: \n    text: \"${ctaObj2.text}\"\n    action: \"${ctaObj2.urlPrefix}${ctaObj2.url}\"\n`
+    : ``;
+  return `---\nit:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}en:\n  cta_1: \n    text: \"${ctaObj.text}\"\n    action: \"${ctaObj.urlPrefix}${ctaObj.url}\"\n${cta_2}---`;
+};
+
+const splitUrlPrefix = (urlValue: string) => {
+  const matchedObject = urlValue.match(URL_PREFIX_REGEX);
+  return matchedObject
+    ? {
+        url: urlValue.slice(matchedObject[0].length),
+        urlPrefix: matchedObject[1],
+      }
+    : { url: urlValue, urlPrefix: "" };
+};
+
+const parseCta = (source: string): Cta => {
+  const enabled = true;
+  const text = getCtaValueFromCtaString(source, "text") ?? "";
+  const action = getCtaValueFromCtaString(source, "action") ?? "";
+  const { url, urlPrefix } = splitUrlPrefix(action);
+  return { enabled, text, url, urlPrefix };
+};
+
+const buildCtaObj = (ctaString?: string): Ctas => {
+  if (!NonEmptyString.is(ctaString)) {
+    return { cta_1: DEFAULT_CTA, cta_2: DEFAULT_CTA };
   }
-  return { text: "", url: "" };
+
+  // English language not currently supported (only Italian)
+  const itBlock = ctaString.split("en:")[0] ?? ctaString;
+
+  // check the word cta_2: if found return true ( so we know that we have cta_2 )
+  const hasCta_2 = itBlock.includes("cta_2:");
+  const cta2Block = hasCta_2 ? itBlock.split("cta_2:")[1] : ""; // take the source string on the right of cta_2 string from payload
+
+  return {
+    cta_1: parseCta(itBlock),
+    cta_2: hasCta_2 ? parseCta(cta2Block) : { ...DEFAULT_CTA },
+  };
 };
 
 const getCtaValueFromCtaString = (
@@ -209,7 +255,6 @@ const getCtaValueFromCtaString = (
   }
   return "";
 };
-
 /**
  * Remove empty/undefined properties from object.\
  * Since the form using react-hook-form needs controlled inputs, all fields are initialized to an empty string.
