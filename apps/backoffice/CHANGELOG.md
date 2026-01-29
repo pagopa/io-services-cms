@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.31.0
+
+### Minor Changes
+
+- 2f09e813: Added secondary CTA and improved CTA management for created/modified services
+
 ## 1.30.6
 
 ### Patch Changes
