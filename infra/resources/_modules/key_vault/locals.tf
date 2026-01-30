@@ -19,6 +19,8 @@ locals {
       pdv_tokenizer_api_key                            = "PDV-TOKENIZER-API-KEY"
       slack_svc_monitor_email                          = "slack-svc-monitor-email"
       opsgenie_svc_api_key                             = "opsgenie-svc-api-key"
+      appbe_host_key_for_app_backend                   = "appbe-host-key-for-app-backend"
+      appbe_host_key_for_apim_platform                 = "appbe-host-key-for-apim-platform"
     }
   }
 }
