@@ -38,6 +38,30 @@ resource "random_password" "postgres_readonly_usr_password" {
   min_upper   = 3
 }
 
+resource "random_password" "appbe_host_key_for_app_backend" {
+  for_each = toset([var.appbe_host_key_for_app_backend_rotation_id])
+  length   = 64
+  special  = true
+  # Only allow these specific safe symbols
+  override_special = "_-."
+  min_upper        = 2
+  min_lower        = 2
+  min_numeric      = 2
+  min_special      = 2
+}
+
+resource "random_password" "appbe_host_key_for_apim_platform" {
+  for_each = toset([var.appbe_host_key_for_apim_platform_rotation_id])
+  length   = 64
+  special  = true
+  # Only allow these specific safe symbols
+  override_special = "_-."
+  min_upper        = 2
+  min_lower        = 2
+  min_numeric      = 2
+  min_special      = 2
+}
+
 
 /*************************************
  * key vault secrets for credentials *
@@ -73,4 +97,20 @@ resource "azurerm_key_vault_secret" "pgres_flex_readonly_usr_pwd" {
   value           = random_password.postgres_readonly_usr_password[var.postgres_readonly_usr_credentials_rotation_id].result
   content_type    = "string"
   expiration_date = "2026-02-19T23:59:59Z"
+}
+
+resource "azurerm_key_vault_secret" "appbe_host_key_for_app_backend" {
+  name            = local.key_vault.secrets_name.appbe_host_key_for_app_backend
+  key_vault_id    = module.key_vault.id
+  value           = random_password.appbe_host_key_for_app_backend[var.appbe_host_key_for_app_backend_rotation_id].result
+  content_type    = "string"
+  expiration_date = "2028-01-28T16:00:06Z"
+}
+
+resource "azurerm_key_vault_secret" "appbe_host_key_for_apim_platform" {
+  name            = local.key_vault.secrets_name.appbe_host_key_for_apim_platform
+  key_vault_id    = module.key_vault.id
+  value           = random_password.appbe_host_key_for_apim_platform[var.appbe_host_key_for_apim_platform_rotation_id].result
+  content_type    = "string"
+  expiration_date = "2028-01-28T16:00:06Z"
 }
