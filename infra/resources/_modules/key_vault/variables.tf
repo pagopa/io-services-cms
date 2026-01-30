@@ -71,3 +71,15 @@ variable "postgres_readonly_usr_credentials_rotation_id" {
   default     = "1682602957131"
   description = "You can renew readonly user credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
 }
+
+variable "appbe_host_key_for_app_backend_rotation_id" {
+  type        = string
+  default     = "1769615985"
+  description = "You can renew (services) App-Backend Function App host key (specific to App-Backend) by using a new, never-used-before value (hint: use the current timestamp)"
+}
+
+variable "appbe_host_key_for_apim_platform_rotation_id" {
+  type        = string
+  default     = "1769616006"
+  description = "You can renew (services) App-Backend Function App host key (specific to APIM Platform) by using a new, never-used-before value (hint: use the current timestamp)"
+}
