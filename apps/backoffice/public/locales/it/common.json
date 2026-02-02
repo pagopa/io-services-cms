@@ -141,8 +141,20 @@
         "description": "Queste funzionalità ti permettono di arricchire il servizio con tanti parametri aggiuntivi. Alcuni di questi richiedono la firma di un contratto ad hoc.",
         "arriving": "In arrivo",
         "cta": {
-          "label": "Pulsante con link esterno",
-          "description": "Aggiungi un pulsante che rimanda ad una pagina web con più informazioni sul servizio."
+          "label": "Pulsante con link",
+          "description": "Aggiungi uno o due pulsanti alla scheda servizio, per indirizzare il cittadino ad un link esterno, interno o direttamente ad un’area di post-login grazie al Single Sign-On.",
+          "addSecondaryButton": "Aggiungi pulsante secondario",
+          "removeSecondaryButton": "Rimuovi pulsante secondario",
+          "form": {
+            "selectLabel": "Tipo di pulsante",
+            "externalLink": "Link esterno all'app",
+            "singleSignOn": "Link in Single Sign-on",
+            "internalLink": "Link interno all'app (deeplink)",
+            "placeholder": "",
+            "btnWithLink": {
+              "alertSingleSignOn": "Per abilitare il pulsante con link in Single Sign-On, è necessario aver completato l'integrazione all'interno dei sistemi dell'ente. Per ulteriori informazioni, ti invitiamo a contattare il nostro  [supporto](mailto:io‑service‑management@pagopa.it)"
+            }
+          }
         },
         "fims": {
           "label": "Protocollo FIMS",
@@ -179,6 +191,7 @@
           "url": {
             "helperText": "",
             "label": "URL esterna",
+            "labelInternal": "URL interna",
             "placeholder": ""
           }
         },
