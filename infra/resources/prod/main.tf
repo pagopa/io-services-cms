@@ -73,6 +73,11 @@ module "function_app" {
     services_index_name    = module.ai_search.search_service_index_aliases.services
   }
 
+  custom_host_keys = zipmap(
+    [module.key_vault.secrets_name.appbe_host_key_for_app_backend, module.key_vault.secrets_name.appbe_host_key_for_apim_platform],
+    [module.key_vault.secrets_value.appbe_host_key_for_app_backend, module.key_vault.secrets_value.appbe_host_key_for_apim_platform]
+  )
+
   error_action_group_id = module.monitor.action_group_ids.oncall
 
   tags = local.tags

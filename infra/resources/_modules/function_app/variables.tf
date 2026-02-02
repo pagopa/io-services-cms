@@ -92,3 +92,10 @@ variable "ai_search" {
   })
   description = "AI Search input parameters"
 }
+
+variable "custom_host_keys" {
+  type        = map(string)
+  description = "Map of custom host keys where Key = Name and Value = Secret"
+  sensitive   = true
+  default     = {}
+}
