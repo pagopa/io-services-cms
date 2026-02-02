@@ -107,6 +107,16 @@ resource "azurerm_key_vault_secret" "appbe_host_key_for_app_backend" {
   expiration_date = "2028-01-28T16:00:06Z"
 }
 
+# TODO: remove this secret once E&S's endpoints have been removed from io-backend
+# temporary used to "clone" a secret to be used by io-infra CI/CD
+resource "azurerm_key_vault_secret" "appbe_host_key_for_app_backend_common" {
+  name            = local.key_vault.secrets_name.appbe_host_key_for_app_backend
+  key_vault_id    = data.azurerm_key_vault.common.id
+  value           = random_password.appbe_host_key_for_app_backend[var.appbe_host_key_for_app_backend_rotation_id].result
+  content_type    = "string"
+  expiration_date = "2028-01-28T16:00:06Z"
+}
+
 resource "azurerm_key_vault_secret" "appbe_host_key_for_apim_platform" {
   name            = local.key_vault.secrets_name.appbe_host_key_for_apim_platform
   key_vault_id    = module.key_vault.id
