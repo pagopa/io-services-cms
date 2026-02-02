@@ -6,11 +6,13 @@ import { useTranslation } from "next-i18next";
 import { Controller, get, useFormContext } from "react-hook-form";
 
 export type UrlFieldControllerProps = {
+  hideCheckUrl?: boolean;
   name: string;
 } & TextFieldProps;
 
 /** Controller for MUI `TextField` component enhanced with url type check and a "Try URL" action button. */
 export function UrlFieldController({
+  hideCheckUrl = false,
   name,
   ...props
 }: UrlFieldControllerProps) {
@@ -49,17 +51,19 @@ export function UrlFieldController({
               value={value}
             />
           </Grid>
-          <Grid item xs="auto">
-            <ButtonNaked
-              color="primary"
-              disabled={value ? value.length === 0 : true}
-              onClick={() => window.open(value, "_blank")}
-              size="large"
-              startIcon={<OpenInNew />}
-            >
-              {t("forms.testUrl")}
-            </ButtonNaked>
-          </Grid>
+          {!hideCheckUrl && (
+            <Grid item xs="auto">
+              <ButtonNaked
+                color="primary"
+                disabled={value ? value.length === 0 : true}
+                onClick={() => window.open(value, "_blank")}
+                size="large"
+                startIcon={<OpenInNew />}
+              >
+                {t("forms.testUrl")}
+              </ButtonNaked>
+            </Grid>
+          )}
         </Grid>
       )}
     />
