@@ -7,7 +7,7 @@ info:
   contact:
     name: PagoPA S.p.A.
     url: https://pagopa.it/
-  version: 1.0.13
+  version: 2.0.0
 servers:
   - url: https://to-be-defined.it
 tags:
@@ -42,6 +42,8 @@ paths:
       summary: Find institutions
       description: Multiple status values can be provided with comma separated strings
       operationId: findInstitutions
+      security:
+        - ApiKeyAuth: []
       parameters:
         - name: search
           in: query
@@ -105,6 +107,8 @@ paths:
         - featured
       summary: Retrieve featured intitutions
       operationId: getFeaturedInstitutions
+      security:
+        - ApiKeyAuth: []
       responses:
         "200":
           description: successful operation
@@ -129,6 +133,8 @@ paths:
       summary: Find services for institution
       description: Given an Institution allow to find its services
       operationId: findInstutionServices
+      security:
+        - ApiKeyAuth: []
       parameters:
         - name: institutionId
           in: path
@@ -187,6 +193,8 @@ paths:
       summary: Retrieve service details
       description: Retrieve a service by ID
       operationId: getServiceById
+      security:
+        - ApiKeyAuth: []
       parameters:
         - name: serviceId
           in: path
@@ -219,6 +227,8 @@ paths:
         - featured
       summary: Retrieve featured services
       operationId: getFeaturedServices
+      security:
+        - ApiKeyAuth: []
       responses:
         "200":
           description: successful operation
@@ -237,6 +247,11 @@ paths:
         "504":
           description: Gateway timeout
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Functions-Key
   schemas:
     ApplicationInfo:
       type: object
