@@ -1,3 +1,8 @@
+locals {
+  # Extract the keys (names) and mark them as safe for the loop
+  safe_keys = nonsensitive(keys(var.custom_host_keys))
+}
+
 ##################
 #  Function App  #
 ##################
@@ -37,4 +42,21 @@ module "app_be_fn" {
   application_insights_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
   tags = var.tags
+}
+
+resource "azapi_resource_action" "custom_host_key" {
+  for_each = toset(local.safe_keys)
+
+  # Target the PARENT resource (which we know exists)
+  resource_id = module.app_be_fn.function_app.function_app.id
+  # Append the key path here, so final URL becomes: .../sites/{name}/host/default/functionKeys/{keyName}
+  action = "host/default/functionKeys/${each.key}"
+  type   = "Microsoft.Web/sites@2025-03-01"
+  method = "PUT"
+
+  body = {
+    properties = {
+      value = var.custom_host_keys[each.key]
+    }
+  }
 }

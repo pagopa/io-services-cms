@@ -14,7 +14,7 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.47.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.58.0 |
 | <a name="provider_dx"></a> [dx](#provider\_dx) | ~> 0.6 |
 
 ## Modules
