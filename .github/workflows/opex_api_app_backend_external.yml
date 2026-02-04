@@ -7,12 +7,12 @@ on:
     branches:
       - master
     paths:
-      - 'apps/app-backend/api/catalog_internal.yaml'
-      - '.github/workflows/opex_api_app_backend_catalog_internal.yml'
-      - '.opex/api_app_backend_catalog_internal/**'
+      - 'apps/app-backend/api/external.yaml'
+      - '.github/workflows/opex_api_app_backend_external.yml'
+      - '.opex/api_app_backend_external/**'
 
 env:
-  API_NAME: api_app_backend_catalog_internal
+  API_NAME: api_app_backend_external
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
   DOCKER_IMAGE_TAG: sha256:eb3354b7e5c07e9557182828489fc0bf8092dd80886035429268d019250f5cd3

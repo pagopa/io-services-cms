@@ -1,5 +1,5 @@
-oa3_spec: apps/app-backend/api/catalog_internal.yaml
-name: opex_api_app_backend_catalog_internal
+oa3_spec: apps/app-backend/api/external.yaml
+name: opex_api_app_backend_external
 location: West Europe
 timespan: 5m
 evaluation_frequency: 10
