@@ -5,26 +5,26 @@ on:
         type: string
         required: true
     secrets:
-      AZURE_CLIENT_ID_CI:
+      ARM_CLIENT_ID:
         required: true
-      AZURE_TENANT_ID:
+      ARM_TENANT_ID:
         required: true
-      AZURE_SUBSCRIPTION_ID:
+      ARM_SUBSCRIPTION_ID:
         required: true
 
 jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-22.04
-    environment: prod-ci
+    environment: opex-prod-ci
     env:
       API_NAME: ${{ inputs.api_name }}
       DOCKER_IMAGE_TAG: sha256:eb3354b7e5c07e9557182828489fc0bf8092dd80886035429268d019250f5cd3
       TEMPLATE_DIR: azure-dashboard
       ARM_USE_OIDC: true
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_CI }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     permissions:
       id-token: write
       pull-requests: write
@@ -42,9 +42,9 @@ jobs:
         id: az_login
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_CI }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
       - name: Run opex dashboard
         shell: bash
