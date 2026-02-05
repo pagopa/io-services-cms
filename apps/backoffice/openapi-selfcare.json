@@ -1335,232 +1335,6 @@
       }
     },
     "/product": {
-      "patch": {
-        "summary": "Partially update a product by ID",
-        "description": "Partially updates an existing product identified by its productId. Only the non-null fields provided in the request body will be updated; all other fields will remain unchanged.",
-        "operationId": "patchProductById",
-        "tags": [
-          "Product"
-        ],
-        "parameters": [
-          {
-            "name": "createdBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProductPatchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Product successfully patched",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductBaseResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request - Invalid patch document, invalid productId, or field constraint violation",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not Authorized"
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "404": {
-            "description": "Not Found - No product found with the specified productId",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - Unexpected error occurred while applying the patch",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyHeader": [
-              "global"
-            ]
-          }
-        ]
-      },
-      "get": {
-        "summary": "Get product by productId",
-        "description": "Retrieve a product by its unique identifier.",
-        "operationId": "getProductById",
-        "tags": [
-          "Product"
-        ],
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Product found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not Authorized"
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "404": {
-            "description": "Product not found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyHeader": [
-              "global"
-            ]
-          }
-        ]
-      },
-      "delete": {
-        "summary": "Cancel product by ID",
-        "description": "Marks the product as DELETED if it exists.",
-        "operationId": "deleteProductById",
-        "tags": [
-          "Product"
-        ],
-        "parameters": [
-          {
-            "name": "productId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Product cancelled",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductBaseResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Not Authorized"
-          },
-          "403": {
-            "description": "Not Allowed"
-          },
-          "404": {
-            "description": "Product not found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem4"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyHeader": [
-              "global"
-            ]
-          }
-        ]
-      },
       "post": {
         "summary": "Create or update a product configuration",
         "description": "Creates a new product configuration or updates the existing one when a match is found",
@@ -1571,14 +1345,6 @@
         "parameters": [
           {
             "name": "createdBy",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productId",
-            "required": true,
             "in": "query",
             "schema": {
               "type": "string"
@@ -1667,6 +1433,234 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProductOriginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
+    "/product/{productId}": {
+      "patch": {
+        "summary": "Partially update a product by ID",
+        "description": "Partially updates an existing product identified by its productId. Only the non-null fields provided in the request body will be updated; all other fields will remain unchanged.",
+        "operationId": "patchProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "createdBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductPatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product successfully patched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid patch document, invalid productId, or field constraint violation",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Not Found - No product found with the specified productId",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected error occurred while applying the patch",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "summary": "Get product by productId",
+        "description": "Retrieve a product by its unique identifier.",
+        "operationId": "getProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": [
+              "global"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Cancel product by ID",
+        "description": "Marks the product as DELETED if it exists.",
+        "operationId": "deleteProductById",
+        "tags": [
+          "Product"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBaseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem4"
                 }
               }
             }
@@ -2724,6 +2718,16 @@
                 "SUSPENDED"
               ]
             }
+          },
+          {
+            "name": "parentInstitutionId",
+            "in": "query",
+            "description": "Users group's parent institutionId",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3706,7 +3710,7 @@
           "SUSPEND"
         ]
       },
-      "ProductPatchRequest": {
+      "ProductCreateRequest": {
         "type": "object",
         "required": [
           "productId"
@@ -3769,6 +3773,12 @@
             "items": {
               "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
             }
+          },
+          "testEnvProductIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3822,6 +3832,9 @@
           "role": {
             "type": "string"
           },
+          "institutionType": {
+            "$ref": "#/components/schemas/InstitutionType1"
+          },
           "multiroleAllowed": {
             "type": "boolean"
           },
@@ -3841,6 +3854,26 @@
             }
           }
         }
+      },
+      "InstitutionType1": {
+        "type": "string",
+        "enum": [
+          "PA",
+          "PG",
+          "GSP",
+          "SA",
+          "PT",
+          "SCP",
+          "PSP",
+          "AS",
+          "REC",
+          "CON",
+          "PRV",
+          "PRV_PF",
+          "GPU",
+          "SCEC",
+          "DEFAULT"
+        ]
       },
       "BackOfficeRole": {
         "type": "object",
@@ -3914,26 +3947,6 @@
           "INSTITUTION_AGGREGATOR",
           "USER",
           "USER_AGGREGATOR"
-        ]
-      },
-      "InstitutionType1": {
-        "type": "string",
-        "enum": [
-          "PA",
-          "PG",
-          "GSP",
-          "SA",
-          "PT",
-          "SCP",
-          "PSP",
-          "AS",
-          "REC",
-          "CON",
-          "PRV",
-          "PRV_PF",
-          "GPU",
-          "SCEC",
-          "DEFAULT"
         ]
       },
       "ContractType": {
@@ -4038,6 +4051,89 @@
           }
         }
       },
+      "ProductOriginResponse": {
+        "type": "object",
+        "properties": {
+          "origins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          }
+        }
+      },
+      "ProductPatchRequest": {
+        "type": "object",
+        "required": [
+          "productId"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "pattern": "\\S"
+          },
+          "alias": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProductStatus"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "visualConfiguration": {
+            "$ref": "#/components/schemas/VisualConfiguration"
+          },
+          "features": {
+            "$ref": "#/components/schemas/Features"
+          },
+          "roleMappings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleMapping"
+            }
+          },
+          "contracts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractTemplateConfig"
+            }
+          },
+          "institutionOrigins": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OriginEntry"
+            }
+          },
+          "emailTemplates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmailTemplateConfig"
+            }
+          },
+          "backOfficeEnvironmentConfigurations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
+            }
+          },
+          "testEnvProductIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ProductResponse": {
         "type": "object",
         "required": [
@@ -4102,6 +4198,12 @@
               "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
             }
           },
+          "testEnvProductIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "id": {
             "type": "string"
           },
@@ -4125,83 +4227,6 @@
           },
           "createdBy": {
             "type": "string"
-          }
-        }
-      },
-      "ProductCreateRequest": {
-        "type": "object",
-        "required": [
-          "productId"
-        ],
-        "properties": {
-          "productId": {
-            "type": "string",
-            "pattern": "\\S"
-          },
-          "alias": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "status": {
-            "$ref": "#/components/schemas/ProductStatus"
-          },
-          "consumers": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "visualConfiguration": {
-            "$ref": "#/components/schemas/VisualConfiguration"
-          },
-          "features": {
-            "$ref": "#/components/schemas/Features"
-          },
-          "roleMappings": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RoleMapping"
-            }
-          },
-          "contracts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContractTemplateConfig"
-            }
-          },
-          "institutionOrigins": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OriginEntry"
-            }
-          },
-          "emailTemplates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EmailTemplateConfig"
-            }
-          },
-          "backOfficeEnvironmentConfigurations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BackOfficeEnvironmentConfiguration"
-            }
-          }
-        }
-      },
-      "ProductOriginResponse": {
-        "type": "object",
-        "properties": {
-          "origins": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OriginEntry"
-            }
           }
         }
       },
