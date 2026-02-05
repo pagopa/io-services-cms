@@ -108,7 +108,7 @@ app.http("SearchServices", {
 
 const GetServiceById = GetServiceByIdFn(serviceDetailsContainerDependency);
 app.http("GetServiceById", {
-  authLevel: "function",
+  authLevel: "anonymous",
   handler: GetServiceById,
   methods: ["GET"],
   route: "services/{serviceId}",
