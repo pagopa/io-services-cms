@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.31.1
+
+### Patch Changes
+
+- 9a41c3f2: second update Selfcare OpenAPI json file
+
 ## 1.31.0
 
 ### Minor Changes
