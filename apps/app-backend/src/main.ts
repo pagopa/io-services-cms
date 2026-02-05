@@ -108,7 +108,7 @@ app.http("SearchServices", {
 
 const GetServiceById = GetServiceByIdFn(serviceDetailsContainerDependency);
 app.http("GetServiceById", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetServiceById,
   methods: ["GET"],
   route: "services/{serviceId}",
@@ -116,35 +116,35 @@ app.http("GetServiceById", {
 
 const catalogPrefix = "api/catalog/v2";
 app.http("GetFeaturedServices", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetFeaturedServices,
   methods: ["GET"],
   route: `${catalogPrefix}/services/featured`,
 });
 
 app.http("GetFeaturedInstitutions", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetFeaturedInstitutions,
   methods: ["GET"],
   route: `${catalogPrefix}/institutions/featured`,
 });
 
 app.http("SearchInstitutions", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: SearchInstitutions,
   methods: ["GET"],
   route: `${catalogPrefix}/institutions`,
 });
 
 app.http("SearchServices", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: SearchServices,
   methods: ["GET"],
   route: `${catalogPrefix}/institutions/{institutionId}/services`,
 });
 
 app.http("GetServiceById", {
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: GetServiceById,
   methods: ["GET"],
   route: `${catalogPrefix}/services/{serviceId}`,
