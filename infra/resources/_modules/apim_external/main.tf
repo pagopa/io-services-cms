@@ -36,6 +36,7 @@ resource "azurerm_api_management_product_api" "this" {
   resource_group_name = azurerm_api_management_api.api_services_cms.resource_group_name
 }
 
+
 ##########
 # Policy #
 ##########
@@ -74,7 +75,6 @@ resource "azurerm_api_management_api_operation_policy" "get_service_topics" {
 
   xml_content = file("${path.module}/api/io_services_cms/v1/getservicetopics_policy/policy.xml")
 }
-
 
 resource "azurerm_api_management_logger" "cache_policy_app_insights" {
   name                = "cache-policy-appinsight-apimlogger"
