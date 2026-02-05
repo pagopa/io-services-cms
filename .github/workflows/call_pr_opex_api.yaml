@@ -38,16 +38,6 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Validate Inputs API Name
-        id: validate_inputs_api_name
-        shell: bash
-        run: |
-          TARGET_DIR=".opex/${{ inputs.api_name }}"
-          if [ ! -d "$TARGET_DIR" ]; then
-            echo "Invalid api_name '${{ inputs.api_name }}'. Directory $TARGET_DIR does not exist."
-            exit 1
-          fi
-
       - name: Azure Login
         id: az_login
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
@@ -63,13 +53,13 @@ jobs:
           docker run \
             --workdir /github/workspace --rm \
             -v $(pwd):"/github/workspace" \
-            ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/${{ env.API_NAME }}/env/prod/config.yaml
+            ghcr.io/pagopa/opex-dashboard-azure-action@${{ env.DOCKER_IMAGE_TAG }} ${{ env.TEMPLATE_DIR }} .opex/$API_NAME/env/prod/config.yaml
 
       - name: Copy Environments
         shell: bash
         id: opex_copy
         run: |
-          cp -R .opex/${{ env.API_NAME }}/env ./${{ env.TEMPLATE_DIR }}
+          cp -R .opex/$API_NAME/env ./${{ env.TEMPLATE_DIR }}
 
       - name: Setup Terraform
         id: terraform_setup
