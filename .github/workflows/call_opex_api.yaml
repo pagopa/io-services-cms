@@ -37,22 +37,12 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      
-      - name: Validate Inputs API Name
-        id: validate_inputs_api_name
-        shell: bash
-        run: |
-          TARGET_DIR=".opex/${{ inputs.api_name }}"
-          if [ ! -d "$TARGET_DIR" ]; then
-            echo "Invalid api_name '${{ inputs.api_name }}'. Directory $TARGET_DIR does not exist."
-            exit 1
-          fi
 
       - uses: pagopa/opex-dashboard-azure-action@ece3bc2b133be74cabb50aec14cdb9b8051b886f # action v1.1.2
         with:
           environment: prod
-          api-name: ${{ env.API_NAME }}
-          config: .opex/${{ env.API_NAME }}/env/prod/config.yaml
+          api-name: $API_NAME
+          config: .opex/$API_NAME/env/prod/config.yaml
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
