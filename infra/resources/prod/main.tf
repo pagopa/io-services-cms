@@ -252,6 +252,8 @@ module "apim_external" {
     resource_group_name = data.azurerm_api_management.apim_external.resource_group_name
     product_id          = data.azurerm_api_management_product.apim_external_product_services.product_id
   }
-  cms_hostname           = module.cms_function_app.cms_fn_default_hostname
-  ai_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
+  cms_hostname                     = module.cms_function_app.cms_fn_default_hostname
+  ai_instrumentation_key           = data.azurerm_application_insights.ai_common.instrumentation_key
+  app_backend_hostname             = module.function_app.app_be_fn_default_hostname
+  appbe_host_key_for_apim_platform = module.key_vault.secrets_value.appbe_host_key_for_apim_platform
 }

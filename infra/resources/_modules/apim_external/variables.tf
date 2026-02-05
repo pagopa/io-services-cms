@@ -17,3 +17,14 @@ variable "ai_instrumentation_key" {
   description = "Application Insights Instrumentation Key"
   sensitive   = true
 }
+
+variable "app_backend_hostname" {
+  type        = string
+  description = "Services APP Backend Hostname"
+}
+
+variable "appbe_host_key_for_apim_platform" {
+  type        = string
+  description = "Services APP Backend Key for APIM Platform"
+  sensitive   = true
+}
