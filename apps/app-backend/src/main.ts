@@ -113,39 +113,3 @@ app.http("GetServiceById", {
   methods: ["GET"],
   route: "services/{serviceId}",
 });
-
-const catalogPrefix = "api/catalog/v2";
-app.http("GetFeaturedServices", {
-  authLevel: "function",
-  handler: GetFeaturedServices,
-  methods: ["GET"],
-  route: `${catalogPrefix}/services/featured`,
-});
-
-app.http("GetFeaturedInstitutions", {
-  authLevel: "function",
-  handler: GetFeaturedInstitutions,
-  methods: ["GET"],
-  route: `${catalogPrefix}/institutions/featured`,
-});
-
-app.http("SearchInstitutions", {
-  authLevel: "function",
-  handler: SearchInstitutions,
-  methods: ["GET"],
-  route: `${catalogPrefix}/institutions`,
-});
-
-app.http("SearchServices", {
-  authLevel: "function",
-  handler: SearchServices,
-  methods: ["GET"],
-  route: `${catalogPrefix}/institutions/{institutionId}/services`,
-});
-
-app.http("GetServiceById", {
-  authLevel: "function",
-  handler: GetServiceById,
-  methods: ["GET"],
-  route: `${catalogPrefix}/services/{serviceId}`,
-});
