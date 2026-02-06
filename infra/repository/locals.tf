@@ -9,6 +9,6 @@ locals {
     opex_cd_policy_branches  = ["master"]
     app_cd_policy_branches   = ["master"]
     app_cd_policy_tags       = ["io-services-app-backend@*", "io-services-cms-backoffice@*", "io-services-cms-webapp@*"]
-    jira_boards_ids          = ["CES", "IOPAE"]
+    jira_boards_ids          = ["CES", "IOPAE", "IOPID"]
   }
 }
