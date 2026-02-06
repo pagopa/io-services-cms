@@ -1,4 +1,5 @@
 # see https://help.github.com/en/articles/about-code-owners#example-of-a-codeowners-file
 
-* @pagopa/io-institutions-n-services
-/infra/bootstrapper/ @pagopa/io-institutions-n-services @pagopa/engineering-team-devex
+* @pagopa/io-institutions-n-services @pagopa/io-foundation-identity-n-access-backend
+  /infra/bootstrapper/ @pagopa/io-institutions-n-services @pagopa/io-foundation-identity-n-access-backend @pagopa/engineering-team-devex
+  /apps/backoffice/ @pagopa/io-institutions-n-services @pagopa/io-foundation-identity-n-access-backend @pagopa/io-foundation-identity-n-access-frontend
