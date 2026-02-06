@@ -64,6 +64,12 @@ vi.mock("../../../utils/logger", () => ({
   getLogger: getLoggerMock,
 }));
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 beforeEach(() => {
   vi.restoreAllMocks();
 });
