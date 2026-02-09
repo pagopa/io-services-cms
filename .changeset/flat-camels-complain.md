@@ -2,4 +2,4 @@
 "io-services-app-backend": minor
 ---
 
-Duplicate APP Backend endpoints
+Add external OpenAPI spec
