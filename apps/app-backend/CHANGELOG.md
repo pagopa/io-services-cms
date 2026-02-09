@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 2.0.0
+
+### Major Changes
+
+- d3f61486: Add ApiKey auth for internal APIs
+
 ## 1.2.5
 
 ### Patch Changes
