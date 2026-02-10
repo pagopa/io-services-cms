@@ -254,4 +254,8 @@ module "apim_external" {
   }
   cms_hostname           = module.cms_function_app.cms_fn_default_hostname
   ai_instrumentation_key = data.azurerm_application_insights.ai_common.instrumentation_key
+
+  app_backend_hostname             = module.function_app.app_be_fn_default_hostname
+  app_backend_name                 = module.function_app.app_be_fn_name
+  appbe_host_key_for_apim_platform = module.key_vault.secrets_value.appbe_host_key_for_apim_platform
 }
