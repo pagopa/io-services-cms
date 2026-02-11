@@ -176,10 +176,10 @@ resource "azurerm_api_management_api_diagnostic" "services_cms_api_app_insights"
 ################
 
 resource "azurerm_api_management_named_value" "app_backend_apim_key" {
-  name                = "appbe-host-key-for-apim-platform"
+  name                = "svc-appbe-host-key"
   api_management_name = azurerm_api_management_api.api_services_app_backend.api_management_name
   resource_group_name = azurerm_api_management_api.api_services_app_backend.resource_group_name
-  display_name        = "appbe-host-key-for-apim-platform"
+  display_name        = "svc-appbe-host-key"
   value               = var.appbe_host_key_for_apim_platform
   secret              = true
 }
