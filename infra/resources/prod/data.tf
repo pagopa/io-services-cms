@@ -48,7 +48,7 @@ data "azurerm_api_management" "apim_platform" {
 }
 
 data "azurerm_api_management_product" "apim_platform_product_services" {
-  product_id          = "io-services-app-backend-api"
+  product_id          = "io-platform"
   api_management_name = data.azurerm_api_management.apim_platform.name
   resource_group_name = data.azurerm_api_management.apim_platform.resource_group_name
 }
