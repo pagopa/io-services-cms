@@ -72,7 +72,8 @@ resource "azurerm_api_management_api_policy" "app_backend" {
 
   depends_on = [
     azurerm_api_management_backend.app_backends,
-    azurerm_api_management_named_value.app_backend_apim_key
+    azurerm_api_management_named_value.app_backend_apim_key,
+    azapi_resource.app_backend_pool
   ]
 }
 
