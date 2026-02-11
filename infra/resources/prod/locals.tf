@@ -21,4 +21,3 @@ locals {
     CostCenter     = "TS310 - PAGAMENTI & SERVIZI"
   }
 }
-
