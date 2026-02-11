@@ -8,9 +8,9 @@ variable "api_management" {
   description = "API Management reference"
 }
 
-variable "app_backend_hostname" {
-  type        = string
-  description = "Services APP Backend Hostname"
+variable "app_backend_hostnames" {
+  type        = list(string)
+  description = "Services APP Backend Hostnames"
 }
 
 variable "app_backend_name" {

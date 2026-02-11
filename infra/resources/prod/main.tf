@@ -266,7 +266,7 @@ module "apim_platform" {
     product_id          = data.azurerm_api_management_product.apim_platform_product_services.product_id
   }
 
-  app_backend_hostname             = module.function_app.app_be_fn_default_hostname
+  app_backend_hostnames            = [module.function_app.app_be_fn_default_hostname]
   app_backend_name                 = module.function_app.app_be_fn_name
   appbe_host_key_for_apim_platform = module.key_vault.secrets_value.appbe_host_key_for_apim_platform
 }

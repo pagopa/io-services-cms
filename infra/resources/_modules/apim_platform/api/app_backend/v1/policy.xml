@@ -1,7 +1,7 @@
 <policies>
     <inbound>
         <base />
-        <set-backend-service backend-id="{{backend-id}}" />
+        <set-backend-service backend-id="io-services-app-backend-pool" />
         <set-header name="x-functions-key" exists-action="override">
             <value>{{svc-appbe-host-key}}</value>
         </set-header>

@@ -61,7 +61,7 @@ resource "azurerm_api_management_api_policy" "app_backend" {
   xml_content = file("${path.module}/api/app_backend/v1/policy.xml")
 
   depends_on = [
-    azurerm_api_management_backend.app_backend,
+    azurerm_api_management_backend.app_backends,
     azurerm_api_management_named_value.app_backend_apim_key
   ]
 }
@@ -69,13 +69,35 @@ resource "azurerm_api_management_api_policy" "app_backend" {
 ############
 # Backends #
 ############
-resource "azurerm_api_management_backend" "app_backend" {
-  name                = var.app_backend_name
-  description         = "IO Services App Backend"
-  api_management_name = azurerm_api_management_api.api_services_app_backend.api_management_name
+resource "azurerm_api_management_backend" "app_backends" {
+  count               = length(var.app_backend_hostnames)
+  title               = "IO Services App Backend ${count.index + 1}"
+  name                = "${var.app_backend_name}-${count.index + 1}"
   resource_group_name = azurerm_api_management_api.api_services_app_backend.resource_group_name
+  api_management_name = azurerm_api_management_api.api_services_app_backend.api_management_name
   protocol            = "http"
-  url                 = "https://${var.app_backend_hostname}"
+  url                 = "https://${var.app_backend_hostnames[count.index]}"
+}
+
+resource "azapi_resource" "app_backend_pool" {
+  type      = "Microsoft.ApiManagement/service/backends@2024-06-01-preview"
+  name      = "io-services-app-backend-pool"
+  parent_id = var.api_management.id
+  body = {
+    properties = {
+      protocol    = null
+      url         = null
+      type        = "Pool"
+      description = "Load Balancer of IO Services App Backend"
+      pool = {
+        services = [
+          for backend in azurerm_api_management_backend.app_backends : {
+            id = backend.id
+          }
+        ]
+      }
+    }
+  }
 }
 
 
@@ -91,7 +113,3 @@ resource "azurerm_api_management_named_value" "app_backend_apim_key" {
   value               = var.appbe_host_key_for_apim_platform
   secret              = true
 }
-
-
-
-
