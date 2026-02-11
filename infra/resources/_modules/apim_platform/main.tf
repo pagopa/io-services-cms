@@ -82,7 +82,7 @@ resource "azurerm_api_management_api_policy" "app_backend" {
 resource "azurerm_api_management_backend" "app_backends" {
   count               = length(var.app_backend_hostnames)
   title               = "IO Services App Backend ${count.index + 1}"
-  name                = "${var.app_backend_name}-${count.index + 1}"
+  name                = "io-services-app-backend-${count.index + 1}"
   resource_group_name = azurerm_api_management_api.api_services_app_backend.resource_group_name
   api_management_name = azurerm_api_management_api.api_services_app_backend.api_management_name
   protocol            = "http"
