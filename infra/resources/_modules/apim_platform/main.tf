@@ -31,13 +31,8 @@ resource "azurerm_api_management_api" "api_services_app_backend" {
   protocols    = ["https"]
 
   import {
-    content_format = "openapi"
-    content_value = templatefile("${path.module}/api/app_backend/v1/_swagger.yaml.tpl",
-      {
-        host     = "api.io.pagopa.it",
-        basePath = "api/catalog"
-      }
-    )
+    content_format = "openapi-link"
+    content_value  = "https://raw.githubusercontent.com/pagopa/io-services-cms/9b841ae4b757a15214636c7d3f3b122e47b0ec7c/apps/app-backend/api/external.yaml"
   }
 }
 
