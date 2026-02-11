@@ -36,6 +36,16 @@ resource "azurerm_api_management_api" "api_services_app_backend" {
   }
 }
 
+resource "azurerm_api_management_tag" "services_app_backend_tag" {
+  api_management_id = var.api_management.id
+  name              = "IO-Services"
+}
+
+resource "azurerm_api_management_api_tag" "services_app_backend_api_tag" {
+  api_id = azurerm_api_management_api.api_services_app_backend.id
+  name   = azurerm_api_management_tag.services_app_backend_tag.name
+}
+
 
 ###############
 # API Product #
