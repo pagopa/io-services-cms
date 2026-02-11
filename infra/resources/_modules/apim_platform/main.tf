@@ -38,7 +38,7 @@ resource "azurerm_api_management_api" "api_services_app_backend" {
 
 resource "azurerm_api_management_tag" "services_app_backend_tag" {
   api_management_id = var.api_management.id
-  name              = "IO-Services"
+  name              = "IO-Institutions"
 }
 
 resource "azurerm_api_management_api_tag" "services_app_backend_api_tag" {
