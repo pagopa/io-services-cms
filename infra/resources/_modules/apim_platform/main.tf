@@ -32,7 +32,7 @@ resource "azurerm_api_management_api" "api_services_app_backend" {
 
   import {
     content_format = "openapi-link"
-    content_value  = "https://raw.githubusercontent.com/pagopa/io-services-cms/9b841ae4b757a15214636c7d3f3b122e47b0ec7c/apps/app-backend/api/external.yaml"
+    content_value  = "https://raw.githubusercontent.com/pagopa/io-services-cms/8568de5dae8e0e936bd2b0c215332a97604d13bc/apps/app-backend/api/external.yaml"
   }
 }
 
