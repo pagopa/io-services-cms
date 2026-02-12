@@ -34,7 +34,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ProblemJson"
-
   /institutions:
     get:
       tags:
@@ -91,6 +90,8 @@ paths:
                 $ref: "#/components/schemas/InstitutionsResource"
         "400":
           description: Bad Request
+        "401":
+          description: API key null or expired
         "500":
           description: Internal Server Error
           content:
@@ -116,6 +117,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Institutions'
+        "401":
+          description: API key null or expired
         "500":
           description: Internal Server Error
           content:
@@ -176,6 +179,8 @@ paths:
                 $ref: "#/components/schemas/InstitutionServicesResource"
         "400":
           description: Bad Request
+        "401":
+          description: API key null or expired
         "500":
           description: Internal Server Error
           content:
@@ -236,6 +241,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeaturedServices'
+        "401":
+          description: API key null or expired
         "500":
           description: Internal Server Error
           content:

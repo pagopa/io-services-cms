@@ -1,0 +1,38 @@
+name: PR - Opex Dashboard api_app_backend_external
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - master
+    paths:
+      - 'apps/app-backend/api/external.yaml'
+      - '.github/workflows/opex_api_app_backend_external.yml'
+      - '.opex/api_app_backend_external/**'
+      - '.github/workflows/pr_opex_api_app_backend_external.yml'
+
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  pull-requests: write
+
+jobs:
+  plan:
+    uses: ./.github/workflows/call_pr_opex_api.yml
+    name: Plan changes against Production
+    secrets:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    with:
+      api_name: api_app_backend_external
