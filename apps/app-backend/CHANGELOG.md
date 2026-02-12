@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 2.1.0
+
+### Minor Changes
+
+- 8568de5d: Add external OpenAPI spec
+
 ## 2.0.0
 
 ### Major Changes
