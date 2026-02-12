@@ -25,7 +25,7 @@
     "api-definitions:bundle-internal": "bundle-api-spec -i ./api/internal.yaml.template -o ./api/internal.yaml",
     "api-definitions:bundle-external": "bundle-api-spec -i ./api/external.yaml.template -o ./api/external.yaml",
     "api-definitions:internal": "shx rm -rf ./src/generated/definitions/internal && gen-api-models --api-spec ./api/internal.yaml --out-dir ./src/generated/definitions/internal --request-types --response-decoders",
-    "generate:version": "sh generate-version.sh -o ./src/generated/ -v $npm_package_version -n io-services-app-backend"
+    "generate:version": "shx rm -f ./src/generated/version.ts && sh generate-version.sh -o ./src/generated/ -v $npm_package_version -n io-services-app-backend"
   },
   "devDependencies": {
     "@pagopa/openapi-codegen-ts": "^13.1.0",
