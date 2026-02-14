@@ -41,3 +41,14 @@ data "azurerm_api_management_product" "apim_external_product_services" {
   api_management_name = data.azurerm_api_management.apim_external.name
   resource_group_name = data.azurerm_api_management.apim_external.resource_group_name
 }
+
+data "azurerm_api_management" "apim_platform" {
+  name                = "${local.project}-platform-api-gateway-apim-01"
+  resource_group_name = "${local.project}-common-rg-01"
+}
+
+data "azurerm_api_management_product" "apim_platform_product_services" {
+  product_id          = "io-institutions"
+  api_management_name = data.azurerm_api_management.apim_platform.name
+  resource_group_name = data.azurerm_api_management.apim_platform.resource_group_name
+}

@@ -21,7 +21,6 @@ resource "azurerm_api_management_api" "api_services_cms" {
       }
     )
   }
-
 }
 
 
@@ -76,6 +75,7 @@ resource "azurerm_api_management_api_operation_policy" "get_service_topics" {
   xml_content = file("${path.module}/api/io_services_cms/v1/getservicetopics_policy/policy.xml")
 }
 
+
 resource "azurerm_api_management_logger" "cache_policy_app_insights" {
   name                = "cache-policy-appinsight-apimlogger"
   api_management_name = azurerm_api_management_api.api_services_cms.api_management_name
@@ -112,3 +112,4 @@ resource "azurerm_api_management_api_diagnostic" "services_cms_api_app_insights"
     body_bytes = 32
   }
 }
+
