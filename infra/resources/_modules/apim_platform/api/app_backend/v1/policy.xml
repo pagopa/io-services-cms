@@ -5,7 +5,7 @@
         <set-header name="x-functions-key" exists-action="override">
             <value>{{svc-appbe-host-key}}</value>
         </set-header>
-        <rewrite-uri template="@(context.Request.Url.Path.Replace("/catalog", ""))" />
+        <rewrite-uri template="@(context.Request.OriginalUrl.Path.Replace("/catalog", ""))" />
     </inbound>
     <backend>
         <base />
