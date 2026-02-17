@@ -213,8 +213,8 @@ export const getDelegatedInstitutions = async (
       offset: apiResult.pageInfo?.pageNo ?? 0,
     },
     value: (apiResult.delegations ?? []).map((delegation) => ({
-      id: delegation.institutionId ?? "",
-      name: delegation.institutionName ?? "",
+      id: delegation.institutionId,
+      name: delegation.institutionName,
     })),
   };
 };
