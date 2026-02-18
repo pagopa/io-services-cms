@@ -14,6 +14,7 @@ module "github_repository" {
     opex_cd_policy_branches  = local.repository.opex_cd_policy_branches
     app_cd_policy_branches   = local.repository.app_cd_policy_branches
     app_cd_policy_tags       = local.repository.app_cd_policy_tags
+    jira_boards_ids          = local.repository.jira_boards_ids
     environments             = ["prod"]
   }
 }
