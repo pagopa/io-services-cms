@@ -5,6 +5,7 @@ import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResp
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { ProductResource } from "../../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
+import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import {
   getSelfcareClient,
   resetInstance,
@@ -19,7 +20,7 @@ const mocks: {
   institutionGroups: PageOfUserGroupResource;
   delegations: DelegationWithPaginationResponse;
 } = {
-  institution: { id: "institutionId" } as InstitutionResponse,
+  institution: { id: "institutionId", origin: "IPA", originId: "originId" } as InstitutionResponse,
   userInstitutions: [
     {
       institutionId: "institutionId1",
@@ -58,12 +59,20 @@ const mocks: {
   delegations: {
     delegations: [
       {
+        id: "delegationId1",
         institutionId: "institutionGroupsInstID",
         institutionName: "institutionGroupsName",
+        type: "PT" as TypeEnum,
+        productId: "productId1",
+        brokerId: "brokerId1",
       },
       {
+        id: "delegationId2",
         institutionId: "institutionGroupsInstID2",
         institutionName: "institutionGroupsName2",
+        type: "PT" as TypeEnum,
+        productId: "productId2",
+        brokerId: "brokerId2",
       },
     ],
     pageInfo: {
