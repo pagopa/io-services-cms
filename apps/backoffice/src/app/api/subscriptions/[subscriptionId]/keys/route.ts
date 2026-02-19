@@ -46,7 +46,6 @@ export const GET = withJWTAuthHandler(
       const subscriptionKeysResponse = await retrieveManageSubscriptionApiKeys(
         params.subscriptionId,
       );
-      console.log("subscriptionKeysResponse", subscriptionKeysResponse);
       return sanitizedNextResponseJson(subscriptionKeysResponse);
     } catch (error) {
       handlerErrorLog(
