@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.31.3
+
+### Patch Changes
+
+- befc1edb: remove unwanted log
+
 ## 1.31.2
 
 ### Patch Changes
