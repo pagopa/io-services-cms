@@ -122,6 +122,12 @@ vi.mock("../../../utils/check-service", () => ({
   checkService: vi.fn(() => checkServiceMock),
 }));
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -135,7 +141,7 @@ describe("uploadServiceLogo", () => {
     fsmPublicationClient,
     subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
+    assetBlobService: mockBlobService,
     serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 

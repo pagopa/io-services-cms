@@ -25,6 +25,12 @@ import { IConfig } from "../../../config";
 import { ReviewRequest } from "../../../generated/api/ReviewRequest";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(

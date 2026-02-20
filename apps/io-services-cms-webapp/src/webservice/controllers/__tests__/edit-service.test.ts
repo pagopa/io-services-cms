@@ -56,6 +56,7 @@ const {
   getLoggerMock,
   fsmLifecycleClientMock,
   fsmLifecycleClientCreatorMock,
+  cosmosdbInstanceMock,
 } = vi.hoisted(() => {
   const payloadToItemResponseMock = "payloadToItemResponse";
   const itemToResponseResponseMock = { value: "itemToResponseResponse" };
@@ -84,6 +85,9 @@ const {
     getLoggerMock: vi.fn(() => ({ logErrorResponse: logErrorResponseMock })),
     fsmLifecycleClientMock,
     fsmLifecycleClientCreatorMock: vi.fn(() => fsmLifecycleClientMock),
+    cosmosdbInstanceMock: {
+      container: vi.fn(() => ({})),
+    },
   };
 });
 
@@ -102,6 +106,10 @@ vi.mock("../../../utils/converters/service-lifecycle-converters", () => ({
 
 vi.mock("../../../utils/logger", () => ({
   getLogger: getLoggerMock,
+}));
+
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: cosmosdbInstanceMock,
 }));
 
 const aManageSubscriptionId = "MANAGE-123";
