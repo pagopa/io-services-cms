@@ -68,6 +68,14 @@
         "eslint.options": {
           "resolvePluginsRelativeTo": "."
         }
+      },
+      "mcp": {
+        "servers": {
+          "dx": {
+            "type": "http",
+            "url": "https://api.dx.pagopa.it/mcp"
+          }
+        }
       }
     }
   }
