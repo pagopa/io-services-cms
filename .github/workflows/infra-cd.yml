@@ -67,14 +67,15 @@ jobs:
         run: |
           bash ./terraform.sh plan ${{ env.AZURE_ENVIRONMENT }} -lock-timeout=3000s -out=tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }} -input=false
 
-      - uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392
-        id: artifact_upload
-        name: Upload plans as artifacts
+      - name: Upload plans as artifacts
+        uses: pagopa/dx/actions/terraform-plan-upload@main
+        env:
+          ARTIFACT_ENC_KEY: ${{ secrets.ARTIFACT_ENC_KEY }}
         with:
-          name: tfplan-output
-          if-no-files-found: error
-          path: |
-            **/tfplan-prod-*
+          plan-file: tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
+          working-directory: ${{ env.DIR }}
+          artifact-name: terraform-plan
+          retention-days: 1
 
     outputs:
       terraform_version: ${{ steps.env_tf_version.outputs.terraform_version}}
@@ -98,11 +99,14 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110
-        id: artifact_download
-        name: Download plans as artifact
+      - name: Download plans as artifact
+        uses: pagopa/dx/actions/terraform-plan-download@main
+        env:
+          ARTIFACT_ENC_KEY: ${{ secrets.ARTIFACT_ENC_KEY }}
         with:
-          name: tfplan-output
+          plan-file: tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }}
+          working-directory: ${{ env.DIR }}
+          artifact-name: terraform-plan
 
       - name: Azure Login
         id: az_login
