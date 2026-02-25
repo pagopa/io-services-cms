@@ -30,7 +30,7 @@
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
     // Use interactive bash (-i) to load NVM and the correct PATH
-    "install-yarn-and-deps": "/bin/bash -i -c 'corepack enable && pnpm install'",
+    "install-deps": "/bin/bash -i -c 'corepack enable && pnpm install'",
     // Do the same for pre-commit for safety
     "install-pre-commit": "/bin/bash -i -c 'pre-commit install --install-hooks'"
   },
@@ -64,8 +64,18 @@
         "ms-azuretools.vscode-cosmosdb"
       ],
       "settings": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "eslint.run": "onSave", // Forces linting logic to trigger when saving
+        "eslint.options": {
+          "resolvePluginsRelativeTo": "."
+        }
+      },
+      "mcp": {
+        "servers": {
+          "dx": {
+            "type": "http",
+            "url": "https://api.dx.pagopa.it/mcp"
+          }
+        }
       }
     }
   }
