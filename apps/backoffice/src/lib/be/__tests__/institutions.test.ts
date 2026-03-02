@@ -11,7 +11,7 @@ import {
 } from "../../../generated/selfcare/UserGroupResource";
 import { GroupNotFoundError } from "../errors";
 import {
-  getDelegatedInstitutions,
+  retrieveInstitutionAggregates,
   getUserInstitutionProducts,
   groupExists,
   retrieveInstitution,
@@ -388,7 +388,7 @@ describe("Institutions", () => {
     });
   });
 
-  describe("getDelegatedInstitutions", () => {
+  describe("retrieveInstitutionAggregates", () => {
     const institutionId = "institutionId";
     const size = 5;
     const page = 1;
@@ -400,7 +400,7 @@ describe("Institutions", () => {
       });
 
       // when
-      const result = await getDelegatedInstitutions(
+      const result = await retrieveInstitutionAggregates(
         institutionId,
         size,
         page,
@@ -435,7 +435,7 @@ describe("Institutions", () => {
 
       // when and then
       expect(
-        getDelegatedInstitutions(institutionId, size, page, search),
+        retrieveInstitutionAggregates(institutionId, size, page, search),
       ).rejects.toThrowError(error);
       expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
         institutionId,

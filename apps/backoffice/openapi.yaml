@@ -987,9 +987,9 @@ paths:
     get:
       tags:
         - institutions
-      summary: Retrieve all active delegated institutions
-      description: Retrieve all active delegated institutions for the given institution (aggregator)
-      operationId: getDelegatedInstitutions
+      summary: Retrieve all active aggregated institutions
+      description: Retrieve all active aggregated institutions for the given aggregator
+      operationId: retrieveInstitutionAggregates
       security:
         - cookieAuth: []
       parameters:

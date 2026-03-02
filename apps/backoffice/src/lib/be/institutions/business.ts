@@ -194,7 +194,7 @@ export const getGroup = async (
   return toGroup(selfcareGroup);
 };
 
-export const getDelegatedInstitutions = async (
+export const retrieveInstitutionAggregates = async (
   institutionId: string,
   size?: number,
   page?: number,
