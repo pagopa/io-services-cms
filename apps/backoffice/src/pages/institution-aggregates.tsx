@@ -37,8 +37,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useState } from "react";
 
-const pageTitleLocaleKey = "routes.delegated-institutions.title";
-const pageDescriptionLocaleKey = "routes.delegated-institutions.description";
+const pageTitleLocaleKey = "routes.institution-aggregates.title";
+const pageDescriptionLocaleKey = "routes.institution-aggregates.description";
 
 const DEFAULT_PAGE_LIMIT = 10;
 
@@ -79,7 +79,7 @@ export default function DelegatedInstitutions() {
           {di.name}
         </Typography>
       ),
-      label: "routes.delegated-institutions.tableHeader.name",
+      label: "routes.institution-aggregates.tableHeader.name",
       name: "name",
     },
     {
@@ -99,7 +99,7 @@ export default function DelegatedInstitutions() {
           />
         </Box>
       ),
-      label: "routes.delegated-institutions.tableHeader.primaryKey",
+      label: "routes.institution-aggregates.tableHeader.primaryKey",
       name: "primary_key",
     },
     {
@@ -119,7 +119,7 @@ export default function DelegatedInstitutions() {
           />
         </Box>
       ),
-      label: "routes.delegated-institutions.tableHeader.secondaryKey",
+      label: "routes.institution-aggregates.tableHeader.secondaryKey",
       name: "secondary_key",
     },
   ];
@@ -321,7 +321,7 @@ export default function DelegatedInstitutions() {
 
   const getDelegatedInstitutions = () => {
     dipFetchData(
-      "getDelegatedInstitutions",
+      "retrieveInstitutionAggregates",
       {
         institutionId: session?.user?.institution.id as string,
         limit: pagination.limit,
@@ -397,7 +397,7 @@ export default function DelegatedInstitutions() {
         <EmptyStateLayer
           ctaLabel=""
           ctaRoute=""
-          emptyStateLabel="routes.delegated-institutions.empty"
+          emptyStateLabel="routes.institution-aggregates.empty"
         />
       ) : (
         <>
