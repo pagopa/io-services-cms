@@ -2,79 +2,39 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "generate": {
-      "inputs": [
-        "./openapi.yaml",
-        "./openapi/*.yaml"
-      ],
-      "outputs": [
-        "src/generated/**/*"
-      ],
+      "inputs": ["./openapi.yaml", "./openapi/*.yaml"],
+      "outputs": ["src/generated/**/*"],
       "outputLogs": "errors-only"
     },
     "build": {
-      "inputs": [
-        "src/**/*.ts"
-      ],
-      "outputs": [
-        "dist/**"
-      ],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "inputs": ["src/**/*.ts"],
+      "outputs": ["dist/**"],
+      "outputLogs": "new-only",
+      "dependsOn": ["generate", "^build"]
     },
     "typecheck": {
-      "inputs": [
-        "src/**/*.ts",
-        "tsconfig.json"
-      ],
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "inputs": ["src/**/*.ts", "tsconfig.json"],
+      "dependsOn": ["generate", "^build"]
     },
     "format": {},
     "lint": {
-      "inputs": [
-        "src/**/*.ts",
-        "eslintrc.*"
-      ]
+      "inputs": ["src/**/*.ts", "eslintrc.*"]
     },
     "test": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "package.json"
-      ],
-      "outputLogs": "errors-only",
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "package.json"],
+      "outputLogs": "new-only",
+      "dependsOn": ["generate", "^build"]
     },
     "test:integrations": {
-      "inputs": [
-        "__integrations__/**/*"
-      ],
-      "outputLogs": "errors-only",
-      "dependsOn": [
-        "^build"
-      ]
+      "inputs": ["__integrations__/**/*"],
+      "outputLogs": "new-only",
+      "dependsOn": ["^build"]
     },
     "coverage": {
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "package.json"
-      ],
-      "outputs": [
-        "coverage/*"
-      ],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "package.json"],
+      "outputs": ["coverage/*"],
       "outputLogs": "errors-only",
-      "dependsOn": [
-        "generate",
-        "^build"
-      ]
+      "dependsOn": ["generate", "^build"]
     }
   }
 }
