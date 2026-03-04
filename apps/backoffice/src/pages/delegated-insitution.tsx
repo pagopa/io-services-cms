@@ -37,8 +37,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useState } from "react";
 
-const pageTitleLocaleKey = "routes.institution-aggregates.title";
-const pageDescriptionLocaleKey = "routes.institution-aggregates.description";
+const pageTitleLocaleKey = "routes.delegated-institutions.title";
+const pageDescriptionLocaleKey = "routes.delegated-institutions.description";
 
 const DEFAULT_PAGE_LIMIT = 10;
 
@@ -79,7 +79,7 @@ export default function DelegatedInstitutions() {
           {di.name}
         </Typography>
       ),
-      label: "routes.institution-aggregates.tableHeader.name",
+      label: "routes.delegated-institutions.tableHeader.name",
       name: "name",
     },
     {
@@ -99,7 +99,7 @@ export default function DelegatedInstitutions() {
           />
         </Box>
       ),
-      label: "routes.institution-aggregates.tableHeader.primaryKey",
+      label: "routes.delegated-institutions.tableHeader.primaryKey",
       name: "primary_key",
     },
     {
@@ -119,7 +119,7 @@ export default function DelegatedInstitutions() {
           />
         </Box>
       ),
-      label: "routes.institution-aggregates.tableHeader.secondaryKey",
+      label: "routes.delegated-institutions.tableHeader.secondaryKey",
       name: "secondary_key",
     },
   ];
@@ -397,7 +397,7 @@ export default function DelegatedInstitutions() {
         <EmptyStateLayer
           ctaLabel=""
           ctaRoute=""
-          emptyStateLabel="routes.institution-aggregates.empty"
+          emptyStateLabel="routes.delegated-institutions.empty"
         />
       ) : (
         <>
