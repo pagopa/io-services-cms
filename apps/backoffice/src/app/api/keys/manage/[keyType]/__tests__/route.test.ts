@@ -11,46 +11,46 @@ const mocks: {
 } = vi.hoisted(() => ({
   apiKeys: {
     primary_key: "aPrimaryKey",
-    secondary_key: "aSecondaryKey",
+    secondary_key: "aSecondaryKey"
   },
-  jwtMock: {
+  jwtMock: ({
     institution: { role: "admin", id: "institutionId" },
     permissions: ["permission1", "permission2"],
     parameters: {
       userEmail: "anEmail@email.it",
       userId: "anUserId",
-      subscriptionId: "aSubscriptionId",
-    },
-  } as unknown as BackOfficeUser,
+      subscriptionId: "aSubscriptionId"
+    }
+  } as unknown) as BackOfficeUser
 }));
 
 vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
-    GROUP_AUTHZ_ENABLED: "true",
+    GROUP_AUTHZ_ENABLED: "true"
   };
 });
 
 const { getToken } = vi.hoisted(() => ({
-  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
+  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock))
 }));
 
 const { regenerateManageSubscritionApiKey } = vi.hoisted(() => ({
   regenerateManageSubscritionApiKey: vi
     .fn()
-    .mockReturnValue(Promise.resolve(mocks.apiKeys)),
+    .mockReturnValue(Promise.resolve(mocks.apiKeys))
 }));
 
-vi.mock("@/lib/be/keys/business", () => ({
-  regenerateManageSubscritionApiKey,
+vi.mock("@/lib/be/subscriptions/business", () => ({
+  regenerateManageSubscritionApiKey
 }));
 
 vi.mock("next-auth/jwt", async () => {
   const actual = await vi.importActual("next-auth/jwt");
   return {
     ...(actual as any),
-    getToken,
+    getToken
   };
 });
 
@@ -62,7 +62,7 @@ afterEach(() => {
 describe("Regenerate Manage Keys API", () => {
   it("should return 200", async () => {
     regenerateManageSubscritionApiKey.mockReturnValueOnce(
-      Promise.resolve(mocks.apiKeys),
+      Promise.resolve(mocks.apiKeys)
     );
     getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
 
@@ -106,8 +106,8 @@ describe("Regenerate Manage Keys API", () => {
     getToken.mockReturnValueOnce(
       Promise.resolve({
         ...mocks.jwtMock,
-        institution: { ...mocks.jwtMock.institution, role: "operator" },
-      }),
+        institution: { ...mocks.jwtMock.institution, role: "operator" }
+      })
     );
 
     // Mock NextRequest

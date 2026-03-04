@@ -4,8 +4,8 @@ import {
   HTTP_STATUS_NOT_FOUND,
 } from "@/config/constants";
 import { ApiKeyNotFoundError, handlerErrorLog } from "@/lib/be/errors";
-import { retrieveManageSubscriptionApiKeys } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { retrieveManageSubscriptionApiKeys } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 

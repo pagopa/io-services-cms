@@ -23,7 +23,7 @@ const mock: {
   isAdminMock: vi.fn(() => true),
   userAuthz: vi.fn(() => ({
     isGroupAllowed: mock.isGroupAllowed,
-    isAdmin: mock.isAdminMock,
+    isAdmin: mock.isAdminMock
   })),
   retrieveManageSubscriptionAuthorizedCIDRs: vi.fn(),
   upsertManageSubscriptionAuthorizedCIDRs: vi.fn(),
@@ -31,33 +31,32 @@ const mock: {
     (
       handler: (
         nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any },
-      ) => Promise<NextResponse> | Promise<Response>,
-    ) =>
-      async (nextRequest: NextRequest, { params }: { params: {} }) =>
-        handler(nextRequest, {
-          backofficeUser: aBackofficeUser,
-          params,
-        }),
-  ),
+        context: { backofficeUser: BackOfficeUser; params: any }
+      ) => Promise<NextResponse> | Promise<Response>
+    ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
+      handler(nextRequest, {
+        backofficeUser: aBackofficeUser,
+        params
+      })
+  )
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: mock.withJWTAuthHandler,
+  withJWTAuthHandler: mock.withJWTAuthHandler
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: mock.userAuthz,
+  userAuthz: mock.userAuthz
 }));
 
 vi.mock("@/lib/be/req-res-utils", () => ({
-  parseBody: mock.parseBody,
+  parseBody: mock.parseBody
 }));
 
-vi.mock("@/lib/be/keys/business", () => ({
+vi.mock("@/lib/be/subscriptions/business", () => ({
   retrieveManageSubscriptionAuthorizedCIDRs:
     mock.retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs:
-    mock.upsertManageSubscriptionAuthorizedCIDRs,
+    mock.upsertManageSubscriptionAuthorizedCIDRs
 }));
 
 afterEach(() => {
@@ -75,24 +74,24 @@ describe("Authorized CIDRs API", () => {
 
       // when
       const result = await GET(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
       const jsonBody = await result.json();
       expect(result.status).toBe(403);
       expect(jsonBody.detail).toEqual(
-        "Requested subscription is out of your scope",
+        "Requested subscription is out of your scope"
       );
       expect(mock.userAuthz).toHaveBeenCalledOnce();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
 
@@ -104,12 +103,12 @@ describe("Authorized CIDRs API", () => {
       mock.isGroupAllowed.mockReturnValueOnce(true);
       const error = new Error();
       mock.retrieveManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
-        error,
+        error
       );
 
       // when
       const result = await GET(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -122,13 +121,13 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledWith(subscriptionId);
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
 
@@ -139,12 +138,12 @@ describe("Authorized CIDRs API", () => {
       const subscriptionId = `MANAGE-GROUP-${groupId}`;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       mock.retrieveManageSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(
-        anAuthrizedCIDRs,
+        anAuthrizedCIDRs
       );
 
       // when
       const result = await GET(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -156,13 +155,13 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
       expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledWith(subscriptionId);
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
   });
@@ -177,7 +176,7 @@ describe("Authorized CIDRs API", () => {
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -190,10 +189,10 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.parseBody).not.toHaveBeenCalled();
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
 
@@ -208,7 +207,7 @@ describe("Authorized CIDRs API", () => {
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -222,13 +221,13 @@ describe("Authorized CIDRs API", () => {
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
-        SubscriptionCIDRs,
+        SubscriptionCIDRs
       );
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
 
@@ -244,7 +243,7 @@ describe("Authorized CIDRs API", () => {
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -259,17 +258,17 @@ describe("Authorized CIDRs API", () => {
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
-        SubscriptionCIDRs,
+        SubscriptionCIDRs
       );
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(mock.upsertManageSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
         subscriptionId,
-        anAuthrizedCIDRs,
+        anAuthrizedCIDRs
       );
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
 
@@ -281,12 +280,12 @@ describe("Authorized CIDRs API", () => {
       mock.isGroupAllowed.mockReturnValueOnce(true);
       mock.parseBody.mockResolvedValueOnce({ cidrs: anAuthrizedCIDRs });
       mock.upsertManageSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(
-        anAuthrizedCIDRs,
+        anAuthrizedCIDRs
       );
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -300,17 +299,17 @@ describe("Authorized CIDRs API", () => {
       expect(mock.parseBody).toHaveBeenCalledOnce();
       expect(mock.parseBody).toHaveBeenCalledWith(
         nextRequest,
-        SubscriptionCIDRs,
+        SubscriptionCIDRs
       );
       expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs,
+        mock.upsertManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(mock.upsertManageSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
         subscriptionId,
-        anAuthrizedCIDRs,
+        anAuthrizedCIDRs
       );
       expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs,
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
     });
   });

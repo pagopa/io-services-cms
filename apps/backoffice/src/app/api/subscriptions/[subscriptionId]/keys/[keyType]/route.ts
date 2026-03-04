@@ -8,8 +8,8 @@ import {
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { regenerateManageSubscritionApiKey } from "@/lib/be/keys/business";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import { regenerateManageSubscritionApiKey } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";

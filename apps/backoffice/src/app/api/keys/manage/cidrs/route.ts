@@ -6,11 +6,11 @@ import {
 import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { userAuthz } from "@/lib/be/authz";
 import { handleForbiddenErrorResponse, handlerErrorLog } from "@/lib/be/errors";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscriptionAuthorizedCIDRs,
-} from "@/lib/be/keys/business";
-import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+} from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
