@@ -3,7 +3,7 @@ import { ApiKeysGroups } from "@/components/api-keys/api-keys-groups";
 import { PageHeader } from "@/components/headers";
 import { getConfiguration } from "@/config";
 import { Cidr } from "@/generated/api/Cidr";
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
+import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
@@ -12,12 +12,12 @@ import { ROUTES } from "@/lib/routes";
 import {
   hasManageKeyGroup,
   hasManageKeyRoot,
-  isAdmin,
+  isAdmin
 } from "@/utils/auth-util";
 import {
   trackApiKeyPageEvent,
   trackGroupKeyGenerateStartEvent,
-  trackManageKeyRegenerateEvent,
+  trackManageKeyRegenerateEvent
 } from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
 import { useRouter } from "next/router";
@@ -36,7 +36,9 @@ export default function Keys() {
   const router = useRouter();
   const { data: session } = useSession();
   const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
-  const { data: acData, fetchData: acFetchData } = useFetch<ManageKeyCIDRs>();
+  const { data: acData, fetchData: acFetchData } = useFetch<
+    SubscriptionCIDRs
+  >();
 
   const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
@@ -44,7 +46,7 @@ export default function Keys() {
   const handleRegenerateKey = (keyType: SubscriptionKeyTypeEnum) => {
     trackManageKeyRegenerateEvent(keyType);
     mkFetchData("regenerateManageKey", { keyType }, SubscriptionKeys, {
-      notify: "all",
+      notify: "all"
     });
   };
 
@@ -52,8 +54,8 @@ export default function Keys() {
     acFetchData(
       "updateManageKeysAuthorizedCidrs",
       { body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) } },
-      ManageKeyCIDRs,
-      { notify: "all" },
+      SubscriptionCIDRs,
+      { notify: "all" }
     );
   };
 
@@ -65,8 +67,8 @@ export default function Keys() {
   useEffect(() => {
     if (showManageKeyRoot) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
-      acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
-        notify: "errors",
+      acFetchData("getManageKeysAuthorizedCidrs", {}, SubscriptionCIDRs, {
+        notify: "errors"
       });
     }
     trackApiKeyPageEvent();
@@ -89,7 +91,7 @@ export default function Keys() {
             title={t("routes.keys.manage.master.title")}
           />
           <AuthorizedCidrs
-            cidrs={acData?.cidrs as unknown as string[]}
+            cidrs={(acData?.cidrs as unknown) as string[]}
             description="routes.keys.authorizedCidrs.description"
             editable={!(GROUP_APIKEY_ENABLED && !isAdmin(session))}
             onSaveClick={handleUpdateCidrs}
@@ -105,7 +107,7 @@ export default function Keys() {
                 `${getConfiguration().SELFCARE_URL}/dashboard/${
                   session?.user?.institution.id
                 }/groups/add`,
-                "_blank",
+                "_blank"
               )
             }
             onGenerateClick={handleGenerateGroupApiKey}
@@ -121,8 +123,8 @@ export async function getStaticProps({ locale }: any) {
   return {
     props: {
       // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
+      ...(await serverSideTranslations(locale))
+    }
   };
 }
 
