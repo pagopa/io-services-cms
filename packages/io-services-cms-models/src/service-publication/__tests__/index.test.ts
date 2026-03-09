@@ -10,8 +10,6 @@ import { ItemType, getFsmClient } from "..";
 import {
   FSMStore,
   FsmItemNotFoundError,
-  FsmStoreFetchError,
-  FsmStoreSaveError,
   WithState,
   stores,
 } from "../../lib/fsm";
@@ -188,7 +186,6 @@ describe("apply", () => {
     })();
 
     if (E.isLeft(result)) {
-      console.log(result);
       throw new Error(`Expecting a success`);
     }
     const { right: value } = result;
@@ -241,7 +238,6 @@ describe("apply", () => {
     })();
 
     if (E.isLeft(result)) {
-      console.log(result);
       throw new Error(`Expecting a success`);
     }
     const { right: value } = result;
@@ -322,12 +318,10 @@ describe("override", () => {
       ...aService,
       data: { ...aService.data, name: " a name with spaces " },
     };
-    store
-      .inspect()
-      .set(aServiceId, {
-        ...aServiceWithSpaces,
-        fsm: { state: "unpublished" },
-      });
+    store.inspect().set(aServiceId, {
+      ...aServiceWithSpaces,
+      fsm: { state: "unpublished" },
+    });
 
     const item = {
       ...aServiceWithSpaces,

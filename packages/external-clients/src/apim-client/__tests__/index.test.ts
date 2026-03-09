@@ -584,8 +584,8 @@ describe("ApimService Test", () => {
         name: "apim error",
         details: {
           error: {
-            message: "managed error from apim"
-          }
+            message: "managed error from apim",
+          },
         },
       };
       mockApimClient.subscription.delete.mockRejectedValueOnce(error);
@@ -845,7 +845,6 @@ describe("ApimService Test", () => {
       )();
 
       // expect result
-      console.log(result);
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left).toEqual({

@@ -109,9 +109,5 @@ describe("Service Lifecycle Avro Formatter", () => {
     );
 
     expect(E.isLeft(res)).toBeTruthy();
-
-    if (E.isLeft(res)) {
-      console.log(res.left);
-    }
   });
 });
