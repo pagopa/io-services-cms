@@ -4,7 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../../../types/next-auth";
 import { PUT } from "../route";
 
-const backofficeUserMock = { permissions: {} } as BackOfficeUser;
+const backofficeUserMock = {
+  parameters: { userId: "userId" },
+  permissions: {}
+} as BackOfficeUser;
 
 const {
   userAuthzMock,
@@ -49,11 +52,13 @@ afterEach(() => {
 });
 
 describe("regenerateManageSubscriptionKey", () => {
+  const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
+
   it("should return an unauthorized response when provided groupId is not allowed", async () => {
     // given
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
-    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isAdminMock.mockReturnValueOnce(false);
 
     // when
@@ -76,7 +81,7 @@ describe("regenerateManageSubscriptionKey", () => {
     // given
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
-    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isAdminMock.mockReturnValueOnce(true);
     const keyType = "invalid";
 
@@ -101,7 +106,7 @@ describe("regenerateManageSubscriptionKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const keyType = "primary";
     const groupId = "groupId";
-    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isGroupAllowedMock.mockReturnValueOnce(true);
     const expectedResponse = { foo: "bar" };
     regenerateManageSubscritionApiKeyMock.mockResolvedValueOnce(
@@ -123,6 +128,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(isAdminMock).toHaveBeenCalledWith();
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
+      backofficeUserMock.parameters.userId,
       subscriptionId,
       keyType
     );
@@ -138,7 +144,7 @@ describe("regenerateManageSubscriptionKey", () => {
       const nextRequest = new NextRequest("http://localhost");
       const keyType = "primary";
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       isAdminMock.mockReturnValueOnce(true);
       regenerateManageSubscritionApiKeyMock.mockRejectedValueOnce(error);
 
@@ -158,6 +164,7 @@ describe("regenerateManageSubscriptionKey", () => {
       expect(isAdminMock).toHaveBeenCalledWith();
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
+        backofficeUserMock.parameters.userId,
         subscriptionId,
         keyType
       );

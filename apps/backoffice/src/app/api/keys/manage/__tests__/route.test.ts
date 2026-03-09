@@ -48,17 +48,18 @@ afterEach(() => {
 
 describe("Retrieve Manage Keys API", () => {
   it("should forward request", async () => {
-    // Mock NextRequest
+    // given
     getManageSubscriptionKeysHandlerMock.mockResolvedValueOnce(
       NextResponse.json(mocks.apiKeys, { status: 200 })
     );
     const request = new NextRequest(new URL("http://localhost"));
 
+    // when
     const result = await GET(request, {});
-    //extract jsonBody from NextResponse
-    const jsonResponse = await new Response(result.body).json();
 
+    // then
     expect(result.status).toBe(200);
+    const jsonResponse = await new Response(result.body).json();
     expect(jsonResponse).toStrictEqual(mocks.apiKeys);
     expect(getManageSubscriptionKeysHandlerMock).toHaveBeenCalledOnce();
     expect(getManageSubscriptionKeysHandlerMock).toHaveBeenCalledWith(request, {

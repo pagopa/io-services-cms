@@ -38,6 +38,7 @@ export const regenerateManageSubscriptionKeyHandler = async (
     }
 
     const manageKeysResponse = await regenerateManageSubscritionApiKey(
+      backofficeUser.parameters.userId,
       params.subscriptionId,
       maybeDecodedKeyType.right
     );

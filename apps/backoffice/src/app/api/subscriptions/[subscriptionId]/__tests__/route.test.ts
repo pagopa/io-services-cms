@@ -7,14 +7,14 @@ import { DELETE } from "../route";
 import { SubscriptionOwnershipError } from "../../../../../lib/be/errors";
 
 const backofficeUserMock = {
-  parameters: { userId: "userId" },
+  parameters: { userId: "userId" }
 } as BackOfficeUser;
 
 const {
   deleteManageSubscriptionMock,
   isAdminMock,
   userAuthzMock,
-  withJWTAuthHandlerMock,
+  withJWTAuthHandlerMock
 } = vi.hoisted(() => {
   const isAdminMock = vi.fn(() => true);
   return {
@@ -25,26 +25,25 @@ const {
       (
         handler: (
           nextRequest: NextRequest,
-          context: { backofficeUser: BackOfficeUser; params: any },
-        ) => Promise<NextResponse> | Promise<Response>,
-      ) =>
-        async (nextRequest: NextRequest, { params }: { params: {} }) =>
-          handler(nextRequest, {
-            backofficeUser: backofficeUserMock,
-            params,
-          }),
-    ),
+          context: { backofficeUser: BackOfficeUser; params: any }
+        ) => Promise<NextResponse> | Promise<Response>
+      ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
+        handler(nextRequest, {
+          backofficeUser: backofficeUserMock,
+          params
+        })
+    )
   };
 });
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  deleteManageSubscription: deleteManageSubscriptionMock,
+  deleteManageSubscription: deleteManageSubscriptionMock
 }));
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock,
+  withJWTAuthHandler: withJWTAuthHandlerMock
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock,
+  userAuthz: userAuthzMock
 }));
 
 beforeEach(() => {
@@ -82,7 +81,7 @@ describe("Delete Manage Subscription API", () => {
     expect(result.status).toBe(403);
     const jsonBody = await result.json();
     expect(jsonBody.detail).toEqual(
-      "Only MANAGE_GROUP Subscriptions can be deleted",
+      "Only MANAGE_GROUP Subscriptions can be deleted"
     );
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -111,7 +110,7 @@ describe("Delete Manage Subscription API", () => {
     expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
     expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
-      { subscriptionId },
+      subscriptionId
     );
   });
 
@@ -135,7 +134,7 @@ describe("Delete Manage Subscription API", () => {
     expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
     expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
-      { subscriptionId },
+      subscriptionId
     );
   });
 
@@ -158,7 +157,7 @@ describe("Delete Manage Subscription API", () => {
     expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
     expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
-      { subscriptionId },
+      subscriptionId
     );
   });
 });

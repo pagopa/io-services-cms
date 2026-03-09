@@ -6,7 +6,8 @@ import {
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handleNotFoundErrorResponse,
-  handlerErrorLog
+  handlerErrorLog,
+  SubscriptionOwnershipError
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/subscriptions/business";
@@ -35,20 +36,25 @@ export const getManageSubscriptionKeysHandler = async (
       "Requested subscription is out of your scope"
     );
   }
-  // TODO: add subscription ownerId check. To do that we need to fetch first the subscription in order to get its ownerId and then check equality with backofficeUser.parameters.userId
   try {
     const subscriptionKeysResponse = await retrieveManageSubscriptionApiKeys(
+      backofficeUser.parameters.userId,
       params.subscriptionId
     );
     return sanitizedNextResponseJson(subscriptionKeysResponse);
   } catch (error) {
-    handlerErrorLog(
-      `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${params.subscriptionId}`,
-      error
-    );
     if (error instanceof ApiKeyNotFoundError) {
       return handleNotFoundErrorResponse("ApiKeyNotFoundError", error);
+    } else if (error instanceof SubscriptionOwnershipError) {
+      return handleForbiddenErrorResponse(
+        "You can only delete subscriptions that you own"
+      );
+    } else {
+      handlerErrorLog(
+        `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${params.subscriptionId}`,
+        error
+      );
+      return handleInternalErrorResponse("ManageKeyRetrieveError", error);
     }
-    return handleInternalErrorResponse("ManageKeyRetrieveError", error);
   }
 };

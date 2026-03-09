@@ -59,17 +59,18 @@ afterEach(() => {
 describe("Authorized CIDRs API", () => {
   describe("getManageKeysAuthorizedCidrs", () => {
     it("should forward request", async () => {
+      // given
       getManageSubscriptionAuthorizedCidrsHandlerMock.mockResolvedValueOnce(
         NextResponse.json({ cidrs: mocks.authrizedCIDRs }, { status: 200 })
       );
-      // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when
       const result = await GET(request, {});
-      //extract jsonBody from NextResponse
-      const jsonResponse = await new Response(result.body).json();
 
+      // then
       expect(result.status).toBe(200);
+      const jsonResponse = await new Response(result.body).json();
       expect(jsonResponse).toEqual({ cidrs: mocks.authrizedCIDRs });
       expect(
         getManageSubscriptionAuthorizedCidrsHandlerMock
@@ -85,20 +86,21 @@ describe("Authorized CIDRs API", () => {
 
   describe("updateManageKeysAuthorizedCidrs", () => {
     it("should forward request", async () => {
+      // given
       updateManageSubscriptionAuthorizedCidrsHandlerMock.mockResolvedValueOnce(
         NextResponse.json({ cidrs: mocks.authrizedCIDRs }, { status: 200 })
       );
-      // Mock NextRequest
       const request = new NextRequest(new URL("http://localhost"), {
         method: "PUT",
         body: JSON.stringify({ cidrs: mocks.authrizedCIDRs })
       });
 
+      // when
       const result = await PUT(request, {});
-      //extract jsonBody from NextResponse
-      const jsonResponse = await new Response(result.body).json();
 
+      // then
       expect(result.status).toBe(200);
+      const jsonResponse = await new Response(result.body).json();
       expect(jsonResponse).toEqual({ cidrs: mocks.authrizedCIDRs });
       expect(
         updateManageSubscriptionAuthorizedCidrsHandlerMock

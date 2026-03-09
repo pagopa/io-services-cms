@@ -6,7 +6,10 @@ import { Cidr } from "../../../../../../generated/api/Cidr";
 import { SubscriptionCIDRs } from "../../../../../../generated/api/SubscriptionCIDRs";
 import { GET, PUT } from "../route";
 
-const aBackofficeUser = { permissions: {} } as BackOfficeUser;
+const aBackofficeUser = {
+  parameters: { userId: "userId" },
+  permissions: {}
+} as BackOfficeUser;
 const anAuthrizedCIDRs = ["127.0.0.1" as Cidr];
 
 const mock: {
@@ -64,12 +67,13 @@ afterEach(() => {
 });
 
 describe("Authorized CIDRs API", () => {
+  const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
   describe("getManageSubscriptionAuthorizedCidrs", () => {
     it("should return an unauthorized response when provided group is not allowed", async () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(false);
 
       // when
@@ -99,7 +103,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       const error = new Error();
       mock.retrieveManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
@@ -125,7 +129,7 @@ describe("Authorized CIDRs API", () => {
       ).toHaveBeenCalledOnce();
       expect(
         mock.retrieveManageSubscriptionAuthorizedCIDRs
-      ).toHaveBeenCalledWith(subscriptionId);
+      ).toHaveBeenCalledWith(aBackofficeUser.parameters.userId, subscriptionId);
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
@@ -135,7 +139,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       mock.retrieveManageSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(
         anAuthrizedCIDRs
@@ -159,7 +163,7 @@ describe("Authorized CIDRs API", () => {
       ).toHaveBeenCalledOnce();
       expect(
         mock.retrieveManageSubscriptionAuthorizedCIDRs
-      ).toHaveBeenCalledWith(subscriptionId);
+      ).toHaveBeenCalledWith(aBackofficeUser.parameters.userId, subscriptionId);
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
@@ -171,7 +175,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isAdminMock.mockReturnValueOnce(false);
 
       // when
@@ -200,7 +204,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       const error = new Error("message");
       mock.parseBody.mockRejectedValueOnce(error);
@@ -235,7 +239,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       mock.parseBody.mockResolvedValueOnce({ cidrs: anAuthrizedCIDRs });
       const error = new Error();
@@ -264,6 +268,7 @@ describe("Authorized CIDRs API", () => {
         mock.upsertManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(mock.upsertManageSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
+        aBackofficeUser.parameters.userId,
         subscriptionId,
         anAuthrizedCIDRs
       );
@@ -276,7 +281,7 @@ describe("Authorized CIDRs API", () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       mock.isGroupAllowed.mockReturnValueOnce(true);
       mock.parseBody.mockResolvedValueOnce({ cidrs: anAuthrizedCIDRs });
       mock.upsertManageSubscriptionAuthorizedCIDRs.mockResolvedValueOnce(
@@ -305,6 +310,7 @@ describe("Authorized CIDRs API", () => {
         mock.upsertManageSubscriptionAuthorizedCIDRs
       ).toHaveBeenCalledOnce();
       expect(mock.upsertManageSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
+        aBackofficeUser.parameters.userId,
         subscriptionId,
         anAuthrizedCIDRs
       );

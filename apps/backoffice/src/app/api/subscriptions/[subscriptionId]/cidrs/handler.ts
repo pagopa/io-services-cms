@@ -15,7 +15,6 @@ import {
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 import { NextRequest, NextResponse } from "next/server";
 
 export const getManageSubscriptionAuthorizedCidrsHandler = async (
@@ -39,9 +38,9 @@ export const getManageSubscriptionAuthorizedCidrsHandler = async (
       "Requested subscription is out of your scope"
     );
   }
-  // TODO: add subscription ownerId check. To do that we need to fetch first the subscription in order to get its ownerId and then check equality with backofficeUser.parameters.userId
   try {
     const authorizedCIDRsResponse = await retrieveManageSubscriptionAuthorizedCIDRs(
+      backofficeUser.parameters.userId,
       params.subscriptionId
     );
 
@@ -70,7 +69,6 @@ export const updateManageSubscriptionAuthorizedCidrsHandler = async (
   if (!userAuthz(backofficeUser).isAdmin()) {
     return handleForbiddenErrorResponse("Role not authorized");
   }
-  // TODO: add subscription ownerId check. To do that we need to fetch first the subscription in order to get its ownerId and then check equality with backofficeUser.parameters.userId
   let requestPayload;
   try {
     requestPayload = await parseBody(request, SubscriptionCIDRs);
@@ -81,6 +79,7 @@ export const updateManageSubscriptionAuthorizedCidrsHandler = async (
   }
   try {
     const authorizedCIDRsResponse = await upsertManageSubscriptionAuthorizedCIDRs(
+      backofficeUser.parameters.userId,
       params.subscriptionId,
       requestPayload.cidrs
     );
