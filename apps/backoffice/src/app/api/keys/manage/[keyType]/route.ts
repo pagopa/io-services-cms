@@ -11,14 +11,14 @@ export const PUT = withJWTAuthHandler(
     request: NextRequest,
     {
       backofficeUser,
-      params
-    }: { backofficeUser: BackOfficeUserEnriched; params: { keyType: string } }
+      params,
+    }: { backofficeUser: BackOfficeUserEnriched; params: { keyType: string } },
   ) =>
     regenerateManageSubscriptionKeyHandler(request, {
       backofficeUser,
       params: {
         keyType: params.keyType,
-        subscriptionId: backofficeUser.parameters.subscriptionId
-      }
-    })
+        subscriptionId: backofficeUser.parameters.subscriptionId,
+      },
+    }),
 );

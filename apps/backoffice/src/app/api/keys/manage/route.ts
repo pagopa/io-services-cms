@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
+
 import { getManageSubscriptionKeysHandler } from "../../subscriptions/[subscriptionId]/keys/handler";
 
 /**
@@ -10,10 +11,10 @@ import { getManageSubscriptionKeysHandler } from "../../subscriptions/[subscript
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched }
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) =>
     getManageSubscriptionKeysHandler(request, {
       backofficeUser,
-      params: { subscriptionId: backofficeUser.parameters.subscriptionId }
-    })
+      params: { subscriptionId: backofficeUser.parameters.subscriptionId },
+    }),
 );

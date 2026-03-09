@@ -1,6 +1,6 @@
 import {
   getManageSubscriptionAuthorizedCidrsHandler,
-  updateManageSubscriptionAuthorizedCidrsHandler
+  updateManageSubscriptionAuthorizedCidrsHandler,
 } from "@/app/api/subscriptions/[subscriptionId]/cidrs/handler";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";
@@ -12,14 +12,14 @@ import { NextRequest } from "next/server";
 export const GET = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched }
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) =>
     getManageSubscriptionAuthorizedCidrsHandler(request, {
       backofficeUser,
       params: {
-        subscriptionId: backofficeUser.parameters.subscriptionId
-      }
-    })
+        subscriptionId: backofficeUser.parameters.subscriptionId,
+      },
+    }),
 );
 
 /**
@@ -29,12 +29,12 @@ export const GET = withJWTAuthHandler(
 export const PUT = withJWTAuthHandler(
   async (
     request: NextRequest,
-    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched }
+    { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ) =>
     updateManageSubscriptionAuthorizedCidrsHandler(request, {
       backofficeUser,
       params: {
-        subscriptionId: backofficeUser.parameters.subscriptionId
-      }
-    })
+        subscriptionId: backofficeUser.parameters.subscriptionId,
+      },
+    }),
 );

@@ -12,7 +12,7 @@ import useFetch from "@/hooks/use-fetch";
 import { getBffApiClient } from "@/utils/bff-api-client";
 import {
   trackGroupKeyDeleteEvent,
-  trackGroupKeyRegenerateEvent
+  trackGroupKeyRegenerateEvent,
 } from "@/utils/mix-panel";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { KeyboardArrowDown } from "@mui/icons-material";
@@ -20,8 +20,8 @@ import { Box } from "@mui/material";
 import { ButtonNaked } from "@pagopa/mui-italia";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
-import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useRef, useState } from "react";
 
@@ -55,14 +55,14 @@ export interface RecordApiKeyValue {
 type ApiKeysGroupRecordset = Record<string, RecordApiKeyValue>;
 
 const convertArrayToRecordset = (
-  items: Subscription[]
+  items: Subscription[],
 ): ApiKeysGroupRecordset =>
   items.reduce((acc, item) => {
     acc[item.id] = {
       name: item.name,
       primary_key: "",
       secondary_key: "",
-      state: item.state
+      state: item.state,
     };
     return acc;
   }, {} as ApiKeysGroupRecordset);
@@ -82,23 +82,21 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const {
     data: mspData,
     fetchData: mspFetchData,
-    loading: mspLoading
+    loading: mspLoading,
   } = useFetch<SubscriptionPagination>();
-  const { data: keysData, fetchData: skFetchData } = useFetch<
-    SubscriptionKeys
-  >();
-  const { data: cidrsData, fetchData: scFetchData } = useFetch<
-    SubscriptionCIDRs
-  >();
+  const { data: keysData, fetchData: skFetchData } =
+    useFetch<SubscriptionKeys>();
+  const { data: cidrsData, fetchData: scFetchData } =
+    useFetch<SubscriptionCIDRs>();
   const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   const [apiKeys, setApiKeys] = useState<ApiKeysGroupRecordset | undefined>(
-    undefined
+    undefined,
   );
   const [pagination, setPagination] = useState({
     count: 0,
     limit: GET_MANAGE_GROUP_SUBSCRIPTIONS_LIMIT,
-    offset: 0
+    offset: 0,
   });
 
   const getManageGroupSubscriptions = () =>
@@ -107,42 +105,42 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       {
         kind: SubscriptionTypeEnum.MANAGE_GROUP,
         limit: pagination.limit,
-        offset: pagination.offset
+        offset: pagination.offset,
       },
       SubscriptionPagination,
       {
-        notify: "errors"
-      }
+        notify: "errors",
+      },
     );
 
   const handleLoadMore = () =>
     setPagination({
       ...pagination,
-      offset: pagination.offset + pagination.limit
+      offset: pagination.offset + pagination.limit,
     });
 
   const updateApiKey = (key: string, newValues: Partial<RecordApiKeyValue>) => {
-    setApiKeys(prevApiKeys => {
+    setApiKeys((prevApiKeys) => {
       const currentRecord = prevApiKeys?.[key] || {
         name: "",
         primary_key: "",
         secondary_key: "",
-        state: undefined
+        state: undefined,
       };
 
       return {
         ...prevApiKeys,
         [key]: {
           ...currentRecord,
-          ...newValues
-        }
+          ...newValues,
+        },
       };
     });
   };
 
   const handleOnExpandClick = async (
     expanded: boolean,
-    subscriptionId: string
+    subscriptionId: string,
   ) => {
     // UC: open collapse (expanded) for the first time, try to fetch until keys or cidrs are valorized
     if (
@@ -155,13 +153,13 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         name: apiKeys[subscriptionId].name,
         primary_key: "",
         secondary_key: "",
-        state: apiKeys[subscriptionId].state
+        state: apiKeys[subscriptionId].state,
       };
 
       const maybeKeys = await getBffApiClient().fetchData(
         "getManageSubscriptionKeys",
         { subscriptionId },
-        SubscriptionKeys
+        SubscriptionKeys,
       );
       if (E.isRight(maybeKeys)) {
         apiKeyObjValue.primary_key = maybeKeys.right.primary_key;
@@ -171,7 +169,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       const maybeCidrs = await getBffApiClient().fetchData(
         "getManageSubscriptionAuthorizedCidrs",
         { subscriptionId },
-        SubscriptionCIDRs
+        SubscriptionCIDRs,
       );
 
       if (E.isRight(maybeCidrs)) {
@@ -182,8 +180,8 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         enqueueSnackbar(
           buildSnackbarItem({
             severity: "error",
-            title: t("routes.keys.notifications.loadingError")
-          })
+            title: t("routes.keys.notifications.loadingError"),
+          }),
         );
       }
       updateApiKey(subscriptionId, apiKeyObjValue);
@@ -192,7 +190,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
 
   const handleRegenerateKey = (
     keyType: SubscriptionKeyTypeEnum,
-    subscriptionId: string
+    subscriptionId: string,
   ) => {
     trackGroupKeyRegenerateEvent(keyType);
     skFetchData(
@@ -201,8 +199,8 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       SubscriptionKeys,
       {
         notify: "all",
-        referenceId: subscriptionId
-      }
+        referenceId: subscriptionId,
+      },
     );
   };
 
@@ -211,10 +209,10 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       "updateManageSubscriptionAuthorizedCidrs",
       {
         body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) },
-        subscriptionId
+        subscriptionId,
       },
       SubscriptionCIDRs,
-      { notify: "all", referenceId: subscriptionId }
+      { notify: "all", referenceId: subscriptionId },
     );
   };
 
@@ -225,9 +223,9 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     const confirmApiKeyDeletion = await showDialog({
       confirmButtonLabel: t("buttons.delete"),
       message: t("routes.services.deleteApiKeyGroupModal.description", {
-        groupName: subscription.name
+        groupName: subscription.name,
       }),
-      title: t("routes.services.deleteApiKeyGroupModal.title")
+      title: t("routes.services.deleteApiKeyGroupModal.title"),
     });
     if (confirmApiKeyDeletion) {
       trackGroupKeyDeleteEvent(subscription.id);
@@ -236,8 +234,8 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         { subscriptionId: subscription.id },
         tt.unknown,
         {
-          notify: "all"
-        }
+          notify: "all",
+        },
       );
       // Reset api keys data and restart fetch from offset 0
       setApiKeys({});
@@ -257,7 +255,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         if (targetEl) {
           targetEl.scrollIntoView({
             behavior: "smooth",
-            block: "start"
+            block: "start",
           });
         }
       }, 500);
@@ -293,7 +291,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
     if (mspData?.value) {
       setApiKeys({
         ...apiKeys,
-        ...convertArrayToRecordset(mspData.value as Subscription[])
+        ...convertArrayToRecordset(mspData.value as Subscription[]),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

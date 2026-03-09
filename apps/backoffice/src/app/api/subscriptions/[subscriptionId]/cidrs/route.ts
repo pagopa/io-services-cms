@@ -1,7 +1,8 @@
 import { withJWTAuthHandler } from "@/lib/be/wrappers";
+
 import {
   getManageSubscriptionAuthorizedCidrsHandler,
-  updateManageSubscriptionAuthorizedCidrsHandler
+  updateManageSubscriptionAuthorizedCidrsHandler,
 } from "./handler";
 
 /**
@@ -9,7 +10,7 @@ import {
  * @description Retrieve manage key authorized CIDRs
  */
 export const GET = withJWTAuthHandler(
-  getManageSubscriptionAuthorizedCidrsHandler
+  getManageSubscriptionAuthorizedCidrsHandler,
 );
 
 /**
@@ -17,5 +18,5 @@ export const GET = withJWTAuthHandler(
  * @description Update manage key authorized CIDRs
  */
 export const PUT = withJWTAuthHandler(
-  updateManageSubscriptionAuthorizedCidrsHandler
+  updateManageSubscriptionAuthorizedCidrsHandler,
 );

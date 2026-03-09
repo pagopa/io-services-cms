@@ -3,11 +3,11 @@ import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { userAuthz } from "@/lib/be/authz";
 import {
   ApiKeyNotFoundError,
+  SubscriptionOwnershipError,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handleNotFoundErrorResponse,
   handlerErrorLog,
-  SubscriptionOwnershipError
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/subscriptions/business";
@@ -19,27 +19,27 @@ export const getManageSubscriptionKeysHandler = async (
   _: NextRequest,
   {
     backofficeUser,
-    params
+    params,
   }: {
     backofficeUser: BackOfficeUserEnriched;
     params: { subscriptionId: string };
-  }
+  },
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
   if (
     !userAuthz(backofficeUser).isGroupAllowed(
       params.subscriptionId.substring(
-        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length
-      )
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+      ),
     )
   ) {
     return handleForbiddenErrorResponse(
-      "Requested subscription is out of your scope"
+      "Requested subscription is out of your scope",
     );
   }
   try {
     const subscriptionKeysResponse = await retrieveManageSubscriptionApiKeys(
       backofficeUser.parameters.userId,
-      params.subscriptionId
+      params.subscriptionId,
     );
     return sanitizedNextResponseJson(subscriptionKeysResponse);
   } catch (error) {
@@ -47,12 +47,12 @@ export const getManageSubscriptionKeysHandler = async (
       return handleNotFoundErrorResponse("ApiKeyNotFoundError", error);
     } else if (error instanceof SubscriptionOwnershipError) {
       return handleForbiddenErrorResponse(
-        "You can only delete subscriptions that you own"
+        "You can only delete subscriptions that you own",
       );
     } else {
       handlerErrorLog(
         `An Error has occurred while retrieving Manage Subscription Keys for subscriptionId: ${params.subscriptionId}`,
-        error
+        error,
       );
       return handleInternalErrorResponse("ManageKeyRetrieveError", error);
     }
