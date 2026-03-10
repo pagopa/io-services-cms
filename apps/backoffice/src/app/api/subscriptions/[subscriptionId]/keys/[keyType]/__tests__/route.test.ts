@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../../../types/next-auth";
+import { SubscriptionOwnershipError } from "../../../../../../../lib/be/errors";
 import { PUT } from "../route";
 
 const backofficeUserMock = {
@@ -135,10 +136,11 @@ describe("regenerateManageSubscriptionKey", () => {
   });
 
   it.each`
-    scenario             | expectedStatusCode | error          | expectedTitle                 | expectedDetail
-    ${"a generic error"} | ${500}             | ${new Error()} | ${"ManageKeyRegenerateError"} | ${"Something went wrong"}
+    scenario                        | expectedStatusCode | error                                                    | expectedTitle                 | expectedDetail
+    ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRegenerateError"} | ${"Something went wrong"}
+    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                | ${"You can only handle subscriptions that you own"}
   `(
-    "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
+    "should return an error response when regenerateManageSubscritionApiKey rejects with ",
     async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
       // given
       const nextRequest = new NextRequest("http://localhost");

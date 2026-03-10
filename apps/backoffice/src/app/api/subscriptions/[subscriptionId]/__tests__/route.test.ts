@@ -1,10 +1,10 @@
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ApimUtils } from "@io-services-cms/external-clients";
 
 import { BackOfficeUser } from "../../../../../../types/next-auth";
-import { DELETE } from "../route";
 import { SubscriptionOwnershipError } from "../../../../../lib/be/errors";
+import { DELETE } from "../route";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" }
@@ -90,53 +90,38 @@ describe("Delete Manage Subscription API", () => {
     expect(deleteManageSubscriptionMock).not.toHaveBeenCalled();
   });
 
-  it("should return an error response when deleteManageSubscription fails when the user doesn't own the subscription", async () => {
-    // given
-    const nextRequest = new NextRequest(new URL("http://localhost"));
-    const error = new SubscriptionOwnershipError("error from business");
-    const subscriptionId =
-      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + "subscriptionId";
-    deleteManageSubscriptionMock.mockRejectedValueOnce(error);
+  it.each`
+    scenario                        | expectedStatusCode | error                                                    | expectedTitle                  | expectedDetail
+    ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"SubscriptionDeletionError"} | ${"Something went wrong"}
+    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                 | ${"You can only handle subscriptions that you own"}
+  `(
+    "should return an error response when upsertManageSubscriptionAuthorizedCIDRs rejects with ",
+    async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
+      // given
+      const nextRequest = new NextRequest(new URL("http://localhost"));
+      const subscriptionId =
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + "subscriptionId";
+      deleteManageSubscriptionMock.mockRejectedValueOnce(error);
 
-    // when
-    const result = await DELETE(nextRequest, { params: { subscriptionId } });
+      // when
+      const result = await DELETE(nextRequest, { params: { subscriptionId } });
 
-    // then
-    expect(result.status).toBe(403);
-    expect(userAuthzMock).toHaveBeenCalledOnce();
-    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith();
-    expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
-    expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
-      backofficeUserMock.parameters.userId,
-      subscriptionId
-    );
-  });
-
-  it("should return an error response when deleteManageSubscription fails with generic error", async () => {
-    // given
-    const nextRequest = new NextRequest(new URL("http://localhost"));
-    const error = new Error("error from business");
-    const subscriptionId =
-      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + "subscriptionId";
-    deleteManageSubscriptionMock.mockRejectedValueOnce(error);
-
-    // when
-    const result = await DELETE(nextRequest, { params: { subscriptionId } });
-
-    // then
-    expect(result.status).toBe(500);
-    expect(userAuthzMock).toHaveBeenCalledOnce();
-    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isAdminMock).toHaveBeenCalledOnce();
-    expect(isAdminMock).toHaveBeenCalledWith();
-    expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
-    expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
-      backofficeUserMock.parameters.userId,
-      subscriptionId
-    );
-  });
+      // then
+      expect(result.status).toBe(expectedStatusCode);
+      const jsonBody = await result.json();
+      expect(jsonBody.title).toEqual(expectedTitle);
+      expect(jsonBody.detail).toEqual(expectedDetail);
+      expect(userAuthzMock).toHaveBeenCalledOnce();
+      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+      expect(isAdminMock).toHaveBeenCalledOnce();
+      expect(isAdminMock).toHaveBeenCalledWith();
+      expect(deleteManageSubscriptionMock).toHaveBeenCalledOnce();
+      expect(deleteManageSubscriptionMock).toHaveBeenCalledWith(
+        backofficeUserMock.parameters.userId,
+        subscriptionId
+      );
+    }
+  );
 
   it("should return OK", async () => {
     // given

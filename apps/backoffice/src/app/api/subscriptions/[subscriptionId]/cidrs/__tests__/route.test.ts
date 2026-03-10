@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import { Cidr } from "../../../../../../generated/api/Cidr";
 import { SubscriptionCIDRs } from "../../../../../../generated/api/SubscriptionCIDRs";
+import { SubscriptionOwnershipError } from "../../../../../../lib/be/errors";
 import { GET, PUT } from "../route";
 
 const aBackofficeUser = {
@@ -94,6 +95,44 @@ describe("Authorized CIDRs API", () => {
       expect(
         mock.retrieveManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
+      expect(
+        mock.upsertManageSubscriptionAuthorizedCIDRs
+      ).not.toHaveBeenCalled();
+    });
+
+    it("should return an error response when retrieveManageSubscriptionAuthorizedCIDRs fails when the user doesn't own the subscription", async () => {
+      // given
+      const nextRequest = new NextRequest("http://localhost");
+      const groupId = "groupId";
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+      mock.isGroupAllowed.mockReturnValueOnce(true);
+      const error = new SubscriptionOwnershipError("error from business");
+      mock.retrieveManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
+        error
+      );
+
+      // when
+      const result = await GET(nextRequest, {
+        params: { subscriptionId }
+      });
+
+      // then
+      expect(result.status).toBe(403);
+      const jsonBody = await result.json();
+      expect(jsonBody.title).toEqual("Forbidden");
+      expect(jsonBody.detail).toEqual(
+        "You can only handle subscriptions that you own"
+      );
+      expect(mock.userAuthz).toHaveBeenCalledOnce();
+      expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
+      expect(mock.isGroupAllowed).toHaveBeenCalledOnce();
+      expect(mock.isGroupAllowed).toHaveBeenCalledWith(groupId);
+      expect(
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
+      ).toHaveBeenCalledOnce();
+      expect(
+        mock.retrieveManageSubscriptionAuthorizedCIDRs
+      ).toHaveBeenCalledWith(aBackofficeUser.parameters.userId, subscriptionId);
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs
       ).not.toHaveBeenCalled();
@@ -235,47 +274,57 @@ describe("Authorized CIDRs API", () => {
       ).not.toHaveBeenCalled();
     });
 
-    it("should return an internal error response when upsertManageSubscriptionAuthorizedCIDRs fail", async () => {
-      // given
-      const nextRequest = new NextRequest("http://localhost");
-      const groupId = "groupId";
-      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
-      mock.isGroupAllowed.mockReturnValueOnce(true);
-      mock.parseBody.mockResolvedValueOnce({ cidrs: anAuthrizedCIDRs });
-      const error = new Error();
-      mock.upsertManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(error);
+    it.each`
+      scenario                        | expectedStatusCode | error                                                    | expectedTitle                     | expectedDetail
+      ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"UpsertSubscriptionCIDRsError"} | ${"Something went wrong"}
+      ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                    | ${"You can only handle subscriptions that you own"}
+    `(
+      "should return an error response when upsertManageSubscriptionAuthorizedCIDRs rejects with ",
+      async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
+        // given
+        const nextRequest = new NextRequest("http://localhost");
+        const groupId = "groupId";
+        const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+        mock.isGroupAllowed.mockReturnValueOnce(true);
+        mock.parseBody.mockResolvedValueOnce({ cidrs: anAuthrizedCIDRs });
+        mock.upsertManageSubscriptionAuthorizedCIDRs.mockRejectedValueOnce(
+          error
+        );
 
-      // when
-      const result = await PUT(nextRequest, {
-        params: { subscriptionId }
-      });
+        // when
+        const result = await PUT(nextRequest, {
+          params: { subscriptionId }
+        });
 
-      // then
-      const jsonBody = await result.json();
-      expect(result.status).toBe(500);
-      expect(jsonBody.title).toEqual("UpsertSubscriptionCIDRsError");
-      expect(jsonBody.detail).toEqual("Something went wrong");
-      expect(mock.userAuthz).toHaveBeenCalledOnce();
-      expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isAdminMock).toHaveBeenCalledOnce();
-      expect(mock.isAdminMock).toHaveBeenCalledWith();
-      expect(mock.parseBody).toHaveBeenCalledOnce();
-      expect(mock.parseBody).toHaveBeenCalledWith(
-        nextRequest,
-        SubscriptionCIDRs
-      );
-      expect(
-        mock.upsertManageSubscriptionAuthorizedCIDRs
-      ).toHaveBeenCalledOnce();
-      expect(mock.upsertManageSubscriptionAuthorizedCIDRs).toHaveBeenCalledWith(
-        aBackofficeUser.parameters.userId,
-        subscriptionId,
-        anAuthrizedCIDRs
-      );
-      expect(
-        mock.retrieveManageSubscriptionAuthorizedCIDRs
-      ).not.toHaveBeenCalled();
-    });
+        // then
+        expect(result.status).toBe(expectedStatusCode);
+        const jsonBody = await result.json();
+        expect(jsonBody.title).toEqual(expectedTitle);
+        expect(jsonBody.detail).toEqual(expectedDetail);
+        expect(mock.userAuthz).toHaveBeenCalledOnce();
+        expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
+        expect(mock.isAdminMock).toHaveBeenCalledOnce();
+        expect(mock.isAdminMock).toHaveBeenCalledWith();
+        expect(mock.parseBody).toHaveBeenCalledOnce();
+        expect(mock.parseBody).toHaveBeenCalledWith(
+          nextRequest,
+          SubscriptionCIDRs
+        );
+        expect(
+          mock.upsertManageSubscriptionAuthorizedCIDRs
+        ).toHaveBeenCalledOnce();
+        expect(
+          mock.upsertManageSubscriptionAuthorizedCIDRs
+        ).toHaveBeenCalledWith(
+          aBackofficeUser.parameters.userId,
+          subscriptionId,
+          anAuthrizedCIDRs
+        );
+        expect(
+          mock.retrieveManageSubscriptionAuthorizedCIDRs
+        ).not.toHaveBeenCalled();
+      }
+    );
 
     it("should return the requested subscription", async () => {
       // given
