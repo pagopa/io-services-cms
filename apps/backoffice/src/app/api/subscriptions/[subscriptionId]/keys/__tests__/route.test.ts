@@ -114,7 +114,7 @@ describe("getManageSubscriptionKeys", () => {
     scenario                        | expectedStatusCode | error                                                    | expectedTitle               | expectedDetail
     ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"} | ${"Something went wrong"}
     ${"ApiKeyNotFoundError"}        | ${404}             | ${new ApiKeyNotFoundError()}                             | ${"ApiKeyNotFoundError"}    | ${"the API does not exists"}
-    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}              | ${"You can only delete subscriptions that you own"}
+    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}              | ${"You can only handle subscriptions that you own"}
   `(
     "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
     async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {

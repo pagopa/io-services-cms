@@ -16,7 +16,7 @@ beforeEach(() => {
 });
 
 describe("bulkPatch", () => {
-  it("shold throw an error when bulkPatch dependency fail", async () => {
+  it("should throw an error when bulkPatch dependency fail", async () => {
     // given
     const bulkPatchServicePayload = [
       {
@@ -44,7 +44,7 @@ describe("bulkPatch", () => {
     );
   });
 
-  it("shold not fail", () => {
+  it("should not fail", () => {
     // given
     const bulkPatchServicePayload = [
       {

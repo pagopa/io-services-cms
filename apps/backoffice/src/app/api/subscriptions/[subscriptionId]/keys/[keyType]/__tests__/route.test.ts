@@ -44,7 +44,7 @@ vi.mock("@/lib/be/authz", () => ({
   userAuthz: userAuthzMock
 }));
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  regenerateManageSubscritionApiKey: regenerateManageSubscritionApiKeyMock
+  regenerateManageSubscriptionApiKey: regenerateManageSubscritionApiKeyMock
 }));
 
 afterEach(() => {

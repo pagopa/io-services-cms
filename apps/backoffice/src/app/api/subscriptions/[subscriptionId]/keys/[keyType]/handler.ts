@@ -7,9 +7,10 @@ import {
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlerErrorLog,
+  SubscriptionOwnershipError
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { regenerateManageSubscritionApiKey } from "@/lib/be/subscriptions/business";
+import { regenerateManageSubscriptionApiKey } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -19,11 +20,11 @@ export const regenerateManageSubscriptionKeyHandler = async (
   _: NextRequest,
   {
     backofficeUser,
-    params,
+    params
   }: {
     backofficeUser: BackOfficeUserEnriched;
     params: { keyType: string; subscriptionId: string };
-  },
+  }
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
   if (!userAuthz(backofficeUser).isAdmin()) {
     return handleForbiddenErrorResponse("Role not authorized");
@@ -33,22 +34,28 @@ export const regenerateManageSubscriptionKeyHandler = async (
 
     if (E.isLeft(maybeDecodedKeyType)) {
       return handleBadRequestErrorResponse(
-        readableReport(maybeDecodedKeyType.left),
+        readableReport(maybeDecodedKeyType.left)
       );
     }
 
-    const manageKeysResponse = await regenerateManageSubscritionApiKey(
+    const manageKeysResponse = await regenerateManageSubscriptionApiKey(
       backofficeUser.parameters.userId,
       params.subscriptionId,
-      maybeDecodedKeyType.right,
+      maybeDecodedKeyType.right
     );
 
     return sanitizedNextResponseJson(manageKeysResponse);
   } catch (error) {
-    handlerErrorLog(
-      `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${params.subscriptionId}`,
-      error,
-    );
-    return handleInternalErrorResponse("ManageKeyRegenerateError", error);
+    if (error instanceof SubscriptionOwnershipError) {
+      return handleForbiddenErrorResponse(
+        "You can only handle subscriptions that you own"
+      );
+    } else {
+      handlerErrorLog(
+        `An Error has occurred while regenerating ${params.keyType} Manage Subscription Keys for subscriptionId: ${params.subscriptionId}`,
+        error
+      );
+      return handleInternalErrorResponse("ManageKeyRegenerateError", error);
+    }
   }
 };

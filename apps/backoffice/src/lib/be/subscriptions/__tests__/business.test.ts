@@ -7,7 +7,7 @@ import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionK
 import {
   deleteManageSubscription,
   getManageSubscriptions,
-  regenerateManageSubscritionApiKey,
+  regenerateManageSubscriptionApiKey,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscription,
@@ -443,14 +443,14 @@ describe("Manage Keys", () => {
     });
   });
 
-  describe("regenerateManageSubscritionApiKey", () => {
+  describe("regenerateManageSubscriptionApiKey", () => {
     it.each`
       scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
       ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.regenerateSubscriptionKey]}
       ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.regenerateSubscriptionKey]}
     `(
       "should throw an error when $scenario",
-      validateSubscriptionOwnershipTestFn(retrieveManageSubscriptionApiKeys)
+      validateSubscriptionOwnershipTestFn(regenerateManageSubscriptionApiKey)
     );
 
     it("should return the regenerated manage key", async () => {
@@ -468,7 +468,7 @@ describe("Manage Keys", () => {
       );
 
       // when
-      const result = await regenerateManageSubscritionApiKey(
+      const result = await regenerateManageSubscriptionApiKey(
         ownerId,
         subscriptionId,
         SubscriptionKeyTypeEnum.primary
@@ -505,7 +505,7 @@ describe("Manage Keys", () => {
 
       // when and then
       await expect(
-        regenerateManageSubscritionApiKey(
+        regenerateManageSubscriptionApiKey(
           ownerId,
           subscriptionId,
           SubscriptionKeyTypeEnum.primary
