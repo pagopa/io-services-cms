@@ -4,7 +4,7 @@ import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import {
   SubscriptionType,
-  SubscriptionTypeEnum
+  SubscriptionTypeEnum,
 } from "@/generated/api/SubscriptionType";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import { SubscriptionState } from "@azure/arm-apimanagement";
@@ -17,12 +17,12 @@ import {
   ManagedInternalError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
-  apimErrorToManagedInternalError
+  apimErrorToManagedInternalError,
 } from "../errors";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
-  upsertSubscriptionAuthorizedCIDRs
+  upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
 
 // Type utility to extract the right side of a TaskEither
@@ -50,30 +50,30 @@ const parseState = (state: SubscriptionState): StateEnum => {
 };
 
 const toSubscription = (
-  subscription: RightType<ReturnType<typeof upsertSubscription>>
+  subscription: RightType<ReturnType<typeof upsertSubscription>>,
 ) => {
   if (!subscription.name) {
     throw new ManagedInternalError(
       "Partial data received",
-      "Subscription 'name' is not defined"
+      "Subscription 'name' is not defined",
     );
   }
   if (!subscription.state) {
     throw new ManagedInternalError(
       "Partial data received",
-      "Subscription 'state' is not defined"
+      "Subscription 'state' is not defined",
     );
   }
   if (!subscription.displayName) {
     throw new ManagedInternalError(
       "Partial data received",
-      "Subscription 'displayName' is not defined"
+      "Subscription 'displayName' is not defined",
     );
   }
   return {
     id: subscription.name,
     name: subscription.displayName,
-    state: parseState(subscription.state)
+    state: parseState(subscription.state),
   };
 };
 
@@ -86,26 +86,25 @@ const toSubscription = (
  */
 const validateSubscriptionOwnership = async (
   subscriptionId: string,
-  apimUserId: string
+  apimUserId: string,
 ): Promise<void> => {
-  const filter = ApimUtils.apim_filters.subscriptionsByIdsApimFilter(
-    subscriptionId
-  );
+  const filter =
+    ApimUtils.apim_filters.subscriptionsByIdsApimFilter(subscriptionId);
   const maybeSubscription = await getApimService().getUserSubscriptions(
     apimUserId,
     undefined,
     undefined,
-    filter
+    filter,
   )();
   if (E.isLeft(maybeSubscription)) {
     throw apimErrorToManagedInternalError(
       "Error retrieving user's subscriptions",
-      maybeSubscription.left
+      maybeSubscription.left,
     );
   }
   if (maybeSubscription.right.length === 0) {
     throw new SubscriptionOwnershipError(
-      "The user doesn't own the subscription"
+      "The user doesn't own the subscription",
     );
   }
 };
@@ -119,28 +118,30 @@ const validateSubscriptionOwnership = async (
  */
 export async function upsertManageSubscription(
   ownerId: string,
-  group?: { id: string; name: string }
+  group?: { id: string; name: string },
 ): Promise<Subscription> {
-  const maybeSubscription = await (group
-    ? upsertSubscription("MANAGE_GROUP", ownerId, group)
-    : upsertSubscription("MANAGE", ownerId))();
+  const maybeSubscription = await (
+    group
+      ? upsertSubscription("MANAGE_GROUP", ownerId, group)
+      : upsertSubscription("MANAGE", ownerId)
+  )();
 
   if (E.isLeft(maybeSubscription)) {
     if ("statusCode" in maybeSubscription.left) {
       if (maybeSubscription.left.statusCode === 412) {
         throw new PreconditionFailedError(
           maybeSubscription.left.name ?? "Precondition Failed",
-          maybeSubscription.left.details ?? ""
+          maybeSubscription.left.details ?? "",
         );
       }
       throw apimErrorToManagedInternalError(
         "Error creating subscription",
-        maybeSubscription.left
+        maybeSubscription.left,
       );
     } else {
       throw new ManagedInternalError(
         "Error creating subscription",
-        maybeSubscription.left.message
+        maybeSubscription.left.message,
       );
     }
   }
@@ -162,7 +163,7 @@ export async function getManageSubscriptions(
   apimUserId: string,
   limit?: number,
   offset?: number,
-  selcGroups?: Group[]
+  selcGroups?: Group[],
 ): Promise<Subscription[]> {
   let filter;
   switch (subscriptionType) {
@@ -175,7 +176,7 @@ export async function getManageSubscriptions(
       break;
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
-        selcGroups?.map(group => group.id)
+        selcGroups?.map((group) => group.id),
       );
       break;
     default:
@@ -187,13 +188,13 @@ export async function getManageSubscriptions(
     apimUserId,
     offset,
     limit,
-    filter
+    filter,
   )();
 
   if (E.isLeft(maybeSubscriptions)) {
     throw apimErrorToManagedInternalError(
       "Error retrieving manage group subscriptions",
-      maybeSubscriptions.left
+      maybeSubscriptions.left,
     );
   }
 
@@ -209,12 +210,11 @@ export async function getManageSubscriptions(
  */
 export async function deleteManageSubscription(
   apimUserId: string,
-  subscriptionId: string
+  subscriptionId: string,
 ): Promise<void> {
   await validateSubscriptionOwnership(subscriptionId, apimUserId);
-  const deletionResult = await getApimService().deleteSubscription(
-    subscriptionId
-  )();
+  const deletionResult =
+    await getApimService().deleteSubscription(subscriptionId)();
   if (E.isLeft(deletionResult)) {
     const errorMessage = "Error deleting subscription";
     if ("statusCode" in deletionResult.left) {
@@ -239,13 +239,13 @@ export async function deleteManageSubscription(
  */
 export async function retrieveManageSubscriptionApiKeys(
   apimUserId: string,
-  subscriptionId: string
+  subscriptionId: string,
 ) {
   await validateSubscriptionOwnership(subscriptionId, apimUserId);
   const subscriptionApiKeys = await listSubscriptionSecrets(subscriptionId);
   return {
     primary_key: subscriptionApiKeys.primaryKey,
-    secondary_key: subscriptionApiKeys.secondaryKey
+    secondary_key: subscriptionApiKeys.secondaryKey,
   };
 }
 
@@ -261,18 +261,18 @@ export async function retrieveManageSubscriptionApiKeys(
 export async function regenerateManageSubscriptionApiKey(
   apimUserId: string,
   subscriptionId: string,
-  keyType: SubscriptionKeyType
+  keyType: SubscriptionKeyType,
 ) {
   await validateSubscriptionOwnership(subscriptionId, apimUserId);
 
   const subscriptionApiKeys = await regenerateSubscriptionKey(
     subscriptionId,
-    keyType
+    keyType,
   );
 
   return {
     primary_key: subscriptionApiKeys.primaryKey,
-    secondary_key: subscriptionApiKeys.secondaryKey
+    secondary_key: subscriptionApiKeys.secondaryKey,
   };
 }
 
@@ -286,13 +286,12 @@ export async function regenerateManageSubscriptionApiKey(
  */
 export async function retrieveManageSubscriptionAuthorizedCIDRs(
   apimUserId: string,
-  subscriptionId: string
+  subscriptionId: string,
 ) {
   await validateSubscriptionOwnership(subscriptionId, apimUserId);
 
-  const authorizedCIDRsResponse = await getSubscriptionAuthorizedCIDRs(
-    subscriptionId
-  );
+  const authorizedCIDRsResponse =
+    await getSubscriptionAuthorizedCIDRs(subscriptionId);
 
   if (O.isNone(authorizedCIDRsResponse)) {
     return new Array<Cidr>();
@@ -313,13 +312,13 @@ export async function retrieveManageSubscriptionAuthorizedCIDRs(
 export async function upsertManageSubscriptionAuthorizedCIDRs(
   apimUserId: string,
   subscriptionId: string,
-  cidrs: readonly Cidr[]
+  cidrs: readonly Cidr[],
 ) {
   await validateSubscriptionOwnership(subscriptionId, apimUserId);
 
   const authorizedCIDRsResponse = await upsertSubscriptionAuthorizedCIDRs(
     subscriptionId,
-    cidrs
+    cidrs,
   );
 
   return Array.from(authorizedCIDRsResponse.cidrs);
