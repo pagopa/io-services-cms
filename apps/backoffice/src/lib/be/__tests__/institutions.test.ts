@@ -428,7 +428,7 @@ describe("Institutions", () => {
       );
     });
 
-    it("should rejects when getInstitutionDelegations return an error response", async () => {
+    it("should rejects when retrieveInstitutionAggregates return an error response", async () => {
       // given
       const error = new Error("errorMessage");
       getInstitutionDelegationsMock.mockRejectedValueOnce(error);
