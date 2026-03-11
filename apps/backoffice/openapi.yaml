@@ -983,7 +983,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /institutions/{institutionId}/delegations:
+  /institutions/{institutionId}/aggregates:
     get:
       tags:
         - institutions
