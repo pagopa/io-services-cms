@@ -1,11 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { BackOfficeUser } from "../../../../../../types/next-auth";
 import { SubscriptionKeys } from "../../../../../generated/api/SubscriptionKeys";
-import { ApiKeyNotFoundError } from "../../../../../lib/be/errors";
-import { GET } from "../route";
 import { BackOfficeUserEnriched } from "../../../../../lib/be/wrappers";
+import { GET } from "../route";
 
 const mocks: {
   apiKeys: SubscriptionKeys;
@@ -13,76 +12,59 @@ const mocks: {
 } = vi.hoisted(() => ({
   apiKeys: {
     primary_key: "aPrimaryKey",
-    secondary_key: "aSecondaryKey",
+    secondary_key: "aSecondaryKey"
   },
-  jwtMock: {
+  jwtMock: ({
     institution: { id: "institutionId" },
     permissions: ["permission1", "permission2"],
     parameters: {
       userEmail: "anEmail@email.it",
       userId: "anUserId",
-      subscriptionId: "aSubscriptionId",
-    },
-  } as unknown as BackOfficeUser,
+      subscriptionId: "aSubscriptionId"
+    }
+  } as unknown) as BackOfficeUser
 }));
 
-const { getToken } = vi.hoisted(() => ({
-  getToken: vi.fn().mockReturnValue(Promise.resolve(mocks.jwtMock)),
+const { getToken, getManageSubscriptionKeysHandlerMock } = vi.hoisted(() => ({
+  getToken: vi.fn(() => Promise.resolve(mocks.jwtMock)),
+  getManageSubscriptionKeysHandlerMock: vi.fn()
 }));
 
-const { retrieveManageSubscriptionApiKeys } = vi.hoisted(() => ({
-  retrieveManageSubscriptionApiKeys: vi
-    .fn()
-    .mockReturnValue(Promise.resolve(mocks.apiKeys)),
-}));
-
-vi.mock("@/lib/be/keys/business", () => ({
-  retrieveManageSubscriptionApiKeys,
+vi.mock("../../../subscriptions/[subscriptionId]/keys/handler", () => ({
+  getManageSubscriptionKeysHandler: getManageSubscriptionKeysHandlerMock
 }));
 
 vi.mock("next-auth/jwt", async () => {
   const actual = await vi.importActual("next-auth/jwt");
   return {
     ...(actual as any),
-    getToken,
+    getToken
   };
 });
 
+afterEach(() => {
+  vi.resetAllMocks();
+});
+
 describe("Retrieve Manage Keys API", () => {
-  it("should return 200", async () => {
-    // Mock NextRequest
-    const request = new NextRequest(new URL("http://localhost"));
-
-    const result = await GET(request, {});
-
-    //extract jsonBody from NextResponse
-    const jsonResponse = await new Response(result.body).json();
-
-    expect(result.status).toBe(200);
-    expect(jsonResponse).toStrictEqual(mocks.apiKeys);
-  });
-
-  it("should return 400", async () => {
-    retrieveManageSubscriptionApiKeys.mockReturnValueOnce(
-      Promise.reject(new ApiKeyNotFoundError("api key not found")),
+  it("should forward request", async () => {
+    // given
+    getManageSubscriptionKeysHandlerMock.mockResolvedValueOnce(
+      NextResponse.json(mocks.apiKeys, { status: 200 })
     );
-
-    // Mock NextRequest
     const request = new NextRequest(new URL("http://localhost"));
 
+    // when
     const result = await GET(request, {});
 
-    expect(result.status).toBe(404);
-  });
-
-  it("should return 500", async () => {
-    retrieveManageSubscriptionApiKeys.mockRejectedValueOnce("an error");
-
-    // Mock NextRequest
-    const request = new NextRequest(new URL("http://localhost"));
-
-    const result = await GET(request, {});
-
-    expect(result.status).toBe(500);
+    // then
+    expect(result.status).toBe(200);
+    const jsonResponse = await new Response(result.body).json();
+    expect(jsonResponse).toStrictEqual(mocks.apiKeys);
+    expect(getManageSubscriptionKeysHandlerMock).toHaveBeenCalledOnce();
+    expect(getManageSubscriptionKeysHandlerMock).toHaveBeenCalledWith(request, {
+      backofficeUser: expect.anything(), // FIXME: we can be more specific here
+      params: { subscriptionId: mocks.jwtMock.parameters.subscriptionId }
+    });
   });
 });

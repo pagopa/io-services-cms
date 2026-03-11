@@ -92,7 +92,6 @@ describe("AzureUserAttributesManageMiddlewareWrapper", () => {
     expect(E.isRight(result)).toBeTruthy();
 
     if (E.isRight(result)) {
-      console.log(result.right);
       expect(result.right).toEqual({
         authorizedCIDRs: new Set([
           ...returningCIDRs,

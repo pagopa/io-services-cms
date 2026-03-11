@@ -3,7 +3,7 @@ import { ApiKeysGroups } from "@/components/api-keys/api-keys-groups";
 import { PageHeader } from "@/components/headers";
 import { getConfiguration } from "@/config";
 import { Cidr } from "@/generated/api/Cidr";
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
+import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch from "@/hooks/use-fetch";
@@ -36,7 +36,8 @@ export default function Keys() {
   const router = useRouter();
   const { data: session } = useSession();
   const { data: mkData, fetchData: mkFetchData } = useFetch<SubscriptionKeys>();
-  const { data: acData, fetchData: acFetchData } = useFetch<ManageKeyCIDRs>();
+  const { data: acData, fetchData: acFetchData } =
+    useFetch<SubscriptionCIDRs>();
 
   const showManageKeyRoot = hasManageKeyRoot(GROUP_APIKEY_ENABLED)(session);
   const showManageKeyGroup = hasManageKeyGroup(GROUP_APIKEY_ENABLED)(session);
@@ -52,7 +53,7 @@ export default function Keys() {
     acFetchData(
       "updateManageKeysAuthorizedCidrs",
       { body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) } },
-      ManageKeyCIDRs,
+      SubscriptionCIDRs,
       { notify: "all" },
     );
   };
@@ -65,7 +66,7 @@ export default function Keys() {
   useEffect(() => {
     if (showManageKeyRoot) {
       mkFetchData("getManageKeys", {}, SubscriptionKeys, { notify: "errors" });
-      acFetchData("getManageKeysAuthorizedCidrs", {}, ManageKeyCIDRs, {
+      acFetchData("getManageKeysAuthorizedCidrs", {}, SubscriptionCIDRs, {
         notify: "errors",
       });
     }

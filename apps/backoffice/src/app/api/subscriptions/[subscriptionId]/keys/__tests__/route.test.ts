@@ -2,45 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
-import { ApiKeyNotFoundError } from "../../../../../../lib/be/errors";
+import {
+  ApiKeyNotFoundError,
+  SubscriptionOwnershipError
+} from "../../../../../../lib/be/errors";
 import { GET } from "../route";
 
-const backofficeUserMock = { permissions: {} } as BackOfficeUser;
+const backofficeUserMock = {
+  parameters: { userId: "userId" },
+  permissions: {}
+} as BackOfficeUser;
 
 const {
   userAuthzMock,
   isGroupAllowedMock,
   retrieveManageSubscriptionApiKeysMock,
-  withJWTAuthHandlerMock,
+  withJWTAuthHandlerMock
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   userAuthzMock: vi.fn(() => ({
-    isGroupAllowed: isGroupAllowedMock,
+    isGroupAllowed: isGroupAllowedMock
   })),
   retrieveManageSubscriptionApiKeysMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
     (
       handler: (
         nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any },
-      ) => Promise<NextResponse> | Promise<Response>,
-    ) =>
-      async (nextRequest: NextRequest, { params }: { params: {} }) =>
-        handler(nextRequest, {
-          backofficeUser: backofficeUserMock,
-          params,
-        }),
-  ),
+        context: { backofficeUser: BackOfficeUser; params: any }
+      ) => Promise<NextResponse> | Promise<Response>
+    ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
+      handler(nextRequest, {
+        backofficeUser: backofficeUserMock,
+        params
+      })
+  )
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock,
+  withJWTAuthHandler: withJWTAuthHandlerMock
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock,
+  userAuthz: userAuthzMock
 }));
-vi.mock("@/lib/be/keys/business", () => ({
-  retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock,
+vi.mock("@/lib/be/subscriptions/business", () => ({
+  retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock
 }));
 
 afterEach(() => {
@@ -48,23 +53,24 @@ afterEach(() => {
 });
 
 describe("getManageSubscriptionKeys", () => {
+  const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
   it("should return an unauthorized response when provided groupId is not allowed", async () => {
     // given
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
-    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isGroupAllowedMock.mockReturnValueOnce(false);
 
     // when
     const result = await GET(nextRequest, {
-      params: { subscriptionId },
+      params: { subscriptionId }
     });
 
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
     expect(jsonBody.detail).toEqual(
-      "Requested subscription is out of your scope",
+      "Requested subscription is out of your scope"
     );
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -77,16 +83,16 @@ describe("getManageSubscriptionKeys", () => {
     // given
     const nextRequest = new NextRequest("http://localhost");
     const groupId = "groupId";
-    const subscriptionId = `MANAGE-GROUP-${groupId}`;
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isGroupAllowedMock.mockReturnValueOnce(true);
     const expectedResponse = { foo: "bar" };
     retrieveManageSubscriptionApiKeysMock.mockResolvedValueOnce(
-      expectedResponse,
+      expectedResponse
     );
 
     // when
     const result = await GET(nextRequest, {
-      params: { subscriptionId },
+      params: { subscriptionId }
     });
 
     // then
@@ -99,27 +105,29 @@ describe("getManageSubscriptionKeys", () => {
     expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
     expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
     expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
-      subscriptionId,
+      backofficeUserMock.parameters.userId,
+      subscriptionId
     );
   });
 
   it.each`
-    scenario                 | expectedStatusCode | error                        | expectedTitle               | expectedDetail
-    ${"a generic error"}     | ${500}             | ${new Error()}               | ${"ManageKeyRetrieveError"} | ${"Something went wrong"}
-    ${"ApiKeyNotFoundError"} | ${404}             | ${new ApiKeyNotFoundError()} | ${"ApiKeyNotFoundError"}    | ${"the API does not exists"}
+    scenario                        | expectedStatusCode | error                                                    | expectedTitle               | expectedDetail
+    ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"} | ${"Something went wrong"}
+    ${"ApiKeyNotFoundError"}        | ${404}             | ${new ApiKeyNotFoundError()}                             | ${"ApiKeyNotFoundError"}    | ${"the API does not exists"}
+    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}              | ${"You can only handle subscriptions that you own"}
   `(
     "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
     async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
       // given
       const nextRequest = new NextRequest("http://localhost");
       const groupId = "groupId";
-      const subscriptionId = `MANAGE-GROUP-${groupId}`;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
       isGroupAllowedMock.mockReturnValueOnce(true);
       retrieveManageSubscriptionApiKeysMock.mockRejectedValueOnce(error);
 
       // when
       const result = await GET(nextRequest, {
-        params: { subscriptionId },
+        params: { subscriptionId }
       });
 
       // then
@@ -133,8 +141,9 @@ describe("getManageSubscriptionKeys", () => {
       expect(isGroupAllowedMock).toHaveBeenCalledWith(groupId);
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
-        subscriptionId,
+        backofficeUserMock.parameters.userId,
+        subscriptionId
       );
-    },
+    }
   );
 });

@@ -3,17 +3,18 @@
 
 import react from "@vitejs/plugin-react";
 import * as path from "node:path";
+import tsconfigPaths from "vite-tsconfig-paths";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 import configShared from "../../vitest.shared.js";
 
 export default mergeConfig(
   configShared,
   defineConfig({
-    plugins: [react() as any],
+    plugins: [react() as any, tsconfigPaths()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+        "@": path.resolve(__dirname, "./src")
+      }
     },
     test: {
       globals: true,
@@ -21,7 +22,7 @@ export default mergeConfig(
       include: ["./src/**/*.test.tsx"],
       exclude: [
         ...configDefaults.exclude,
-        "./src/components/__tests__/setup.ts",
+        "./src/components/__tests__/setup.ts"
       ],
       css: true,
       setupFiles: "./src/components/__tests__/setup.ts",
@@ -45,9 +46,9 @@ export default mergeConfig(
           "**/__mocks__/**",
           // BE
           "src/app/*",
-          "src/lib/be/*",
-        ],
-      },
-    },
-  }),
+          "src/lib/be/*"
+        ]
+      }
+    }
+  })
 );
