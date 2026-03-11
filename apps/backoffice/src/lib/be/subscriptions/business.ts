@@ -81,8 +81,8 @@ const toSubscription = (
  * Validates that the subscription belongs to the user with the given apimUserId by fetching the subscription from APIM and checking its ownerId
  * @param subscriptionId the id of the subscription to validate
  * @param apimUserId the id of the user to check the subscription ownership for
- * @throws SubscriptionOwnershipError if the subscription doesn't belong to the user
- * @throws ManagedInternalError if an error occurs while retrieving the subscription from APIM
+ * @throws `SubscriptionOwnershipError` if the subscription doesn't belong to the user
+ * @throws `ManagedInternalError` if an error occurs while retrieving the subscription from APIM
  */
 const validateSubscriptionOwnership = async (
   subscriptionId: string,
@@ -114,7 +114,7 @@ const validateSubscriptionOwnership = async (
  * @param ownerId The id of the user who will own the subscription
  * @param group The group information for the subscription (only for GROUP subscriptions)
  * @returns The created or updated subscription
- * @throws ManagedInternalError if an error occurs while processing the subscription data
+ * @throws `ManagedInternalError` if an error occurs while processing the subscription data
  */
 export async function upsertManageSubscription(
   ownerId: string,
@@ -205,8 +205,8 @@ export async function getManageSubscriptions(
  * Deletes a subscription for a given user.
  * @param apimUserId The id of the user to check the subscription ownership for
  * @param subscriptionId The id of the subscription to delete
- * @throws see validateSubscriptionOwnership for possible errors related to subscription ownership validation
- * @throws ManagedInternalError if an error occurs while deleting the subscription in APIM
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws `ManagedInternalError` if an error occurs while deleting the subscription in APIM
  */
 export async function deleteManageSubscription(
   apimUserId: string,
@@ -234,8 +234,8 @@ export async function deleteManageSubscription(
  * @param apimUserId The id of the user to check the subscription ownership for
  * @param subscriptionId The id of the subscription to retrieve the keys for
  * @returns The API keys for the subscription
- * @throws see validateSubscriptionOwnership for possible errors related to subscription ownership validation
- * @throws see listSubscriptionSecrets for possible errors related to retrieving the keys from the database
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws see {@linkcode listSubscriptionSecrets} for possible errors related to retrieving the keys from the database
  */
 export async function retrieveManageSubscriptionApiKeys(
   apimUserId: string,
@@ -255,8 +255,8 @@ export async function retrieveManageSubscriptionApiKeys(
  * @param subscriptionId The id of the subscription to regenerate the key for
  * @param keyType The type of key to regenerate (primary or secondary)
  * @returns The updated API keys
- * @throws see validateSubscriptionOwnership for possible errors related to subscription ownership validation
- * @throws see regenerateSubscriptionKey for possible errors related to regenerating the key in the database
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws see {@linkcode regenerateSubscriptionKey} for possible errors related to regenerating the key in the database
  */
 export async function regenerateManageSubscriptionApiKey(
   apimUserId: string,
@@ -281,8 +281,8 @@ export async function regenerateManageSubscriptionApiKey(
  * @param apimUserId The id of the user to check the subscription ownership for
  * @param subscriptionId The id of the subscription to retrieve the CIDRs for
  * @returns The list of authorized CIDRs
- * @throws see validateSubscriptionOwnership for possible errors related to subscription ownership validation
- * @throws see getSubscriptionAuthorizedCIDRs for possible errors related to retrieving the CIDRs from the database
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws see {@linkcode getSubscriptionAuthorizedCIDRs} for possible errors related to retrieving the CIDRs from the database
  */
 export async function retrieveManageSubscriptionAuthorizedCIDRs(
   apimUserId: string,
@@ -306,8 +306,8 @@ export async function retrieveManageSubscriptionAuthorizedCIDRs(
  * @param subscriptionId The id of the subscription to update
  * @param cidrs The CIDRs to upsert
  * @returns The updated list of CIDRs
- * @throws see validateSubscriptionOwnership for possible errors related to subscription ownership validation
- * @throws see upsertSubscriptionAuthorizedCIDRs for possible errors related to upserting the CIDRs in the database
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws see {@linkcode upsertSubscriptionAuthorizedCIDRs} for possible errors related to upserting the CIDRs in the database
  */
 export async function upsertManageSubscriptionAuthorizedCIDRs(
   apimUserId: string,

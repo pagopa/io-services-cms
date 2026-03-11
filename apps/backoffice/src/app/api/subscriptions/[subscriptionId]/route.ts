@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * @operationId deleteManageSubscription
  * @description Delete the provided manage subscription
- * @note Only Subscriptions _Manage Group_ (id starting with "MANAGE_GROUP_") can be deleted and only by their owner
+ * @note Only Subscriptions _Manage Group_ (id starting with `MANAGE_GROUP_`) can be deleted and only by their owner
  */
 export const DELETE = withJWTAuthHandler(
   async (
