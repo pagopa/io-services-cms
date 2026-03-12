@@ -2,8 +2,8 @@
 import { useDialog } from "@/components/dialog-provider";
 import { LoaderSkeleton } from "@/components/loaders";
 import { Cidr } from "@/generated/api/Cidr";
-import { ManageKeyCIDRs } from "@/generated/api/ManageKeyCIDRs";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
+import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionPagination } from "@/generated/api/SubscriptionPagination";
@@ -87,7 +87,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
   const { data: keysData, fetchData: skFetchData } =
     useFetch<SubscriptionKeys>();
   const { data: cidrsData, fetchData: scFetchData } =
-    useFetch<ManageKeyCIDRs>();
+    useFetch<SubscriptionCIDRs>();
   const { fetchData: noContentFetchData } = useFetch<unknown>();
 
   const [apiKeys, setApiKeys] = useState<ApiKeysGroupRecordset | undefined>(
@@ -169,7 +169,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
       const maybeCidrs = await getBffApiClient().fetchData(
         "getManageSubscriptionAuthorizedCidrs",
         { subscriptionId },
-        ManageKeyCIDRs,
+        SubscriptionCIDRs,
       );
 
       if (E.isRight(maybeCidrs)) {
@@ -211,7 +211,7 @@ export const ApiKeysGroups = (props: ApiKeysGroupsProps) => {
         body: { cidrs: Array.from(cidrs || []).filter(Cidr.is) },
         subscriptionId,
       },
-      ManageKeyCIDRs,
+      SubscriptionCIDRs,
       { notify: "all", referenceId: subscriptionId },
     );
   };

@@ -169,7 +169,6 @@ describe("UnPublishService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    console.log(response.body);
     expect(mockContext.log.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });

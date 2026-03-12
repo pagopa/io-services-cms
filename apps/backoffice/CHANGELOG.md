@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.31.5
+
+### Patch Changes
+
+- 685a4d88: add subscription ownership validation before processing the request
+
 ## 1.31.4
 
 ### Patch Changes

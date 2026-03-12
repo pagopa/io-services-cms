@@ -1,45 +1,122 @@
+import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, Mock, vi } from "vitest";
+import { Cidr } from "../../../../generated/api/Cidr";
+import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionKeyType";
 import {
-  getManageSubscriptions,
-  upsertManageSubscription,
   deleteManageSubscription,
+  getManageSubscriptions,
+  regenerateManageSubscriptionApiKey,
+  retrieveManageSubscriptionApiKeys,
+  retrieveManageSubscriptionAuthorizedCIDRs,
+  upsertManageSubscription,
+  upsertManageSubscriptionAuthorizedCIDRs
 } from "../business";
 
-const { upsertSubscription, getUserSubscriptions, deleteSubscription } =
-  vi.hoisted(() => ({
-    upsertSubscription: vi.fn(),
-    getUserSubscriptions: vi.fn(),
-    deleteSubscription: vi.fn(),
-  }));
-
-vi.mock("../../apim-service", () => ({
-  upsertSubscription,
-  getApimService: () => ({
-    getUserSubscriptions,
-    deleteSubscription,
-  }),
-}));
-
-const mocks = {
+const mocks: {
+  anOwnerId: string;
+  aGroup: { id: string; name: string };
+  aSubscriptionContract: { name: string; displayName: string; state: string };
+  upsertSubscription: Mock<any>;
+  getUserSubscriptions: Mock<any>;
+  deleteSubscription: Mock<any>;
+  findLastVersionByModelId: Mock<any>;
+  upsert: Mock<(...args: Parameters<SubscriptionCIDRsModel["upsert"]>) => any>;
+  cidrs: Set<Cidr>;
+  aSubscriptionId: string;
+  aPrimaryKey: string;
+  aSecondaryKey: string;
+  listSecrets: Mock<any>;
+  regenerateSubscriptionKey: Mock<any>;
+} = vi.hoisted(() => ({
   anOwnerId: "anOwnerId",
   aGroup: {
     id: "aGroupId",
-    name: "aGroupName",
+    name: "aGroupName"
   },
   aSubscriptionContract: {
     name: "name",
     displayName: "displayName",
-    state: "active",
+    state: "active"
   },
-  upsertSubscription,
-  getUserSubscriptions,
-  deleteSubscription,
-};
+  cidrs: new Set(["127.0.0.1/8", "127.0.0.2/8"]) as Set<Cidr>,
+  aSubscriptionId: "aSubscriptionId",
+  aPrimaryKey: "primary",
+  aSecondaryKey: "secondary",
+  upsertSubscription: vi.fn(),
+  getUserSubscriptions: vi.fn(),
+  deleteSubscription: vi.fn(),
+  findLastVersionByModelId: vi.fn(),
+  upsert: vi.fn(),
+  listSecrets: vi.fn(),
+  regenerateSubscriptionKey: vi.fn()
+}));
+
+vi.mock("@/lib/be/legacy-cosmos", () => ({
+  getSubscriptionCIDRsModel: () => ({
+    findLastVersionByModelId: mocks.findLastVersionByModelId,
+    upsert: mocks.upsert
+  })
+}));
+
+vi.mock("@/lib/be/apim-service", () => ({
+  upsertSubscription: mocks.upsertSubscription,
+  getApimService: () => ({
+    getUserSubscriptions: mocks.getUserSubscriptions,
+    deleteSubscription: mocks.deleteSubscription,
+    listSecrets: mocks.listSecrets,
+    regenerateSubscriptionKey: mocks.regenerateSubscriptionKey
+  })
+}));
 
 afterEach(() => {
   vi.restoreAllMocks();
 });
+
+const validateSubscriptionOwnershipExpectation = (
+  ownerId: string,
+  subscriptionId: string
+) => {
+  expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+  expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+    ownerId,
+    undefined,
+    undefined,
+    `name eq '${subscriptionId}'`
+  );
+};
+
+const validateSubscriptionOwnershipTestFn = <T extends any[]>(
+  functionToTest: (
+    apimUserId: string,
+    subscriptionId: string,
+    ...args: T
+  ) => any,
+  args: T = ([] as unknown) as T
+) => async ({
+  getUserSubscriptionsMockResult,
+  expectedErrorMessage,
+  toNotHaveBeenCalledMocks
+}: {
+  getUserSubscriptionsMockResult: Mock<any>;
+  expectedErrorMessage: string;
+  toNotHaveBeenCalledMocks: Mock<any>[];
+}) => {
+  const subscriptionId = "subscriptionId";
+  const ownerId = mocks.anOwnerId;
+  mocks.getUserSubscriptions.mockReturnValueOnce(
+    getUserSubscriptionsMockResult
+  );
+
+  await expect(() =>
+    functionToTest(ownerId, subscriptionId, ...args)
+  ).rejects.toThrowError(expectedErrorMessage);
+  validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+  toNotHaveBeenCalledMocks.forEach(mock => {
+    expect(mock).not.toHaveBeenCalled();
+  });
+};
 
 describe("Subscriptions Business Logic", () => {
   describe("upsertManageSubscription", () => {
@@ -57,15 +134,15 @@ describe("Subscriptions Business Logic", () => {
         mocks.upsertSubscription.mockReturnValueOnce(upsertSubResult);
 
         await expect(() =>
-          upsertManageSubscription(ownerId),
+          upsertManageSubscription(ownerId)
         ).rejects.toThrowError(excpectedErrorMessage);
 
         expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
         expect(mocks.upsertSubscription).toHaveBeenCalledWith(
           "MANAGE",
-          ownerId,
+          ownerId
         );
-      },
+      }
     );
 
     it.each`
@@ -86,18 +163,18 @@ describe("Subscriptions Business Logic", () => {
             displayName,
             state,
             foo: "foo",
-            bar: "bar",
-          }),
+            bar: "bar"
+          })
         );
 
         // when and then
         await expect(
-          upsertManageSubscription(ownerId, group),
+          upsertManageSubscription(ownerId, group)
         ).resolves.toStrictEqual({ id: name, name: displayName, state });
         const params = group ? [subType, ownerId, group] : [subType, ownerId];
         expect(mocks.upsertSubscription).toHaveBeenCalledOnce();
         expect(mocks.upsertSubscription).toHaveBeenCalledWith(...params);
-      },
+      }
     );
   });
 
@@ -108,11 +185,11 @@ describe("Subscriptions Business Logic", () => {
       const limit = 5;
       const offset = 0;
       mocks.getUserSubscriptions.mockReturnValueOnce(
-        TE.left({ statusCode: 500 }),
+        TE.left({ statusCode: 500 })
       );
 
       await expect(() =>
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions(subscriptionType, ownerId, limit, offset)
       ).rejects.toThrowError("Error retrieving manage group subscriptions");
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -120,7 +197,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        "startswith(name, 'MANAGE-GROUP-')",
+        "startswith(name, 'MANAGE-GROUP-')"
       );
     });
 
@@ -138,13 +215,13 @@ describe("Subscriptions Business Logic", () => {
             displayName,
             state,
             foo: "foo",
-            bar: "bar",
-          },
-        ]),
+            bar: "bar"
+          }
+        ])
       );
 
       await expect(
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions(subscriptionType, ownerId, limit, offset)
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -152,7 +229,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        "startswith(name, 'MANAGE-GROUP-')",
+        "startswith(name, 'MANAGE-GROUP-')"
       );
     });
 
@@ -165,8 +242,8 @@ describe("Subscriptions Business Logic", () => {
 
       await expect(
         getManageSubscriptions(subscriptionType, ownerId, limit, offset, [
-          group,
-        ]),
+          group
+        ])
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -174,7 +251,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        `name eq 'MANAGE-GROUP-${group.id}'`,
+        `name eq 'MANAGE-GROUP-${group.id}'`
       );
     });
 
@@ -190,7 +267,7 @@ describe("Subscriptions Business Logic", () => {
         const limit = 5;
         const offset = 0;
         mocks.getUserSubscriptions.mockReturnValueOnce(
-          TE.right([mocks.aSubscriptionContract]),
+          TE.right([mocks.aSubscriptionContract])
         );
 
         await expect(
@@ -199,14 +276,14 @@ describe("Subscriptions Business Logic", () => {
             ownerId,
             limit,
             offset,
-            selcGroups,
-          ),
+            selcGroups
+          )
         ).resolves.toStrictEqual([
           {
             id: mocks.aSubscriptionContract.name,
             name: mocks.aSubscriptionContract.displayName,
-            state: mocks.aSubscriptionContract.state,
-          },
+            state: mocks.aSubscriptionContract.state
+          }
         ]);
 
         expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -214,9 +291,9 @@ describe("Subscriptions Business Logic", () => {
           ownerId,
           offset,
           limit,
-          `name eq 'MANAGE-${ownerId}'`,
+          `name eq 'MANAGE-${ownerId}'`
         );
-      },
+      }
     );
 
     it("should return an empty array when the root manage is requested and selcGroups contains at least one item", async () => {
@@ -226,7 +303,7 @@ describe("Subscriptions Business Logic", () => {
       const offset = 0;
       const selcGroups = ["item"];
       mocks.getUserSubscriptions.mockReturnValueOnce(
-        TE.right([mocks.aSubscriptionContract]),
+        TE.right([mocks.aSubscriptionContract])
       );
 
       await expect(
@@ -235,8 +312,8 @@ describe("Subscriptions Business Logic", () => {
           ownerId,
           limit,
           offset,
-          selcGroups,
-        ),
+          selcGroups
+        )
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
@@ -244,49 +321,14 @@ describe("Subscriptions Business Logic", () => {
   });
 
   describe("deleteManageSubscription", () => {
-    it("should throw an error when the getUserSubscriptions fails", async () => {
-      //given
-      const subscriptionId = "subscriptionId";
-      const ownerId = mocks.anOwnerId;
-      const errorMessage = "Error retrieving user's subscriptions";
-      const filter = `name eq '${subscriptionId}'`;
-      mocks.getUserSubscriptions.mockReturnValueOnce(
-        TE.left({ statusCode: 500 }),
-      );
-
-      //when and then
-      await expect(
-        deleteManageSubscription(ownerId, { subscriptionId }),
-      ).rejects.toThrowError(errorMessage);
-      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
-        ownerId,
-        undefined,
-        undefined,
-        filter,
-      );
-    });
-
-    it("should throw an error when the getUserSubscriptions returns an empty list of subscriptions", async () => {
-      //given
-      const subscriptionId = "subscriptionId";
-      const ownerId = mocks.anOwnerId;
-      const errorMessage = "The user can't delete the subscription";
-      const filter = `name eq '${subscriptionId}'`;
-      mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
-
-      //when and then
-      await expect(
-        deleteManageSubscription(ownerId, { subscriptionId }),
-      ).rejects.toThrowError(errorMessage);
-      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
-        ownerId,
-        undefined,
-        undefined,
-        filter,
-      );
-    });
+    it.each`
+      scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
+      ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.deleteSubscription]}
+      ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.deleteSubscription]}
+    `(
+      "should throw an error when $scenario",
+      validateSubscriptionOwnershipTestFn(deleteManageSubscription)
+    );
 
     it.each`
       scenario              | deleteSubscriptionResult                       | expectedErrorMessage
@@ -296,37 +338,362 @@ describe("Subscriptions Business Logic", () => {
       "should throw an error when received $scenario response from deleteSubscription",
       async ({ deleteSubscriptionResult, expectedErrorMessage }) => {
         //given
-        const subscriptionId = "subscriptionId";
+        const subscriptionId = mocks.aSubscriptionId;
         const ownerId = mocks.anOwnerId;
         mocks.getUserSubscriptions.mockReturnValueOnce(
-          TE.right([mocks.aSubscriptionContract]),
+          TE.right([mocks.aSubscriptionContract])
         );
         mocks.deleteSubscription.mockReturnValueOnce(deleteSubscriptionResult);
 
         //when and then
         await expect(
-          deleteManageSubscription(ownerId, { subscriptionId }),
+          deleteManageSubscription(ownerId, subscriptionId)
         ).rejects.toThrowError(expectedErrorMessage);
+        validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
         expect(mocks.deleteSubscription).toHaveBeenCalledOnce();
         expect(mocks.deleteSubscription).toHaveBeenCalledWith(subscriptionId);
-      },
+      }
     );
 
     it("should success when the delete subscription success", async () => {
       //given
-      const subscriptionId = "subscriptionId";
+      const subscriptionId = mocks.aSubscriptionId;
       const ownerId = mocks.anOwnerId;
       mocks.getUserSubscriptions.mockReturnValueOnce(
-        TE.right([mocks.aSubscriptionContract]),
+        TE.right([mocks.aSubscriptionContract])
       );
       mocks.deleteSubscription.mockReturnValueOnce(TE.right(void 0));
 
       //when and then
       await expect(
-        deleteManageSubscription(ownerId, { subscriptionId }),
+        deleteManageSubscription(ownerId, subscriptionId)
       ).resolves.toBe(undefined);
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
       expect(mocks.deleteSubscription).toHaveBeenCalledOnce();
       expect(mocks.deleteSubscription).toHaveBeenCalledWith(subscriptionId);
+    });
+  });
+});
+
+describe("Manage Keys", () => {
+  describe("retrieveManageSubscriptionApiKeys", () => {
+    it.each`
+      scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
+      ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.deleteSubscription]}
+      ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.deleteSubscription]}
+    `(
+      "should throw an error when $scenario",
+      validateSubscriptionOwnershipTestFn(retrieveManageSubscriptionApiKeys)
+    );
+
+    it("should fail when apim respond with an error", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.listSecrets.mockReturnValueOnce(
+        TE.left({
+          error: {
+            code: "Error",
+            message: "An error has occurred on APIM"
+          },
+          statusCode: 500
+        })
+      );
+
+      // when and then
+      await expect(
+        retrieveManageSubscriptionApiKeys(ownerId, subscriptionId)
+      ).rejects.toThrowError();
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.listSecrets).toHaveBeenCalledOnce();
+      expect(mocks.listSecrets).toHaveBeenCalledWith(subscriptionId);
+    });
+
+    it("should return the keys found", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.listSecrets.mockReturnValueOnce(
+        TE.right({
+          primaryKey: mocks.aPrimaryKey,
+          secondaryKey: mocks.aSecondaryKey
+        })
+      );
+
+      // when
+      const result = await retrieveManageSubscriptionApiKeys(
+        ownerId,
+        subscriptionId
+      );
+
+      // then
+      expect(result).toStrictEqual({
+        primary_key: mocks.aPrimaryKey,
+        secondary_key: mocks.aSecondaryKey
+      });
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.listSecrets).toHaveBeenCalledOnce();
+      expect(mocks.listSecrets).toHaveBeenCalledWith(subscriptionId);
+    });
+  });
+
+  describe("regenerateManageSubscriptionApiKey", () => {
+    it.each`
+      scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
+      ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.regenerateSubscriptionKey]}
+      ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.regenerateSubscriptionKey]}
+    `(
+      "should throw an error when $scenario",
+      validateSubscriptionOwnershipTestFn(regenerateManageSubscriptionApiKey)
+    );
+
+    it("should return the regenerated manage key", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.regenerateSubscriptionKey.mockReturnValueOnce(
+        TE.right({
+          primaryKey: mocks.aPrimaryKey,
+          secondaryKey: mocks.aSecondaryKey
+        })
+      );
+
+      // when
+      const result = await regenerateManageSubscriptionApiKey(
+        ownerId,
+        subscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+
+      // then
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+        mocks.aSubscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+      expect(result).toStrictEqual({
+        primary_key: mocks.aPrimaryKey,
+        secondary_key: mocks.aSecondaryKey
+      });
+    });
+
+    it("should return an error when apim fails regenerating", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.regenerateSubscriptionKey.mockReturnValueOnce(
+        TE.left({
+          error: {
+            code: "Error",
+            message: "An error has occurred on APIM"
+          },
+          statusCode: 500
+        })
+      );
+
+      // when and then
+      await expect(
+        regenerateManageSubscriptionApiKey(
+          ownerId,
+          subscriptionId,
+          SubscriptionKeyTypeEnum.primary
+        )
+      ).rejects.toThrowError();
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+        subscriptionId,
+        SubscriptionKeyTypeEnum.primary
+      );
+    });
+  });
+});
+
+describe("Authorized CIDRs Subscription Manage", () => {
+  describe("retrieveManageSubscriptionAuthorizedCIDRs", () => {
+    it.each`
+      scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
+      ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.findLastVersionByModelId]}
+      ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.findLastVersionByModelId]}
+    `(
+      "should throw an error when $scenario",
+      validateSubscriptionOwnershipTestFn(
+        retrieveManageSubscriptionAuthorizedCIDRs
+      )
+    );
+
+    it("should return the authorized cidrs found", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.findLastVersionByModelId.mockReturnValueOnce(
+        TE.right(
+          O.some({
+            cidrs: mocks.cidrs
+          })
+        )
+      );
+
+      // when
+      const result = await retrieveManageSubscriptionAuthorizedCIDRs(
+        ownerId,
+        subscriptionId
+      );
+
+      // then
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.findLastVersionByModelId).toHaveBeenCalledWith([
+        subscriptionId
+      ]);
+      expect(result).toStrictEqual(Array.from(mocks.cidrs));
+    });
+
+    it("should return an empty authorized cidrs list when not found are not found", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.findLastVersionByModelId.mockReturnValueOnce(TE.right(O.none));
+
+      // when
+      const result = await retrieveManageSubscriptionAuthorizedCIDRs(
+        ownerId,
+        subscriptionId
+      );
+
+      // then
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.findLastVersionByModelId).toHaveBeenCalledWith([
+        subscriptionId
+      ]);
+      expect(result).not.toBe(null);
+      expect(result).toStrictEqual(Array<Cidr>());
+    });
+
+    it("should return 500 when an error is returned from cosmos", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.findLastVersionByModelId.mockReturnValueOnce(
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: {
+            code: 500,
+            body: {
+              code: "Error",
+              message: "Cosmos error"
+            }
+          }
+        })
+      );
+
+      // when and then
+      await expect(
+        retrieveManageSubscriptionAuthorizedCIDRs(ownerId, subscriptionId)
+      ).rejects.toThrowError();
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.findLastVersionByModelId).toHaveBeenCalledWith([
+        subscriptionId
+      ]);
+    });
+  });
+
+  describe("upsertManageSubscriptionAuthorizedCIDRs", () => {
+    it.each`
+      scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage                       | toNotHaveBeenCalledMocks
+      ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"} | ${[mocks.upsert]}
+      ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"} | ${[mocks.upsert]}
+    `(
+      "should throw an error when $scenario",
+      validateSubscriptionOwnershipTestFn(
+        upsertManageSubscriptionAuthorizedCIDRs,
+        [Array.from(mocks.cidrs)]
+      )
+    );
+
+    it("should return 500 when an error is returned from cosmos", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.upsert.mockReturnValueOnce(
+        TE.left({
+          kind: "COSMOS_ERROR_RESPONSE",
+          error: {
+            code: 500,
+            body: {
+              code: "Error",
+              message: "Cosmos error"
+            }
+          }
+        })
+      );
+
+      // when and then
+      await expect(
+        upsertManageSubscriptionAuthorizedCIDRs(
+          ownerId,
+          subscriptionId,
+          Array.from(mocks.cidrs)
+        )
+      ).rejects.toThrowError();
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.upsert).toHaveBeenCalledWith({
+        cidrs: mocks.cidrs,
+        kind: "INewSubscriptionCIDRs",
+        subscriptionId: subscriptionId
+      });
+    });
+
+    it("should return 200 when authorized cidrs are updated correctly", async () => {
+      // given
+      const subscriptionId = mocks.aSubscriptionId;
+      const ownerId = mocks.anOwnerId;
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract])
+      );
+      mocks.upsert.mockImplementationOnce(request =>
+        TE.right({
+          cidrs: request.cidrs.values()
+        })
+      );
+
+      // when
+      const result = await upsertManageSubscriptionAuthorizedCIDRs(
+        ownerId,
+        subscriptionId,
+        Array.from(mocks.cidrs)
+      );
+
+      // then
+      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+      expect(mocks.upsert).toHaveBeenCalledWith({
+        cidrs: mocks.cidrs,
+        kind: "INewSubscriptionCIDRs",
+        subscriptionId: mocks.aSubscriptionId
+      });
+      expect(result).toStrictEqual(Array.from(mocks.cidrs));
     });
   });
 });

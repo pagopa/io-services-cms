@@ -95,8 +95,6 @@ describe("Service Publication Avro Formatter", () => {
         modified_at: aServicePublicationCosmosResource.modified_at,
         version: "aServiceEtag",
       });
-
-      //console.log(body);
     }
   });
 
