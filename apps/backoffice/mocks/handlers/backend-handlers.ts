@@ -27,13 +27,15 @@ import {
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
 } from "../data/backend-data";
+import { getMockInstitutionGroups } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import {
   aMockCurrentUserAuthorizedInstitution,
   getMockInstitution,
   getMockUserAuthorizedInstitution,
+  getSelfCareProblemResponse,
+  retrieveMockInstitutionAggregates,
 } from "../data/selfcare-data";
-import { getMockInstitutionGroups } from "../data/backend-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -739,6 +741,38 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(
+      `${baseURL}/institutions/:institutionId/aggregates`,
+      ({ params, request }) => {
+        const { institutionId } = params;
+        const url = new URL(request.url);
+        const limit = url.searchParams.get("limit");
+        const offset = url.searchParams.get("offset");
+        const search = url.searchParams.get("search") ?? undefined;
+
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(
+              retrieveMockInstitutionAggregates(
+                institutionId as string,
+                limit !== null ? +limit : 0,
+                offset !== null ? +offset : 0,
+                search,
+              ),
+            ),
+            { status: 200 },
+          ),
+          new HttpResponse(JSON.stringify(getSelfCareProblemResponse(404)), {
+            status: 404,
+          }),
+          new HttpResponse(JSON.stringify(getSelfCareProblemResponse(500)), {
+            status: 500,
+          }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
     http.get(`${baseURL}/institutions/:institutionId/groups`, ({ request }) => {
       const url = new URL(request.url);
       const institutionId = url.searchParams.get("institutionId");

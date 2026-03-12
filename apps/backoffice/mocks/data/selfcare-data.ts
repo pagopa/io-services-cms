@@ -213,6 +213,27 @@ export const getMockInstitutionProducts = (_institutionId?: string) => {
   return [product, ...createOtherProducts(product)];
 };
 
+export const retrieveMockInstitutionAggregates = (
+  _institutionId: string,
+  limit: number,
+  offset: number,
+  search?: string,
+) => {
+  const totalElements = search ? faker.number.int({ max: 15, min: 3 }) : 55;
+
+  return {
+    pagination: {
+      count: totalElements,
+      limit,
+      offset,
+    },
+    value: Array.from(Array.from({ length: limit })).map(() => ({
+      id: faker.string.uuid(),
+      name: faker.company.name(),
+    })),
+  };
+};
+
 export const getMockInstitutionGroups = (_institutionId?: string) => ({
   content: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
     (_value, _index, _array) => ({

@@ -319,7 +319,7 @@ export default function DelegatedInstitutions() {
     return result;
   };
 
-  const getDelegatedInstitutions = () => {
+  const retrieveInstututionAggregates = () => {
     dipFetchData(
       "retrieveInstitutionAggregates",
       {
@@ -349,7 +349,7 @@ export default function DelegatedInstitutions() {
 
   // fetch services when table pagination or search by institution name change
   useEffect(() => {
-    getDelegatedInstitutions();
+    retrieveInstututionAggregates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, currentSearchByInstitutionName]);
 
