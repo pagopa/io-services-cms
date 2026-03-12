@@ -26,6 +26,7 @@ import {
   getMockServicesMigrationDelegate,
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
+  retrieveMockInstitutionAggregates,
 } from "../data/backend-data";
 import { getMockInstitutionGroups } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
@@ -34,7 +35,6 @@ import {
   getMockInstitution,
   getMockUserAuthorizedInstitution,
   getSelfCareProblemResponse,
-  retrieveMockInstitutionAggregates,
 } from "../data/selfcare-data";
 
 const MAX_ARRAY_LENGTH = 20;
