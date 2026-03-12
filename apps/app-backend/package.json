@@ -34,6 +34,7 @@
     "dependency-check": "^4.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "npm-pack-zip": "^1.3.0",
+    "prettier": "catalog:",
     "shx": "^0.3.2",
     "supertest": "^6.3.4",
     "swagger-cli": "^4.0.4"
