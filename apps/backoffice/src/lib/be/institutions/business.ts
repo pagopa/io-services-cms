@@ -1,4 +1,4 @@
-import { DelegatedInstitutionPagination } from "@/generated/api/DelegatedInstitutionPagination";
+import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { Group, StateEnum } from "@/generated/api/Group";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
@@ -199,7 +199,7 @@ export const retrieveInstitutionAggregates = async (
   size?: number,
   page?: number,
   search?: string,
-): Promise<DelegatedInstitutionPagination> => {
+): Promise<AggregatedInstitutionPagination> => {
   const apiResult = await getInstitutionDelegations(
     institutionId,
     size,

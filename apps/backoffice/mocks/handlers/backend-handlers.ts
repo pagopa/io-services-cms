@@ -14,8 +14,8 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getMockAggregatedInstitutionPagination,
   getMockBulkPatchService,
-  getMockDelegatedInstitutionPagination,
   getMockGroupUnboundedServices,
   getMockManageSubscription,
   getMockManageSubscriptions,
@@ -27,13 +27,13 @@ import {
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
 } from "../data/backend-data";
+import { getMockInstitutionGroups } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import {
   aMockCurrentUserAuthorizedInstitution,
   getMockInstitution,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
-import { getMockInstitutionGroups } from "../data/backend-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -802,7 +802,7 @@ export const buildHandlers = () => {
         const resultArray = [
           new HttpResponse(
             JSON.stringify(
-              getGetDelegatedInstitutionPagination200Response(
+              getGetAggregatedInstitutionPagination200Response(
                 limit as string,
                 offset as string,
                 search as string,
@@ -1253,12 +1253,12 @@ export function getInstitutionGroups200Response(institutionId: string) {
   return getMockInstitutionGroups(institutionId);
 }
 
-export function getGetDelegatedInstitutionPagination200Response(
+export function getGetAggregatedInstitutionPagination200Response(
   limit: string,
   offset: string,
   search: string,
 ) {
-  return getMockDelegatedInstitutionPagination(+limit, +offset, search);
+  return getMockAggregatedInstitutionPagination(+limit, +offset, search);
 }
 
 export function getGetManageSubscriptions200Response(
