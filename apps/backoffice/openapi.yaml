@@ -1013,7 +1013,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DelegatedInstitutionPagination'
+                $ref: '#/components/schemas/AggregatedInstitutionPagination'
         '401':
           description: Unauthorized
         '403':
