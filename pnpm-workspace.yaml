@@ -2,6 +2,11 @@ packages:
   - packages/*
   - apps/*
 
-linkWorkspacePackages: true
-packageImportMethod: "clone-or-copy"
+catalog:
+  prettier: ^3.5.3
+
 cleanupUnusedCatalogs: true
+
+linkWorkspacePackages: true
+
+packageImportMethod: clone-or-copy

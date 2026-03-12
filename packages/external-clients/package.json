@@ -36,7 +36,8 @@
     "ulid": "^3.0.2"
   },
   "devDependencies": {
-    "@pagopa/openapi-codegen-ts": "^13.1.0"
+    "@pagopa/openapi-codegen-ts": "^13.1.0",
+    "prettier": "catalog:"
   },
   "imports": {
     "#package.json": "./package.json"
