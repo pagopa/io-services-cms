@@ -49,7 +49,7 @@ export default function Login() {
   useEffect(() => {
     if (session && router.isReady) {
       if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
-        router.push(ROUTES.DELEGATED_INSTITUTIONS);
+        router.push(ROUTES.AGGREGATED_INSTITUTIONS);
       } else {
         router.push(ROUTES.HOME);
       }
