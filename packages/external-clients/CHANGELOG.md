@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.8.8
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+
 ## 1.8.7
 
 ### Patch Changes

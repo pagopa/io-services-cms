@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 2.1.1
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+- Updated dependencies [adc31a1c]
+  - @io-services-cms/models@1.28.5
+
 ## 2.1.0
 
 ### Minor Changes
