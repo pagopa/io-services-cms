@@ -22,6 +22,9 @@
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\""
   },
+  "devDependencies": {
+    "prettier": "catalog:"
+  },
   "dependencies": {
     "@azure/cosmos": "^4.0.0",
     "@pagopa/io-functions-commons": "^29.1.2",
