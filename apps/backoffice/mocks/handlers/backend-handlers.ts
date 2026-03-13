@@ -792,7 +792,7 @@ export const buildHandlers = () => {
       return resultArray[0];
     }),
     http.get(
-      `${baseURL}/institutions/:institutionId/delegations`,
+      `${baseURL}/institutions/:institutionId/aggregates`,
       ({ request }) => {
         const url = new URL(request.url);
         const limit = url.searchParams.get("limit");
