@@ -13,7 +13,7 @@ import {
 import { InstitutionProducts } from "../../../lib/be/selfcare-client";
 import { GroupNotFoundError } from "../errors";
 import {
-  getDelegatedInstitutions,
+  retrieveInstitutionAggregates,
   getUserInstitutionProducts,
   groupExists,
   retrieveInstitution,
@@ -388,7 +388,7 @@ describe("Institutions", () => {
     });
   });
 
-  describe("getDelegatedInstitutions", () => {
+  describe("retrieveInstitutionAggregates", () => {
     const institutionId = "institutionId";
     const size = 5;
     const page = 1;
@@ -400,7 +400,7 @@ describe("Institutions", () => {
       });
 
       // when
-      const result = await getDelegatedInstitutions(
+      const result = await retrieveInstitutionAggregates(
         institutionId,
         size,
         page,
@@ -428,14 +428,14 @@ describe("Institutions", () => {
       );
     });
 
-    it("should rejects when getInstitutionDelegations return an error response", async () => {
+    it("should rejects when retrieveInstitutionAggregates return an error response", async () => {
       // given
       const error = new Error("errorMessage");
       getInstitutionDelegationsMock.mockRejectedValueOnce(error);
 
       // when and then
       await expect(
-        getDelegatedInstitutions(institutionId, size, page, search)
+        retrieveInstitutionAggregates(institutionId, size, page, search),
       ).rejects.toThrowError(error);
       expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
         institutionId,

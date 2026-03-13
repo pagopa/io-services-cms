@@ -10,7 +10,7 @@ import {
   TableView,
   TableViewColumn,
 } from "@/components/table-view";
-import { DelegatedInstitutionPagination } from "@/generated/api/DelegatedInstitutionPagination";
+import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -129,7 +129,7 @@ export default function DelegatedInstitutions() {
     error: dipError,
     fetchData: dipFetchData,
     loading: dipLoading,
-  } = useFetch<DelegatedInstitutionPagination>();
+  } = useFetch<AggregatedInstitutionPagination>();
   const [delegatedInstitutions, setDelegatedInstitutions] =
     useState<DelegatedInstitutionListItem[]>();
   const [pagination, setPagination] = useState({
@@ -321,14 +321,14 @@ export default function DelegatedInstitutions() {
 
   const getDelegatedInstitutions = () => {
     dipFetchData(
-      "getDelegatedInstitutions",
+      "retrieveInstitutionAggregates",
       {
         institutionId: session?.user?.institution.id as string,
         limit: pagination.limit,
         offset: pagination.offset,
         search: currentSearchByInstitutionName,
       },
-      DelegatedInstitutionPagination,
+      AggregatedInstitutionPagination,
       {
         notify: "errors",
       },
@@ -355,7 +355,7 @@ export default function DelegatedInstitutions() {
 
   // make some checks and adjustments on delegated institutions fetch result
   useEffect(() => {
-    const maybeDipData = DelegatedInstitutionPagination.decode(dipData);
+    const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
     if (E.isRight(maybeDipData)) {
       // check fetch result (if no delegated institutions, an EmptyState component will be displayed)
       if (

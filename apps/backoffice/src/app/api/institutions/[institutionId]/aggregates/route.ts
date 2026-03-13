@@ -2,7 +2,7 @@ import {
   handleBadRequestErrorResponse,
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
-import { getDelegatedInstitutions } from "@/lib/be/institutions/business";
+import { retrieveInstitutionAggregates } from "@/lib/be/institutions/business";
 import {
   parseLimitQueryParam,
   parseOffsetQueryParam,
@@ -18,8 +18,8 @@ import { NextRequest } from "next/server";
 const DEFAULT_SEARCH_DECODER = t.union([NonEmptyString, t.null]);
 
 /**
- * @description Retrieve all active delegated institutions
- * @operationId getDelegatedInstitutions
+ * @description Retrieve all active aggregated institutions
+ * @operationId retrieveInstitutionAggregates
  */
 export const GET = withJWTAuthHandler(
   async (
@@ -53,7 +53,7 @@ export const GET = withJWTAuthHandler(
     }
 
     try {
-      const institutionResponse = await getDelegatedInstitutions(
+      const institutionResponse = await retrieveInstitutionAggregates(
         params.institutionId,
         maybeLimit.right,
         maybeOffset.right,
@@ -62,12 +62,12 @@ export const GET = withJWTAuthHandler(
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
       console.error(
-        `An Error has occurred while retrieving delegations for institutionId: ${params.institutionId}, caused by: `,
+        `An Error has occurred while retrieving institution aggregates for institutionId: ${params.institutionId}, caused by: `,
         error,
       );
 
       return handleInternalErrorResponse(
-        "InstitutionDelegationsRetrieveError",
+        "InstitutionAggregatesRetrieveError",
         error,
       );
     }
