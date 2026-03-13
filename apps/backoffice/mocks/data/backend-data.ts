@@ -432,9 +432,13 @@ const getMockAggregatedInstitution = () => ({
   name: faker.company.name(),
 });
 
+// Defined outside the function to maintain consistency across
+// `retrieveMockInstitutionAggregates` calls and provide realistic pagination behavior
+const cachedInstitutionsCount = faker.number.int({ max: 99, min: 8 });
+
 export const getMockAggregatedInstitutionPagination = (
-  limit?: number,
-  offset?: number,
+  limit: number,
+  offset: number,
   search?: string,
 ) => {
   const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
@@ -442,29 +446,6 @@ export const getMockAggregatedInstitutionPagination = (
     offset !== undefined && offset >= 0 && offset < 99
       ? offset
       : faker.number.int({ max: 99, min: 0 });
-
-  const total = search ? [1] : [...Array.from(Array(purifiedLimit).keys())];
-
-  return {
-    pagination: {
-      count: search ? 1 : 100,
-      limit: purifiedLimit,
-      offset: purifiedOffset,
-    },
-    value: total.map((_) => getMockAggregatedInstitution()),
-  };
-};
-
-// Defined outside the function to maintain consistency across
-// `retrieveMockInstitutionAggregates` calls and provide realistic pagination behavior
-const cachedInstitutionsCount = faker.number.int({ max: 99, min: 8 });
-
-export const retrieveMockInstitutionAggregates = (
-  _institutionId: string,
-  limit: number,
-  offset: number,
-  search?: string,
-) => {
   const totalElements = search
     ? Math.ceil(cachedInstitutionsCount / 10)
     : cachedInstitutionsCount;
@@ -472,8 +453,8 @@ export const retrieveMockInstitutionAggregates = (
   return {
     pagination: {
       count: totalElements,
-      limit,
-      offset,
+      limit: purifiedLimit,
+      offset: purifiedOffset,
     },
     value: Array.from({ length: Math.min(limit, totalElements - offset) }).map(
       getMockAggregatedInstitution,
