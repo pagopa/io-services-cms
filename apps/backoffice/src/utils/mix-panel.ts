@@ -371,9 +371,9 @@ export const trackBulkGroupAssignmentAbortEvent = () => {
   logToMixpanel("IO_BO_BULK_GROUP_ASSIGNMENT_ABORT", "UX", {}, "action");
 };
 
-// delegated-institutions page events for aggregator institutions (EA)
+// aggregated-institutions page events for aggregator institutions (EA)
 
-export const trackDelegatedInstitutionsPageEvent = () => {
+export const trackAggregatedInstitutionsPageEvent = () => {
   logToMixpanel("IO_BO_DELEGATED_INSTITUTIONS_PAGE", "UX", {}, "screen_view");
 };
 

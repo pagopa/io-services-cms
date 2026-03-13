@@ -3,7 +3,7 @@ import { Cidr } from "@/generated/api/Cidr";
 import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
 import {
   SubscriptionType,
-  SubscriptionTypeEnum
+  SubscriptionTypeEnum,
 } from "@/generated/api/SubscriptionType";
 import { faker } from "@faker-js/faker/locale/it";
 
@@ -14,145 +14,145 @@ const MAX_ARRAY_LENGTH = 20;
 
 export const anInfoVersion = {
   name: packageJson.name,
-  version: packageJson.version
+  version: packageJson.version,
 };
 
 export const aMockServiceTopicsArray = [
   {
     id: 0,
-    name: "Altro"
+    name: "Altro",
   },
   {
     id: 1,
-    name: "Ambiente e animali"
+    name: "Ambiente e animali",
   },
   {
     id: 2,
-    name: "Attività produttive e commercio"
+    name: "Attività produttive e commercio",
   },
   {
     id: 3,
-    name: "Benessere sociale"
+    name: "Benessere sociale",
   },
   {
     id: 4,
-    name: "Casa e utenze"
+    name: "Casa e utenze",
   },
   {
     id: 5,
-    name: "Cultura, tempo libero e sport"
+    name: "Cultura, tempo libero e sport",
   },
   {
     id: 6,
-    name: "Educazione e formazione"
+    name: "Educazione e formazione",
   },
   {
     id: 7,
-    name: "Giustizia e legge"
+    name: "Giustizia e legge",
   },
   {
     id: 8,
-    name: "Lavori edilizi, catasto e urbanistica"
+    name: "Lavori edilizi, catasto e urbanistica",
   },
   {
     id: 9,
-    name: "Mobilità e trasporti"
+    name: "Mobilità e trasporti",
   },
   {
     id: 10,
-    name: "Redditi, patrimoni e fisco"
+    name: "Redditi, patrimoni e fisco",
   },
   {
     id: 11,
-    name: "Servizi anagrafici e civici"
+    name: "Servizi anagrafici e civici",
   },
   {
     id: 12,
-    name: "Servizi elettorali"
+    name: "Servizi elettorali",
   },
   {
     id: 13,
-    name: "Sicurezza e Protezione Civile"
+    name: "Sicurezza e Protezione Civile",
   },
   {
     id: 14,
-    name: "Suolo, spazi e beni pubblici"
+    name: "Suolo, spazi e beni pubblici",
   },
   {
     id: 15,
-    name: "Viaggi e turismo"
+    name: "Viaggi e turismo",
   },
   {
     id: 16,
-    name: "Vita lavorativa"
+    name: "Vita lavorativa",
   },
   {
     id: 17,
-    name: "Salute"
-  }
+    name: "Salute",
+  },
 ];
 
 const CTA_PREFIX_URL_SCHEMES = {
   EXTERNAL: "iohandledlink://",
   INTERNAL: "ioit://",
-  SSO: "iosso://"
+  SSO: "iosso://",
 } as const;
 
 export const aMockServiceCTASingle = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}\"\n---`;
 
 export const aMockServiceCTADouble = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.EXTERNAL
 }${faker.internet.url()}\"\n---`;
 
 export const aMockServiceCTADoubleDifferentLink = `---\nit:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.INTERNAL
 }${faker.internet.url()}"\n  cta_2: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.SSO
 }${faker.internet.url()}\"\nen:\n  cta_1: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.INTERNAL
 }${faker.internet.url()}\"\n  cta_2: \n    text: \"${faker.lorem.words(
-  2
+  2,
 )}\"\n    action: \"${
   CTA_PREFIX_URL_SCHEMES.SSO
 }${faker.internet.url()}\"\n---`;
 
 export const getMockServiceLifecycle = (serviceId?: string) => ({
   authorized_cidrs: [
-    ...Array.from(Array(faker.number.int({ max: 5, min: 1 })).keys())
+    ...Array.from(Array(faker.number.int({ max: 5, min: 1 })).keys()),
   ].map(
-    _ =>
+    (_) =>
       `${faker.internet.ipv4()}/${faker.helpers.rangeToNumber({
         max: 32,
-        min: 0
-      })}`
+        min: 0,
+      })}`,
   ),
   authorized_recipients: faker.helpers.arrayElements(
     [
@@ -160,9 +160,9 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
       "RSSMRA80A01F205X",
       "VRDLNZ69P01H501H",
       "BNCMRA55H50A944J",
-      "SLAFNC76B68G273U"
+      "SLAFNC76B68G273U",
     ],
-    { max: 5, min: 0 }
+    { max: 5, min: 0 },
   ),
   description: faker.lorem.sentence({ max: 50, min: 10 }),
   id: serviceId ?? faker.string.alphanumeric(26).toUpperCase(),
@@ -176,13 +176,13 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     cta: faker.helpers.arrayElement([
       aMockServiceCTASingle,
       aMockServiceCTADoubleDifferentLink,
-      undefined
+      undefined,
     ]),
     custom_special_flow: faker.lorem.slug(1),
     email: faker.internet.email(),
     group: faker.helpers.arrayElement([
       getMockManageSubscriptionGroup("abc123"),
-      undefined
+      undefined,
     ]),
     pec: faker.internet.email(),
     phone: faker.phone.number(),
@@ -192,13 +192,13 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     token_name: faker.lorem.slug(1),
     topic: faker.helpers.arrayElement([...aMockServiceTopicsArray, undefined]),
     tos_url: faker.internet.url(),
-    web_url: faker.internet.url()
+    web_url: faker.internet.url(),
   },
   name: faker.lorem.words({ max: 5, min: 3 }),
   organization: {
     department_name: faker.company.name(),
     fiscal_code: faker.string.numeric(11),
-    name: faker.company.name()
+    name: faker.company.name(),
   },
   require_secure_channel: faker.datatype.boolean(),
   status: {
@@ -209,15 +209,15 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
       "submitted",
       "approved",
       "rejected",
-      "deleted"
-    ])
+      "deleted",
+    ]),
   },
-  version: faker.number.int({ max: undefined, min: undefined })
+  version: faker.number.int({ max: undefined, min: undefined }),
 });
 
 export const getMockServicePublication = (serviceId?: string) => ({
   ...getMockServiceLifecycle(serviceId),
-  status: faker.helpers.arrayElement(["published", "unpublished"])
+  status: faker.helpers.arrayElement(["published", "unpublished"]),
 });
 
 export const getMockServiceHistoryItem = (serviceId?: string) => {
@@ -230,39 +230,39 @@ export const getMockServiceHistoryItem = (serviceId?: string) => {
           "submitted",
           "approved",
           "rejected",
-          "deleted"
+          "deleted",
         ]);
   return {
     ...getMockServiceLifecycle(serviceId),
     status: {
       kind: kind,
       reason: fsmState === "rejected" ? faker.lorem.sentence() : undefined,
-      value: fsmState
-    }
+      value: fsmState,
+    },
   };
 };
 
 export const aMockServicePublication = {
   ...getMockServiceLifecycle(),
-  status: faker.helpers.arrayElement(["published", "unpublished"])
+  status: faker.helpers.arrayElement(["published", "unpublished"]),
   //version: faker.string.uuid()
 };
 
 export const getMockServiceKeys = () => ({
   primary_key: faker.string.alphanumeric(32),
-  secondary_key: faker.string.alphanumeric(32)
+  secondary_key: faker.string.alphanumeric(32),
 });
 
 export const aMockManageKeysCIDRs: SubscriptionCIDRs = {
   cidrs: [
-    ...Array.from(Array(faker.number.int({ max: 5, min: 1 })).keys())
+    ...Array.from(Array(faker.number.int({ max: 5, min: 1 })).keys()),
   ].map(
-    _ =>
+    (_) =>
       `${faker.internet.ipv4()}/${faker.helpers.rangeToNumber({
         max: 32,
-        min: 0
-      })}` as Cidr
-  )
+        min: 0,
+      })}` as Cidr,
+  ),
 };
 
 const getMockServicePagination = (limit?: number, offset?: number) => {
@@ -273,30 +273,30 @@ const getMockServicePagination = (limit?: number, offset?: number) => {
 
   const total = [
     ...Array.from(
-      Array(faker.number.int({ max: MAX_ARRAY_LENGTH, min: 1 })).keys()
-    )
+      Array(faker.number.int({ max: MAX_ARRAY_LENGTH, min: 1 })).keys(),
+    ),
   ];
 
   return {
     pagination: {
       count: total.length,
       limit: purifiedLimit,
-      offset: purifiedOffset
+      offset: purifiedOffset,
     },
-    value: total.map(_ => getMockServiceLifecycle())
+    value: total.map((_) => getMockServiceLifecycle()),
   };
 };
 
 export const aMockServicePagination = getMockServicePagination();
 export const aMockServicePaginationLimitOffset = (
   limit?: number,
-  offset?: number
+  offset?: number,
 ) => getMockServicePagination(limit, offset);
 
 export const getMockServiceList = (
   limit?: number,
   offset?: number,
-  id?: string
+  id?: string,
 ) => {
   const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
   const purifiedOffset =
@@ -310,21 +310,21 @@ export const getMockServiceList = (
     pagination: {
       count: id ? 1 : 100,
       limit: purifiedLimit,
-      offset: purifiedOffset
+      offset: purifiedOffset,
     },
-    value: total.map(_ => ({
+    value: total.map((_) => ({
       ...getMockServiceLifecycle(),
       visibility: faker.helpers.arrayElement([
         "published",
         "unpublished",
-        undefined
-      ])
-    }))
+        undefined,
+      ]),
+    })),
   };
 };
 
 export const aMockServiceTopics = {
-  topics: aMockServiceTopicsArray
+  topics: aMockServiceTopicsArray,
 };
 
 export const getMockGroupUnboundedServices = () => ({
@@ -332,32 +332,32 @@ export const getMockGroupUnboundedServices = () => ({
     ...Array.from(Array(faker.number.int({ max: 100, min: 1 })).keys()).map(
       () => ({
         id: faker.string.alphanumeric(26).toUpperCase(),
-        name: faker.lorem.words({ max: 5, min: 3 })
-      })
-    )
-  ]
+        name: faker.lorem.words({ max: 5, min: 3 }),
+      }),
+    ),
+  ],
 });
 
 export const getMockServiceHistory = (
   serviceId: string,
   order: "ASC" | "DESC" | null,
   limit: null | string,
-  _continuationToken: null | string
+  _continuationToken: null | string,
 ) => {
   const purifiedLimit = limit ? +limit : 10;
   const total = [
     ...Array.from(
-      Array(faker.number.int({ max: purifiedLimit, min: 1 })).keys()
-    )
+      Array(faker.number.int({ max: purifiedLimit, min: 1 })).keys(),
+    ),
   ];
 
   return {
     continuationToken: faker.helpers.arrayElement([
       faker.string.alphanumeric({ length: { max: 10, min: 5 } }),
-      undefined
+      undefined,
     ]),
     items: total
-      .map(_ => getMockServiceHistoryItem(serviceId))
+      .map((_) => getMockServiceHistoryItem(serviceId))
       .sort((a, b) =>
         order
           ? order === "DESC"
@@ -366,15 +366,15 @@ export const getMockServiceHistory = (
             : new Date(a.last_update).getTime() -
               new Date(b.last_update).getTime()
           : new Date(b.last_update).getTime() -
-            new Date(a.last_update).getTime()
-      )
+            new Date(a.last_update).getTime(),
+      ),
   };
 };
 
 export const getMockManageSubscriptions = (
   limit: number,
   offset: number,
-  kind: SubscriptionType
+  kind: SubscriptionType,
 ) => {
   const purifiedLimit = limit
     ? limit >= 10
@@ -395,11 +395,11 @@ export const getMockManageSubscriptions = (
     pagination: {
       count: total.length,
       limit: purifiedLimit,
-      offset: purifiedOffset
+      offset: purifiedOffset,
     },
-    value: [...Array.from(Array(purifiedLimit).keys())].map(_ => ({
-      ...getMockManageSubscription()
-    }))
+    value: [...Array.from(Array(purifiedLimit).keys())].map((_) => ({
+      ...getMockManageSubscription(),
+    })),
   };
 };
 
@@ -408,12 +408,12 @@ export const getMockManageSubscription = () => ({
   name: faker.word.words({ count: { max: 3, min: 1 } }),
   state: faker.helpers.arrayElement([
     "suspended",
-    "active"
+    "active",
     // "expired",
     // "submitted",
     // "rejected",
     // "cancelled",
-  ])
+  ]),
 });
 
 export const getMockBulkPatchService = () => ({
@@ -421,37 +421,44 @@ export const getMockBulkPatchService = () => ({
     ...Array.from(Array(faker.number.int({ max: 100, min: 1 })).keys()).map(
       () => ({
         id: faker.string.alphanumeric(26).toUpperCase(),
-        statusCode: 200
-      })
-    )
-  ]
+        statusCode: 200,
+      }),
+    ),
+  ],
 });
 
 const getMockAggregatedInstitution = () => ({
   id: faker.string.uuid(),
-  name: faker.company.name()
+  name: faker.company.name(),
 });
 
+// Defined outside the function to maintain consistency across
+// `retrieveMockInstitutionAggregates` calls and provide realistic pagination behavior
+const cachedInstitutionsCount = faker.number.int({ max: 99, min: 8 });
+
 export const getMockAggregatedInstitutionPagination = (
-  limit?: number,
-  offset?: number,
-  search?: string
+  limit: number,
+  offset: number,
+  search?: string,
 ) => {
   const purifiedLimit = limit ?? faker.helpers.arrayElement([10, 20, 50, 100]);
   const purifiedOffset =
     offset !== undefined && offset >= 0 && offset < 99
       ? offset
       : faker.number.int({ max: 99, min: 0 });
-
-  const total = search ? [1] : [...Array.from(Array(purifiedLimit).keys())];
+  const totalElements = search
+    ? Math.ceil(cachedInstitutionsCount / 10)
+    : cachedInstitutionsCount;
 
   return {
     pagination: {
-      count: search ? 1 : 100,
+      count: totalElements,
       limit: purifiedLimit,
-      offset: purifiedOffset
+      offset: purifiedOffset,
     },
-    value: total.map(_ => getMockAggregatedInstitution())
+    value: Array.from({ length: Math.min(limit, totalElements - offset) }).map(
+      getMockAggregatedInstitution,
+    ),
   };
 };
 
@@ -463,14 +470,14 @@ export const getMockServicesMigrationDelegate = () => ({
   sourceId: faker.string.alphanumeric(26).toUpperCase(),
   sourceName: faker.person.firstName(),
   sourceSurname: faker.person.lastName(),
-  subscriptionCounter: faker.number.int({ max: MAX_ARRAY_LENGTH, min: 0 })
+  subscriptionCounter: faker.number.int({ max: MAX_ARRAY_LENGTH, min: 0 }),
 });
 
 export const getMockServicesMigrationLatestStatus = () => ({
   completed: faker.number.int({ max: 3, min: 0 }),
   failed: faker.number.int({ max: 3, min: 0 }),
   initial: 0,
-  processing: faker.number.int({ max: 3, min: 0 })
+  processing: faker.number.int({ max: 3, min: 0 }),
 });
 
 export const getMockServicesMigrationStatusDetails = () => ({
@@ -478,20 +485,19 @@ export const getMockServicesMigrationStatusDetails = () => ({
     completed: faker.number.int({ max: 3, min: 0 }),
     failed: faker.number.int({ max: 3, min: 0 }),
     initial: faker.number.int({ max: 3, min: 0 }),
-    processing: faker.number.int({ max: 3, min: 0 })
-  }
+    processing: faker.number.int({ max: 3, min: 0 }),
+  },
 });
 
 export const getIoServicesError = (status: number) => ({
   detail: faker.lorem.sentence(),
   status: status,
-  title: faker.lorem.sentence()
+  title: faker.lorem.sentence(),
 });
 
 export const getMockInstitutionGroups = (_institutionId?: string) => ({
-  groups: Array.from(
-    Array(faker.number.int({ max: 10, min: 1 }))
-  ).map((_, index) =>
-    getMockManageSubscriptionGroup(index === 0 ? "abc123" : undefined)
-  )
+  groups: Array.from(Array(faker.number.int({ max: 10, min: 1 }))).map(
+    (_, index) =>
+      getMockManageSubscriptionGroup(index === 0 ? "abc123" : undefined),
+  ),
 });
