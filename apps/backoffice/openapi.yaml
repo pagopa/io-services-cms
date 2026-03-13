@@ -1013,7 +1013,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DelegatedInstitutionPagination'
+                $ref: '#/components/schemas/AggregatedInstitutionPagination'
         '401':
           description: Unauthorized
         '403':
@@ -1998,7 +1998,7 @@ components:
             $ref: '#/components/schemas/ServiceLifecycle'
         pagination:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
-    DelegatedInstitution:
+    AggregatedInstitution:
       type: object
       properties:
         id:
@@ -2008,13 +2008,13 @@ components:
       required:
         - id
         - name
-    DelegatedInstitutionPagination:
+    AggregatedInstitutionPagination:
       type: object
       properties:
         value:
           type: array
           items:
-            $ref: '#/components/schemas/DelegatedInstitution'
+            $ref: '#/components/schemas/AggregatedInstitution'
         pagination:
           $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/PaginationResultSet'
       required:
