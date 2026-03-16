@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import * as E from "fp-ts/lib/Either";
 import { useSession } from "next-auth/react";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import AggregatedInstitutions from "../aggregated-institutions";
+import AggregatedInstitutions from "../../pages/aggregated-institutions";
 
 // ---------------------------------------------------------------------------
 // Hoisted mocks (available inside vi.mock factories)
