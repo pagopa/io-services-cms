@@ -1,6 +1,12 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import * as E from "fp-ts/lib/Either";
 import { useSession } from "next-auth/react";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -52,7 +58,8 @@ const {
 vi.mock("@/hooks/use-fetch", () => ({
   default: mockUseFetch,
   client: {
-    getManageSubscriptionKeys: mockGetManageSubscriptionKeys,
+    retrieveInstitutionAggregateManageSubscriptionsKeys:
+      mockGetManageSubscriptionKeys,
     regenerateManageSubscriptionKey: mockRegenerateManageSubscriptionKey,
   },
 }));
@@ -74,7 +81,8 @@ vi.mock("@/components/dialog-provider", () => ({
 }));
 
 vi.mock("@/utils/mix-panel", () => ({
-  trackAggregatedInstitutionsPageEvent: mockTrackAggregatedInstitutionsPageEvent,
+  trackAggregatedInstitutionsPageEvent:
+    mockTrackAggregatedInstitutionsPageEvent,
   trackEaManageKeyCopyEvent: vi.fn(),
   trackEaManageKeyRegenerateEvent: vi.fn(),
   trackEaManageKeyShowEvent: vi.fn(),
@@ -85,15 +93,11 @@ vi.mock("@/utils/auth-util", () => ({
 }));
 
 vi.mock("@/components/empty-state", () => ({
-  EmptyStateLayer: () => (
-    <div data-testid="empty-state" />
-  ),
+  EmptyStateLayer: () => <div data-testid="empty-state" />,
 }));
 
 vi.mock("@/components/institutions", () => ({
-  InstitutionSearchByName: () => (
-    <div data-testid="institution-search" />
-  ),
+  InstitutionSearchByName: () => <div data-testid="institution-search" />,
 }));
 
 vi.mock("@/components/headers", () => ({
@@ -331,7 +335,10 @@ describe("[AggregatedInstitutions] Page", () => {
 
     it("should return hide action after show has been triggered", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "pk", secondary_key: "sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
@@ -350,7 +357,9 @@ describe("[AggregatedInstitutions] Page", () => {
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(1);
-        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+        expect(items[0]).toHaveTextContent(
+          "aggregated-institution.actions.hide",
+        );
       });
     });
   });
@@ -388,7 +397,10 @@ describe("[AggregatedInstitutions] Page", () => {
 
     it("should return hide + regeneratePk + regenerateSk actions after show is triggered", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "pk", secondary_key: "sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
@@ -407,7 +419,9 @@ describe("[AggregatedInstitutions] Page", () => {
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(3);
-        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+        expect(items[0]).toHaveTextContent(
+          "aggregated-institution.actions.hide",
+        );
         expect(items[1]).toHaveTextContent(
           "aggregated-institution.actions.regeneratePk",
         );
@@ -432,7 +446,10 @@ describe("[AggregatedInstitutions] Page", () => {
 
     it("should call getManageSubscriptionKeys when showing keys for the first time", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "pk", secondary_key: "sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
@@ -444,14 +461,17 @@ describe("[AggregatedInstitutions] Page", () => {
 
       await waitFor(() =>
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledWith({
-          subscriptionId: "agg-1",
+          aggregateId: "agg-1",
         }),
       );
     });
 
     it("should not call getManageSubscriptionKeys when keys are already loaded", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "pk", secondary_key: "sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
@@ -529,7 +549,10 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should call regenerateManageSubscriptionKey when user confirms", async () => {
       mockShowDialog.mockResolvedValue(true); // user confirms
       mockRegenerateManageSubscriptionKey.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "new-pk", secondary_key: "old-sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "new-pk", secondary_key: "old-sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
@@ -551,7 +574,10 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should call regenerateManageSubscriptionKey with secondary key type", async () => {
       mockShowDialog.mockResolvedValue(true);
       mockRegenerateManageSubscriptionKey.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "old-pk", secondary_key: "new-sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "old-pk", secondary_key: "new-sk" },
+        }),
       );
 
       render(<AggregatedInstitutions />);
