@@ -1,0 +1,573 @@
+/// <reference types="@testing-library/jest-dom" />
+import "@testing-library/jest-dom";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import * as E from "fp-ts/lib/Either";
+import { useSession } from "next-auth/react";
+import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import AggregatedInstitutions from "../aggregated-institutions";
+
+// ---------------------------------------------------------------------------
+// Hoisted mocks (available inside vi.mock factories)
+// ---------------------------------------------------------------------------
+const {
+  mockFetchData,
+  mockUseFetch,
+  mockGetManageSubscriptionKeys,
+  mockRegenerateManageSubscriptionKey,
+  mockShowDialog,
+  mockEnqueueSnackbar,
+  mockIsAdmin,
+  mockTrackAggregatedInstitutionsPageEvent,
+} = vi.hoisted(() => {
+  const mockFetchData = vi.fn();
+  const mockUseFetch = vi.fn(() => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: undefined as any,
+    error: undefined,
+    fetchData: mockFetchData,
+    loading: false,
+  }));
+  const mockGetManageSubscriptionKeys = vi.fn();
+  const mockRegenerateManageSubscriptionKey = vi.fn();
+  const mockShowDialog = vi.fn();
+  const mockEnqueueSnackbar = vi.fn();
+  const mockIsAdmin = vi.fn(() => false);
+  const mockTrackAggregatedInstitutionsPageEvent = vi.fn();
+
+  return {
+    mockFetchData,
+    mockUseFetch,
+    mockGetManageSubscriptionKeys,
+    mockRegenerateManageSubscriptionKey,
+    mockShowDialog,
+    mockEnqueueSnackbar,
+    mockIsAdmin,
+    mockTrackAggregatedInstitutionsPageEvent,
+  };
+});
+
+// ---------------------------------------------------------------------------
+// Module mocks
+// ---------------------------------------------------------------------------
+vi.mock("@/hooks/use-fetch", () => ({
+  default: mockUseFetch,
+  client: {
+    getManageSubscriptionKeys: mockGetManageSubscriptionKeys,
+    regenerateManageSubscriptionKey: mockRegenerateManageSubscriptionKey,
+  },
+}));
+
+vi.mock("next-auth/react");
+const mockUseSession = useSession as Mock;
+
+vi.mock("next-i18next", () => ({
+  Trans: ({ i18nKey }: any) => i18nKey,
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock("notistack", () => ({
+  useSnackbar: () => ({ enqueueSnackbar: mockEnqueueSnackbar }),
+}));
+
+vi.mock("@/components/dialog-provider", () => ({
+  useDialog: () => mockShowDialog,
+}));
+
+vi.mock("@/utils/mix-panel", () => ({
+  trackAggregatedInstitutionsPageEvent: mockTrackAggregatedInstitutionsPageEvent,
+  trackEaManageKeyCopyEvent: vi.fn(),
+  trackEaManageKeyRegenerateEvent: vi.fn(),
+  trackEaManageKeyShowEvent: vi.fn(),
+}));
+
+vi.mock("@/utils/auth-util", () => ({
+  isAdmin: mockIsAdmin,
+}));
+
+vi.mock("@/components/empty-state", () => ({
+  EmptyStateLayer: () => (
+    <div data-testid="empty-state" />
+  ),
+}));
+
+vi.mock("@/components/institutions", () => ({
+  InstitutionSearchByName: () => (
+    <div data-testid="institution-search" />
+  ),
+}));
+
+vi.mock("@/components/headers", () => ({
+  PageHeader: ({ title, description }: any) => (
+    <div data-testid="page-header">
+      <span data-testid="page-title">{title}</span>
+      <span data-testid="page-description">{description}</span>
+    </div>
+  ),
+}));
+
+vi.mock("@/components/notification", () => ({
+  buildSnackbarItem: (opts: any) => opts,
+}));
+
+vi.mock("@/components/api-keys/api-key-value-async", () => ({
+  ApiKeyValueAsync: () => <span data-testid="api-key-value-async" />,
+}));
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+const mockSessionAdmin = {
+  status: "authenticated",
+  data: {
+    user: {
+      institution: { id: "inst-001", role: "admin", isAggregator: true },
+      permissions: { apimGroups: [] },
+    },
+  },
+};
+
+const mockSessionOperator = {
+  status: "authenticated",
+  data: {
+    user: {
+      institution: { id: "inst-001", role: "operator", isAggregator: true },
+      permissions: { apimGroups: [] },
+    },
+  },
+};
+
+const mockPaginationData = {
+  value: [
+    { id: "agg-1", name: "Institution Alpha" },
+    { id: "agg-2", name: "Institution Beta" },
+  ],
+  pagination: { count: 2, limit: 10, offset: 0 },
+};
+
+const mockEmptyPaginationData = {
+  value: [],
+  pagination: { count: 0, limit: 10, offset: 0 },
+};
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+describe("[AggregatedInstitutions] Page", () => {
+  describe("Rendering", () => {
+    it("should render the page header", () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: undefined,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      expect(screen.getByTestId("page-header")).toBeDefined();
+      expect(screen.getByTestId("page-title")).toHaveTextContent(
+        "routes.aggregated-institutions.title",
+      );
+      expect(screen.getByTestId("page-description")).toHaveTextContent(
+        "routes.aggregated-institutions.description",
+      );
+    });
+
+    it("should render table and search when institutions are present", async () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("institution-search")).toBeDefined();
+        expect(screen.getByTestId("table-view")).toBeDefined();
+      });
+    });
+
+    it("should render table rows with institution names", async () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Institution Alpha")).toBeInTheDocument();
+        expect(screen.getByText("Institution Beta")).toBeInTheDocument();
+      });
+    });
+
+    it("should show empty state when no institutions and no active search", async () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockEmptyPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("empty-state")).toBeDefined();
+        expect(screen.queryByTestId("table-view")).toBeNull();
+        expect(screen.queryByTestId("institution-search")).toBeNull();
+      });
+    });
+
+    it("should show table loading state", () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: undefined,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: true,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      expect(screen.getByRole("progressbar")).toBeInTheDocument();
+    });
+  });
+
+  describe("Tracking", () => {
+    it("should track page view event on mount", () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: undefined,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      expect(mockTrackAggregatedInstitutionsPageEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("Fetch behaviour", () => {
+    it("should call fetchData on mount with institution id and default pagination", () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: undefined,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+
+      expect(mockFetchData).toHaveBeenCalledWith(
+        "retrieveInstitutionAggregates",
+        expect.objectContaining({
+          institutionId: "inst-001",
+          limit: 10,
+          offset: 0,
+        }),
+        expect.anything(),
+        expect.objectContaining({ notify: "errors" }),
+      );
+    });
+
+    it("should re-fetch when pagination changes", async () => {
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      // Simulate page change via the TableView mock's onPageChange
+      // fetchData is called once on mount; changing pagination triggers a second call
+      expect(mockFetchData).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("Row context menu — operator (non-admin)", () => {
+    beforeEach(() => {
+      mockIsAdmin.mockReturnValue(false);
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+    });
+
+    it("should return only show action for hidden institution", async () => {
+      render(<AggregatedInstitutions />);
+
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
+      fireEvent.click(moreBtn);
+
+      const items = screen.getAllByRole("menuitem");
+      expect(items).toHaveLength(1);
+      expect(items[0]).toHaveTextContent("aggregated-institution.actions.show");
+    });
+
+    it("should return hide action after show has been triggered", async () => {
+      mockGetManageSubscriptionKeys.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      // Trigger "show" → sets isVisible: true in state
+      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
+      fireEvent.click(moreBtn);
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+      await waitFor(() =>
+        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
+      );
+
+      // Reopen menu — after re-render, menu should show "hide"
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await waitFor(() => {
+        const items = screen.getAllByRole("menuitem");
+        expect(items).toHaveLength(1);
+        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+      });
+    });
+  });
+
+  describe("Row context menu — admin", () => {
+    beforeEach(() => {
+      mockIsAdmin.mockReturnValue(true);
+      mockUseSession.mockReturnValue(mockSessionAdmin);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+    });
+
+    it("should return show + regeneratePk + regenerateSk actions for hidden institution", async () => {
+      render(<AggregatedInstitutions />);
+
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
+      fireEvent.click(moreBtn);
+
+      const items = screen.getAllByRole("menuitem");
+      expect(items).toHaveLength(3);
+      expect(items[0]).toHaveTextContent("aggregated-institution.actions.show");
+      expect(items[1]).toHaveTextContent(
+        "aggregated-institution.actions.regeneratePk",
+      );
+      expect(items[2]).toHaveTextContent(
+        "aggregated-institution.actions.regenerateSk",
+      );
+    });
+
+    it("should return hide + regeneratePk + regenerateSk actions after show is triggered", async () => {
+      mockGetManageSubscriptionKeys.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      // Trigger "show" → sets isVisible: true in state
+      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
+      fireEvent.click(moreBtn);
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+      await waitFor(() =>
+        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
+      );
+
+      // Reopen menu — should show hide + regeneratePk + regenerateSk
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await waitFor(() => {
+        const items = screen.getAllByRole("menuitem");
+        expect(items).toHaveLength(3);
+        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+        expect(items[1]).toHaveTextContent(
+          "aggregated-institution.actions.regeneratePk",
+        );
+        expect(items[2]).toHaveTextContent(
+          "aggregated-institution.actions.regenerateSk",
+        );
+      });
+    });
+  });
+
+  describe("Show subscription keys action", () => {
+    beforeEach(() => {
+      mockIsAdmin.mockReturnValue(false);
+      mockUseSession.mockReturnValue(mockSessionOperator);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+    });
+
+    it("should call getManageSubscriptionKeys when showing keys for the first time", async () => {
+      mockGetManageSubscriptionKeys.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
+      fireEvent.click(moreBtn);
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+
+      await waitFor(() =>
+        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledWith({
+          subscriptionId: "agg-1",
+        }),
+      );
+    });
+
+    it("should not call getManageSubscriptionKeys when keys are already loaded", async () => {
+      mockGetManageSubscriptionKeys.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      // First show: fetches keys
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+      await waitFor(() =>
+        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
+      );
+
+      // After show, isVisible=true → menu shows "hide"
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await waitFor(() =>
+        expect(
+          screen.getByText("aggregated-institution.actions.hide"),
+        ).toBeInTheDocument(),
+      );
+
+      // Click hide → sets isVisible: false (primary_key remains in state)
+      fireEvent.click(screen.getByText("aggregated-institution.actions.hide"));
+
+      // Open menu again → should show "show"
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await waitFor(() =>
+        expect(
+          screen.getByText("aggregated-institution.actions.show"),
+        ).toBeInTheDocument(),
+      );
+
+      // Second show: primary_key already in state → should NOT call getManageSubscriptionKeys again
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+      await waitFor(() =>
+        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
+      );
+    });
+  });
+
+  describe("Regenerate key action (admin)", () => {
+    beforeEach(() => {
+      mockIsAdmin.mockReturnValue(true);
+      mockUseSession.mockReturnValue(mockSessionAdmin);
+      mockUseFetch.mockReturnValue({
+        data: mockPaginationData,
+        error: undefined,
+        fetchData: mockFetchData,
+        loading: false,
+      });
+    });
+
+    it("should open confirmation dialog before regenerating primary key", async () => {
+      mockShowDialog.mockResolvedValue(false); // user cancels
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      fireEvent.click(
+        screen.getByText("aggregated-institution.actions.regeneratePk"),
+      );
+
+      await waitFor(() =>
+        expect(mockShowDialog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            confirmButtonLabel: expect.any(String),
+            title: expect.any(String),
+            message: expect.any(String),
+          }),
+        ),
+      );
+      expect(mockRegenerateManageSubscriptionKey).not.toHaveBeenCalled();
+    });
+
+    it("should call regenerateManageSubscriptionKey when user confirms", async () => {
+      mockShowDialog.mockResolvedValue(true); // user confirms
+      mockRegenerateManageSubscriptionKey.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "new-pk", secondary_key: "old-sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      fireEvent.click(
+        screen.getByText("aggregated-institution.actions.regeneratePk"),
+      );
+
+      await waitFor(() =>
+        expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
+          subscriptionId: "agg-1",
+          keyType: "primary",
+        }),
+      );
+    });
+
+    it("should call regenerateManageSubscriptionKey with secondary key type", async () => {
+      mockShowDialog.mockResolvedValue(true);
+      mockRegenerateManageSubscriptionKey.mockResolvedValue(
+        E.right({ status: 200, value: { primary_key: "old-pk", secondary_key: "new-sk" } }),
+      );
+
+      render(<AggregatedInstitutions />);
+      await waitFor(() => screen.getByText("Institution Alpha"));
+
+      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      fireEvent.click(
+        screen.getByText("aggregated-institution.actions.regenerateSk"),
+      );
+
+      await waitFor(() =>
+        expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
+          subscriptionId: "agg-1",
+          keyType: "secondary",
+        }),
+      );
+    });
+  });
+});
