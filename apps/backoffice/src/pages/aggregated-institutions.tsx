@@ -30,6 +30,7 @@ import {
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import { Session, getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -94,7 +95,7 @@ export default function AggregatedInstitutions() {
               trackEaManageKeyCopyEvent(di.id, "primary")
             }
             onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
+              handleRetrieveManageSubscriptionKeys(di.id)
             }
           />
         </Box>
@@ -114,7 +115,7 @@ export default function AggregatedInstitutions() {
               trackEaManageKeyCopyEvent(di.id, "secondary")
             }
             onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
+              handleRetrieveManageSubscriptionKeys(di.id)
             }
           />
         </Box>
@@ -162,52 +163,64 @@ export default function AggregatedInstitutions() {
       }),
     );
 
-  const handleGetManageSubscriptionKeys = async (subscriptionId: string) => {
-    const maybeResponse = await client.getManageSubscriptionKeys({
-      subscriptionId,
-    });
-    if (E.isRight(maybeResponse)) {
-      updateAggregatedInstitutionListItemById(subscriptionId, {
-        ...maybeResponse.right.value,
+  const handleRetrieveManageSubscriptionKeys = async (aggregateId: string) => {
+    const response =
+      await client.retrieveInstitutionAggregateManageSubscriptionsKeys({
+        aggregateId,
       });
-    } else {
-      getGenericErrorNotification();
-      updateAggregatedInstitutionListItemById(subscriptionId, {
-        isVisible: true,
-        primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-        secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-      });
-    }
+
+    pipe(
+      response,
+      E.chain((res) => SubscriptionKeys.decode(res.value)),
+      E.fold(
+        () => {
+          getGenericErrorNotification();
+          updateAggregatedInstitutionListItemById(aggregateId, {
+            isVisible: true,
+            primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+            secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+          });
+        },
+        (decoded) => {
+          updateAggregatedInstitutionListItemById(aggregateId, {
+            ...decoded,
+          });
+        },
+      ),
+    );
   };
 
   const handleRegenerateKey = async (
     subscriptionId: string,
     keyType: SubscriptionKeyTypeEnum,
   ) => {
-    const maybeResponse = await client.regenerateManageSubscriptionKey({
+    const response = await client.regenerateManageSubscriptionKey({
       keyType,
       subscriptionId,
     });
-    if (E.isRight(maybeResponse)) {
-      const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
-      if (E.isRight(maybeValue)) {
-        enqueueSnackbar(
-          buildSnackbarItem({
-            message: "",
-            severity: "success",
-            title: t("notifications.success"),
-          }),
-        );
-        updateAggregatedInstitutionListItemById(subscriptionId, {
-          ...maybeResponse.right.value,
-        });
-        trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
-      } else {
-        getGenericErrorNotification();
-      }
-    } else {
-      getGenericErrorNotification();
-    }
+
+    pipe(
+      response,
+      E.chain((res) => SubscriptionKeys.decode(res.value)),
+      E.fold(
+        () => {
+          getGenericErrorNotification();
+        },
+        (decoded) => {
+          enqueueSnackbar(
+            buildSnackbarItem({
+              message: "",
+              severity: "success",
+              title: t("notifications.success"),
+            }),
+          );
+          updateAggregatedInstitutionListItemById(subscriptionId, {
+            ...decoded,
+          });
+          trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
+        },
+      ),
+    );
   };
 
   const handlePageChange = (pageIndex: number) =>
@@ -229,14 +242,14 @@ export default function AggregatedInstitutions() {
     action: AggregatedInstitutionContextMenuActions;
     institutionId: string;
   }) => {
-    const raiseClickEvent = await showDialog({
+    const isConfirmed = await showDialog({
       confirmButtonLabel: t(
         `aggregated-institution.${options.action}.modal.button`,
       ),
       message: t(`aggregated-institution.${options.action}.modal.description`),
       title: t(`aggregated-institution.${options.action}.modal.title`),
     });
-    if (raiseClickEvent) {
+    if (isConfirmed) {
       switch (options.action) {
         case AggregatedInstitutionContextMenuActions.regeneratePk:
           await handleRegenerateKey(
@@ -261,63 +274,61 @@ export default function AggregatedInstitutions() {
   const getAggregatedInstitutionMenu = (
     di: AggregatedInstitutionListItem,
   ): TableRowMenuAction[] => {
-    const result: TableRowMenuAction[] = [];
+    const isUserAdmin = isAdmin(session);
 
-    if (di.isVisible) {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <VisibilityOff color="primary" fontSize="inherit" />,
-        label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
-        onClick: () =>
-          updateAggregatedInstitutionListItemById(di.id, {
-            isVisible: false,
-          }),
-      });
-    } else {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <Visibility color="primary" fontSize="inherit" />,
-        label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
-        onClick: async () => {
-          if (isNullUndefinedOrEmpty(di.primary_key)) {
+    const visibilityAction: TableRowMenuAction = di.isVisible
+      ? {
+          hasBottomDivider: isUserAdmin,
+          icon: <VisibilityOff color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
+          onClick: () =>
             updateAggregatedInstitutionListItemById(di.id, {
-              isLoading: true,
+              isVisible: false,
+            }),
+        }
+      : {
+          hasBottomDivider: isUserAdmin,
+          icon: <Visibility color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
+          onClick: async () => {
+            if (isNullUndefinedOrEmpty(di.primary_key)) {
+              updateAggregatedInstitutionListItemById(di.id, {
+                isLoading: true,
+              });
+              await handleRetrieveManageSubscriptionKeys(di.id);
+            }
+            updateAggregatedInstitutionListItemById(di.id, {
+              isLoading: false,
+              isVisible: true,
             });
-            await handleGetManageSubscriptionKeys(di.id);
-          }
-          updateAggregatedInstitutionListItemById(di.id, {
-            isLoading: false,
-            isVisible: true,
-          });
-          trackEaManageKeyShowEvent(di.id);
-        },
-      });
-    }
+            trackEaManageKeyShowEvent(di.id);
+          },
+        };
 
-    if (isAdmin(session)) {
-      result.push(
-        {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: AggregatedInstitutionContextMenuActions.regeneratePk,
-              institutionId: di.id,
-            }),
-        },
-        {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: AggregatedInstitutionContextMenuActions.regenerateSk,
-              institutionId: di.id,
-            }),
-        },
-      );
-    }
+    const adminActions: TableRowMenuAction[] = isUserAdmin
+      ? [
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regeneratePk,
+                institutionId: di.id,
+              }),
+          },
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regenerateSk,
+                institutionId: di.id,
+              }),
+          },
+        ]
+      : [];
 
-    return result;
+    return [visibilityAction, ...adminActions];
   };
 
   const retrieveInstututionAggregates = () => {
@@ -354,7 +365,7 @@ export default function AggregatedInstitutions() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, currentSearchByInstitutionName]);
 
-  // make some checks and adjustments on delegated institutions fetch result
+  // make some checks and adjustments on aggregated institutions fetch result
   useEffect(() => {
     const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
     if (E.isRight(maybeDipData)) {
