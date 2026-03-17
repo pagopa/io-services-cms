@@ -149,26 +149,33 @@ const mockEmptyPaginationData = {
   pagination: { count: 0, limit: 10, offset: 0 },
 };
 
-const setupOperatorMocks = () => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const setupFetch = (data: any, loading = false) =>
+  mockUseFetch.mockReturnValue({ data, error: undefined, fetchData: mockFetchData, loading });
+
+const setupOperatorMocks = (data: any = mockPaginationData) => {
   mockIsAdmin.mockReturnValue(false);
   mockUseSession.mockReturnValue(mockSessionOperator);
-  mockUseFetch.mockReturnValue({
-    data: mockPaginationData,
-    error: undefined,
-    fetchData: mockFetchData,
-    loading: false,
-  });
+  setupFetch(data);
 };
 
-const setupAdminMocks = () => {
+const setupAdminMocks = (data: any = mockPaginationData) => {
   mockIsAdmin.mockReturnValue(true);
   mockUseSession.mockReturnValue(mockSessionAdmin);
-  mockUseFetch.mockReturnValue({
-    data: mockPaginationData,
-    error: undefined,
-    fetchData: mockFetchData,
-    loading: false,
-  });
+  setupFetch(data);
+};
+
+const mockKeysOkResponse = E.right({
+  status: 200,
+  value: { primary_key: "pk", secondary_key: "sk" },
+});
+
+const triggerShowAndWait = async () => {
+  openMenu();
+  fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+  await waitFor(() =>
+    expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
+  );
 };
 
 const renderPage = async () => {
@@ -190,15 +197,9 @@ afterEach(() => {
 
 describe("[AggregatedInstitutions] Page", () => {
   describe("Rendering", () => {
-    it("should render the page header", () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: undefined,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+    beforeEach(() => setupOperatorMocks(undefined));
 
+    it("should render the page header", () => {
       render(<AggregatedInstitutions />);
 
       expect(screen.getByTestId("page-header")).toBeDefined();
@@ -211,13 +212,7 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should render table and search when institutions are present", async () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+      setupFetch(mockPaginationData);
 
       render(<AggregatedInstitutions />);
 
@@ -228,13 +223,7 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should render table rows with institution names", async () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+      setupFetch(mockPaginationData);
 
       render(<AggregatedInstitutions />);
 
@@ -245,13 +234,7 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should show empty state when no institutions and no active search", async () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockEmptyPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+      setupFetch(mockEmptyPaginationData);
 
       render(<AggregatedInstitutions />);
 
@@ -263,13 +246,7 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should show table loading state", () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: undefined,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: true,
-      });
+      setupFetch(undefined, true);
 
       render(<AggregatedInstitutions />);
 
@@ -278,15 +255,9 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Tracking", () => {
-    it("should track page view event on mount", () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: undefined,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+    beforeEach(() => setupOperatorMocks(undefined));
 
+    it("should track page view event on mount", () => {
       render(<AggregatedInstitutions />);
 
       expect(mockTrackAggregatedInstitutionsPageEvent).toHaveBeenCalledTimes(1);
@@ -294,15 +265,9 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Fetch behaviour", () => {
-    it("should call fetchData on mount with institution id and default pagination", () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: undefined,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+    beforeEach(() => setupOperatorMocks(undefined));
 
+    it("should call fetchData on mount with institution id and default pagination", () => {
       render(<AggregatedInstitutions />);
 
       expect(mockFetchData).toHaveBeenCalledWith(
@@ -318,13 +283,7 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should not refetch without pagination interaction", async () => {
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
+      setupFetch(mockPaginationData);
 
       render(<AggregatedInstitutions />);
       await waitFor(() => screen.getByText("Institution Alpha"));
@@ -335,7 +294,7 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Row context menu — operator (non-admin)", () => {
-    beforeEach(setupOperatorMocks);
+    beforeEach(() => setupOperatorMocks());
 
     it("should return only show action for hidden institution", async () => {
       await renderPage();
@@ -347,17 +306,10 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should return hide action after show has been triggered", async () => {
-      mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
-      );
+      mockGetManageSubscriptionKeys.mockResolvedValue(mockKeysOkResponse);
 
       await renderPage();
-
-      openMenu();
-      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
-      await waitFor(() =>
-        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
-      );
+      await triggerShowAndWait();
 
       // Reopen menu — after re-render, menu should show "hide"
       openMenu();
@@ -370,7 +322,7 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Row context menu — admin", () => {
-    beforeEach(setupAdminMocks);
+    beforeEach(() => setupAdminMocks());
 
     it("should return show + regeneratePk + regenerateSk actions for hidden institution", async () => {
       await renderPage();
@@ -388,17 +340,10 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should return hide + regeneratePk + regenerateSk actions after show is triggered", async () => {
-      mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
-      );
+      mockGetManageSubscriptionKeys.mockResolvedValue(mockKeysOkResponse);
 
       await renderPage();
-
-      openMenu();
-      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
-      await waitFor(() =>
-        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
-      );
+      await triggerShowAndWait();
 
       // Reopen menu — should show hide + regeneratePk + regenerateSk
       openMenu();
@@ -417,12 +362,10 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Show subscription keys action", () => {
-    beforeEach(setupOperatorMocks);
+    beforeEach(() => setupOperatorMocks());
 
     it("should call getManageSubscriptionKeys when showing keys for the first time", async () => {
-      mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
-      );
+      mockGetManageSubscriptionKeys.mockResolvedValue(mockKeysOkResponse);
 
       await renderPage();
       openMenu();
@@ -436,18 +379,12 @@ describe("[AggregatedInstitutions] Page", () => {
     });
 
     it("should not call getManageSubscriptionKeys when keys are already loaded", async () => {
-      mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
-      );
+      mockGetManageSubscriptionKeys.mockResolvedValue(mockKeysOkResponse);
 
       await renderPage();
 
       // First show: fetches keys
-      openMenu();
-      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
-      await waitFor(() =>
-        expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
-      );
+      await triggerShowAndWait();
 
       // After show, isVisible=true → menu shows "hide"
       openMenu();
@@ -477,7 +414,7 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Regenerate key action (admin)", () => {
-    beforeEach(setupAdminMocks);
+    beforeEach(() => setupAdminMocks());
 
     it("should open confirmation dialog before regenerating primary key", async () => {
       mockShowDialog.mockResolvedValue(false); // user cancels
