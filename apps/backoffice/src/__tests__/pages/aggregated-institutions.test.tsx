@@ -187,6 +187,20 @@ const openMenu = (index = 0) => {
   fireEvent.click(screen.getAllByRole("button", { name: "more" })[index]);
 };
 
+const renderPageAndOpenMenu = async () => {
+  await renderPage();
+  openMenu();
+};
+
+const triggerRegenerateKey = async (keyType: "primary" | "secondary") => {
+  await renderPageAndOpenMenu();
+  fireEvent.click(
+    screen.getByText(
+      `aggregated-institution.actions.regenerate${keyType === "primary" ? "Pk" : "Sk"}`,
+    ),
+  );
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -297,8 +311,7 @@ describe("[AggregatedInstitutions] Page", () => {
     beforeEach(() => setupOperatorMocks());
 
     it("should return only show action for hidden institution", async () => {
-      await renderPage();
-      openMenu();
+      await renderPageAndOpenMenu();
 
       const items = screen.getAllByRole("menuitem");
       expect(items).toHaveLength(1);
@@ -325,8 +338,7 @@ describe("[AggregatedInstitutions] Page", () => {
     beforeEach(() => setupAdminMocks());
 
     it("should return show + regeneratePk + regenerateSk actions for hidden institution", async () => {
-      await renderPage();
-      openMenu();
+      await renderPageAndOpenMenu();
 
       const items = screen.getAllByRole("menuitem");
       expect(items).toHaveLength(3);
@@ -367,8 +379,7 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should call getManageSubscriptionKeys when showing keys for the first time", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(mockKeysOkResponse);
 
-      await renderPage();
-      openMenu();
+      await renderPageAndOpenMenu();
       fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
 
       await waitFor(() =>
@@ -419,11 +430,7 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should open confirmation dialog before regenerating primary key", async () => {
       mockShowDialog.mockResolvedValue(false); // user cancels
 
-      await renderPage();
-      openMenu();
-      fireEvent.click(
-        screen.getByText("aggregated-institution.actions.regeneratePk"),
-      );
+      await triggerRegenerateKey("primary");
 
       await waitFor(() =>
         expect(mockShowDialog).toHaveBeenCalledWith(
@@ -443,11 +450,7 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "new-pk", secondary_key: "old-sk" } }),
       );
 
-      await renderPage();
-      openMenu();
-      fireEvent.click(
-        screen.getByText("aggregated-institution.actions.regeneratePk"),
-      );
+      await triggerRegenerateKey("primary");
 
       await waitFor(() =>
         expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
@@ -463,11 +466,7 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "old-pk", secondary_key: "new-sk" } }),
       );
 
-      await renderPage();
-      openMenu();
-      fireEvent.click(
-        screen.getByText("aggregated-institution.actions.regenerateSk"),
-      );
+      await triggerRegenerateKey("secondary");
 
       await waitFor(() =>
         expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
