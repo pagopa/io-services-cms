@@ -433,7 +433,7 @@ const getMockAggregatedInstitution = () => ({
 });
 
 // Defined outside the function to maintain consistency across
-// `retrieveMockInstitutionAggregates` calls and provide realistic pagination behavior
+// `getMockAggregatedInstitutionPagination` calls and provide realistic pagination behavior
 const cachedInstitutionsCount = faker.number.int({ max: 99, min: 8 });
 
 export const getMockAggregatedInstitutionPagination = (
