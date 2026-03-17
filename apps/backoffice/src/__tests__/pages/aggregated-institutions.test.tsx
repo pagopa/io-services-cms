@@ -149,6 +149,37 @@ const mockEmptyPaginationData = {
   pagination: { count: 0, limit: 10, offset: 0 },
 };
 
+const setupOperatorMocks = () => {
+  mockIsAdmin.mockReturnValue(false);
+  mockUseSession.mockReturnValue(mockSessionOperator);
+  mockUseFetch.mockReturnValue({
+    data: mockPaginationData,
+    error: undefined,
+    fetchData: mockFetchData,
+    loading: false,
+  });
+};
+
+const setupAdminMocks = () => {
+  mockIsAdmin.mockReturnValue(true);
+  mockUseSession.mockReturnValue(mockSessionAdmin);
+  mockUseFetch.mockReturnValue({
+    data: mockPaginationData,
+    error: undefined,
+    fetchData: mockFetchData,
+    loading: false,
+  });
+};
+
+const renderPage = async () => {
+  render(<AggregatedInstitutions />);
+  await waitFor(() => screen.getByText("Institution Alpha"));
+};
+
+const openMenu = (index = 0) => {
+  fireEvent.click(screen.getAllByRole("button", { name: "more" })[index]);
+};
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -304,24 +335,11 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Row context menu — operator (non-admin)", () => {
-    beforeEach(() => {
-      mockIsAdmin.mockReturnValue(false);
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
-    });
+    beforeEach(setupOperatorMocks);
 
     it("should return only show action for hidden institution", async () => {
-      render(<AggregatedInstitutions />);
-
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
-      fireEvent.click(moreBtn);
+      await renderPage();
+      openMenu();
 
       const items = screen.getAllByRole("menuitem");
       expect(items).toHaveLength(1);
@@ -333,19 +351,16 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
+      await renderPage();
 
-      // Trigger "show" → sets isVisible: true in state
-      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
-      fireEvent.click(moreBtn);
+      openMenu();
       fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
       await waitFor(() =>
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
       );
 
       // Reopen menu — after re-render, menu should show "hide"
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      openMenu();
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(1);
@@ -355,24 +370,11 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Row context menu — admin", () => {
-    beforeEach(() => {
-      mockIsAdmin.mockReturnValue(true);
-      mockUseSession.mockReturnValue(mockSessionAdmin);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
-    });
+    beforeEach(setupAdminMocks);
 
     it("should return show + regeneratePk + regenerateSk actions for hidden institution", async () => {
-      render(<AggregatedInstitutions />);
-
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
-      fireEvent.click(moreBtn);
+      await renderPage();
+      openMenu();
 
       const items = screen.getAllByRole("menuitem");
       expect(items).toHaveLength(3);
@@ -390,19 +392,16 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
+      await renderPage();
 
-      // Trigger "show" → sets isVisible: true in state
-      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
-      fireEvent.click(moreBtn);
+      openMenu();
       fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
       await waitFor(() =>
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
       );
 
       // Reopen menu — should show hide + regeneratePk + regenerateSk
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      openMenu();
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(3);
@@ -418,27 +417,15 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Show subscription keys action", () => {
-    beforeEach(() => {
-      mockIsAdmin.mockReturnValue(false);
-      mockUseSession.mockReturnValue(mockSessionOperator);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
-    });
+    beforeEach(setupOperatorMocks);
 
     it("should call getManageSubscriptionKeys when showing keys for the first time", async () => {
       mockGetManageSubscriptionKeys.mockResolvedValue(
         E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      const [moreBtn] = screen.getAllByRole("button", { name: "more" });
-      fireEvent.click(moreBtn);
+      await renderPage();
+      openMenu();
       fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
 
       await waitFor(() =>
@@ -453,18 +440,17 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "pk", secondary_key: "sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
+      await renderPage();
 
       // First show: fetches keys
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      openMenu();
       fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
       await waitFor(() =>
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
       );
 
       // After show, isVisible=true → menu shows "hide"
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      openMenu();
       await waitFor(() =>
         expect(
           screen.getByText("aggregated-institution.actions.hide"),
@@ -475,7 +461,7 @@ describe("[AggregatedInstitutions] Page", () => {
       fireEvent.click(screen.getByText("aggregated-institution.actions.hide"));
 
       // Open menu again → should show "show"
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      openMenu();
       await waitFor(() =>
         expect(
           screen.getByText("aggregated-institution.actions.show"),
@@ -491,24 +477,13 @@ describe("[AggregatedInstitutions] Page", () => {
   });
 
   describe("Regenerate key action (admin)", () => {
-    beforeEach(() => {
-      mockIsAdmin.mockReturnValue(true);
-      mockUseSession.mockReturnValue(mockSessionAdmin);
-      mockUseFetch.mockReturnValue({
-        data: mockPaginationData,
-        error: undefined,
-        fetchData: mockFetchData,
-        loading: false,
-      });
-    });
+    beforeEach(setupAdminMocks);
 
     it("should open confirmation dialog before regenerating primary key", async () => {
       mockShowDialog.mockResolvedValue(false); // user cancels
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await renderPage();
+      openMenu();
       fireEvent.click(
         screen.getByText("aggregated-institution.actions.regeneratePk"),
       );
@@ -531,10 +506,8 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "new-pk", secondary_key: "old-sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await renderPage();
+      openMenu();
       fireEvent.click(
         screen.getByText("aggregated-institution.actions.regeneratePk"),
       );
@@ -553,10 +526,8 @@ describe("[AggregatedInstitutions] Page", () => {
         E.right({ status: 200, value: { primary_key: "old-pk", secondary_key: "new-sk" } }),
       );
 
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      fireEvent.click(screen.getAllByRole("button", { name: "more" })[0]);
+      await renderPage();
+      openMenu();
       fireEvent.click(
         screen.getByText("aggregated-institution.actions.regenerateSk"),
       );
