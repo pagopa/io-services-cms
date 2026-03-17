@@ -286,7 +286,7 @@ describe("[AggregatedInstitutions] Page", () => {
       );
     });
 
-    it("should re-fetch when pagination changes", async () => {
+    it("should not refetch without pagination interaction", async () => {
       mockUseSession.mockReturnValue(mockSessionOperator);
       mockUseFetch.mockReturnValue({
         data: mockPaginationData,
@@ -298,8 +298,7 @@ describe("[AggregatedInstitutions] Page", () => {
       render(<AggregatedInstitutions />);
       await waitFor(() => screen.getByText("Institution Alpha"));
 
-      // Simulate page change via the TableView mock's onPageChange
-      // fetchData is called once on mount; changing pagination triggers a second call
+      // With initial pagination state, fetchData should be called only once on mount
       expect(mockFetchData).toHaveBeenCalledTimes(1);
     });
   });
