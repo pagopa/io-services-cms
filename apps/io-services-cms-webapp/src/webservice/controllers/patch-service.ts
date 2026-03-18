@@ -1,6 +1,7 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -10,10 +11,6 @@ import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseSuccessNoContent,
   ResponseErrorInternal,
@@ -44,7 +41,7 @@ interface Dependencies {
 }
 
 type EditServiceHandler = (
-  context: Context,
+  context: InvocationContext,
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: PatchServicePayload,
@@ -91,8 +88,8 @@ export const makePatchServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig) =>
-  (handler: EditServiceHandler): ReturnType<typeof wrapRequestHandler> => {
-    const middlewaresWrap = withRequestMiddlewares(
+  (handler: EditServiceHandler): ReturnType<typeof wrapHandlerV4> => {
+    const middlewares = [
       // extract the client IP from the request
       ClientIpMiddleware,
       // extract the Azure functions context
@@ -103,23 +100,21 @@ export const applyRequestMiddelwares =
       RequiredParamMiddleware("serviceId", NonEmptyString),
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(PatchServicePayload),
-    );
-    return wrapRequestHandler(
-      middlewaresWrap((...args) =>
-        pipe(
-          args,
-          ([clientIp, ...rest]) =>
-            pipe(
-              checkSourceIp(
-                clientIp,
-                new Set(config.BACKOFFICE_INTERNAL_SUBNET_CIDRS),
-              ),
-              E.map((_) => rest),
+    ] as const;
+    return wrapHandlerV4(middlewares, (...args) =>
+      pipe(
+        args,
+        ([clientIp, ...rest]) =>
+          pipe(
+            checkSourceIp(
+              clientIp,
+              new Set(config.BACKOFFICE_INTERNAL_SUBNET_CIDRS),
             ),
-          TE.fromEither,
-          TE.chainW((args) => handler(...args)),
-          TE.toUnion,
-        )(),
-      ),
+            E.map((_) => rest),
+          ),
+        TE.fromEither,
+        TE.chainW((args) => handler(...args)),
+        TE.toUnion,
+      )(),
     );
   };

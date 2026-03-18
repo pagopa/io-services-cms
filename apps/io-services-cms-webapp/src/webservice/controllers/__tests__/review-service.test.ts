@@ -10,7 +10,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -24,6 +23,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { ReviewRequest } from "../../../generated/api/ReviewRequest";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -119,13 +119,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
@@ -152,7 +146,7 @@ describe("ReviewService", () => {
     serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   const payload: ReviewRequest = {
     auto_publish: true,
@@ -167,7 +161,7 @@ describe("ReviewService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -185,7 +179,7 @@ describe("ReviewService", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(409);
   });
 
@@ -234,7 +228,7 @@ describe("ReviewService", () => {
       expect(finalValue.fsm.state).toBe("submitted");
     }
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(204);
   });
 
@@ -280,7 +274,7 @@ describe("ReviewService", () => {
       .set("x-user-id", aDifferentUserId)
       .set("x-subscription-id", aDifferentManageSubscriptionId);
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 

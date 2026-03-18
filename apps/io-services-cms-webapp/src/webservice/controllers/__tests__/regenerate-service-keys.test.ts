@@ -18,6 +18,7 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const aManageSubscriptionId = "MANAGE-123";
 const userId = "123";
@@ -84,7 +85,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const {
   serviceOwnerCheckManageTaskMock,

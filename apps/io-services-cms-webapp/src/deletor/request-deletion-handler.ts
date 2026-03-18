@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { Queue, ServicePublication } from "@io-services-cms/models";
 import * as T from "fp-ts/lib/Task";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -10,7 +10,7 @@ import { QueuePermanentError } from "../utils/errors";
 import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
-  context: Context,
+  context: InvocationContext,
   queueItem: Json,
   fsmPublicationClient: ServicePublication.FsmClient,
 ) =>
@@ -26,7 +26,7 @@ export const handleQueueItem = (
     ),
     TE.getOrElse((e) => {
       if (e instanceof QueuePermanentError) {
-        context.log.error(`Permanent error: ${e.message}`);
+        context.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }
       throw e;

@@ -6,7 +6,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -21,6 +20,7 @@ import { IConfig } from "../../../config";
 import { itemsToResponse } from "../../../utils/converters/service-history-converters";
 import { CosmosPagedHelper } from "../../../utils/cosmos-helper";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const { getServiceTopicDao } = vi.hoisted(() => ({
   getServiceTopicDao: vi.fn(() => ({
@@ -120,13 +120,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockServiceTopicDao = {
   findAllNotDeletedTopics: vi.fn(() => TE.right([])),
@@ -135,18 +129,28 @@ const mockServiceTopicDao = {
 const mockWebServer = (
   serviceHistoryPagedHelper: CosmosPagedHelper<ServiceHistoryCosmosType>,
 ) => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: mockApimService,
-    config: mockConfig,
-    subscriptionCIDRsModel,
-    fsmLifecycleClientCreator: vi.fn(),
-    serviceTopicDao: mockServiceTopicDao,
-    telemetryClient: mockAppinsights,
-    serviceHistoryPagedHelper,
+    const app = createWebServer({
+      basePath: "api",
+      apimService: mockApimService,
+      config: mockConfig,
+      subscriptionCIDRsModel,
+      fsmLifecycleClientCreator: vi.fn(() => ({
+        fetch: vi.fn(() =>
+          TE.right(
+            O.some({
+              fsm: {
+                state: "draft",
+              },
+            }),
+          ),
+        ),
+      })),
+      serviceTopicDao: mockServiceTopicDao,
+      telemetryClient: mockAppinsights,
+      serviceHistoryPagedHelper,
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   return app;
 };
@@ -218,7 +222,7 @@ describe("getServiceHistory", () => {
       items: expectedItemList.right,
     });
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -273,7 +277,7 @@ describe("getServiceHistory", () => {
       items: expectedItemList.right,
     });
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -328,7 +332,7 @@ describe("getServiceHistory", () => {
       items: expectedItemList.right,
     });
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -385,7 +389,7 @@ describe("getServiceHistory", () => {
       items: expectedItemList.right,
     });
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -422,7 +426,7 @@ describe("getServiceHistory", () => {
       items: [],
     });
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -456,7 +460,7 @@ describe("getServiceHistory", () => {
     );
 
     expect(response.body.detail).toEqual("COSMOS ERROR RETURNED");
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 

@@ -6,7 +6,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -18,6 +17,7 @@ import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const aName1 = "a-name-1";
 const aName2 = "a-name-2";
@@ -135,12 +135,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
@@ -163,7 +158,7 @@ describe("getServices", () => {
     serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   it("should return a Bad Request response when called with a wrong 'limit' queryparam", async () => {
     const response = await request(app)
@@ -211,7 +206,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty(
       "limit",
       mockConfig.PAGINATION_DEFAULT_LIMIT,
@@ -228,7 +223,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.body.pagination).toHaveProperty("offset", 0);
   });
 
@@ -245,7 +240,7 @@ describe("getServices", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     expect(response.statusCode).toBe(200);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.body.value.length).toBe(aServiceList.length);
     expect(response.body.pagination).toStrictEqual({
       count: aServiceList.length,

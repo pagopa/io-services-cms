@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import {
   FsmItemNotFoundError,
   Queue,
@@ -14,7 +14,7 @@ import { QueuePermanentError } from "../utils/errors";
 import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
-  context: Context,
+  context: InvocationContext,
   queueItem: Json,
   fsmPublicationClient: ServicePublication.FsmClient,
 ) =>
@@ -35,13 +35,13 @@ export const handleQueueItem = (
     TE.fold(
       (e) => {
         if (e instanceof FsmItemNotFoundError) {
-          context.log.info(
+          context.info(
             `Operation Completed no more action needed => ${e.message}`,
             e,
           );
           return T.of(void 0);
         } else if (e instanceof QueuePermanentError) {
-          context.log.error(`Permanent error: ${e.message}`);
+          context.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         } else {
           throw e;

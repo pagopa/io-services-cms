@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import { Queue, ServiceDetail } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -8,13 +7,9 @@ import { handleQueueItem, toServiceDetail } from "../request-detail-handler";
 import { CosmosHelper } from "../../utils/cosmos-helper";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const serviceDetailCosmosHelperMock: CosmosHelper = {
   fetchSingleItem: vi.fn(() => TE.right(O.none)),
@@ -105,8 +100,9 @@ describe("Service Detail Handler", () => {
       serviceDetailCosmosHelperMock.fetchSingleItem,
     ).not.toHaveBeenCalled();
 
-    expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericPublicationItemType)),
+    expect(context.extraOutputs.set).toHaveBeenCalledWith(
+      "serviceDetailDocument",
+      toServiceDetail(aGenericPublicationItemType),
     );
   });
 
@@ -121,8 +117,9 @@ describe("Service Detail Handler", () => {
 
     expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
 
-    expect(context.bindings.serviceDetailDocument).toBe(
-      JSON.stringify(toServiceDetail(aGenericLifecycleItemType)),
+    expect(context.extraOutputs.set).toHaveBeenCalledWith(
+      "serviceDetailDocument",
+      toServiceDetail(aGenericLifecycleItemType),
     );
   });
 
@@ -142,7 +139,7 @@ describe("Service Detail Handler", () => {
 
     expect(serviceDetailCosmosHelperMock.fetchSingleItem).toHaveBeenCalled();
 
-    expect(context.bindings.serviceDetailDocument).toBeUndefined();
+    expect(context.extraOutputs.set).not.toHaveBeenCalled();
   });
 
   it("[buildDocument] should build document starting from a service", async () => {

@@ -5,7 +5,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -17,6 +16,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const {
   validateServiceTopicRequest,
@@ -132,7 +132,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {} as any;
+const { context: mockContext } = makeInvocationContext();
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -151,7 +151,7 @@ describe("createService", () => {
     serviceTopicDao: vi.fn(),
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   const logPrefix = "CreateServiceHandler";
 

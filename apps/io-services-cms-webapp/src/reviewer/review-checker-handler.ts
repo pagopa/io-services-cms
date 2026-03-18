@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
@@ -62,7 +62,7 @@ export const createReviewCheckerHandler =
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
-  async (context: Context): Promise<unknown> => {
+  async (context: InvocationContext): Promise<unknown> => {
     const logger = getLogger(context, logPrefix, "createReviewCheckerHandler");
     return await pipe(
       processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient),
@@ -83,7 +83,7 @@ export const createReviewCheckerHandler =
  * @returns
  */
 export const buildIssueItemPairs =
-  (context: Context, jiraProxy: JiraProxy) =>
+  (context: InvocationContext, jiraProxy: JiraProxy) =>
   (items: ServiceReviewRowDataTable[]) => {
     const logger = getLogger(context, logPrefix, "buildIssueItemPairs");
     return pipe(
@@ -125,7 +125,7 @@ export const buildIssueItemPairs =
  */
 export const updateReview =
   (
-    context: Context,
+    context: InvocationContext,
     dao: ServiceReviewDao,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
@@ -203,7 +203,7 @@ const decodeJiraIssueStatus = (issue: JiraIssue): "APPROVED" | "REJECTED" => {
 
 export const processBatchOfReviews =
   (
-    context: Context,
+    context: InvocationContext,
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
