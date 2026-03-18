@@ -1,3 +1,4 @@
+import { InvocationContext } from "@azure/functions";
 import { Container } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
@@ -17,11 +18,14 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
 import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
+import { IConfig } from "../../../config";
+import {
+  applyRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "../unpublish-service";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -117,15 +121,8 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const { context: mockContext } = makeInvocationContext();
-
-const mockBlobService = {
-  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
-} as any;
-
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
-} as any;
+const { context: mockContext }: { context: InvocationContext } =
+  makeInvocationContext();
 
 const { checkServiceMock } = vi.hoisted(() => ({
   checkServiceMock: vi.fn(() => TE.right(undefined)),
@@ -140,31 +137,46 @@ afterEach(() => {
 });
 
 describe("UnPublishService", () => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: mockApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator,
-    fsmPublicationClient,
-    subscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
-  } as unknown as WebServerDependencies);
+  const handler = applyRequestMiddelwares(mockConfig, subscriptionCIDRsModel)(
+    makeUnpublishServiceHandler({
+      apimService: mockApimService,
+      fsmLifecycleClientCreator,
+      fsmPublicationClient,
+      telemetryClient: mockAppinsights,
+    }),
+  );
 
-  app.set("context", mockContext);
+  const makeRequest = ({
+    serviceId = "s2",
+    subscriptionId = aManageSubscriptionId,
+    userGroup = UserGroup.ApiServiceWrite,
+    userId = anUserId,
+  }: {
+    serviceId?: string;
+    subscriptionId?: string;
+    userGroup?: string;
+    userId?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        headers: {
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroup,
+          "x-user-id": userId,
+        },
+        method: "DELETE",
+        params: { serviceId },
+      }),
+      mockContext,
+    );
 
   it("should fail when cannot find requested service", async () => {
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
     expect(mockContext.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(404);
+    expect(response.status).toBe(404);
   });
 
   it("should allow delete release when service is already unpublished", async () => {
@@ -173,28 +185,16 @@ describe("UnPublishService", () => {
       fsm: { state: "unpublished" },
     })();
 
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
     expect(mockContext.error).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(204);
+    expect(response.status).toBe(204);
   });
 
   it("should not allow the operation without right group", async () => {
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ userGroup: "OtherGroup" });
 
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 
   it("should unpublish a service", async () => {
@@ -203,44 +203,28 @@ describe("UnPublishService", () => {
       fsm: { state: "published" },
     })();
 
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
     expect(mockContext.error).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(204);
+    expect(response.status).toBe(204);
   });
-  it("should not allow the operation without right userId", async () => {
-    const aDifferentManageSubscriptionId = "MANAGE-456";
-    const aDifferentUserId = "456";
 
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", aDifferentUserId)
-      .set("x-subscription-id", aDifferentManageSubscriptionId);
+  it("should not allow the operation without right userId", async () => {
+    const response = await makeRequest({
+      subscriptionId: "MANAGE-456",
+      userId: "456",
+    });
 
     expect(mockContext.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
-  it("should not allow the operation without manageKey", async () => {
-    const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-    const response = await request(app)
-      .delete("/api/services/s2/release")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+  it("should not allow the operation without manageKey", async () => {
+    const response = await makeRequest({
+      subscriptionId: "NOT-MANAGE-123",
+    });
 
     expect(mockApimService.getSubscription).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 });

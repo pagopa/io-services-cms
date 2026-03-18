@@ -13,11 +13,14 @@ import {
 } from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
-import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
 import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
+import { IConfig } from "../../../config";
+import {
+  applyRequestMiddelwares,
+  makeGetServicesHandler,
+} from "../get-services";
 
 const aName1 = "a-name-1";
 const aName2 = "a-name-2";
@@ -89,10 +92,6 @@ let mockFsmLifecycleClient = {
 } as any;
 const mockFsmLifecycleClientCreator = vi.fn(() => mockFsmLifecycleClient);
 
-const mockFsmPublicationClient = {
-  getStore: vi.fn(() => ({})),
-} as any;
-
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
 
@@ -137,112 +136,94 @@ const mockAppinsights = {
 
 const { context: mockContext } = makeInvocationContext();
 
-const mockBlobService = {
-  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
-} as any;
-
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
-} as any;
-
-describe("getServices", () => {
-  const app = createWebServer({
-    basePath: "api",
+const handler = applyRequestMiddelwares(mockConfig, subscriptionCIDRsModel)(
+  makeGetServicesHandler({
     apimService: mockApimService,
     config: mockConfig,
     fsmLifecycleClientCreator: mockFsmLifecycleClientCreator,
-    fsmPublicationClient: mockFsmPublicationClient,
-    subscriptionCIDRsModel,
     telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
-  } as unknown as WebServerDependencies);
+  }),
+);
 
-  app.set("context", mockContext);
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe("getServices", () => {
+  const makeRequest = ({
+    query = {},
+    subscriptionId = aManageSubscriptionId,
+    userGroups = UserGroup.ApiServiceWrite,
+  }: {
+    query?: Record<string, string>;
+    subscriptionId?: string;
+    userGroups?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        headers: {
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroups,
+          "x-user-id": anUserId,
+        },
+        query,
+      }),
+      mockContext,
+    );
 
   it("should return a Bad Request response when called with a wrong 'limit' queryparam", async () => {
-    const response = await request(app)
-      .get("/api/services?limit=nonNumericValue")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({
+      query: { limit: "nonNumericValue" },
+    });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
   });
 
   it("should return a Bad Request response when called with an higher than expected 'limit' queryparam", async () => {
-    const response = await request(app)
-      .get("/api/services?limit=9999")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ query: { limit: "9999" } });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
   });
 
   it("should not allow the operation without right 'x-user-groups'", async () => {
-    const response = await request(app)
-      .get("/api/services")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ userGroups: "OtherGroup" });
 
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 
   it("should return an ok response and default limit when called without 'limit' queryparam", async () => {
-    const response = await request(app)
-      .get("/api/services")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(200);
+    expect(response.status).toBe(200);
     expect(mockContext.error).not.toHaveBeenCalled();
-    expect(response.body.pagination).toHaveProperty(
+    expect(response.jsonBody.pagination).toHaveProperty(
       "limit",
       mockConfig.PAGINATION_DEFAULT_LIMIT,
     );
   });
 
   it("should return an ok response and offset equals to zero when called without 'offset' queryparam", async () => {
-    const response = await request(app)
-      .get("/api/services?limit=10")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ query: { limit: "10" } });
 
-    expect(response.statusCode).toBe(200);
+    expect(response.status).toBe(200);
     expect(mockContext.error).not.toHaveBeenCalled();
-    expect(response.body.pagination).toHaveProperty("offset", 0);
+    expect(response.jsonBody.pagination).toHaveProperty("offset", 0);
   });
 
   it("should return a list of user services", async () => {
     const anOffset = 0;
     const aQueryLimit = 5;
 
-    const response = await request(app)
-      .get(`/api/services?limit=${aQueryLimit}&offset=${anOffset}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({
+      query: { limit: String(aQueryLimit), offset: String(anOffset) },
+    });
 
-    expect(response.statusCode).toBe(200);
+    expect(response.status).toBe(200);
     expect(mockContext.error).not.toHaveBeenCalled();
-    expect(response.body.value.length).toBe(aServiceList.length);
-    expect(response.body.pagination).toStrictEqual({
+    expect(response.jsonBody.value.length).toBe(aServiceList.length);
+    expect(response.jsonBody.pagination).toStrictEqual({
       count: aServiceList.length,
       limit: aQueryLimit,
       offset: anOffset,
@@ -252,14 +233,10 @@ describe("getServices", () => {
   it("should not allow the operation without manageKey", async () => {
     const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-    const response = await request(app)
-      .get("/api/services")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+    const response = await makeRequest({
+      subscriptionId: aNotManageSubscriptionId,
+    });
 
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 });

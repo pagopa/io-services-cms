@@ -111,7 +111,6 @@ const mocks = vi.hoisted(() => {
     SERVICE_COLLECTION_NAME: "test",
     envConfig: {},
     makeInfoHandler: vi.fn(() => {}),
-    createWebServer: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
     processBatchOf: vi.fn(
       () =>
@@ -165,10 +164,6 @@ vi.mock("@io-services-cms/external-clients", () => ({
 
 vi.mock("../webservice/controllers/info", () => ({
   makeInfoHandler: mocks.makeInfoHandler,
-}));
-
-vi.mock("../webservice/index", () => ({
-  createWebServer: mocks.createWebServer,
 }));
 
 vi.mock("../lib/azure/cosmos", () => ({
