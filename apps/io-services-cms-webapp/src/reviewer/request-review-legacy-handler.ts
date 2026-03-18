@@ -11,7 +11,7 @@
  *   and update the legacy service when the review is completed
  */
 
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { Queue, ServiceLifecycle } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -30,7 +30,7 @@ import { ServiceReviewDao } from "../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../utils/synchronizer";
 
 export const handleQueueItem = (
-  context: Context,
+  context: InvocationContext,
   queueItem: Json,
   fsmLifecycleClient: ServiceLifecycle.FsmClient,
   dao: ServiceReviewDao,
@@ -52,7 +52,7 @@ export const handleQueueItem = (
     ),
     TE.getOrElseW((e) => {
       if (e instanceof QueuePermanentError) {
-        context.log.error(`Permanent error: ${e.message}`);
+        context.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }
       throw e;

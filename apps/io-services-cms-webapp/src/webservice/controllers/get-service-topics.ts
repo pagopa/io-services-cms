@@ -1,9 +1,6 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -23,7 +20,7 @@ type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceTopicList>;
 
 type GetServiceTopicsHandler = (
-  context: Context,
+  context: InvocationContext,
 ) => Promise<HandlerResponseTypes>;
 
 interface Dependencies {
@@ -48,15 +45,10 @@ export const makeGetServiceTopicsHandler =
 
 export const applyRequestMiddelwares = (
   handler: GetServiceTopicsHandler,
-): ReturnType<typeof wrapRequestHandler> => {
-  const middlewaresWrap = withRequestMiddlewares(
+): ReturnType<typeof wrapHandlerV4> => {
+  const middlewares = [
     // extract the Azure functions context
     ContextMiddleware(),
-  );
-  return wrapRequestHandler(
-    middlewaresWrap(
-      // eslint-disable-next-line max-params
-      handler,
-    ),
-  );
+  ] as const;
+  return wrapHandlerV4(middlewares, handler);
 };

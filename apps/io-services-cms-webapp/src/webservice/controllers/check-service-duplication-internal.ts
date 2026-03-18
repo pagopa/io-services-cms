@@ -1,10 +1,7 @@
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import { RequiredQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_query_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseSuccessJson,
   ResponseErrorInternal,
@@ -166,11 +163,11 @@ const getNotDeletedDuplicatesOnServiceLifecycle =
 
 export const applyRequestMiddelwares = (
   handler: CheckServiceDuplicationInternalHandler,
-): ReturnType<typeof wrapRequestHandler> => {
-  const middlewaresWrap = withRequestMiddlewares(
+): ReturnType<typeof wrapHandlerV4> => {
+  const middlewares = [
     RequiredQueryParamMiddleware("serviceName", NonEmptyString),
     RequiredQueryParamMiddleware("organizationFiscalCode", NonEmptyString),
     OptionalQueryParamMiddleware("serviceId", NonEmptyString),
-  );
-  return wrapRequestHandler(middlewaresWrap(handler));
+  ] as const;
+  return wrapHandlerV4(middlewares, handler);
 };

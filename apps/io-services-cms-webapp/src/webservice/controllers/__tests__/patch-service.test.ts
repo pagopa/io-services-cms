@@ -2,13 +2,13 @@ import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { ResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/lib/TaskEither";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 const aService = {
   id: "aServiceId",
@@ -80,7 +80,7 @@ describe("patchService", () => {
     trackEvent: vi.fn(),
     trackError: vi.fn(),
   } as any;
-  const mockContext = {} as any;
+  const { context: mockContext } = makeInvocationContext();
 
   const app = createWebServer({
     basePath: "api",
@@ -94,7 +94,7 @@ describe("patchService", () => {
     serviceTopicDao: vi.fn(),
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   const aServicePayload = {
     name: "string",

@@ -10,7 +10,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -22,6 +21,7 @@ import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -117,12 +117,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
@@ -141,7 +136,7 @@ const mockWebServer = (mockServiceTopicDao: any) => {
     serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   return app;
 };
@@ -171,7 +166,7 @@ describe("getServiceTopics", () => {
     expect(response.body).toStrictEqual({
       topics: [{ id: 1, name: "aTopicName" }],
     });
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -193,7 +188,7 @@ describe("getServiceTopics", () => {
     expect(response.body).toStrictEqual({
       topics: [],
     });
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -217,7 +212,7 @@ describe("getServiceTopics", () => {
       status: 500,
       title: "Internal server error",
     });
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
+    expect(mockContext.error).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(500);
   });
 });

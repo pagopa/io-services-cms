@@ -11,7 +11,6 @@ import {
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -27,6 +26,7 @@ import { itemToResponse as getPublicationItemToResponse } from "../../../utils/c
 import { WebServerDependencies, createWebServer } from "../../index";
 import { last } from "fp-ts/lib/ReadonlyArray";
 import { getResponseErrorForbiddenNoAuthorizationGroups } from "@pagopa/ts-commons/lib/responses";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
 vi.mock("../../lib/clients/apim-client", async () => {
   const anApimResource = { id: "any-id", name: "any-name" };
@@ -155,13 +155,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
@@ -196,7 +190,7 @@ describe("getServicePublication", () => {
     serviceTopicDao: mockServiceTopicDao,
   } as unknown as WebServerDependencies);
 
-  setAppContext(app, mockContext);
+  app.set("context", mockContext);
 
   it("should fail when cannot find requested service", async () => {
     const response = await request(app)
@@ -207,7 +201,7 @@ describe("getServicePublication", () => {
       .set("x-user-id", anUserId)
       .set("x-subscription-id", aManageSubscriptionId);
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(404);
   });
 
@@ -228,7 +222,7 @@ describe("getServicePublication", () => {
       .set("x-subscription-id", aManageSubscriptionId);
 
     // then
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 
@@ -250,7 +244,7 @@ describe("getServicePublication", () => {
         TE.toUnion,
       )(),
     );
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(mockContext.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
   });
 
@@ -281,7 +275,7 @@ describe("getServicePublication", () => {
     expect(response.text).toContain(
       "You do not have enough permission to complete the operation you requested",
     );
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
+    expect(mockContext.warn).toHaveBeenCalledOnce();
     expect(response.statusCode).toBe(403);
   });
 
