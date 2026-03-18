@@ -1,4 +1,4 @@
-import { Container } from "@azure/cosmos";
+import { Container, HTTPMethod } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   RetrievedSubscriptionCIDRs,
@@ -11,10 +11,14 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
+import { HttpRequest, InvocationContext } from "@azure/functions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import {
+  applyRequestMiddelwares,
+  makeCreateServiceHandler,
+} from "../create-service";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
@@ -132,41 +136,61 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const { context: mockContext } = makeInvocationContext();
-
-beforeEach(() => {
-  vi.restoreAllMocks();
-});
+let mockContext: InvocationContext;
 
 describe("createService", () => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: apimServiceMock as unknown as ApimUtils.ApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
-    fsmPublicationClient: vi.fn(),
-    subscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: vi.fn(),
-    serviceTopicDao: vi.fn(),
-  } as unknown as WebServerDependencies);
+  beforeEach(() => {
+    ({ context: mockContext } = makeInvocationContext());
+    vi.restoreAllMocks();
+  });
 
-  app.set("context", mockContext);
+  const handler = applyRequestMiddelwares(
+    mockConfig,
+    subscriptionCIDRsModel,
+  )(
+    makeCreateServiceHandler({
+      apimService: apimServiceMock as unknown as ApimUtils.ApimService,
+      config: mockConfig,
+      fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
+      telemetryClient: mockAppinsights,
+    }),
+  );
+
+  const makeRequest = ({
+    body = {},
+    subscriptionId = aManageSubscriptionId,
+    userGroup = UserGroup.ApiServiceWrite,
+    userId = anUserId,
+  }: {
+    body?: unknown;
+    subscriptionId?: string;
+    userGroup?: string;
+    userId?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        body: { string: JSON.stringify(body) },
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroup,
+          "x-user-id": userId,
+        },
+        method: "POST",
+      }),
+      mockContext,
+    );
 
   const logPrefix = "CreateServiceHandler";
 
   it("should not accept invalid payloads", async () => {
     // when
-    const response = await request(app)
-      .post("/api/services")
-      .send({})
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
     // then
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
     expect(validateServiceTopicRequest).not.toHaveBeenCalled();
     expect(payloadToItemMock).not.toHaveBeenCalled();
     expect(itemToResponseMock).not.toHaveBeenCalled();
@@ -177,16 +201,10 @@ describe("createService", () => {
 
   it("should not allow the operation without right group", async () => {
     // when
-    const response = await request(app)
-      .post("/api/services")
-      .send({})
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ userGroup: "OtherGroup" });
 
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(validateServiceTopicRequest).not.toHaveBeenCalled();
     expect(payloadToItemMock).not.toHaveBeenCalled();
     expect(itemToResponseMock).not.toHaveBeenCalled();
@@ -207,16 +225,10 @@ describe("createService", () => {
     // payloadToItemMock.mockImplementationOnce(() => itemService);
 
     // when
-    const response = await request(app)
-      .post("/api/services")
-      .send(servicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ body: servicePayload });
 
     // then
-    expect(response.statusCode).toBe(201);
+    expect(response.status).toBe(201);
     expect(validateServiceTopicRequest).toHaveBeenCalledOnce();
     expect(payloadToItemMock).toHaveBeenCalledOnce();
     expect(payloadToItemMock).toHaveBeenCalledWith(
@@ -252,16 +264,13 @@ describe("createService", () => {
     const aNotManageSubscriptionId = "NOT-MANAGE-456";
 
     // when
-    const response = await request(app)
-      .post("/api/services")
-      .send(aNewService)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+    const response = await makeRequest({
+      body: aNewService,
+      subscriptionId: aNotManageSubscriptionId,
+    });
 
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(validateServiceTopicRequest).not.toHaveBeenCalled();
     expect(getLoggerMock).not.toHaveBeenCalled();
     expect(logErrorResponseMock).not.toHaveBeenCalled();
@@ -276,16 +285,10 @@ describe("createService", () => {
     apimServiceMock.upsertSubscription.mockReturnValueOnce(TE.left(error));
 
     // when
-    const response = await request(app)
-      .post("/api/services")
-      .send(aNewService)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ body: aNewService });
 
     // then
-    expect(response.statusCode).toBe(500);
+    expect(response.status).toBe(500);
     expect(validateServiceTopicRequest).toHaveBeenCalledOnce();
     expect(getLoggerMock).toHaveBeenCalledOnce();
     expect(getLoggerMock).toHaveBeenCalledWith(mockContext, logPrefix);
