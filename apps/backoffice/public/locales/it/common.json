@@ -35,7 +35,7 @@
     "view": "Visualizza"
   },
   "copied": "Copiato",
-  "delegated-institution": {
+  "aggregated-institution": {
     "actions": {
       "hide": "Nascondi API Key",
       "show": "Mostra API Key",
@@ -365,7 +365,7 @@
     "operator": "Operatore"
   },
   "routes": {
-    "delegated-institutions": {
+    "aggregated-institutions": {
       "title": "I tuoi enti",
       "description": "Visualizza e gestisci gli enti per il prodotto App IO. Per operare su uno di questi clicca sul menu contestuale in tabella.",
       "empty": "Non sono presenti enti aggregati.",

@@ -1,6 +1,7 @@
 import { UrlObject } from "url";
 
 export const ROUTES = {
+  AGGREGATED_INSTITUTIONS: "/aggregated-institutions",
   ASSOCIATE_GROUP: "/groups/associate",
   AUTH: {
     ERROR: "/auth/error",
@@ -10,7 +11,6 @@ export const ROUTES = {
     }),
     LOGOUT: "/auth/logout",
   },
-  DELEGATED_INSTITUTIONS: "/delegated-institutions",
   HOME: "/",
   KEYS: {
     DETAILS: (keyId: string) => `/keys?id=${keyId}`,

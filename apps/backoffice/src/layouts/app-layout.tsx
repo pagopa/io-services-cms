@@ -43,10 +43,10 @@ export const AppLayout = ({
     if (hasAggregatorFeatures(getConfiguration().EA_ENABLED)(session)) {
       return [
         {
-          href: ROUTES.DELEGATED_INSTITUTIONS,
+          href: ROUTES.AGGREGATED_INSTITUTIONS,
           icon: <Dns fontSize="inherit" />,
           linkType: "internal",
-          text: "routes.delegated-institutions.title",
+          text: "routes.aggregated-institutions.title",
         },
       ];
     }
