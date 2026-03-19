@@ -1,5 +1,10 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { InvocationContext, app, output } from "@azure/functions";
+import {
+  ExponentialBackoffRetryOptions,
+  InvocationContext,
+  app,
+  output,
+} from "@azure/functions";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -282,21 +287,21 @@ const blobServiceClient = new BlobServiceClient(
   new DefaultAzureCredential(),
 );
 
-const retryThreeOneToSixty = {
+const eventHubRetryPolicy: ExponentialBackoffRetryOptions = {
   maxRetryCount: 3,
   maximumInterval: { minutes: 1 },
   minimumInterval: { seconds: 1 },
   strategy: "exponentialBackoff" as const,
 };
 
-const retryTenFiveToSixty = {
+const changeFeedFiveSecondsRetryPolicy: ExponentialBackoffRetryOptions = {
   maxRetryCount: 10,
   maximumInterval: { minutes: 1 },
   minimumInterval: { seconds: 5 },
   strategy: "exponentialBackoff" as const,
 };
 
-const retryTenTenToSixty = {
+const changeFeedTenSecondsRetryPolicy: ExponentialBackoffRetryOptions = {
   maxRetryCount: 10,
   maximumInterval: { minutes: 1 },
   minimumInterval: { seconds: 10 },
@@ -1076,7 +1081,7 @@ app.cosmosDB("ServiceLifecycleWatcher", {
   handler: onServiceLifecycleChangeEntryPoint,
   leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-lease",
   maxItemsPerInvocation: 30,
-  retry: retryTenFiveToSixty,
+  retry: changeFeedFiveSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1096,7 +1101,7 @@ app.cosmosDB("ServicePublicationWatcher", {
   handler: onServicePublicationChangeEntryPoint,
   leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-lease",
   maxItemsPerInvocation: 30,
-  retry: retryTenFiveToSixty,
+  retry: changeFeedFiveSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1116,7 +1121,7 @@ app.cosmosDB("LegacyServiceWatcher", {
   handler: onLegacyServiceChangeEntryPoint,
   leaseContainerName: "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
   maxItemsPerInvocation: 10,
-  retry: retryTenTenToSixty,
+  retry: changeFeedTenSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1136,7 +1141,7 @@ app.cosmosDB("ServiceHistoryWatcher", {
   handler: onServiceHistoryChangeEntryPoint,
   leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%-lease",
   maxItemsPerInvocation: 30,
-  retry: retryTenFiveToSixty,
+  retry: changeFeedFiveSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1156,7 +1161,7 @@ app.cosmosDB("ServiceDetailPublicationWatcher", {
   handler: onServiceDetailPublicationChangeEntryPoint,
   leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-details-lease",
   maxItemsPerInvocation: 30,
-  retry: retryTenFiveToSixty,
+  retry: changeFeedFiveSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1176,7 +1181,7 @@ app.cosmosDB("ServiceDetailLifecycleWatcher", {
   handler: onServiceDetailLifecycleChangeEntryPoint,
   leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-details-lease",
   maxItemsPerInvocation: 30,
-  retry: retryTenFiveToSixty,
+  retry: changeFeedFiveSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
@@ -1194,7 +1199,7 @@ app.eventHub("SelfcareGroupWatcher", {
     }),
   ],
   handler: onSelfcareGroupChangeEntryPoint,
-  retry: retryThreeOneToSixty,
+  retry: eventHubRetryPolicy,
 });
 
 app.cosmosDB("ActivationsSyncFromLegacy", {
@@ -1213,7 +1218,7 @@ app.cosmosDB("ActivationsSyncFromLegacy", {
   handler: activationsSyncFromLegacyEntryPoint,
   leaseContainerName: "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE%",
   maxItemsPerInvocation: 50,
-  retry: retryTenTenToSixty,
+  retry: changeFeedTenSecondsRetryPolicy,
   startFromBeginning: true,
 });
 
