@@ -138,7 +138,7 @@ describe("getServiceLifecycle", () => {
           "x-user-email": "example@email.com",
           "x-user-groups": userGroups,
           "x-user-id": userId,
-          "x-user-groups-selc": userGroupSelc,
+          ...(userGroupSelc ? { "x-user-groups-selc": userGroupSelc } : {}),
         } as Record<string, string>,
         params: { serviceId },
       }),
