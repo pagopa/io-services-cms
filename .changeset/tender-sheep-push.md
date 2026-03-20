@@ -2,4 +2,4 @@
 "io-services-cms-backoffice": patch
 ---
 
-include upper bound value to default limit decoder
+Include upper bound value in default limit decoder
