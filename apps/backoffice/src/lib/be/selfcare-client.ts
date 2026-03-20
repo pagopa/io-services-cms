@@ -236,7 +236,7 @@ const buildSelfcareClient = (): SelfcareClient => {
                 page,
                 search,
                 size,
-                sort: "ASC",
+                order: "ASC",
               },
             }),
           flow(
