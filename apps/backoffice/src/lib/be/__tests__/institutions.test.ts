@@ -21,6 +21,7 @@ import {
   retrieveUnboundInstitutionGroups,
   retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
+import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -93,8 +94,8 @@ const mocks: {
       },
     ],
     pageInfo: {
-      page: 0,
-      size: 0,
+      pageNo: 0,
+      pageSize: 0,
       totalElements: 0,
       totalPages: 0,
     },
@@ -409,6 +410,7 @@ describe("Institutions", () => {
         search,
       );
 
+      console.log("pageInfo", mocks.institutionDelegations.pageInfo);
       // then
       expect(result).toStrictEqual({
         value: mocks.institutionDelegations.delegations?.map((delegation) => ({
@@ -417,10 +419,10 @@ describe("Institutions", () => {
         })),
         pagination: {
           count: mocks.institutionDelegations.pageInfo?.totalElements ?? 0,
-          limit: mocks.institutionDelegations.pageInfo?.pageSize ?? limit,
+          limit: mocks.institutionDelegations.pageInfo?.pageSize ?? 0,
           offset:
-            (mocks.institutionDelegations.pageInfo?.pageNo ?? offset) *
-            (mocks.institutionDelegations.pageInfo?.pageSize ?? limit),
+            (mocks.institutionDelegations.pageInfo?.pageNo ?? 0) *
+            (mocks.institutionDelegations.pageInfo?.pageSize ?? 0),
         },
       });
       expect(getInstitutionDelegationsMock).toHaveBeenCalledOnce();
