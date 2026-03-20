@@ -375,7 +375,7 @@ describe("Selfcare Client", () => {
           size,
           page,
           search,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).not.toHaveBeenCalled();
@@ -405,7 +405,7 @@ describe("Selfcare Client", () => {
           size: undefined,
           page: undefined,
           search: undefined,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).toHaveBeenCalled();
@@ -428,7 +428,7 @@ describe("Selfcare Client", () => {
           size: undefined,
           page: undefined,
           search: undefined,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).not.toHaveBeenCalled();
