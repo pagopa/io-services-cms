@@ -398,7 +398,7 @@ describe("Institutions", () => {
     const limit = 5;
     const offset = 5;
     const search = "search";
-    const totalElements = faker.number.int({ max: 20, min: 8 });
+    const totalElements = 10;
     it("should return the delegated institutions for the given institution", async () => {
       // given
       const mockedInstitutionDelegations = mocks.institutionDelegations(
