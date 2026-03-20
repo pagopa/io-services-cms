@@ -72,6 +72,7 @@ const Config = t.intersection([
 const institutionsApi = "/institutions";
 const usersApi = "/users";
 const groupsApi = "/user-groups";
+const delegationsApi = "/delegations";
 let selfcareConfig: Config;
 let selfcareClient: SelfcareClient;
 
@@ -229,17 +230,15 @@ const buildSelfcareClient = (): SelfcareClient => {
       pipe(
         TE.tryCatch(
           () =>
-            axiosInstance.get(
-              `${institutionsApi}/${institutionId}/delegations/delegations-with-pagination`,
-              {
-                params: {
-                  page,
-                  search,
-                  size,
-                  sort: "ASC",
-                },
+            axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
+              params: {
+                brokerId: institutionId,
+                page,
+                search,
+                size,
+                order: "ASC",
               },
-            ),
+            }),
           flow(
             E.fromPredicate(
               axios.isAxiosError,
