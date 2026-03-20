@@ -418,7 +418,6 @@ describe("Institutions", () => {
         search,
       );
 
-      console.log("pageInfo", mockedInstitutionDelegations.pageInfo);
       // then
       expect(result).toStrictEqual({
         value: mockedInstitutionDelegations.delegations?.map((delegation) => ({
