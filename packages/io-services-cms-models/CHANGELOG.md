@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.28.5
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+
 ## 1.28.4
 
 ### Patch Changes

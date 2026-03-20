@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 1.31.6
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+- 668fe9d8: Rename `getDelegatedInstitutions` into `retrieveInstitutionAggregates`
+- 221ff839: Include upper bound value in default limit decoder
+- 3a43b64a: Update `delegated` prefixes to `aggregated` across all occurrences
+- Updated dependencies [adc31a1c]
+  - @io-services-cms/models@1.28.5
+  - @io-services-cms/external-clients@1.8.8
+  - @io-services-cms/fetch-utils@1.0.4
+
 ## 1.31.5
 
 ### Patch Changes
