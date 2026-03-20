@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { UserInstitutions } from "../../../lib/be/selfcare-client";
@@ -13,15 +14,14 @@ import {
 import { InstitutionProducts } from "../../../lib/be/selfcare-client";
 import { GroupNotFoundError } from "../errors";
 import {
-  retrieveInstitutionAggregates,
   getUserInstitutionProducts,
   groupExists,
   retrieveInstitution,
+  retrieveInstitutionAggregates,
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
   retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
-import { cons } from "fp-ts/lib/ReadonlyNonEmptyArray";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -29,7 +29,11 @@ const mocks: {
   aSelfcareUserId: string;
   institutionGroup: UserGroupResource;
   institutionGroups: PageOfUserGroupResource;
-  institutionDelegations: DelegationWithPaginationResponse;
+  institutionDelegations: (
+    limit: number,
+    offset: number,
+    totalElements: number,
+  ) => DelegationWithPaginationResponse;
 } = vi.hoisted(() => ({
   institution: { id: "institutionId" },
   userInstitutions: [
@@ -82,24 +86,22 @@ const mocks: {
     totalElements: 0,
     totalPages: 0,
   },
-  institutionDelegations: {
-    delegations: [
-      {
-        institutionId: "institutionGroupsInstID",
-        institutionName: "institutionGroupsName",
-      },
-      {
-        institutionId: "institutionGroupsInstID2",
-        institutionName: "institutionGroupsName2",
-      },
-    ],
+  institutionDelegations: (
+    limit: number,
+    offset: number,
+    totalElements: number,
+  ) => ({
+    delegations: Array.from({ length: limit }, (_, index) => ({
+      institutionId: `institutionGroupsInstID${index + 1}`,
+      institutionName: `institutionGroupsName${index + 1}`,
+    })),
     pageInfo: {
-      pageNo: 0,
-      pageSize: 0,
-      totalElements: 0,
-      totalPages: 0,
+      pageNo: Math.floor(offset / limit),
+      pageSize: limit,
+      totalElements: totalElements,
+      totalPages: Math.ceil(totalElements / limit),
     },
-  },
+  }),
 }));
 
 const {
@@ -394,13 +396,19 @@ describe("Institutions", () => {
   describe("retrieveInstitutionAggregates", () => {
     const institutionId = "institutionId";
     const limit = 5;
-    const offset = 2;
+    const offset = 5;
     const search = "search";
+    const totalElements = faker.number.int({ max: 20, min: 8 });
     it("should return the delegated institutions for the given institution", async () => {
       // given
-      getInstitutionDelegationsMock.mockResolvedValueOnce({
-        ...mocks.institutionDelegations,
-      });
+      const mockedInstitutionDelegations = mocks.institutionDelegations(
+        limit,
+        offset,
+        totalElements,
+      );
+      getInstitutionDelegationsMock.mockResolvedValueOnce(
+        mockedInstitutionDelegations,
+      );
 
       // when
       const result = await retrieveInstitutionAggregates(
@@ -410,19 +418,19 @@ describe("Institutions", () => {
         search,
       );
 
-      console.log("pageInfo", mocks.institutionDelegations.pageInfo);
+      console.log("pageInfo", mockedInstitutionDelegations.pageInfo);
       // then
       expect(result).toStrictEqual({
-        value: mocks.institutionDelegations.delegations?.map((delegation) => ({
+        value: mockedInstitutionDelegations.delegations?.map((delegation) => ({
           id: delegation.institutionId,
           name: delegation.institutionName,
         })),
         pagination: {
-          count: mocks.institutionDelegations.pageInfo?.totalElements ?? 0,
-          limit: mocks.institutionDelegations.pageInfo?.pageSize ?? 0,
+          count: mockedInstitutionDelegations.pageInfo?.totalElements ?? 0,
+          limit: mockedInstitutionDelegations.pageInfo?.pageSize ?? 0,
           offset:
-            (mocks.institutionDelegations.pageInfo?.pageNo ?? 0) *
-            (mocks.institutionDelegations.pageInfo?.pageSize ?? 0),
+            (mockedInstitutionDelegations.pageInfo?.pageNo ?? 0) *
+            (mockedInstitutionDelegations.pageInfo?.pageSize ?? 0),
         },
       });
       expect(getInstitutionDelegationsMock).toHaveBeenCalledOnce();
