@@ -1,14 +1,17 @@
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { ResponseErrorForbiddenNotAuthorized } from "@pagopa/ts-commons/lib/responses";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import {
+  applyRequestMiddelwares,
+  makePatchServiceHandler,
+} from "../patch-service";
 
 const aService = {
   id: "aServiceId",
@@ -80,21 +83,16 @@ describe("patchService", () => {
     trackEvent: vi.fn(),
     trackError: vi.fn(),
   } as any;
-  const mockContext = {} as any;
+  const { context: mockContext }: { context: InvocationContext } =
+    makeInvocationContext();
 
-  const app = createWebServer({
-    basePath: "api",
-    apimService: mockApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
-    fsmPublicationClient: vi.fn(),
-    subscriptionCIDRsModel: {} as SubscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: vi.fn(),
-    serviceTopicDao: vi.fn(),
-  } as unknown as WebServerDependencies);
-
-  setAppContext(app, mockContext);
+  const handler = applyRequestMiddelwares(mockConfig)(
+    makePatchServiceHandler({
+      apimService: mockApimService,
+      fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
+      telemetryClient: mockAppinsights,
+    }),
+  );
 
   const aServicePayload = {
     name: "string",
@@ -125,22 +123,46 @@ describe("patchService", () => {
     },
   };
 
+  const makeRequest = ({
+    body = aServicePayload,
+    serviceId = aService.id,
+    subscriptionId = aManageSubscriptionId,
+    userGroup = UserGroup.ApiServiceWrite,
+    userId = anUserId,
+  }: {
+    body?: typeof aServicePayload;
+    serviceId?: string;
+    subscriptionId?: string;
+    userGroup?: string;
+    userId?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        body: { string: JSON.stringify(body) },
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroup,
+          "x-user-id": userId,
+        },
+        method: "PATCH",
+        params: { serviceId },
+      }),
+      mockContext,
+    );
+
   it("should fail when cannot find requested service", async () => {
     // given
     const serviceId = aService.id;
     patchMock.mockReturnValueOnce(TE.left(new Error("patch error")));
 
     // when
-    const response = await request(app)
-      .patch(`/api/services/${serviceId}`)
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ serviceId });
 
     // then
-    expect(response.statusCode).toBe(500);
+    expect(response.status).toBe(500);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       mockApimService,
@@ -163,16 +185,10 @@ describe("patchService", () => {
     const serviceId = aService.id;
 
     // when
-    const response = await request(app)
-      .patch(`/api/services/${serviceId}`)
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ serviceId, userGroup: "OtherGroup" });
 
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(serviceOwnerCheckManageTaskMock).not.toHaveBeenCalled();
     expect(patchMock).not.toHaveBeenCalled();
     expect(getLoggerMock).not.toHaveBeenCalled();
@@ -184,16 +200,10 @@ describe("patchService", () => {
     const serviceId = aService.id;
 
     // when
-    const response = await request(app)
-      .patch(`/api/services/${serviceId}`)
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ serviceId });
 
     // then
-    expect(response.statusCode).toBe(204);
+    expect(response.status).toBe(204);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       mockApimService,
@@ -213,16 +223,10 @@ describe("patchService", () => {
     serviceOwnerCheckManageTaskMock.mockReturnValueOnce(TE.left(error));
 
     // when
-    const response = await request(app)
-      .patch(`/api/services/${serviceId}`)
-      .send(aServicePayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ serviceId });
 
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       mockApimService,

@@ -1,12 +1,9 @@
 import { describe, it, expect, vi, beforeEach, assert } from "vitest";
 import * as TE from "fp-ts/lib/TaskEither";
 import { toAzureFunctionHandler } from "../adapters";
-import { Context } from "@azure/functions";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
-const mockContext = {
-  log: console,
-  executionContext: { functionName: "aFunctionName" },
-} as unknown as Context;
+const mockContext = makeInvocationContext("aFunctionName").context;
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -18,12 +15,12 @@ describe(`toAzureFunctionHandler`, () => {
 
     const handler = toAzureFunctionHandler(aProcedure);
 
-    const result = await handler(mockContext, "input1", "input2");
+    const result = await handler("input1", mockContext);
 
     expect(result).toBe("ok");
     expect(aProcedure).toHaveBeenCalledWith({
       context: mockContext,
-      inputs: ["input1", "input2"],
+      inputs: ["input1"],
     });
   });
 
@@ -32,7 +29,7 @@ describe(`toAzureFunctionHandler`, () => {
 
     const handler = toAzureFunctionHandler(aProcedure);
 
-    const result = await handler(mockContext);
+    const result = await handler(undefined, mockContext);
 
     expect(result).toBe("ok");
     expect(aProcedure).toHaveBeenCalledWith({
@@ -47,7 +44,7 @@ describe(`toAzureFunctionHandler`, () => {
     const handler = toAzureFunctionHandler(aFailingProcedure);
 
     try {
-      const result = await handler(mockContext);
+      const result = await handler(undefined, mockContext);
       assert.fail(
         `It's not supposed to be here, result: ${JSON.stringify(result)}`,
       );

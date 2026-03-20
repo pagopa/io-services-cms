@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import { DateUtils, ServiceLifecycle } from "@io-services-cms/models";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -8,6 +7,7 @@ import { IConfig } from "../../config";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { createRequestReviewLegacyHandler } from "../request-review-legacy-handler";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -77,12 +77,7 @@ const mainMockServiceReviewDao = {
   updateStatus: vi.fn(),
 };
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 describe("Request Review Legacy Handler", () => {
   it("should set to submitted status the item", async () => {
@@ -109,7 +104,7 @@ describe("Request Review Legacy Handler", () => {
       mockConfig,
     );
     const context = createContext();
-    await handler(context, JSON.stringify(aQueueMessage));
+    await handler(JSON.stringify(aQueueMessage), context);
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
 
@@ -152,7 +147,7 @@ describe("Request Review Legacy Handler", () => {
       excusiveConfig,
     );
     const context = createContext();
-    await handler(context, JSON.stringify(aQueueMessage));
+    await handler(JSON.stringify(aQueueMessage), context);
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
 
@@ -195,7 +190,7 @@ describe("Request Review Legacy Handler", () => {
       excusiveConfig,
     );
     const context = createContext();
-    await handler(context, JSON.stringify(aQueueMessage));
+    await handler(JSON.stringify(aQueueMessage), context);
 
     expect(mockFsmLifecycleClient.fetch).not.toHaveBeenCalled();
     expect(mockFsmLifecycleClient.override).not.toHaveBeenCalled();
@@ -233,7 +228,7 @@ describe("Request Review Legacy Handler", () => {
       mockConfig,
     );
     const context = createContext();
-    await handler(context, JSON.stringify(aQueueMessage));
+    await handler(JSON.stringify(aQueueMessage), context);
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
     expect(mockFsmLifecycleClient.override).not.toHaveBeenCalled();
@@ -265,7 +260,7 @@ describe("Request Review Legacy Handler", () => {
       mockConfig,
     );
     const context = createContext();
-    await handler(context, JSON.stringify(aQueueMessage));
+    await handler(JSON.stringify(aQueueMessage), context);
 
     expect(mockFsmLifecycleClient.fetch).not.toHaveBeenCalled();
   });
@@ -296,7 +291,7 @@ describe("Request Review Legacy Handler", () => {
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(JSON.stringify(aQueueMessage), context),
     ).rejects.toThrowError(`Service ${aServiceId} not found `);
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
@@ -330,7 +325,7 @@ describe("Request Review Legacy Handler", () => {
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(JSON.stringify(aQueueMessage), context),
     ).rejects.toThrowError("error fetching service");
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);
@@ -362,7 +357,7 @@ describe("Request Review Legacy Handler", () => {
     );
     const context = createContext();
     await expect(() =>
-      handler(context, JSON.stringify(aQueueMessage)),
+      handler(JSON.stringify(aQueueMessage), context),
     ).rejects.toThrowError("error overriding the service");
 
     expect(mockFsmLifecycleClient.fetch).toHaveBeenCalledWith(aServiceId);

@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   FsmAuthorizationError,
@@ -39,7 +39,7 @@ export const genericServiceRetrieveHandler =
     itemToResponse: GenericItemToResponse<T, V>,
   ) =>
   (
-    context: Context,
+    context: InvocationContext,
     auth: IAzureApiAuthorization,
     serviceId: NonEmptyString,
     logPrefix: string,

@@ -1,28 +1,13 @@
-import { AzureFunction, Context } from "@azure/functions";
-import createAzureFunctionHandler from "@pagopa/express-azure-functions/dist/src/createAzureFunctionsHandler";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
-import { Express } from "express";
+import { InvocationContext } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 /**
- *
- * @param app
- * @returns
- */
-export const expressToAzureFunction =
-  (app: Express): AzureFunction =>
-  (context: Context): void => {
-    setAppContext(app, context);
-    createAzureFunctionHandler(app)(context);
-  };
-
-/**
  * @typedef AzureFunctionCall Describe the context of an Azure Function invocation alongside its inputs
  */
 export interface AzureFunctionCall {
-  context: Context;
+  context: InvocationContext;
   inputs: unknown[];
 }
 
@@ -37,10 +22,8 @@ export interface AzureFunctionCall {
  * @throws an Error in case of a failing procedure.
  */
 export const toAzureFunctionHandler =
-  <L, R>(
-    procedure: RTE.ReaderTaskEither<AzureFunctionCall, L, R>,
-  ): AzureFunction =>
-  (context, ...inputs) =>
+  <L, R>(procedure: RTE.ReaderTaskEither<AzureFunctionCall, L, R>) =>
+  (input: unknown, context: InvocationContext) =>
     pipe(
       procedure,
       RTE.getOrElseW((f) => {
@@ -50,11 +33,11 @@ export const toAzureFunctionHandler =
             : new UnhandledProcedureError(context, E.toError(f).message);
         throw error;
       }),
-    )({ context, inputs })();
+    )({ context, inputs: typeof input === "undefined" ? [] : [input] })();
 
 class UnhandledProcedureError extends Error {
-  constructor(context: Context, message?: string) {
-    const formattedMessage = `${context.executionContext.functionName} failed, error: ${message}`;
+  constructor(context: InvocationContext, message?: string) {
+    const formattedMessage = `${context.functionName} failed, error: ${message}`;
     super(formattedMessage);
   }
 }
