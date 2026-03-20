@@ -128,6 +128,7 @@ describe("parseLimitQueryParam", () => {
     scenario      | paramName  | paramValue | expectedValue
     ${"default"}  | ${"foo"}   | ${"bar"}   | ${LIMIT_DEFAULT_VALUE}
     ${"provided"} | ${"limit"} | ${30}      | ${30}
+    ${"provided"} | ${"limit"} | ${100}     | ${100}
   `(
     "should return the $scenario limit value",
     ({ paramName, paramValue, expectedValue }) => {
