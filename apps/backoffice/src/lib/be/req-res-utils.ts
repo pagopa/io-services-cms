@@ -34,7 +34,7 @@ export const LIMIT_UPPER_BOUND = 100;
 export const LIMIT_DEFAULT_DECODER = withDefault(
   t.refinement(
     PositiveIntegerFromString,
-    (i) => i < LIMIT_UPPER_BOUND,
+    (i) => i <= LIMIT_UPPER_BOUND,
     `PositiveIntegerMax${LIMIT_UPPER_BOUND}FromString`,
   ),
   String(LIMIT_DEFAULT_VALUE) as unknown as PositiveInteger,
