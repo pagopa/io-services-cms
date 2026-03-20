@@ -1,17 +1,17 @@
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
+import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { ProductResource } from "../../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
-import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import {
   getSelfcareClient,
   resetInstance,
   UserInstitutions,
 } from "../selfcare-client";
-import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -20,7 +20,11 @@ const mocks: {
   institutionGroups: PageOfUserGroupResource;
   delegations: DelegationWithPaginationResponse;
 } = {
-  institution: { id: "institutionId", origin: "IPA", originId: "originId" } as InstitutionResponse,
+  institution: {
+    id: "institutionId",
+    origin: "IPA",
+    originId: "originId",
+  } as InstitutionResponse,
   userInstitutions: [
     {
       institutionId: "institutionId1",
@@ -343,7 +347,7 @@ describe("Selfcare Client", () => {
 
   describe("getDelegations", () => {
     const institutionId = "instId";
-    const endpoint = `/institutions/${institutionId}/delegations/delegations-with-pagination`;
+    const endpoint = `/delegations/delegations-with-pagination`;
 
     it("should return the delegated institutions for the given institution", async () => {
       // given
@@ -367,6 +371,7 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size,
           page,
           search,
@@ -396,6 +401,7 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size: undefined,
           page: undefined,
           search: undefined,
@@ -418,6 +424,7 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size: undefined,
           page: undefined,
           search: undefined,
@@ -486,7 +493,7 @@ describe("Selfcare Client", () => {
       const institutionProducts = getMockInstitutionProducts(
         "institutionId",
       ) as unknown as ProductResource[];
-      
+
       getMock.mockResolvedValueOnce({
         status: 200,
         data: institutionProducts,
