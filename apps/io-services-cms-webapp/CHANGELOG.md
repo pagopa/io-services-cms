@@ -1,5 +1,15 @@
 # io-services-cms-webapp
 
+## 1.42.12
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+- Updated dependencies [adc31a1c]
+  - @io-services-cms/models@1.28.5
+  - @io-services-cms/external-clients@1.8.8
+  - @io-services-cms/fetch-utils@1.0.4
+
 ## 1.42.11
 
 ### Patch Changes
