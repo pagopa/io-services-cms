@@ -233,10 +233,10 @@ const buildSelfcareClient = (): SelfcareClient => {
             axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
               params: {
                 brokerId: institutionId,
+                order: "ASC",
                 page,
                 search,
                 size,
-                order: "ASC",
               },
             }),
           flow(
