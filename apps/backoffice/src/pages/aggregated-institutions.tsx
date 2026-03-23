@@ -369,13 +369,13 @@ export default function AggregatedInstitutions() {
   useEffect(() => {
     const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
     if (E.isRight(maybeDipData)) {
-      // check fetch result (if no delegated institutions, an EmptyState component will be displayed)
+      // check fetch result (if no aggregated institutions, an EmptyState component will be displayed)
       if (
         maybeDipData.right.value.length === 0 &&
         !currentSearchByInstitutionName // no active search by institution name in progress
       )
         setNoAggregatedInstitutions(true);
-      // check pagination data and build a full pagination.count array of delegated institutions
+      // check pagination data and build a full pagination.count array of aggregated institutions
       // filling empty items with some placeholders (in order to have a working paginated MUI Table)
       if (
         maybeDipData.right.pagination.offset !== undefined &&
