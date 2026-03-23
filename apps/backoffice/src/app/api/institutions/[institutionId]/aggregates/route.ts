@@ -52,6 +52,12 @@ export const GET = withJWTAuthHandler(
       );
     }
 
+    if (maybeOffset.right % maybeLimit.right !== 0) {
+      return handleBadRequestErrorResponse(
+        `'offset' query param must be a multiple of 'limit' query param`,
+      );
+    }
+
     try {
       const institutionResponse = await retrieveInstitutionAggregates(
         params.institutionId,
