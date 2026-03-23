@@ -1,15 +1,12 @@
 /* eslint-disable max-lines-per-function */
+import { AggregatedInstitutionTableView } from "@/components/aggregated-institution-table-view";
 import { ApiKeyValueAsync } from "@/components/api-keys/api-key-value-async";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
 import { InstitutionSearchByName } from "@/components/institutions";
 import { buildSnackbarItem } from "@/components/notification";
-import {
-  TableRowMenuAction,
-  TableView,
-  TableViewColumn,
-} from "@/components/table-view";
+import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
@@ -35,7 +32,7 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
 
 const pageTitleLocaleKey = "routes.aggregated-institutions.title";
 const pageDescriptionLocaleKey = "routes.aggregated-institutions.description";
@@ -58,71 +55,11 @@ interface AggregatedInstitutionListItem {
   secondary_key?: string;
 }
 
-const aggregatedInstitutionPlaceholder: AggregatedInstitutionListItem = {
-  id: "",
-  isLoading: false,
-  isVisible: false,
-  name: "",
-};
-
 export default function AggregatedInstitutions() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const showDialog = useDialog();
   const { enqueueSnackbar } = useSnackbar();
-
-  const tableViewColumns: TableViewColumn<AggregatedInstitutionListItem>[] = [
-    {
-      alignment: "left",
-      cellTemplate: (di) => (
-        <Typography fontWeight={600} variant="body2">
-          {di.name}
-        </Typography>
-      ),
-      label: "routes.aggregated-institutions.tableHeader.name",
-      name: "name",
-    },
-    {
-      alignment: "left",
-      cellTemplate: (di) => (
-        <Box display="inline-flex">
-          <ApiKeyValueAsync
-            isLoading={di.isLoading}
-            isVisible={di.isVisible}
-            keyValue={di.primary_key}
-            onCopyToClipboardClick={() =>
-              trackEaManageKeyCopyEvent(di.id, "primary")
-            }
-            onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
-            }
-          />
-        </Box>
-      ),
-      label: "routes.aggregated-institutions.tableHeader.primaryKey",
-      name: "primary_key",
-    },
-    {
-      alignment: "left",
-      cellTemplate: (di) => (
-        <Box display="inline-flex">
-          <ApiKeyValueAsync
-            isLoading={di.isLoading}
-            isVisible={di.isVisible}
-            keyValue={di.secondary_key}
-            onCopyToClipboardClick={() =>
-              trackEaManageKeyCopyEvent(di.id, "secondary")
-            }
-            onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
-            }
-          />
-        </Box>
-      ),
-      label: "routes.aggregated-institutions.tableHeader.secondaryKey",
-      name: "secondary_key",
-    },
-  ];
 
   const {
     data: dipData,
@@ -130,197 +67,290 @@ export default function AggregatedInstitutions() {
     fetchData: dipFetchData,
     loading: dipLoading,
   } = useFetch<AggregatedInstitutionPagination>();
+
   const [aggregatedInstitutions, setAggregatedInstitutions] =
     useState<AggregatedInstitutionListItem[]>();
   const [pagination, setPagination] = useState({
-    count: 0,
     limit: DEFAULT_PAGE_LIMIT,
     offset: 0,
   });
+  const [totalCount, setTotalCount] = useState(0);
   const [noAggregatedInstitutions, setNoAggregatedInstitutions] =
     useState(false);
   const [currentSearchByInstitutionName, setCurrentSearchByInstitutionName] =
     useState<string>();
 
-  const updateAggregatedInstitutionListItemById = (
-    id: string,
-    updatedItem: Partial<AggregatedInstitutionListItem>,
-  ) => {
-    setAggregatedInstitutions((prev) =>
-      prev?.map((item) =>
-        item.id === id ? { ...item, ...updatedItem } : item,
+  const updateAggregatedInstitutionListItemById = useCallback(
+    (id: string, updatedItem: Partial<AggregatedInstitutionListItem>) => {
+      setAggregatedInstitutions((prev) =>
+        prev?.map((item) =>
+          item.id === id ? { ...item, ...updatedItem } : item,
+        ),
+      );
+    },
+    [],
+  );
+
+  const getGenericErrorNotification = useCallback(
+    () =>
+      enqueueSnackbar(
+        buildSnackbarItem({
+          message: "",
+          severity: "error",
+          title: t("notifications.genericError"),
+        }),
       ),
-    );
-  };
+    [enqueueSnackbar, t],
+  );
 
-  const getGenericErrorNotification = () =>
-    enqueueSnackbar(
-      buildSnackbarItem({
-        message: "",
-        severity: "error",
-        title: t("notifications.genericError"),
-      }),
-    );
-
-  const handleGetManageSubscriptionKeys = async (subscriptionId: string) => {
-    const maybeResponse = await client.getManageSubscriptionKeys({
-      subscriptionId,
-    });
-    if (E.isRight(maybeResponse)) {
-      updateAggregatedInstitutionListItemById(subscriptionId, {
-        ...maybeResponse.right.value,
+  const handleGetManageSubscriptionKeys = useCallback(
+    async (subscriptionId: string) => {
+      const maybeResponse = await client.getManageSubscriptionKeys({
+        subscriptionId,
       });
-    } else {
-      getGenericErrorNotification();
-      updateAggregatedInstitutionListItemById(subscriptionId, {
-        isVisible: true,
-        primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-        secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-      });
-    }
-  };
-
-  const handleRegenerateKey = async (
-    subscriptionId: string,
-    keyType: SubscriptionKeyTypeEnum,
-  ) => {
-    const maybeResponse = await client.regenerateManageSubscriptionKey({
-      keyType,
-      subscriptionId,
-    });
-    if (E.isRight(maybeResponse)) {
-      const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
-      if (E.isRight(maybeValue)) {
-        enqueueSnackbar(
-          buildSnackbarItem({
-            message: "",
-            severity: "success",
-            title: t("notifications.success"),
-          }),
-        );
+      if (E.isRight(maybeResponse)) {
         updateAggregatedInstitutionListItemById(subscriptionId, {
           ...maybeResponse.right.value,
         });
-        trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
+      } else {
+        getGenericErrorNotification();
+        updateAggregatedInstitutionListItemById(subscriptionId, {
+          isVisible: true,
+          primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+          secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+        });
+      }
+    },
+    [getGenericErrorNotification, updateAggregatedInstitutionListItemById],
+  );
+
+  const handleRegenerateKey = useCallback(
+    async (subscriptionId: string, keyType: SubscriptionKeyTypeEnum) => {
+      const maybeResponse = await client.regenerateManageSubscriptionKey({
+        keyType,
+        subscriptionId,
+      });
+      if (E.isRight(maybeResponse)) {
+        const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
+        if (E.isRight(maybeValue)) {
+          enqueueSnackbar(
+            buildSnackbarItem({
+              message: "",
+              severity: "success",
+              title: t("notifications.success"),
+            }),
+          );
+          updateAggregatedInstitutionListItemById(subscriptionId, {
+            ...maybeResponse.right.value,
+          });
+          trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
+        } else {
+          getGenericErrorNotification();
+        }
       } else {
         getGenericErrorNotification();
       }
-    } else {
-      getGenericErrorNotification();
-    }
-  };
+    },
+    [
+      enqueueSnackbar,
+      getGenericErrorNotification,
+      t,
+      updateAggregatedInstitutionListItemById,
+    ],
+  );
 
-  const handlePageChange = (pageIndex: number) =>
-    setPagination({
-      count: pagination.count,
-      limit: pagination.limit,
-      offset: pagination.limit * pageIndex,
-    });
+  const handlePageChange = useCallback(
+    (pageIndex: number) =>
+      setPagination((prev) => ({
+        limit: prev.limit,
+        offset: prev.limit * pageIndex,
+      })),
+    [],
+  );
 
-  const handleRowsPerPageChange = (pageSize: number) =>
-    setPagination({
-      count: pagination.count,
-      limit: pageSize,
-      offset: 0,
-    });
+  const handleRowsPerPageChange = useCallback(
+    (pageSize: number) => setPagination({ limit: pageSize, offset: 0 }),
+    [],
+  );
 
-  /** handle actions click: open confirmation modal and on confirm click, perform bff call action */
-  const handleConfirmationModal = async (options: {
-    action: AggregatedInstitutionContextMenuActions;
-    institutionId: string;
-  }) => {
-    const raiseClickEvent = await showDialog({
-      confirmButtonLabel: t(
-        `aggregated-institution.${options.action}.modal.button`,
-      ),
-      message: t(`aggregated-institution.${options.action}.modal.description`),
-      title: t(`aggregated-institution.${options.action}.modal.title`),
-    });
-    if (raiseClickEvent) {
-      switch (options.action) {
-        case AggregatedInstitutionContextMenuActions.regeneratePk:
-          await handleRegenerateKey(
-            options.institutionId,
-            SubscriptionKeyTypeEnum.primary,
-          );
-          break;
-        case AggregatedInstitutionContextMenuActions.regenerateSk:
-          await handleRegenerateKey(
-            options.institutionId,
-            SubscriptionKeyTypeEnum.secondary,
-          );
-          break;
-        default:
-          console.warn("unhandled action " + options.action);
-          break;
+  const handleConfirmationModal = useCallback(
+    async (options: {
+      action: AggregatedInstitutionContextMenuActions;
+      institutionId: string;
+    }) => {
+      const raiseClickEvent = await showDialog({
+        confirmButtonLabel: t(
+          `aggregated-institution.${options.action}.modal.button`,
+        ),
+        message: t(
+          `aggregated-institution.${options.action}.modal.description`,
+        ),
+        title: t(`aggregated-institution.${options.action}.modal.title`),
+      });
+      if (raiseClickEvent) {
+        switch (options.action) {
+          case AggregatedInstitutionContextMenuActions.regeneratePk:
+            await handleRegenerateKey(
+              options.institutionId,
+              SubscriptionKeyTypeEnum.primary,
+            );
+            break;
+          case AggregatedInstitutionContextMenuActions.regenerateSk:
+            await handleRegenerateKey(
+              options.institutionId,
+              SubscriptionKeyTypeEnum.secondary,
+            );
+            break;
+          default:
+            console.warn("unhandled action " + options.action);
+            break;
+        }
       }
-    }
-  };
+    },
+    [handleRegenerateKey, showDialog, t],
+  );
 
-  /** Returns a list of `TableRowMenuAction` depending on aggregated institution status */
-  const getAggregatedInstitutionMenu = (
-    di: AggregatedInstitutionListItem,
-  ): TableRowMenuAction[] => {
-    const result: TableRowMenuAction[] = [];
+  const getAggregatedInstitutionMenu = useCallback(
+    (di: AggregatedInstitutionListItem): TableRowMenuAction[] => {
+      const result: TableRowMenuAction[] = [];
 
-    if (di.isVisible) {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <VisibilityOff color="primary" fontSize="inherit" />,
-        label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
-        onClick: () =>
-          updateAggregatedInstitutionListItemById(di.id, {
-            isVisible: false,
-          }),
-      });
-    } else {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <Visibility color="primary" fontSize="inherit" />,
-        label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
-        onClick: async () => {
-          if (isNullUndefinedOrEmpty(di.primary_key)) {
+      if (di.isVisible) {
+        result.push({
+          hasBottomDivider: isAdmin(session),
+          icon: <VisibilityOff color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
+          onClick: () =>
             updateAggregatedInstitutionListItemById(di.id, {
-              isLoading: true,
+              isVisible: false,
+            }),
+        });
+      } else {
+        result.push({
+          hasBottomDivider: isAdmin(session),
+          icon: <Visibility color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
+          onClick: async () => {
+            if (isNullUndefinedOrEmpty(di.primary_key)) {
+              updateAggregatedInstitutionListItemById(di.id, {
+                isLoading: true,
+              });
+              await handleGetManageSubscriptionKeys(di.id);
+            }
+            updateAggregatedInstitutionListItemById(di.id, {
+              isLoading: false,
+              isVisible: true,
             });
-            await handleGetManageSubscriptionKeys(di.id);
-          }
-          updateAggregatedInstitutionListItemById(di.id, {
-            isLoading: false,
-            isVisible: true,
-          });
-          trackEaManageKeyShowEvent(di.id);
-        },
-      });
-    }
+            trackEaManageKeyShowEvent(di.id);
+          },
+        });
+      }
 
-    if (isAdmin(session)) {
-      result.push(
+      if (isAdmin(session)) {
+        result.push(
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regeneratePk,
+                institutionId: di.id,
+              }),
+          },
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regenerateSk,
+                institutionId: di.id,
+              }),
+          },
+        );
+      }
+
+      return result;
+    },
+    [
+      handleConfirmationModal,
+      handleGetManageSubscriptionKeys,
+      session,
+      updateAggregatedInstitutionListItemById,
+    ],
+  );
+
+  const tableViewColumns: TableViewColumn<AggregatedInstitutionListItem>[] =
+    useMemo(
+      () => [
         {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: AggregatedInstitutionContextMenuActions.regeneratePk,
-              institutionId: di.id,
-            }),
+          alignment: "left",
+          cellTemplate: (di) => (
+            <Typography fontWeight={600} variant="body2">
+              {di.name}
+            </Typography>
+          ),
+          label: "routes.aggregated-institutions.tableHeader.name",
+          name: "name",
         },
         {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: AggregatedInstitutionContextMenuActions.regenerateSk,
-              institutionId: di.id,
-            }),
+          alignment: "left",
+          cellTemplate: (di) => (
+            <Box display="inline-flex">
+              <ApiKeyValueAsync
+                isLoading={di.isLoading}
+                isVisible={di.isVisible}
+                keyValue={di.primary_key}
+                onCopyToClipboardClick={() =>
+                  trackEaManageKeyCopyEvent(di.id, "primary")
+                }
+                onRequestCopyToClipboard={() =>
+                  handleGetManageSubscriptionKeys(di.id)
+                }
+              />
+            </Box>
+          ),
+          label: "routes.aggregated-institutions.tableHeader.primaryKey",
+          name: "primary_key",
         },
-      );
-    }
+        {
+          alignment: "left",
+          cellTemplate: (di) => (
+            <Box display="inline-flex">
+              <ApiKeyValueAsync
+                isLoading={di.isLoading}
+                isVisible={di.isVisible}
+                keyValue={di.secondary_key}
+                onCopyToClipboardClick={() =>
+                  trackEaManageKeyCopyEvent(di.id, "secondary")
+                }
+                onRequestCopyToClipboard={() =>
+                  handleGetManageSubscriptionKeys(di.id)
+                }
+              />
+            </Box>
+          ),
+          label: "routes.aggregated-institutions.tableHeader.secondaryKey",
+          name: "secondary_key",
+        },
+      ],
+      [handleGetManageSubscriptionKeys],
+    );
 
-    return result;
-  };
+  const tablePagination = useMemo(
+    () => ({ ...pagination, count: totalCount }),
+    [pagination, totalCount],
+  );
 
-  const retrieveInstututionAggregates = () => {
+  const handleSearchByInstitutionNameClick = useCallback((name?: string) => {
+    setPagination((prev) => ({ ...prev, offset: 0 }));
+    setCurrentSearchByInstitutionName(name);
+  }, []);
+
+  const resetSearchByInstitutionName = useCallback(() => {
+    setCurrentSearchByInstitutionName(undefined);
+  }, []);
+
+  // Fetch when pagination or search changes
+  useEffect(() => {
     dipFetchData(
       "retrieveInstitutionAggregates",
       {
@@ -330,55 +360,32 @@ export default function AggregatedInstitutions() {
         search: currentSearchByInstitutionName,
       },
       AggregatedInstitutionPagination,
-      {
-        notify: "errors",
-      },
+      { notify: "errors" },
     );
-  };
-
-  const handleSearchByInstitutionNameClick = (name?: string) => {
-    setPagination({
-      ...pagination,
-      offset: 0,
-    });
-    setCurrentSearchByInstitutionName(name);
-  };
-
-  const resetSearchByInstitutionName = () => {
-    setCurrentSearchByInstitutionName(undefined);
-  };
-
-  // fetch services when table pagination or search by institution name change
-  useEffect(() => {
-    retrieveInstututionAggregates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, currentSearchByInstitutionName]);
 
-  // make some checks and adjustments on delegated institutions fetch result
+  // Process fetch results
   useEffect(() => {
     const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
     if (E.isRight(maybeDipData)) {
-      // check fetch result (if no delegated institutions, an EmptyState component will be displayed)
       if (
         maybeDipData.right.value.length === 0 &&
-        !currentSearchByInstitutionName // no active search by institution name in progress
+        !currentSearchByInstitutionName
       )
         setNoAggregatedInstitutions(true);
-      // check pagination data and build a full pagination.count array of delegated institutions
-      // filling empty items with some placeholders (in order to have a working paginated MUI Table)
       if (
         maybeDipData.right.pagination.offset !== undefined &&
         maybeDipData.right.pagination.limit
       ) {
-        const aggregatedInstitutionsPlaceholders = Array(
-          maybeDipData.right.pagination.count,
-        ).fill(aggregatedInstitutionPlaceholder);
-        aggregatedInstitutionsPlaceholders.splice(
-          maybeDipData.right.pagination.offset,
-          maybeDipData.right.value.length,
-          ...maybeDipData.right.value,
+        setAggregatedInstitutions(
+          maybeDipData.right.value.map((item) => ({
+            ...item,
+            isLoading: false,
+            isVisible: false,
+          })),
         );
-        setAggregatedInstitutions(aggregatedInstitutionsPlaceholders);
+        setTotalCount(maybeDipData.right.pagination.count);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -406,12 +413,12 @@ export default function AggregatedInstitutions() {
             onEmptySearch={resetSearchByInstitutionName}
             onSearchClick={handleSearchByInstitutionNameClick}
           />
-          <TableView
+          <AggregatedInstitutionTableView
             columns={tableViewColumns}
             loading={dipLoading && dipError === undefined}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
-            pagination={pagination}
+            pagination={tablePagination}
             rowMenu={getAggregatedInstitutionMenu}
             rows={aggregatedInstitutions ?? (dipError ? [] : undefined)}
           />
