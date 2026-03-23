@@ -331,7 +331,7 @@ export default function AggregatedInstitutions() {
     return [visibilityAction, ...adminActions];
   };
 
-  const retrieveInstututionAggregates = () => {
+  const retrieveInstitutionAggregates = () => {
     dipFetchData(
       "retrieveInstitutionAggregates",
       {
@@ -361,7 +361,7 @@ export default function AggregatedInstitutions() {
 
   // fetch services when table pagination or search by institution name change
   useEffect(() => {
-    retrieveInstututionAggregates();
+    retrieveInstitutionAggregates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, currentSearchByInstitutionName]);
 
