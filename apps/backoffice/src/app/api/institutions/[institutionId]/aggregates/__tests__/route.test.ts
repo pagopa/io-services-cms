@@ -129,7 +129,7 @@ describe("Institution's Delegations API", () => {
     it("should return an error response when search query param is not valid", async () => {
       // given
       const limit = 10;
-      const offset = 5;
+      const offset = 10;
       mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
       mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
@@ -158,10 +158,35 @@ describe("Institution's Delegations API", () => {
       expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
     });
 
-    it("should return an error response when retrieveInstitutionAggregates fails", async () => {
+    it("should return an error response when offset query param is not a multiple of limit query param", async () => {
       // given
       const limit = 10;
       const offset = 5;
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+      mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(null));
+      const request = new NextRequest("http://localhost");
+
+      // when
+      const result = await GET(request, {});
+
+      // then
+      expect(result.status).toBe(400);
+      const responseBody = await result.json();
+      expect(responseBody.title).toEqual("Bad Request");
+      expect(responseBody.detail).toEqual(
+        `'offset' query param must be a multiple of 'limit' query param`,
+      );
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
+    });
+
+    it("should return an error response when retrieveInstitutionAggregates fails", async () => {
+      // given
+      const limit = 10;
+      const offset = 10;
       const institutionId = "institutionId";
       const request = new NextRequest(
         `http://localhost?limit=${limit}&offset=${offset}`,
@@ -203,7 +228,7 @@ describe("Institution's Delegations API", () => {
       async ({ actualSearch, expectedSearch }) => {
         // given
         const limit = 10;
-        const offset = 5;
+        const offset = 10;
         const institutionId = "institutionId";
         const request = new NextRequest("http://localhost");
         mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));

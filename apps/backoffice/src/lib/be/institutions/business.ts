@@ -196,21 +196,22 @@ export const getGroup = async (
 
 export const retrieveInstitutionAggregates = async (
   institutionId: string,
-  size?: number,
-  page?: number,
+  limit: number,
+  offset: number,
   search?: string,
 ): Promise<AggregatedInstitutionPagination> => {
   const apiResult = await getInstitutionDelegations(
     institutionId,
-    size,
-    page,
+    limit,
+    Math.floor(offset / limit),
     search,
   );
   return {
     pagination: {
       count: apiResult.pageInfo?.totalElements ?? 0,
       limit: apiResult.pageInfo?.pageSize ?? 0,
-      offset: apiResult.pageInfo?.pageNo ?? 0,
+      offset:
+        (apiResult.pageInfo?.pageNo ?? 0) * (apiResult.pageInfo?.pageSize ?? 0),
     },
     value: (apiResult.delegations ?? []).map((delegation) => ({
       id: delegation.institutionId,
