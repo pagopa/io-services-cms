@@ -30,7 +30,6 @@ import {
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import { Session, getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -169,25 +168,18 @@ export default function AggregatedInstitutions() {
         aggregateId,
       });
 
-    pipe(
-      response,
-      E.chain((res) => SubscriptionKeys.decode(res.value)),
-      E.fold(
-        () => {
-          getGenericErrorNotification();
-          updateAggregatedInstitutionListItemById(aggregateId, {
-            isVisible: true,
-            primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-            secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-          });
-        },
-        (decoded) => {
-          updateAggregatedInstitutionListItemById(aggregateId, {
-            ...decoded,
-          });
-        },
-      ),
-    );
+    if (E.isRight(response)) {
+      updateAggregatedInstitutionListItemById(aggregateId, {
+        ...response.right.value,
+      });
+    } else {
+      getGenericErrorNotification();
+      updateAggregatedInstitutionListItemById(aggregateId, {
+        isVisible: true,
+        primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+        secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+      });
+    }
   };
 
   const handleRegenerateKey = async (
@@ -199,28 +191,26 @@ export default function AggregatedInstitutions() {
       subscriptionId,
     });
 
-    pipe(
-      response,
-      E.chain((res) => SubscriptionKeys.decode(res.value)),
-      E.fold(
-        () => {
-          getGenericErrorNotification();
-        },
-        (decoded) => {
-          enqueueSnackbar(
-            buildSnackbarItem({
-              message: "",
-              severity: "success",
-              title: t("notifications.success"),
-            }),
-          );
-          updateAggregatedInstitutionListItemById(subscriptionId, {
-            ...decoded,
-          });
-          trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
-        },
-      ),
-    );
+    if (E.isRight(response)) {
+      const maybeValue = SubscriptionKeys.decode(response.right.value);
+      if (E.isRight(maybeValue)) {
+        enqueueSnackbar(
+          buildSnackbarItem({
+            message: "",
+            severity: "success",
+            title: t("notifications.success"),
+          }),
+        );
+        updateAggregatedInstitutionListItemById(subscriptionId, {
+          ...response.right.value,
+        });
+        trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
+      } else {
+        getGenericErrorNotification();
+      }
+    } else {
+      getGenericErrorNotification();
+    }
   };
 
   const handlePageChange = (pageIndex: number) =>

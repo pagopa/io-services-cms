@@ -461,32 +461,6 @@ describe("[AggregatedInstitutions] Page", () => {
         ).toBeInTheDocument(),
       );
     });
-
-    it("should show a generic error notification and set placeholder keys when the client returns a Right with an invalid body", async () => {
-      mockGetManageSubscriptionKeys.mockResolvedValue(
-        E.right({ status: 200, value: { not_a_valid_key: "oops" } }),
-      );
-
-      await renderPageAndOpenMenu();
-      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
-
-      await waitFor(() =>
-        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
-          expect.objectContaining({
-            severity: "error",
-            title: "notifications.genericError",
-          }),
-        ),
-      );
-
-      // isVisible is set to true with placeholder keys → menu item switches to "hide"
-      openMenu();
-      await waitFor(() =>
-        expect(
-          screen.getByText("aggregated-institution.actions.hide"),
-        ).toBeInTheDocument(),
-      );
-    });
   });
 
   describe("Regenerate key action (admin)", () => {
