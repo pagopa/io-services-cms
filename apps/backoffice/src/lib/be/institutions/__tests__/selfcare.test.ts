@@ -1,34 +1,37 @@
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
+import { getMockInstitutionProducts } from "../../../../../mocks/data/selfcare-data";
 import {
   getGroup,
   getInstitutionDelegations,
+  getInstitutionGroups,
   getInstitutionProducts,
 } from "../selfcare";
-import { getMockInstitutionProducts } from "../../../../../mocks/data/selfcare-data";
-
-// import { UserInstitutions, getSelfcareClient } from "@/lib/be/selfcare-client";
 
 const mocks: {
   getSelfcareClient: Mock;
   getGroup: Mock;
   getInstitutionDelegations: Mock;
   getInstitutionProducts: Mock;
+  getInstitutionGroups: Mock;
   isAxiosError: Mock;
 } = vi.hoisted(() => {
   const getGroup = vi.fn();
   const getInstitutionDelegations = vi.fn();
   const getInstitutionProducts = vi.fn();
+  const getInstitutionGroups = vi.fn();
   return {
     getSelfcareClient: vi.fn(() => ({
       getGroup,
       getInstitutionDelegations,
       getInstitutionProducts,
+      getInstitutionGroups,
     })),
     getGroup,
     getInstitutionDelegations,
     getInstitutionProducts,
+    getInstitutionGroups,
     isAxiosError: vi.fn(),
   };
 });
@@ -192,5 +195,66 @@ describe("Selfcare Institutions", () => {
       );
       expect(mocks.isAxiosError).not.toHaveBeenCalled();
     });
+  });
+
+  describe("getInstitutionGroups", () => {
+    // given
+    const institutionId = "institutionId";
+    const error = "error";
+
+    it("should rejct when getInstitutionGroups fail", async () => {
+      // given
+      mocks.getInstitutionGroups.mockReturnValueOnce(TE.left(error));
+
+      // when and then
+      await expect(() =>
+        getInstitutionGroups(institutionId),
+      ).rejects.toThrowError("Error calling selfcare getInstitutionGroups API");
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+        institutionId,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+      );
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it.each`
+      givenParams                                                                                 | expectedParams
+      ${{ state: undefined, size: undefined, page: undefined, parentInstitutionId: undefined }}   | ${{ state: undefined, size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }} | ${{ state: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "*", size: 5, page: 1, parentInstitutionId: "pInstId" }}                         | ${{ state: "*", size: 5, page: 1, parentInstitutionId: "pInstId" }}
+    `(
+      "should return the institution groups by calling selfcare with the correct params when called with $givenParams",
+      async ({ givenParams, expectedParams }) => {
+        // given
+        const expectedInstitutionGroups = [{ foo: "bar" }];
+        mocks.getInstitutionGroups.mockReturnValueOnce(
+          TE.right(expectedInstitutionGroups),
+        );
+
+        // when and then
+        await expect(
+          getInstitutionGroups(
+            institutionId,
+            givenParams.size,
+            givenParams.page,
+            givenParams.state,
+            givenParams.parentInstitutionId,
+          ),
+        ).resolves.toStrictEqual(expectedInstitutionGroups);
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+          institutionId,
+          expectedParams.size,
+          expectedParams.page,
+          expectedParams.state,
+          expectedParams.parentInstitutionId,
+        );
+        expect(mocks.isAxiosError).not.toHaveBeenCalled();
+      },
+    );
   });
 });
