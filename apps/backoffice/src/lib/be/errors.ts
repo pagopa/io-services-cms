@@ -43,10 +43,10 @@ export class ManagedInternalError extends Error {
   }
 }
 
-export class ApiKeyNotFoundError extends ManagedInternalError {
+export class SubscriptionNotFoundError extends ManagedInternalError {
   constructor(additionalDetails?: string) {
-    super("the API does not exists", additionalDetails);
-    this.name = "ApiKeyNotFoundError";
+    super("Subscription does not exists", additionalDetails);
+    this.name = "SubscriptionNotFoundError";
   }
 }
 
@@ -91,7 +91,11 @@ export class HealthChecksError extends Error {
 export const handleInternalErrorResponse = (
   title: string,
   error: unknown,
+  logMessage?: string,
 ): NextResponse<ResponseError> => {
+  if (logMessage) {
+    handlerErrorLog(logMessage, error);
+  }
   let message = "Something went wrong";
   if (error instanceof ManagedInternalError) {
     message = error.message;
