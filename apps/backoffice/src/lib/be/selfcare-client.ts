@@ -49,6 +49,7 @@ export interface SelfcareClient {
     size?: number,
     page?: number,
     state?: GroupFilter,
+    parentInstitutionId?: string,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getInstitutionProducts: (
     institutionId: string,
@@ -170,10 +171,11 @@ const buildSelfcareClient = (): SelfcareClient => {
     );
 
   const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
-    institutionId: string,
-    size?: number,
-    page?: number,
-    state: GroupFilter = StateEnum.ACTIVE,
+    institutionId,
+    size?,
+    page?,
+    state = StateEnum.ACTIVE,
+    parentInstitutionId?,
   ) =>
     pipe(
       TE.tryCatch(
@@ -184,6 +186,7 @@ const buildSelfcareClient = (): SelfcareClient => {
               page,
               size,
               status: state === "*" ? undefined : state,
+              parentInstitutionId,
             },
           }),
         flow(
