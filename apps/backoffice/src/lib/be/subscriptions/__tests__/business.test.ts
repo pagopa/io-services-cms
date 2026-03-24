@@ -28,7 +28,6 @@ const mocks: {
   aSubscriptionId: string;
   aPrimaryKey: string;
   aSecondaryKey: string;
-  listSecrets: Mock<any>;
   regenerateSubscriptionKey: Mock<any>;
   getInstitutionGroups: Mock<any>;
   listSubscriptionSecrets: Mock<any>;
@@ -52,7 +51,6 @@ const mocks: {
   deleteSubscription: vi.fn(),
   findLastVersionByModelId: vi.fn(),
   upsert: vi.fn(),
-  listSecrets: vi.fn(),
   regenerateSubscriptionKey: vi.fn(),
   getInstitutionGroups: vi.fn(),
   listSubscriptionSecrets: vi.fn(),
@@ -70,8 +68,6 @@ vi.mock("@/lib/be/apim-service", () => ({
   getApimService: () => ({
     getUserSubscriptions: mocks.getUserSubscriptions,
     deleteSubscription: mocks.deleteSubscription,
-    listSecrets: mocks.listSecrets,
-    regenerateSubscriptionKey: mocks.regenerateSubscriptionKey,
   }),
 }));
 
@@ -81,6 +77,7 @@ vi.mock("../../institutions/selfcare", () => ({
 
 vi.mock("../apim", () => ({
   listSubscriptionSecrets: mocks.listSubscriptionSecrets,
+  regenerateSubscriptionKey: mocks.regenerateSubscriptionKey,
 }));
 
 afterEach(() => {
@@ -401,30 +398,26 @@ describe("Manage Keys", () => {
       validateSubscriptionOwnershipTestFn(retrieveManageSubscriptionApiKeys),
     );
 
-    it("should fail when apim respond with an error", async () => {
+    it("should fail when the subscription's secrets retrieval fails", async () => {
       // given
       const subscriptionId = mocks.aSubscriptionId;
       const ownerId = mocks.anOwnerId;
       mocks.getUserSubscriptions.mockReturnValueOnce(
         TE.right([mocks.aSubscriptionContract]),
       );
-      mocks.listSecrets.mockReturnValueOnce(
-        TE.left({
-          error: {
-            code: "Error",
-            message: "An error has occurred on APIM",
-          },
-          statusCode: 500,
-        }),
-      );
+      const errorMessage = "test error message";
+      const error = new Error(errorMessage);
+      mocks.listSubscriptionSecrets.mockRejectedValueOnce(error);
 
       // when and then
       await expect(
         retrieveManageSubscriptionApiKeys(ownerId, subscriptionId),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(errorMessage);
       validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
-      expect(mocks.listSecrets).toHaveBeenCalledOnce();
-      expect(mocks.listSecrets).toHaveBeenCalledWith(subscriptionId);
+      expect(mocks.listSubscriptionSecrets).toHaveBeenCalledOnce();
+      expect(mocks.listSubscriptionSecrets).toHaveBeenCalledWith(
+        subscriptionId,
+      );
     });
 
     it("should return the keys found", async () => {
@@ -434,12 +427,10 @@ describe("Manage Keys", () => {
       mocks.getUserSubscriptions.mockReturnValueOnce(
         TE.right([mocks.aSubscriptionContract]),
       );
-      mocks.listSecrets.mockReturnValueOnce(
-        TE.right({
-          primaryKey: mocks.aPrimaryKey,
-          secondaryKey: mocks.aSecondaryKey,
-        }),
-      );
+      mocks.listSubscriptionSecrets.mockResolvedValueOnce({
+        primaryKey: mocks.aPrimaryKey,
+        secondaryKey: mocks.aSecondaryKey,
+      });
 
       // when
       const result = await retrieveManageSubscriptionApiKeys(
@@ -453,8 +444,10 @@ describe("Manage Keys", () => {
         secondary_key: mocks.aSecondaryKey,
       });
       validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
-      expect(mocks.listSecrets).toHaveBeenCalledOnce();
-      expect(mocks.listSecrets).toHaveBeenCalledWith(subscriptionId);
+      expect(mocks.listSubscriptionSecrets).toHaveBeenCalledOnce();
+      expect(mocks.listSubscriptionSecrets).toHaveBeenCalledWith(
+        subscriptionId,
+      );
     });
   });
 
@@ -468,55 +461,16 @@ describe("Manage Keys", () => {
       validateSubscriptionOwnershipTestFn(regenerateManageSubscriptionApiKey),
     );
 
-    it("should return the regenerated manage key", async () => {
+    it("should fail when the subscription's secret regeneration fails", async () => {
       // given
       const subscriptionId = mocks.aSubscriptionId;
       const ownerId = mocks.anOwnerId;
       mocks.getUserSubscriptions.mockReturnValueOnce(
         TE.right([mocks.aSubscriptionContract]),
       );
-      mocks.regenerateSubscriptionKey.mockReturnValueOnce(
-        TE.right({
-          primaryKey: mocks.aPrimaryKey,
-          secondaryKey: mocks.aSecondaryKey,
-        }),
-      );
-
-      // when
-      const result = await regenerateManageSubscriptionApiKey(
-        ownerId,
-        subscriptionId,
-        SubscriptionKeyTypeEnum.primary,
-      );
-
-      // then
-      validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
-      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
-        mocks.aSubscriptionId,
-        SubscriptionKeyTypeEnum.primary,
-      );
-      expect(result).toStrictEqual({
-        primary_key: mocks.aPrimaryKey,
-        secondary_key: mocks.aSecondaryKey,
-      });
-    });
-
-    it("should return an error when apim fails regenerating", async () => {
-      // given
-      const subscriptionId = mocks.aSubscriptionId;
-      const ownerId = mocks.anOwnerId;
-      mocks.getUserSubscriptions.mockReturnValueOnce(
-        TE.right([mocks.aSubscriptionContract]),
-      );
-      mocks.regenerateSubscriptionKey.mockReturnValueOnce(
-        TE.left({
-          error: {
-            code: "Error",
-            message: "An error has occurred on APIM",
-          },
-          statusCode: 500,
-        }),
-      );
+      const errorMessage = "test error message";
+      const error = new Error(errorMessage);
+      mocks.regenerateSubscriptionKey.mockRejectedValueOnce(error);
 
       // when and then
       await expect(
@@ -525,12 +479,43 @@ describe("Manage Keys", () => {
           subscriptionId,
           SubscriptionKeyTypeEnum.primary,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(errorMessage);
       validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
       expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
         subscriptionId,
         SubscriptionKeyTypeEnum.primary,
       );
+    });
+  });
+
+  it("should return the regenerated manage key", async () => {
+    // given
+    const subscriptionId = mocks.aSubscriptionId;
+    const ownerId = mocks.anOwnerId;
+    mocks.getUserSubscriptions.mockReturnValueOnce(
+      TE.right([mocks.aSubscriptionContract]),
+    );
+    mocks.regenerateSubscriptionKey.mockResolvedValueOnce({
+      primaryKey: mocks.aPrimaryKey,
+      secondaryKey: mocks.aSecondaryKey,
+    });
+
+    // when
+    const result = await regenerateManageSubscriptionApiKey(
+      ownerId,
+      subscriptionId,
+      SubscriptionKeyTypeEnum.primary,
+    );
+
+    // then
+    validateSubscriptionOwnershipExpectation(ownerId, subscriptionId);
+    expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+      mocks.aSubscriptionId,
+      SubscriptionKeyTypeEnum.primary,
+    );
+    expect(result).toStrictEqual({
+      primary_key: mocks.aPrimaryKey,
+      secondary_key: mocks.aSecondaryKey,
     });
   });
 
@@ -599,11 +584,11 @@ describe("Manage Keys", () => {
       const aggregateId = "aggregateId";
       const aggregatorId = "aggregatorId";
       const errorMessage = "test error message";
-      const error = new Error(errorMessage);
       mocks.getInstitutionGroups.mockResolvedValueOnce({
         content: [mocks.aGroup],
         totalElements: 1,
       });
+      const error = new Error(errorMessage);
       mocks.listSubscriptionSecrets.mockRejectedValueOnce(error);
 
       // when and then
