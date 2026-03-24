@@ -1,6 +1,12 @@
 /// <reference types="@testing-library/jest-dom" />
 import "@testing-library/jest-dom";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import * as E from "fp-ts/lib/Either";
 import { useSession } from "next-auth/react";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -52,7 +58,8 @@ const {
 vi.mock("@/hooks/use-fetch", () => ({
   default: mockUseFetch,
   client: {
-    getManageSubscriptionKeys: mockGetManageSubscriptionKeys,
+    retrieveInstitutionAggregateManageSubscriptionsKeys:
+      mockGetManageSubscriptionKeys,
     regenerateManageSubscriptionKey: mockRegenerateManageSubscriptionKey,
   },
 }));
@@ -74,7 +81,8 @@ vi.mock("@/components/dialog-provider", () => ({
 }));
 
 vi.mock("@/utils/mix-panel", () => ({
-  trackAggregatedInstitutionsPageEvent: mockTrackAggregatedInstitutionsPageEvent,
+  trackAggregatedInstitutionsPageEvent:
+    mockTrackAggregatedInstitutionsPageEvent,
   trackEaManageKeyCopyEvent: vi.fn(),
   trackEaManageKeyRegenerateEvent: vi.fn(),
   trackEaManageKeyShowEvent: vi.fn(),
@@ -85,15 +93,11 @@ vi.mock("@/utils/auth-util", () => ({
 }));
 
 vi.mock("@/components/empty-state", () => ({
-  EmptyStateLayer: () => (
-    <div data-testid="empty-state" />
-  ),
+  EmptyStateLayer: () => <div data-testid="empty-state" />,
 }));
 
 vi.mock("@/components/institutions", () => ({
-  InstitutionSearchByName: () => (
-    <div data-testid="institution-search" />
-  ),
+  InstitutionSearchByName: () => <div data-testid="institution-search" />,
 }));
 
 vi.mock("@/components/headers", () => ({
@@ -151,7 +155,12 @@ const mockEmptyPaginationData = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setupFetch = (data: any, loading = false) =>
-  mockUseFetch.mockReturnValue({ data, error: undefined, fetchData: mockFetchData, loading });
+  mockUseFetch.mockReturnValue({
+    data,
+    error: undefined,
+    fetchData: mockFetchData,
+    loading,
+  });
 
 const setupOperatorMocks = (data: any = mockPaginationData) => {
   mockIsAdmin.mockReturnValue(false);
@@ -329,7 +338,9 @@ describe("[AggregatedInstitutions] Page", () => {
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(1);
-        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+        expect(items[0]).toHaveTextContent(
+          "aggregated-institution.actions.hide",
+        );
       });
     });
   });
@@ -362,7 +373,9 @@ describe("[AggregatedInstitutions] Page", () => {
       await waitFor(() => {
         const items = screen.getAllByRole("menuitem");
         expect(items).toHaveLength(3);
-        expect(items[0]).toHaveTextContent("aggregated-institution.actions.hide");
+        expect(items[0]).toHaveTextContent(
+          "aggregated-institution.actions.hide",
+        );
         expect(items[1]).toHaveTextContent(
           "aggregated-institution.actions.regeneratePk",
         );
@@ -384,7 +397,7 @@ describe("[AggregatedInstitutions] Page", () => {
 
       await waitFor(() =>
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledWith({
-          subscriptionId: "agg-1",
+          aggregateId: "agg-1",
         }),
       );
     });
@@ -422,6 +435,32 @@ describe("[AggregatedInstitutions] Page", () => {
         expect(mockGetManageSubscriptionKeys).toHaveBeenCalledTimes(1),
       );
     });
+
+    it("should show a generic error notification and set placeholder keys when the client returns a Left", async () => {
+      mockGetManageSubscriptionKeys.mockResolvedValue(
+        E.left(new Error("network error")),
+      );
+
+      await renderPageAndOpenMenu();
+      fireEvent.click(screen.getByText("aggregated-institution.actions.show"));
+
+      await waitFor(() =>
+        expect(mockEnqueueSnackbar).toHaveBeenCalledWith(
+          expect.objectContaining({
+            severity: "error",
+            title: "notifications.genericError",
+          }),
+        ),
+      );
+
+      // isVisible is set to true with placeholder keys → menu item switches to "hide"
+      openMenu();
+      await waitFor(() =>
+        expect(
+          screen.getByText("aggregated-institution.actions.hide"),
+        ).toBeInTheDocument(),
+      );
+    });
   });
 
   describe("Regenerate key action (admin)", () => {
@@ -447,7 +486,10 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should call regenerateManageSubscriptionKey when user confirms", async () => {
       mockShowDialog.mockResolvedValue(true); // user confirms
       mockRegenerateManageSubscriptionKey.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "new-pk", secondary_key: "old-sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "new-pk", secondary_key: "old-sk" },
+        }),
       );
 
       await triggerRegenerateKey("primary");
@@ -463,7 +505,10 @@ describe("[AggregatedInstitutions] Page", () => {
     it("should call regenerateManageSubscriptionKey with secondary key type", async () => {
       mockShowDialog.mockResolvedValue(true);
       mockRegenerateManageSubscriptionKey.mockResolvedValue(
-        E.right({ status: 200, value: { primary_key: "old-pk", secondary_key: "new-sk" } }),
+        E.right({
+          status: 200,
+          value: { primary_key: "old-pk", secondary_key: "new-sk" },
+        }),
       );
 
       await triggerRegenerateKey("secondary");
