@@ -343,6 +343,7 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
     undefined,
     aggregatorId,
   );
+
   // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
   if (aggregatorGroups.totalElements !== 1) {
     throw new ManagedInternalError(
@@ -352,9 +353,18 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
   }
   const subscriptionId =
     ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + aggregatorGroups.content[0].id;
-  const subscriptionApiKeys = await listSubscriptionSecrets(subscriptionId);
+  const { primaryKey, secondaryKey } =
+    await listSubscriptionSecrets(subscriptionId);
+
+  if (!primaryKey || !secondaryKey) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `Missing subscription keys for manage-group subscription '${subscriptionId}'`,
+    );
+  }
+
   return {
-    primary_key: subscriptionApiKeys.primaryKey ?? "undefined",
-    secondary_key: subscriptionApiKeys.secondaryKey ?? "undefined",
+    primary_key: primaryKey,
+    secondary_key: secondaryKey,
   };
 };

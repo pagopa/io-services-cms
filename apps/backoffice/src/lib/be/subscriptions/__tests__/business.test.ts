@@ -612,6 +612,46 @@ describe("Manage Keys", () => {
       );
     });
 
+    it.each`
+      apimRespnse
+      ${{ primaryKey: undefined, secondaryKey: "secondary-key" }}
+      ${{ primaryKey: "primary-key", secondaryKey: undefined }}
+      ${{ primaryKey: undefined, secondaryKey: undefined }}
+    `(
+      "should return an error when APIM responds with $apimRespnse",
+      async ({ apimRespnse }) => {
+        // given
+        const aggregateId = "aggregateId";
+        const aggregatorId = "aggregatorId";
+        mocks.getInstitutionGroups.mockResolvedValueOnce({
+          content: [mocks.aGroup],
+          totalElements: 1,
+        });
+        const primaryKey = apimRespnse.primaryKey;
+        const secondaryKey = apimRespnse.secondaryKey;
+        mocks.listSubscriptionSecrets.mockResolvedValueOnce({
+          primaryKey,
+          secondaryKey,
+        });
+
+        // when and then
+        await expect(
+          retrieveInstitutionAggregateManageSubscriptionsKeys(
+            aggregateId,
+            aggregatorId,
+          ),
+        ).rejects.toThrowError("Data inconsistency");
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+          aggregateId,
+          undefined,
+          undefined,
+          undefined,
+          aggregatorId,
+        );
+      },
+    );
+
     it("should return the subscription keys related to the group found", async () => {
       // given
       const aggregateId = "aggregateId";
