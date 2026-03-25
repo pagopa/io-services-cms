@@ -2,6 +2,7 @@ import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
   SubscriptionType,
   SubscriptionTypeEnum,
@@ -19,6 +20,7 @@ import {
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
 } from "../errors";
+import { getInstitutionGroups } from "../institutions/selfcare";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -323,3 +325,46 @@ export async function upsertManageSubscriptionAuthorizedCIDRs(
 
   return Array.from(authorizedCIDRsResponse.cidrs);
 }
+
+/**
+ * Retrieves the subscription keys for the manage-group subscription of a given institution aggregate related to a specific aggregator.
+ * @param aggregateId The id of the aggregate
+ * @param aggregatorId The id of the aggregator
+ * @returns The subscription keys for the manage subscription
+ */
+export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
+  aggregateId: string,
+  aggregatorId: string,
+): Promise<SubscriptionKeys> => {
+  const aggregatorGroups = await getInstitutionGroups(
+    aggregateId,
+    undefined,
+    undefined,
+    undefined,
+    aggregatorId,
+  );
+
+  // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
+  if (aggregatorGroups.totalElements !== 1) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `${aggregatorGroups.totalElements === 0 ? "No" : "Multiple"} groups exist for aggregate '${aggregateId}' related to aggregator '${aggregatorId}'`,
+    );
+  }
+  const subscriptionId =
+    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + aggregatorGroups.content[0].id;
+  const { primaryKey, secondaryKey } =
+    await listSubscriptionSecrets(subscriptionId);
+
+  if (!primaryKey || !secondaryKey) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `Missing subscription keys for manage-group subscription '${subscriptionId}'`,
+    );
+  }
+
+  return {
+    primary_key: primaryKey,
+    secondary_key: secondaryKey,
+  };
+};

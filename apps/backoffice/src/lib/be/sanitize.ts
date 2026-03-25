@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import xss from "xss";
 
-export const sanitizeObject = (obj: any): any => {
+export const sanitizeObject = <T>(obj: T): T => {
   if (typeof obj === "string") {
-    return xss(obj);
+    return xss(obj) as T;
   } else if (Array.isArray(obj)) {
-    return obj.map(sanitizeObject);
+    return obj.map(sanitizeObject) as T;
   } else if (typeof obj === "object" && obj !== null) {
-    const sanitizedObj: any = {};
+    const sanitizedObj = {} as T;
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         sanitizedObj[key] = sanitizeObject(obj[key]);
@@ -19,6 +18,8 @@ export const sanitizeObject = (obj: any): any => {
     return obj;
   }
 };
-//TODO improve typing
-export const sanitizedNextResponseJson = (obj: any, status = 200) =>
-  NextResponse.json(sanitizeObject(obj), { status });
+
+export const sanitizedNextResponseJson = <T>(
+  obj: T,
+  status = 200,
+): NextResponse<T> => NextResponse.json(sanitizeObject(obj), { status });

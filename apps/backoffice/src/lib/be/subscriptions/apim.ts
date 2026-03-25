@@ -2,7 +2,7 @@ import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
 import * as E from "fp-ts/lib/Either";
 
 import { getApimService } from "../apim-service";
-import { ApiKeyNotFoundError } from "../errors";
+import { SubscriptionNotFoundError } from "../errors";
 
 export async function listSubscriptionSecrets(subscriptionId: string) {
   const result = await getApimService().listSecrets(subscriptionId)();
@@ -10,7 +10,7 @@ export async function listSubscriptionSecrets(subscriptionId: string) {
   if (E.isLeft(result)) {
     const error = result.left;
     if (error.statusCode === 404) {
-      throw new ApiKeyNotFoundError(
+      throw new SubscriptionNotFoundError(
         `Subscription ${subscriptionId} not found in Api Management`,
       );
     }

@@ -65,17 +65,19 @@ export const getInstitutionGroups = async (
   size?: number,
   page?: number,
   state?: GroupFilter,
+  parentInstitutionId?: string,
 ): Promise<PageOfUserGroupResource> => {
   const apiResult = await getSelfcareClient().getInstitutionGroups(
     institutionId,
     size,
     page,
     state,
+    parentInstitutionId,
   )();
 
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
-      "Error calling selfcare getUserGroups API",
+      "Error calling selfcare getInstitutionGroups API",
       apiResult.left,
     );
   }
