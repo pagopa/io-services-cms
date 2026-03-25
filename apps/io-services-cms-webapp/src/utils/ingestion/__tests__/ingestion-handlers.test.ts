@@ -1,9 +1,9 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { Context } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 import {
   createIngestionBlobTriggerHandler,
   createIngestionCosmosDBTriggerHandler,
@@ -51,12 +51,7 @@ const aProducerWhichFails = {
   sendBatch: vi.fn(() => Promise.reject(new Error("Failed to send batch"))),
 } as unknown as EventHubProducerClient;
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const aValidQueueItem = {
   id: "anItemId",
@@ -103,7 +98,7 @@ describe("Generic Ingestion PDND Handlers", () => {
         ItemType,
         aProducer,
         aFormatter,
-      )(context, anInvalidQueueItem);
+      )(anInvalidQueueItem, context);
 
       expect(aFormatter).not.toBeCalled();
       expect(aProducer.sendBatch).not.toBeCalled();
@@ -116,7 +111,7 @@ describe("Generic Ingestion PDND Handlers", () => {
         ItemType,
         aProducer,
         aFormatter,
-      )(context, aValidQueueItem);
+      )(aValidQueueItem, context);
 
       expect(aFormatter).toHaveBeenCalledOnce();
       expect(aFormatter).toBeCalledWith(anItem);
@@ -132,7 +127,7 @@ describe("Generic Ingestion PDND Handlers", () => {
           ItemType,
           aProducerWhichFails,
           aFormatter,
-        )(context, aValidQueueItem),
+        )(aValidQueueItem, context),
       ).rejects.toThrowError("Failed to send batch");
     });
   });

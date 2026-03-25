@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";
 import * as E from "fp-ts/lib/Either";
@@ -29,7 +29,7 @@ export interface IssueItemPair {
 
 export const processBatchOfReviews =
   (
-    context: Context,
+    context: InvocationContext,
     dao: ServiceReviewDao,
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
@@ -84,7 +84,7 @@ export const updateReview =
   (
     dao: ServiceReviewDao,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
-    context: Context,
+    context: InvocationContext,
   ) =>
   (issueItemPairs: IssueItemPair[]): TE.TaskEither<Error, void> => {
     const logger = getLogger(context, logPrefix, "updateReview");
@@ -110,7 +110,7 @@ export const updateReview =
   };
 
 const makeServiceLifecycleApply =
-  (context: Context) =>
+  (context: InvocationContext) =>
   (
     serviceReview: ServiceReviewRowDataTable,
     jiraIssue: JiraIssue,
@@ -213,7 +213,7 @@ export const createReviewLegacyCheckerHandler =
     jiraProxy: JiraProxy,
     fsmLifecycleClient: ServiceLifecycle.FsmClient,
   ) =>
-  (context: Context): Promise<unknown> =>
+  (context: InvocationContext): Promise<unknown> =>
     dao.executeOnPending(
       processBatchOfReviews(context, dao, jiraProxy, fsmLifecycleClient),
     )();

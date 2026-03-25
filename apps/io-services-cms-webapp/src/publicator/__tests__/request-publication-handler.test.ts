@@ -1,18 +1,13 @@
 /* eslint-disable no-console */
-import { Context } from "@azure/functions";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleQueueItem } from "../request-publication-handler";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const atimestamp = 1685529694747;
 const aService = {

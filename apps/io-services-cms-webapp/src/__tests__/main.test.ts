@@ -1,7 +1,8 @@
-import { AzureFunction, Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import * as RTE from "fp-ts/ReaderTaskEither";
 import { pipe } from "fp-ts/lib/function";
 import { beforeEach, describe, expect, it, test, vi } from "vitest";
+import { makeInvocationContext } from "../__tests__/utils/invocation-context";
 import {
   activationsSyncFromLegacyEntryPoint,
   onSelfcareGroupChangeEntryPoint,
@@ -110,7 +111,6 @@ const mocks = vi.hoisted(() => {
     SERVICE_COLLECTION_NAME: "test",
     envConfig: {},
     makeInfoHandler: vi.fn(() => {}),
-    createWebServer: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
     processBatchOf: vi.fn(
       () =>
@@ -125,14 +125,14 @@ const mocks = vi.hoisted(() => {
       <L, R>(
         procedure: RTE.ReaderTaskEither<
           {
-            context: Context;
+            context: InvocationContext;
             inputs: unknown[];
           },
           L,
           R
         >,
-      ): AzureFunction =>
-        (context, ...inputs) =>
+      ) =>
+        (input: unknown, context: InvocationContext) =>
           pipe(
             procedure,
             RTE.getOrElseW((f) => {
@@ -140,7 +140,10 @@ const mocks = vi.hoisted(() => {
                 f instanceof Error ? f : new Error("Unexpected error");
               throw error;
             }),
-          )({ context, inputs })(),
+          )({
+            context,
+            inputs: typeof input === "undefined" ? [] : [input],
+          })(),
     ),
     setBindings: vi.fn((...args: any[]) => () => {}),
   };
@@ -161,10 +164,6 @@ vi.mock("@io-services-cms/external-clients", () => ({
 
 vi.mock("../webservice/controllers/info", () => ({
   makeInfoHandler: mocks.makeInfoHandler,
-}));
-
-vi.mock("../webservice/index", () => ({
-  createWebServer: mocks.createWebServer,
 }));
 
 vi.mock("../lib/azure/cosmos", () => ({
@@ -189,10 +188,14 @@ vi.mock("../lib/azure/adapters", async (importOriginal) => {
   };
 });
 
-vi.mock("../utils/cosmos-helper", () => ({
-  makeCosmosHelper: mocks.makeCosmosHelper,
-  makeCosmosPagedHelper: mocks.makeCosmosPagedHelper,
-}));
+vi.mock("../utils/cosmos-helper", async (importOriginal) => {
+  const actual = (await importOriginal()) as any;
+  return {
+    ...actual,
+    makeCosmosHelper: mocks.makeCosmosHelper,
+    makeCosmosPagedHelper: mocks.makeCosmosPagedHelper,
+  };
+});
 
 vi.mock("../utils/cosmos-legacy", () => ({
   cosmosdbClient: mocks.cosmosdbClient,
@@ -290,32 +293,30 @@ describe("main", () => {
   const createMockContext = (
     retryCount: number = 0,
     maxRetryCount: number = 3,
-  ): Context =>
-    ({
+  ) => {
+    const { context, extraOutputsSet } = makeInvocationContext("test-function");
+    Object.assign(context, {
       invocationId: "test-invocation-id",
-      executionContext: {
-        retryContext: {
-          retryCount,
-          maxRetryCount,
-        },
+      retryContext: {
+        retryCount,
+        maxRetryCount,
       },
-      bindings: {
-        syncGroupPoisonQueue: undefined,
+      error: mockLogger.error,
+      warn: mockLogger.warn,
+      info: mockLogger.info,
+      extraOutputs: {
+        ...context.extraOutputs,
+        set: extraOutputsSet,
       },
-      bindingData: {},
-      traceContext: {
-        traceparent: "",
-        tracestate: "",
-        attributes: {},
-      },
-      bindingDefinitions: [],
-      log: mockLogger,
-    }) as unknown as Context;
+    });
+
+    return { context, extraOutputsSet };
+  };
 
   describe("onSelfcareGroupChangeEntryPoint", () => {
     it("should fail when handler fails when the max retries are not reached", async () => {
       //given
-      const context = createMockContext(1, 3);
+      const { context, extraOutputsSet } = createMockContext(1, 3);
       const args = [{ testData: "test" }];
       const error = new Error("error from makeOnSelfcareGroupChangeHandler");
       mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
@@ -324,16 +325,16 @@ describe("main", () => {
 
       //when and then
       await expect(
-        onSelfcareGroupChangeEntryPoint(context, args),
+        onSelfcareGroupChangeEntryPoint(args, context),
       ).rejects.toThrow(error);
-      expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
+      expect(extraOutputsSet).not.toHaveBeenCalled();
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
       expect(mocks.makeOnSelfcareGroupChangeHandler).toHaveBeenCalledOnce();
     });
 
     it("should fail when handler fails when the max retries are reached", async () => {
       //given
-      const context = createMockContext(3, 3);
+      const { context, extraOutputsSet } = createMockContext(3, 3);
       const args = [{ testData: "test" }];
       const error = new Error("error from makeOnSelfcareGroupChangeHandler");
       mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
@@ -341,10 +342,11 @@ describe("main", () => {
       );
 
       //when
-      const result = await onSelfcareGroupChangeEntryPoint(context, args);
+      const result = await onSelfcareGroupChangeEntryPoint(args, context);
       //then
       expect(result).toStrictEqual([]);
-      expect(context.bindings.syncGroupPoisonQueue).toStrictEqual(
+      expect(extraOutputsSet).toHaveBeenCalledWith(
+        "syncGroupPoisonQueue",
         JSON.stringify(args),
       );
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
@@ -353,17 +355,17 @@ describe("main", () => {
 
     it("should success", async () => {
       //given
-      const context = createMockContext(3, 3);
+      const { context, extraOutputsSet } = createMockContext(3, 3);
       const args = [{ testData: "test" }];
       mocks.makeOnSelfcareGroupChangeHandler.mockImplementationOnce(() =>
         RTE.right(args),
       );
 
       //when
-      const result = await onSelfcareGroupChangeEntryPoint(context, args);
+      const result = await onSelfcareGroupChangeEntryPoint(args, context);
       //then
       expect(result).toStrictEqual(args);
-      expect(context.bindings.syncGroupPoisonQueue).toBeUndefined();
+      expect(extraOutputsSet).not.toHaveBeenCalled();
 
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
       expect(mocks.makeOnSelfcareGroupChangeHandler).toHaveBeenCalledOnce();
@@ -373,7 +375,7 @@ describe("main", () => {
   describe("activationsSyncFromLegacyEntryPoint", () => {
     it("should fail when handler fails when the max retries are not reached", async () => {
       //given
-      const context = createMockContext(1, 3);
+      const { context, extraOutputsSet } = createMockContext(1, 3);
       const args = [{ testData: "test" }];
       const error = new Error("error from makeOnLegacyActivationChangeHandler");
       mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
@@ -382,11 +384,12 @@ describe("main", () => {
 
       //when and then
       await expect(
-        activationsSyncFromLegacyEntryPoint(context, args),
+        activationsSyncFromLegacyEntryPoint(args, context),
       ).rejects.toThrow(error);
-      expect(
-        context.bindings.activationsSyncFromLegacyPoisonQueue,
-      ).toBeUndefined();
+      expect(extraOutputsSet).not.toHaveBeenCalledWith(
+        "activationsSyncFromLegacyPoisonQueue",
+        expect.anything(),
+      );
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(
@@ -399,19 +402,20 @@ describe("main", () => {
     });
     it("should fail when handler fails when the max retries are reached", async () => {
       //given
-      const context = createMockContext(3, 3);
+      const { context, extraOutputsSet } = createMockContext(3, 3);
       const args = [{ testData: "test" }];
       const error = new Error("error from makeOnLegacyActivationChangeHandler");
       mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
         RTE.left(error),
       );
       //when
-      const result = await activationsSyncFromLegacyEntryPoint(context, args);
+      const result = await activationsSyncFromLegacyEntryPoint(args, context);
       //then
       expect(result).toStrictEqual([]);
-      expect(
-        context.bindings.activationsSyncFromLegacyPoisonQueue,
-      ).toStrictEqual(JSON.stringify(args));
+      expect(extraOutputsSet).toHaveBeenCalledWith(
+        "activationsSyncFromLegacyPoisonQueue",
+        JSON.stringify(args),
+      );
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(
@@ -424,18 +428,16 @@ describe("main", () => {
     });
     it("should success", async () => {
       //given
-      const context = createMockContext(3, 3);
+      const { context, extraOutputsSet } = createMockContext(3, 3);
       const args = [{ testData: "test" }];
       mocks.makeOnLegacyActivationChangeHandler.mockImplementationOnce(() =>
         RTE.right(args),
       );
       //when
-      const result = await activationsSyncFromLegacyEntryPoint(context, args);
+      const result = await activationsSyncFromLegacyEntryPoint(args, context);
       //then
       expect(result).toStrictEqual(args);
-      expect(
-        context.bindings.activationsSyncFromLegacyPoisonQueue,
-      ).toBeUndefined();
+      expect(extraOutputsSet).not.toHaveBeenCalled();
       expect(mocks.processBatchOf).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledOnce();
       expect(mocks.makeOnLegacyActivationChangeHandler).toHaveBeenCalledWith(

@@ -110,7 +110,7 @@ export const createIngestionRetryQueueTriggerHandler = <S, U extends S>(
       TE.fold(
         (e) => {
           if (e instanceof QueuePermanentError) {
-            context.log.error(`Permanent error: ${e.message}`);
+            context.error(`Permanent error: ${e.message}`);
             return T.of(void 0);
           } else {
             throw e; // this will be catched by the Azure Function runtime which will log the error and retry process the message again till the max retry count is reached

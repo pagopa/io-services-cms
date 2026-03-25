@@ -1,4 +1,4 @@
-import { describe, it, expect, assert } from "vitest";
+import { beforeEach, describe, it, expect, assert } from "vitest";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -6,12 +6,13 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { processAllOf, processBatchOf, setBindings } from "../misc";
-import { Context } from "@azure/functions";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 
-const mockContext = {
-  log: console,
-  executionContext: { functionName: "aFunctionName" },
-} as unknown as Context;
+const { context: mockContext, extraOutputsSet } = makeInvocationContext("aFunctionName");
+
+beforeEach(() => {
+  extraOutputsSet.mockClear();
+});
 
 describe(`processBatchOf`, () => {
   // a dummy shape to parse the items
@@ -124,7 +125,7 @@ describe("setBindings", () => {
   });
 
   it("should set bindings on successful procedure", async () => {
-    const context = { ...mockContext, bindings: {} };
+    const context = mockContext;
 
     const result = await pipe(
       aProcedure,
@@ -133,12 +134,12 @@ describe("setBindings", () => {
     )({ context, inputs: [] })();
 
     // @ts-ignore
-    expect(context.bindings.bar).toBe(aResult);
+    expect(extraOutputsSet).toHaveBeenCalledWith("bar", aResult);
     expect(result).toEqual(anItem);
   });
 
   it("should not set bindings on failing procedure", async () => {
-    const context = { ...mockContext, bindings: {} };
+    const context = mockContext;
 
     const result = await pipe(
       aFailingProcedure,
@@ -146,7 +147,7 @@ describe("setBindings", () => {
     )({ context, inputs: [] })();
 
     // @ts-ignore
-    expect(context.bindings.bar).not.toBe(aResult);
+    expect(extraOutputsSet).not.toHaveBeenCalledWith("bar", aResult);
     expect(E.isLeft(result)).toBe(true);
   });
 });
