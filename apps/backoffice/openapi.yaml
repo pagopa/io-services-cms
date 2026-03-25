@@ -1089,7 +1089,7 @@ paths:
       tags:
         - manage-subscriptions
       summary: Regenerate aggregate's manage group subscription key
-      description: Regenerate manage group subscription key for the given aggregate allowed to use by the current aggregator
+      description: Regenerate the provided key type related to the manage group subscription of the given aggregate allowed to use by the current aggregator
       operationId: regenerateInstitutionAggregateManageSubscriptionsKey
       security:
         - cookieAuth: []
