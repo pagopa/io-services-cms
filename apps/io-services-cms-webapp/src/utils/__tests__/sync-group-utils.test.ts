@@ -1,13 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  syncSubscription,
-  GroupChangeEvent,
-  syncServices,
-} from "../sync-group-utils";
-import * as E from "fp-ts/lib/Either";
-import * as TE from "fp-ts/lib/TaskEither";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import * as E from "fp-ts/lib/Either";
+import * as TE from "fp-ts/lib/TaskEither";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  GroupChangeEvent,
+  syncServices,
+  syncSubscription,
+} from "../sync-group-utils";
 
 const mocks = vi.hoisted(() => ({
   ApimService: { getSubscription: vi.fn(), updateSubscription: vi.fn() },
@@ -204,7 +204,7 @@ describe("sync group utils", () => {
       expect(
         mocks.LifecycleStore.executeOnServicesFilteredByGroupId,
       ).toHaveBeenCalledWith(groupId, expect.any(Function));
-      expect(mocks.LifecycleStore.bulkPatch).not.toHaveBeenCalledOnce();
+      expect(mocks.LifecycleStore.bulkPatch).not.toHaveBeenCalled();
     });
 
     it("should fail when status is DELETED and bulkPatch fails", async () => {

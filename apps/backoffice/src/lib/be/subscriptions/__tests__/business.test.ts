@@ -543,7 +543,7 @@ describe("Manage Keys", () => {
         undefined,
         aggregatorId,
       );
-      expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalledOnce();
+      expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
     });
 
     it.each`
@@ -575,7 +575,7 @@ describe("Manage Keys", () => {
           undefined,
           aggregatorId,
         );
-        expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalledOnce();
+        expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
       },
     );
 

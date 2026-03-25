@@ -87,7 +87,7 @@ describe("retrieveInstitutionAggregateManageSubscriptionsKeys", () => {
       error,
       `An Error has occurred while retrieving Manage Group Subscription Keys for aggregateId '${aggregateId}' requested by aggregatorId '${mocks.backofficeUser.institution.id}'`,
     );
-    expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalledOnce();
+    expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalled();
   });
 
   it("should return a sanitized response with the retrieved subscription keys", async () => {
@@ -115,6 +115,6 @@ describe("retrieveInstitutionAggregateManageSubscriptionsKeys", () => {
     expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
       subscriptionKeysResponse,
     );
-    expect(mocks.handleInternalErrorResponse).not.toHaveBeenCalledOnce();
+    expect(mocks.handleInternalErrorResponse).not.toHaveBeenCalled();
   });
 });
