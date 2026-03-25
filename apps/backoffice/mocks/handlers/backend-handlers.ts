@@ -829,6 +829,24 @@ export const buildHandlers = () => {
         return resultArray[0];
       },
     ),
+    http.get(
+      `${baseURL}/institutions/current/aggregates/:aggregateId/subscriptions/manage/keys`,
+      () => {
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(getGetAggregateManageSubscriptionKeys200Response()),
+            { status: 200 },
+          ),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 404 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
     http.get(`${baseURL}/keys/manage`, () => {
       const resultArray = [
         new HttpResponse(JSON.stringify(getGetServiceKeys200Response()), {
@@ -1259,6 +1277,10 @@ export function getGetAggregatedInstitutionPagination200Response(
   search: string,
 ) {
   return getMockAggregatedInstitutionPagination(+limit, +offset, search);
+}
+
+export function getGetAggregateManageSubscriptionKeys200Response() {
+  return getMockServiceKeys();
 }
 
 export function getGetManageSubscriptions200Response(

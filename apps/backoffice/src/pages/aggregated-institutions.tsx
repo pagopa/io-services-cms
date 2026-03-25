@@ -103,18 +103,20 @@ export default function AggregatedInstitutions() {
     [enqueueSnackbar, t],
   );
 
-  const handleGetManageSubscriptionKeys = useCallback(
-    async (subscriptionId: string) => {
-      const maybeResponse = await client.getManageSubscriptionKeys({
-        subscriptionId,
-      });
-      if (E.isRight(maybeResponse)) {
-        updateAggregatedInstitutionListItemById(subscriptionId, {
-          ...maybeResponse.right.value,
+  const handleRetrieveManageSubscriptionKeys = useCallback(
+    async (aggregateId: string) => {
+      const response =
+        await client.retrieveInstitutionAggregateManageSubscriptionsKeys({
+          aggregateId,
+        });
+
+      if (E.isRight(response)) {
+        updateAggregatedInstitutionListItemById(aggregateId, {
+          ...response.right.value,
         });
       } else {
         getGenericErrorNotification();
-        updateAggregatedInstitutionListItemById(subscriptionId, {
+        updateAggregatedInstitutionListItemById(aggregateId, {
           isVisible: true,
           primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
           secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
@@ -173,12 +175,13 @@ export default function AggregatedInstitutions() {
     [],
   );
 
+  /** handle actions click: open confirmation modal and on confirm click, perform bff call action */
   const handleConfirmationModal = useCallback(
     async (options: {
       action: AggregatedInstitutionContextMenuActions;
       institutionId: string;
     }) => {
-      const raiseClickEvent = await showDialog({
+      const isConfirmed = await showDialog({
         confirmButtonLabel: t(
           `aggregated-institution.${options.action}.modal.button`,
         ),
@@ -187,7 +190,7 @@ export default function AggregatedInstitutions() {
         ),
         title: t(`aggregated-institution.${options.action}.modal.title`),
       });
-      if (raiseClickEvent) {
+      if (isConfirmed) {
         switch (options.action) {
           case AggregatedInstitutionContextMenuActions.regeneratePk:
             await handleRegenerateKey(
@@ -210,69 +213,68 @@ export default function AggregatedInstitutions() {
     [handleRegenerateKey, showDialog, t],
   );
 
+  /** Returns a list of `TableRowMenuAction` depending on aggregated institution status */
   const getAggregatedInstitutionMenu = useCallback(
     (di: AggregatedInstitutionListItem): TableRowMenuAction[] => {
-      const result: TableRowMenuAction[] = [];
+      const isUserAdmin = isAdmin(session);
 
-      if (di.isVisible) {
-        result.push({
-          hasBottomDivider: isAdmin(session),
-          icon: <VisibilityOff color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
-          onClick: () =>
-            updateAggregatedInstitutionListItemById(di.id, {
-              isVisible: false,
-            }),
-        });
-      } else {
-        result.push({
-          hasBottomDivider: isAdmin(session),
-          icon: <Visibility color="primary" fontSize="inherit" />,
-          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
-          onClick: async () => {
-            if (isNullUndefinedOrEmpty(di.primary_key)) {
+      const visibilityAction: TableRowMenuAction = di.isVisible
+        ? {
+            hasBottomDivider: isUserAdmin,
+            icon: <VisibilityOff color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
+            onClick: () =>
               updateAggregatedInstitutionListItemById(di.id, {
-                isLoading: true,
+                isVisible: false,
+              }),
+          }
+        : {
+            hasBottomDivider: isUserAdmin,
+            icon: <Visibility color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
+            onClick: async () => {
+              if (isNullUndefinedOrEmpty(di.primary_key)) {
+                updateAggregatedInstitutionListItemById(di.id, {
+                  isLoading: true,
+                });
+                await handleRetrieveManageSubscriptionKeys(di.id);
+              }
+              updateAggregatedInstitutionListItemById(di.id, {
+                isLoading: false,
+                isVisible: true,
               });
-              await handleGetManageSubscriptionKeys(di.id);
-            }
-            updateAggregatedInstitutionListItemById(di.id, {
-              isLoading: false,
-              isVisible: true,
-            });
-            trackEaManageKeyShowEvent(di.id);
-          },
-        });
-      }
+              trackEaManageKeyShowEvent(di.id);
+            },
+          };
 
-      if (isAdmin(session)) {
-        result.push(
-          {
-            icon: <Sync color="primary" fontSize="inherit" />,
-            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
-            onClick: () =>
-              handleConfirmationModal({
-                action: AggregatedInstitutionContextMenuActions.regeneratePk,
-                institutionId: di.id,
-              }),
-          },
-          {
-            icon: <Sync color="primary" fontSize="inherit" />,
-            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
-            onClick: () =>
-              handleConfirmationModal({
-                action: AggregatedInstitutionContextMenuActions.regenerateSk,
-                institutionId: di.id,
-              }),
-          },
-        );
-      }
+      const adminActions: TableRowMenuAction[] = isUserAdmin
+        ? [
+            {
+              icon: <Sync color="primary" fontSize="inherit" />,
+              label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
+              onClick: () =>
+                handleConfirmationModal({
+                  action: AggregatedInstitutionContextMenuActions.regeneratePk,
+                  institutionId: di.id,
+                }),
+            },
+            {
+              icon: <Sync color="primary" fontSize="inherit" />,
+              label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
+              onClick: () =>
+                handleConfirmationModal({
+                  action: AggregatedInstitutionContextMenuActions.regenerateSk,
+                  institutionId: di.id,
+                }),
+            },
+          ]
+        : [];
 
-      return result;
+      return [visibilityAction, ...adminActions];
     },
     [
       handleConfirmationModal,
-      handleGetManageSubscriptionKeys,
+      handleRetrieveManageSubscriptionKeys,
       session,
       updateAggregatedInstitutionListItemById,
     ],
@@ -303,7 +305,7 @@ export default function AggregatedInstitutions() {
                   trackEaManageKeyCopyEvent(di.id, "primary")
                 }
                 onRequestCopyToClipboard={() =>
-                  handleGetManageSubscriptionKeys(di.id)
+                  handleRetrieveManageSubscriptionKeys(di.id)
                 }
               />
             </Box>
@@ -323,7 +325,7 @@ export default function AggregatedInstitutions() {
                   trackEaManageKeyCopyEvent(di.id, "secondary")
                 }
                 onRequestCopyToClipboard={() =>
-                  handleGetManageSubscriptionKeys(di.id)
+                  handleRetrieveManageSubscriptionKeys(di.id)
                 }
               />
             </Box>
@@ -332,7 +334,7 @@ export default function AggregatedInstitutions() {
           name: "secondary_key",
         },
       ],
-      [handleGetManageSubscriptionKeys],
+      [handleRetrieveManageSubscriptionKeys],
     );
 
   const tablePagination = useMemo(
