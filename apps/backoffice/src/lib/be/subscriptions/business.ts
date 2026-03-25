@@ -2,6 +2,7 @@ import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
 import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
   SubscriptionType,
   SubscriptionTypeEnum,
@@ -13,7 +14,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
-import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
   ManagedInternalError,
   PreconditionFailedError,

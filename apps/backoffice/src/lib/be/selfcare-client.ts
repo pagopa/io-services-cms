@@ -184,9 +184,9 @@ const buildSelfcareClient = (): SelfcareClient => {
             params: {
               institutionId,
               page,
+              parentInstitutionId,
               size,
               status: state === "*" ? undefined : state,
-              parentInstitutionId,
             },
           }),
         flow(
